@@ -1,0 +1,13 @@
+# use glob syntax
+syntax: glob
+
+*~
+*.DS_Store
+*.ignore
+*.log
+*.orig
+*.pdf
+*.ps
+*.pyc
+*.pyo
+*.swp
