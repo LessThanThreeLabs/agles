@@ -1,0 +1,3 @@
+[submodule "submodules/dulwich"]
+	path = submodules/dulwich
+	url = git@github.com:jchonphoenix/dulwich.git
