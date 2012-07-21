@@ -1,0 +1,4 @@
+Setup:
+	Install node.js from nodejs.org
+	Install coffeescript by running "npm install -g coffee-script"
+	Run "npm -d install" in the web/back/ directory.
