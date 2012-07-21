@@ -1,3 +1,4 @@
-server = require './server'
+context = require './context'
+server = require './server/main'
 
-server.start()
+server.start context

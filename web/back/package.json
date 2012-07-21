@@ -1,0 +1,16 @@
+{
+  "name": "Agles",
+  "version": "0.1.0",
+
+  "dependencies" : {
+    "express":  "3.0.x",
+    "express-resource":  "0.2.x",
+    "spdy": "1.3.x",
+    "nconf":  "0.6.x"
+  },
+
+  "engines": {
+    "node": "0.8.x",
+    "npm":  "1.1.x"
+  }
+}
