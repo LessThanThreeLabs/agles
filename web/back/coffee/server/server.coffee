@@ -28,6 +28,6 @@ configureServer = (context, server) ->
 
 getHttpsOptions = (context) ->
 	options = 
-		key: fs.readFileSync(process.cwd() + '/' + context.config.server.security.key)
-		cert: fs.readFileSync(process.cwd() + '/' + context.config.server.security.certificate)
-		ca: fs.readFileSync(process.cwd() + '/' + context.config.server.security.certrequest)
+		key: fs.readFileSync process.cwd() + '/' + context.config.server.security.key
+		cert: fs.readFileSync process.cwd() + '/' + context.config.server.security.certificate
+		ca: fs.readFileSync process.cwd() + '/' + context.config.server.security.certrequest
