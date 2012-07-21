@@ -5,9 +5,11 @@
 		"http": {
 			"port": 80
 		},
+
 		"https": {
 			"port": 443
 		},
+
 		"security": {
 			"key": "keys/privatekey.pem",
 			"certificate": "keys/certificate.pem",

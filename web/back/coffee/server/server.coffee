@@ -12,7 +12,7 @@ exports.start = (context) ->
 createBaseServer = (context) ->
 	server = express.createServer()
 	server.get '*', (request, response) ->
-		response.send 'sup nerd?'
+		response.sendfile './front/index.html'
 	return server
 
 
