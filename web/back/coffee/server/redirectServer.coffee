@@ -1,8 +1,8 @@
 express = require 'express'
 
 exports.start = (context) ->
-	httpPort = context.config.get 'server:http:port' 
-	httpsPort = context.config.get 'server:https:port'
+	httpPort = context.config.server.http.port 
+	httpsPort = context.config.server.https.port
 
 	redirectServer = express.createServer()
 	redirectServer.get '*', (request, response) ->

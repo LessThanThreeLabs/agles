@@ -9,6 +9,6 @@ exports.start = (context) ->
 
 
 printThatServersStarted = (context) ->
-	httpPort = context.config.get 'server:http:port' 
-	httpsPort = context.config.get 'server:https:port'
+	httpPort = context.config.server.http.port
+	httpsPort = context.config.server.https.port
 	console.log 'Servers started on ' + httpPort + ' (http) and ' + httpsPort + ' (https)'
