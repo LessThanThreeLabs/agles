@@ -5,7 +5,8 @@ express = require 'express'
 exports.start = (context) ->
 	server = express.createServer getHttpsOptions(context)
 
-	server.get '*', (request, response) ->
+	server.use '/img', express.static process.cwd() + '/front/img'
+	server.get '/', (request, response) ->
 		response.sendfile './front/index.html'
 	
 	httpsPort = context.config.server.https.port
