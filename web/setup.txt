@@ -1,5 +1,14 @@
 Setup:
 	Install node.js from nodejs.org
+
 	Install the Apple Developer Tools -> Command Line Tools for Xcode
+
+	Install Redis
+		wget http://redis.googlecode.com/files/redis-2.4.15.tar.gz
+		tar xzf redis-2.4.15.tar.gz
+		cd redis-2.4.15
+		sudo make install
+
 	Install coffeescript by running "npm install -g coffee-script"
+
 	Run "npm -d install" in the web/back/ directory.
