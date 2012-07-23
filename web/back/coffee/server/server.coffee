@@ -16,16 +16,23 @@ exports.start = (context) ->
 
 configureServer = (context, server) ->
 	server.configure () ->
-		# TODO: decide which ones we need as we go
+		# TODO: decide what middleware we need as we go
 	    # server.use express.methodOverride()
 	    # server.use express.bodyParser()
+
 	    server.use express.cookieParser()
 	    server.use express.session
 	    	secret: context.config.server.session.secret
+	    	cookie: 
+	    		path: '/',
+	    		httpOnly: true,
+	    		secure: true,
+	    		maxAge: 14400000
 	    	store: new redisStore
 	    		port: context.config.server.redis.port
-    	express.session.ignore.push('/front')
-	    server.use '/img', express.static process.cwd() + '/front/img'
+		express.session.ignore.push '/favicon.ico', '/img/awesomeFace.png'
+		console.log express.session.ignore
+		server.use '/img', express.static process.cwd() + '/front/img'
 
 	server.configure 'development', () ->
 	    server.use express.errorHandler 
