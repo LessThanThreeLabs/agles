@@ -10,6 +10,10 @@
 			"port": 443
 		},
 
+		"session": {
+			"secret": "e0140cbb6dee1e7ceea9ca2219081c95b8e14a14"
+		},
+
 		"security": {
 			"key": "keys/privatekey.pem",
 			"certificate": "keys/certificate.pem",
