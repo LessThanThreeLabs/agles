@@ -1,4 +1,5 @@
 fs = require 'fs'
+fileWalker = require 'walk'
 express = require 'express'
 redisStore = require('connect-redis')(express)
 
@@ -21,6 +22,7 @@ configureServer = (context, server) ->
 	    # server.use express.bodyParser()
 
 	    server.use express.cookieParser()
+
 	    server.use express.session
 	    	secret: context.config.server.session.secret
 	    	cookie: 
@@ -30,14 +32,30 @@ configureServer = (context, server) ->
 	    		maxAge: 14400000
 	    	store: new redisStore
 	    		port: context.config.server.redis.port
-		express.session.ignore.push '/favicon.ico', '/img/awesomeFace.png'
-		console.log express.session.ignore
+
+		express.session.ignore.push '/favicon.ico'
+		ignoreStaticFilesFromSessionLogic context
+
 		server.use '/img', express.static process.cwd() + '/front/img'
 
 	server.configure 'development', () ->
 	    server.use express.errorHandler 
 	    	dumpExceptions: true, 
 	    	showStack: true
+
+
+ignoreStaticFilesFromSessionLogic = (context) ->
+	rootDirectory = process.cwd() + '/' + context.config.server.staticFiles.rootDirectory
+
+	for serverDirectory in context.config.server.staticFiles.directoriesToIgnoreFromSessionLogic
+		directory = rootDirectory + serverDirectory
+
+		walker = fileWalker.walkSync directory, followLinks: true
+		walker.on 'file', (root, fileStats, next) ->
+			fileToIgnore = root + '/' + fileStats.name
+			serverFileToIgnore = fileToIgnore.substring fileToIgnore.indexOf serverDirectory
+			express.session.ignore.push serverFileToIgnore
+			next()
 
 
 getHttpsOptions = (context) ->

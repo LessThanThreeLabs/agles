@@ -10,6 +10,11 @@
 			"port": 443
 		},
 
+		"staticFiles": {
+			"rootDirectory": "front",
+			"directoriesToIgnoreFromSessionLogic": ["/img"]
+		},
+
 		"session": {
 			"secret": "e0140cbb6dee1e7ceea9ca2219081c95b8e14a14"
 		},

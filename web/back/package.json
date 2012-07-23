@@ -6,7 +6,8 @@
     "nodetime": "x.x.x",
     "express":  "2.x.x",
     "express-resource":  "0.2.x",
-    "connect-redis": "1.4.x"
+    "connect-redis": "1.4.x",
+    "walk": "x.x.x"
   },
 
   "engines": {
