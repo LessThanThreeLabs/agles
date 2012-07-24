@@ -1,4 +1,5 @@
 fs = require 'fs'
+assert = require 'assert'
 fileWalker = require 'walk'
 express = require 'express'
 redisStore = require('connect-redis')(express)
@@ -30,11 +31,12 @@ configureSessionLogic = (context, server) ->
     	store: new redisStore
     		port: context.config.server.redis.port
 
-	express.session.ignore.push '/favicon.ico'
 	ignoreStaticFilesFromSessionLogic context
 
 
 ignoreStaticFilesFromSessionLogic = (context) ->
+	express.session.ignore.push '/favicon.ico'
+
 	rootDirectory = context.config.server.staticFiles.rootDirectory
 	staticDirectories = context.config.server.staticFiles.directoriesToIgnoreFromSessionLogic
 
@@ -42,8 +44,13 @@ ignoreStaticFilesFromSessionLogic = (context) ->
 		directory = rootDirectory + staticDirectory
 
 		walker = fileWalker.walkSync directory, followLinks: true
+
 		walker.on 'file', (root, fileStats, next) ->
 			fileToIgnore = root + '/' + fileStats.name
 			staticFileToIgnore = fileToIgnore.substring fileToIgnore.indexOf staticDirectory
 			express.session.ignore.push staticFileToIgnore
 			next()
+
+		walker.on 'end', () ->
+			assert.ok express.session.ignore.length > 1,
+				'Problem finding static files to ignore from session logic.'
