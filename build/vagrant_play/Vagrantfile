@@ -1,0 +1,6 @@
+Vagrant::Config.run do |config|
+	config.vm.box = "lucid64"
+	
+	# Enable Puppet provisioner
+	config.vm.provision :puppet
+end
