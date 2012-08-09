@@ -14,22 +14,35 @@ import shutil
 from os import sep
 from dulwich.repo import Repo
 
-class FileSystemRepoManager(object):
+
+class DistributedRepoManager(object):
+	def create(self, repo_name):
+		pass
+
+	def delete(self, repo_hash, repo_name):
+		pass
+
+	def rename(self, repo_hash, repo_name):
+		pass
+
+
+class FileSystemRepoServer(object):
 	"""Management class for server side git repositories"""
 
 	DIR_LEVELS = 3
-	
-	def __init__(self):
-		pass
+
+	def __init__(self, root_path):
+		if not os.path.exists(root_path):
+			os.makedirs(root_path)
+		self._root_path = root_path
 
 	def create(self, repo_hash, repo_name):
-		"""Creates a new server side repository.
+		"""Creates a new server side repository. Raises an exception on failure.
 		We create bare repositories because they are server side.
 
 		:param repo_hash: A unique hash assigned to each repository that determines which directory
 						  the repository is stored under.
 		:param repo_name: The name of the new repository.
-		:return: The newly created repository.
 		"""
 
 		repo_path = self._resolve_path(repo_hash, repo_name)
@@ -38,10 +51,9 @@ class FileSystemRepoManager(object):
 		else:
 			raise RepositoryAlreadyExistsException(repo_hash, repo_path)
 		repo = Repo.init_bare(repo_path)
-		return repo
 
 	def delete(self, repo_hash, repo_name):
-		"""Deletes a server side repository. This cannot be undone.
+		"""Deletes a server side repository. This cannot be undone. Raises an exception on failure.
 
 		:param repo_hash: A unique hash assigned to each repository that determines which directory
 						  the repository is stored under.
@@ -50,14 +62,13 @@ class FileSystemRepoManager(object):
 		repo_path = self._resolve_path(repo_hash, repo_name)
 		shutil.rmtree(repo_path)
 
-	def rename(self, old_name, new_name):
-		"""Renames a repository.
+	def rename(self, repo_hash, old_name, new_name):
+		"""Renames a repository. Raises an exception on failure.
 
 		:param repo_hash: A unique hash assigned to each repository that determines which directory
 						  the repository is stored under.
 		:param old_name: The old repository name.
 		:param new_name: The new repository name.
-		:return: The renamed repository.
 		"""
 
 		old_repo_path = self._resolve_path(repo_hash, old_name)
@@ -65,11 +76,12 @@ class FileSystemRepoManager(object):
 		if not os.path.exists(new_repo_path):
 			shutil.move(old_repo_path, new_repo_path)
 		else:
-			raise RepositoryAlreadyExistsException(repo_hash, new_repo_path) 
-		return Repo(new_repo_path)
+			raise RepositoryAlreadyExistsException(repo_hash, new_repo_path)
 
 	def _resolve_path(self, repo_hash, repo_name):
-		repo_path = sep.join([self._directory_treeify(repo_hash, self.DIR_LEVELS), repo_name])
+		repo_path = sep.join([self._root_path,
+							  self._directory_treeify(repo_hash, self.DIR_LEVELS),
+							  repo_name])
 		return os.path.realpath(repo_path)
 
 	def _directory_treeify(self, repo_hash, dir_levels):
@@ -88,10 +100,11 @@ class RepositoryManagementException(Exception):
 	def __init__(self, msg=''):
 		Exception.__init__(self, msg)
 
+
 class RepositoryAlreadyExistsException(RepositoryManagementException):
 	"""Indicates an exception occured due to a repository already existing."""
 
 	def __init__(self, repo_hash, existing_repo_path):
 		RepositoryManagementException.__init__(
-			self, 
+			self,
 			'Repository with hash %s already exists at path %s' % (repo_hash, existing_repo_path))
