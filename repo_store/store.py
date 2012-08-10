@@ -2,7 +2,7 @@
 
 """Git repository manager for server side git repositories.
 
-Repository managment is done using a modified version of dulwich, 
+Repository managment is done using a modified version of dulwich,
 a git implementation written in python.
 
 * For more information on the modified dulwich, see the submodule.
@@ -15,7 +15,7 @@ from os import sep
 from dulwich.repo import Repo
 
 
-class DistributedRepoManager(object):
+class DistributedRepoStore(object):
 	def create(self, repo_name):
 		pass
 
@@ -26,7 +26,7 @@ class DistributedRepoManager(object):
 		pass
 
 
-class FileSystemRepoServer(object):
+class FileSystemRepoStore(object):
 	"""Management class for server side git repositories"""
 
 	DIR_LEVELS = 3
@@ -50,7 +50,7 @@ class FileSystemRepoServer(object):
 			os.makedirs(repo_path)
 		else:
 			raise RepositoryAlreadyExistsException(repo_hash, repo_path)
-		repo = Repo.init_bare(repo_path)
+		Repo.init_bare(repo_path)
 
 	def delete(self, repo_hash, repo_name):
 		"""Deletes a server side repository. This cannot be undone. Raises an exception on failure.
@@ -94,17 +94,17 @@ class FileSystemRepoServer(object):
 		return sep.join(repo_hash[:dir_levels]) + repo_hash[dir_levels:]
 
 
-class RepositoryManagementException(Exception):
+class RepositoryOperationException(Exception):
 	"""Base class for exception relating to repository management."""
 
 	def __init__(self, msg=''):
 		Exception.__init__(self, msg)
 
 
-class RepositoryAlreadyExistsException(RepositoryManagementException):
+class RepositoryAlreadyExistsException(RepositoryOperationException):
 	"""Indicates an exception occured due to a repository already existing."""
 
 	def __init__(self, repo_hash, existing_repo_path):
-		RepositoryManagementException.__init__(
+		RepositoryOperationException.__init__(
 			self,
 			'Repository with hash %s already exists at path %s' % (repo_hash, existing_repo_path))
