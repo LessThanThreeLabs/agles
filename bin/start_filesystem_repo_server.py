@@ -4,7 +4,7 @@ import os
 
 import zerorpc
 
-from repo_store import FileSystemRepoStore
+from repo_store import FileSystemRepositoryStore
 
 DEFAULT_ADDRESS = "tcp://0.0.0.0:4242"
 DEFAULT_ROOT_DIR = "/repositories"
@@ -21,7 +21,7 @@ def main():
     print "Starting FileSystem Repository Server on %s with root directory %s ..." % (
         args.server_address, root_dir)
 
-    fs_repo_server = zerorpc.Server(FileSystemRepoStore(root_dir))
+    fs_repo_server = zerorpc.Server(FileSystemRepositoryStore(root_dir))
     fs_repo_server.bind(args.server_address)
     fs_repo_server.run()
 

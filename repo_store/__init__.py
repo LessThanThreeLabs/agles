@@ -1,2 +1,2 @@
-from store import DistributedRepoStore
-from store import FileSystemRepoStore
+from store import DistributedLoadBalancingRepositoryStoreManager
+from store import FileSystemRepositoryStore
