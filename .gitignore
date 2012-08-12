@@ -13,3 +13,6 @@ build/
 *.pyc
 *.pyo
 *.swp
+
+*.sublime-project
+*.sublime-workspace
