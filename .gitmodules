@@ -1,6 +1,6 @@
 [submodule "submodules/dulwich"]
 	path = submodules/dulwich
 	url = git@github.com:jchonphoenix/dulwich.git
-[submodule "zerorpc"]
-	path = zerorpc
+[submodule "submodules/zerorpc"]
+	path = submodules/zerorpc
 	url = https://github.com/dotcloud/zerorpc-python.git
