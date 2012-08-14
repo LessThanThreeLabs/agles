@@ -82,7 +82,7 @@ class DistributedLoadBalancingRepositoryStoreManager(RepositoryStoreManager):
 	def _register_managed_stores(self, managed_stores):
 		self._initialize_store_repo_counts_if_not_exists(managed_stores.iterkeys())
 		for store_name, connection_info in managed_stores.iteritems():
-			self.managed_store_conns[store_name] = zerorpc.Client(connection_info, timeout=DEFAULT_RPC_TIMEOUT)
+			self.managed_store_conns[store_name] = zerorpc.Client(connection_info, timeout=self.DEFAULT_RPC_TIMEOUT)
 
 	def get_least_loaded_store(self):
 		"""Identifies the local store that is being least utilized. For this particular class
