@@ -9,6 +9,27 @@ Setup:
 		cd redis-2.4.15
 		sudo make install
 
+	Install gevent
+		sudo pip install gevent
+		if doesn't work, should do:
+			curl -O http://pypi.python.org/packages/source/g/gevent/gevent-0.13.6.tar.gz
+			tar xf gevent-0*
+			cd gevent-0.13.6
+			./fetch_libevent.py
+			python setup.py build install
+
+	Install ZeroMq
+		git clone git://github.com/zeromq/libzmq.git
+		cd libzmq
+		./autogen.sh
+		./configure     # add other options here
+		make
+		make check
+		sudo make install
+
+	Install ZeroRpc
+		sudo pip install zerorpc
+
 	Install coffeescript by running "npm install -g coffee-script"
 
 	Run "npm -d install" in the web/back/ directory.
