@@ -12,7 +12,12 @@
 
 		"staticFiles": {
 			"rootDirectory": "front",
-			"directoriesToIgnoreFromSessionLogic": ["/img"]
+			"directoriesToIgnoreFromSessionLogic": ["/img"],
+
+			"cache": {
+				"maxObjects": 128,
+				"maxLength": 524288
+			}
 		},
 
 		"session": {

@@ -7,17 +7,15 @@ redisStore = require('connect-redis')(express)
 
 exports.configureServer = (context, server) ->
 	server.configure () ->
-	    configureCookieLogic context, server
+		server.use express.cookieParser()
 		configureSessionLogic context, server
+		server.use express.bodyParser()
+		server.use express.compress()		
 
 	server.configure 'development', () ->
 	    server.use express.errorHandler 
 	    	dumpExceptions: true,
 	    	showStack: true
-
-
-configureCookieLogic = (context, server) ->
-	server.use express.cookieParser()
 
 
 configureSessionLogic = (context, server) ->
