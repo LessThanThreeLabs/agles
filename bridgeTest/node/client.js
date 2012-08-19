@@ -10,8 +10,8 @@
 
   bridge.connect();
 
-  bridge.getService('helloWorld', function(blahHandler) {
-    return blahHandler.hello(function(string) {
+  bridge.getService('helloWorld', function(handle) {
+    return handle.hello(function(string) {
       return console.log(string);
     });
   });
