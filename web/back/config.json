@@ -12,7 +12,7 @@
 
 		"staticFiles": {
 			"rootDirectory": "front",
-			"directoriesToIgnoreFromSessionLogic": ["/img"],
+			"staticDirectories": ["/js", "/img"],
 
 			"cache": {
 				"maxObjects": 128,

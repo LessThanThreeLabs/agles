@@ -9,13 +9,26 @@ exports.configureServer = (context, server) ->
 	server.configure () ->
 		server.use express.cookieParser()
 		configureSessionLogic context, server
-		server.use express.bodyParser()
-		server.use express.compress()		
+		server.use express.bodyParser()  # need this?
+		server.use express.query()  # need this?
+		configureCsrfLogic context, server
+		server.use express.compress()	
 
 	server.configure 'development', () ->
 	    server.use express.errorHandler 
 	    	dumpExceptions: true,
 	    	showStack: true
+
+
+configureCsrfLogic = (context, server) ->
+	staticDirectories = context.config.server.staticFiles.staticDirectories
+
+	server.use (request, response, next) ->
+		if (staticDirectories.some (staticDirectory) ->
+				return request.url.indexOf(staticDirectory + '/') == 0)
+			next()
+		else
+			express.csrf()(request, response, next)
 
 
 configureSessionLogic = (context, server) ->
@@ -36,7 +49,7 @@ ignoreStaticFilesFromSessionLogic = (context) ->
 	express.session.ignore.push '/favicon.ico'
 
 	rootDirectory = context.config.server.staticFiles.rootDirectory
-	staticDirectories = context.config.server.staticFiles.directoriesToIgnoreFromSessionLogic
+	staticDirectories = context.config.server.staticFiles.staticDirectories
 
 	for staticDirectory in staticDirectories
 		directory = rootDirectory + staticDirectory

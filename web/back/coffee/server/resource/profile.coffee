@@ -1,8 +1,9 @@
 exports.create = (request, response) ->
+	console.log 'create called!'
 	response.send 'create'
 
 exports.show = (request, response) ->
-	response.send request.context
+	response.send 'show'
 
 exports.edit = (request, response) ->
 	response.send 'edit'
