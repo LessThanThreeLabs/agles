@@ -30,6 +30,11 @@ setupResources = (context, server) ->
 setupStaticServer = (context, server) ->
 	server.use express.favicon()
 
+	staticCacheParams = context.config.server.staticFiles.cache
+	server.use express.staticCache
+		maxObjects: staticCacheParams.maxObjects
+		maxLength: staticCacheParams.maxLength
+
 	rootStaticDirectory = context.config.server.staticFiles.rootDirectory
 	staticDirectories = context.config.server.staticFiles.staticDirectories
 	for staticDirectory in staticDirectories
