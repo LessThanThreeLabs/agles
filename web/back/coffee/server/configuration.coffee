@@ -12,7 +12,7 @@ exports.configureServer = (context, server) ->
 		server.use express.bodyParser()  # need this?
 		server.use express.query()  # need this?
 		configureCsrfLogic context, server
-		server.use express.compress()	
+		server.use express.compress()
 
 	server.configure 'development', () ->
 	    server.use express.errorHandler 
@@ -22,10 +22,13 @@ exports.configureServer = (context, server) ->
 
 configureCsrfLogic = (context, server) ->
 	staticDirectories = context.config.server.staticFiles.staticDirectories
+	shouldIgnoreCsrfLogic = (url) ->
+		return url == '/favicon.ico' ||
+			staticDirectories.some (staticDirectory) ->
+				return url.indexOf(staticDirectory + '/') == 0
 
 	server.use (request, response, next) ->
-		if (staticDirectories.some (staticDirectory) ->
-				return request.url.indexOf(staticDirectory + '/') == 0)
+		if shouldIgnoreCsrfLogic request.url
 			next()
 		else
 			express.csrf()(request, response, next)
