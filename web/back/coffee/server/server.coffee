@@ -28,7 +28,8 @@ setupResources = (context, server) ->
 
 
 setupStaticServer = (context, server) ->
-	server.use express.favicon()
+	rootStaticDirectory = context.config.server.staticFiles.rootDirectory
+	server.use express.favicon(rootStaticDirectory + '/favicon.ico')
 
 	staticCacheParams = context.config.server.staticFiles.cache
 	server.use express.staticCache

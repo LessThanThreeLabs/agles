@@ -13,11 +13,20 @@ exports.configureServer = (context, server) ->
 		server.use express.query()  # need this?
 		configureCsrfLogic context, server
 		server.use express.compress()
+		configureViewEngine context, server
 
 	server.configure 'development', () ->
 	    server.use express.errorHandler 
 	    	dumpExceptions: true,
 	    	showStack: true
+
+
+configureViewEngine = (context, server) ->
+	rootStaticDirectory = context.config.server.staticFiles.rootDirectory
+
+	server.set 'view engine', 'hbs'
+	server.set 'view options', layout: false
+	server.set 'views', context.config.server.staticFiles.rootDirectory
 
 
 configureCsrfLogic = (context, server) ->
