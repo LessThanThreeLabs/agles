@@ -5,16 +5,16 @@
   "dependencies" : {
     "nodetime": "x.x.x",
     "express":  "2.x.x",
-    "express-resource":  "0.2.x",
-    "socket.io": "0.9.x",
+    "express-resource":  "x.x.x",
+    "socket.io": "x.x.x",
     "bridge-js": "x.x.x",
-    "connect-redis": "1.4.x",
+    "connect-redis": "x.x.x",
     "walk": "x.x.x",
     "zombie": "x.x.x"
   },
 
   "engines": {
-    "node": "0.8.x",
+    "node": "x.x.x",
     "npm":  "x.x.x"
   },
 
