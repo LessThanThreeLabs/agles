@@ -1,10 +1,10 @@
 from sqlalchemy import create_engine
-from settings import database
+from settings import db
 
 
 class EngineFactory(object):
-	_ENGINE = create_engine(database.db_url)
+    _ENGINE = create_engine(db.db_url)
 
-	@classmethod
-	def get_engine(cls):
-		return cls._ENGINE
+    @classmethod
+    def get_engine(cls):
+        return cls._ENGINE
