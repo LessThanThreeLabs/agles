@@ -8,3 +8,7 @@ class EngineFactory(object):
     @classmethod
     def get_engine(cls):
         return cls._ENGINE
+
+    @classmethod
+    def get_connection(cls):
+    	return cls.get_engine().connect()
