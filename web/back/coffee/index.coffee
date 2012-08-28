@@ -6,7 +6,7 @@ os = require 'os'
 cluster = require 'cluster'
 context = require './context'
 environment = require './environment'
-server = require './server/main'
+server = require './server/server'
 
 
 createMultipleServers = () ->
@@ -17,4 +17,8 @@ createMultipleServers = () ->
 		server.start context
 
 environment.setup context
-createMultipleServers()
+
+if context.config.server.cluster
+	createMultipleServers()
+else
+	server.start context

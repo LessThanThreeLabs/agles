@@ -1,11 +1,20 @@
 <html>
 <head>
 	<title>Love</title>
-	<script src="js/jquery.js"></script>
 </head>
 <body>
 	{{csrfToken}}
 	<br>
 	<img src="/img/awesomeFace.png" />
+
+	<script src="js/jquery.js"></script>
+	<script src="socket/socket.io.js"></script>
+	<script>
+	  var socket = io.connect('https://127.0.0.1', { resource: 'socket'});
+	  socket.on('news', function (data) {
+	    console.log(data);
+	    socket.emit('my other event', { my: 'data' });
+	  });
+	</script>
 </body>
 </html>

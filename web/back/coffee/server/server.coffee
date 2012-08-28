@@ -1,30 +1,32 @@
 fs = require 'fs'
 express = require 'express'
 resource = require 'express-resource'
-serverConfigurer = require './configuration'
+redirectServer = require './redirectServer'
+configurer = require './configuration'
+socket = require './socket/socket'
 
 
 exports.start = (context) ->
-	server = express.createServer getHttpsOptions context
-	serverConfigurer.configureServer context, server
+	server = startServer context
+	redirectServer.start context
+	socket.start context, server
 
-	addContextToRequestMiddleware context, server
-	setupResources context, server
+	console.log 'Server started.'
+
+
+startServer = (context) ->
+	server = express.createServer getHttpsOptions context
+	configurer.configureServer context, server
+
 	setupStaticServer context, server
+
+	server.use '/', (request, response) ->
+		response.render 'index', csrfToken: request.session._csrf
 	
 	httpsPort = context.config.server.https.port
 	server.listen httpsPort
 
-
-addContextToRequestMiddleware = (context, server) ->
-	server.use (request, response, next) ->
-		request.context = context
-		next()
-
-
-setupResources = (context, server) ->
-	server.resource require('./resource/root')
-	server.resource 'profile', require('./resource/profile'), format: 'json'
+	return server
 
 
 setupStaticServer = (context, server) ->
