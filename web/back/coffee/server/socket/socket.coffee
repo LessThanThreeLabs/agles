@@ -5,7 +5,7 @@ configurer = require './configuration'
 
 exports.start = (context, server) ->
 	io = socketio.listen server
-	configurer.configure context, io
+	configurer.configureSocket context, io
 
 	io.sockets.on 'connection', (socket) ->
 		socket.emit 'news', hello: 'world'

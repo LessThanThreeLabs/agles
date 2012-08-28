@@ -3,7 +3,7 @@ redis = require 'socket.io/node_modules/redis'
 redisStore = require 'socket.io/lib/stores/redis'
 
 
-exports.configure = (context, socket) ->
+exports.configureSocket = (context, socket) ->
 	socket.configure () ->
 		socket.set 'resource', '/socket'
 		socket.set 'transports', ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling', 'flashsocket'] # should turn off flashsockets?
