@@ -18,7 +18,7 @@
 
 			"cache": {
 				"maxObjects": 128,
-				"maxLength": 524288
+				"maxLength": 262144
 			}
 		},
 
