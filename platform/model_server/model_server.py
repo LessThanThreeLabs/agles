@@ -1,6 +1,6 @@
 # aci.py - Defines an access control interface for the model server
 
-"""Access control interface for the model server.
+"""Interface for the model server and db calls.
 
 This class contains the api that is exposed to clients
 and is the only point of interaction between clients and the model server.
