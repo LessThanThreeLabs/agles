@@ -11,9 +11,6 @@ server = require './server/server'
 
 
 startEverything = () ->
-	for key in configuration
-		console.log key
-
 	environment.setup configuration
 	serverConfiguration = configuration.server
 
