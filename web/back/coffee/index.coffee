@@ -5,20 +5,27 @@ profiler = require('nodetime').profile
 os = require 'os'
 cluster = require 'cluster'
 context = require './context'
+modelConnection = require './modelConnection'
 environment = require './environment'
 server = require './server/server'
 
 
-createMultipleServers = () ->
+startEverything = () ->
+	environment.setup context
+	serverConfiguration = context.config.server
+
+	if context.config.server.cluster
+		createMultipleServers serverConfiguration, modelConnection
+	else
+		server.start serverConfiguration, modelConnection
+
+
+createMultipleServers = (serverConfiguration, modelConnection) ->
 	if cluster.isMaster
 		numCpus = os.cpus().length
 		cluster.fork() for num in [0...numCpus]
 	else
-		server.start context
+		server.start serverConfiguration, modelConnection
 
-environment.setup context
 
-if context.config.server.cluster
-	createMultipleServers()
-else
-	server.start context
+startEverything()

@@ -5,15 +5,15 @@ express = require 'express'
 redisStore = require('connect-redis')(express)
 
 
-exports.configureServer = (context, server) ->
+exports.configureServer = (server, serverConfiguration) ->
 	server.configure () ->
 		server.use express.cookieParser()
-		configureSessionLogic context, server
+		configureSessionLogic server, serverConfiguration
 		server.use express.bodyParser()  # need this?
 		server.use express.query()  # need this?
-		configureCsrfLogic context, server
+		configureCsrfLogic server, serverConfiguration
 		server.use express.compress()
-		configureViewEngine context, server
+		configureViewEngine server, serverConfiguration
 
 	server.configure 'development', () ->
 	    server.use express.errorHandler 
@@ -21,16 +21,16 @@ exports.configureServer = (context, server) ->
 	    	showStack: true
 
 
-configureViewEngine = (context, server) ->
-	rootStaticDirectory = context.config.server.staticFiles.rootDirectory
+configureViewEngine = (server, serverConfiguration) ->
+	rootStaticDirectory = serverConfiguration.staticFiles.rootDirectory
 
 	server.set 'view engine', 'hbs'
 	server.set 'view options', layout: false
-	server.set 'views', context.config.server.staticFiles.rootDirectory
+	server.set 'views', serverConfiguration.staticFiles.rootDirectory
 
 
-configureCsrfLogic = (context, server) ->
-	staticDirectories = context.config.server.staticFiles.staticDirectories
+configureCsrfLogic = (server, serverConfiguration) ->
+	staticDirectories = serverConfiguration.staticFiles.staticDirectories
 	shouldIgnoreCsrfLogic = (url) ->
 		return url == '/favicon.ico' ||
 			staticDirectories.some (staticDirectory) ->
@@ -43,25 +43,25 @@ configureCsrfLogic = (context, server) ->
 			express.csrf()(request, response, next)
 
 
-configureSessionLogic = (context, server) ->
+configureSessionLogic = (server, serverConfiguration) ->
 	server.use express.session
-    	secret: context.config.server.session.secret
+    	secret: serverConfiguration.session.secret
     	cookie:
     		path: '/',
     		httpOnly: true,
     		secure: true,
     		maxAge: 14400000
     	store: new redisStore
-    		port: context.config.server.redis.port
+    		port: serverConfiguration.redis.port
 
-	ignoreStaticFilesFromSessionLogic context
+	ignoreStaticFilesFromSessionLogic serverConfiguration
 
 
-ignoreStaticFilesFromSessionLogic = (context) ->
+ignoreStaticFilesFromSessionLogic = (serverConfiguration) ->
 	express.session.ignore.push '/favicon.ico'
 
-	rootDirectory = context.config.server.staticFiles.rootDirectory
-	staticDirectories = context.config.server.staticFiles.staticDirectories
+	rootDirectory = serverConfiguration.staticFiles.rootDirectory
+	staticDirectories = serverConfiguration.staticFiles.staticDirectories
 
 	for staticDirectory in staticDirectories
 		directory = rootDirectory + staticDirectory
