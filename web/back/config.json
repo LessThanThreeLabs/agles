@@ -2,7 +2,7 @@
 	"mode": "development",
 
 	"server": {
-		"cluster": true,
+		"cluster": false,
 
 		"http": {
 			"port": 80
