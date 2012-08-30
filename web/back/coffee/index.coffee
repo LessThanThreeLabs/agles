@@ -4,17 +4,20 @@ profiler = require('nodetime').profile
 
 os = require 'os'
 cluster = require 'cluster'
-context = require './context'
+configuration = require './configuration'
 modelConnection = require './modelConnection'
 environment = require './environment'
 server = require './server/server'
 
 
 startEverything = () ->
-	environment.setup context
-	serverConfiguration = context.config.server
+	for key in configuration
+		console.log key
 
-	if context.config.server.cluster
+	environment.setup configuration
+	serverConfiguration = configuration.server
+
+	if serverConfiguration.cluster
 		createMultipleServers serverConfiguration, modelConnection
 	else
 		server.start serverConfiguration, modelConnection
