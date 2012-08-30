@@ -6,7 +6,7 @@ redisStore = require 'socket.io/lib/stores/redis'
 exports.configureSocket = (context, socket) ->
 	socket.configure () ->
 		socket.set 'resource', '/socket'
-		socket.set 'transports', ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling', 'flashsocket'] # should turn off flashsockets?
+		socket.set 'transports', ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling'] # 'flashsocket' won't send browser cookies
 		socket.enable 'browser client minification'
 		socket.enable 'browser client etag'
 		socket.enable 'browser client gzip'
@@ -22,8 +22,8 @@ exports.configureSocket = (context, socket) ->
 
 configureOriginPolicy = (context, socket) ->
 	socket.set 'authorization', (handshakeData, callback) ->
-		isCrossDomain = handshakeData.xdomain
-		callback null, !isCrossDomain
+		errorMessage = handshakeData.xdomain ? 'Cross domain sockets not allowed' : null
+		callback errorMessage, !handshakeData.xdomain
 
 
 configureRedisStore = (context, socket) ->
