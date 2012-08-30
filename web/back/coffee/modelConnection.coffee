@@ -1,6 +1,4 @@
 
-exports.create = (configuration) ->
-	return new ModelConnection configuration
 
-class ModelConnection
-	constructor: (@configuration) ->
+exports.doSomething = () ->
+	console.log 'blah'
