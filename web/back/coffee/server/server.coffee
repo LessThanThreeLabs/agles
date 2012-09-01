@@ -1,51 +1,42 @@
 fs = require 'fs'
+assert = require 'assert'
 express = require 'express'
-resource = require 'express-resource'
-redirectServer = require './redirectServer'
-configurer = require './configuration'
-socket = require './socket/socket'
+
+Configurer = require './configuration'
+ResourceSocket = require './socket/resourceSocket'
 
 
-exports.start = (serverConfiguration, modelConnection) ->
-	server = startServer serverConfiguration
-	redirectServer.start serverConfiguration
-	socket.start server, serverConfiguration
+exports.create = (configurationParams, modelConnection, resourceSocket) ->
+	configurer = Configurer.create(configurationParams)
+	resourceSocket ?= ResourceSocket.create configurationParams, modelConnection
 
-	console.log 'Server started.'
-
-
-startServer = (serverConfiguration) ->
-	server = express.createServer getHttpsOptions serverConfiguration
-	configurer.configureServer server, serverConfiguration
-
-	setupStaticServer server, serverConfiguration
-
-	server.use '/', (request, response) ->
-		response.render 'index', csrfToken: request.session._csrf
-	
-	httpsPort = serverConfiguration.https.port
-	server.listen httpsPort
-
-	return server
+	return new Server configurer, modelConnection, resourceSocket
 
 
-setupStaticServer = (server, serverConfiguration) ->
-	rootStaticDirectory = serverConfiguration.staticFiles.rootDirectory
-	server.use express.favicon(rootStaticDirectory + '/favicon.ico')
+class Server
+	constructor: (@configurer, @modelConnection, @resourceSocket) ->
+		assert.ok @configurer? and @modelConnection? and @resourceSocket?
 
-	staticCacheParams = serverConfiguration.staticFiles.cache
-	server.use express.staticCache
-		maxObjects: staticCacheParams.maxObjects
-		maxLength: staticCacheParams.maxLength
+	start: () ->
+		@server = express.createServer @_getHttpsOptions()
+		configurer.configureServer @server
 
-	rootStaticDirectory = serverConfiguration.staticFiles.rootDirectory
-	staticDirectories = serverConfiguration.staticFiles.staticDirectories
-	for staticDirectory in staticDirectories
-		server.use staticDirectory, express.static rootStaticDirectory + staticDirectory
+		@server.use '/', (request, response) ->
+			response.render 'index', csrfToken: request.session._csrf
+
+		@server.listen @configurer.getConfigurationParams().https.port
+
+		@resourceSocket.start(server)
+
+		_printThatServerStarted()
 
 
-getHttpsOptions = (serverConfiguration) ->
-	options = 
-		key: fs.readFileSync serverConfiguration.security.key
-		cert: fs.readFileSync serverConfiguration.security.certificate
-		ca: fs.readFileSync serverConfiguration.security.certrequest
+	_getHttpsOptions: () ->
+		options = 
+			key: fs.readFileSync @configurer.getConfigurationParams().security.key
+			cert: fs.readFileSync @configurer.getConfigurationParams().security.certificate
+			ca: fs.readFileSync @configurer.getConfigurationParams().security.certrequest
+
+
+	_printThatServerStarted: () ->
+		console.log 'Server started on port ' + @configurer.getConfigurationParams().https.port

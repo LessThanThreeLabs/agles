@@ -1,10 +1,24 @@
+assert = require 'assert'
 express = require 'express'
 
-exports.start = (serverConfiguration) ->
-	httpPort = serverConfiguration.http.port 
-	httpsPort = serverConfiguration.https.port
 
-	redirectServer = express.createServer()
-	redirectServer.get '*', (request, response) ->
-		response.redirect 'https://' + request.headers.host + ':' + httpsPort + request.url
-	redirectServer.listen httpPort
+exports.create = (configurationParams) ->
+	return new RedirectServer configurationParams
+
+
+class RedirectServer
+	constructor: (@configurationParams) ->
+		assert.ok @configurationParams?
+
+	start: () ->
+		redirectServer = express.createServer()
+		redirectServer.get '*', (request, response) ->
+			response.redirect 'https://' + request.headers.host + ':' + @configurationParams.https.port + request.url
+		redirectServer.listen @configurationParams.http.port 
+
+		_printThatServerStarted()
+
+
+	_printThatServerStarted: () ->
+		console.log 'Redirect server started on port ' + @configurationParams.http.port
+		

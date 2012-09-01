@@ -5,75 +5,85 @@ express = require 'express'
 redisStore = require('connect-redis')(express)
 
 
-exports.configureServer = (server, serverConfiguration) ->
-	server.configure () ->
-		server.use express.cookieParser()
-		configureSessionLogic server, serverConfiguration
-		server.use express.bodyParser()  # need this?
-		server.use express.query()  # need this?
-		configureCsrfLogic server, serverConfiguration
-		server.use express.compress()
-		configureViewEngine server, serverConfiguration
-
-	server.configure 'development', () ->
-	    server.use express.errorHandler 
-	    	dumpExceptions: true,
-	    	showStack: true
+exports.create = (configurationParams) ->
+	return new ServerConfigurer configurationParams
 
 
-configureViewEngine = (server, serverConfiguration) ->
-	rootStaticDirectory = serverConfiguration.staticFiles.rootDirectory
-
-	server.set 'view engine', 'hbs'
-	server.set 'view options', layout: false
-	server.set 'views', serverConfiguration.staticFiles.rootDirectory
+class ServerConfigurer
+	constructor: (@configurationParams) ->
 
 
-configureCsrfLogic = (server, serverConfiguration) ->
-	staticDirectories = serverConfiguration.staticFiles.staticDirectories
-	shouldIgnoreCsrfLogic = (url) ->
-		return url == '/favicon.ico' ||
-			staticDirectories.some (staticDirectory) ->
-				return url.indexOf(staticDirectory + '/') == 0
-
-	server.use (request, response, next) ->
-		if shouldIgnoreCsrfLogic request.url
-			next()
-		else
-			express.csrf()(request, response, next)
+	getConfigurationParams: () ->
+		return @configurationParams
 
 
-configureSessionLogic = (server, serverConfiguration) ->
-	server.use express.session
-    	secret: serverConfiguration.session.secret
-    	cookie:
-    		path: '/',
-    		httpOnly: true,
-    		secure: true,
-    		maxAge: 14400000
-    	store: new redisStore
-    		port: serverConfiguration.redis.port
+	configure: (server) ->
+		server.configure () ->
+			server.use express.cookieParser()
+			configureSessionLogic server
+			server.use express.bodyParser()  # need this?
+			server.use express.query()  # need this?
+			configureCsrfLogic server
+			server.use express.compress()
+			_configureViewEngine server
 
-	ignoreStaticFilesFromSessionLogic serverConfiguration
+		server.configure 'development', () ->
+		    server.use express.errorHandler 
+		    	dumpExceptions: true,
+		    	showStack: true
 
 
-ignoreStaticFilesFromSessionLogic = (serverConfiguration) ->
-	express.session.ignore.push '/favicon.ico'
+	_configureViewEngine: (server) ->
+		server.set 'view engine', 'hbs'
+		server.set 'view options', layout: false
+		server.set 'views', @configurationParams.staticFiles.rootDirectory
 
-	rootDirectory = serverConfiguration.staticFiles.rootDirectory
-	staticDirectories = serverConfiguration.staticFiles.staticDirectories
 
-	for staticDirectory in staticDirectories
-		directory = rootDirectory + staticDirectory
+	_configureStaticServer: (server) ->
+		server.use express.favicon @configuration.staticFiles.rootDirectory + '/favicon.ico'
 
-		walker = fileWalker.walkSync directory, followLinks: true
+		server.use express.staticCache
+			maxObjects: @configuration.staticFiles.cache.maxObjects
+			maxLength: @configuration.staticFiles.cache.maxLength
 
-		walker.on 'file', (root, fileStats, next) ->
-			fileToIgnore = root + '/' + fileStats.name
-			staticFileToIgnore = fileToIgnore.substring fileToIgnore.indexOf staticDirectory
-			express.session.ignore.push staticFileToIgnore
-			next()
+		for staticDirectory in @configuration.staticFiles.staticDirectories
+			@server.use staticDirectory,
+				express.static @configuration.staticFiles.rootDirectory + staticDirectory
 
-		walker.on 'end', () ->
-			assert.ok express.session.ignore.length > 1,
-				'Problem finding static files to ignore from session logic.'
+
+	_configureSessionLogic: (server) ->
+		server.use express.session
+	    	secret: @configurationParams.session.secret
+	    	cookie:
+	    		path: '/',
+	    		httpOnly: true,
+	    		secure: true,
+	    		maxAge: 14400000
+	    	store: new redisStore
+	    		port: @configurationParams.redis.port
+
+		_ignoreStaticFilesFromSessionLogic()
+
+
+	_ignoreStaticFilesFromSessionLogic: () ->
+		console.log '_ignoreStaticBlah has sideeffects!!!! '
+
+		express.session.ignore.push '/favicon.ico'
+
+		rootDirectory = serverConfiguration.staticFiles.rootDirectory
+		staticDirectories = serverConfiguration.staticFiles.staticDirectories
+
+		for staticDirectory in staticDirectories
+			directory = rootDirectory + staticDirectory
+
+			walker = fileWalker.walkSync directory, followLinks: true
+
+			walker.on 'file', (root, fileStats, next) ->
+				fileToIgnore = root + '/' + fileStats.name
+				staticFileToIgnore = fileToIgnore.substring fileToIgnore.indexOf staticDirectory
+				express.session.ignore.push staticFileToIgnore
+				next()
+
+			walker.on 'end', () ->
+				assert.ok express.session.ignore.length > 1,
+					'Problem finding static files to ignore from session logic.'

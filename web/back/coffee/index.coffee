@@ -4,28 +4,38 @@ profiler = require('nodetime').profile
 
 os = require 'os'
 cluster = require 'cluster'
-configuration = require './configuration'
-modelConnection = require './modelConnection'
-environment = require './environment'
-server = require './server/server'
+
+configuration = require('./configuration')('./config.json')
+environment = require('./environment')(configuration.mode)
+
+ModelConnection = require './modelConnection'
+Server = require './server/server'
+RedirectServer = require './server/redirectServer'
 
 
 startEverything = () ->
-	environment.setup configuration
-	serverConfiguration = configuration.server
+	modelConnection = ModelConnection.create configuration.server
 
-	if serverConfiguration.cluster
-		createMultipleServers serverConfiguration, modelConnection
+	if configuration.server.cluster
+		createMultipleServers configuration.server, modelConnection
 	else
-		server.start serverConfiguration, modelConnection
+		createServers configuration.server, modelConnection
 
 
-createMultipleServers = (serverConfiguration, modelConnection) ->
+createMultipleServers = (serverConfigurationParams) ->
 	if cluster.isMaster
 		numCpus = os.cpus().length
 		cluster.fork() for num in [0...numCpus]
 	else
-		server.start serverConfiguration, modelConnection
+		createServers serverConfigurationParams, modelConnection
+
+
+createServers = (serverConfigurationParams, modelConnection) ->
+	redirectServer = RedirectServer.create configurationParams
+	redirectServer.start()
+
+	server = Server.createServer serverConfigurationParams, modelConnection
+	server.start()
 
 
 startEverything()
