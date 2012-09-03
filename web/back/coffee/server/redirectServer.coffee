@@ -10,13 +10,14 @@ class RedirectServer
 	constructor: (@configurationParams) ->
 		assert.ok @configurationParams?
 
-	start: () ->
-		redirectServer = express.createServer()
-		redirectServer.get '*', (request, response) ->
-			response.redirect 'https://' + request.headers.host + ':' + @configurationParams.https.port + request.url
-		redirectServer.listen @configurationParams.http.port 
 
-		_printThatServerStarted()
+	start: () ->
+		@redirectServer = express.createServer()
+		@redirectServer.get '*', (request, response) =>
+			response.redirect 'https://' + request.headers.host + ':' + @configurationParams.https.port + request.url
+		@redirectServer.listen @configurationParams.http.port 
+
+		@_printThatServerStarted()
 
 
 	_printThatServerStarted: () ->

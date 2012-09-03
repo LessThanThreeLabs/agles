@@ -11,6 +11,7 @@ exports.create = (configurationParams) ->
 
 class ServerConfigurer
 	constructor: (@configurationParams) ->
+		assert.ok @configurationParams?
 
 
 	getConfigurationParams: () ->
@@ -18,14 +19,15 @@ class ServerConfigurer
 
 
 	configure: (server) ->
-		server.configure () ->
+		server.configure () =>
 			server.use express.cookieParser()
-			configureSessionLogic server
 			server.use express.bodyParser()  # need this?
 			server.use express.query()  # need this?
-			configureCsrfLogic server
 			server.use express.compress()
-			_configureViewEngine server
+			@_configureSessionLogic server
+			@_configureCsrfLogic server
+			@_configureViewEngine server
+			@_configureStaticServer server
 
 		server.configure 'development', () ->
 		    server.use express.errorHandler 
@@ -40,15 +42,31 @@ class ServerConfigurer
 
 
 	_configureStaticServer: (server) ->
-		server.use express.favicon @configuration.staticFiles.rootDirectory + '/favicon.ico'
+		server.use express.favicon @configurationParams.staticFiles.rootDirectory + '/favicon.ico'
 
 		server.use express.staticCache
-			maxObjects: @configuration.staticFiles.cache.maxObjects
-			maxLength: @configuration.staticFiles.cache.maxLength
+			maxObjects: @configurationParams.staticFiles.cache.maxObjects
+			maxLength: @configurationParams.staticFiles.cache.maxLength
 
-		for staticDirectory in @configuration.staticFiles.staticDirectories
-			@server.use staticDirectory,
-				express.static @configuration.staticFiles.rootDirectory + staticDirectory
+		for staticDirectory in @configurationParams.staticFiles.staticDirectories
+			server.use staticDirectory,
+				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory
+
+
+	_configureCsrfLogic: (server) ->
+		console.log '>> if using websockets, dont need heavy csrf logic on every request!'
+
+		staticDirectories = @configurationParams.staticFiles.staticDirectories
+		shouldIgnoreCsrfLogic = (url) ->
+			return url == '/favicon.ico' ||
+				staticDirectories.some (staticDirectory) ->
+					return url.indexOf(staticDirectory + '/') == 0
+
+		server.use (request, response, next) ->
+			if shouldIgnoreCsrfLogic request.url
+				next()
+			else
+				express.csrf()(request, response, next)
 
 
 	_configureSessionLogic: (server) ->
@@ -60,9 +78,10 @@ class ServerConfigurer
 	    		secure: true,
 	    		maxAge: 14400000
 	    	store: new redisStore
+	    		url: @configurationParams.redis.url
 	    		port: @configurationParams.redis.port
 
-		_ignoreStaticFilesFromSessionLogic()
+		@_ignoreStaticFilesFromSessionLogic()
 
 
 	_ignoreStaticFilesFromSessionLogic: () ->
@@ -70,8 +89,8 @@ class ServerConfigurer
 
 		express.session.ignore.push '/favicon.ico'
 
-		rootDirectory = serverConfiguration.staticFiles.rootDirectory
-		staticDirectories = serverConfiguration.staticFiles.staticDirectories
+		rootDirectory = @configurationParams.staticFiles.rootDirectory
+		staticDirectories = @configurationParams.staticFiles.staticDirectories
 
 		for staticDirectory in staticDirectories
 			directory = rootDirectory + staticDirectory

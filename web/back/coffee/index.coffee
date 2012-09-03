@@ -1,28 +1,34 @@
-profiler = require('nodetime').profile
-	accountKey: 'e32c83cafbf931d5e47aca4c66f34bc7b36701f3'
-	appName: 'Less Than Three'
-
 os = require 'os'
 cluster = require 'cluster'
+profiler = require 'nodetime'
+configuration = require('./configuration')
+environment = require('./environment')
 
-configuration = require('./configuration')('./config.json')
-environment = require('./environment')(configuration.mode)
-
-ModelConnection = require './modelConnection'
+ModelConnection = require './modelConnection/modelConnection'
 Server = require './server/server'
 RedirectServer = require './server/redirectServer'
 
 
 startEverything = () ->
-	modelConnection = ModelConnection.create configuration.server
+	configurationParams = configuration.getConfigurationParams './config.json'
+	environment.setEnvironmentMode configurationParams.mode
+	startProfiler configurationParams
 
-	if configuration.server.cluster
-		createMultipleServers configuration.server, modelConnection
+	modelConnection = ModelConnection.create configurationParams.server
+
+	if configurationParams.server.cluster
+		createMultipleServers configurationParams.server, modelConnection
 	else
-		createServers configuration.server, modelConnection
+		createServers configurationParams.server, modelConnection
 
 
-createMultipleServers = (serverConfigurationParams) ->
+startProfiler = (configurationParams) ->
+	profiler.profile
+		appName: configurationParams.applicationName
+		accountKey: configurationParams.accountKey
+
+
+createMultipleServers = (serverConfigurationParams, modelConnection) ->
 	if cluster.isMaster
 		numCpus = os.cpus().length
 		cluster.fork() for num in [0...numCpus]
@@ -31,10 +37,10 @@ createMultipleServers = (serverConfigurationParams) ->
 
 
 createServers = (serverConfigurationParams, modelConnection) ->
-	redirectServer = RedirectServer.create configurationParams
+	redirectServer = RedirectServer.create serverConfigurationParams
 	redirectServer.start()
 
-	server = Server.createServer serverConfigurationParams, modelConnection
+	server = Server.create serverConfigurationParams, modelConnection
 	server.start()
 
 
