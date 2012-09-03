@@ -31,15 +31,9 @@ class Server
 
 		@resourceSocket.start @server
 
-		@_printThatServerStarted()
-
 
 	_getHttpsOptions: () ->
 		options = 
 			key: fs.readFileSync @configurer.getConfigurationParams().security.key
 			cert: fs.readFileSync @configurer.getConfigurationParams().security.certificate
 			ca: fs.readFileSync @configurer.getConfigurationParams().security.certrequest
-
-
-	_printThatServerStarted: () ->
-		console.log 'Server started on port ' + @configurer.getConfigurationParams().https.port

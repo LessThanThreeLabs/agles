@@ -4,44 +4,30 @@ profiler = require 'nodetime'
 configuration = require('./configuration')
 environment = require('./environment')
 
-ModelConnection = require './modelConnection/modelConnection'
-Server = require './server/server'
-RedirectServer = require './server/redirectServer'
-
 
 startEverything = () ->
 	configurationParams = configuration.getConfigurationParams './config.json'
 	environment.setEnvironmentMode configurationParams.mode
-	startProfiler configurationParams
+	startProfiler configurationParams.profiler
 
-	modelConnection = ModelConnection.create configurationParams.server
-
-	if configurationParams.server.cluster
-		createMultipleServers configurationParams.server, modelConnection
-	else
-		createServers configurationParams.server, modelConnection
+	createServers configurationParams.server
 
 
-startProfiler = (configurationParams) ->
+startProfiler = (profilerConfigurationParams) ->
 	profiler.profile
-		appName: configurationParams.applicationName
-		accountKey: configurationParams.accountKey
+		appName: profilerConfigurationParams.applicationName
+		accountKey: profilerConfigurationParams.accountKey
+		silent: profilerConfigurationParams.silent
 
 
-createMultipleServers = (serverConfigurationParams, modelConnection) ->
-	if cluster.isMaster
-		numCpus = os.cpus().length
-		cluster.fork() for num in [0...numCpus]
-	else
-		createServers serverConfigurationParams, modelConnection
+createServers = (serverConfigurationParams) ->
+	numWorkers = if serverConfigurationParams.cluster then os.cpus().length else 1
 
-
-createServers = (serverConfigurationParams, modelConnection) ->
-	redirectServer = RedirectServer.create serverConfigurationParams
-	redirectServer.start()
-
-	server = Server.create serverConfigurationParams, modelConnection
-	server.start()
+	cluster.setupMaster exec: "js/worker"
+	cluster.fork() for num in [0...numWorkers]
+	
+	console.log numWorkers + ' servers started on port ' + serverConfigurationParams.http.port + ' (http)' +
+		' and port ' + serverConfigurationParams.https.port + ' (https)'
 
 
 startEverything()

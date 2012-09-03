@@ -16,10 +16,3 @@ class RedirectServer
 		@redirectServer.get '*', (request, response) =>
 			response.redirect 'https://' + request.headers.host + ':' + @configurationParams.https.port + request.url
 		@redirectServer.listen @configurationParams.http.port 
-
-		@_printThatServerStarted()
-
-
-	_printThatServerStarted: () ->
-		console.log 'Redirect server started on port ' + @configurationParams.http.port
-		
