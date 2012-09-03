@@ -25,7 +25,6 @@ class ServerConfigurer
 			server.use express.query()  # need this?
 			server.use express.compress()
 			@_configureSessionLogic server
-			@_configureCsrfLogic server
 			@_configureViewEngine server
 			@_configureStaticServer server
 
@@ -51,22 +50,6 @@ class ServerConfigurer
 		for staticDirectory in @configurationParams.staticFiles.staticDirectories
 			server.use staticDirectory,
 				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory
-
-
-	_configureCsrfLogic: (server) ->
-		console.log '>> if using websockets, dont need heavy csrf logic on every request!'
-
-		staticDirectories = @configurationParams.staticFiles.staticDirectories
-		shouldIgnoreCsrfLogic = (url) ->
-			return url == '/favicon.ico' ||
-				staticDirectories.some (staticDirectory) ->
-					return url.indexOf(staticDirectory + '/') == 0
-
-		server.use (request, response, next) ->
-			if shouldIgnoreCsrfLogic request.url
-				next()
-			else
-				express.csrf()(request, response, next)
 
 
 	_configureSessionLogic: (server) ->
