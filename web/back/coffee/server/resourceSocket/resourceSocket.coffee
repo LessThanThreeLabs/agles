@@ -5,7 +5,7 @@ Configurer = require './configuration'
 
 
 exports.create = (configurationParams, modelConnection) ->
-	configurer = Configurer.create configurationParams.socket, configurationParams.redis
+	configurer = Configurer.create configurationParams.socket, configurationParams.redis, configurationParams.session
 	return new ResourceSocket configurer, modelConnection
 
 

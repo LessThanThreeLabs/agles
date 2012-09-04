@@ -20,6 +20,7 @@ class ServerConfigurer
 
 	configure: (server) ->
 		server.configure () =>
+			# ORDER HERE IS VERY IMPORTANT!!!!
 			server.use express.cookieParser()
 			server.use express.bodyParser()  # need this?
 			server.use express.query()  # need this?
@@ -29,9 +30,9 @@ class ServerConfigurer
 			@_configureStaticServer server
 
 		server.configure 'development', () ->
-		    server.use express.errorHandler 
-		    	dumpExceptions: true,
-		    	showStack: true
+			server.use express.errorHandler 
+				dumpExceptions: true,
+				showStack: true
 
 
 	_configureViewEngine: (server) ->
@@ -56,6 +57,7 @@ class ServerConfigurer
 		server.use express.session
 	    	secret: @configurationParams.session.secret
 	    	cookie:
+	    		key: @configurationParams.session.cookie.name
 	    		path: '/',
 	    		httpOnly: true,
 	    		secure: true,

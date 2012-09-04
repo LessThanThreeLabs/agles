@@ -6,13 +6,13 @@ redisStore = require 'socket.io/lib/stores/redis'
 Session = require('express').session.Session;
 
 
-exports.create = (socketconfigurationParams, redisConfigurationParams) ->
-	return new ResourceSocketConfigurer socketconfigurationParams, redisConfigurationParams
+exports.create = (socketconfigurationParams, redisConfigurationParams, sessionConfigurationParams) ->
+	return new ResourceSocketConfigurer socketconfigurationParams, redisConfigurationParams, sessionConfigurationParams
 
 
 class ResourceSocketConfigurer
-	constructor: (@socketconfigurationParams, @redisConfigurationParams) ->
-		assert.ok @socketconfigurationParams? and @redisConfigurationParams?
+	constructor: (@socketconfigurationParams, @redisConfigurationParams, @sessionConfigurationParams) ->
+		assert.ok @socketconfigurationParams? and @redisConfigurationParams? and @sessionConfigurationParams
 
 
 	configure: (socket) ->
@@ -38,35 +38,34 @@ class ResourceSocketConfigurer
 				callback 'Cross domain sockets not allowed', false
 				return
 
-#			@_attachSessionToHandshake handshakeData
-#			if not handshakeData.session?
+# TODO: uncomment below when parseCookie is included in express!!
+#			try
+#				session = @_getSessionFromSessionId @_getSessionIdFromCookie handshakeData
+				# will need a deep copy of the session object for future use!!
+				# ...right?  it has to be a deep copy? otherwise actions won't get pushed to redis??
+#				soctet.session = new Session {sessionStore: redisStore}, session
+#			catch error
 #				callback 'Unable to retrieve session information', false
-#			else if handshakeData.session.csrfToken != handshakeData.queryString.csrfToken
+#				throw error
+
+#			if handshakeData.session.csrfToken != handshakeData.queryString.csrfToken
 #				callback 'Csrf token mismatch', false
-			else
-				callback null, true
+#				return
+
+			callback null, true
 
 
-	_attachSessionToHandshake: (handshakeData) ->
-		if handshakeData.headers.cookie?
-			handshakeData.cookie = parseCookie handshakeData.headers.cookie
-			return if not handshakeData.cookie['connect.sid']?
+	_getSessionIdFromCookie: (handshakeData) ->
+		assert.ok handshakeData.headers.cookie?
+		cookie = parseCookie handshakeData.headers.cookie
+		return cookie[@sessionConfigurationParams.cookie.name]
 
-			handshakeData.sessionId = handshakeData.cookie['connect.sid']
-			console.log 'sessionId: ' + handshakeData.sessionId
 
-			handshakeData.sessionStore = redisStore
-			console.log 'sessionStore: ' + handshakeData.sessionStore
-
-			redisStore.get sessionId, (error, session) ->
-				console.log 'error: ' + error
-				console.log 'session: ' + session
-				if not error? and session?
-					handshakeData.session = new Session handshakeData, session
-		else
-			console.log 'blah1'
-
-		console.log ' -------------------------- '
+	_getSessionFromSessionId: (sessionId) ->
+		assert.ok sessionId?
+		redisStore.get sessionId, (error, session) ->
+			throw error if error?
+			return session
 
 
 	_configureRedisStore: (socket) ->
