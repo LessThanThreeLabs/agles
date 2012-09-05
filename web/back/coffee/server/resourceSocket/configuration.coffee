@@ -1,24 +1,24 @@
 fs = require 'fs'
 assert = require 'assert'
 redis = require 'socket.io/node_modules/redis'
-redisStore = require 'socket.io/lib/stores/redis'
 
+RedisStore = require 'socket.io/lib/stores/redis'
 Session = require('express').session.Session;
 
 
-exports.create = (socketconfigurationParams, redisConfigurationParams, sessionConfigurationParams) ->
-	return new ResourceSocketConfigurer socketconfigurationParams, redisConfigurationParams, sessionConfigurationParams
+exports.create = (configurationParams, sessionStore) ->
+	return new ResourceSocketConfigurer configurationParams, sessionStore
 
 
 class ResourceSocketConfigurer
-	constructor: (@socketconfigurationParams, @redisConfigurationParams, @sessionConfigurationParams) ->
-		assert.ok @socketconfigurationParams? and @redisConfigurationParams? and @sessionConfigurationParams
+	constructor: (@configurationParams, @sessionStore) ->
+		assert.ok @configurationParams? and @sessionStore?
 
 
 	configure: (socket) ->
 		socket.configure () =>
 			socket.set 'resource', '/socket'
-			socket.set 'tranports', @socketconfigurationParams.transports
+			socket.set 'tranports', @configurationParams.socket.transports
 			socket.enable 'browser client minification'
 			socket.enable 'browser client etag'
 			socket.enable 'browser client gzip'
@@ -34,44 +34,51 @@ class ResourceSocketConfigurer
 
 	_configureAuthorization: (socket) ->
 		socket.set 'authorization', (handshakeData, callback) =>
+			# TODO: do we need to check if secure here?
 			if handshakeData.xdomain
 				callback 'Cross domain sockets not allowed', false
-				return
+			else
+				@_handleSessionAuthorization socket, handshakeData, callback
 
-# TODO: uncomment below when parseCookie is included in express!!
-#			try
-#				session = @_getSessionFromSessionId @_getSessionIdFromCookie handshakeData
+
+	_handleSessionAuthorization: (socket, handshakeData, callback) ->
+		try
+			sessionId = @_getSessionIdFromCookie handshakeData
+			console.log 'searching for session with id: ' + sessionId
+			@sessionStore.get sessionId, (error, session) ->
+				throw error if error?
+				console.log 'failed to find session?' if not session?
+				assert.ok session?
+
 				# will need a deep copy of the session object for future use!!
 				# ...right?  it has to be a deep copy? otherwise actions won't get pushed to redis??
-#				soctet.session = new Session {sessionStore: redisStore}, session
-#			catch error
-#				callback 'Unable to retrieve session information', false
-#				throw error
+				# socket.session = new Session {sessionStore: @sessionStore}, session
+				socket.session = session
 
-#			if handshakeData.session.csrfToken != handshakeData.queryString.csrfToken
-#				callback 'Csrf token mismatch', false
-#				return
-
-			callback null, true
+				console.log socket.session.csrfToken
+				console.log '== ?'
+				console.log handshakeData.query.csrfToken
+				if socket.session.csrfToken != handshakeData.query.csrfToken
+					callback 'Csrf token mismatch', false
+				else
+					callback null, true
+		catch error
+			callback 'Unable to retrieve session information', false
+			throw error
 
 
 	_getSessionIdFromCookie: (handshakeData) ->
 		assert.ok handshakeData.headers.cookie?
-		cookie = parseCookie handshakeData.headers.cookie
-		return cookie[@sessionConfigurationParams.cookie.name]
-
-
-	_getSessionFromSessionId: (sessionId) ->
-		assert.ok sessionId?
-		redisStore.get sessionId, (error, session) ->
-			throw error if error?
-			return session
+		cookie = handshakeData.headers.cookie
+		return cookie.substring 'connect.sid='.length
+		# cookie = parseCookie handshakeData.headers.cookie
+		# return cookie[@configurationParams.session.cookie.name]
 
 
 	_configureRedisStore: (socket) ->
-		socket.set 'store', new redisStore
-			url: @redisConfigurationParams.url
-			port: @redisConfigurationParams.port
+		socket.set 'store', new RedisStore
+			url: @configurationParams.redis.url
+			port: @configurationParams.redis.port
 			redisClient: redis.createClient()
 			redisPub: redis.createClient()
 			redisSub: redis.createClient()

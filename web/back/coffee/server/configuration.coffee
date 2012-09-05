@@ -2,16 +2,15 @@ fs = require 'fs'
 assert = require 'assert'
 fileWalker = require 'walk'
 express = require 'express'
-redisStore = require('connect-redis')(express)
 
 
-exports.create = (configurationParams) ->
-	return new ServerConfigurer configurationParams
+exports.create = (configurationParams, sessionStore) ->
+	return new ServerConfigurer configurationParams, sessionStore
 
 
 class ServerConfigurer
-	constructor: (@configurationParams) ->
-		assert.ok @configurationParams?
+	constructor: (@configurationParams, @sessionStore) ->
+		assert.ok @configurationParams? and @sessionStore?
 
 
 	getConfigurationParams: () ->
@@ -50,7 +49,8 @@ class ServerConfigurer
 
 		for staticDirectory in @configurationParams.staticFiles.staticDirectories
 			server.use staticDirectory,
-				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory
+				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory, maxAge: 1
+				# TODO: determine correct maxage!!!!
 
 
 	_configureSessionLogic: (server) ->
@@ -62,9 +62,7 @@ class ServerConfigurer
 	    		httpOnly: true,
 	    		secure: true,
 	    		maxAge: 14400000
-	    	store: new redisStore
-	    		url: @configurationParams.redis.url
-	    		port: @configurationParams.redis.port
+	    	store: @sessionStore
 
 		@_ignoreStaticFilesFromSessionLogic()
 

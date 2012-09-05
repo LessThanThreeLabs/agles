@@ -4,8 +4,8 @@ io = require 'socket.io'
 Configurer = require './configuration'
 
 
-exports.create = (configurationParams, modelConnection) ->
-	configurer = Configurer.create configurationParams.socket, configurationParams.redis, configurationParams.session
+exports.create = (configurationParams, sessionStore, modelConnection) ->
+	configurer = Configurer.create configurationParams, sessionStore
 	return new ResourceSocket configurer, modelConnection
 
 

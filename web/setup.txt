@@ -31,6 +31,10 @@ Setup:
 	Install ZeroRpc
 		sudo pip install zerorpc
 
-	Install coffeescript by running "npm install -g coffee-script"
+	Install CoffeeScript by running "npm install -g coffee-script"
+
+	Install CoffeeScript syntax in Sublime
+		cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
+		git clone git://github.com/dhoelzgen/iced-coffee-script-tmbundle.git IcedCoffeeScript
 
 	Run "npm -d install" in the web/back/ directory.

@@ -3,15 +3,23 @@ assert = require 'assert'
 express = require 'express'
 csrf = require './csrf'
 
+RedisStore = require('connect-redis')(express)
 Configurer = require './configuration'
 ResourceSocket = require './resourceSocket/resourceSocket'
 
 
 exports.create = (configurationParams, modelConnection, resourceSocket) ->
-	configurer = Configurer.create configurationParams
-	resourceSocket ?= ResourceSocket.create configurationParams, modelConnection
+	sessionStore = createSessionStore configurationParams
+	configurer = Configurer.create configurationParams, sessionStore
+	resourceSocket ?= ResourceSocket.create configurationParams, sessionStore, modelConnection
 
 	return new Server configurer, modelConnection, resourceSocket
+
+
+createSessionStore = (configurationParams) ->
+	return new RedisStore
+		url: configurationParams.redis.url
+		port: configurationParams.redis.port
 
 
 class Server
@@ -24,7 +32,9 @@ class Server
 		@configurer.configure @server
 
 		@server.use '/', (request, response) ->
-			csrf.generateCsrfToken request.session
+			console.log 'received request...'
+			csrf.setCsrfTokenIfMissing request.session
+			console.log 'USING CSRF TOKEN: ' + request.session.csrfToken
 			response.render 'index', csrfToken: request.session.csrfToken
 
 		@server.listen @configurer.getConfigurationParams().https.port
