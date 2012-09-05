@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 
-from db.engine import EngineFactory
+from database.engine import EngineFactory
 
 
 metadata = MetaData()
