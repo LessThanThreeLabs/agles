@@ -44,20 +44,14 @@ class ResourceSocketConfigurer
 	_handleSessionAuthorization: (socket, handshakeData, callback) ->
 		try
 			sessionId = @_getSessionIdFromCookie handshakeData
-			console.log 'searching for session with id: ' + sessionId
 			@sessionStore.get sessionId, (error, session) ->
 				throw error if error?
-				console.log 'failed to find session?' if not session?
 				assert.ok session?
 
 				# will need a deep copy of the session object for future use!!
 				# ...right?  it has to be a deep copy? otherwise actions won't get pushed to redis??
 				# socket.session = new Session {sessionStore: @sessionStore}, session
 				socket.session = session
-
-				console.log socket.session.csrfToken
-				console.log '== ?'
-				console.log handshakeData.query.csrfToken
 				if socket.session.csrfToken != handshakeData.query.csrfToken
 					callback 'Csrf token mismatch', false
 				else
@@ -70,7 +64,8 @@ class ResourceSocketConfigurer
 	_getSessionIdFromCookie: (handshakeData) ->
 		assert.ok handshakeData.headers.cookie?
 		cookie = handshakeData.headers.cookie
-		return cookie.substring 'connect.sid='.length
+		uriEncodedSessionId = cookie.substring 'connect.sid='.length
+		return decodeURIComponent uriEncodedSessionId
 		# cookie = parseCookie handshakeData.headers.cookie
 		# return cookie[@configurationParams.session.cookie.name]
 

@@ -13,7 +13,7 @@ exports.create = (configurationParams, modelConnection, resourceSocket) ->
 	configurer = Configurer.create configurationParams, sessionStore
 	resourceSocket ?= ResourceSocket.create configurationParams, sessionStore, modelConnection
 
-	return new Server configurer, modelConnection, resourceSocket
+	return new Server configurer, modelConnection, resourceSocket, sessionStore
 
 
 createSessionStore = (configurationParams) ->
@@ -23,18 +23,16 @@ createSessionStore = (configurationParams) ->
 
 
 class Server
-	constructor: (@configurer, @modelConnection, @resourceSocket) ->
-		assert.ok @configurer? and @modelConnection? and @resourceSocket?
+	constructor: (@configurer, @modelConnection, @resourceSocket, @sessionStore) ->
+		assert.ok @configurer? and @modelConnection? and @resourceSocket? and @sessionStore?
 
 
 	start: () ->
 		@server = express.createServer @_getHttpsOptions()
 		@configurer.configure @server
 
-		@server.use '/', (request, response) ->
-			console.log 'received request...'
+		@server.use '/', (request, response) =>
 			csrf.setCsrfTokenIfMissing request.session
-			console.log 'USING CSRF TOKEN: ' + request.session.csrfToken
 			response.render 'index', csrfToken: request.session.csrfToken
 
 		@server.listen @configurer.getConfigurationParams().https.port

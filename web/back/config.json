@@ -8,7 +8,7 @@
 	},
 
 	"server": {
-		"cluster": false,
+		"cluster": true,
 
 		"http": {
 			"port": 80

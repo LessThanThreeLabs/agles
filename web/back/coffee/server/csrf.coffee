@@ -11,7 +11,7 @@ generateCsrfToken = () ->
 	characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 	
 	tokenBuffer = []
-	for num in [0...24]
+	for num in [0...32]
 		randomCharacterIndex = Math.floor Math.random() * characters.length
 		tokenBuffer.push characters[randomCharacterIndex]
 
