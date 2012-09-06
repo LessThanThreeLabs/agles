@@ -51,7 +51,6 @@ class ResourceSocketConfigurer
 				# want to store this session as an express session 
 				# so we get all those fancy methods in the future
 				socket.session = new Session {sessionID: sessionId, sessionStore: @sessionStore}, session
-				console.log 'NEED TO TOUCH THE SESSION OBJECT EVERY ONCE IN A WHILE'
 
 				if socket.session.csrfToken != handshakeData.query.csrfToken
 					callback 'Csrf token mismatch', false
