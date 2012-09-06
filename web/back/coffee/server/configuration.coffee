@@ -56,8 +56,8 @@ class ServerConfigurer
 	_configureSessionLogic: (server) ->
 		server.use express.session
 	    	secret: @configurationParams.session.secret
+	    	key: @configurationParams.session.cookie.name
 	    	cookie:
-	    		key: @configurationParams.session.cookie.name
 	    		path: '/',
 	    		httpOnly: true,
 	    		secure: true,
