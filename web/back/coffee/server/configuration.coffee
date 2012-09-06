@@ -49,7 +49,7 @@ class ServerConfigurer
 
 		for staticDirectory in @configurationParams.staticFiles.staticDirectories
 			server.use staticDirectory,
-				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory, maxAge: 1
+				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory, maxAge: 0
 				# TODO: determine correct maxage!!!!
 
 
