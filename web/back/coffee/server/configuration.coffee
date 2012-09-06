@@ -68,8 +68,6 @@ class ServerConfigurer
 
 
 	_ignoreStaticFilesFromSessionLogic: () ->
-		console.log '_ignoreStaticBlah has sideeffects!!!! '
-
 		express.session.ignore.push '/favicon.ico'
 
 		rootDirectory = @configurationParams.staticFiles.rootDirectory
