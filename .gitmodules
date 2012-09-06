@@ -4,6 +4,3 @@
 [submodule "submodules/zerorpc"]
 	path = submodules/zerorpc
 	url = https://github.com/dotcloud/zerorpc-python.git
-[submodule "submodules/cgit"]
-	path = submodules/cgit
-	url = git://github.com/git/git.git
