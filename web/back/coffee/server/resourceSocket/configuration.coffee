@@ -32,6 +32,31 @@ class ResourceSocketConfigurer
 			socket.set 'log level', 1
 
 
+
+	_testSession: (sStore, sId) ->
+		console.log 'called _testSession with session id: ' + sId
+
+		sStore.get sId, (error, session) ->
+			expressSession = new Session 
+				sessionId: sId
+				sessionStore: sStore
+				, session
+			expressSession.foo = 17
+
+			console.log 'set expressSession.foo to: ' + expressSession.foo
+
+			expressSession.save (error) ->
+				console.log 'error: ' + error
+
+			setTimeout (()->
+				sStore.get sId, (error, session) ->
+					console.log 'foo = ' + session.foo
+					for blah of session
+						console.log '~ ' + blah
+				), 1000
+			
+
+
 	_configureAuthorization: (socket) ->
 		socket.set 'authorization', (handshakeData, callback) =>
 			# TODO: do we need to check if secure here?
@@ -39,6 +64,9 @@ class ResourceSocketConfigurer
 				callback 'Cross domain sockets not allowed', false
 			else
 				@_handleSessionAuthorization socket, handshakeData, callback
+
+			# sessionId = @_getSessionIdFromCookie handshakeData
+			# setTimeout (() => @_testSession(@sessionStore, sessionId)), 1000
 
 
 	_handleSessionAuthorization: (socket, handshakeData, callback) ->
@@ -50,8 +78,8 @@ class ResourceSocketConfigurer
 
 				# will need a deep copy of the session object for future use!!
 				# ...right?  it has to be a deep copy? otherwise actions won't get pushed to redis??
-				# socket.session = new Session {sessionStore: @sessionStore}, session
-				socket.session = session
+				socket.session = new Session {sessionId: sessionId, sessionStore: @sessionStore}, session
+				# socket.session = session
 				if socket.session.csrfToken != handshakeData.query.csrfToken
 					callback 'Csrf token mismatch', false
 				else
