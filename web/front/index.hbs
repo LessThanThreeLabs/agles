@@ -5,12 +5,12 @@
 <body>
 	<img src="/img/awesomeFace.png" />
 
+	<script src="socket/socket.io.js"></script>
 	<script src="js/libs/jquery.js"></script>
 	<script src="js/libs/underscore.js"></script>
 	<script src="js/libs/backbone/backbone.js"></script>
 	<script src="js/libs/backbone/iosync.js"></script>
 	<script src="js/libs/backbone/iobind.productionModeShouldUseMinified.js"></script>
-	<script src="socket/socket.io.js"></script>
 
 	<script>
 	  var socket = io.connect('https://127.0.0.1?csrfToken={{csrfToken}}', { resource: 'socket'});
