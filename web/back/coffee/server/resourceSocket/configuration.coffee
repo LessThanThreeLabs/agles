@@ -44,15 +44,15 @@ class ResourceSocketConfigurer
 	_handleSessionAuthorization: (socket, handshakeData, callback) ->
 		try
 			sessionId = @_getSessionIdFromCookie handshakeData
-			@sessionStore.get sessionId, (error, session) ->
+			@sessionStore.get sessionId, (error, session) =>
 				throw error if error?
 				assert.ok session?
 
 				# want to store this session as an express session 
 				# so we get all those fancy methods in the future
-				socket.session = new Session {sessionID: sessionId, sessionStore: @sessionStore}, session
+				handshakeData.session = new Session {sessionID: sessionId, sessionStore: @sessionStore}, session
 
-				if socket.session.csrfToken != handshakeData.query.csrfToken
+				if handshakeData.session.csrfToken != handshakeData.query.csrfToken
 					callback 'Csrf token mismatch', false
 				else
 					callback null, true
@@ -77,3 +77,19 @@ class ResourceSocketConfigurer
 			redisClient: redis.createClient()
 			redisPub: redis.createClient()
 			redisSub: redis.createClient()
+
+
+	configureConnection: (socket) ->
+		socket.session = socket.handshake.session
+		@_setupSessionMaintenance socket
+
+
+	_setupSessionMaintenance: (socket) ->
+		maintenanceInterval = setInterval (() ->
+			socket.session.reload (error) ->
+				throw error if error?
+				socket.session.touch().save()
+			), @configurationParams.socket.sessionRestoreInterval
+
+		socket.on 'disconnect', () ->
+			clearInterval maintenanceInterval

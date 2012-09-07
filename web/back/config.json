@@ -37,7 +37,8 @@
 		},
 
 		"socket": {
-			"transports": ["websocket", "htmlfile", "xhr-polling", "jsonp-polling"]
+			"transports": ["websocket", "htmlfile", "xhr-polling", "jsonp-polling"],
+			"sessionRestoreInterval": 60000
 		},
 
 		"security": {

@@ -18,7 +18,9 @@ class ResourceSocket
 		@socketio = io.listen server
 		@configurer.configure @socketio
 
-		@socketio.sockets.on 'connection', (socket) ->
+		@socketio.sockets.on 'connection', (socket) =>
+			@configurer.configureConnection socket
+
 			socket.emit 'news', hello: 'world'
 			socket.on 'my other event', (data) ->
 				console.log 'data: ' + data
