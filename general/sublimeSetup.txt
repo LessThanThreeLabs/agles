@@ -4,6 +4,6 @@ Package Control:
 
 Packages:
 	BracketHighlighter
-	CoffeeScript
+	IcedCoffeeScript
 	SublimeCodeIntel
 	SublimeLinter
