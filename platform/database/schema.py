@@ -1,17 +1,25 @@
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, UniqueConstraint
 
 from database.engine import EngineFactory
 
 
 metadata = MetaData()
 
-users = Table('user', metadata,
+user = Table('user', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('username', String, nullable=False),
 	Column('name', String, nullable=False)
 )
 
-repositories = Table('repository', metadata,
+uri_repository_map = Table('uri_repo_map', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('uri', String, nullable=False),
+	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
+	
+	UniqueConstraint('uri', 'repo_id')
+)
+
+repo = Table('repo', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('name', String, nullable=False),
 	Column('hash', String, nullable=False),

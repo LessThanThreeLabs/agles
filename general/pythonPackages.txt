@@ -1,0 +1,6 @@
+pip
+	-mock
+	-nose
+	-psycopg2
+	-sqlalchemy
+	-zerorpc
