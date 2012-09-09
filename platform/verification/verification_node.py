@@ -4,17 +4,14 @@ import msgpack
 
 from threading import Thread
 from subprocess import call
+from settings.verification_node import connection_parameters, queue_name, box_name, vm_count
 
 
 class VerificationNode(object):
 	"""Verifies correctness of builds"""
 
-	BOX_NAME = "lucid32"
-	VM_COUNT = 4
-
 	def __init__(self):
-		self.connection = pika.BlockingConnection(pika.ConnectionParameters(
-				host='localhost'))
+		self.connection = pika.BlockingConnection(connection_parameters)
 		self.current_build_requests = {}
 		self.free_vms = set()
 
@@ -28,7 +25,7 @@ class VerificationNode(object):
 			self.teardown_vm(vm_identifier)
 
 	def spawn_vm_pool(self):
-		for x in range(self.VM_COUNT):
+		for x in range(vm_count):
 			self.spawn_vm(str(x))
 
 	def spawn_listener(self):
@@ -39,7 +36,7 @@ class VerificationNode(object):
 		self.teardown_vm(vm_identifier)
 		if not os.access(vm_identifier, os.F_OK):
 			os.mkdir(vm_identifier)
-		retval = call(["vagrant", "init", self.BOX_NAME], cwd=vm_identifier)
+		retval = call(["vagrant", "init", box_name], cwd=vm_identifier)
 		if retval != 0:
 			raise Exception("Couldn't initialize vagrant: " + vm_identifier)
 		retval = call(["vagrant", "up"], cwd=vm_identifier)
@@ -64,10 +61,10 @@ class VerificationNode(object):
 
 	def _listen(self):
 		request_listener = self.connection.channel()
-		request_listener.queue_declare(queue='task_queue', durable=True)
-		request_listener.basic_qos(prefetch_count=self.VM_COUNT)
+		request_listener.queue_declare(queue=queue_name, durable=True)
+		request_listener.basic_qos(prefetch_count=vm_count)
 		request_listener.basic_consume(self.request_callback,
-				queue='task_queue')
+				queue=queue_name)
 		print "Listening for verification requests"
 		request_listener.start_consuming()
 
@@ -101,8 +98,8 @@ class VerificationNode(object):
 			if retval != 0:
 				raise Exception("Couldn't provision vm: " + vm_identifier)
 		finally:
-			self.mark_success(vm_identifier, repo_address, sha, retval, ch, method)
 			os.remove(os.path.join(vm_identifier, "repo_config.txt"))
+			self.mark_success(vm_identifier, repo_address, sha, retval, ch, method)
 
 	def get_git_config_commands(self, repo_address, sha):
 		# returns a list of git configuration commands for provisioning a vm
