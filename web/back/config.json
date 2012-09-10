@@ -23,6 +23,7 @@
 			"staticDirectories": ["/js", "/img"],
 
 			"cache": {
+				"enabled": true,
 				"maxObjects": 128,
 				"maxLength": 262144
 			}

@@ -43,14 +43,17 @@ class ServerConfigurer
 	_configureStaticServer: (server) ->
 		server.use express.favicon @configurationParams.staticFiles.rootDirectory + '/favicon.ico'
 
-		server.use express.staticCache
-			maxObjects: @configurationParams.staticFiles.cache.maxObjects
-			maxLength: @configurationParams.staticFiles.cache.maxLength
-
 		for staticDirectory in @configurationParams.staticFiles.staticDirectories
 			server.use staticDirectory,
 				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory, maxAge: 0
 				# TODO: determine correct maxage!!!!
+
+
+	_configureStaticCache: (server) ->
+		if @configurationParams.staticFiles.cache.enabled
+			server.use express.staticCache
+				maxObjects: @configurationParams.staticFiles.cache.maxObjects
+				maxLength: @configurationParams.staticFiles.cache.maxLength
 
 
 	_configureSessionLogic: (server) ->

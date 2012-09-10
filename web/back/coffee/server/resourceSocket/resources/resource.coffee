@@ -1,13 +1,11 @@
 assert = require 'assert'
 
-Resource = require './resource'
+
+module.exports = class Resource
+	constructor: (@modelConnection) ->
+		assert.ok @modelConnection?
 
 
-exports.create = (modelConnection) ->
-	return new OrganizationsResource modelConnection
-
-
-class OrganizationsResource extends Resource
 	create: (session, data, callback) ->
 		callback 'create not written yet' if callback?
 
