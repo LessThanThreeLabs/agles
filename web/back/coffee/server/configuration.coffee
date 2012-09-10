@@ -2,6 +2,7 @@ fs = require 'fs'
 assert = require 'assert'
 fileWalker = require 'walk'
 express = require 'express'
+csrf = require './csrf'
 
 
 exports.create = (configurationParams, sessionStore) ->
@@ -25,6 +26,7 @@ class ServerConfigurer
 			server.use express.query()  # need this?
 			server.use express.compress()
 			@_configureSessionLogic server
+			server.use csrf()
 			@_configureViewEngine server
 			@_configureStaticServer server
 

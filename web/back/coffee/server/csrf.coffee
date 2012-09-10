@@ -1,10 +1,10 @@
 assert = require 'assert'
 
 
-exports.setCsrfTokenIfMissing = (session) ->
-	assert.ok session?
-	if not session.csrfToken?
-		session.csrfToken = generateCsrfToken()
+module.exports = () ->
+	return (request, response, next) ->
+		request.session?.csrfToken ?= generateCsrfToken()
+		next()
 
 
 generateCsrfToken = () ->

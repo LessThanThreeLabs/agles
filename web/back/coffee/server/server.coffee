@@ -1,7 +1,6 @@
 fs = require 'fs'
 assert = require 'assert'
 express = require 'express'
-csrf = require './csrf'
 
 RedisStore = require('connect-redis')(express)
 Configurer = require './configuration'
@@ -32,7 +31,6 @@ class Server
 		@configurer.configure @server
 
 		@server.use '/', (request, response) =>
-			csrf.setCsrfTokenIfMissing request.session
 			response.render 'index', csrfToken: request.session.csrfToken
 
 		@server.listen @configurer.getConfigurationParams().https.port
