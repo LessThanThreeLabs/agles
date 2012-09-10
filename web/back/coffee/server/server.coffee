@@ -2,13 +2,13 @@ fs = require 'fs'
 assert = require 'assert'
 express = require 'express'
 
-RedisStore = require('connect-redis')(express)
+SessionStore = require './sessionStore'
 Configurer = require './configuration'
 ResourceSocket = require './resourceSocket/resourceSocket'
 
 
 exports.create = (configurationParams, modelConnection, resourceSocket) ->
-	sessionStore = createSessionStore configurationParams
+	sessionStore = SessionStore.create configurationParams
 	configurer = Configurer.create configurationParams, sessionStore
 	resourceSocket ?= ResourceSocket.create configurationParams, sessionStore, modelConnection
 
