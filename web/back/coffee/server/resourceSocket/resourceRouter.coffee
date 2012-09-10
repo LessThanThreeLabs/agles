@@ -2,11 +2,13 @@ assert = require 'assert'
 
 OrganizationsResource = require './resources/organizationsResource'
 BuildsResource = require './resources/buildsResource'
+RepositoriesResource = require './resources/repositoriesResource'
 
 
 exports.create = (modelConnection) ->
 	organizationsResource = OrganizationsResource.create modelConnection
 	buildsResource = BuildsResource.create modelConnection
+	repositoriesResource = RepositoriesResource.cerate modelConnection
 	return new ResourceRouter organizationsResource, buildsResource
 
 
@@ -25,6 +27,7 @@ class ResourceRouter
 	bindToResources: (socket) ->
 		@_bindToResource socket, 'organizations', @organizationsResource
 		@_bindToResource socket, 'builds', @buildsResource
+		@_bindToResource socket, 'repositories', @repositoriesResource
 
 
 	_bindToResource: (socket, name, resource) ->
