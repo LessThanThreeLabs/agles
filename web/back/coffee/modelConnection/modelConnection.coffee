@@ -23,7 +23,6 @@ class ModelConnection
 
 
 	_createFakeBuild: (id, number) ->
-		console.log 'called'
 		id: if id? then id else Math.floor Math.random() * 10000
 		number: if number? then number else Math.floor Math.random() * 10000
 		owner: 'Jordan Potter'

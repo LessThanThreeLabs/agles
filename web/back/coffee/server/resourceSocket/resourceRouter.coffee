@@ -14,7 +14,7 @@ exports.create = (modelConnection) ->
 
 class ResourceRouter
 	constructor: (@organizationsResource, @buildsResource) ->
-		@allowedActions = ['create', 'read', 'update', 'delete']
+		@allowedActions = ['create', 'read', 'update', 'delete', 'subscribe']
 		assert.ok @_checkResource @organizationsResource
 		assert.ok @_checkResource @buildsResource
 
