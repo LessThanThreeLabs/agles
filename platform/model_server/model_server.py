@@ -7,14 +7,11 @@ and is the only point of interaction between clients and the model server.
 """
 
 import pika
-import zerorpc
 
 import database.schema
 
-from multiprocessing import Process
 from settings.rabbit import connection_parameters
 from database.engine import EngineFactory
-from settings.model_server import model_server_rpc_chan
 
 
 class ModelServer(object):
@@ -27,19 +24,7 @@ class ModelServer(object):
 				type='direct')
 
 		# TODO(bbland): uncomment this
-		#self.conn = EngineFactory.get_connection()
-
-		self.spawn_rpc_service()
-
-	def spawn_rpc_service(self):
-		rpc_service = Process(target=self._bind_rpc)
-		rpc_service.start()
-
-	def _bind_rpc(self):
-		rpc = zerorpc.Server(ModelServer.ModelServerRPC())
-		rpc.bind(model_server_rpc_chan)
-		# blocks, must be run last
-		rpc.run()
+		self.conn = EngineFactory.get_connection()
 
 	def subscribe(self, event):
 		"""No-op
@@ -64,26 +49,23 @@ class ModelServer(object):
 						delivery_mode=2,  # make message persistent
 				))
 
-	class ModelServerRPC(object):
-		"""Contains the RPC methods for the model server
-		"""
-		def __init__(self):
-			pass
+	def get_repo_address(self, repo_hash):
+		repo = database.schema.repo
+		uri_repository_map = database.schema.uri_repository_map
+		query = repo.join(
+				uri_repository_map).select().where(
+				repo.c.hash==repo_hash)
+		row = self.conn.execute(query).first()
+		if row:
+			return row[uri_repository_map.c.uri]
+		else:
+			return None
 
-		def get_repo_address(self, repo_id):
-			uri_repository_map = database.schema.uri_repository_map
-			query = uri_repository_map.select().where(uri_repository_map.c.repo_id==repo_id)
-			row = self.conn.execute(query).first()
-			if row:
-				return row[uri_repository_map.c.uri]
-			else:
-				return None
-
-		def verify_public_key(self, key):
-			ssh_pubkeys = database.schema.ssh_pubkeys
-			query = ssh_pubkeys.select().where(ssh_pubkeys.c.ssh_key==key)
-			row = self.conn.execute(query).first()
-			if row:
-				return row[ssh_pubkeys.c.user_id]
-			else:
-				return None
+	def verify_public_key(self, key):
+		ssh_pubkeys = database.schema.ssh_pubkeys
+		query = ssh_pubkeys.select().where(ssh_pubkeys.c.ssh_key==key)
+		row = self.conn.execute(query).first()
+		if row:
+			return row[ssh_pubkeys.c.user_id]
+		else:
+			return None

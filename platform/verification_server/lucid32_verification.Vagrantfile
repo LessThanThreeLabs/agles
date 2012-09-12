@@ -9,6 +9,9 @@ Vagrant::Config.run do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "lucid32"
 
+  # Get Agles root directory
+  agles_root = ENV["AGLES_ROOT"]
+
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
   # config.vm.box_url = "http://domain.com/path/to/above.box"
@@ -64,7 +67,9 @@ Vagrant::Config.run do |config|
   # some recipes and/or roles.
   #
 	config.vm.provision :chef_solo do |chef|
-		chef.cookbooks_path = "../../chef/cookbooks"
+		chef.cookbooks_path = agles_root.nil? ? 
+				"~/chef-repo" :
+				agles_root + "/chef/cookbooks"
 		# chef.roles_path = "/var/chef/cookbooks/verification/roles"
 		# chef.data_bags_path = "/var/chef/cookbooks/verification/data_bags"
 		chef.add_recipe "git"
