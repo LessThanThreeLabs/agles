@@ -53,4 +53,4 @@ class Repository.View extends Backbone.View
 repositoryModel = new Repository.Model()
 repositoryView = new Repository.View model: repositoryModel
 
-$('body').html repositoryView.render().el
+$('body').append repositoryView.render().el

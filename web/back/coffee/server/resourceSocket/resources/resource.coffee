@@ -6,17 +6,21 @@ module.exports = class Resource
 		assert.ok @modelConnection?
 
 
-	create: (session, data, callback) ->
+	create: (socket, data, callback) ->
 		callback 'create not written yet' if callback?
 
 
-	read: (session, data, callback) ->
+	read: (socket, data, callback) ->
 		callback 'read not written yet' if callback?
 
 
-	update: (session, data, callback) ->
+	update: (socket, data, callback) ->
 		callback 'update not written yet' if callback?
 
 
-	delete: (session, data, callback) ->
+	delete: (socket, data, callback) ->
 		callback 'delete not written yet' if callback?
+
+
+	subscribe: (socket, data, callback) ->
+		callback 'subscribe not written yet' if callback?

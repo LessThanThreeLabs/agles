@@ -8,11 +8,11 @@ exports.create = (modelConnection) ->
 
 
 class BuildsResource extends Resource
-	read: (session, data, callback) ->
+	read: (socket, data, callback) ->
 		if data.id?
-			@modelConnection.getBuild session.user, data.repositoryId, data.id, callback
+			@modelConnection.getBuild socket.session.user, data.repositoryId, data.id, callback
 		else if data.range?
-			@modelConnection.getBuilds session.user, data.repositoryId, 
+			@modelConnection.getBuilds socket.session.user, data.repositoryId, 
 				data.range.start, data.range.end, callback
 		else
 			callback 'Parsing error'

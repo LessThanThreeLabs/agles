@@ -9,14 +9,15 @@ exports.create = (modelConnection) ->
 	organizationsResource = OrganizationsResource.create modelConnection
 	buildsResource = BuildsResource.create modelConnection
 	repositoriesResource = RepositoriesResource.create modelConnection
-	return new ResourceRouter organizationsResource, buildsResource
+	return new ResourceRouter organizationsResource, buildsResource, repositoriesResource
 
 
 class ResourceRouter
-	constructor: (@organizationsResource, @buildsResource) ->
-		@allowedActions = ['create', 'read', 'update', 'delete']
+	constructor: (@organizationsResource, @buildsResource, @repositoriesResource) ->
+		@allowedActions = ['create', 'read', 'update', 'delete', 'subscribe']
 		assert.ok @_checkResource @organizationsResource
 		assert.ok @_checkResource @buildsResource
+		assert.ok @_checkResource @repositoriesResource
 
 
 	_checkResource: (resource) ->
@@ -42,4 +43,4 @@ class ResourceRouter
 			# 	callback 'No user associated with resource request'
 			# else
 				socket.session.user = 'fake user'
-				resource[action] socket.session, data, callback
+				resource[action] socket, data, callback
