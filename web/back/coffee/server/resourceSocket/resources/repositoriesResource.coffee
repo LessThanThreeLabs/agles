@@ -8,5 +8,7 @@ exports.create = (modelConnection) ->
 
 
 class RepositoriesResource extends Resource
-	read: (session, data, callback) ->
+	read: (socket, data, callback) ->
 		callback 'read not written yet' if callback?
+
+	

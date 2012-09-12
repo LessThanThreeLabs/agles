@@ -42,4 +42,4 @@ class ResourceRouter
 			# 	callback 'No user associated with resource request'
 			# else
 				socket.session.user = 'fake user'
-				resource[action] socket.session, data, callback
+				resource[action] socket, data, callback
