@@ -16,6 +16,8 @@ import zerorpc
 from dulwich.repo import Repo
 from redis import Redis
 
+from util import repositories
+
 
 class RepositoryStoreManager(object):
 	def create_repository(self, store_name, repo_hash, repo_name):
@@ -169,18 +171,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def _resolve_path(self, repo_hash, repo_name):
 		repo_path = sep.join([self._root_path,
-							  self._directory_treeify(repo_hash, self.DIR_LEVELS),
-							  repo_name])
+							  repository.to_path(repo_hash, repo_name, self.DIR_LEVELS)])
 		return os.path.realpath(repo_path)
-
-	def _directory_treeify(self, repo_hash, dir_levels):
-		"""Takes a hash and separates it into directories (e.g. a23fe89 => a/2/3fe89)
-
-		:param repo_hash: The hash we are treeifying.
-		:param dir_levels: The number of directory levels to create from repo_hash.
-		:return: A string representing repo_hash with file separators up to dir_levels levels.
-		"""
-		return sep.join(repo_hash[:dir_levels]) + repo_hash[dir_levels:]
 
 
 class RepositoryOperationException(Exception):
