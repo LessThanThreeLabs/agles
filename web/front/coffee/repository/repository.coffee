@@ -12,7 +12,9 @@ class Repository.Model extends Backbone.Model
 	# TODO: this is for testing... get rid of this soon...
 	addNewBuild: () ->
 		buildModel = new Build.Model()
-		buildModel.set 'id': Math.floor Math.random() * 10000
+		buildModel.set
+			id: Math.floor Math.random() * 10000
+			repositoryId: Math.floor Math.random() * 1000
 		@buildModels.add buildModel
 
 		buildModel.fetch

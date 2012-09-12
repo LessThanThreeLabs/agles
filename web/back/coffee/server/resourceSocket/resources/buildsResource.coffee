@@ -9,12 +9,10 @@ exports.create = (modelConnection) ->
 
 class BuildsResource extends Resource
 	read: (session, data, callback) ->
-		assert.ok callback?
-		console.log 'looking for build id: ' + data.id
-		
-		callback null,
-			id: data.id
-			number: 17
-			owner: 'Jordan Potter'
-			progress: '52'
-			success: false
+		if data.id?
+			@modelConnection.getBuild session.user, data.repositoryId, data.id, callback
+		else if data.range?
+			@modelConnection.getBuilds session.user, data.repositoryId, 
+				data.range.start, data.range.end, callback
+		else
+			callback 'Parsing error'

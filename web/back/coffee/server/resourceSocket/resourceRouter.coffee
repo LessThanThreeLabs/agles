@@ -8,7 +8,7 @@ RepositoriesResource = require './resources/repositoriesResource'
 exports.create = (modelConnection) ->
 	organizationsResource = OrganizationsResource.create modelConnection
 	buildsResource = BuildsResource.create modelConnection
-	repositoriesResource = RepositoriesResource.cerate modelConnection
+	repositoriesResource = RepositoriesResource.create modelConnection
 	return new ResourceRouter organizationsResource, buildsResource
 
 
@@ -38,4 +38,8 @@ class ResourceRouter
 	_bindToResourceFunction: (socket, name, action, resource) ->
 		eventName = name + ':' + action
 		socket.on eventName, (data, callback) ->
-			fn = resource[action] socket.session, data, callback
+			# if not socket.session.user?
+			# 	callback 'No user associated with resource request'
+			# else
+				socket.session.user = 'fake user'
+				resource[action] socket.session, data, callback
