@@ -1,1 +1,2 @@
-bind_address = "tcp://127.0.0.1:4242"
+verification_results_queue_name = "verification_results_queue"
+box_name = "lucid32_verification"
