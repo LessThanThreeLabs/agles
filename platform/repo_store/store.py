@@ -10,7 +10,6 @@ a git implementation written in python.
 
 import os
 import shutil
-from os import sep
 
 import zerorpc
 from dulwich.repo import Repo
@@ -170,7 +169,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			raise RepositoryAlreadyExistsException(repo_hash, new_repo_path)
 
 	def _resolve_path(self, repo_hash, repo_name):
-		repo_path = sep.join([self._root_path,
+		repo_path = os.path.join([self._root_path,
 							  repository.to_path(repo_hash, repo_name, self.DIR_LEVELS)])
 		return os.path.realpath(repo_path)
 
