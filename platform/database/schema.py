@@ -11,7 +11,7 @@ user = Table('user', metadata,
 	Column('name', String, nullable=False)
 )
 
-uri_repository_map = Table('uri_repo_map', metadata,
+uri_repo_map = Table('uri_repo_map', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('uri', String, nullable=False, unique=True),
 	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),

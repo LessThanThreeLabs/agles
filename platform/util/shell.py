@@ -1,8 +1,13 @@
 import os
 import re
 
+from sqlalchemy.sql import select
+
 from database.engine import EngineFactory
 from database import schema
+from model_server import ModelServer
+from repo_store.store import FileSystemRepositoryStore
+from util import repositories
 
 REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"
 
@@ -20,23 +25,22 @@ class RestrictedShell(object):
 	def _replace_paths(self, orig_args_str, new_path):
 		return re.sub(REPO_PATH_PATTERN, new_path, orig_args_str)
 	
-	def _get_requested_repo(self, cmd_args_str):
+	def _get_requested_repo_uri(self, cmd_args_str):
 		match = re.search(REPO_PATH_PATTERN, cmd_args_str)
 		assert match is not None
 		return match.group()
 
-	def _get_requested_params(self, requested_repos):
-		conn = EngineFactory.get_connection()
+	def _get_requested_params(self, requested_repo_uri):
+		modelserver_rpc_conn = ModelServer.rpc_connect()
+		route, repo_hash, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+		modelserver_rpc_conn.close()
 		
-		
-		# get a db connection
-		# look up mapping for requested_repo to uri
-		# return new route and path
-		pass
+		path = repositories.to_path(repo_hash, repo_name, FileSystemRepositoryStore.DIR_LEVELS)
+		return route, path
 
 	def handle_gitcmd(self, action, cmd_args_str):
-		requested_repo = self._get_requested_repo(cmd_args_str)
-		route, path = self._get_request_params(requested_repo)
+		requested_repo_uri = self._get_requested_repo_uri(cmd_args_str)
+		route, path = self._get_requested_params(requested_repo_uri)
 		
 		new_cmd_args_str = self._replace_paths(cmd_args_str, path)
 		self._exec_ssh_gitcmd(route, action, new_cmd_args_str)	

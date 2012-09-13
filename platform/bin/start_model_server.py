@@ -5,9 +5,9 @@ import os
 import zerorpc
 from model_server import ModelServer
 
-from settings.model_server import model_server_rpc_chan
+from settings.model_server import model_server_rpc_address
 
-DEFAULT_ADDRESS = model_server_rpc_chan
+DEFAULT_ADDRESS = model_server_rpc_address
 
 
 def main():

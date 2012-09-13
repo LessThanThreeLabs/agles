@@ -4,9 +4,9 @@ import os
 
 from verification_server import VerificationServer
 
-from settings.model_server import model_server_rpc_chan
+from settings.model_server import model_server_rpc_address
 
-DEFAULT_ADDRESS = model_server_rpc_chan
+DEFAULT_MODEL_SERVER_ADDRESS = model_server_rpc_addresss
 DEFAULT_VM_DIRECTORY = "/tmp/verification"
 
 
@@ -16,7 +16,7 @@ def main():
 			help="The model server address to connect this server to")
 	parser.add_argument("-v", "--vm_dir",
 			help="The root directory for the virtual machine")
-	parser.set_defaults(model_server_address=DEFAULT_ADDRESS,
+	parser.set_defaults(model_server_address=DEFAULT_MODEL_SERVER_ADDRESS,
 			vm_dir=DEFAULT_VM_DIRECTORY)
 	args = parser.parse_args()
 

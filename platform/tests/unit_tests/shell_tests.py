@@ -17,7 +17,7 @@ def test_invalid_command():
 
 def test_command_mutation():
 	rsh = RestrictedShell(VALID_COMMANDS)
-	requested_repo = rsh._get_requested_repo("'schacon/simplegit-progit.git'")
+	requested_repo = rsh._get_requested_repo_uri("'schacon/simplegit-progit.git'")
 	assert_equals("schacon/simplegit-progit.git", requested_repo,
 				  msg="Did not correctly parse requested repository from argument string")
 	
