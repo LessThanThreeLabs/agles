@@ -12,9 +12,6 @@
 	<script src="js/libs/backbone/iosync.js"></script>
 	<script src="js/libs/backbone/iobind.productionModeShouldUseMinified.js"></script>
 
-	<script src="js/src/repository/build.js"></script>
-	<script src="js/src/repository/repository.js"></script>
-
 	<script>
 	  var socket = io.connect('https://127.0.0.1?csrfToken={{csrfToken}}', { resource: 'socket'});
 	  socket.on('news', function (data) {
@@ -22,5 +19,8 @@
 	    socket.emit('my other event', { my: 'data' });
 	  });
 	</script>
+
+	<script src="js/src/repository/build.js"></script>
+	<script src="js/src/repository/repository.js"></script>
 </body>
 </html>

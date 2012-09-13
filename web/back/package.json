@@ -8,7 +8,6 @@
     "express-resource":  "x.x.x",
     "hbs": "x.x.x",
     "socket.io": "x.x.x",
-    "bridge-js": "x.x.x",
     "connect-redis": "x.x.x",
     "walk": "x.x.x",
     "zombie": "x.x.x"

@@ -6,13 +6,13 @@ RedisStore = require 'socket.io/lib/stores/redis'
 Session = require('express').session.Session;
 
 
-exports.create = (configurationParams, sessionStore) ->
-	return new ResourceSocketConfigurer configurationParams, sessionStore
+exports.create = (configurationParams, modelConnection, sessionStore) ->
+	return new ResourceSocketConfigurer configurationParams, modelConnection, sessionStore
 
 
 class ResourceSocketConfigurer
-	constructor: (@configurationParams, @sessionStore) ->
-		assert.ok @configurationParams? and @sessionStore?
+	constructor: (@configurationParams, @modelConnection, @sessionStore) ->
+		assert.ok @configurationParams? and @modelConnection? and @sessionStore?
 
 
 	configure: (socket) ->
@@ -24,6 +24,7 @@ class ResourceSocketConfigurer
 			socket.enable 'browser client gzip'
 			@_configureAuthorization socket
 			@_configureRedisStore socket
+			@_configureModelEvents socket
 
 		socket.configure 'development', () ->
 			socket.set 'log level', 2
@@ -77,6 +78,10 @@ class ResourceSocketConfigurer
 			redisClient: redis.createClient()
 			redisPub: redis.createClient()
 			redisSub: redis.createClient()
+
+
+	_configureModelEvents: (socket) ->
+		@modelConnection.setSocketsToFireEventsOn socket.sockets
 
 
 	configureConnection: (socket) ->

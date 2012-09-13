@@ -7,7 +7,7 @@ class Repository.Model extends Backbone.Model
 		@buildModels = new Backbone.Collection model:Build.Model
 		@buildModels.on 'add', (buildModel) =>
 			@trigger 'add', buildModel
-
+			
 
 	# TODO: this is for testing... get rid of this soon...
 	addNewBuild: () ->

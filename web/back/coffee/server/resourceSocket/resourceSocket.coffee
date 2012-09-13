@@ -6,7 +6,7 @@ ResourceRouter = require './resourceRouter'
 
 
 exports.create = (configurationParams, sessionStore, modelConnection) ->
-	configurer = Configurer.create configurationParams, sessionStore
+	configurer = Configurer.create configurationParams, modelConnection, sessionStore
 	resourceRouter = ResourceRouter.create modelConnection
 	return new ResourceSocket configurer, resourceRouter
 

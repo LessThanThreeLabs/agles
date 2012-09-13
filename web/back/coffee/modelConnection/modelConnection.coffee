@@ -1,5 +1,7 @@
 assert = require 'assert'
 
+EventHandler = require './events/EventHandler'
+
 
 exports.create = (configurationParams) ->
 	return new ModelConnection configurationParams
@@ -8,6 +10,12 @@ exports.create = (configurationParams) ->
 class ModelConnection
 	constructor: (@configurationParams) ->
 		assert.ok @configurationParams?
+
+
+	setSocketsToFireEventsOn: (sockets) ->
+		assert.ok sockets?
+		@eventHandler = EventHandler.create @configurationParams, sockets
+		@eventHandler.beginListening()
 
 
 	getBuild: (user, repositoryId, buildId, callback) ->
