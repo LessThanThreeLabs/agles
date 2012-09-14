@@ -31,12 +31,21 @@ def _map_uri(repo_uri, repo_id):
 		conn.execute(ins)
 
 def test_reroute_param_generation():
-	model_server_rpc_conn = ModelServer()
 	REPO_URI = "schacon/repo.git"
 	machine_id = _create_repo_store_machine()
-	repo_id = model_server_rpc_conn.create_repo("repo.git", machine_id)
+	
+	try:
+		rpc_conn = ModelServer.rpc_connect()
+		repo_id = rpc_conn.create_repo("repo.git", machine_id)
+	finally:
+		rpc_conn.close()
 	
 	_map_uri(REPO_URI, repo_id)
 	
 	rsh = RestrictedShell(VALID_COMMANDS)
-	rsh._get_requested_params(REPO_URI)
+	route, path = rsh._get_requested_params(REPO_URI)
+	assert_equals(route, "http://machine0")
+	assert_not_equals(path.find("repo.git"), -1,
+					  msg="Incorrect repo for path: %s" % path)
+	assert_equals(path.count('/'), 3,
+				  msg="Incorrect directory levels for path: %s" % path)
