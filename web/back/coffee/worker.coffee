@@ -10,8 +10,10 @@ startWorker = () ->
 	configurationParams = configuration.getConfigurationParams './config.json'
 	environment.setEnvironmentMode configurationParams.mode
 
-	modelConnection = ModelConnection.create configurationParams
-	createServers configurationParams.server, modelConnection
+	modelConnection = ModelConnection.create configurationParams.modelConnection
+	modelConnection.connect (error) ->
+		throw error if error?
+		createServers configurationParams.server, modelConnection
 
 
 createServers = (serverConfigurationParams, modelConnection) ->

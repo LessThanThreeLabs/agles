@@ -1,4 +1,5 @@
 assert = require 'assert'
+amqp = require 'amqp'
 
 EventHandler = require './events/EventHandler'
 
@@ -10,6 +11,15 @@ exports.create = (configurationParams) ->
 class ModelConnection
 	constructor: (@configurationParams) ->
 		assert.ok @configurationParams?
+
+
+	connect: (callback) ->
+		@connection = amqp.createConnection @configurationParams.messageBroker
+		@connection.on 'ready', () ->
+			console.log 'connection made!'
+			callback(null)
+		@connection.on 'error', (error) ->
+			callback error
 
 
 	setSocketsToFireEventsOn: (sockets) ->

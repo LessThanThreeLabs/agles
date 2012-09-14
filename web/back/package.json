@@ -9,6 +9,7 @@
     "hbs": "x.x.x",
     "socket.io": "x.x.x",
     "connect-redis": "x.x.x",
+    "amqp": "x.x.x",
     "walk": "x.x.x",
     "zombie": "x.x.x"
   },
