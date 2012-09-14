@@ -67,9 +67,10 @@ Vagrant::Config.run do |config|
   # some recipes and/or roles.
   #
 	config.vm.provision :chef_solo do |chef|
-		chef.cookbooks_path = agles_root.nil? ? 
+		chef_path = agles_root.nil? ?
 				"~/chef-repo" :
-				agles_root + "/chef/cookbooks"
+				agles_root + "/chef"
+		chef.cookbooks_path = chef_path + "/cookbooks"
 		# chef.roles_path = "/var/chef/cookbooks/verification/roles"
 		# chef.data_bags_path = "/var/chef/cookbooks/verification/data_bags"
 		chef.add_recipe "git"

@@ -22,11 +22,11 @@ from settings.rabbit import connection_parameters
 class ModelServer(object):
 	"""A higher level abstraction on top of the database that allows for event creation on database
 	actions.
-	
+
 	All methods in this API return low level database objects such as row_results. This is only meant
 	to be a thin abstraction that allows for proxying, not for higher level modification of the DB-API.
 	"""
-		
+
 	@property
 	def _db_conn(self):
 		return EngineFactory.get_connection()
@@ -65,7 +65,7 @@ class ModelServer(object):
 				properties=pika.BasicProperties(
 						delivery_mode=2,  # make message persistent
 				))
-	
+
 	def create_repo(self, repo_name, machine_id):
 		# This is a stub that only does things that are needed for testing atm.
 		# It needs to be completed
@@ -74,16 +74,16 @@ class ModelServer(object):
 		ins = repo.insert().values(name=repo_name, hash=repo_hash, machine_id=machine_id)
 		result = self._db_conn.execute(ins)
 		return result.inserted_primary_key[0]
-		
+
 	def get_repo_address(self, repo_hash):
 		repo = database.schema.repo
-		uri_repository_map = database.schema.uri_repository_map
+		uri_repo_map = database.schema.uri_repo_map
 		query = repo.join(
-				uri_repository_map).select().where(
+				uri_repo_map).select().where(
 				repo.c.hash==repo_hash)
 		row = self._db_conn.execute(query).first()
 		if row:
-			return row[uri_repository_map.c.uri]
+			return row[uri_repo_map.c.uri]
 		else:
 			return None
 

@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import argparse
-import os
 
 import zerorpc
 from model_server import ModelServer

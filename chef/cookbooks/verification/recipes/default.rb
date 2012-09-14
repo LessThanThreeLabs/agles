@@ -28,6 +28,10 @@ end
 
 execute "apt-get update"
 
+python_pip "pylint" do
+	action :install
+end
+
 ruby_block "package_config" do
 	block do
 		package_config = YAML::load_file(
