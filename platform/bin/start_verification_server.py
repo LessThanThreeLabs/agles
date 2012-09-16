@@ -6,7 +6,7 @@ from verification_server import VerificationServer
 
 from settings.model_server import model_server_rpc_address
 
-DEFAULT_MODEL_SERVER_ADDRESS = model_server_rpc_addresss
+DEFAULT_MODEL_SERVER_ADDRESS = model_server_rpc_address
 DEFAULT_VM_DIRECTORY = "/tmp/verification"
 
 
