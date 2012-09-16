@@ -1,7 +1,8 @@
 assert = require 'assert'
 amqp = require 'amqp'
 
-EventHandler = require './events/EventHandler'
+EventHandler = require './events/eventHandler'
+RpcConnection = require './rpc/rpcConnection'
 
 
 exports.create = (configurationParams) ->
@@ -11,12 +12,12 @@ exports.create = (configurationParams) ->
 class ModelConnection
 	constructor: (@configurationParams) ->
 		assert.ok @configurationParams?
+		@rpcConnection = RpcConnection.create @configurationParams
 
 
 	connect: (callback) ->
 		@connection = amqp.createConnection @configurationParams.messageBroker
 		@connection.on 'ready', () ->
-			console.log 'connection made!'
 			callback(null)
 		@connection.on 'error', (error) ->
 			callback error

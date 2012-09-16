@@ -8,7 +8,7 @@
 	},
 
 	"server": {
-		"cluster": false,
+		"cluster": true,
 
 		"http": {
 			"port": 80
@@ -56,7 +56,7 @@
 
 	"modelConnection": {
 		"messageBroker": {
-			"host": "locaalhost",
+			"host": "localhost",
 			"port": 5672,
 			"login": "guest",
 			"password": "guest",
