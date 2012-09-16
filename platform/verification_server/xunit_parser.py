@@ -1,5 +1,7 @@
 # xunit_parser.py - Converts xunit output to a python heirarchical data structure
 
+import os
+
 from bs4 import BeautifulSoup
 
 
@@ -15,8 +17,10 @@ class XunitParser(object):
 		return suites
 
 	def parse_file(self, file_name):
+		if not os.path.exists(file_name):
+			return None
 		with open(file_name) as file:
-			self.parse(file.read())
+			return self.parse(file.read())
 
 	def _parse_suite(self, suite):
 		name = suite['name']

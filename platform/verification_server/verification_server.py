@@ -74,17 +74,32 @@ class VerificationServer(object):
 		print "Listening for verification requests"
 		self.request_listener.start_consuming()
 
-	def request_callback(self, ch, method, properties, body):
+	def request_callback(self, channel, method, properties, body):
 		"""Respond to a verification event, begin verifying
 		"""
 		(repo_hash, sha, ref) = msgpack.unpackb(body)
-		self.verify(repo_hash, sha, ref, ch, method)
+		repo_address = self.get_repo_address(repo_hash)
+		verify_callback = self.get_verify_callback(repo_hash, sha, ref, channel, method)
+		self.verify(repo_address, sha, ref, verify_callback)
 
-	def verify(self, repo_hash, sha, ref, ch, method):
+	def make_verify_callback(self, repo_hash, sha, ref, channel, method):
+		"""Returns the default callback function to be
+		called with a return value after verification.
+		Sends a message denoting the return value and acks
+		"""
+		def default_verify_callback(retval):
+			self.responder.basic_publish(exchange='',
+				routing_key=verification_results_queue_name,
+				body=msgpack.packb({(repo_hash, sha, ref): retval}),
+				properties=pika.BasicProperties(
+						delivery_mode=2,  # make message persistent
+				))
+			channel.basic_ack(delivery_tag=method.delivery_tag)
+		return default_verify_callback
+
+	def verify(self, repo_address, sha, ref, callback):
 		"""Runs verification on a desired git commit
 		"""
-		repo_address = self.get_repo_address(repo_hash)
-
 		with open(os.path.join(self.vagrant.vm_directory, "repo_config.yml"), 'w') as pref_file:
 			pref_file.write(self.get_git_config_yaml(repo_address, sha))
 
@@ -100,18 +115,22 @@ class VerificationServer(object):
 			errors = lint_parser.get_errors(pylint_issues)
 			if errors:
 				raise Exception("Found the following errors while running pylint:\n" +
-						errors)
+						str(errors))
 			self.vagrant.ssh_call("find /opt/mysource -name \"tests\" |" +
 					"nosetests  --with-xunit --xunit-file=/vagrant/nosetests.xml")
 			test_results = XunitParser().parse_file(
 					os.path.join(self.vagrant.vm_directory, "nosetests.xml"))
-			for suite in test_results:
-				if suite.errors > 0 or suite.failures > 0:
-					raise Exception("Test failure detected in suite " + suite['name'])
-		except:
-			self.mark_failure(repo_hash, sha, ref, ch, method)
+			if test_results:
+				for suite in test_results:
+					if suite.errors > 0 or suite.failures > 0:
+						raise Exception("Test failure detected in suite " + suite['name'])
+			else:
+				print "No test results found"
+		except Exception as e:
+			print str(e)
+			self.mark_failure(callback)
 		else:
-			self.mark_success(repo_hash, sha, ref, ch, method)
+			self.mark_success(callback)
 		finally:
 			os.remove(os.path.join(self.vagrant.vm_directory, "repo_config.yml"))
 
@@ -128,26 +147,14 @@ class VerificationServer(object):
 		return yaml.dump({"repo_address": repo_address,
 				"sha_hash": sha}, default_flow_style=False)
 
-	def mark_success(self, repo_hash, sha, ref, ch, method):
-		"""Send an event denoting verification success and ack
+	def mark_success(self, callback):
+		"""Calls the callback function with a success code
 		"""
-		print "Completed build request " + str((repo_hash, sha, ref))
-		self.responder.basic_publish(exchange='',
-				routing_key=verification_results_queue_name,
-				body=msgpack.packb({(repo_hash, sha, ref): 0}),
-				properties=pika.BasicProperties(
-						delivery_mode=2,  # make message persistent
-				))
-		ch.basic_ack(delivery_tag=method.delivery_tag)
+		print "Completed build request"
+		callback(0)  # success
 
-	def mark_failure(self, repo_hash, sha, ref, ch, method):
-		"""Send an event denoting verification failure and ack
+	def mark_failure(self, callback):
+		"""Calls the callback function with a failure code
 		"""
-		print "Failed build request " + str((repo_hash, sha, ref))
-		self.responder.basic_publish(exchange='',
-				routing_key=verification_results_queue_name,
-				body=msgpack.packb({(repo_hash, sha, ref): 1}),
-				properties=pika.BasicProperties(
-						delivery_mode=2,  # make message persistent
-				))
-		ch.basic_ack(delivery_tag=method.delivery_tag)
+		print "Failed build request"
+		callback(1)  # success
