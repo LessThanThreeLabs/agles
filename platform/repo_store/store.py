@@ -2,7 +2,7 @@
 
 """Git repository storage servers.
 
-Repository managment is done using a modified version of dulwich,
+Repository management is done using a modified version of dulwich,
 a git implementation written in python.
 
 * For more information on the modified dulwich, see the submodule.
@@ -37,12 +37,13 @@ class RepositoryStoreManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def rename_repository(self, store_name, repo_hash, repo_name):
+	def rename_repository(self, store_name, repo_hash, old_repo_name, new_repo_name):
 		"""Renames a repository on the given local store.
 
 		:param store_name: The identifier of the local store(machine) to create the repository on.
 		:param repo_hash: The unique identifier for the repository being created.
-		:param repo_name: The name of the new repository.
+		:param old_repo_name: The name of the old repository.
+		:param new_repo_name: The name of the new repository.
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -169,8 +170,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			raise RepositoryAlreadyExistsException(repo_hash, new_repo_path)
 
 	def _resolve_path(self, repo_hash, repo_name):
-		repo_path = os.path.join([self._root_path,
-							  repository.to_path(repo_hash, repo_name, self.DIR_LEVELS)])
+		repo_path = os.path.join(self._root_path,
+								 repositories.to_path(repo_hash, repo_name, self.DIR_LEVELS))
 		return os.path.realpath(repo_path)
 
 
@@ -182,9 +183,8 @@ class RepositoryOperationException(Exception):
 
 
 class RepositoryAlreadyExistsException(RepositoryOperationException):
-	"""Indicates an exception occured due to a repository already existing."""
+	"""Indicates an exception occurred due to a repository already existing."""
 
 	def __init__(self, repo_hash, existing_repo_path):
 		super(RepositoryAlreadyExistsException, self).__init__(
-			'Repository with hash %s already exists at path %s' % (repo_hash, existing_repo_path)
-		)
+			  'Repository with hash %s already exists at path %s' % (repo_hash, existing_repo_path))

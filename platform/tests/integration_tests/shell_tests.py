@@ -36,8 +36,8 @@ class ShellTest(unittest.TestCase):
 		REPO_URI = "schacon/repo.git"
 		machine_id = self._create_repo_store_machine()
 
+		rpc_conn = ModelServer.rpc_connect()
 		try:
-			rpc_conn = ModelServer.rpc_connect()
 			repo_id = rpc_conn.create_repo("repo.git", machine_id)
 		finally:
 			rpc_conn.close()

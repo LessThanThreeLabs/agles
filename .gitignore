@@ -14,5 +14,6 @@ build/
 *.pyo
 *.swp
 
+*.idea
 *.sublime-project
 *.sublime-workspace
