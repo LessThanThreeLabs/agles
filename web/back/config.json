@@ -61,6 +61,10 @@
 			"login": "guest",
 			"password": "guest",
 			"vhost": "/"
+		},
+
+		"rpc": {
+			"queueName": "rpc"
 		}
 	}
 }

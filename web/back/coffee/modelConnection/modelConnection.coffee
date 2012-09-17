@@ -17,9 +17,9 @@ class ModelConnection
 
 	connect: (callback) ->
 		@connection = amqp.createConnection @configurationParams.messageBroker
-		@connection.on 'ready', () ->
-			callback(null)
-		@connection.on 'error', (error) ->
+		@connection.on 'ready', () =>
+			@rpcConnection.connect @connection, callback
+		@connection.on 'error', (error) =>
 			callback error
 
 
