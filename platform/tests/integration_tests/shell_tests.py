@@ -1,19 +1,21 @@
 from nose.tools import *
-from util.test import BaseIntegrationTest
-from util.shell import *
 
+from util.test import BaseIntegrationTest
+from util.test.mixins import ModelServerTestMixin
+from util.shell import *
 from database import schema
-from model_server import ModelServer
 
 VALID_COMMANDS = ['git-receive-pack']
 
 
-class ShellTest(BaseIntegrationTest):
+class ShellTest(BaseIntegrationTest, ModelServerTestMixin):
 	def setUp(self):
 		super(ShellTest, self).setUp()
+		self._start_model_server()
 
 	def tearDown(self):
 		super(ShellTest, self).tearDown()
+		self._stop_model_server()
 
 	def _create_repo_store_machine(self):
 		ins = schema.machine.insert().values(uri="http://machine0")

@@ -32,6 +32,12 @@ class ModelServer(object):
 		return EngineFactory.get_connection()
 
 	@classmethod
+	def start(cls, server_address):
+		model_server = zerorpc.Server(ModelServer())
+		model_server.bind(server_address)
+		model_server.run()
+
+	@classmethod
 	def rpc_connect(cls):
 		return zerorpc.Client(model_server_rpc_address)
 

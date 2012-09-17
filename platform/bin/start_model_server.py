@@ -18,9 +18,7 @@ def main():
 	print "Starting Model Server on %s ..." % (
 		args.server_address)
 
-	model_server = zerorpc.Server(ModelServer())
-	model_server.bind(args.server_address)
-	model_server.run()
+	ModelServer.start(args.server_address)
 
 
 main()
