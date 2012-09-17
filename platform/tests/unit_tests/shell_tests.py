@@ -1,4 +1,5 @@
-from nose.tools import unittest
+import unittest
+
 from nose.tools import *
 from util.shell import *
 

@@ -1,25 +1,19 @@
-from nose.tools import unittest
 from nose.tools import *
+from util.test import BaseIntegrationTest
 from util.shell import *
 
-from database.engine import EngineFactory
 from database import schema
 from model_server import ModelServer
 
 VALID_COMMANDS = ['git-receive-pack']
 
 
-class ShellTest(unittest.TestCase):
-	def _wipe_repo(self):
-		engine = EngineFactory.get_engine()
-		schema.metadata.drop_all(engine)
-		schema.metadata.create_all(engine)
-
+class ShellTest(BaseIntegrationTest):
 	def setUp(self):
-		self._wipe_repo()
+		super(ShellTest, self).setUp()
 
 	def tearDown(self):
-		self._wipe_repo()
+		super(ShellTest, self).tearDown()
 
 	def _create_repo_store_machine(self):
 		ins = schema.machine.insert().values(uri="http://machine0")

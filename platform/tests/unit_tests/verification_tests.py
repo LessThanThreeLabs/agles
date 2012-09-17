@@ -1,8 +1,8 @@
 import os
 
 from shutil import rmtree
-from nose.tools import unittest
 from nose.tools import *
+from nose.tools.trivial import unittest
 from verification_server import *
 from settings.model_server import *
 from dulwich.repo import Repo

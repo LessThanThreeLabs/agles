@@ -38,6 +38,12 @@ ssh_pubkeys = Table('ssh_pubkey', metadata,
 )
 
 
+def reseed_db():
+	engine = EngineFactory.get_engine()
+	metadata.drop_all(engine)
+	metadata.create_all(engine)
+
+
 def main():
 	print "Creating database schema..."
 	engine = EngineFactory.get_engine()
