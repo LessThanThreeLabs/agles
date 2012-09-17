@@ -41,6 +41,7 @@ class RpcConnection
 
 	_handleResponse: (message, headers, deliveryInformation) ->
 		console.log 'message came in... ' + message
+		delete @messageIdsToCallbacks.deliveryInformation.correlationId
 
 
 	_getNextMessageId: () ->
