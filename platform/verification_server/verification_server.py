@@ -50,23 +50,25 @@ class VerificationServer(object):
 		"""Spawns the virtual machine and listener thread defined for this object
 		"""
 		self.vagrant.spawn()
-		self.spawn_listener()
+		self.listener_process = self.spawn_listener()
 
 	def teardown(self):
 		"""Tears down the virtual machine and stops the listener thread for this object
 		"""
-		self.rabbit_connection.cancel()
+		self.listener_process.terminate()
 		self.rabbit_connection.close()
 		self.vagrant.teardown()
 		configfile = os.path.join(self.vagrant.vm_directory, "repo_config.yml")
 		if os.access(configfile, os.F_OK):
 			os.remove(configfile)
 
+	# TODO(bbland): change this logic somehow
 	def spawn_listener(self):
 		"""Begins a subprocess that listens for build events
 		"""
 		listener = Process(target=self._listen)
 		listener.start()
+		return listener
 
 	def _listen(self):
 		"""Listen for verification events

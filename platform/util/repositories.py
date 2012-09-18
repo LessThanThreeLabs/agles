@@ -2,8 +2,10 @@
 
 import os.path
 
+
 def to_path(repo_hash, name, dir_levels):
 	return os.path.join(directory_treeify(repo_hash, dir_levels), name)
+
 
 def directory_treeify(repo_hash, dir_levels):
 	"""Takes a hash and separates it into directories (e.g. a23fe89 => a/2/3fe89)

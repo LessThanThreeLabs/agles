@@ -21,10 +21,6 @@ def get_url(box_name):
 	return 'http://files.vagrantup.com/' + box_name + '.box'
 
 
-def get_box_file(box_name):
-	return VM_DIRECTORY + box_name + '.box'
-
-
 def get_vagrantfile():
 	return VM_DIRECTORY + 'Vagrantfile'
 
@@ -42,16 +38,12 @@ def main():
 		return
 
 	box_name = argv[1]
-	box_file = get_box_file(box_name)
 
 	if have_box_installed(box_name):
 		print 'Already have base box:', box_name
 	else:
 		print 'Downloading base box file:', box_name
-		urllib.urlretrieve(get_url(box_name), box_file)
-		print 'Adding box to vagrant temporarily'
-		call(['vagrant', 'box', 'add', box_name, box_file])
-		os.remove(box_file)
+		call(['vagrant', 'box', 'add', box_name, get_url(box_name)])
 
 	print 'Generating vagrantfile from template'
 	with open(TEMPLATE_FILE) as template_file:

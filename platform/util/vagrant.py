@@ -60,7 +60,7 @@ class Vagrant(object):
 			raise Exception("Couldn't start vagrant vm: " + self.vm_directory)
 		if self.sandbox_on().returncode != 0:
 			raise Exception("Couldn't initialize sandbox on vm: " + self.vm_directory)
-		print "Launched vm at : " + self.vm_directory
+		print "Launched vm at: " + self.vm_directory
 
 	def teardown(self):
 		vagrantfile = os.path.join(self.vm_directory, "Vagrantfile")
