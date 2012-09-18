@@ -14,7 +14,7 @@ import yaml
 import zerorpc
 
 from multiprocessing import Process
-from vagrant import Vagrant
+from util.vagrant import Vagrant
 from xunit_parser import XunitParser
 from lint_parser import LintParser
 from settings.rabbit import connection_parameters
