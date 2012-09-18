@@ -32,13 +32,13 @@ python_pip "pylint" do
 	action :install
 end
 
-ruby_block "package_config" do
+ruby_block "configure_packages" do
 	block do
-		package_config = YAML::load_file(
+		agles_config = YAML::load_file(
 				"/opt/mysource/agles_config.yml")
 		
-		package_config["package"].each do |pkg|
-			run_context = Chef::RunContext.new(node, {})
+		agles_config["package"].each do |pkg|
+			run_context = Chef::RunContext.new(node, {}, events)
 			p = Chef::Resource::Package.new(pkg["name"], run_context)
 			if not pkg["version"].nil?
 				p.version(p["version"])
@@ -46,8 +46,8 @@ ruby_block "package_config" do
 			p.run_action(:install)
 		end
 
-		package_config["pip"].each do |pkg|
-			run_context = Chef::RunContext.new(node, {})
+		agles_config["pip"].each do |pkg|
+			run_context = Chef::RunContext.new(node, {}, events)
 			p = Chef::Resource::PythonPip.new(pkg["name"], run_context)
 			if not pkg["version"].nil?
 				p.version(p["version"])
@@ -59,11 +59,23 @@ ruby_block "package_config" do
 	only_if do File.exists?("/opt/mysource/agles_config.yml") end
 end
 
+ruby_block "copy_agles_config" do
+	block do
+		run_context = Chef::RunContext.new(node, {}, events)
+		f = Chef::Resource::File.new("/vagrant/agles_config.yml", run_context)
+		f.content(IO.read("/opt/mysource/agles_config.yml"))
+		f.run_action(:create)
+	end
+	action :nothing
+	only_if do File.exists?("/opt/mysource/agles_config.yml") end
+end
+
 if not repo_config.nil?
 	git "/opt/mysource" do
 		repository "#{repo_config["repo_address"]}"
 		revision "#{repo_config["sha_hash"]}"
 		action :sync
-		notifies :create, resources(:ruby_block => "package_config"), :immediately
+		notifies :create, resources(:ruby_block => "configure_packages"), :immediately
+		notifies :create, resources(:ruby_block => "copy_agles_config"), :immediately
 	end
 end

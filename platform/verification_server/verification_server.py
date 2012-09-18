@@ -15,8 +15,8 @@ import zerorpc
 
 from multiprocessing import Process
 from util.vagrant import Vagrant
-from xunit_parser import XunitParser
-from lint_parser import LintParser
+from remote_test_runner import VagrantNoseRunner
+from remote_linter import VagrantLinter
 from settings.rabbit import connection_parameters
 from settings.model_server import repo_update_routing_key
 from settings.verification_server import verification_results_queue_name, box_name
@@ -81,7 +81,7 @@ class VerificationServer(object):
 		"""
 		(repo_hash, sha, ref) = msgpack.unpackb(body)
 		repo_address = self.get_repo_address(repo_hash)
-		verify_callback = self.get_verify_callback(repo_hash, sha, ref, channel, method)
+		verify_callback = self.make_verify_callback(repo_hash, sha, ref, channel, method)
 		self.verify(repo_address, sha, ref, verify_callback)
 
 	def make_verify_callback(self, repo_hash, sha, ref, channel, method):
@@ -102,37 +102,16 @@ class VerificationServer(object):
 	def verify(self, repo_address, sha, ref, callback):
 		"""Runs verification on a desired git commit
 		"""
-		with open(os.path.join(self.vagrant.vm_directory, "repo_config.yml"), 'w') as pref_file:
-			pref_file.write(self.get_git_config_yaml(repo_address, sha))
-
+		self.write_git_config_yaml(repo_address, sha)
 		try:
-			if self.vagrant.sandbox_rollback().returncode != 0:
-				raise Exception("Couldn't roll back vm: " + self.vm_directory)
-			if self.vagrant.provision().returncode != 0:
-				raise Exception("Couldn't provision vm: " + self.vm_directory)
-			results = self.vagrant.ssh_call("find /opt/mysource -name \"*.py\" |" +
-					"xargs pylint --reports=n")
-			lint_parser = LintParser()
-			pylint_issues = lint_parser.parse_pylint(results.stdout)
-			errors = lint_parser.get_errors(pylint_issues)
-			if errors:
-				raise Exception("Found the following errors while running pylint:\n" +
-						str(errors))
-			self.vagrant.ssh_call("find /opt/mysource -name \"tests\" |" +
-					"nosetests  --with-xunit --xunit-file=/vagrant/nosetests.xml")
-			test_results = XunitParser().parse_file(
-					os.path.join(self.vagrant.vm_directory, "nosetests.xml"))
-			if test_results:
-				for suite in test_results:
-					if suite.errors > 0 or suite.failures > 0:
-						raise Exception("Test failure detected in suite " + suite['name'])
-			else:
-				print "No test results found"
-		except Exception as e:
-			print str(e)
-			self.mark_failure(callback)
+			self.setup_vagrant()
+			configuration = self.get_user_configuration()
+			self.run_linter(configuration)
+			self.run_tests(configuration)
+		except VerificationException, e:
+			self._mark_failure(callback, e)
 		else:
-			self.mark_success(callback)
+			self._mark_success(callback)
 		finally:
 			os.remove(os.path.join(self.vagrant.vm_directory, "repo_config.yml"))
 
@@ -142,6 +121,13 @@ class VerificationServer(object):
 		"""
 		return self.model_server_rpc.get_repo_address(repo_hash)
 
+	def write_git_config_yaml(self, repo_address, sha):
+		"""Writes out the git repository config yaml into the vagrant
+		shared directory for the purpose of vm provisioning
+		"""
+		with open(os.path.join(self.vagrant.vm_directory, "repo_config.yml"), 'w') as pref_file:
+			pref_file.write(self.get_git_config_yaml(repo_address, sha))
+
 	def get_git_config_yaml(self, repo_address, sha):
 		"""Returns a yaml string with git configuration commands
 		for provisioning a vm
@@ -149,14 +135,74 @@ class VerificationServer(object):
 		return yaml.dump({"repo_address": repo_address,
 				"sha_hash": sha}, default_flow_style=False)
 
-	def mark_success(self, callback):
+	def setup_vagrant(self):
+		"""Rolls back and provisions the contained vagrant vm for
+		analysis and test running
+		"""
+		returncode = self.vagrant.sandbox_rollback().returncode
+		if returncode != 0:
+			raise VerificationException("vm rollback", returncode=returncode)
+		returncode = self.vagrant.provision().returncode
+		if returncode != 0:
+			raise VerificationException("vm provisioning", returncode=returncode)
+
+	def get_user_configuration(self):
+		"""Reads in the yaml config file contained in the checked
+		out user repository which this server is verifying
+		"""
+		config_path = os.path.join(self.vagrant.vm_directory, "agles_config.yml")
+		if not os.access(config_path, os.F_OK):
+			return None
+		with open(config_path) as config_file:
+			config = yaml.load(config_file.read())
+		return config
+
+	def run_linter(self, configuration):
+		"""Delegates to VagrantLinter to run and parse pylint output
+		"""
+		errors = VagrantLinter(self.vagrant).run()
+		if errors:
+			raise VerificationException("pylint linting", details=errors)
+
+	def run_tests(self, configuration):
+		"""Delegates to VagrantNoseRunner to run nose and parse xunit output
+		"""
+		test_results = VagrantNoseRunner(self.vagrant).run()
+		if test_results:
+			for suite in test_results:
+				if suite.errors > 0 or suite.failures > 0:
+					raise VerificationException("nosetests",
+							details={"errors": suite.errors, "failures": suite.failures})
+		else:
+			print "No test results found"
+
+	def _mark_success(self, callback):
 		"""Calls the callback function with a success code
 		"""
 		print "Completed build request"
 		callback(0)  # success
 
-	def mark_failure(self, callback):
+	def _mark_failure(self, callback, exception):
 		"""Calls the callback function with a failure code
 		"""
-		print "Failed build request"
+		print "Failed build request: " + str(exception)
 		callback(1)  # success
+
+
+class VerificationException(Exception):
+	"""Default exception to be thrown during verification failure.
+
+	Contains a failed component name, and optionally a returncode and details
+	"""
+	def __init__(self, component, returncode=None, details=None):
+		self.component = component
+		self.returncode = returncode
+		self.details = details
+
+	def __str__(self):
+		str_rep = "Failed verification (" + self.component + ")"
+		if self.returncode:
+			str_rep += " with return code: " + self.returncode
+		if self.details:
+			str_rep += " Details: " + str(self.details)
+		return str_rep

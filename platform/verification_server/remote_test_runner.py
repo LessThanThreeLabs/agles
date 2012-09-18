@@ -1,11 +1,31 @@
-# xunit_parser.py - Converts xunit output to a python heirarchical data structure
+# test_runner.py - Runs remote tests for the verification server
+
+"""This file contains the logic required to run tests on a vagrant vm.
+"""
 
 import os
 
 from bs4 import BeautifulSoup
 
 
+class VagrantNoseRunner(object):
+	"""Simple nose implementation for running tests on a vagrant vm
+	"""
+	def __init__(self, vagrant):
+		self.vagrant = vagrant
+
+	def run(self):
+		self.vagrant.ssh_call("find /opt/mysource -name \"tests\" |" +
+				"nosetests  --with-xunit --xunit-file=/vagrant/nosetests.xml")
+		test_results = XunitParser().parse_file(
+				os.path.join(self.vagrant.vm_directory, "nosetests.xml"))
+		return test_results
+
+
 class XunitParser(object):
+	"""Simple parser which converts xunit xml output to a python
+	heirarchical dictionary structure
+	"""
 	def __init__(self):
 		pass
 
