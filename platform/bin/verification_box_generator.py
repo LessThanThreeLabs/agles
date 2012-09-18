@@ -5,7 +5,6 @@ from the template in this directory and adds the resulting box
 as BASE_verification to the installed box files in vagrant
 """
 
-import urllib
 import os
 
 from sys import argv
@@ -13,7 +12,7 @@ from subprocess import call, check_output
 from string import Template
 
 
-TEMPLATE_FILE = '../verification_server/Vagrantfile.template'
+TEMPLATE_FILE = os.path.realpath(__file__ + '/../../verification_server/Vagrantfile.template')
 VM_DIRECTORY = '/tmp/'
 
 
