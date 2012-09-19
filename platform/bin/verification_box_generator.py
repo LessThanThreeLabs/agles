@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # verification_box_generator.py - Creates verification vagrant boxes
 
 """Given a base vagrant box name, this packages in a Vagrantfile

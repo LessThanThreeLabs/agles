@@ -16,32 +16,31 @@ class Vagrant(object):
 		self.vagrant_env = self._get_vagrant_env()
 
 	def init(self):
-		return self._vagrant_call(["init", self.box_name])
+		return self._vagrant_call("init", self.box_name)
 
 	def up(self):
-		return self._vagrant_call(["up"])
+		return self._vagrant_call("up")
 
 	def destroy(self):
-		return self._vagrant_call(["destroy", "-f"])
+		return self._vagrant_call("destroy", "-f")
 
 	def provision(self):
-		return self._vagrant_call(["provision"])
+		return self._vagrant_call("provision")
 
 	def ssh_call(self, command):
-		return self._vagrant_call(["ssh", "-c", command])
+		return self._vagrant_call("ssh", "-c", command)
 
 	def sandbox_on(self):
-		return self._vagrant_call(["sandbox", "on"])
+		return self._vagrant_call("sandbox", "on")
 
 	def sandbox_off(self):
-		return self._vagrant_call(["sandbox", "off"])
+		return self._vagrant_call("sandbox", "off")
 
 	def sandbox_rollback(self):
-		return self._vagrant_call(["sandbox", "rollback"])
+		return self._vagrant_call("sandbox", "rollback")
 
-	def _vagrant_call(self, args):
-		command = ["vagrant"]
-		command.extend(args)
+	def _vagrant_call(self, *args):
+		command = ["vagrant"] + list(args)
 		process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=self.vm_directory,
 				env=self.vagrant_env)
 		stdout, stderr = process.communicate()

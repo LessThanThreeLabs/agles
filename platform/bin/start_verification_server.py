@@ -22,7 +22,7 @@ def main():
 
 	vm_dir = os.path.realpath(args.vm_dir)
 	print "Starting Verification Server on %s with vm directory %s ..." % (
-		args.model_server_address, vm_dir)
+			args.model_server_address, vm_dir)
 
 	vs = VerificationServer(args.model_server_address, vm_dir)
 	vs.run()

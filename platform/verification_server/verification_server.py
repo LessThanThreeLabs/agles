@@ -13,7 +13,6 @@ import msgpack
 import yaml
 import zerorpc
 
-from multiprocessing import Process
 from util.vagrant import Vagrant
 from remote_test_runner import VagrantNoseRunner
 from remote_linter import VagrantLinter
@@ -30,56 +29,35 @@ class VerificationServer(object):
 	"""
 
 	def __init__(self, model_server_address, vm_directory):
-		self.rabbit_connection = pika.BlockingConnection(connection_parameters)
+		self.model_server_address = model_server_address
 
-		self.request_listener = self.rabbit_connection.channel()
-		self.request_listener.queue_declare(queue=repo_update_routing_key, durable=True)
-		self.request_listener.basic_qos(prefetch_count=1)
-		self.request_listener.basic_consume(self.request_callback,
-				queue=repo_update_routing_key)
+		self.vagrant = Vagrant(vm_directory, box_name)
+
+		self.rabbit_connection = pika.BlockingConnection(connection_parameters)
 
 		self.responder = self.rabbit_connection.channel()
 		self.responder.queue_declare(queue=verification_results_queue_name, durable=True)
 
-		self.vagrant = Vagrant(vm_directory, box_name)
-
-		self.model_server_rpc = zerorpc.Client()
-		self.model_server_rpc.connect(model_server_address)
-
 	def run(self):
-		"""Spawns the virtual machine and listener thread defined for this object
-		"""
 		self.vagrant.spawn()
-		self.listener_process = self.spawn_listener()
+		self.listen()
 
-	def teardown(self):
-		"""Tears down the virtual machine and stops the listener thread for this object
-		"""
-		self.listener_process.terminate()
-		self.rabbit_connection.close()
-		self.vagrant.teardown()
-		configfile = os.path.join(self.vagrant.vm_directory, "repo_config.yml")
-		if os.access(configfile, os.F_OK):
-			os.remove(configfile)
-
-	# TODO(bbland): change this logic somehow
-	def spawn_listener(self):
-		"""Begins a subprocess that listens for build events
-		"""
-		listener = Process(target=self._listen)
-		listener.start()
-		return listener
-
-	def _listen(self):
+	def listen(self):
 		"""Listen for verification events
 		"""
+		request_listener = self.rabbit_connection.channel()
+		request_listener.queue_declare(queue=repo_update_routing_key, durable=True)
+		request_listener.basic_qos(prefetch_count=1)
 		print "Listening for verification requests"
-		self.request_listener.start_consuming()
+		request_listener.basic_consume(self.request_callback,
+				queue=repo_update_routing_key)
+		request_listener.start_consuming()
 
 	def request_callback(self, channel, method, properties, body):
 		"""Respond to a verification event, begin verifying
 		"""
 		(repo_hash, sha, ref) = msgpack.unpackb(body)
+		print "Processing verification request: " + str((repo_hash, sha, ref))
 		repo_address = self.get_repo_address(repo_hash)
 		verify_callback = self.make_verify_callback(repo_hash, sha, ref, channel, method)
 		self.verify(repo_address, sha, ref, verify_callback)
@@ -119,7 +97,16 @@ class VerificationServer(object):
 		"""Sends out a rpc call to the model server to retrieve
 		the address of a repository based on its hash
 		"""
-		return self.model_server_rpc.get_repo_address(repo_hash)
+		model_server_rpc = zerorpc.Client()
+		model_server_rpc.connect(self.model_server_address)
+		try:
+			model_server_rpc._zerorpc_ping()
+		except zerorpc.exceptions.TimeoutExpired:
+			# recover from timeouts
+			pass
+		repo_address = model_server_rpc.get_repo_address(repo_hash)
+		model_server_rpc.close()
+		return repo_address
 
 	def write_git_config_yaml(self, repo_address, sha):
 		"""Writes out the git repository config yaml into the vagrant
@@ -202,7 +189,7 @@ class VerificationException(Exception):
 	def __str__(self):
 		str_rep = "Failed verification (" + self.component + ")"
 		if self.returncode:
-			str_rep += " with return code: " + self.returncode
+			str_rep += " with return code: " + str(self.returncode)
 		if self.details:
 			str_rep += " Details: " + str(self.details)
 		return str_rep

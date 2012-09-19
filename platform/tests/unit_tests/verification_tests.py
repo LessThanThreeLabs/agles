@@ -11,14 +11,22 @@ VM_DIRECTORY = '/tmp/verification'
 
 
 class VerificationTest(unittest.TestCase):
+	@classmethod
+	def setup_class(VerificationTest):
+		vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
+		vs.vagrant.spawn()
+
+	@classmethod
+	def teardown_class(VerificationTest):
+		vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
+		vs.vagrant.teardown()
+
 	def setUp(self):
 		self.vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
-		self.vs.vagrant.spawn()
 		self.repo_dir = os.path.join(VM_DIRECTORY, 'repo')
 
 	def tearDown(self):
 		rmtree(self.repo_dir)
-		self.vs.vagrant.teardown()
 
 	def test_hello_world_repo(self):
 		os.mkdir(self.repo_dir)
