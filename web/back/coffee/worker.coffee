@@ -7,6 +7,9 @@ RedirectServer = require './server/redirectServer'
 
 
 startWorker = () ->
+	process.on 'uncaughtException', (error) ->
+		console.error error
+		
 	configurationParams = configuration.getConfigurationParams './config.json'
 	environment.setEnvironmentMode configurationParams.mode
 
