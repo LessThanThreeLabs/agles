@@ -3,6 +3,7 @@
 """An interface for Vagrant over the command line.
 """
 
+import collections
 import os
 
 from subprocess import Popen, PIPE
@@ -78,8 +79,5 @@ class Vagrant(object):
 										".."))))
 
 
-class VagrantResults(object):
-	def __init__(self, returncode, stdout, stderr):
-		self.returncode = returncode
-		self.stdout = stdout
-		self.stderr = stderr
+VagrantResults = collections.namedtuple(
+	"VagrantResults", ["returncode", "stdout", "stderr"])
