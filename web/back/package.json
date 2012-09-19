@@ -3,6 +3,7 @@
   "version": "0.1.0",
 
   "dependencies" : {
+    "iced-coffee-script": "x.x.x",
     "nodetime": "x.x.x",
     "express":  "2.x.x",
     "express-resource":  "x.x.x",
@@ -10,6 +11,7 @@
     "socket.io": "x.x.x",
     "connect-redis": "x.x.x",
     "amqp": "x.x.x",
+    "msgpack": "x.x.x",
     "walk": "x.x.x",
     "zombie": "x.x.x"
   },
