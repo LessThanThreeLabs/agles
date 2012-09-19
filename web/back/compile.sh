@@ -1,2 +1,2 @@
 #!/bin/bash 
-coffee --compile --lint --output js/ coffee/
+iced --compile --lint --output js/ coffee/

@@ -31,7 +31,7 @@ Setup:
 	Install ZeroRpc
 		sudo pip install zerorpc
 
-	Install CoffeeScript by running "npm install -g coffee-script"
+	Install IcedCoffeeScript by running "npm install -g iced-coffee-script"
 
 	Install CoffeeScript syntax in Sublime
 		cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
