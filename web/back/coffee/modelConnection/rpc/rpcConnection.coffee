@@ -1,50 +1,37 @@
 assert = require 'assert'
 
-ProxyHandler = require './proxyHandler'
+MessageIdGenerator = require './messageIdGenerator'
+RpcHandler = require './rpcHandler'
+RpcHandlerFunctionProxy = require './rpcHandlerFunctionProxy'
 
 
-exports.create = (configurationParams) ->
-	return new RpcConnection configurationParams
+exports.create = (configurationParams, connection) ->
+	return new RpcConnection configurationParams, connection
 
 
 class RpcConnection
-	constructor: (@configurationParams) ->
-		assert.ok @configurationParams?
-
-		@messageCount = 0
-		@messageIdsToCallbacks = {}
+	constructor: (@configurationParams, @connection) ->
+		assert.ok @connection? and @configurationParams?
+		@messageIdGenerator = MessageIdGenerator.create()
 
 
-	connect: (@connection, callback) ->
-		assert.ok @connection? and callback?
-
-		@connection.queue @configurationParams.rpc.queueName, (queue) ->
-			@requestQueue = queue
-
-			@connection.queue '', exclusive: true, (queue) ->
-				@responseQueue = queue
-				@responseQueue.subscribe @_handleResponse
-				callback(null)
+	connect: (callback) ->
+		@connection.exchange @configurationParams.rpc.exchange, {}, (exchange) =>
+			@exchange = exchange
+			@_createHandles callback
 
 
-	callFunction: (functionName, args, callback) ->
-		assert.ok functionName? and args? and callback?
+	_createHandles: (callback) ->
+		await
+			errors = {}
 
-		messageId = @_getNextMessageId()
-		@messageIdsToCallbacks.messageId = callback
+			usersHandler = RpcHandler.create @connection, @exchange, 'users', @messageIdGenerator
+			@users = RpcHandlerFunctionProxy.create(usersHandler).getProxy()
+			usersHandler.connect defer errors.users
 
-		@connection.publish @requestQueue, 'hello',
-			replyTo: @responseQueue.name
-			correlationId: messageId
-			mandatory: true
+			buildsHandler = RpcHandler.create @connection, @exchange, 'builds', @messageIdGenerator
+			@builds = RpcHandlerFunctionProxy.create(buildsHandler).getProxy()
+			buildsHandler.connect defer errors.builds
 
-
-	_handleResponse: (message, headers, deliveryInformation) ->
-		console.log 'message came in... ' + message
-		delete @messageIdsToCallbacks.deliveryInformation.correlationId
-
-
-	_getNextMessageId: () ->
-		id = @messageCount
-		@messageCount++
-		return id
+		errorsArray = (error for key, error of errors when error?)
+		callback if errorsArray.length then errorsArray else null

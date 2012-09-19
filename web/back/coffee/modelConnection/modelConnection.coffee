@@ -12,13 +12,13 @@ exports.create = (configurationParams) ->
 class ModelConnection
 	constructor: (@configurationParams) ->
 		assert.ok @configurationParams?
-		@rpcConnection = RpcConnection.create @configurationParams
 
 
 	connect: (callback) ->
 		@connection = amqp.createConnection @configurationParams.messageBroker
 		@connection.on 'ready', () =>
-			@rpcConnection.connect @connection, callback
+			@rpcConnection = RpcConnection.create @configurationParams, @connection
+			@rpcConnection.connect callback
 		@connection.on 'error', (error) =>
 			callback error
 
