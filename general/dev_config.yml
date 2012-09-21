@@ -1,0 +1,33 @@
+packages:
+	system:
+		-vim
+		-g++
+		-curl
+		-libssl-dev
+		-apache2-utils
+		-redis-server
+	pip:
+		-pika
+		-sqlalchemy
+		-yaml
+		-msgpack
+		-nose
+		-beautifulsoup4
+		-dulwich
+		-ipython
+		-redis
+		-gevent
+	npm:
+		-iced-coffee-script
+databases:
+	postgres:
+		-name: agles
+		 connection_info:
+		 	host: localhost
+		 	port: 5432
+		 	username: postgres
+scripts:
+	-script: npm -d install
+	 directory: web/back
+	-script: redis-server
+	 background: true

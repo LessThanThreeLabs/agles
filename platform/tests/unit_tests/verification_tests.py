@@ -12,12 +12,12 @@ VM_DIRECTORY = '/tmp/verification'
 
 class VerificationTest(unittest.TestCase):
 	@classmethod
-	def setup_class(VerificationTest):
+	def setup_class(cls):
 		vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
 		vs.vagrant.spawn()
 
 	@classmethod
-	def teardown_class(VerificationTest):
+	def teardown_class(cls):
 		vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
 		vs.vagrant.teardown()
 

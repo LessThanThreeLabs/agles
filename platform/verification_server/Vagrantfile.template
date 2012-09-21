@@ -63,7 +63,7 @@ Vagrant::Config.run do |config|
   # end
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
-  # path, and data_bags path (all relative to this Vagrantfile), and adding 
+  # path, and data_bags path (all relative to this Vagrantfile), and adding
   # some recipes and/or roles.
   #
 	config.vm.provision :chef_solo do |chef|
@@ -71,11 +71,9 @@ Vagrant::Config.run do |config|
 				"~/chef-repo" :
 				agles_root + "/chef"
 		chef.cookbooks_path = chef_path + "/cookbooks"
-		# chef.roles_path = "/var/chef/cookbooks/verification/roles"
+		chef.roles_path = chef_path + "/roles"
 		# chef.data_bags_path = "/var/chef/cookbooks/verification/data_bags"
-		chef.add_recipe "git"
-		chef.add_recipe "python"
-		chef.add_recipe "verification"
+		chef.add_role("verification_server")
 
 		# You may also specify custom JSON attributes:
 		# chef.json = { :mysql_password => "foo" }
