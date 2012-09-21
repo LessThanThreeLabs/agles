@@ -24,12 +24,12 @@ class VerificationTest(unittest.TestCase):
 	def setUp(self):
 		self.vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
 		self.repo_dir = os.path.join(VM_DIRECTORY, 'repo')
+		os.mkdir(self.repo_dir)
 
 	def tearDown(self):
 		rmtree(self.repo_dir)
 
 	def test_hello_world_repo(self):
-		os.mkdir(self.repo_dir)
 		repo = Repo.init(self.repo_dir)
 
 		with open(os.path.join(self.repo_dir, 'hello.py'), 'w') as hello:
@@ -41,7 +41,6 @@ class VerificationTest(unittest.TestCase):
 		self.vs.verify('/vagrant/repo', commit_id, 'ref', lambda retval: assert_equals(0, retval))
 
 	def test_bad_repo(self):
-		os.mkdir(self.repo_dir)
 		repo = Repo.init(self.repo_dir)
 
 		with open(os.path.join(self.repo_dir, 'derp.py'), 'w') as derp:
