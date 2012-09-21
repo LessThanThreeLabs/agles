@@ -6,7 +6,7 @@ from sqlalchemy.sql import select
 from database.engine import EngineFactory
 from database import schema
 from model_server import ModelServer
-from repo_store.store import FileSystemRepositoryStore
+from repostore.store import FileSystemRepositoryStore
 from util import repositories
 
 REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"

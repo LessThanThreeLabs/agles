@@ -1,24 +1,34 @@
-# store.py -- Implements storage servers for git repositories using dulwich
-
+# store.py -- Implements storage servers for git repositories.
 """Git repository storage servers.
 
-Repository management is done using a modified version of dulwich,
-a git implementation written in python.
-
-* For more information on the modified dulwich, see the submodule.
+Repository management is done using gitpython.
 """
 
 import os
 import shutil
+import sys
 
 import zerorpc
-from dulwich.repo import Repo
+
+from git import GitCommandError, Repo
 from redis import Redis
 
 from util import repositories
 
+class RemoteRepositoryManager(object):
+	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+		"""Merges a changeset on the remote repository with a ref.
 
-class RepositoryStoreManager(object):
+		:param store_name: The identifier of the local store(machine) the
+						   repository is on.
+		:param repo_hash: The unique identifier for the repository being created.
+		:param repo_name: The name of the repository.
+		:param ref_to_merge: The sha ref of the changeset on the remote
+							 repository we want to merge.
+		:param ref_to_merge_into: The ref we want to merge into.
+		"""
+		raise NotImplementedError("Subclasses should override this!")
+
 	def create_repository(self, store_name, repo_hash, repo_name):
 		"""Creates a repository on the given local store.
 
@@ -48,14 +58,14 @@ class RepositoryStoreManager(object):
 		raise NotImplementedError("Subclasses should override this!")
 
 
-class DistributedLoadBalancingRepositoryStoreManager(RepositoryStoreManager):
+class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 	"""A manager class that manages local repository stores and forwards requests to the correct store"""
 
 	SERVER_REPO_COUNT_NAME = "server_repository_count"
 	DEFAULT_RPC_TIMEOUT = 500
 
 	def __init__(self, managed_stores, redis_connection):
-		super(DistributedLoadBalancingRepositoryStoreManager, self).__init__()
+		super(DistributedLoadBalancingRemoteRepositoryManager, self).__init__()
 		self.managed_store_conns = {}
 		self._redisdb = redis_connection
 		self._register_managed_stores(managed_stores)
@@ -66,6 +76,10 @@ class DistributedLoadBalancingRepositoryStoreManager(RepositoryStoreManager):
 		from settings.store import file_system_repository_servers, distributed_store_redis_connection
 		redis_connection = Redis(**distributed_store_redis_connection)
 		return cls(file_system_repository_servers, redis_connection)
+
+	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+		client_conn = self.managed_store_conns[store_name]
+		client_conn.merge_changeset(repo_hash, repo_name, ref_to_merge, ref_to_merge_into)
 
 	def create_repository(self, store_name, repo_hash, repo_name):
 		client_conn = self.managed_store_conns[store_name]
@@ -108,6 +122,9 @@ class DistributedLoadBalancingRepositoryStoreManager(RepositoryStoreManager):
 class RepositoryStore(object):
 	"""Base class for RepositoryStore"""
 
+	def merge_changeset(self, repo_hash, repo_name, sha_to_merge, ref_to_merge_into):
+		raise NotImplementedError("Subclasses should override this!")
+
 	def create_repository(self, repo_hash, repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -129,6 +146,25 @@ class FileSystemRepositoryStore(RepositoryStore):
 			os.makedirs(root_storage_directory_path)
 		self._root_path = root_storage_directory_path
 
+	def merge_changeset(self, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+		repo_path = self._resolve_path(repo_hash, repo_name)
+		repo = Repo(repo_path)
+		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
+		try:
+			repo_slave.git.checkout(ref_to_merge_into)
+			repo_slave.git.pull()
+			repo_slave.git.fetch("origin", ref_to_merge)
+			repo_slave.git.merge("FETCH_HEAD")
+			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
+		except GitCommandError, e:
+			stacktrace = sys.exc_info()[2]
+			error_msg = "repo: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
+				repo, ref_to_merge, ref_to_merge_into)
+			raise MergeError, error_msg, stacktrace
+		finally:
+			repo_slave.git.reset(hard=True)
+
+
 	def create_repository(self, repo_hash, repo_name):
 		"""Creates a new server side repository. Raises an exception on failure.
 		We create bare repositories because they are server side.
@@ -142,7 +178,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			os.makedirs(repo_path)
 		else:
 			raise RepositoryAlreadyExistsException(repo_hash, repo_path)
-		Repo.init_bare(repo_path)
+		Repo.init(repo_path, bare=True)
 
 	def delete_repository(self, repo_hash, repo_name):
 		"""Deletes a server side repository. This cannot be undone. Raises an exception on failure.
@@ -181,6 +217,11 @@ class RepositoryOperationException(Exception):
 	def __init__(self, msg=''):
 		super(RepositoryOperationException, self).__init__(msg)
 
+class MergeError(RepositoryOperationException):
+	"""Indicates an exception occurred during an attempted merge."""
+
+	def __init__(self, msg=''):
+		super(MergeError, self).__init__(msg)
 
 class RepositoryAlreadyExistsException(RepositoryOperationException):
 	"""Indicates an exception occurred due to a repository already existing."""

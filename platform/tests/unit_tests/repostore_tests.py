@@ -1,0 +1,89 @@
+import os
+import shutil
+import unittest
+
+from os.path import exists
+
+from nose.tools import *
+from git import Repo
+from repostore import FileSystemRepositoryStore, MergeError
+
+from util.repositories import to_path
+
+class RepoStoreTests(unittest.TestCase):
+	TEST_DIR = '/tmp'
+
+	@classmethod
+	def setup_class(cls):
+		repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
+		os.mkdir(repodir)
+
+	@classmethod
+	def teardown_class(cls):
+		repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
+		shutil.rmtree(repodir)
+
+	def setUp(self):
+		self.repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
+		self.store = FileSystemRepositoryStore(self.repodir)
+		self.repo_path = os.path.join(
+			self.repodir,
+			to_path("asdf", "repo", FileSystemRepositoryStore.DIR_LEVELS))
+
+	def tearDown(self):
+		self._cleardir(self.repodir)
+
+	def _cleardir(self, dirpath):
+		for filename in os.listdir(dirpath):
+			filepath = os.path.join(dirpath, filename)
+			try:
+				shutil.rmtree(filepath)
+			except OSError:
+				os.remove(filepath)
+
+	def test_repo_create(self):
+		assert_false(exists(self.repo_path), msg="Repository should not exist.")
+		self.store.create_repository("asdf", "repo")
+		assert_true(exists(self.repo_path), msg="Repository does not exist.")
+
+	def test_repo_create_remove(self):
+		self.store.create_repository("asdf", "repo")
+		assert_true(exists(self.repo_path), msg="Repository was not deleted.")
+		self.store.delete_repository("asdf", "repo")
+		assert_false(exists(self.repo_path), msg="Repository was not deleted.")
+
+	def _modify_commit_push(self, repo, filename, contents, parent_commits=None,
+	                        refspec="HEAD:master"):
+		with open(os.path.join(repo.working_dir, filename), "w") as f:
+			f.write(contents)
+		repo.index.add([filename])
+		commit = repo.index.commit("", parent_commits=parent_commits)
+		repo.remotes.origin.push(refspec=refspec)
+		return commit
+
+	def test_merge_pass(self):
+		self.store.create_repository("asdf", "repo")
+
+		bare_repo = Repo.init(self.repo_path, bare=True)
+		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
+
+		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
+
+		self._modify_commit_push(work_repo, "test.txt", "c2",
+			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
+
+		self.store.merge_changeset("asdf", "repo", "refs/pending/1", "master")
+
+	def test_merge_fail(self):
+		self.store.create_repository("asdf", "repo")
+
+		bare_repo = Repo.init(self.repo_path, bare=True)
+		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
+
+		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
+		self._modify_commit_push(work_repo, "test.txt", "c2",
+			parent_commits=[init_commit])
+		self._modify_commit_push(work_repo, "test.txt", "c3",
+			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
+
+		assert_raises(MergeError, self.store.merge_changeset, "asdf", "repo", "refs/pending/1", "master")
