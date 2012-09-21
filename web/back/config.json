@@ -64,7 +64,12 @@
 		},
 
 		"rpc": {
-			"queueName": "rpc"
+			"exchange": "model - rpc",
+			"deadLetterExchange": "model - deadLetter"
+		},
+
+		"events": {
+			"exchange": "model - events"
 		}
 	}
 }

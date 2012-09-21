@@ -2,19 +2,16 @@ assert = require 'assert'
 
 
 exports.create = (rpcHandler) ->
-	return new RpcHandlerFunctionProxy rpcHandler
+	handler = new Handler rpcHandler
+	return Proxy.create handler
 
 
-class RpcHandlerFunctionProxy
+class Handler
 	constructor: (@rpcHandler) ->
 		assert.ok @rpcHandler?
-		@proxy = Proxy.create @, @rpcHandler
 
 
-	getProxy: () ->
-		return @proxy
-
-
-	get: (object, name) ->
-		return (type, args..., callback) ->
-			object.callFunction name, type, args, callback
+	get: (proxy, name) ->
+		return (args..., callback) =>
+			@rpcHandler.callFunction name, args, callback
+			

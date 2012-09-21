@@ -1,11 +1,14 @@
-crypto = require 'crypto'
-
-
 exports.create = () ->
 	return new MessageIdGenerator()
 
 
 class MessageIdGenerator
-	generateUniqueId: (callback) ->
-		crypto.randomBytes 32, (error, bytes) ->
-			callback error, bytes.toString 'hex'
+	constructor: () ->
+		@currentId = 0
+		@maxAllowedId = Math.pow 2, 16
+
+
+	generateUniqueId: () ->
+		id = @currentId
+		@currentId = if @currentId < @maxAllowedId then @currentId + 1 else 0
+		return id.toString()

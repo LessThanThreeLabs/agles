@@ -19,14 +19,34 @@ class ModelConnection
 		@connection.on 'ready', () =>
 			@rpcConnection = RpcConnection.create @configurationParams, @connection
 			@rpcConnection.connect callback
+
+			@_startFakeRpcMessages()
 		@connection.on 'error', (error) =>
 			callback error
+
+
+	_startFakeRpcMessages: () ->
+		setInterval (() =>
+			console.log '>> making rpc call'
+			@rpcConnection.builds.read.blah 'a', 'b', (error, data) ->
+				console.log '>> result of rpc call: ' + data + '\n'
+			), 1000
 
 
 	setSocketsToFireEventsOn: (sockets) ->
 		assert.ok sockets?
 		@eventHandler = EventHandler.create @configurationParams, sockets
 		@eventHandler.beginListening()
+
+
+
+
+
+
+
+
+
+
 
 
 	getBuild: (user, repositoryId, buildId, callback) ->

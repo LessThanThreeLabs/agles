@@ -1,6 +1,7 @@
 assert = require 'assert'
 
 MessageIdGenerator = require './messageIdGenerator'
+RpcBroker = require './RpcBroker'
 RpcHandler = require './rpcHandler'
 RpcHandlerFunctionProxy = require './rpcHandlerFunctionProxy'
 
@@ -16,22 +17,25 @@ class RpcConnection
 
 
 	connect: (callback) ->
-		@connection.exchange @configurationParams.rpc.exchange, {}, (exchange) =>
-			@exchange = exchange
-			@_createHandles callback
-
-
-	_createHandles: (callback) ->
 		await
-			errors = {}
+			@connection.exchange @configurationParams.rpc.exchange, type: 'direct', defer @exchange
+			@connection.exchange @configurationParams.rpc.deadLetterExchange, type: 'direct', defer @deadLetterExchange
 
-			usersHandler = RpcHandler.create @connection, @exchange, 'users', @messageIdGenerator
-			@users = RpcHandlerFunctionProxy.create(usersHandler).getProxy()
-			usersHandler.connect defer errors.users
+		@rpcBroker = RpcBroker.create @connection, @exchange, @deadLetterExchange, @messageIdGenerator
+		@rpcBroker.connect (error) =>
+			if error? then callback error else @_createNounHandles callback
 
-			buildsHandler = RpcHandler.create @connection, @exchange, 'builds', @messageIdGenerator
-			@builds = RpcHandlerFunctionProxy.create(buildsHandler).getProxy()
-			buildsHandler.connect defer errors.builds
 
-		errorsArray = (error for key, error of errors when error?)
-		callback if errorsArray.length then errorsArray else null
+	_createNounHandles: (callback) ->
+		for noun in ['users', 'organizations', 'builds', 'repositories']
+			@[noun] = {}
+			@_createVerbHandles noun
+
+		callback null
+
+
+	_createVerbHandles: (noun) ->
+		for verb in ['create', 'read', 'update', 'delete']
+			route = noun + '-' + verb
+			handler = RpcHandler.create route, @rpcBroker
+			@[noun][verb] = RpcHandlerFunctionProxy.create handler
