@@ -1,5 +1,6 @@
-packages:
-  system:
+---
+- packages:
+  - system:
     - vim
     - vagrant
     - gcc
@@ -9,7 +10,7 @@ packages:
     - apache2-utils
     - redis-server
     - libevent-dev
-  pip:
+  - pip:
     - pika
     - sqlalchemy
     - pyyaml
@@ -21,18 +22,19 @@ packages:
     - redis
     - greenlet
     - gevent
-  gem:
-    - pg
-  npm:
+- scripts:
+  - script: /vagrant/scripts/install_node.sh
+- packages:
+  - npm:
     - iced-coffee-script
-databases:
-  postgres:
-  - name: agles
-    connection-info:
-      host: localhost
-      port: 5432
-      username: postgres
-scripts:
+- databases:
+    postgres:
+    - name: agles
+      connection-info:
+        host: localhost
+        port: 5432
+        username: postgres
+- scripts:
   # Currently failing, unable to find amqp.js?
   - script: npm -d install
     directory: /vagrant/web/back

@@ -11,63 +11,82 @@ require 'yaml'
 
 config = YAML::load(File.read("/vagrant/general/dev_config.yml"))
 
-packages = config["packages"]
+def system(package_name)
+	package package_name
+end
 
-packages["system"].each do |p|
-	package p do
+def pip(package_name)
+	python_pip package_name do
 		action :install
 	end
 end
 
-# install node.js
-bash "install_node" do
-	code <<-EOH
-	wget http://nodejs.org/dist/v0.6.11/node-v0.6.11.tar.gz
-	tar xzf node-v0.6.11.tar.gz
-	cd node-v0.6.11
-	./configure
-	make
-	sudo make install
-	EOH
-	not_if {File.exists?("/usr/local/bin/node")}
-end
-
-packages["pip"].each do |p|
-	python_pip p do
+def gem(package_name)
+	gem_package package_name do
 		action :install
 	end
 end
 
-packages["gem"].each do |p|
-	gem_package p do
-		action :install
+def npm(package_name)
+	execute "npm install -g #{package_name}"
+end
+
+def install_packages(package_bundle)
+	package_bundle.each do |type, packages|
+		packages.each do |p|
+			send(type, p)
+		end
 	end
 end
 
-packages["npm"].each do |p|
-	execute "npm install -g #{p}"
+def packages(package_bundles)
+	package_bundles.each do |package_bundle|
+		install_packages package_bundle
+	end
 end
 
-databases = config["databases"]
-
-databases["postgres"].each do |db|
-	postgresql_database db["name"] do
-		c = db["connection-info"]
+def postgres(database_info)
+	puts database_info.inspect
+	postgresql_database database_info["name"] do
+		c = database_info["connection-info"]
 		connection ({:host => c["host"], :port => c["port"], :username => c["username"], :password => node['postgresql']['password']['postgres']})
 		action :create
 	end
 end
 
-scripts = config["scripts"]
-
-scripts.each do |s|
-	execute s["script"] do
-		if s["background"]
-			command "#{s["script"]} &"
+def databases(database_bundles)
+	database_bundles.each do |type, databases|
+		databases.each do |database|
+			send(type, database)
 		end
-		if not s["directory"].nil?
-			cwd s["directory"]
+	end
+end
+
+def execute_script(script_info)
+	name = script_info["script"]
+	execute name do
+		if script_info["background"]
+			command "#{name} &"
+		end
+		if not script_info["directory"].nil?
+			cwd script_info["directory"]
 		end
 		action :run
 	end
 end
+
+def scripts(script_infos)
+	script_infos.each do |script_info|
+		execute_script script_info
+	end
+end
+
+def handle_config(config_bundles)
+	config_bundles.each do |config_bundle|
+		config_bundle.each do |type, bundle|
+			send(type, bundle)
+		end
+	end
+end
+
+handle_config(config)
