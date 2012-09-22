@@ -1,25 +1,30 @@
 packages:
   system:
-    -vim
-    -vagrant
-    -g++
-    -curl
-    -libssl-dev
-    -apache2-utils
-    -redis-server
+    - vim
+    - vagrant
+    - gcc
+    - g++
+    - curl
+    - libssl-dev
+    - apache2-utils
+    - redis-server
+    - libevent-dev
   pip:
-    -pika
-    -sqlalchemy
-    -yaml
-    -msgpack
-    -nose
-    -beautifulsoup4
-    -dulwich
-    -ipython
-    -redis
-    -gevent
+    - pika
+    - sqlalchemy
+    - pyyaml
+    - msgpack-python
+    - nose
+    - beautifulsoup4
+    - dulwich
+    - ipython
+    - redis
+    - greenlet
+    - gevent
+  gem:
+    - pg
   npm:
-    -iced-coffee-script
+    - iced-coffee-script
 databases:
   postgres:
   - name: agles
@@ -28,7 +33,8 @@ databases:
       port: 5432
       username: postgres
 scripts:
+  # Currently failing, unable to find amqp.js?
   - script: npm -d install
-    directory: web/back
+    directory: /vagrant/web/back
   - script: redis-server
     background: true

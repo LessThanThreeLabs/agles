@@ -9,18 +9,18 @@
 
 require 'yaml'
 
-config = YAML::load(File.read("general/dev_config.yml"))
+config = YAML::load(File.read("/vagrant/general/dev_config.yml"))
 
 packages = config["packages"]
 
-for packages["system"].each do |p|
+packages["system"].each do |p|
 	package p do
 		action :install
 	end
 end
 
 # install node.js
-script "install_node" do
+bash "install_node" do
 	code <<-EOH
 	wget http://nodejs.org/dist/v0.6.11/node-v0.6.11.tar.gz
 	tar xzf node-v0.6.11.tar.gz
@@ -29,35 +29,45 @@ script "install_node" do
 	make
 	sudo make install
 	EOH
+	not_if {File.exists?("/usr/local/bin/node")}
 end
 
-for packages["pip"].each do |p|
+packages["pip"].each do |p|
 	python_pip p do
 		action :install
 	end
 end
 
-for packages["npm"].each do |p|
+packages["gem"].each do |p|
+	gem_package p do
+		action :install
+	end
+end
+
+packages["npm"].each do |p|
 	execute "npm install -g #{p}"
 end
 
 databases = config["databases"]
 
-for databases["postgres"].each do |db|
+databases["postgres"].each do |db|
 	postgresql_database db["name"] do
-		connection ({:host => db["host"], :port => db["port"], :username => db["username"]})
+		c = db["connection-info"]
+		connection ({:host => c["host"], :port => c["port"], :username => c["username"], :password => node['postgresql']['password']['postgres']})
 		action :create
 	end
 end
 
-for scripts.each do |s|
+scripts = config["scripts"]
+
+scripts.each do |s|
 	execute s["script"] do
-		if script["background"]
+		if s["background"]
 			command "#{s["script"]} &"
 		end
 		if not s["directory"].nil?
 			cwd s["directory"]
 		end
-		action :create
+		action :run
 	end
 end
