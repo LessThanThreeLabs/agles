@@ -1,5 +1,6 @@
 assert = require 'assert'
 msgpack = require 'msgpack'
+crypto = require 'crypto'
 
 
 exports.create = (connection, exchange, deadLetterExchange, messageIdGenerator) ->
@@ -19,9 +20,18 @@ class RpcBroker
 			
 
 	connect: (callback) ->
-		@connection.queue '', exclusive: true, (queue) =>
-			@responseQueue = queue
+		crypto.randomBytes 8, (error, buffer) =>
+			@fromId = buffer.toString 'hex'
+
+			await
+				@connection.queue '', exclusive: true, defer @responseQueue
+				@connection.queue '', exclusive: true, defer @deadLetterQueue
+
 			@responseQueue.subscribe @_handleResponse
+
+			@deadLetterQueue.subscribe @_handleDeadLetterResponse
+			@deadLetterQueue.bind @deadLetterExchange, ''
+
 			callback null
 
 
@@ -39,6 +49,8 @@ class RpcBroker
 			replyTo: @responseQueue.name
 			correlationId: messageId
 			mandatory: true
+			headers:
+				fromId: @fromId
 
 		console.log 'sent: ' + JSON.stringify msgpack.unpack message
 
@@ -53,8 +65,22 @@ class RpcBroker
 		returnValue = data.returnValue
 
 		if not @messageIdsToCallbacks[messageId]?
-			console.error 'Received unexpected rpc message ' + JSON.stringify response
+			console.error 'Received unexpected rpc message ' + JSON.stringify data
 		else
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
 			callback error, returnValue
+
+
+	_handleDeadLetterResponse: (message, headers, deliveryInformation) =>
+		console.log 'received dead letter message!! ' + JSON.stringify msgpack.unpack message.data
+		console.log 'headers.fromId: ' + headers.fromId
+
+		fromId = headers.fromId
+		messageId = deliveryInformation.correlationId
+
+		if fromId is @fromId and @messageIdsToCallbacks[messageId]?
+			callback = @messageIdsToCallbacks[messageId]
+			delete @messageIdsToCallbacks[messageId]
+			error = new Error 'Rpc request timed out'
+			callback error, null

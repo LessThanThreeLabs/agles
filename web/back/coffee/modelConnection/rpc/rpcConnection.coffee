@@ -19,7 +19,7 @@ class RpcConnection
 	connect: (callback) ->
 		await
 			@connection.exchange @configurationParams.rpc.exchange, type: 'direct', defer @exchange
-			@connection.exchange @configurationParams.rpc.deadLetterExchange, type: 'direct', defer @deadLetterExchange
+			@connection.exchange @configurationParams.rpc.deadLetter.exchange, type: 'fanout', defer @deadLetterExchange
 
 		@rpcBroker = RpcBroker.create @connection, @exchange, @deadLetterExchange, @messageIdGenerator
 		@rpcBroker.connect (error) =>

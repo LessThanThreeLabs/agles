@@ -29,8 +29,9 @@ class ModelConnection
 		setInterval (() =>
 			console.log '>> making rpc call'
 			@rpcConnection.builds.read.blah 'a', 'b', (error, data) ->
+				throw error if error?
 				console.log '>> result of rpc call: ' + data + '\n'
-			), 1000
+			), 2000
 
 
 	setSocketsToFireEventsOn: (sockets) ->
