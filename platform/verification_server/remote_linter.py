@@ -14,8 +14,8 @@ class VagrantLinter(object):
 		self.vagrant = vagrant
 
 	def run(self):
-		results = self.vagrant.ssh_call("find /opt/mysource -name \"*.py\" |" +
-				"xargs pylint --reports=n")
+		results = self.vagrant.ssh_call("find /vagrant/source" +
+			" -name \"*.py\" | xargs pylint --reports=n")
 		lint_parser = LintParser()
 		pylint_issues = lint_parser.parse_pylint(results.stdout)
 		errors = lint_parser.get_errors(pylint_issues)

@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: agles
-# Recipe:: development_machine
+# Recipe:: configure
 #
 # Copyright 2012, Less Than Three Labs
 #
@@ -8,8 +8,6 @@
 #
 
 require 'yaml'
-
-config = YAML::load(File.read("/vagrant/general/dev_config.yml"))
 
 def system(package_name)
 	package package_name
@@ -46,7 +44,6 @@ def packages(package_bundles)
 end
 
 def postgres(database_info)
-	puts database_info.inspect
 	postgresql_database database_info["name"] do
 		c = database_info["connection-info"]
 		connection ({:host => c["host"], :port => c["port"], :username => c["username"], :password => node['postgresql']['password']['postgres']})
@@ -71,6 +68,7 @@ def execute_script(script_info)
 		if not script_info["directory"].nil?
 			cwd script_info["directory"]
 		end
+		timeout script_info["timeout"].nil? ? 120 : script_info["timeout"]
 		action :run
 	end
 end
@@ -89,4 +87,7 @@ def handle_config(config_bundles)
 	end
 end
 
-handle_config(config)
+if File.exist? node[:agles][:configpath]
+	config = YAML::load(File.read(node[:agles][:configpath]))
+	handle_config(config)
+end

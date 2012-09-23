@@ -6,6 +6,7 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+
 case node[:platform]
 when "ubuntu"
 	execute "apt-get update"

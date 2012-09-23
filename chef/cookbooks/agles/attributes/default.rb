@@ -1,12 +1,10 @@
 #
 # Cookbook Name:: agles
-# Recipe:: verification_box
+# Attributes:: agles
 #
 # Copyright 2012, Less Than Three Labs
 #
 # All rights reserved - Do Not Redistribute
 #
 
-python_pip "pylint" do
-	action :install
-end
+default[:agles][:configpath] = "/vagrant/source/agles_config.yml"

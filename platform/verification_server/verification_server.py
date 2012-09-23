@@ -8,11 +8,13 @@ a spawned virtual machine.
 """
 
 import os
+import shutil
 import pika
 import msgpack
 import yaml
 import zerorpc
 
+from git import Repo
 from util.vagrant import Vagrant
 from remote_test_runner import VagrantNoseRunner
 from remote_linter import VagrantLinter
@@ -32,6 +34,8 @@ class VerificationServer(object):
 		self.model_server_address = model_server_address
 
 		self.vagrant = Vagrant(vm_directory, box_name)
+
+		self.source_dir = os.path.join(vm_directory, "source")
 
 		self.rabbit_connection = pika.BlockingConnection(connection_parameters)
 
@@ -80,8 +84,8 @@ class VerificationServer(object):
 	def verify(self, repo_address, sha, ref, callback):
 		"""Runs verification on a desired git commit
 		"""
-		self.write_git_config_yaml(repo_address, sha)
 		try:
+			self.checkout_commit(repo_address, sha)
 			self.setup_vagrant()
 			configuration = self.get_user_configuration()
 			self.run_linter(configuration)
@@ -90,8 +94,6 @@ class VerificationServer(object):
 			self._mark_failure(callback, e)
 		else:
 			self._mark_success(callback)
-		finally:
-			os.remove(os.path.join(self.vagrant.vm_directory, "repo_config.yml"))
 
 	def get_repo_address(self, repo_hash):
 		"""Sends out a rpc call to the model server to retrieve
@@ -108,19 +110,12 @@ class VerificationServer(object):
 		model_server_rpc.close()
 		return repo_address
 
-	def write_git_config_yaml(self, repo_address, sha):
-		"""Writes out the git repository config yaml into the vagrant
-		shared directory for the purpose of vm provisioning
-		"""
-		with open(os.path.join(self.vagrant.vm_directory, "repo_config.yml"), 'w') as pref_file:
-			pref_file.write(self.get_git_config_yaml(repo_address, sha))
-
-	def get_git_config_yaml(self, repo_address, sha):
-		"""Returns a yaml string with git configuration commands
-		for provisioning a vm
-		"""
-		return yaml.dump({"repo_address": repo_address,
-				"sha_hash": sha}, default_flow_style=False)
+	def checkout_commit(self, repo_address, sha):
+		if os.access(self.source_dir, os.F_OK):
+			shutil.rmtree(self.source_dir)
+		source_repo = Repo(repo_address)
+		dest_repo = source_repo.clone(self.source_dir)
+		dest_repo.git.checkout(sha)
 
 	def setup_vagrant(self):
 		"""Rolls back and provisions the contained vagrant vm for
@@ -137,7 +132,7 @@ class VerificationServer(object):
 		"""Reads in the yaml config file contained in the checked
 		out user repository which this server is verifying
 		"""
-		config_path = os.path.join(self.vagrant.vm_directory, "agles_config.yml")
+		config_path = os.path.join(self.source_dir, "agles_config.yml")
 		if not os.access(config_path, os.F_OK):
 			return None
 		with open(config_path) as config_file:

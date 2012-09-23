@@ -27,6 +27,7 @@
 - packages:
   - npm:
     - iced-coffee-script
+    - amqp
 - databases:
     postgres:
     - name: agles

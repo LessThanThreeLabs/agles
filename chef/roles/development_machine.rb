@@ -7,7 +7,7 @@ run_list(
 	"recipe[postgresql::client]",
 	"recipe[database]",
 	"recipe[rabbitmq]",
-	"recipe[agles::development]"
+	"recipe[agles::configure]"
 )
 default_attributes(
 	:postgresql => {
