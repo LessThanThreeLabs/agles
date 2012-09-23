@@ -72,7 +72,7 @@
 		},
 
 		"events": {
-			"exchange": "model - events"
+			"exchange": "model-events"
 		}
 	}
 }
