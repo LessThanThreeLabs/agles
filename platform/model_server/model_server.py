@@ -46,8 +46,7 @@ class ModelServer(object):
 		self.rabbit_connection = pika.BlockingConnection(connection_parameters)
 
 		self.event_channel = self.rabbit_connection.channel()
-		self.event_channel.exchange_declare(exchange='events',
-				type='direct')
+		self.event_channel.exchange_declare(exchange='events', type='direct')
 
 	def subscribe(self, event):
 		"""No-op
@@ -66,11 +65,11 @@ class ModelServer(object):
 		:param msg: The msg we are publishing to the channel.
 		"""
 		self.event_channel.basic_public(exchange='events',
-				routing_key=event,
-				body=msg,
-				properties=pika.BasicProperties(
-						delivery_mode=2,  # make message persistent
-				))
+            routing_key=event,
+			body=msg,
+			properties=pika.BasicProperties(
+                delivery_mode=2,  # make message persistent
+		    ))
 
 	def create_repo(self, repo_name, machine_id):
 		# This is a stub that only does things that are needed for testing atm.
@@ -85,11 +84,20 @@ class ModelServer(object):
 		repo = database.schema.repo
 		uri_repo_map = database.schema.uri_repo_map
 		query = repo.join(
-				uri_repo_map).select().where(
-				repo.c.hash==repo_hash)
+            uri_repo_map).select().where(
+			repo.c.hash==repo_hash)
 		row = self._db_conn.execute(query).first()
 		if row:
 			return row[uri_repo_map.c.uri]
+		else:
+			return None
+
+	def get_repo_name(self, repo_hash):
+		repo = database.schema.repo
+		query = repo.select().where(repo.c.hash==repo_hash)
+		row = self._db_conn.execute(query).first()
+		if row:
+			return row[repo.c.name]
 		else:
 			return None
 
@@ -107,6 +115,6 @@ class ModelServer(object):
 		repo = database.schema.repo
 		machine = database.schema.machine
 		query = select([machine.c.uri, repo.c.hash, repo.c.name], from_obj=[
-			uri_repo_map.select().where(uri_repo_map.c.uri==requested_repo_uri).alias().join(repo).join(machine)])
+            uri_repo_map.select().where(uri_repo_map.c.uri==requested_repo_uri).alias().join(repo).join(machine)])
 		row_result = self._db_conn.execute(query).first()
-		return (row_result[machine.c.uri], row_result[repo.c.hash], row_result[repo.c.name])
+		return row_result[machine.c.uri], row_result[repo.c.hash], row_result[repo.c.name]
