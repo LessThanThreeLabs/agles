@@ -4,7 +4,7 @@ import os
 
 import zerorpc
 
-from repostore import FileSystemRepositoryStore
+from repo.store import FileSystemRepositoryStore
 
 DEFAULT_ADDRESS = "tcp://0.0.0.0:4242"
 DEFAULT_ROOT_DIR = "/repositories"

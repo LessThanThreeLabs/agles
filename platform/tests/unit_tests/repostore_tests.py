@@ -6,7 +6,7 @@ from os.path import exists
 
 from nose.tools import *
 from git import Repo
-from repostore import FileSystemRepositoryStore, MergeError
+from repo.store import FileSystemRepositoryStore, MergeError
 
 from util.repositories import to_path
 
