@@ -7,6 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
+require_recipe 'agles::copy_source'
+
 require 'yaml'
 
 def system(package_name)
