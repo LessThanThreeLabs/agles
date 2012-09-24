@@ -87,7 +87,8 @@ def handle_config(config_bundles)
 	end
 end
 
-if File.exist? node[:agles][:configpath]
-	config = YAML::load(File.read(node[:agles][:configpath]))
+config_path = "/home/vagrant/source/#{node[:agles][:config_path]}"
+if File.exist? config_path
+	config = YAML::load(File.read(config_path))
 	handle_config(config)
 end

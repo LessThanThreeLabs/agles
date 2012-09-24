@@ -15,7 +15,7 @@ class VagrantNoseRunner(object):
 		self.vagrant = vagrant
 
 	def run(self):
-		self.vagrant.ssh_call("find /vagrant/source -name \"tests\" |" +
+		self.vagrant.ssh_call("find /home/vagrant/source -name \"tests\" |" +
 				"nosetests  --with-xunit --xunit-file=/vagrant/nosetests.xml")
 		test_results = XunitParser().parse_file(
 				os.path.join(self.vagrant.vm_directory, "nosetests.xml"))

@@ -25,10 +25,6 @@
     - gitpython
 - scripts:
   - script: /vagrant/scripts/install_node.sh
-- packages:
-  - npm:
-    - iced-coffee-script
-    - amqp
 - databases:
     postgres:
     - name: agles
@@ -38,7 +34,7 @@
         username: postgres
 - scripts:
   # Currently failing, unable to find amqp.js?
-  - script: npm -d install
+  - script: npm install -d
     directory: /vagrant/web/back
   - script: redis-server
     background: true

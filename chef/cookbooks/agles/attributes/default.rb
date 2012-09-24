@@ -7,4 +7,5 @@
 # All rights reserved - Do Not Redistribute
 #
 
-default[:agles][:configpath] = "/vagrant/source/agles_config.yml"
+default[:agles][:source_path] = "/vagrant/source"
+default[:agles][:config_path] = "agles_config.yml"
