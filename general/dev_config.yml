@@ -24,7 +24,11 @@
     - gevent
     - gitpython
 - scripts:
-  - script: /vagrant/scripts/install_node.sh
+  - script: ./install_node.sh
+    directory: scripts
+- packages:
+  - npm:
+    - iced-coffee-script
 - databases:
     postgres:
     - name: agles
@@ -35,6 +39,6 @@
 - scripts:
   # Currently failing, unable to find amqp.js?
   - script: npm install -d
-    directory: /vagrant/web/back
+    directory: web/back
   - script: redis-server
     background: true

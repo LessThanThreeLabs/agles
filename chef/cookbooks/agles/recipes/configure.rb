@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-require_recipe 'agles::copy_source'
+include_recipe 'agles::copy_source'
 
 require 'yaml'
 
@@ -68,9 +68,10 @@ def execute_script(script_info)
 			command "#{name} &"
 		end
 		if not script_info["directory"].nil?
-			cwd script_info["directory"]
+			cwd "#{node[:agles][:source_path][:internal]}/#{script_info["directory"]}"
 		end
-		timeout script_info["timeout"].nil? ? 120 : script_info["timeout"]
+		timeout script_info["timeout"].nil? ? 600 : script_info["timeout"]
+		environment ({'HOME' => '/home/vagrant'})
 		action :run
 	end
 end
@@ -89,7 +90,7 @@ def handle_config(config_bundles)
 	end
 end
 
-config_path = "/home/vagrant/source/#{node[:agles][:config_path]}"
+config_path = "#{node[:agles][:source_path][:internal]}/#{node[:agles][:config_path]}"
 if File.exist? config_path
 	config = YAML::load(File.read(config_path))
 	handle_config(config)

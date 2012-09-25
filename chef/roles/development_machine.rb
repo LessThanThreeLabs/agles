@@ -18,7 +18,9 @@ default_attributes(
 )
 override_attributes(
 	:agles => {
-		:source_path => "/vagrant",
+		:source_path => {
+			:external => "/vagrant"
+		},
 		:config_path => "general/dev_config.yml"
 	}
 )

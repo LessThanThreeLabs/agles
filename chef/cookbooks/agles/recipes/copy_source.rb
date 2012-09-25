@@ -7,9 +7,10 @@
 # All rights reserved - Do Not Redistribute
 #
 
-target_source_dir = "/home/vagrant/source"
+require 'fileutils'
 
 # Clone all of the code from the shared directory into the VM
 # Runs at recipe compile time
-system "rm -rf #{target_source_dir}"
-system "cp -r #{node[:agles][:source_path]} #{target_source_dir}"
+FileUtils.rmtree(node[:agles][:source_path][:internal])
+FileUtils.cp_r(node[:agles][:source_path][:external], node[:agles][:source_path][:internal])
+FileUtils.chown_R('vagrant', 'vagrant', node[:agles][:source_path][:internal])
