@@ -23,7 +23,7 @@ class ResourceSocketConfigurer
 			socket.enable 'browser client etag'
 			socket.enable 'browser client gzip'
 			@_configureAuthorization socket
-			@_configureRedisStore socket
+			# @_configureRedisStore socket
 			@_configureModelEvents socket
 
 		socket.configure 'development', () ->

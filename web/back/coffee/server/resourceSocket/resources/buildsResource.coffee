@@ -3,16 +3,17 @@ assert = require 'assert'
 Resource = require './resource'
 
 
-exports.create = (modelConnection) ->
-	return new BuildsResource modelConnection
+exports.create = (modelRpcConnection) ->
+	return new BuildsResource modelRpcConnection
 
 
 class BuildsResource extends Resource
 	read: (socket, data, callback) ->
 		if data.id?
-			@modelConnection.getBuild socket.session.user, data.repositoryId, data.id, callback
-		else if data.range?
-			@modelConnection.getBuilds socket.session.user, data.repositoryId, 
+			callabck 'Havent implemented this read yet...'
+			# @modelRpcConnection.getBuild socket.session.user, data.repositoryId, data.id, callback
+		else if data.range? and data.repositoryId?
+			@modelRpcConnection.builds.read.get socket.session.user, data.repositoryId,
 				data.range.start, data.range.end, callback
 		else
 			callback 'Parsing error'

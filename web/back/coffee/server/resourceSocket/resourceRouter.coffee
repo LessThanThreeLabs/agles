@@ -5,10 +5,10 @@ BuildsResource = require './resources/buildsResource'
 RepositoriesResource = require './resources/repositoriesResource'
 
 
-exports.create = (modelConnection) ->
-	organizationsResource = OrganizationsResource.create modelConnection
-	buildsResource = BuildsResource.create modelConnection
-	repositoriesResource = RepositoriesResource.create modelConnection
+exports.create = (modelRpcConnection) ->
+	organizationsResource = OrganizationsResource.create modelRpcConnection
+	buildsResource = BuildsResource.create modelRpcConnection
+	repositoriesResource = RepositoriesResource.create modelRpcConnection
 	return new ResourceRouter organizationsResource, buildsResource, repositoriesResource
 
 

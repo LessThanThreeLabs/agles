@@ -3,15 +3,12 @@ assert = require 'assert'
 Resource = require './resource'
 
 
-exports.create = (modelConnection) ->
-	return new RepositoriesResource modelConnection
+exports.create = (modelRpcConnection) ->
+	return new RepositoriesResource modelRpcConnection
 
 
 class RepositoriesResource extends Resource
-	constructor: (@modelConnection) ->
-		super @modelConnection
-		@allowedSubscriptionTypes = ['general', 'builds']
-
+	@allowedSubscriptionTypes = ['general', 'builds']
 
 	read: (socket, data, callback) ->
 		callback 'read not written yet' if callback?

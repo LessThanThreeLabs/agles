@@ -3,8 +3,8 @@ assert = require 'assert'
 Resource = require './resource'
 
 
-exports.create = (modelConnection) ->
-	return new OrganizationsResource modelConnection
+exports.create = (modelRpcConnection) ->
+	return new OrganizationsResource modelRpcConnection
 
 
 class OrganizationsResource extends Resource
