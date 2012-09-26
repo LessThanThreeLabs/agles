@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, UniqueConstraint
+from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, ForeignKey, UniqueConstraint
 
 from database.engine import EngineFactory
 
@@ -24,6 +24,22 @@ repo = Table('repo', metadata,
 	Column('name', String, nullable=False),
 	Column('hash', String, nullable=False, index=True, unique=True),
 	Column('machine_id', Integer, ForeignKey('machine.id'), nullable=False)
+)
+
+commit = Table('commit', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
+	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
+	Column('timestamp', DateTime, nullable=False)
+)
+
+build = Table('build', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('commit_id', Integer, ForeignKey('commit.id'), nullable=False),
+	Column('number', Integer, nullable=False),
+	Column('status', String, nullable=False),
+	Column('start_time', DateTime, nullable=False),
+	Column('end_time', DateTime, nullable=False)
 )
 
 machine = Table('machine', metadata,
