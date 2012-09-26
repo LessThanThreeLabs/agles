@@ -20,8 +20,8 @@ connection.on 'ready', () =>
 		console.log 'received: ' + JSON.stringify msgpack.unpack message.data
 		toReturn = msgpack.pack
 			error: null
-			returnValue: Math.random()
-		connection.publish deliveryInformation.replyTo, toReturn,
-			correlationId: deliveryInformation.correlationId
+			value: Math.random()
+		connection.publish deliveryInformation.replyTo, toReturn
+			# correlationId: deliveryInformation.correlationId
 		console.log 'sent: ' + JSON.stringify msgpack.unpack toReturn
-		# queue.shift()  NOT GOING TO SHIFT!
+		queue.shift()

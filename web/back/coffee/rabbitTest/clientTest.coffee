@@ -1,4 +1,5 @@
 amqp = require 'amqp'
+msgpack = require 'msgpack'
 
 connection = amqp.createConnection()
 connection.on 'ready', () ->
@@ -13,10 +14,10 @@ connection.on 'ready', () ->
 	deadLetterQueue.bind deadLetterExchange, ''
 
 	responseQueue.subscribe (message, headers, deliveryInformation) =>
-		console.log 'responseQueue received: ' + message.data
+		console.log 'responseQueue received: ' + JSON.stringify msgpack.unpack message.data
 
 	deadLetterQueue.subscribe (message, headers, deliveryInformation) =>
-		console.log 'deadLetterQueue received: ' + message.data
+		console.log 'deadLetterQueue received: ' + JSON.stringify msgpack.unpack message.data
 
 	startMakingRandomRequests exchange, responseQueue
 
@@ -24,8 +25,10 @@ startMakingRandomRequests = (exchange, responseQueue) ->
 	setInterval (()-> makeRandomRequest exchange, responseQueue), 2000
 
 makeRandomRequest = (exchange, responseQueue) ->
-	message = Math.random().toString()
+	message = msgpack.pack
+		function: 'foo'
+		args: [Math.random().toString(), Math.random().toString()]
 	exchange.publish 'builds-read', message,
 		replyTo: responseQueue.name
-		correlationId: Math.floor Math.random() * 10000
-	console.log 'sent: ' + message
+		# correlationId: Math.floor Math.random() * 10000
+	console.log 'sent: ' + JSON.stringify msgpack.unpack message
