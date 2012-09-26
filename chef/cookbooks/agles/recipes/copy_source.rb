@@ -12,5 +12,7 @@ require 'fileutils'
 # Clone all of the code from the shared directory into the VM
 # Runs at recipe compile time
 FileUtils.rmtree(node[:agles][:source_path][:internal])
-FileUtils.cp_r(node[:agles][:source_path][:external], node[:agles][:source_path][:internal])
-FileUtils.chown_R('vagrant', 'vagrant', node[:agles][:source_path][:internal])
+if File.exists? node[:agles][:source_path][:external]
+	FileUtils.cp_r(node[:agles][:source_path][:external], node[:agles][:source_path][:internal])
+	FileUtils.chown_R('vagrant', 'vagrant', node[:agles][:source_path][:internal])
+end
