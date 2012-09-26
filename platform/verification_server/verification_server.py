@@ -16,11 +16,11 @@ import zerorpc
 
 from git import Repo
 from util.vagrant import Vagrant
+from verification_result import *
 from remote_test_runner import VagrantNoseRunner
 from remote_linter import VagrantLinter
 from settings.rabbit import connection_parameters
-from settings.model_server import repo_update_routing_key
-from settings.verification_server import verification_results_queue_name, box_name
+from settings.verification_server import *
 
 
 class VerificationServer(object):
@@ -50,18 +50,20 @@ class VerificationServer(object):
 		"""Listen for verification events
 		"""
 		request_listener = self.rabbit_connection.channel()
-		request_listener.queue_declare(queue=repo_update_routing_key, durable=True)
+		request_listener.queue_declare(queue=verification_request_queue_name, durable=True)
 		request_listener.basic_qos(prefetch_count=1)
 		print "Listening for verification requests"
 		request_listener.basic_consume(self.request_callback,
-				queue=repo_update_routing_key)
+			queue=verification_request_queue_name)
 		request_listener.start_consuming()
 
 	def request_callback(self, channel, method, properties, body):
 		"""Respond to a verification event, begin verifying
 		"""
-		(repo_hash, sha, ref) = msgpack.unpackb(body)
-		print "Processing verification request: " + str((repo_hash, sha, ref))
+		repo_hash, commit_list = msgpack.unpackb(body, use_list=True)
+		assert len(commit_list) == 1
+		sha, ref = commit_list[0]
+		print "Processing verification request: " + str((repo_hash, sha, ref,))
 		repo_address = self.get_repo_address(repo_hash)
 		verify_callback = self.make_verify_callback(repo_hash, sha, ref, channel, method)
 		self.verify(repo_address, sha, ref, verify_callback)
@@ -74,9 +76,9 @@ class VerificationServer(object):
 		def default_verify_callback(retval):
 			self.responder.basic_publish(exchange='',
 				routing_key=verification_results_queue_name,
-				body=msgpack.packb({(repo_hash, sha, ref): retval}),
+				body=msgpack.packb((repo_hash, [(sha, ref,)], retval)),
 				properties=pika.BasicProperties(
-						delivery_mode=2,  # make message persistent
+					delivery_mode=2,  # make message persistent
 				))
 			channel.basic_ack(delivery_tag=method.delivery_tag)
 		return default_verify_callback
@@ -154,7 +156,7 @@ class VerificationServer(object):
 			for suite in test_results:
 				if suite.errors > 0 or suite.failures > 0:
 					raise VerificationException("nosetests",
-							details={"errors": suite.errors, "failures": suite.failures})
+						details={"errors": suite.errors, "failures": suite.failures})
 		else:
 			print "No test results found"
 
@@ -162,13 +164,13 @@ class VerificationServer(object):
 		"""Calls the callback function with a success code
 		"""
 		print "Completed build request"
-		callback(0)  # success
+		callback(VerificationResult.SUCCESS)  # success
 
 	def _mark_failure(self, callback, exception):
 		"""Calls the callback function with a failure code
 		"""
 		print "Failed build request: " + str(exception)
-		callback(1)  # success
+		callback(VerificationResult.FAILURE)  # success
 
 
 class VerificationException(Exception):
