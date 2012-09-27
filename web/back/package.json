@@ -6,13 +6,13 @@
     "iced-coffee-script": "x.x.x",
     "nodetime": "x.x.x",
     "express":  "git://github.com/visionmedia/express.git",
-    "hbs": "x.x.x",
+    "hbs": "git://github.com/donpark/hbs.git",
     "socket.io": "git://github.com/LearnBoost/socket.io.git",
     "redis": "git://github.com/mranney/node_redis.git",
-    "connect-redis": "x.x.x",
+    "connect-redis": "git://github.com/visionmedia/connect-redis.git",
     "amqp": "git://github.com/postwait/node-amqp.git",
-    "msgpack": "x.x.x",
-    "zombie": "x.x.x"
+    "msgpack": "git://github.com/pgriess/node-msgpack.git",
+    "zombie": "git://github.com/assaf/zombie.git"
   },
 
   "engines": {
