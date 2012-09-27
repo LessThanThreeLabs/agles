@@ -59,17 +59,16 @@ class RpcBroker
 		console.log 'received: ' + JSON.stringify msgpack.unpack message.data
 
 		messageId = deliveryInformation.correlationId
-
 		data = msgpack.unpack message.data
-		error = if data.error? then new Error data.error else null
-		returnValue = data.returnValue
 
 		if not @messageIdsToCallbacks[messageId]?
 			console.error 'Received unexpected rpc message ' + JSON.stringify data
 		else
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
-			callback error, returnValue
+
+			error = if data.error? then new Error data.error else null
+			callback error, data.value
 
 
 	_handleDeadLetterResponse: (message, headers, deliveryInformation) =>
@@ -82,5 +81,6 @@ class RpcBroker
 		if fromId is @fromId and @messageIdsToCallbacks[messageId]?
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
+
 			error = new Error 'Rpc request timed out'
 			callback error, null
