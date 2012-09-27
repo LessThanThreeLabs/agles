@@ -1,6 +1,7 @@
 fs = require 'fs'
 assert = require 'assert'
 redis = require 'redis'
+cookieParser = require 'cookie'
 
 RedisStore = require 'socket.io/lib/stores/redis'
 Session = require('express').session.Session;
@@ -67,11 +68,9 @@ class ResourceSocketConfigurer
 
 	_getSessionIdFromCookie: (handshakeData) ->
 		assert.ok handshakeData.headers.cookie?
-		cookie = handshakeData.headers.cookie
-		uriEncodedSessionId = cookie.substring @configurationParams.session.cookie.name.length + 1
+		cookie = cookieParser.parse handshakeData.headers.cookie
+		uriEncodedSessionId = cookie[@configurationParams.session.cookie.name]
 		return decodeURIComponent uriEncodedSessionId
-		# cookie = parseCookie handshakeData.headers.cookie
-		# return cookie[@configurationParams.session.cookie.name]
 
 
 	_configureRedisStore: (socket) ->
