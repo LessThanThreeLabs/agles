@@ -1,3 +1,2 @@
 class VerificationResult:
-	FAILURE = 0
-	SUCCESS = 1
+	FAILURE, SUCCESS = range(2)

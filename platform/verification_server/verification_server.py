@@ -61,14 +61,12 @@ class VerificationServer(object):
 		"""Respond to a verification event, begin verifying
 		"""
 		repo_hash, commit_list = msgpack.unpackb(body, use_list=True)
-		assert len(commit_list) == 1
-		sha, ref = commit_list[0]
-		print "Processing verification request: " + str((repo_hash, sha, ref,))
+		print "Processing verification request: " + str((repo_hash, commit_list,))
 		repo_address = self.get_repo_address(repo_hash)
-		verify_callback = self.make_verify_callback(repo_hash, sha, ref, channel, method)
-		self.verify(repo_address, sha, ref, verify_callback)
+		verify_callback = self.make_verify_callback(repo_hash, commit_list, channel, method)
+		self.verify(repo_address, commit_list, verify_callback)
 
-	def make_verify_callback(self, repo_hash, sha, ref, channel, method):
+	def make_verify_callback(self, repo_hash, commit_list, channel, method):
 		"""Returns the default callback function to be
 		called with a return value after verification.
 		Sends a message denoting the return value and acks
@@ -76,18 +74,18 @@ class VerificationServer(object):
 		def default_verify_callback(retval):
 			self.responder.basic_publish(exchange='',
 				routing_key=verification_results_queue_name,
-				body=msgpack.packb((repo_hash, [(sha, ref,)], retval)),
+				body=msgpack.packb((repo_hash, commit_list, retval)),
 				properties=pika.BasicProperties(
 					delivery_mode=2,  # make message persistent
 				))
 			channel.basic_ack(delivery_tag=method.delivery_tag)
 		return default_verify_callback
 
-	def verify(self, repo_address, sha, ref, callback):
+	def verify(self, repo_address, commit_list, callback):
 		"""Runs verification on a desired git commit
 		"""
 		try:
-			self.checkout_commit(repo_address, sha)
+			self.checkout_commit_list(repo_address, commit_list)
 			self.setup_vagrant()
 			configuration = self.get_user_configuration()
 			self.run_linter(configuration)
@@ -112,11 +110,17 @@ class VerificationServer(object):
 		model_server_rpc.close()
 		return repo_address
 
-	def checkout_commit(self, repo_address, sha):
+	def checkout_commit_list(self, repo_address, commit_list):
+		source_repo = Repo(repo_address)
+		sha, ref = commit_list[0]
+		self.checkout_commit(source_repo, sha)
+		for sha, ref in commit_list[1:]:
+			source_repo.git.merge(sha)
+
+	def checkout_commit(self, repo, sha):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
-		source_repo = Repo(repo_address)
-		dest_repo = source_repo.clone(self.source_dir)
+		dest_repo = repo.clone(self.source_dir)
 		dest_repo.git.checkout(sha)
 
 	def setup_vagrant(self):

@@ -21,13 +21,22 @@ class VerificationMaster(object):
 		self.results_reporter.queue_declare(queue=merge_queue_name, durable=True)
 
 	def run(self):
-		self.listen()
+		try:
+			self.listen()
+		except:
+			self.teardown()
+
+	def teardown(self):
+		self.request_listener.terminate()
+		self.results_listener.terminate()
 
 	def listen(self):
-		request_listener = Process(target=self.listen_for_requests)
-		results_listener = Process(target=self.listen_for_results)
-		request_listener.start()
-		results_listener.start()
+		self.request_listener = Process(target=self.listen_for_requests)
+		self.results_listener = Process(target=self.listen_for_results)
+		self.request_listener.start()
+		self.results_listener.start()
+		self.request_listener.join()
+		self.results_listener.join()
 
 	def listen_for_requests(self):
 		rabbit_connection = pika.BlockingConnection(connection_parameters)
@@ -85,6 +94,6 @@ class VerificationMaster(object):
 		self.results_reporter.basic_publish(exchange='',
 			routing_key="IDK MY BFF JILL?",  # TODO (bbland): replace with something useful
 			body=msgpack.packb((repo_hash, commit_list,)),
-			proerties=pika.BasicProperties(
+			properties=pika.BasicProperties(
 				delivery_mode=2,  # make message persistent
 			))
