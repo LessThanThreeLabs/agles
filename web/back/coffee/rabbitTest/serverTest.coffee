@@ -25,6 +25,8 @@ connection.on 'ready', () =>
 			value: Math.random()
 		connection.publish deliveryInformation.replyTo, toReturn,
 			correlationId: deliveryInformation.correlationId
+			headers:
+				from: headers.from
 
 		console.log 'sent: ' + JSON.stringify msgpack.unpack toReturn
 		queue.shift() # IF YOU WANT TO TEST DEADLETTER, COMMENT OUT THIS LINE

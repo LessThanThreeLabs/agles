@@ -50,7 +50,8 @@ class RpcBroker
 			correlationId: messageId
 			mandatory: true
 			headers:
-				fromId: @fromId
+				from: @fromId
+		console.log 'INSTEAD OF FROMID, CAN WE JUST GET THE CLIENT INFORMATION, MAYBE?'
 
 		console.log 'sent: ' + JSON.stringify msgpack.unpack message
 
@@ -73,9 +74,9 @@ class RpcBroker
 
 	_handleDeadLetterResponse: (message, headers, deliveryInformation) =>
 		console.log 'received dead letter message!! ' + JSON.stringify msgpack.unpack message.data
-		console.log 'headers.fromId: ' + headers.fromId
+		console.log 'headers.fromId: ' + headers.from
 
-		fromId = headers.fromId
+		fromId = headers.from
 		messageId = deliveryInformation.correlationId
 
 		if fromId is @fromId and @messageIdsToCallbacks[messageId]?
