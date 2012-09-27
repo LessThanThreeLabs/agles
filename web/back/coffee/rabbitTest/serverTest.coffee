@@ -13,7 +13,7 @@ connection.on 'ready', () =>
 		'x-dead-letter-exchange': 'model-rpc-deadLetter'
 
 	await 
-		connection.queue 'hello', arguments: queueArguments, defer queue
+		connection.queue 'rpc:builds-read', arguments: queueArguments, defer queue
 
 	queue.bind exchange, 'builds-read'
 
@@ -24,8 +24,7 @@ connection.on 'ready', () =>
 			error: null
 			value: Math.random()
 		connection.publish deliveryInformation.replyTo, toReturn,
-			headers:
-				number: headers.number
+			correlationId: deliveryInformation.correlationId
 
 		console.log 'sent: ' + JSON.stringify msgpack.unpack toReturn
 		queue.shift() # IF YOU WANT TO TEST DEADLETTER, COMMENT OUT THIS LINE

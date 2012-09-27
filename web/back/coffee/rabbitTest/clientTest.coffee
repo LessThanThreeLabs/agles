@@ -32,9 +32,10 @@ makeRandomRequest = (exchange, responseQueue) ->
 		function: 'foo'
 		args: [Math.random().toString(), Math.random().toString()]
 
+	messageId = (Math.floor Math.random() * 10000).toString()
+
 	exchange.publish 'builds-read', message,
 		replyTo: responseQueue.name
-		headers: 
-			number: Math.floor Math.random() * 10000
+		correlationId: messageId
 
 	console.log 'sent: ' + JSON.stringify msgpack.unpack message
