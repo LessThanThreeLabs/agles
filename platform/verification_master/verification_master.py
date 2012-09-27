@@ -92,7 +92,7 @@ class VerificationMaster(object):
 	def send_merge_request(self, repo_hash, sha, ref):
 		print "Sending merge request for " + str((repo_hash, sha, ref,))
 		self.results_reporter.basic_publish(exchange='',
-			routing_key="IDK MY BFF JILL?",  # TODO (bbland): replace with something useful
+			routing_key=merge_queue_name,  # TODO (bbland): replace with something useful
 			body=msgpack.packb((repo_hash, commit_list,)),
 			properties=pika.BasicProperties(
 				delivery_mode=2,  # make message persistent
