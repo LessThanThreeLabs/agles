@@ -1,6 +1,6 @@
 fs = require 'fs'
 assert = require 'assert'
-redis = require 'socket.io/node_modules/redis'
+redis = require 'redis'
 
 RedisStore = require 'socket.io/lib/stores/redis'
 Session = require('express').session.Session;
@@ -23,7 +23,7 @@ class ResourceSocketConfigurer
 			socket.enable 'browser client etag'
 			socket.enable 'browser client gzip'
 			@_configureAuthorization socket
-			# @_configureRedisStore socket
+			@_configureRedisStore socket
 			@_configureModelEvents socket
 
 		socket.configure 'development', () ->
