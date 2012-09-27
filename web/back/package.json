@@ -5,15 +5,13 @@
   "dependencies" : {
     "iced-coffee-script": "x.x.x",
     "nodetime": "x.x.x",
-    "express":  "2.x.x",
-    "express-resource":  "x.x.x",
+    "express":  "git://github.com/visionmedia/express.git",
     "hbs": "x.x.x",
     "socket.io": "git://github.com/LearnBoost/socket.io.git",
     "redis": "git://github.com/mranney/node_redis.git",
     "connect-redis": "x.x.x",
     "amqp": "git://github.com/postwait/node-amqp.git",
     "msgpack": "x.x.x",
-    "walk": "x.x.x",
     "zombie": "x.x.x"
   },
 

@@ -7,3 +7,4 @@ exports.create = (configurationParams) ->
 	return new RedisStore
 		url: configurationParams.redis.url
 		port: configurationParams.redis.port
+		

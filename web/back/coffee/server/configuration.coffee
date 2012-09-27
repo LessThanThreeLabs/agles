@@ -1,6 +1,5 @@
 fs = require 'fs'
 assert = require 'assert'
-fileWalker = require 'walk'
 express = require 'express'
 csrf = require './csrf'
 
@@ -38,8 +37,8 @@ class ServerConfigurer
 
 	_configureViewEngine: (server) ->
 		server.set 'view engine', 'hbs'
-		server.set 'view options', layout: false
 		server.set 'views', @configurationParams.staticFiles.rootDirectory
+		server.locals.layout = false
 
 
 	_configureStaticServer: (server) ->
@@ -68,27 +67,3 @@ class ServerConfigurer
 	    		secure: true,
 	    		maxAge: 14400000
 	    	store: @sessionStore
-
-		@_ignoreStaticFilesFromSessionLogic()
-
-
-	_ignoreStaticFilesFromSessionLogic: () ->
-		express.session.ignore.push '/favicon.ico'
-
-		rootDirectory = @configurationParams.staticFiles.rootDirectory
-		staticDirectories = @configurationParams.staticFiles.staticDirectories
-
-		for staticDirectory in staticDirectories
-			directory = rootDirectory + staticDirectory
-
-			walker = fileWalker.walkSync directory, followLinks: true
-
-			walker.on 'file', (root, fileStats, next) ->
-				fileToIgnore = root + '/' + fileStats.name
-				staticFileToIgnore = fileToIgnore.substring fileToIgnore.indexOf staticDirectory
-				express.session.ignore.push staticFileToIgnore
-				next()
-
-			walker.on 'end', () ->
-				assert.ok express.session.ignore.length > 1,
-					'Problem finding static files to ignore from session logic.'

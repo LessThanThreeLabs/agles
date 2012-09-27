@@ -45,6 +45,9 @@ class ResourceSocketConfigurer
 	_handleSessionAuthorization: (socket, handshakeData, callback) ->
 		try
 			sessionId = @_getSessionIdFromCookie handshakeData
+			# TODO: HACK UNTIL FIXED IN EXPRESS 3.0
+			sessionId = sessionId.substring 2, 26
+
 			@sessionStore.get sessionId, (error, session) =>
 				throw error if error?
 				assert.ok session?

@@ -12,7 +12,7 @@ class RedirectServer
 
 
 	start: () ->
-		@redirectServer = express.createServer()
+		@redirectServer = express()
 		@redirectServer.get '*', (request, response) =>
 			response.redirect 'https://' + request.headers.host + ':' + @configurationParams.https.port + request.url
 		@redirectServer.listen @configurationParams.http.port 
