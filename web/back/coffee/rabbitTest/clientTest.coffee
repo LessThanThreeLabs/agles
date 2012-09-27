@@ -1,6 +1,7 @@
 amqp = require 'amqp'
 msgpack = require 'msgpack'
 
+
 connection = amqp.createConnection()
 connection.on 'ready', () ->
 	await
@@ -21,14 +22,19 @@ connection.on 'ready', () ->
 
 	startMakingRandomRequests exchange, responseQueue
 
+
 startMakingRandomRequests = (exchange, responseQueue) ->
 	setInterval (()-> makeRandomRequest exchange, responseQueue), 2000
+
 
 makeRandomRequest = (exchange, responseQueue) ->
 	message = msgpack.pack
 		function: 'foo'
 		args: [Math.random().toString(), Math.random().toString()]
+
 	exchange.publish 'builds-read', message,
 		replyTo: responseQueue.name
-		# correlationId: Math.floor Math.random() * 10000
+		headers: 
+			number: Math.floor Math.random() * 10000
+
 	console.log 'sent: ' + JSON.stringify msgpack.unpack message
