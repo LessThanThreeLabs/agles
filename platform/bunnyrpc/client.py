@@ -19,7 +19,7 @@ from functools import partial
 
 import msgpack
 import pika
-from gevent import spawn, queue, monkey; monkey.patch_all(thread=False)
+from gevent import event, spawn, queue, monkey; monkey.patch_all(thread=False)
 from settings.rabbit import connection_parameters
 
 
@@ -39,6 +39,7 @@ class Client(ClientBase):
         self.exchange_name = exchange_name
         self.routing_key = routing_key
         self.result_queue = queue.Queue()
+        self.connection_event = event.Event()
         self.connection = None
         self.channel = None
         self.ioloop_greenlet = None
@@ -56,8 +57,7 @@ class Client(ClientBase):
         self.connection = pika.SelectConnection(connection_parameters,
             partial(self._on_connected, exchange))
         self.ioloop_greenlet = spawn(self.listen)
-        #TODO(jchu): THIS IS RETARDED
-        import gevent; gevent.sleep(1)
+        self.connection_event.wait()
 
     def _on_connected(self, exchange, connection):
         connection.channel(partial(self._on_chan_open, exchange))
@@ -81,6 +81,7 @@ class Client(ClientBase):
 
     def _on_queue_bind(self, frame):
         self.channel.basic_consume(self._on_response, queue=self.response_mq)
+        self.connection_event.set()
 
     def _on_response(self, ch, method, props, body):
         proto = msgpack.unpackb(body)
