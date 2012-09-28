@@ -1,3 +1,23 @@
+"""server.py - Implementation of a python RPC server for BunnyRPC
+
+BunnyRPC is an rpc framework written on top of rabbitmq.
+
+Protocol Definition:
+	client->server rpc call:
+	 	An rpc call is of the format:
+			{"method": "method", "args": [arg0, arg1, arg2, ...]}
+
+	server->client response:
+	 	The server's response is of the format:
+			{
+			"error": {
+					 "type": "type",
+					 "message": "msg",
+					 "traceback": "traceback"
+					 } or None,
+			"value": value
+			}
+"""
 import sys
 import traceback
 
@@ -7,6 +27,15 @@ from settings.rabbit import connection_parameters
 
 
 class Server(object):
+	"""RPC Server that handles rpc calls from clients.
+
+	RPC Servers are created in the following fashion:
+
+				server = Server(BaseInstance())
+				queues_to_receive_calls_on = ["queue0", "queue1"]
+				server.bind("rpc_exchange", queues_to_receive_calls_on)
+				server.run()
+	"""
 
 	@property
 	def deadletter_exchange_name(self):
@@ -14,12 +43,25 @@ class Server(object):
 		return "%s-dlx" % self.exchange_name
 
 	def __init__(self, base_instance):
+		"""Creates an RPC server that exposes <base_instance> methods to clients.
+
+		:param base_instance: An instance of the class being exposed as an RPC
+								server.
+		"""
 		self.base_instance = base_instance
 		self.exchange_name = None
 		self.queue_names = None
 		self.chan = None
 
 	def bind(self, exchange_name, queue_names):
+		""" Binds this RPC server to listen for calls from <exchange_name>
+		routed to <queue_names>.
+
+		:param exchange_name: The name of the exchange to bind this server to.
+							  This is the exchange we'll be receiving rpc calls from.
+		:param queue_names: A list of queues we bind to. These queues are the
+							the ones we pull our rpc calls from.
+		"""
 		self.exchange_name = exchange_name
 		self.queue_names = set(queue_names)
 		connection = pika.BlockingConnection(connection_parameters)
@@ -40,7 +82,7 @@ class Server(object):
 
 		map(setup_queue, self.queue_names)
 
-	def handle_call(self, chan, method, properties, body):
+	def _handle_call(self, chan, method, properties, body):
 		proto = msgpack.unpackb(body)
 		message_proto = self._call(proto["method"], proto["args"])
 		response = msgpack.packb(message_proto)
@@ -69,5 +111,5 @@ class Server(object):
 	def run(self):
 		self.chan.basic_qos(prefetch_count=1)
 		for queue_name in self.queue_names:
-			self.chan.basic_consume(self.handle_call, queue=queue_name)
+			self.chan.basic_consume(self._handle_call, queue=queue_name)
 		self.chan.start_consuming()

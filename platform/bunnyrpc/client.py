@@ -1,19 +1,6 @@
-"""bunnyrpc.py - An rpc framework on top of rabbitmq
+""" client.py - Implementation of a python client to BunnyRPC.
 
-BunnyRPC is an rpc framework written on top of rabbitmq.
-
-The protocol is quite simple. The message sent from
-client->server for an rpc call is of the format:
-	{"method": "method", "args": [arg0, arg1, arg2, ...]}
-the response from server->client is of the format:
-	{
-	"error": {
-				"type": "type",
-				"message": "msg",
-				"traceback": "traceback"
-			 } or None,
-	"value": value
-	}
+See server.py for the RPC protocol definition.
 """
 import msgpack
 import pika
@@ -31,9 +18,10 @@ class ClientBase(object):
 		self.close()
 
 	def close(self):
-		raise RuntimeError("Subclasses should implement this!")
+		raise NotImplementedError("Subclasses should override this!")
 
 class Client(ClientBase):
+	"""RPC Client that invokes calls on the server"""
 
 	@property
 	def deadletter_exchange_name(self):
@@ -41,6 +29,15 @@ class Client(ClientBase):
 		return "%s-dlx" % self.exchange_name
 
 	def __init__(self, exchange_name, routing_key):
+		"""Constructor that determines where rpc calls are sent.
+
+		:param exchange_name: The exchange to send rpc calls to. Your rpc
+								server must be bound to this exchange.
+		:param routing_key: The routing key that defines the route the exchange
+							will send your rpc calls to. This is the same as
+							the queue name your rpc server is bound to.
+		"""
+		super(Client, self).__init__()
 		self.exchange_name = exchange_name
 		self.routing_key = routing_key
 		self.result_queue = queue.Queue()
@@ -51,9 +48,6 @@ class Client(ClientBase):
 		self.response_mq = None
 		self._connect()
 
-	def listen(self):
-		self.connection.ioloop.start()
-
 	def __getattr__(self, remote_method):
 		return lambda *args, **kwargs: self._remote_call(
 			remote_method, *args, **kwargs)
@@ -61,7 +55,8 @@ class Client(ClientBase):
 	def _connect(self):
 		self.connection = pika.SelectConnection(connection_parameters,
 			self._on_connected)
-		self.ioloop_greenlet = spawn(self.listen)
+
+		self.ioloop_greenlet = spawn(lambda: self.connection.ioloop.start())
 		self.connection_event.wait()
 
 	def _on_connected(self, connection):
@@ -126,5 +121,6 @@ class Client(ClientBase):
 			return proto["value"]
 
 	def close(self):
+		"""Closes the rabbit connection and cleans up resources."""
 		self.connection.close()
 		self.ioloop_greenlet.join()
