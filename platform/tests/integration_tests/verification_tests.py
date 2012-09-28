@@ -4,12 +4,15 @@ import unittest
 
 from shutil import rmtree
 from nose.tools import *
+from util.vagrant import Vagrant
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin
 from multiprocessing import Process
 from verification_master import *
 from verification_server import *
+from verification_server.verification_result import VerificationResult
 from settings.model_server import *
+from settings.verification_server import *
 from dulwich.repo import Repo
 
 VM_DIRECTORY = '/tmp/verification'
@@ -18,19 +21,15 @@ VM_DIRECTORY = '/tmp/verification'
 class VerificationServerTest(unittest.TestCase):
 	@classmethod
 	def setup_class(cls):
-		try:
-			vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
-			vs.vagrant.spawn()
-		except:
-			teardown_class(cls)
+		vagrant = Vagrant(VM_DIRECTORY, box_name)
+		cls.verification_server = VerificationServer(vagrant)
+		cls.verification_server.vagrant.spawn()
 
 	@classmethod
 	def teardown_class(cls):
-		vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
-		vs.vagrant.teardown()
+		cls.verification_server.vagrant.teardown()
 
 	def setUp(self):
-		self.vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
 		self.repo_dir = os.path.join(VM_DIRECTORY, 'repo')
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.mkdir(self.repo_dir)
@@ -47,7 +46,8 @@ class VerificationServerTest(unittest.TestCase):
 		commit_id = repo.do_commit('First commit',
 				committer='Brian Bland <r4nd0m1n4t0r@gmail.com>')
 
-		self.vs.verify(self.repo_dir, [(commit_id, 'ref',)], lambda retval: assert_equals(0, retval))
+		self.verification_server.verify(self.repo_dir, [(commit_id, 'ref',)],
+			lambda retval: assert_equals(VerificationResult.SUCCESS, retval))
 
 	def test_bad_repo(self):
 		repo = Repo.init(self.repo_dir)
@@ -60,15 +60,16 @@ class VerificationServerTest(unittest.TestCase):
 		commit_id = repo.do_commit('First commit',
 				committer='Brian Bland <r4nd0m1n4t0r@gmail.com>')
 
-		self.vs.verify(self.repo_dir, [(commit_id, 'ref',)], lambda retval: assert_equals(1, retval))
+		self.verification_server.verify(self.repo_dir, [(commit_id, 'ref',)],
+			lambda retval: assert_equals(VerificationResult.FAILURE, retval))
 
 """
 class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin):
 	@classmethod
 	def setup_class(cls):
-			vs = VerificationServer(model_server_rpc_address, VM_DIRECTORY)
+			vs = VerificationServer(VM_DIRECTORY)
 			cls.vs_process = Process(target=vs.run)
-			vm = VerificationMaster(model_server_rpc_address)
+			vm = VerificationMaster()
 			cls.vm_process = Process(target=vm.run)
 			cls.vs_process.run()
 			cls.vm_process.run()

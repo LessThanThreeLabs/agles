@@ -8,14 +8,14 @@ and is the only point of interaction between clients and the model server.
 
 import os
 import pika
-import zerorpc
 
 from sqlalchemy.sql import select
 
 import database.schema
 
+from bunnyrpc.server import Server
+from bunnyrpc.client import Client
 from database.engine import EngineFactory
-from settings.model_server import model_server_rpc_address
 from settings.rabbit import connection_parameters
 
 
@@ -27,19 +27,25 @@ class ModelServer(object):
 	to be a thin abstraction that allows for proxying, not for higher level modification of the DB-API.
 	"""
 
+	rpc_nouns = ["repo", "users"]
+	rpc_verbs = ["create", "read", "update", "delete"]
+
 	@property
 	def _db_conn(self):
 		return EngineFactory.get_connection()
 
 	@classmethod
-	def start(cls, server_address):
-		model_server = zerorpc.Server(ModelServer())
-		model_server.bind(server_address)
+	def start(cls):
+		model_server = Server(ModelServer())
+		for rpc_noun in cls.rpc_nouns:
+			for rpc_verb in cls.rpc_verbs:
+				queue = rpc_noun + "-" + rpc_verb
+				model_server.bind("model-rpc", queue, queue)
 		model_server.run()
 
 	@classmethod
-	def rpc_connect(cls):
-		return zerorpc.Client(model_server_rpc_address)
+	def rpc_connect(cls, route):
+		return Client("model-rpc", route)
 
 	def __init__(self):
 		# TODO(bbland): might want to not use blocking connection?

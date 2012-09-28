@@ -12,15 +12,14 @@ import shutil
 import pika
 import msgpack
 import yaml
-import zerorpc
 
 from git import Repo
 from handler import MessageHandler
-from util.vagrant import Vagrant
 from verification_result import *
 from remote_test_runner import VagrantNoseRunner
 from remote_linter import VagrantLinter
 from settings.rabbit import connection_parameters
+from settings.model_server import repo_update_routing_key
 from settings.verification_server import *
 
 
@@ -31,12 +30,10 @@ class VerificationServer(MessageHandler):
 	lint, and run tests against commits.
 	"""
 
-	def __init__(self, model_server_address, vm_directory):
-		self.model_server_address = model_server_address
+	def __init__(self, vagrant):
+		self.vagrant = vagrant
 
-		self.vagrant = Vagrant(vm_directory, box_name)
-
-		self.source_dir = os.path.join(vm_directory, "source")
+		self.source_dir = os.path.join(vagrant.vm_directory, "source")
 
 		self.rabbit_connection = pika.BlockingConnection(connection_parameters)
 
@@ -45,6 +42,7 @@ class VerificationServer(MessageHandler):
 
 	def run(self):
 		self.vagrant.spawn()
+		self.listen(self.rabbit_connection.channel(), verification_request_queue_name)
 
 	def handle_message(self, channel, method, properties, body):
 		"""Respond to a verification event, begin verifying"""
@@ -84,15 +82,8 @@ class VerificationServer(MessageHandler):
 	def get_repo_address(self, repo_hash):
 		"""Sends out a rpc call to the model server to retrieve
 		the address of a repository based on its hash"""
-		model_server_rpc = zerorpc.Client()
-		model_server_rpc.connect(self.model_server_address)
-		try:
-			model_server_rpc._zerorpc_ping()
-		except zerorpc.exceptions.TimeoutExpired:
-			# recover from timeouts
-			pass
-		repo_address = model_server_rpc.get_repo_address(repo_hash)
-		model_server_rpc.close()
+		with ModelServer.rpc_connect(repo_update_routing_key) as model_server_rpc:
+			repo_address = model_server_rpc.get_repo_address(repo_hash)
 		return repo_address
 
 	def checkout_commit_list(self, repo_address, commit_list):

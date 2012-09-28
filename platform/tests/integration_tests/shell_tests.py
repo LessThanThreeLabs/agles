@@ -3,6 +3,7 @@ from nose.tools import *
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin
 from util.shell import *
+from database.engine import EngineFactory
 from database import schema
 
 VALID_COMMANDS = ['git-receive-pack']
@@ -32,7 +33,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin):
 		REPO_URI = "schacon/repo.git"
 		machine_id = self._create_repo_store_machine()
 
-		rpc_conn = ModelServer.rpc_connect()
+		rpc_conn = ModelServer.rpc_connect("repo-create")
 		try:
 			repo_id = rpc_conn.create_repo("repo.git", machine_id)
 		finally:
