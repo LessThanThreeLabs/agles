@@ -113,3 +113,4 @@ class Client(ClientBase):
 
     def close(self):
         self.ioloop_greenlet.kill()
+        self.connection.close()
