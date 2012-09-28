@@ -20,7 +20,7 @@
 
 		"staticFiles": {
 			"rootDirectory": "front",
-			"staticDirectories": ["/js", "/img"],
+			"staticDirectories": ["/js", "/css", "/img"],
 
 			"cache": {
 				"enabled": true,
