@@ -19,7 +19,7 @@ class Server(object):
 		self.queue_names = None
 		self.chan = None
 
-	def bind(self, exchange_name, queue_names, routing_key):
+	def bind(self, exchange_name, queue_names):
 		self.exchange_name = exchange_name
 		self.queue_names = set(queue_names)
 		connection = pika.BlockingConnection(connection_parameters)
@@ -36,7 +36,7 @@ class Server(object):
 				})
 			self.chan.queue_bind(exchange=exchange_name,
 				queue=queue_name,
-				routing_key=routing_key)
+				routing_key=queue_name)
 
 		map(setup_queue, self.queue_names)
 
