@@ -1,6 +1,7 @@
 import os
 import time
-import unittest
+import pika
+import msgpack
 
 from shutil import rmtree
 from nose.tools import *
@@ -8,17 +9,20 @@ from util.vagrant import Vagrant
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin
 from multiprocessing import Process
+from database.engine import EngineFactory
+from database import schema
 from verification_master import *
 from verification_server import *
 from verification_server.verification_result import VerificationResult
 from settings.model_server import *
+from settings.rabbit import *
 from settings.verification_server import *
 from dulwich.repo import Repo
 
 VM_DIRECTORY = '/tmp/verification'
 
 
-class VerificationServerTest(unittest.TestCase):
+class VerificationServerTest(BaseIntegrationTest, ModelServerTestMixin):
 	@classmethod
 	def setup_class(cls):
 		vagrant = Vagrant(VM_DIRECTORY, box_name)
@@ -33,9 +37,11 @@ class VerificationServerTest(unittest.TestCase):
 		self.repo_dir = os.path.join(VM_DIRECTORY, 'repo')
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.mkdir(self.repo_dir)
+		self._start_model_server()
 
 	def tearDown(self):
 		rmtree(self.repo_dir)
+		self._stop_model_server()
 
 	def test_hello_world_repo(self):
 		repo = Repo.init(self.repo_dir)
@@ -63,16 +69,17 @@ class VerificationServerTest(unittest.TestCase):
 		self.verification_server.verify(self.repo_dir, [(commit_id, 'ref',)],
 			lambda retval: assert_equals(VerificationResult.FAILURE, retval))
 
-"""
+
 class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin):
 	@classmethod
 	def setup_class(cls):
-			vs = VerificationServer(VM_DIRECTORY)
-			cls.vs_process = Process(target=vs.run)
-			vm = VerificationMaster()
-			cls.vm_process = Process(target=vm.run)
-			cls.vs_process.run()
-			cls.vm_process.run()
+			vagrant = Vagrant(VM_DIRECTORY, box_name)
+			verification_server = VerificationServer(vagrant)
+			cls.vs_process = Process(target=verification_server.run)
+			verification_master = VerificationMaster()
+			cls.vm_process = Process(target=verification_master.run)
+			cls.vs_process.start()
+			cls.vm_process.start()
 
 	@classmethod
 	def teardown_class(cls):
@@ -97,11 +104,12 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin):
 			machine_key = conn.execute(ins_machine).inserted_primary_key[0]
 			ins_repo = schema.repo.insert().values(name="repo", hash="hash", machine_id=machine_key)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
-			ins_map = schema.repo.insert().values(uri=repo_uri, repo_id=repo_key)
+			ins_map = schema.uri_repo_map.insert().values(uri=repo_uri, repo_id=repo_key)
 			conn.execute(ins_map)
 
 	def _on_response(self, channel, method, properties, body):
 		self.response = msgpack.unpackb(body)
+		channel.basic_ack(delivery_tag=method.delivery_tag)
 
 	def test_hello_world_repo(self):
 		repo = Repo.init(self.repo_dir)
@@ -114,13 +122,13 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin):
 
 		self._insert_repo_info(self.repo_dir)
 
-		rabbit_connection = pika.BlockingConnectionn(connection_parameters)
+		rabbit_connection = pika.BlockingConnection(connection_parameters)
 
 		output_channel = rabbit_connection.channel()
-		output_channel.queue_declare(queue=repo_update_routing_key, durable=True)
+		output_channel.queue_declare(queue=repo_update_routing_key)
 
 		input_channel = rabbit_connection.channel()
-		input_channel.queue_declare(queue=merge_queue_name, durable=True)
+		input_channel.queue_declare(queue=merge_queue_name)
 
 		output_channel.basic_publish(exchange='',
 			routing_key=repo_update_routing_key,
@@ -134,7 +142,6 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin):
 		input_channel.basic_consume(self._on_response, queue=merge_queue_name)
 		while self.response is None:
 			rabbit_connection.process_data_events()
-			assert time.time() - start_time < 60000  # 1 minute timeout
+			assert time.time() - start_time < 90  # 90s timeout
 
 		assert_equals(("hash", commit_id, "ref"), self.response)
-"""

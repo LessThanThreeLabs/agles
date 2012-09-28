@@ -7,6 +7,7 @@ import collections
 import os
 
 from subprocess import Popen, PIPE
+from time import sleep
 
 
 class Vagrant(object):
@@ -58,6 +59,7 @@ class Vagrant(object):
 			raise Exception("Couldn't initialize vagrant: " + self.vm_directory)
 		if self.up().returncode != 0:
 			raise Exception("Couldn't start vagrant vm: " + self.vm_directory)
+		sleep(1)  # TODO (bbland): decide if this is necessary
 		if self.sandbox_on().returncode != 0:
 			raise Exception("Couldn't initialize sandbox on vm: " + self.vm_directory)
 		print "Launched vm at: " + self.vm_directory

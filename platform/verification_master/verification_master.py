@@ -1,7 +1,6 @@
 import pika
 import msgpack
 
-from multiprocessing import Process
 from verification_server.verification_result import *
 from settings.rabbit import connection_parameters
 from settings.model_server import repo_update_routing_key
@@ -10,53 +9,37 @@ from settings.verification_server import *
 
 class VerificationMaster(object):
 
-	def __init__(self, model_server_address):
-		self.model_server_address = model_server_address
+	def __init__(self):
 		rabbit_connection = pika.BlockingConnection(connection_parameters)
 
 		self.request_forwarder = rabbit_connection.channel()
-		self.request_forwarder.queue_declare(queue=verification_request_queue_name, durable=True)
+		self.request_forwarder.queue_declare(queue=verification_request_queue_name)
 
 		self.results_reporter = rabbit_connection.channel()
-		self.results_reporter.queue_declare(queue=merge_queue_name, durable=True)
+		self.results_reporter.queue_declare(queue=merge_queue_name)
 
 	def run(self):
-		try:
-			self.listen()
-		except:
-			self.teardown()
-
-	def teardown(self):
-		self.request_listener.terminate()
-		self.results_listener.terminate()
+		self.listen()
 
 	def listen(self):
-		self.request_listener = Process(target=self.listen_for_requests)
-		self.results_listener = Process(target=self.listen_for_results)
-		self.request_listener.start()
-		self.results_listener.start()
-		self.request_listener.join()
-		self.results_listener.join()
-
-	def listen_for_requests(self):
 		rabbit_connection = pika.BlockingConnection(connection_parameters)
-		request_listener = rabbit_connection.channel()
-		request_listener.queue_declare(queue=repo_update_routing_key, durable=True)
-		request_listener.basic_qos(prefetch_count=1)
+		channel = rabbit_connection.channel()
+		channel.basic_qos(prefetch_count=1)
+		self.bind_request_listener(channel)
+		self.bind_results_listener(channel)
+		channel.start_consuming()
+
+	def bind_request_listener(self, channel):
+		channel.queue_declare(queue=repo_update_routing_key)
 		print "Listening for new patch sets"
-		request_listener.basic_consume(self.request_callback,
+		channel.basic_consume(self.request_callback,
 			queue=repo_update_routing_key)
-		request_listener.start_consuming()
 
-	def listen_for_results(self):
-		rabbit_connection = pika.BlockingConnection(connection_parameters)
-		results_listener = rabbit_connection.channel()
-		results_listener.queue_declare(queue=verification_results_queue_name, durable=True)
-		results_listener.basic_qos(prefetch_count=1)
-		print "Listening for vefification results"
-		results_listener.basic_consume(self.results_callback,
+	def bind_results_listener(self, channel):
+		channel.queue_declare(queue=verification_results_queue_name)
+		print "Listening for verification results"
+		channel.basic_consume(self.results_callback,
 			queue=verification_results_queue_name)
-		results_listener.start_consuming()
 
 	def request_callback(self, channel, method, properties, body):
 		repo_hash, sha, ref = msgpack.unpackb(body)
@@ -93,7 +76,7 @@ class VerificationMaster(object):
 		print "Sending merge request for " + str((repo_hash, sha, ref,))
 		self.results_reporter.basic_publish(exchange='',
 			routing_key=merge_queue_name,  # TODO (bbland): replace with something useful
-			body=msgpack.packb((repo_hash, commit_list,)),
+			body=msgpack.packb((repo_hash, sha, ref,)),
 			properties=pika.BasicProperties(
 				delivery_mode=2,  # make message persistent
 			))

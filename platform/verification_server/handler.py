@@ -16,13 +16,13 @@ class MessageHandler(object):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def listen(self, request_listener, queue):
-		request_listener.queue_declare(queue=verification_results_queue_name, durable=True)
+		request_listener.queue_declare(queue=queue)
 		request_listener.basic_qos(prefetch_count=1)
 
 		print "Listening for requests"
 
 		request_listener.basic_consume(self.handle_message,
-				queue=verification_results_queue_name)
+				queue=queue)
 		request_listener.start_consuming()
 
 	def handle_message(self, channel, method, properties, body):

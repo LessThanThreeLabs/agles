@@ -27,7 +27,7 @@ class RestrictedShell(object):
 		return match.group()
 
 	def _get_requested_params(self, requested_repo_uri):
-		modelserver_rpc_conn = ModelServer.rpc_connect("repo-read")
+		modelserver_rpc_conn = ModelServer.rpc_connect("rpc-repo-read")
 		route, repo_hash, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 		modelserver_rpc_conn.close()
 

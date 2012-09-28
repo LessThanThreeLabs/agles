@@ -6,7 +6,7 @@ Mixins are NOT meant to be instantiated and should never be instantiated.
 Instantiating a mixin violates the mixin paradigm and will have unintended side
 consequences/side effects.
 """
-import gevent
+from multiprocessing import Process
 
 from model_server import ModelServer
 
@@ -20,8 +20,9 @@ class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	def _start_model_server(self):
-		self.model_server = gevent.spawn(
-			ModelServer.start)
+		self.model_server_process = Process(
+			target=ModelServer.start)
+		self.model_server_process.start()
 
 	def _stop_model_server(self):
-		self.model_server.kill()
+		self.model_server_process.terminate()

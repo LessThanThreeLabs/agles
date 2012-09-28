@@ -16,10 +16,10 @@ import yaml
 from git import Repo
 from handler import MessageHandler
 from verification_result import *
+from model_server import ModelServer
 from remote_test_runner import VagrantNoseRunner
 from remote_linter import VagrantLinter
 from settings.rabbit import connection_parameters
-from settings.model_server import repo_update_routing_key
 from settings.verification_server import *
 
 
@@ -38,7 +38,7 @@ class VerificationServer(MessageHandler):
 		self.rabbit_connection = pika.BlockingConnection(connection_parameters)
 
 		self.responder = self.rabbit_connection.channel()
-		self.responder.queue_declare(queue=verification_results_queue_name, durable=True)
+		self.responder.queue_declare(queue=verification_results_queue_name)
 
 	def run(self):
 		self.vagrant.spawn()
@@ -82,7 +82,7 @@ class VerificationServer(MessageHandler):
 	def get_repo_address(self, repo_hash):
 		"""Sends out a rpc call to the model server to retrieve
 		the address of a repository based on its hash"""
-		with ModelServer.rpc_connect(repo_update_routing_key) as model_server_rpc:
+		with ModelServer.rpc_connect("rpc-repo-read") as model_server_rpc:
 			repo_address = model_server_rpc.get_repo_address(repo_hash)
 		return repo_address
 
