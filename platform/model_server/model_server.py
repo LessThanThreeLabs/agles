@@ -37,10 +37,10 @@ class ModelServer(object):
 	@classmethod
 	def start(cls):
 		model_server = Server(ModelServer())
-		for rpc_noun in cls.rpc_nouns:
-			for rpc_verb in cls.rpc_verbs:
-				queue = "-".join(["rpc", rpc_noun, rpc_verb])
-				model_server.bind("model-rpc", queue, queue)
+		queue_names = ["-".join(["rpc", rpc_noun, rpc_verb])
+			for rpc_noun in cls.rpc_nouns
+			for rpc_verb in cls.rpc_verbs]
+		model_server.bind("model-rpc", queue_names)
 		model_server.run()
 
 	@classmethod

@@ -1,7 +1,7 @@
 import pika
 import msgpack
 
-from verification_server.verification_result import *
+from verification.server.verification_result import *
 from settings.rabbit import connection_parameters
 from settings.model_server import repo_update_routing_key
 from settings.verification_server import *

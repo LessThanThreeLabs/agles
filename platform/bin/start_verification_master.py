@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from verification_master import VerificationMaster
+from verification.master import VerificationMaster
 
 
 def main():

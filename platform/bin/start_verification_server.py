@@ -3,7 +3,7 @@ import argparse
 import os
 
 from settings.verification_server import box_name
-from verification_server import VerificationServer
+from verification.server import VerificationServer
 from util.vagrant import Vagrant
 
 DEFAULT_VM_DIRECTORY = "/tmp/verification"

@@ -11,9 +11,9 @@ from util.test.mixins import ModelServerTestMixin
 from multiprocessing import Process
 from database.engine import EngineFactory
 from database import schema
-from verification_master import *
-from verification_server import *
-from verification_server.verification_result import VerificationResult
+from verification.master import *
+from verification.server import *
+from verification.server.verification_result import VerificationResult
 from settings.model_server import *
 from settings.rabbit import *
 from settings.verification_server import *
