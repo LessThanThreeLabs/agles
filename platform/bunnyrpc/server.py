@@ -7,23 +7,38 @@ from settings.rabbit import connection_parameters
 
 
 class Server(object):
+
+	@property
+	def deadletter_exchange_name(self):
+		assert self.exchange_name is not None
+		return "%s-dlx" % self.exchange_name
+
 	def __init__(self, base_instance):
 		self.base_instance = base_instance
 		self.exchange_name = None
-		self.queue_names = set()
+		self.queue_names = None
 		self.chan = None
 
-	def bind(self, exchange_name, queue_name, routing_key):
+	def bind(self, exchange_name, queue_names, routing_key):
 		self.exchange_name = exchange_name
-		assert not queue_name in self.queue_names
-		self.queue_names.add(queue_name)
+		self.queue_names = set(queue_names)
 		connection = pika.BlockingConnection(connection_parameters)
 		self.chan = connection.channel()
-		self.chan.exchange_declare(exchange=exchange_name, type="direct")
-		self.chan.queue_declare(queue=queue_name)
-		self.chan.queue_bind(exchange=exchange_name,
-			queue=queue_name,
-			routing_key=routing_key)
+		self.chan.exchange_declare(exchange=self.exchange_name, type="direct")
+		self.chan.exchange_declare(exchange=self.deadletter_exchange_name,
+			type="fanout")
+
+		def setup_queue(queue_name):
+			self.chan.queue_declare(
+				queue=queue_name,
+				arguments={
+					"x-dead-letter-exchange": self.deadletter_exchange_name
+				})
+			self.chan.queue_bind(exchange=exchange_name,
+				queue=queue_name,
+				routing_key=routing_key)
+
+		map(setup_queue, self.queue_names)
 
 	def handle_call(self, chan, method, properties, body):
 		proto = msgpack.unpackb(body)
