@@ -11,7 +11,10 @@ class RepositoriesResource extends Resource
 	@allowedSubscriptionTypes = ['general', 'builds']
 
 	read: (socket, data, callback) ->
-		callback 'read not written yet' if callback?
+		fakeRepository =
+			id: data.id
+			name: 'Awesome Sauce'
+		callback null, fakeRepository
 
 
 	subscribe: (socket, data, callback) ->

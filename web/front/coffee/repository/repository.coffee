@@ -17,10 +17,8 @@ class Repository.Model extends Backbone.Model
 				start: start
 				end: end
 
-		console.log 'making builds:read call...'
 		socket.emit 'builds:read', requestData, (error, buildsData) =>
-			console.log 'error: ' + error
-			console.log 'buildsData: ' + buildsData
+			console.log 'buildsData: ' + JSON.stringify buildsData
 			@buildModels.add buildsData
 
 
@@ -48,10 +46,8 @@ class Repository.View extends Backbone.View
 
 repositoryModel = new Repository.Model id: Math.floor Math.random() * 10000
 repositoryModel.fetch
-	success: (model, response) ->
-		console.log 'success: ' + model
 	error: (model, response) ->
- 		console.log 'failed: ' + response
+ 		console.log 'failed to get repository info: ' + response
 repositoryModel.fetchBuilds 0, 20
 
 repositoryView = new Repository.View model: repositoryModel
