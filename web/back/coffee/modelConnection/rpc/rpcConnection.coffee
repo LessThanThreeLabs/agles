@@ -1,7 +1,7 @@
 assert = require 'assert'
 
 MessageIdGenerator = require './messageIdGenerator'
-RpcBroker = require './RpcBroker'
+RpcBroker = require './rpcBroker'
 RpcHandler = require './rpcHandler'
 RpcHandlerFunctionProxy = require './rpcHandlerFunctionProxy'
 
