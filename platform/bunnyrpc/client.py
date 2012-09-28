@@ -126,5 +126,5 @@ class Client(ClientBase):
 			return proto["value"]
 
 	def close(self):
-		self.ioloop_greenlet.kill()
 		self.connection.close()
+		self.ioloop_greenlet.join()
