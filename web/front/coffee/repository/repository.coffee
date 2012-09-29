@@ -51,7 +51,7 @@ repositoryModel.fetch
 repositoryModel.fetchBuilds 0, 20
 
 repositoryView = new Repository.View model: repositoryModel
-$('body').append repositoryView.render().el
+$('#mainContainer').append repositoryView.render().el
 
 
 
