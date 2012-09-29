@@ -35,3 +35,4 @@ createFakeBuild = (repositoryId, number, numberOffset) ->
 
 getRandomStatus = () ->
 	return if Math.random() > .35 then 'success' else 'failed'
+	

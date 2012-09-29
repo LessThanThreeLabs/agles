@@ -24,7 +24,7 @@ class Repository.Model extends Backbone.Model
 
 class Repository.View extends Backbone.View
 	tagName: 'div'
-	class: 'repository'
+	className: 'repository'
 	template: Handlebars.compile '<div class="buildsList"></div>'
 
 	initialize: () ->
