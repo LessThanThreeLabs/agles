@@ -21,7 +21,14 @@ class ClientBase(object):
 		raise NotImplementedError("Subclasses should override this!")
 
 class Client(ClientBase):
-	"""RPC Client that invokes calls on the server"""
+	"""RPC Client that invokes calls on the server.
+
+	A globals parameter can be passed to the constructor to define the namespace
+	for raising exceptions. Otherwise, it uses the client.py namespace.
+
+	Example of common usage:
+		client = Client("exchange", "queue", globals=globals())
+	"""
 
 	@property
 	def deadletter_exchange_name(self):
