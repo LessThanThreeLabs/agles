@@ -23,25 +23,11 @@ div.build {
 
 	.status {
 		font-size: 1.0em;
-
-		&.success {
-			color: @successColor;
-		}
-
-		&.waiting {
-			color: @waitingColor;
-		}
-
-		&.failed {
-			color: @failedColor;
-		}
+		&.success { color: @successColor; }
+		&.waiting { color: @waitingColor; }
+		&.failed  { color: @failedColor;  }
 	}
 
-	&:hover {
-		box-shadow: 0px 0px 32px 0px #888888;
-	}
-
-	&:active {
-		box-shadow: 0px 0px 32px 4px #888888;
-	}
+	&:hover  { box-shadow: 0px 0px 32px 0px #888888 }
+	&:active { box-shadow: 0px 0px 32px 4px #888888 }
 }

@@ -17,8 +17,8 @@ class Build.View extends Backbone.View
 
 	render: () ->
 		@$el.html @template
-			number: @model.get('number')
-			status: @model.get('status')
+			number: @model.get 'number'
+			status: @model.get 'status'
 		return @
 
 
