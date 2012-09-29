@@ -1,8 +1,7 @@
 import os
 import time
-import pika
-import msgpack
 
+from kombu import Connection
 from shutil import rmtree
 from nose.tools import *
 from util.vagrant import Vagrant
@@ -13,6 +12,7 @@ from database.engine import EngineFactory
 from database import schema
 from verification.master import *
 from verification.server import *
+from verification.server.verification_request_handler import VerificationRequestHandler
 from verification.server.verification_result import VerificationResult
 from settings.model_server import *
 from settings.rabbit import *
@@ -22,16 +22,16 @@ from dulwich.repo import Repo
 VM_DIRECTORY = '/tmp/verification'
 
 
-class VerificationServerTest(BaseIntegrationTest, ModelServerTestMixin):
+class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin):
 	@classmethod
 	def setup_class(cls):
-		vagrant = Vagrant(VM_DIRECTORY, box_name)
-		cls.verification_server = VerificationServer(vagrant)
-		cls.verification_server.vagrant.spawn()
+		cls.vagrant = Vagrant(VM_DIRECTORY, box_name)
+		cls.handler = VerificationRequestHandler(cls.vagrant)
+		cls.vagrant.spawn()
 
 	@classmethod
 	def teardown_class(cls):
-		cls.verification_server.vagrant.teardown()
+		cls.vagrant.teardown()
 
 	def setUp(self):
 		self.repo_dir = os.path.join(VM_DIRECTORY, 'repo')
@@ -52,7 +52,7 @@ class VerificationServerTest(BaseIntegrationTest, ModelServerTestMixin):
 		commit_id = repo.do_commit('First commit',
 				committer='Brian Bland <r4nd0m1n4t0r@gmail.com>')
 
-		self.verification_server.verify(self.repo_dir, [(commit_id, 'ref',)],
+		self.handler.verify(self.repo_dir, [(commit_id, 'ref',)],
 			lambda retval: assert_equals(VerificationResult.SUCCESS, retval))
 
 	def test_bad_repo(self):
@@ -66,7 +66,7 @@ class VerificationServerTest(BaseIntegrationTest, ModelServerTestMixin):
 		commit_id = repo.do_commit('First commit',
 				committer='Brian Bland <r4nd0m1n4t0r@gmail.com>')
 
-		self.verification_server.verify(self.repo_dir, [(commit_id, 'ref',)],
+		self.handler.verify(self.repo_dir, [(commit_id, 'ref',)],
 			lambda retval: assert_equals(VerificationResult.FAILURE, retval))
 
 
@@ -107,9 +107,9 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin):
 			ins_map = schema.uri_repo_map.insert().values(uri=repo_uri, repo_id=repo_key)
 			conn.execute(ins_map)
 
-	def _on_response(self, channel, method, properties, body):
-		self.response = msgpack.unpackb(body)
-		channel.basic_ack(delivery_tag=method.delivery_tag)
+	def _on_response(self, body, message):
+		self.response = body
+		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
 	def test_hello_world_repo(self):
 		repo = Repo.init(self.repo_dir)
@@ -122,26 +122,19 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin):
 
 		self._insert_repo_info(self.repo_dir)
 
-		rabbit_connection = pika.BlockingConnection(connection_parameters)
-
-		output_channel = rabbit_connection.channel()
-		output_channel.queue_declare(queue=repo_update_routing_key)
-
-		input_channel = rabbit_connection.channel()
-		input_channel.queue_declare(queue=merge_queue_name)
-
-		output_channel.basic_publish(exchange='',
-			routing_key=repo_update_routing_key,
-			body=msgpack.packb(("hash", commit_id, "ref",)),
-			properties=pika.BasicProperties(
-				delivery_mode=1,
-			))
-
-		self.response = None
-		start_time = time.time()
-		input_channel.basic_consume(self._on_response, queue=merge_queue_name)
-		while self.response is None:
-			rabbit_connection.process_data_events()
-			assert time.time() - start_time < 90  # 90s timeout
+		with Connection('amqp://guest:guest@localhost//') as connection:
+			with connection.Producer(serializer="msgpack") as producer:
+				producer.publish(("hash", commit_id, "ref"),
+					exchange=repo_update_queue.exchange,
+					routing_key=repo_update_queue.routing_key,
+					delivery_mode=1
+				)
+			with connection.Consumer(merge_queue, callbacks=[self._on_response]) as consumer:
+				consumer.consume()
+				self.response = None
+				start_time = time.time()
+				while self.response is None:
+					connection.drain_events()
+					assert time.time() - start_time < 90  # 90s timeout
 
 		assert_equals(("hash", commit_id, "ref"), self.response)

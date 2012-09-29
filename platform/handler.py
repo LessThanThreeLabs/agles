@@ -2,30 +2,22 @@
 """ Contains implementation of various message
 """
 import msgpack
-import pika
 import zerorpc
 
-from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
+from kombu import Consumer
 
+from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
 from settings.rabbit import connection_parameters
-from settings.verification_server import verification_results_queue_name
 
 
 class MessageHandler(object):
-	def run(self):
-		raise NotImplementedError("Subclasses should override this!")
+	def __init__(self, queue):
+		self.queue = queue
 
-	def listen(self, request_listener, queue):
-		request_listener.queue_declare(queue=queue)
-		request_listener.basic_qos(prefetch_count=1)
+	def bind(self, channel):
+		Consumer(channel, queues=self.queue, callbacks=[self.handle_message]).consume()
 
-		print "Listening for requests"
-
-		request_listener.basic_consume(self.handle_message,
-				queue=queue)
-		request_listener.start_consuming()
-
-	def handle_message(self, channel, method, properties, body):
+	def handle_message(self, body, message):
 		raise NotImplementedError("Subclasses should override this!")
 
 
@@ -39,10 +31,6 @@ class VerificationResultHandler(MessageHandler):
 		self.model_server_address = model_server_address
 		self.rabbit_connection = pika.BlockingConnection(connection_parameters)
 		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager.create_from_settings()
-
-	def run(self):
-		request_listener = self.rabbit_connection.channel()
-		self.listen(request_listener, verification_results_queue_name)
 
 	def _merge_change(self, channel, method, repo_hash, repo_name,
                       ref_to_merge, ref_to_merge_into):
