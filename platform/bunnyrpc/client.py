@@ -28,7 +28,7 @@ class Client(ClientBase):
 		assert self.exchange_name is not None
 		return "%s-dlx" % self.exchange_name
 
-	def __init__(self, exchange_name, routing_key):
+	def __init__(self, exchange_name, routing_key, globals=None):
 		"""Constructor that determines where rpc calls are sent.
 
 		:param exchange_name: The exchange to send rpc calls to. Your rpc
@@ -36,8 +36,12 @@ class Client(ClientBase):
 		:param routing_key: The routing key that defines the route the exchange
 							will send your rpc calls to. This is the same as
 							the queue name your rpc server is bound to.
+		:param globals: The global scope to use when re-raising a remote error.
+						This allows us to raise exceptions not currently
+						imported in client.py's namespace.
 		"""
 		super(Client, self).__init__()
+		self.caller_globals_dict = globals
 		self.exchange_name = exchange_name
 		self.routing_key = routing_key
 		self.result_queue = queue.Queue()
@@ -116,7 +120,7 @@ class Client(ClientBase):
 						 proto["error"]["message"],
 						 proto["error"]["traceback"])
 			eval_str = "%s(r'''%s\n RemoteTraceback (most recent call last):%s''')" % exc_tuple
-			raise eval(eval_str)
+			raise eval(eval_str, self.caller_globals_dict)
 		else:
 			return proto["value"]
 
