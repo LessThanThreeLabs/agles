@@ -1,0 +1,43 @@
+@import 'constants';
+
+
+div.build {
+	border: #CCCCCC solid 1px;
+	width: 150px;
+	text-align: center;
+
+	@boxShadowTransitionTime: 0.3s;
+	transition: box-shadow @boxShadowTransitionTime;
+	-moz-transition: box-shadow @boxShadowTransitionTime;
+	-webkit-transition: box-shadow @boxShadowTransitionTime;
+	-o-transition: box-shadow @boxShadowTransitionTime;
+
+	.number {
+		font-size: 1.5em;
+		color: #444444;
+	}
+
+	.status {
+		font-size: 1.0em;
+
+		&.success {
+			color: @successColor;
+		}
+
+		&.waiting {
+			color: @waitingColor;
+		}
+
+		&.failed {
+			color: @failedColor;
+		}
+	}
+
+	&:hover {
+		box-shadow: 8px 0px 32px 0px #888888;
+	}
+
+	&:active {
+		box-shadow: 8px 0px 32px 4px #888888;
+	}
+}

@@ -13,7 +13,8 @@ class BuildsResource extends Resource
 			callabck 'Havent implemented this read yet...'
 			# @modelRpcConnection.getBuild socket.session.user, data.repositoryId, data.id, callback
 		else if data.range? and data.repositoryId?
-			fakeBuilds = (createFakeBuild data.repositoryId, number for number in [data.range.start...data.range.end])
+			numberOffset = Math.floor Math.random() * 10000
+			fakeBuilds = (createFakeBuild data.repositoryId, number, numberOffset for number in [data.range.start...data.range.end].reverse())
 			callback null, fakeBuilds
 			# @modelRpcConnection.builds.read.get socket.session.user, data.repositoryId,
 			# 	data.range.start, data.range.end, callback
@@ -22,12 +23,15 @@ class BuildsResource extends Resource
 
 
 
-createFakeBuild = (repositoryId, number) ->
+createFakeBuild = (repositoryId, number, numberOffset) ->
 	fakeBuild =
 		id: Math.floor Math.random() * 100000
 		repositoryId: repositoryId
-		number: number
-		status: 'single'
+		number: number + numberOffset
+		status: getRandomStatus()
 		startTime: 'second breakfast'
 		endTime: 'pumping in da club'
-		
+
+
+getRandomStatus = () ->
+	return if Math.random() > .35 then 'success' else 'failed'
