@@ -21,7 +21,8 @@ class BuildsList.Model extends Backbone.Model
 				end: end
 
 		socket.emit 'builds:read', requestData, (error, buildsData) =>
-			@buildModels.add buildsData
+			if error? then console.error 'Error when retrieving builds' 
+			else @buildModels.add buildsData 
 
 
 class BuildsList.View extends Backbone.View
