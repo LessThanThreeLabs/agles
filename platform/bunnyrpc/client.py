@@ -81,7 +81,10 @@ class Client(ClientBase):
 			type="direct", callback=self._on_exchange_declare)
 
 	def _on_exchange_declare(self, frame):
-		self.channel.queue_declare(exclusive=True, callback=self._on_queue_declare)
+		self.channel.queue_declare(
+			exclusive=True,
+			callback=self._on_queue_declare,
+			arguments={"x-dead-letter-exchange": self.deadletter_exchange_name})
 
 	def _on_queue_declare(self, frame):
 		self.response_mq = frame.method.queue
