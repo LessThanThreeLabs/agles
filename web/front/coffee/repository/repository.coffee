@@ -5,9 +5,13 @@ class Repository.Model extends Backbone.Model
 	urlRoot: 'repositories'
 
 	initialize: () ->
-		@buildModels = new Backbone.Collection model:Build.Model
-		@buildModels.on 'add', (buildModel) =>
-			@trigger 'add', buildModel
+		@buildModels = new Backbone.Collection
+		@buildModels.model = Build.Model
+		@buildModels.comparator = (buildModel) ->
+			return -1.0 * buildModel.get 'number'
+
+		@buildModels.on 'add', (buildModel, collection, options) =>
+			@trigger 'add', buildModel, collection, options
 
 
 	fetchBuilds: (start, end) ->
@@ -18,7 +22,6 @@ class Repository.Model extends Backbone.Model
 				end: end
 
 		socket.emit 'builds:read', requestData, (error, buildsData) =>
-			console.log 'buildsData: ' + JSON.stringify buildsData
 			@buildModels.add buildsData
 
 
@@ -28,6 +31,7 @@ class Repository.View extends Backbone.View
 	template: Handlebars.compile '<div class="buildsList"></div>'
 
 	initialize: () ->
+		@buildViews = []
 		@model.on 'add', @handleAdd
 
 
@@ -39,19 +43,24 @@ class Repository.View extends Backbone.View
 		return @
 
 
-	handleAdd: (buildModel) =>
+	handleAdd: (buildModel, collection, options) =>
 		buildView = new Build.View model: buildModel
-		$('.buildsList').append buildView.render().el
+		@_insertBuildAtIndex buildView.render().el, options.index
+
+
+	_insertBuildAtIndex: (buildView, index) =>
+		if index == 0 then $('.buildsList').prepend buildView
+		else $('.buildsList .build:nth-child(' + index + ')').after buildView
 
 
 repositoryModel = new Repository.Model id: Math.floor Math.random() * 10000
-repositoryModel.fetch
-	error: (model, response) ->
- 		console.log 'failed to get repository info: ' + response
-repositoryModel.fetchBuilds 0, 20
+repositoryModel.fetch()
+repositoryModel.fetchBuilds 0, 3
 
 repositoryView = new Repository.View model: repositoryModel
 $('#mainContainer').append repositoryView.render().el
+
+setInterval (() -> repositoryModel.fetchBuilds 0, 3), 10000
 
 
 
