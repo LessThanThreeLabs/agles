@@ -15,6 +15,7 @@ from bunnyrpc.client import Client
 from settings.store import rpc_exchange_name
 from util import repositories
 
+
 class RemoteRepositoryManager(object):
 	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
 		"""Merges a changeset on the remote repository with a ref.

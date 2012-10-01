@@ -2,7 +2,6 @@
 - packages:
   - system:
     - vim
-    - vagrant
     - gcc
     - g++
     - curl
@@ -12,6 +11,8 @@
     - libevent-dev
   - pip:
     - pika
+    - kombu
+    - librabbitmq
     - sqlalchemy
     - pyyaml
     - msgpack-python
@@ -23,6 +24,8 @@
     - greenlet
     - gevent
     - gitpython
+  - gem:
+    - vagrant
 - scripts:
   - script: ./install_node.sh
     directory: scripts
@@ -40,5 +43,3 @@
   # Currently failing, unable to find amqp.js?
   - script: npm install -d
     directory: web/back
-  - script: redis-server
-    background: true

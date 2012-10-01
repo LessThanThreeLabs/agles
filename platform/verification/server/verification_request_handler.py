@@ -71,16 +71,16 @@ class VerificationRequestHandler(MessageHandler):
 
 	def checkout_commit_list(self, repo_address, commit_list):
 		source_repo = Repo(repo_address)
-		sha, ref = commit_list[0]
-		self.checkout_commit(source_repo, sha)
-		for sha, ref in commit_list[1:]:
-			source_repo.git.merge(sha)
+		ref, parent_ref = commit_list[0]
+		self.checkout_commit(source_repo, ref)
+		for ref_parent_ref in commit_list[1:]:
+			source_repo.git.merge(ref)
 
-	def checkout_commit(self, repo, sha):
+	def checkout_commit(self, repo, ref):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
 		dest_repo = repo.clone(self.source_dir)
-		dest_repo.git.checkout(sha)
+		dest_repo.git.checkout(ref)
 
 	def setup_vagrant(self):
 		"""Rolls back and provisions the contained vagrant vm for

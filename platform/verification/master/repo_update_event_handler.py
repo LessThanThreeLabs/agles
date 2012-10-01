@@ -1,5 +1,3 @@
-import msgpack
-
 from kombu import Producer
 
 from handler import MessageHandler
@@ -16,15 +14,15 @@ class RepoUpdateEventHandler(MessageHandler):
 		super(RepoUpdateEventHandler, self).bind(channel)
 
 	def handle_message(self, body, message):
-		repo_hash, sha, ref = body
-		for commit_list in self.get_commit_permutations(repo_hash, sha, ref):
+		repo_hash, ref, parent_ref = body
+		for commit_list in self.get_commit_permutations(repo_hash, ref, parent_ref):
 			self.send_verification_request(repo_hash, commit_list)
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
-	def get_commit_permutations(self, repo_hash, sha, ref):
+	def get_commit_permutations(self, repo_hash, ref, parent_ref):
 		# TODO (bbland): do something more useful than this trivial case
 		# This is a single permutation which is a single commit which is a sha, ref pair
-		return [[(sha, ref,)]]
+		return [[(ref, parent_ref,)]]
 
 	def send_verification_request(self, repo_hash, commit_list):
 		print "Sending verification request for " + str((repo_hash, commit_list,))
