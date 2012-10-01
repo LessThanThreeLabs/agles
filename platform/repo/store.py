@@ -8,11 +8,11 @@ import os
 import shutil
 import sys
 
-import zerorpc
-
 from git import GitCommandError, Repo
 from redis import Redis
 
+from bunnyrpc.client import Client
+from settings.store import rpc_exchange_name
 from util import repositories
 
 class RemoteRepositoryManager(object):
@@ -64,41 +64,38 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 	SERVER_REPO_COUNT_NAME = "server_repository_count"
 	DEFAULT_RPC_TIMEOUT = 500
 
-	def __init__(self, managed_stores, redis_connection):
+	def __init__(self, filesystem_stores, redis_connection):
 		super(DistributedLoadBalancingRemoteRepositoryManager, self).__init__()
-		self.managed_store_conns = {}
 		self._redisdb = redis_connection
-		self._register_managed_stores(managed_stores)
+		self._register_filesystem_stores(filesystem_stores)
 
 	@classmethod
 	def create_from_settings(cls):
 		"""Create an instance from the settings/store.py file"""
-		from settings.store import file_system_repository_servers, distributed_store_redis_connection
+		from settings.store import filesystem_repository_servers, distributed_store_redis_connection
 		redis_connection = Redis(**distributed_store_redis_connection)
-		return cls(file_system_repository_servers, redis_connection)
+		return cls(filesystem_repository_servers, redis_connection)
 
 	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
-		client_conn = self.managed_store_conns[store_name]
-		client_conn.merge_changeset(repo_hash, repo_name, ref_to_merge, ref_to_merge_into)
+		with Client(rpc_exchange_name, store_name) as client:
+			client.merge_changeset(repo_hash, repo_name, ref_to_merge, ref_to_merge_into)
 
 	def create_repository(self, store_name, repo_hash, repo_name):
-		client_conn = self.managed_store_conns[store_name]
-		client_conn.create_repository(repo_hash, repo_name)
+		with Client(rpc_exchange_name, store_name) as client:
+			client.create_repository(repo_hash, repo_name)
 		self._update_store_repo_count(store_name)
 
 	def delete_repository(self, store_name, repo_hash, repo_name):
-		client_conn = self.managed_store_conns[store_name]
-		client_conn.delete_repository(repo_hash, repo_name)
+		with Client(rpc_exchange_name, store_name) as client:
+			client.delete_repository(repo_hash, repo_name)
 		self._update_store_repo_count(store_name, -1)
 
 	def rename_repository(self, store_name, repo_hash, old_repo_name, new_repo_name):
-		client_conn = self.managed_store_conns[store_name]
-		client_conn.rename_repository(repo_hash, old_repo_name, new_repo_name)
+		with Client(rpc_exchange_name, store_name) as client:
+			client.rename_repository(repo_hash, old_repo_name, new_repo_name)
 
-	def _register_managed_stores(self, managed_stores):
-		self._initialize_store_repo_counts_if_not_exists(managed_stores.iterkeys())
-		for store_name, connection_info in managed_stores.iteritems():
-			self.managed_store_conns[store_name] = zerorpc.Client(connection_info, timeout=self.DEFAULT_RPC_TIMEOUT)
+	def _register_filesystem_stores(self, filesystem_stores):
+		self._initialize_store_repo_counts_if_not_exists(filesystem_stores)
 
 	def get_least_loaded_store(self):
 		"""Identifies the local store that is being least utilized. For this particular class
@@ -131,7 +128,7 @@ class RepositoryStore(object):
 	def delete_repository(self, repo_hash, repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def rename_repository(self, repo_hash, repo_name):
+	def rename_repository(self, repo_hash, old_repo_name, new_repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
 
