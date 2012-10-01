@@ -77,11 +77,11 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		return cls(filesystem_repository_servers, redis_connection)
 
 	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
-		with Client(rpc_exchange_name, store_name) as client:
+		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
 			client.merge_changeset(repo_hash, repo_name, ref_to_merge, ref_to_merge_into)
 
 	def create_repository(self, store_name, repo_hash, repo_name):
-		with Client(rpc_exchange_name, store_name) as client:
+		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
 			client.create_repository(repo_hash, repo_name)
 		self._update_store_repo_count(store_name)
 
@@ -91,7 +91,7 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		self._update_store_repo_count(store_name, -1)
 
 	def rename_repository(self, store_name, repo_hash, old_repo_name, new_repo_name):
-		with Client(rpc_exchange_name, store_name) as client:
+		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
 			client.rename_repository(repo_hash, old_repo_name, new_repo_name)
 
 	def _register_filesystem_stores(self, filesystem_stores):
@@ -223,6 +223,7 @@ class MergeError(RepositoryOperationException):
 class RepositoryAlreadyExistsException(RepositoryOperationException):
 	"""Indicates an exception occurred due to a repository already existing."""
 
-	def __init__(self, repo_hash, existing_repo_path):
-		super(RepositoryAlreadyExistsException, self).__init__(
-			  'Repository with hash %s already exists at path %s' % (repo_hash, existing_repo_path))
+	def __init__(self, msg='', repo_hash=None, existing_repo_path=None):
+		if not msg:
+			msg = 'Repository with hash %s already exists at path %s' % (repo_hash, existing_repo_path)
+		super(RepositoryAlreadyExistsException, self).__init__(msg)

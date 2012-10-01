@@ -129,7 +129,7 @@ class Client(ClientBase):
 			exc_tuple = (proto["error"]["type"],
 						 proto["error"]["message"],
 						 proto["error"]["traceback"])
-			eval_str = "%s(r'''%s\n RemoteTraceback (most recent call last):%s''')" % exc_tuple
+			eval_str = "%s(r''' %s\n RemoteTraceback (most recent call last):%s ''')" % exc_tuple
 			raise eval(eval_str, self.caller_globals_dict)
 		else:
 			return proto["value"]
