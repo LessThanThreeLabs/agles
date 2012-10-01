@@ -27,11 +27,12 @@ class Repository.View extends Backbone.View
 		return @
 
 
+
+
 repositoryModel = new Repository.Model id: Math.floor Math.random() * 10000
 repositoryModel.fetch()
-repositoryModel.fetchBuilds 0, 3
+console.log 'SHOULD LOAD ENOUGH TO FILL ENTIRE HEIGHT, and future height??...'
+repositoryModel.fetchBuilds 0, 40
 
 repositoryView = new Repository.View model: repositoryModel
 $('#mainContainer').append repositoryView.render().el
-
-setInterval (() -> repositoryModel.fetchBuilds 0, 3), 10000

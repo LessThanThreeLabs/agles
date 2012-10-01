@@ -1,22 +1,42 @@
 @import 'constants';
 
 
+@keyframes fadeIn { 
+	from { opacity: 0.0; }
+	to { opacity: 1.0; }
+}
+
+@-moz-keyframes fadeIn {
+	from { opacity: 0.0; }
+	to { opacity: 1.0; }
+}
+
+@-webkit-keyframes fadeIn {
+	from { opacity: 0.0; }
+	to { opacity: 1.0; }
+}
+
+@-o-keyframes fadeIn {
+	from { opacity: 0.0; }
+	to { opacity: 1.0; }
+}
+
+
 div.build {
 	border-bottom: #CCCCCC solid 1px;
 	text-align: center;
 
-	height: 50px;
+	@fadeInTransitionTime: 2.0s;
+	animation: fadeIn @fadeInTransitionTime;
+	-moz-animation: fadeIn @fadeInTransitionTime;
+	-webkit-animation: fadeIn @fadeInTransitionTime;
+	-o-animation: fadeIn @fadeInTransitionTime;
 
 	@boxShadowTransitionTime: 0.5s;
-	transition: box-shadow @boxShadowTransitionTime;
-	-moz-transition: box-shadow @boxShadowTransitionTime;
-	-webkit-transition: box-shadow @boxShadowTransitionTime;
-	-o-transition: box-shadow @boxShadowTransitionTime;
-
-	transition-timing-function: ease-out;
-	-moz-transition-timing-function: ease-out;
-	-webkit-transition-timing-function: ease-out;
-	-o-transition-timing-function: ease-out;
+	transition: box-shadow @boxShadowTransitionTime ease-out;
+	-moz-transition: box-shadow @boxShadowTransitionTime ease-out;
+	-webkit-transition: box-shadow @boxShadowTransitionTime ease-out;
+	-o-transition: box-shadow @boxShadowTransitionTime ease-out;
 
 	.number {
 		font-size: 1.5em;
@@ -30,6 +50,6 @@ div.build {
 		&.failed  { color: @failedColor;  }
 	}
 
-	&:hover  { box-shadow: 0px 0px 32px 0px #888888 }
-	&:active { box-shadow: 0px 0px 32px 4px #888888 }
+	&:hover  { box-shadow: 0px 0px 32px 0px #888888; opacity: 1.0; }
+	&:active { box-shadow: 0px 0px 32px 4px #888888; }
 }

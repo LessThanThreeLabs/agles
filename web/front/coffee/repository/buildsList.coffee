@@ -13,7 +13,11 @@ class BuildsList.Model extends Backbone.Model
 			@trigger 'add', buildModel, collection, options
 
 
+	@fetchingBuilds = false
 	fetchBuilds: (start, end) =>
+		return false if @fetchingBuilds
+		@fetchingBuilds = true
+
 		requestData = 
 			repositoryId: @get 'repositoryId'
 			range: 
@@ -23,12 +27,19 @@ class BuildsList.Model extends Backbone.Model
 		socket.emit 'builds:read', requestData, (error, buildsData) =>
 			if error? then console.error 'Error when retrieving builds' 
 			else @buildModels.add buildsData 
+			@fetchingBuilds = false
+
+
+	fetchMoreBuilds: (number) ->
+		@fetchBuilds @buildModels.length, @buildModels.length + number
 
 
 class BuildsList.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildsList'
 	template: Handlebars.compile ''
+	events:
+		'scroll': 'checkScroll'
 
 	initialize: () ->
 		@model.on 'add', @handleAdd
@@ -50,3 +61,9 @@ class BuildsList.View extends Backbone.View
 	_insertBuildAtIndex: (buildView, index) =>
 		if index == 0 then $('.buildsList').prepend buildView
 		else $('.buildsList .build:nth-child(' + index + ')').after buildView
+
+
+	checkScroll: () =>
+		heightBeforeFetchingMoreBuilds = 100
+		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreBuilds > @el.scrollHeight
+			@model.fetchMoreBuilds 20
