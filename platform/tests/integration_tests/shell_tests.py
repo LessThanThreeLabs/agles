@@ -3,7 +3,7 @@ from nose.tools import *
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin
 from util.shell import *
-from database.engine import EngineFactory
+from database.engine import ConnectionFactory
 from database import schema
 
 VALID_COMMANDS = ['git-receive-pack']
@@ -20,13 +20,13 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin):
 
 	def _create_repo_store_machine(self):
 		ins = schema.machine.insert().values(uri="http://machine0")
-		with EngineFactory.get_connection() as conn:
+		with ConnectionFactory.get_sql_connection() as conn:
 			result = conn.execute(ins)
 			return result.inserted_primary_key[0]
 
 	def _map_uri(self, repo_uri, repo_id):
 		ins = schema.uri_repo_map.insert().values(uri=repo_uri, repo_id=repo_id)
-		with EngineFactory.get_connection() as conn:
+		with ConnectionFactory.get_sql_connection() as conn:
 			conn.execute(ins)
 
 	def test_reroute_param_generation(self):

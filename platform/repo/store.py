@@ -9,10 +9,10 @@ import shutil
 import sys
 
 from git import GitCommandError, Repo
-from redis import Redis
 
 from bunnyrpc.client import Client
-from settings.store import rpc_exchange_name
+from database.engine import ConnectionFactory
+from settings.store import rpc_exchange_name, filesystem_repository_servers
 from util import repositories
 
 
@@ -73,9 +73,7 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 	@classmethod
 	def create_from_settings(cls):
 		"""Create an instance from the settings/store.py file"""
-		from settings.store import filesystem_repository_servers, distributed_store_redis_connection
-		redis_connection = Redis(**distributed_store_redis_connection)
-		return cls(filesystem_repository_servers, redis_connection)
+		return cls(filesystem_repository_servers, ConnectionFactory.get_redis_connection())
 
 	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
 		with Client(rpc_exchange_name, store_name, globals=globals()) as client:

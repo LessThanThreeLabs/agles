@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, ForeignKey, UniqueConstraint
 
-from database.engine import EngineFactory
+from database.engine import ConnectionFactory
 
 
 metadata = MetaData()
@@ -55,14 +55,14 @@ ssh_pubkeys = Table('ssh_pubkey', metadata,
 
 
 def reseed_db():
-	engine = EngineFactory.get_engine()
+	engine = ConnectionFactory.get_sql_engine()
 	metadata.drop_all(engine)
 	metadata.create_all(engine)
 
 
 def main():
 	print "Creating database schema..."
-	engine = EngineFactory.get_engine()
+	engine = ConnectionFactory.get_sql_engine()
 	metadata.create_all(engine)
 
 if __name__ == "__main__":

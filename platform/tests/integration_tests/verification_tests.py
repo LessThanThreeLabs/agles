@@ -8,7 +8,7 @@ from util.vagrant import Vagrant
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
 from multiprocessing import Process
-from database.engine import EngineFactory
+from database.engine import ConnectionFactory
 from database import schema
 from verification.master import *
 from verification.server import *
@@ -108,7 +108,7 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin, RepoStor
 		self._stop_model_server()
 
 	def _insert_repo_info(self, repo_uri):
-		with EngineFactory.get_connection() as conn:
+		with ConnectionFactory.get_sql_connection() as conn:
 			ins_machine = schema.machine.insert().values(uri="fs0")
 			machine_key = conn.execute(ins_machine).inserted_primary_key[0]
 			ins_repo = schema.repo.insert().values(name="repo", hash="asdf", machine_id=machine_key)
