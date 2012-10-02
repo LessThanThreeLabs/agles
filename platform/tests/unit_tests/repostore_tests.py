@@ -9,13 +9,16 @@ from git import Repo
 from repo.store import FileSystemRepositoryStore, MergeError
 
 from util.repositories import to_path
+from util.test.mixins import *
 
-class RepoStoreTests(unittest.TestCase):
+
+class RepoStoreTests(unittest.TestCase, RepoStoreTestMixin):
 	TEST_DIR = '/tmp'
 
 	@classmethod
 	def setup_class(cls):
 		repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
+		shutil.rmtree(repodir, ignore_errors=True)
 		os.mkdir(repodir)
 
 	@classmethod
@@ -51,15 +54,6 @@ class RepoStoreTests(unittest.TestCase):
 		assert_true(exists(self.repo_path), msg="Repository was not deleted.")
 		self.store.delete_repository("asdf", "repo")
 		assert_false(exists(self.repo_path), msg="Repository was not deleted.")
-
-	def _modify_commit_push(self, repo, filename, contents, parent_commits=None,
-	                        refspec="HEAD:master"):
-		with open(os.path.join(repo.working_dir, filename), "w") as f:
-			f.write(contents)
-		repo.index.add([filename])
-		commit = repo.index.commit("", parent_commits=parent_commits)
-		repo.remotes.origin.push(refspec=refspec)
-		return commit
 
 	def test_merge_pass(self):
 		self.store.create_repository("asdf", "repo")

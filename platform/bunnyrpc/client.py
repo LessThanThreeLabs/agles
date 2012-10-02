@@ -20,6 +20,7 @@ class ClientBase(object):
 	def close(self):
 		raise NotImplementedError("Subclasses should override this!")
 
+
 class Client(ClientBase):
 	"""RPC Client that invokes calls on the server.
 

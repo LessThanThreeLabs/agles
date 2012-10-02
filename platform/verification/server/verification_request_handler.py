@@ -80,7 +80,8 @@ class VerificationRequestHandler(MessageHandler):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
 		dest_repo = repo.clone(self.source_dir)
-		dest_repo.git.checkout(ref)
+		dest_repo.git.fetch("origin", ref)
+		dest_repo.git.checkout("FETCH_HEAD")
 
 	def setup_vagrant(self):
 		"""Rolls back and provisions the contained vagrant vm for

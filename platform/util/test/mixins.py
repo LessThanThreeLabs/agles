@@ -6,7 +6,7 @@ Mixins are NOT meant to be instantiated and should never be instantiated.
 Instantiating a mixin violates the mixin paradigm and will have unintended side
 consequences/side effects.
 """
-from multiprocessing import Process
+import os
 
 from model_server import ModelServer
 
@@ -20,9 +20,19 @@ class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	def _start_model_server(self):
-		self.model_server_process = Process(
-			target=ModelServer.start)
-		self.model_server_process.start()
+		self.model_server = ModelServer()
+		self.model_server.start()
 
 	def _stop_model_server(self):
-		self.model_server_process.terminate()
+		self.model_server.stop()
+
+
+class RepoStoreTestMixin(BaseTestMixin):
+	def _modify_commit_push(self, repo, filename, contents, parent_commits=None,
+	                        refspec="HEAD:master"):
+		with open(os.path.join(repo.working_dir, filename), "w") as f:
+			f.write(contents)
+		repo.index.add([filename])
+		commit = repo.index.commit("", parent_commits=parent_commits)
+		repo.remotes.origin.push(refspec=refspec)
+		return commit
