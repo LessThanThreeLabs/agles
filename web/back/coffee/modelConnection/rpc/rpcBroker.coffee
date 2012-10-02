@@ -20,19 +20,16 @@ class RpcBroker
 			
 
 	connect: (callback) ->
-		crypto.randomBytes 8, (error, buffer) =>
-			@fromId = buffer.toString 'hex'
+		await
+			@connection.queue '', exclusive: true, defer @responseQueue
+			@connection.queue '', exclusive: true, defer @deadLetterQueue
 
-			await
-				@connection.queue '', exclusive: true, defer @responseQueue
-				@connection.queue '', exclusive: true, defer @deadLetterQueue
+		@responseQueue.subscribe @_handleResponse
 
-			@responseQueue.subscribe @_handleResponse
+		@deadLetterQueue.subscribe @_handleDeadLetterResponse
+		@deadLetterQueue.bind @deadLetterExchange, ''
 
-			@deadLetterQueue.subscribe @_handleDeadLetterResponse
-			@deadLetterQueue.bind @deadLetterExchange, ''
-
-			callback null
+		callback null
 
 
 	callFunction: (route, functionName, args, callback) ->
@@ -46,11 +43,12 @@ class RpcBroker
 			args: args
 
 		@exchange.publish route, message,
+			contentType: 'application/x-msgpack'
+			contentEncoding: 'binary'
 			replyTo: @responseQueue.name
 			correlationId: messageId
 			mandatory: true
-			headers:
-				from: @fromId
+
 		console.log 'INSTEAD OF FROMID, CAN WE JUST GET THE CLIENT INFORMATION, MAYBE?'
 
 		console.log 'sent: ' + JSON.stringify msgpack.unpack message
@@ -74,12 +72,11 @@ class RpcBroker
 
 	_handleDeadLetterResponse: (message, headers, deliveryInformation) =>
 		console.log 'received dead letter message!! ' + JSON.stringify msgpack.unpack message.data
-		console.log 'headers.fromId: ' + headers.from
 
-		fromId = headers.from
+		responseQueueName = deliveryInformation.replyTo
 		messageId = deliveryInformation.correlationId
 
-		if fromId is @fromId and @messageIdsToCallbacks[messageId]?
+		if responseQueueName is @responseQueue.name and @messageIdsToCallbacks[messageId]?
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
 

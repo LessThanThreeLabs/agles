@@ -24,9 +24,9 @@ connection.on 'ready', () =>
 			error: null
 			value: Math.random()
 		connection.publish deliveryInformation.replyTo, toReturn,
+			contentType: 'application/x-msgpack'
+			contentEncoding: 'binary'
 			correlationId: deliveryInformation.correlationId
-			headers:
-				from: headers.from
 
 		console.log 'sent: ' + JSON.stringify msgpack.unpack toReturn
 		queue.shift() # IF YOU WANT TO TEST DEADLETTER, COMMENT OUT THIS LINE
