@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, ForeignKey, UniqueConstraint
+from sqlalchemy import Table, Column, Integer, SmallInteger, String, DateTime, Text, MetaData, ForeignKey, UniqueConstraint
 
 from database.engine import ConnectionFactory
 
@@ -40,6 +40,15 @@ build = Table('build', metadata,
 	Column('status', String, nullable=False),
 	Column('start_time', DateTime, nullable=False),
 	Column('end_time', DateTime, nullable=False)
+)
+
+build_console = Table('build_console', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('build_id', Integer, ForeignKey('build.id'), nullable=False),
+	Column('type', SmallInteger, nullable=False),
+	Column('console_output', Text, nullable=False),
+
+	UniqueConstraint('build_id', 'type')
 )
 
 machine = Table('machine', metadata,
