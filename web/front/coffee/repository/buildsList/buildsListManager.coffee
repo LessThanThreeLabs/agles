@@ -41,7 +41,8 @@ class BuildsListManager.View extends Backbone.View
 
 		@$el.append @buildsSearchView.render().el
 
-		@$el.append @allBuildsListView.render().el
+		@$el.append '<div class="buildsListContainer"></div>'
+		@$el.find('.buildsListContainer').append @allBuildsListView.render().el
 		@allBuildsListView.saturateBuilds()
 
 		return @

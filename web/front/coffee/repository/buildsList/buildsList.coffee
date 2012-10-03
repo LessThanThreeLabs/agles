@@ -55,7 +55,7 @@ class BuildsList.View extends Backbone.View
 		@$el.html @template()
 		@model.buildModels.each (buildModel) =>
 			buildView = new Build.View model: buildModel
-			$('.buildsList').append buildView.render().el
+			@$el.append buildView.render().el
 		return @
 
 
