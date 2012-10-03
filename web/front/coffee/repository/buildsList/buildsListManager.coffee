@@ -39,7 +39,8 @@ class BuildsListManager.View extends Backbone.View
 	render: () =>
 		@$el.html @template()
 
-		@$el.append @buildsSearchView.render().el
+		@$el.append '<div class="buildsSearchContainer"></div>'
+		@$el.find('.buildsSearchContainer').append @buildsSearchView.render().el
 
 		@$el.append '<div class="buildsListContainer"></div>'
 		@$el.find('.buildsListContainer').append @allBuildsListView.render().el
