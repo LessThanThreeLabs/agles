@@ -1,7 +1,7 @@
 window.BuildsFetcher = class BuildsFetcher
 	@fetchingBuilds = false
 
-	fetchBuilds: (repositoryId, type, start, end, callback) ->
+	fetchBuilds: (repositoryId, type, start, end, callback) =>
 		return false if @fetchingBuilds
 		@fetchingBuilds = true
 

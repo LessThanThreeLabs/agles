@@ -6,7 +6,7 @@ class BuildsList.Model extends Backbone.Model
 	initialize: () ->
 		@buildModels = new Backbone.Collection
 		@buildModels.model = Build.Model
-		@buildModels.comparator = (buildModel) ->
+		@buildModels.comparator = (buildModel) =>
 			return -1.0 * buildModel.get 'number'
 
 		@buildModels.on 'add', (buildModel, collection, options) =>
@@ -14,8 +14,8 @@ class BuildsList.Model extends Backbone.Model
 
 
 	@noMoreBuildsToFetch = false
-	fetchBuilds: (start, end, callback) ->
-		assert.ok end > start
+	fetchBuilds: (start, end, callback) =>
+		assert.ok start < end and not @noMoreBuildsToFetch
 
 		@get('buildsFetcher').fetchBuilds @get('repositoryId'), @get('type'), start, end, (error, buildsData) =>
 			if error? then console.error 'Error when retrieving builds ' + error
@@ -28,7 +28,7 @@ class BuildsList.Model extends Backbone.Model
 			callback() if callback?
 
 
-	fetchMoreBuilds: (number, callback) ->
+	fetchMoreBuilds: (number, callback) =>
 		@fetchBuilds @buildModels.length, @buildModels.length + number, callback
 
 
@@ -40,12 +40,12 @@ class BuildsList.View extends Backbone.View
 	events:
 		'scroll': 'scrollHandler'
 
-	initialize: () ->
+	initialize: () =>
 		@model.on 'add', @handleAdd
-		$(window).bind 'resize', @resizeHandler
+		$(window).bind 'resize', @windowResizeHandler
 
 
-	render: () ->
+	render: () =>
 		@$el.html @template()
 		@model.buildModels.each (buildModel) =>
 			buildView = new Build.View model: buildModel
@@ -53,16 +53,27 @@ class BuildsList.View extends Backbone.View
 		return @
 
 
-	loadInitialBuilds: (initialAmount, deltaAmount) ->
-		assert.ok initialAmount? and deltaAmount?
-		@model.fetchMoreBuilds initialAmount, () =>
-			@_loadBuildsToFitHeight deltaAmount
+	numberOfBuildsToRequest: 50
+	saturateBuilds: () =>
+		@_loadBuildsToFitHeight @numberOfBuildsToRequest
 
 
 	_loadBuildsToFitHeight: (deltaAmount) =>
-		if not @model.noMoreBuildsToFetch and (@el.scrollHeight < @el.clientHeight * 2)
+		console.log 'called ' + @model.get 'type'
+		if not @model.noMoreBuildsToFetch and 
+				(@el.scrollHeight < @el.clientHeight * 2 or @model.buildModels.length is 0)
 			@model.fetchMoreBuilds deltaAmount, () =>
 				@_loadBuildsToFitHeight deltaAmount
+
+
+	scrollHandler: () =>
+		heightBeforeFetchingMoreBuilds = 100
+		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreBuilds > @el.scrollHeight
+			@model.fetchMoreBuilds @numberOfBuildsToRequest
+
+
+	windowResizeHandler: () =>
+		@saturateBuilds()
 
 
 	handleAdd: (buildModel, collection, options) =>
@@ -73,13 +84,3 @@ class BuildsList.View extends Backbone.View
 	_insertBuildAtIndex: (buildView, index) =>
 		if index == 0 then $('.buildsList').prepend buildView
 		else $('.buildsList .build:nth-child(' + index + ')').after buildView
-
-
-	scrollHandler: () =>
-		heightBeforeFetchingMoreBuilds = 100
-		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreBuilds > @el.scrollHeight
-			@model.fetchMoreBuilds 20
-
-
-	resizeHandler: () =>
-		@_loadBuildsToFitHeight()

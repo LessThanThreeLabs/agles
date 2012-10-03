@@ -23,4 +23,4 @@ class Build.View extends Backbone.View
 
 
 	clickHandler: () ->
-		console.log 'clicked'
+		@$el.toggleClass 'selected'
