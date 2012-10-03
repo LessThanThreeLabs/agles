@@ -3,9 +3,11 @@ window.Build = {}
 
 class Build.Model extends Backbone.Model
 	urlRoot: 'builds'
+	defaults:
+		selected: false
 
-	validate: (attributes) ->
-		return
+	toggleSelected: () =>
+		@set 'selected', not @get 'selected'
 
 
 class Build.View extends Backbone.View
@@ -15,12 +17,21 @@ class Build.View extends Backbone.View
 		<div class="status {{status}}">{{status}}</div>'
 	events: 'click': 'clickHandler'
 
-	render: () ->
+	initialize: () =>
+		@model.on 'change:selected', @handleSelected
+
+
+	render: () =>
 		@$el.html @template
 			number: @model.get 'number'
 			status: @model.get 'status'
 		return @
 
 
-	clickHandler: () ->
-		@$el.toggleClass 'selected'
+	clickHandler: () =>
+		@model.toggleSelected()
+
+
+	handleSelected: () =>
+		if @model.get 'selected' then @$el.addClass 'selected'
+		else @$el.removeClass 'selected'

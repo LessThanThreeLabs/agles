@@ -12,6 +12,12 @@ class BuildsList.Model extends Backbone.Model
 		@buildModels.on 'add', (buildModel, collection, options) =>
 			@trigger 'add', buildModel, collection, options
 
+		@buildModels.on 'change:selected', (buildModel) =>
+			return if not buildModel.get 'selected'
+			@buildModels.each (otherBuildModel) =>
+				if otherBuildModel.id isnt buildModel.id
+					otherBuildModel.set 'selected', false
+
 
 	@noMoreBuildsToFetch = false
 	fetchBuilds: (start, end, callback) =>
