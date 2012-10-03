@@ -1,7 +1,6 @@
 # handler.py - Implementation of message handlers
 """ Contains implementation of various message
 """
-from kombu import Consumer
 
 
 class MessageHandler(object):
@@ -9,7 +8,9 @@ class MessageHandler(object):
 		self.queue = queue
 
 	def bind(self, channel):
-		Consumer(channel, queues=self.queue, callbacks=[self.handle_message]).consume()
+		consumer = channel.Consumer(queues=self.queue, callbacks=[self.handle_message])
+		consumer.qos(prefetch_count=1)
+		consumer.consume()
 
 	def handle_message(self, body, message):
 		raise NotImplementedError("Subclasses should override this!")

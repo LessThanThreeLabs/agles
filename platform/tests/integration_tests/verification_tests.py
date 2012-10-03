@@ -71,7 +71,7 @@ class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin, 
 			lambda retval: assert_equals(VerificationResult.FAILURE, retval))
 
 
-class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMixin):
+class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMixin):
 	@classmethod
 	def setup_class(cls):
 			vagrant = Vagrant(VM_DIRECTORY, box_name)
@@ -94,7 +94,7 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin, RepoStor
 		cls.repo_store_process.terminate()
 
 	def setUp(self):
-		super(VerificationMasterTest, self).setUp()
+		super(VerificationRoundTripTest, self).setUp()
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.mkdir(self.repo_dir)
 		self._start_model_server()
@@ -103,7 +103,7 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin, RepoStor
 			to_path("asdf", "repo", FileSystemRepositoryStore.DIR_LEVELS))
 
 	def tearDown(self):
-		super(VerificationMasterTest, self).setUp()
+		super(VerificationRoundTripTest, self).setUp()
 		rmtree(self.repo_dir)
 		self._stop_model_server()
 
@@ -128,8 +128,8 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin, RepoStor
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
 		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
-		self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
-			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
+		commit_id = self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
+			parent_commits=[init_commit], refspec="HEAD:refs/pending/1").hexsha
 
 		self._insert_repo_info(self.repo_path)
 
@@ -147,5 +147,5 @@ class VerificationMasterTest(BaseIntegrationTest, ModelServerTestMixin, RepoStor
 				while self.response is None:
 					connection.drain_events()
 					assert time.time() - start_time < 90  # 90s timeout
-
-		assert_equals(("asdf", "refs/pending/1", "master"), self.response)
+		work_repo.git.pull()
+		assert_equals(commit_id, work_repo.head.commit.hexsha)

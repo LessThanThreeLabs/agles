@@ -5,15 +5,11 @@
 This class contains the api that is exposed to clients
 and is the only point of interaction between clients and the model server.
 """
-
-from multiprocessing import Process
-
-import pika
+from kombu import Connection, Exchange
 
 from bunnyrpc.client import Client
 from repo.create_handler import RepoCreateHandler
 from repo.read_handler import RepoReadHandler
-from settings.rabbit import connection_parameters
 
 
 class ModelServer(object):
@@ -33,24 +29,20 @@ class ModelServer(object):
 	def rpc_connect(cls, route):
 		return Client("model-rpc", route)
 
-	def __init__(self):
-		# TODO(bbland): might want to not use blocking connection?
-		self.rabbit_connection = pika.BlockingConnection(connection_parameters)
-
-		self.event_channel = self.rabbit_connection.channel()
-		self.event_channel.exchange_declare(exchange='events', type='direct')
+	def __init__(self, channel=None):
+		if channel:
+			self.channel = channel
+		else:
+			connection = Connection("amqp://guest:guest@localhost//")
+			self.channel = connection.channel()
+		self.producer = self.channel.Producer(serializer="msgpack")
+		self.events_exchange = Exchange("events", "direct", durable=False)
 
 	def start(self):
-		self.rpc_handler_processes = list()
-		for rpc_handler_class in self.rpc_handler_classes:
-			rpc_handler = rpc_handler_class()
-			rpc_handler_process = Process(target=rpc_handler.start)
-			self.rpc_handler_processes.append(rpc_handler_process)
-			rpc_handler_process.daemon = True
-			rpc_handler_process.start()
-
-	def stop(self):
-		map(lambda process: process.terminate() or process.join(), self.rpc_handler_processes)
+		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.channel),
+			self.rpc_handler_classes)
+		while True:
+			self.channel.connection.drain_events()
 
 	def subscribe(self, event):
 		"""No-op
@@ -68,9 +60,7 @@ class ModelServer(object):
 		:param event: The event channel to publish msg to.
 		:param msg: The msg we are publishing to the channel.
 		"""
-		self.event_channel.basic_public(exchange='events',
-            routing_key=event,
-			body=msg,
-			properties=pika.BasicProperties(
-                delivery_mode=2,  # make message persistent
-		    ))
+		self.producer.publish(msg,
+			exchange=self.events_exchange,
+			delivery_mode=2
+		)

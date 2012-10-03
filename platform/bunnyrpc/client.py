@@ -120,7 +120,9 @@ class Client(ClientBase):
 		self.channel.basic_publish(
 			exchange=self.exchange_name,
 			routing_key=self.routing_key,
-			properties=pika.BasicProperties(reply_to=self.response_mq),
+			properties=pika.BasicProperties(reply_to=self.response_mq,
+				content_encoding="binary",
+				content_type="application/x-msgpack"),
 			body=msgpack.packb(proto))
 		proto = self.result_queue.get()
 		return self._process_result(proto)

@@ -8,6 +8,10 @@ consequences/side effects.
 """
 import os
 
+from multiprocessing import Process
+
+from kombu import Connection
+
 from model_server import ModelServer
 
 
@@ -20,11 +24,15 @@ class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	def _start_model_server(self):
-		self.model_server = ModelServer()
-		self.model_server.start()
+		connection = Connection("amqp://guest:guest@localhost//")
+		self.model_server_channel = connection.channel()
+		self.model_server_process = Process(target=ModelServer(self.model_server_channel).start)
+		self.model_server_process.start()
 
 	def _stop_model_server(self):
-		self.model_server.stop()
+		self.model_server_process.terminate()
+		self.model_server_process.join()
+		self.model_server_channel.close()
 
 
 class RepoStoreTestMixin(BaseTestMixin):

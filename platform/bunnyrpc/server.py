@@ -21,9 +21,7 @@ Protocol Definition:
 import sys
 import traceback
 
-import msgpack
-import pika
-from settings.rabbit import connection_parameters
+from kombu import Connection, Exchange, Queue
 
 
 class Server(object):
@@ -53,7 +51,7 @@ class Server(object):
 		self.queue_names = None
 		self.chan = None
 
-	def bind(self, exchange_name, queue_names):
+	def bind(self, exchange_name, queue_names, channel=None):
 		""" Binds this RPC server to listen for calls from <exchange_name>
 		routed to <queue_names>.
 
@@ -64,35 +62,36 @@ class Server(object):
 		"""
 		self.exchange_name = exchange_name
 		self.queue_names = set(queue_names)
-		connection = pika.BlockingConnection(connection_parameters)
-		self.chan = connection.channel()
-		self.chan.exchange_declare(exchange=self.exchange_name, type="direct")
-		self.chan.exchange_declare(exchange=self.deadletter_exchange_name,
-			type="fanout")
+		if channel:
+			self.channel = channel
+		else:
+			connection = Connection("amqp://guest:guest@localhost//")
+			self.channel = connection.channel()
+		self.consumer = self.channel.Consumer(callbacks=[self._handle_call])
+		self.consumer.qos(prefetch_count=1)
+		self.producer = self.channel.Producer(serializer="msgpack")
+
+		self.exchange = Exchange(self.exchange_name, "direct", durable=False)
+		self.deadletter_exchange = Exchange(self.deadletter_exchange_name, "fanout")
 
 		def setup_queue(queue_name):
-			self.chan.queue_declare(
-				queue=queue_name,
-				arguments={
+			queue = Queue(queue_name, exchange=self.exchange, routing_key=queue_name,
+				durable=False, arguments={
 					"x-dead-letter-exchange": self.deadletter_exchange_name
 				})
-			self.chan.queue_bind(exchange=exchange_name,
-				queue=queue_name,
-				routing_key=queue_name)
+			self.consumer.add_queue(queue)
 
 		map(setup_queue, self.queue_names)
+		self.consumer.consume()
 
-	def _handle_call(self, chan, method, properties, body):
-		proto = msgpack.unpackb(body)
-		message_proto = self._call(proto["method"], proto["args"])
-		response = msgpack.packb(message_proto)
-		self.chan.basic_publish(
-			exchange=self.exchange_name,
-			routing_key=properties.reply_to,
-			properties=pika.BasicProperties(
-				delivery_mode=2),
-			body=response)
-		chan.basic_ack(delivery_tag=method.delivery_tag)
+	def _handle_call(self, body, message):
+		message_proto = self._call(body["method"], body["args"])
+		self.producer.publish(message_proto,
+			exchange=self.exchange,
+			routing_key=message.properties["reply_to"],
+			delivery_mode=2
+		)
+		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
 	def _call(self, method_name, args):
 		proto = {}
@@ -109,7 +108,5 @@ class Server(object):
 		return proto
 
 	def run(self):
-		self.chan.basic_qos(prefetch_count=1)
-		for queue_name in self.queue_names:
-			self.chan.basic_consume(self._handle_call, queue=queue_name)
-		self.chan.start_consuming()
+		while True:
+			self.channel.connection.drain_events()
