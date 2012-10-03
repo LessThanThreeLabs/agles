@@ -24,7 +24,7 @@
 	<script src="js/libs/backbone/iobind.productionModeShouldUseMinified.js"></script>
 
 	<script>
-	  var socket = io.connect('https://127.0.0.1?csrfToken={{csrfToken}}', { resource: 'socket'});
+	  var socket = io.connect('https://' + window.location.host + '?csrfToken={{csrfToken}}', { resource: 'socket'});
 	  socket.on('news', function (data) {
 	    console.log(data);
 	    socket.emit('my other event', { my: 'data' });
