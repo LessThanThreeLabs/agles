@@ -7,11 +7,13 @@ Instantiating a mixin violates the mixin paradigm and will have unintended side
 consequences/side effects.
 """
 import os
+import subprocess
 
 from multiprocessing import Process
 
 from kombu import Connection
 
+from database.engine import ConnectionFactory
 from model_server import ModelServer
 
 
@@ -44,3 +46,22 @@ class RepoStoreTestMixin(BaseTestMixin):
 		commit = repo.index.commit("", parent_commits=parent_commits)
 		repo.remotes.origin.push(refspec=refspec)
 		return commit
+
+
+class RedisTestMixin(BaseTestMixin):
+	def _start_redis(self):
+		self._redis_process = subprocess.Popen(
+			"redis-server",
+			stderr=subprocess.PIPE,
+			stdout=subprocess.PIPE)
+
+		while True:
+			self._redis_process.poll()
+			line = self._redis_process.stdout.readline()
+			if line.find("The server is now ready to accept connections") != -1:
+				break
+
+	def _stop_redis(self):
+		redis_conn = ConnectionFactory.get_redis_connection()
+		redis_conn.flushdb()
+		self._redis_process.terminate()

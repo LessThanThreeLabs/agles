@@ -17,7 +17,7 @@ class BuildConsoleUpdateHandler(ModelServerRpcHandler):
 		:param console: The console type we are appending to.
 		"""
 
-		redis_key = "build.output:%s:%s" % build_id, console
+		redis_key = "build.output:%s:%s" % (build_id, console)
 		redis_conn = ConnectionFactory.get_redis_connection()
 		redis_conn.rpush(redis_key, console_output)
 
@@ -27,7 +27,7 @@ class BuildConsoleUpdateHandler(ModelServerRpcHandler):
 		:param console: The console type we are flushing.
 		"""
 
-		redis_key = "build.output:%s:%s" % build_id, console
+		redis_key = "build.output:%s:%s" % (build_id, console)
 		redis_conn = ConnectionFactory.get_redis_connection()
 		complete_console_output = '\n'.join(redis_conn.lrange(redis_key, 0, -1))
 

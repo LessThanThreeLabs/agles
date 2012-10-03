@@ -12,6 +12,7 @@ syntax: glob
 *.ps
 *.pyc
 *.pyo
+*.rdb
 *.swp
 
 *.idea
