@@ -34,18 +34,14 @@ div.build {
 	-webkit-animation: fadeIn @fadeInTransitionTime;
 	-o-animation: fadeIn @fadeInTransitionTime;
 
-	@boxShadowTransitionTime: 0.8s;
+	@boxShadowTransitionTime: 1.0s;
 	transition: box-shadow @boxShadowTransitionTime ease-out;
 	-moz-transition: box-shadow @boxShadowTransitionTime ease-out;
 	-webkit-transition: box-shadow @boxShadowTransitionTime ease-out;
 	-o-transition: box-shadow @boxShadowTransitionTime ease-out;
 
-	// &:last-child {
-	// 	border-bottom: @borderColor solid 1px;
-	// }
-
 	&.selected {
-		box-shadow: 0px 0px 20px 0px #888888;
+		box-shadow: 0px 0px 50px 0px #888888;
 	}
 
 	.number {
@@ -60,6 +56,6 @@ div.build {
 		&.failed  { color: @failedColor;  }
 	}
 
-	&:hover  { box-shadow: 0px 0px 20px 0px #888888; }
-	&:active { box-shadow: 0px 0px 20px 4px #888888; }
+	&:hover  { box-shadow: 0px 0px 50px 0px #888888; }
+	&:active { box-shadow: 0px 0px 70px 4px #888888; }
 }
