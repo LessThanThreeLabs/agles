@@ -5,6 +5,7 @@ See server.py for the RPC protocol definition.
 import msgpack
 import pika
 from gevent import event, spawn, queue, monkey; monkey.patch_all(thread=False)
+from gevent.util import wrap_errors
 
 from bunnyrpc.exceptions import RPCRequestError
 from settings.rabbit import connection_parameters
@@ -112,13 +113,14 @@ class Client(ClientBase):
 
 		was_deadlettered = props.headers and "x-death" in props.headers
 		if was_deadlettered and props.reply_to == self.response_mq:
-			raise RPCRequestError("The server failed to process your call")
-
-		proto = msgpack.unpackb(body)
-		self.result_queue.put(proto)
+			queue_result = RPCRequestError("The server failed to process your call")
+		else:
+			queue_result = msgpack.unpackb(body)
+		self.result_queue.put(queue_result)
 
 	def _on_return(self, method, props, body):
-		raise RPCRequestError("The request was rejected and returned without being processed.")
+		error = RPCRequestError("The request was rejected and returned without being processed.")
+		self.result_queue.put(error)
 
 	def _remote_call(self, remote_method, *args, **kwargs):
 		"""Calls the remote method on the server.
@@ -133,8 +135,10 @@ class Client(ClientBase):
 				content_type="application/x-msgpack"),
 			body=msgpack.packb(proto),
 			mandatory=True)
-		proto = self.result_queue.get()
-		return self._process_result(proto)
+		queue_result = self.result_queue.get()
+		if isinstance(queue_result, Exception):
+			raise queue_result
+		return self._process_result(queue_result)
 
 	def _process_result(self, proto):
 		if proto["error"]:

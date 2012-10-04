@@ -2,7 +2,7 @@ from multiprocessing import Process, Event
 
 from nose.tools import *
 
-from bunnyrpc.client import Client
+from bunnyrpc.client import Client, RPCRequestError
 from bunnyrpc.server import Server
 from util.test import BaseIntegrationTest
 
@@ -10,22 +10,36 @@ from util.test import BaseIntegrationTest
 class BunnyRPCTest(BaseIntegrationTest):
 	def setUp(self):
 		super(BunnyRPCTest, self).setUp()
-		server_started_event = Event()
-		self.p = Process(target=self._runserver,
-			args=[self._TestRPCServer(),
-				  server_started_event,
-				  "exchange",
-				  ["queue0", "queue1"],])
-		self.p.start()
-		server_started_event.wait()
+		server_event = Event()
+		self.server_process = Process(target=self._runserver,
+			args=[self._TestRPCServer(), "exchange", ["queue0", "queue1"], server_event])
+		self.server_process.start()
+
+		ttl_event = Event()
+		self.ttl_process = Process(target=self._runserver,
+			args=[self._TestRPCServer(), "ttl_exchange", ["queue"], ttl_event],
+				  kwargs=dict(ttl=0))
+		self.ttl_process.start()
+
+		return_event = Event()
+		self.returned_msg_process = Process(target=self._runserver,
+			args=[self._TestRPCServer(), "returned_exchange", [], return_event])
+		self.returned_msg_process.start()
+
+		server_event.wait()
+		ttl_event.wait()
+		return_event.wait()
+		self.ttl_process.terminate()
 
 	def tearDown(self):
 		super(BunnyRPCTest, self).tearDown()
-		self.p.terminate()
+		self.server_process.terminate()
+		self.returned_msg_process.terminate()
 
-	def _runserver(self, base_instance, event, exchange, queue_names):
+	def _runserver(self, base_instance, exchange,
+				   queue_names, event, ttl=30000):
 		server = Server(base_instance)
-		server.bind(exchange, queue_names)
+		server.bind(exchange, queue_names, message_ttl=ttl)
 		event.set()
 		server.run()
 
@@ -61,7 +75,12 @@ class BunnyRPCTest(BaseIntegrationTest):
 		self._run_multiclients_in_tandem(client0, client1)
 
 	def test_deadlettering(self):
-		pass
+		with Client("ttl_exchange", "queue") as client:
+			assert_raises(RPCRequestError, client.incr)
+
+	def test_returned_message(self):
+		with Client("returned_exchange", "queue") as client:
+			assert_raises(RPCRequestError, client.incr)
 
 	class _TestRPCServer(object):
 		def __init__(self):
