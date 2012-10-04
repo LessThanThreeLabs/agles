@@ -30,18 +30,21 @@ class VerificationRequestHandler(MessageHandler):
 
 	def handle_message(self, body, message):
 		"""Respond to a verification event, begin verifying"""
-		repo_hash, commit_list = body
-		print "Processing verification request: " + str((repo_hash, commit_list,))
-		repo_address = self.get_repo_address(repo_hash)
-		verify_callback = self.make_verify_callback(repo_hash, commit_list, message)
-		self.verify(repo_address, commit_list, verify_callback)
+		change_id, commit_list = body
+		print "Processing verification request: " + str((change_id, commit_list,))
+		repo_uri = self.get_repo_uri(commit_list[0])
+		verify_callback = self.make_verify_callback(change_id, commit_list, message)
+		build_id = self._create_build(change_id, commit_list)
+		print "Starting build: " + str(build_id)
+		refs = self._get_ref_list(commit_list)
+		self.verify(repo_uri, refs, verify_callback)
 
-	def make_verify_callback(self, repo_hash, commit_list, message):
+	def make_verify_callback(self, change_id, commit_list, message):
 		"""Returns the default callback function to be
 		called with a return value after verification.
 		Sends a message denoting the return value and acks"""
 		def default_verify_callback(results):
-			self.producer.publish((repo_hash, commit_list, results),
+			self.producer.publish((change_id, commit_list, results),
 				exchange=verification_results_queue.exchange,
 				routing_key=verification_results_queue.routing_key,
 				delivery_mode=2,  # make message persistent
@@ -49,10 +52,14 @@ class VerificationRequestHandler(MessageHandler):
 			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		return default_verify_callback
 
-	def verify(self, repo_address, commit_list, callback):
+	def _create_build(self, change_id, commit_list):
+		with ModelServer.rpc_connect("build", "create") as model_server_rpc:
+			return model_server_rpc.create_build(change_id, commit_list)
+
+	def verify(self, repo_uri, refs, callback):
 		"""Runs verification on a desired git commit"""
 		try:
-			self.checkout_commit_list(repo_address, commit_list)
+			self.checkout_refs(repo_uri, refs)
 			self.setup_vagrant()
 			configuration = self.get_user_configuration()
 			self.run_linter(configuration)
@@ -62,18 +69,21 @@ class VerificationRequestHandler(MessageHandler):
 		else:
 			self._mark_success(callback)
 
-	def get_repo_address(self, repo_hash):
+	def get_repo_uri(self, commit_id):
 		"""Sends out a rpc call to the model server to retrieve
-		the address of a repository based on its hash"""
+		the uri of a repository for a commit"""
 		with ModelServer.rpc_connect("repo", "read") as model_server_rpc:
-			repo_address = model_server_rpc.get_repo_address(repo_hash)
-		return repo_address
+			return model_server_rpc.get_repo_uri(commit_id)
 
-	def checkout_commit_list(self, repo_address, commit_list):
-		source_repo = Repo(repo_address)
-		ref, parent_ref = commit_list[0]
+	def _get_ref_list(self, commit_list):
+		with ModelServer.rpc_connect("repo", "read") as model_server_rpc:
+			return [model_server_rpc.get_commit_attributes(commit)[2] for commit in commit_list]
+
+	def checkout_refs(self, repo_uri, refs):
+		source_repo = Repo(repo_uri)
+		ref = refs[0]
 		self.checkout_commit(source_repo, ref)
-		for ref_parent_ref in commit_list[1:]:
+		for ref in refs[1:]:
 			source_repo.git.merge(ref)
 
 	def checkout_commit(self, repo, ref):

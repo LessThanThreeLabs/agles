@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, SmallInteger, String, DateTime, Text, MetaData, ForeignKey, UniqueConstraint
+from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Text, MetaData, ForeignKey, UniqueConstraint
 
 from database.engine import ConnectionFactory
 
@@ -30,16 +30,34 @@ commit = Table('commit', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
-	Column('timestamp', DateTime, nullable=False)
+	Column('ref', String, nullable=False),
+	Column('message', String, nullable=False),
+	Column('timestamp', Integer, nullable=False)
+)
+
+change = Table('change', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('commit_id', Integer, ForeignKey('commit.id'), nullable=False),
+	Column('merge_target', String, nullable=False),
+	Column('number', Integer, nullable=False),
+	Column('status', String, nullable=False),
+	Column('start_time', Integer, nullable=True),
+	Column('end_time', Integer, nullable=True)
 )
 
 build = Table('build', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('commit_id', Integer, ForeignKey('commit.id'), nullable=False),
-	Column('number', Integer, nullable=False),
+	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
+	Column('is_primary', Boolean, nullable=False),
 	Column('status', String, nullable=False),
-	Column('start_time', DateTime, nullable=False),
-	Column('end_time', DateTime, nullable=False)
+	Column('start_time', Integer, nullable=True),
+	Column('end_time', Integer, nullable=True)
+)
+
+"""Maps builds to lists of commits"""
+build_commits_map = Table('build_commits_map', metadata,
+	Column('build_id', Integer, ForeignKey('build.id'), nullable=False),
+	Column('commit_id', Integer, ForeignKey('commit.id'), nullable=False)
 )
 
 build_console = Table('build_console', metadata,
