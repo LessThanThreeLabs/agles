@@ -1,4 +1,4 @@
-from multiprocessing import Process
+from multiprocessing import Process, Event
 
 from nose.tools import *
 
@@ -10,17 +10,23 @@ from util.test import BaseIntegrationTest
 class BunnyRPCTest(BaseIntegrationTest):
 	def setUp(self):
 		super(BunnyRPCTest, self).setUp()
+		server_started_event = Event()
 		self.p = Process(target=self._runserver,
-			args=(self._TestRPCServer(), "exchange", ["queue0", "queue1"],))
+			args=[self._TestRPCServer(),
+				  server_started_event,
+				  "exchange",
+				  ["queue0", "queue1"],])
 		self.p.start()
+		server_started_event.wait()
 
 	def tearDown(self):
 		super(BunnyRPCTest, self).tearDown()
 		self.p.terminate()
 
-	def _runserver(self, base_instance, exchange, queue_names):
+	def _runserver(self, base_instance, event, exchange, queue_names):
 		server = Server(base_instance)
 		server.bind(exchange, queue_names)
+		event.set()
 		server.run()
 
 	def test_basic_clientserver_rpc(self):

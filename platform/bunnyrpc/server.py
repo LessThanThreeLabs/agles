@@ -21,7 +21,8 @@ Protocol Definition:
 import sys
 import traceback
 
-from kombu import Connection, Exchange, Queue
+from kombu.connection import Connection
+from kombu.entity import Exchange, Queue
 
 
 class Server(object):
@@ -51,7 +52,7 @@ class Server(object):
 		self.queue_names = None
 		self.chan = None
 
-	def bind(self, exchange_name, queue_names, channel=None):
+	def bind(self, exchange_name, queue_names, channel=None, message_ttl=30000):
 		""" Binds this RPC server to listen for calls from <exchange_name>
 		routed to <queue_names>.
 
@@ -62,6 +63,7 @@ class Server(object):
 		"""
 		self.exchange_name = exchange_name
 		self.queue_names = set(queue_names)
+		self.message_ttl = message_ttl
 		if channel:
 			self.channel = channel
 		else:
@@ -72,12 +74,15 @@ class Server(object):
 		self.producer = self.channel.Producer(serializer="msgpack")
 
 		self.exchange = Exchange(self.exchange_name, "direct", durable=False)
-		self.deadletter_exchange = Exchange(self.deadletter_exchange_name, "fanout")
+		self.deadletter_exchange = Exchange(self.deadletter_exchange_name,
+			"fanout", channel=self.channel, durable=False)
+		self.deadletter_exchange.declare()
 
 		def setup_queue(queue_name):
 			queue = Queue(queue_name, exchange=self.exchange, routing_key=queue_name,
-				durable=False, arguments={
-					"x-dead-letter-exchange": self.deadletter_exchange_name
+				durable=False, queue_arguments={
+					"x-dead-letter-exchange": self.deadletter_exchange_name,
+					"x-message-ttl": self.message_ttl
 				})
 			self.consumer.add_queue(queue)
 

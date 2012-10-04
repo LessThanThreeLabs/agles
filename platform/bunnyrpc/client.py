@@ -29,6 +29,13 @@ class Client(ClientBase):
 
 	Example of common usage:
 		client = Client("exchange", "queue", globals=globals())
+
+	!!!
+	WARNING: You must start your server before you bind a client to it.
+			 Otherwise, exchanges and queues have not yet been declared and
+			 RabbitMQ doesn't know how to handle this. Currently this manifests
+			 itself as a race condition where the client hangs on Event.set().
+	!!!
 	"""
 
 	@property
@@ -76,16 +83,14 @@ class Client(ClientBase):
 
 	def _on_chan_open(self, chan):
 		self.channel = chan
-		self.channel.exchange_declare(exchange=self.deadletter_exchange_name,
-			type="fanout")
+		self.channel.add_on_return_callback(self._on_return)
 		self.channel.exchange_declare(exchange=self.exchange_name,
 			type="direct", callback=self._on_exchange_declare)
 
 	def _on_exchange_declare(self, frame):
 		self.channel.queue_declare(
 			exclusive=True,
-			callback=self._on_queue_declare,
-			arguments={"x-dead-letter-exchange": self.deadletter_exchange_name})
+			callback=self._on_queue_declare)
 
 	def _on_queue_declare(self, frame):
 		self.response_mq = frame.method.queue
@@ -112,6 +117,9 @@ class Client(ClientBase):
 		proto = msgpack.unpackb(body)
 		self.result_queue.put(proto)
 
+	def _on_return(self, method, props, body):
+		raise RPCRequestError("The request was rejected and returned without being processed.")
+
 	def _remote_call(self, remote_method, *args, **kwargs):
 		"""Calls the remote method on the server.
 		NOTE: Currently does not support **kwargs"""
@@ -123,7 +131,8 @@ class Client(ClientBase):
 			properties=pika.BasicProperties(reply_to=self.response_mq,
 				content_encoding="binary",
 				content_type="application/x-msgpack"),
-			body=msgpack.packb(proto))
+			body=msgpack.packb(proto),
+			mandatory=True)
 		proto = self.result_queue.get()
 		return self._process_result(proto)
 
