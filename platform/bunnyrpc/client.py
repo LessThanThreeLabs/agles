@@ -113,12 +113,14 @@ class Client(ClientBase):
 
 		was_deadlettered = props.headers and "x-death" in props.headers
 		if was_deadlettered and props.reply_to == self.response_mq:
+			# Greenlets do not propogate errors to the parent, so we send it over as an Exception
 			queue_result = RPCRequestError("The server failed to process your call")
 		else:
 			queue_result = msgpack.unpackb(body)
 		self.result_queue.put(queue_result)
 
 	def _on_return(self, method, props, body):
+		# Greenlets do not propogate errors to the parent, so we send it over as an Exception
 		error = RPCRequestError("The request was rejected and returned without being processed.")
 		self.result_queue.put(error)
 
@@ -135,10 +137,13 @@ class Client(ClientBase):
 				content_type="application/x-msgpack"),
 			body=msgpack.packb(proto),
 			mandatory=True)
-		queue_result = self.result_queue.get()
-		if isinstance(queue_result, Exception):
-			raise queue_result
-		return self._process_result(queue_result)
+		result = self.result_queue.get()
+		# result is an Exception if the greenlet raised. Process the result,
+		# or reraise the Exception in the parent if it is an Exception
+		try:
+			return self._process_result(result)
+		except TypeError:
+			raise result
 
 	def _process_result(self, proto):
 		if proto["error"]:
