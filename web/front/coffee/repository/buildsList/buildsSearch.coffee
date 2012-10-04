@@ -6,40 +6,34 @@ class BuildsSearch.Model extends Backbone.Model
 		query: ''
 
 	initialize: () =>
-		
+		@buildsSearchFilterModel = new BuildsSearchFilter.Model()
 
 
 class BuildsSearch.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildsSearch'
-	template: Handlebars.compile '<span class="dropdown">
-			<a class="dropdown-toggle" data-toggle="dropdown" href="#">
-				<img src="/img/icons/critical.svg" class="searchImage" /><span class="caret"></span>
-			</a>
-			<ul class="dropdown-menu" role="menu">
-				<li><a tabindex="-1" href="#"><img src="/img/icons/everyone.svg" class="searchImage" />&nbsp;&nbsp;Everyone</a></li>
-				<li><a tabindex="-1" href="#"><img src="/img/icons/user.svg" class="searchImage" />&nbsp;&nbsp;User</a></li>
-				<li><a tabindex="-1" href="#"><img src="/img/icons/critical.svg" class="searchImage" />&nbsp;&nbsp;Critical</a></li>
-			</ul>
-		</span>
-		<input class="searchField" type="search" maxlength=100 placeholder="Search..." data-provide="typeahead">'
-
-	events:
-		'keyup .searchField': 'keyupHandler'
+	template: Handlebars.compile '<form class="form-search">
+			<div class="input-prepend search">
+				<input class="searchField search-query input-small" type="text" placeholder="Search...">
+			</div>
+		</form>'
 
 	initialize: () =>
+		@buildsSearchFilterView = new BuildsSearchFilter.View model: @model.buildsSearchFilterModel
 
 
 	render: () =>
 		@$el.html @template()
-
-		setTimeout (()-> 
-			$('.searchField').typeahead
-				source: ['jpotter', 'jchu', 'bbland']
-			), 100
-
+		@$el.find('.input-prepend').prepend @buildsSearchFilterView.render().el
+		setTimeout (() => @_setupTypeAhead()), 100
 		return @
 
 
-	keyupHandler: () =>
-		@model.set 'query', $('.searchField').val()
+	_setupTypeAhead: () =>
+		$('.searchField').typeahead
+			source: (query, process) ->
+				console.log 'source called'
+				return ['jpotter', 'jchu', 'bbland']
+			updater: (item) ->
+				console.log 'updater called'
+				return item

@@ -26,7 +26,7 @@
 div.build {
 	text-align: center;
 	opacity: @fadeInOpacity;
-	border-top: @borderColor solid 1px;
+	border-bottom: @borderColor solid 1px;
 
 	@fadeInTransitionTime: 2.0s;
 	animation: fadeIn @fadeInTransitionTime;
@@ -40,9 +40,9 @@ div.build {
 	-webkit-transition: box-shadow @boxShadowTransitionTime ease-out;
 	-o-transition: box-shadow @boxShadowTransitionTime ease-out;
 
-	&:last-child {
-		border-bottom: @borderColor solid 1px;
-	}
+	// &:last-child {
+	// 	border-bottom: @borderColor solid 1px;
+	// }
 
 	&.selected {
 		box-shadow: 0px 0px 20px 0px #888888;
