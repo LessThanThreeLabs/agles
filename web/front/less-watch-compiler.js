@@ -60,7 +60,7 @@ function walk (dir, options, callback, initCallback) {
             if (options.filter && options.filter(f, stat)) return done && callback(null, callback.files);
             callback.files[f] = stat;
             if (stat.isDirectory()) {
-              walk(f, options, callback);
+              walk(f, options, callback, initCallback);
             }else{
               initCallback&&initCallback(f);
             }
@@ -132,6 +132,21 @@ function getFilenameWithoutExtention(string){
   return filename
 }
 
+function getFilenameWithoutExtensionFull(string){
+  // console.log('> ' + string.substr(argvs[0].length).split(".")[0]);
+  var filename = string.substr(argvs[0].length+1).split(".")[0];
+  return filename;
+}
+
+function getDirectory(string){
+  if (string.indexOf('/') === string.lastIndexOf('/')) {
+    return null;
+  } else {
+    var temp = string.substr(argvs[0].length+1);
+    return temp.substr(0, temp.lastIndexOf('/'));
+  }
+}
+
 // String function to retrieve the file's extension
 function getFileExtension(string){
   var extension = string.split(".").pop();
@@ -142,16 +157,22 @@ function getFileExtension(string){
 
 // Here's where we run the less compiler
 function compileCSS(file){
-	  var filename = getFilenameWithoutExtention(file);
+    var filename = getFilenameWithoutExtensionFull(file);
+    var directory = getDirectory(file);
+
+    if (directory !== null) {
+      fs.mkdir(argvs[1] + '/' + directory);
+    }
+
     var command = "lessc "+file.replace(/\s+/g,"\\ ")+" "+argvs[1]+"/"+filename.replace(/\s+/g,"\\ ")+".css";
-	  console.log("Command: '"+command+"'");
+    console.log("Command: '"+command+"'");
     // Run the command
-	  exec(command, function (error, stdout, stderr){
-	  if (error !== null) {
-	    console.log('exec error: ' + error);
+    exec(command, function (error, stdout, stderr){
+    if (error !== null) {
+      console.log('exec error: ' + error);
       console.log("stdout : "+stdout)
       console.log("stderr : "+stderr)
-	  }
+    }
   });
 }
 
@@ -161,10 +182,11 @@ function filterFiles(f, stat){
   var extension = getFileExtension(f);
   if (filename.substr(0,1) == "_" || 
       filename.substr(0,1) == "." || 
-      filename == "" ||
-      allowedExtensions.indexOf(extension) == -1
-      )
+      filename == "" //||
+      // allowedExtensions.indexOf(extension) == -1
+      ) {
     return true;
+  }
   else{
     return false;
   }   
