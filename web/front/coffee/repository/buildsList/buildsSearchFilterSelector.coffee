@@ -23,7 +23,7 @@ class BuildsSearchFilterSelector.View extends Backbone.View
 			{{/each}}'
 
 	initialize: () =>
-		$('.searchFilterRadio').live 'change', @_handleRadioSelection
+		$(document).on 'click', '.searchFilter .searchFilterRadio', @_handleRadioSelection
 		
 
 	render: () =>
