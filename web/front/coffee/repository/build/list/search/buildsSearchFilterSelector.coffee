@@ -6,7 +6,11 @@ class BuildsSearchFilterSelector.Model extends Backbone.Model
 		query: ''
 
 	initialize: () =>
-		
+		@types = [
+			new BuildsSearchFilterType 'everyone', 'Everyone', 'View builds created by eveyone,<br>including you.', 'img/icons/everyone.svg'
+			new BuildsSearchFilterType 'user', 'User', 'View your builds and code <br> reviews assigned to you.', 'img/icons/user.svg'
+			new BuildsSearchFilterType 'important', 'Important', 'View builds that need attention.', 'img/icons/critical.svg'
+		]
 
 
 class BuildsSearchFilterSelector.View extends Backbone.View
@@ -14,10 +18,10 @@ class BuildsSearchFilterSelector.View extends Backbone.View
 	className: 'searchFilter'
 	template: Handlebars.compile '{{#each filters}}
 			<label class="radio searchFilterOption">
-				<input type="radio" name="searchFilterRadioGroup" class="searchFilterRadio" value={{value}}>
+				<input type="radio" name="searchFilterRadioGroup" class="searchFilterRadio" value={{name}}>
 				<img src={{{imageSource}}} class="searchImage" />
 				<span class="filterDescription">
-					{{{type}}<br><small class="muted">{{{description}}</small>
+					{{{title}}<br><small class="muted">{{{description}}</small>
 				</span>
 			</label>
 			{{/each}}'
@@ -28,20 +32,7 @@ class BuildsSearchFilterSelector.View extends Backbone.View
 
 	render: () =>
 		@$el.html @template 
-			filters: [
-				{ value: 'everyone'
-				imageSource: 'img/icons/everyone.svg'
-				type: 'Everyone'
-				description: 'View builds created by eveyone,<br>including you.' },
-				{ value: 'user'
-				imageSource: 'img/icons/user.svg'
-				type: 'User'
-				description: 'View your builds and code <br> reviews assigned to you.' },
-				{ value: 'critical'
-				imageSource: 'img/icons/critical.svg'
-				type: 'Critical'
-				description: 'View builds that need attention.' }
-			]
+			filters: @model.types
 		return @
 
 
