@@ -7,6 +7,8 @@ class BuildsSearchFilter.Model extends Backbone.Model
 
 	initialize: () =>
 		@buildsSearchFilterSelectorModel = new BuildsSearchFilterSelector.Model()
+		@buildsSearchFilterSelectorModel.on 'change:selectedType', (model, selectedType) =>
+			@trigger 'selectedType', selectedType
 
 
 class BuildsSearchFilter.View extends Backbone.View
@@ -16,6 +18,7 @@ class BuildsSearchFilter.View extends Backbone.View
 
 	initialize: () =>
 		@buildsSearchFilterSelectorView = new BuildsSearchFilterSelector.View model: @model.buildsSearchFilterSelectorModel
+		@model.on 'selectedType', @_handleFilterTypeSelection
 
 
 	render: () =>
@@ -28,4 +31,8 @@ class BuildsSearchFilter.View extends Backbone.View
 		@$el.popover
 			title: 'Filter by Type'
 			content: @buildsSearchFilterSelectorView.render().el
+
+
+	_handleFilterTypeSelection: (selectedType) =>
+		$('.selectedSearchImage').attr 'src', selectedType.imageSource
 			

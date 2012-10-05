@@ -13,6 +13,19 @@ class BuildsSearchFilterSelector.Model extends Backbone.Model
 		@set 'selectedType', @types[2], silent: true
 
 
+	validate: (attributes) =>
+		if @types.indexOf(attributes.selectedType) is -1
+			return new Error 'Bad selected filter type.'
+
+		return
+
+
+	getFilterTypeFromName: (name) =>
+		for type in @types
+			return type if name is type.name
+		return null
+
+
 class BuildsSearchFilterSelector.View extends Backbone.View
 	tagName: 'div'
 	className: 'searchFilter'
@@ -36,9 +49,9 @@ class BuildsSearchFilterSelector.View extends Backbone.View
 				typeCopy = $.extend(true, {}, type);
 				typeCopy.selected = typeCopy.name == @model.get('selectedType').name
 				return typeCopy
-		
+
 		return @
 
 
-	_handleRadioSelection: (event) ->
-		console.log event.target.value
+	_handleRadioSelection: (event) =>
+		@model.set 'selectedType', @model.getFilterTypeFromName event.target.value
