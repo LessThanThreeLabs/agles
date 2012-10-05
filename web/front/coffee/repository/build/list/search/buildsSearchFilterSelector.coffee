@@ -2,15 +2,15 @@ window.BuildsSearchFilterSelector = {}
 
 
 class BuildsSearchFilterSelector.Model extends Backbone.Model
-	defaults:
-		query: ''
+	types: [
+		new BuildsSearchFilterType 'everyone', 'Everyone', 'View builds created by eveyone,<br>including you.', 'img/icons/everyone.svg'
+		new BuildsSearchFilterType 'user', 'User', 'View your builds and code <br> reviews assigned to you.', 'img/icons/user.svg'
+		new BuildsSearchFilterType 'important', 'Important', 'View builds that need attention.', 'img/icons/critical.svg'
+	]
+
 
 	initialize: () =>
-		@types = [
-			new BuildsSearchFilterType 'everyone', 'Everyone', 'View builds created by eveyone,<br>including you.', 'img/icons/everyone.svg'
-			new BuildsSearchFilterType 'user', 'User', 'View your builds and code <br> reviews assigned to you.', 'img/icons/user.svg'
-			new BuildsSearchFilterType 'important', 'Important', 'View builds that need attention.', 'img/icons/critical.svg'
-		]
+		@set 'selectedType', @types[2], silent: true
 
 
 class BuildsSearchFilterSelector.View extends Backbone.View
@@ -18,7 +18,7 @@ class BuildsSearchFilterSelector.View extends Backbone.View
 	className: 'searchFilter'
 	template: Handlebars.compile '{{#each filters}}
 			<label class="radio searchFilterOption">
-				<input type="radio" name="searchFilterRadioGroup" class="searchFilterRadio" value={{name}}>
+				<input type="radio" name="searchFilterRadioGroup" class="searchFilterRadio" value={{name}} {{#if selected}}checked{{/if}}>
 				<img src={{{imageSource}}} class="searchImage" />
 				<span class="filterDescription">
 					{{{title}}<br><small class="muted">{{{description}}</small>
@@ -32,7 +32,11 @@ class BuildsSearchFilterSelector.View extends Backbone.View
 
 	render: () =>
 		@$el.html @template 
-			filters: @model.types
+			filters: @model.types.map (type) =>
+				typeCopy = $.extend(true, {}, type);
+				typeCopy.selected = typeCopy.name == @model.get('selectedType').name
+				return typeCopy
+		
 		return @
 
 
