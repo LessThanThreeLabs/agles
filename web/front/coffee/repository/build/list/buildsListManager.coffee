@@ -9,21 +9,6 @@ class BuildsListManager.Model extends Backbone.Model
 		@buildsSearchModel.on 'selectedFilterType', (filterType) =>
 			@set 'currentBuildsList', @_getBuildListFromType filterType
 
-		# @allBuildsListModel = new BuildsList.Model
-		# 	repositoryId: @get 'repositoryId'
-		# 	buildsFetcher: @buildsFetcher
-		# 	type: 'all'
-
-		# @userBuildsListModel = new BuildsList.Model
-		# 	repositoryId: @get 'repositoryId'
-		# 	buildsFetcher: @buildsFetcher
-		# 	type: 'user'
-
-		# @criticalBuildsListModel = new BuildsList.Model
-		# 	repositoryId: @get 'repositoryId'
-		# 	buildsFetcher: @buildsFetcher
-		# 	type: 'critical'
-
 		@buildsListModels = []
 		filterTypes = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.types
 		for filterType in filterTypes
@@ -59,10 +44,6 @@ class BuildsListManager.View extends Backbone.View
 			@_renderBuildsList()
 
 		@buildsSearchView = new BuildsSearch.View model: @model.buildsSearchModel
-
-		# @allBuildsListView = new BuildsList.View model: @model.allBuildsListModel
-		# @userBuildsListView = new BuildsList.View model: @model.userBuildsListModel
-		# @criticalBuildsListView = new BuildsList.View model: @model.criticalBuildsListModel
 
 
 	render: () =>
