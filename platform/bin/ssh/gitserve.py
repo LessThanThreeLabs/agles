@@ -11,10 +11,13 @@ import sys
 from util.shell import RestrictedShell
 
 valid_commands = ["git-receive-pack", "git-upload-pack", "git-upload-archive"]
+user_id_required_commands =["git-receive-pack"]
 
 def main():
-	user = sys.argv[0]
+	user_id = sys.argv[1]
 	command = os.environ["SSH_ORIGINAL_COMMAND"]
+	if any(map(lambda x: command.startswith(x), user_id_required_commands)):
+		command += ' ' + user_id
 	rsh = RestrictedShell(valid_commands)
 	rsh.handle_command(command)
 	
