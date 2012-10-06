@@ -7,6 +7,8 @@ class BuildsSearch.Model extends Backbone.Model
 
 	initialize: () =>
 		@buildsSearchFilterModel = new BuildsSearchFilter.Model()
+		@buildsSearchFilterModel.on 'selectedFilterType', (filterType) =>
+			@trigger 'selectedFilterType', filterType
 
 
 class BuildsSearch.View extends Backbone.View

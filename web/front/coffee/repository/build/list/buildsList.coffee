@@ -47,8 +47,8 @@ class BuildsList.View extends Backbone.View
 		'scroll': 'scrollHandler'
 
 	initialize: () =>
-		@model.on 'add', @handleAdd
-		$(window).bind 'resize', @windowResizeHandler
+		@model.on 'add', @_handleAdd
+		$(window).bind 'resize', @_windowResizeHandler
 
 
 	render: () =>
@@ -78,11 +78,11 @@ class BuildsList.View extends Backbone.View
 			@model.fetchMoreBuilds @numberOfBuildsToRequest
 
 
-	windowResizeHandler: () =>
+	_windowResizeHandler: () =>
 		@saturateBuilds()
 
 
-	handleAdd: (buildModel, collection, options) =>
+	_handleAdd: (buildModel, collection, options) =>
 		buildView = new Build.View model: buildModel
 		@_insertBuildAtIndex buildView.render().el, options.index
 

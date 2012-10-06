@@ -7,8 +7,8 @@ class BuildsSearchFilter.Model extends Backbone.Model
 
 	initialize: () =>
 		@buildsSearchFilterSelectorModel = new BuildsSearchFilterSelector.Model()
-		@buildsSearchFilterSelectorModel.on 'change:selectedType', (model, selectedType) =>
-			@trigger 'selectedType', selectedType
+		@buildsSearchFilterSelectorModel.on 'change:selectedType', (model, filterType) =>
+			@trigger 'selectedFilterType', filterType
 
 
 class BuildsSearchFilter.View extends Backbone.View
@@ -18,7 +18,7 @@ class BuildsSearchFilter.View extends Backbone.View
 
 	initialize: () =>
 		@buildsSearchFilterSelectorView = new BuildsSearchFilterSelector.View model: @model.buildsSearchFilterSelectorModel
-		@model.on 'selectedType', @_handleFilterTypeSelection
+		@model.on 'selectedFilterType', @_handleFilterTypeSelection
 
 
 	render: () =>
@@ -33,6 +33,6 @@ class BuildsSearchFilter.View extends Backbone.View
 			content: @buildsSearchFilterSelectorView.render().el
 
 
-	_handleFilterTypeSelection: (selectedType) =>
-		$('.selectedSearchImage').attr 'src', selectedType.imageSource
+	_handleFilterTypeSelection: (filterType) =>
+		$('.selectedSearchImage').attr 'src', filterType.imageSource
 			

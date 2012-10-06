@@ -6,21 +6,47 @@ class BuildsListManager.Model extends Backbone.Model
 	initialize: () =>
 		@buildsFetcher = new BuildsFetcher()
 		@buildsSearchModel = new BuildsSearch.Model()
+		@buildsSearchModel.on 'selectedFilterType', (filterType) =>
+			@set 'currentBuildsList', @_getBuildListFromType filterType
 
-		@allBuildsListModel = new BuildsList.Model
-			repositoryId: @get 'repositoryId'
-			buildsFetcher: @buildsFetcher
-			type: 'all'
+		# @allBuildsListModel = new BuildsList.Model
+		# 	repositoryId: @get 'repositoryId'
+		# 	buildsFetcher: @buildsFetcher
+		# 	type: 'all'
 
-		@userBuildsListModel = new BuildsList.Model
-			repositoryId: @get 'repositoryId'
-			buildsFetcher: @buildsFetcher
-			type: 'user'
+		# @userBuildsListModel = new BuildsList.Model
+		# 	repositoryId: @get 'repositoryId'
+		# 	buildsFetcher: @buildsFetcher
+		# 	type: 'user'
 
-		@criticalBuildsListModel = new BuildsList.Model
-			repositoryId: @get 'repositoryId'
-			buildsFetcher: @buildsFetcher
-			type: 'critical'
+		# @criticalBuildsListModel = new BuildsList.Model
+		# 	repositoryId: @get 'repositoryId'
+		# 	buildsFetcher: @buildsFetcher
+		# 	type: 'critical'
+
+		@buildsListModels = []
+		filterTypes = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.types
+		for filterType in filterTypes
+			@buildsListModels.push new BuildsList.Model
+				repositoryId: @get 'repositoryId'
+				buildsFetcher: @buildsFetcher
+				type: filterType.name
+
+		currentFilterType = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.get 'selectedType'
+		@set 'currentBuildsList', @_getBuildListFromType currentFilterType
+
+
+	_getBuildListFromType: (type) ->
+		for buildsListModel in @buildsListModels
+			return buildsListModel if buildsListModel.get('type') is type.name
+		return null
+
+
+	validate: (attributes) =>
+		if not attributes.currentBuildsList?
+			return new Error 'Invalid current builds list.'
+
+		return
 
 
 class BuildsListManager.View extends Backbone.View
@@ -29,11 +55,14 @@ class BuildsListManager.View extends Backbone.View
 	template: Handlebars.compile ''
 
 	initialize: () =>
+		@model.on 'change:currentBuildsList', (filterType) =>
+			@_renderBuildsList()
+
 		@buildsSearchView = new BuildsSearch.View model: @model.buildsSearchModel
 
-		@allBuildsListView = new BuildsList.View model: @model.allBuildsListModel
-		@userBuildsListView = new BuildsList.View model: @model.userBuildsListModel
-		@criticalBuildsListView = new BuildsList.View model: @model.criticalBuildsListModel
+		# @allBuildsListView = new BuildsList.View model: @model.allBuildsListModel
+		# @userBuildsListView = new BuildsList.View model: @model.userBuildsListModel
+		# @criticalBuildsListView = new BuildsList.View model: @model.criticalBuildsListModel
 
 
 	render: () =>
@@ -43,7 +72,12 @@ class BuildsListManager.View extends Backbone.View
 		@$el.find('.buildsSearchContainer').append @buildsSearchView.render().el
 
 		@$el.append '<div class="buildsListContainer"></div>'
-		@$el.find('.buildsListContainer').append @allBuildsListView.render().el
-		@allBuildsListView.saturateBuilds()
+		@_renderBuildsList()
 
 		return @
+
+
+	_renderBuildsList: () =>
+		buildsListView = new BuildsList.View model: @model.get 'currentBuildsList'
+		@$el.find('.buildsListContainer').append buildsListView.render().el
+		buildsListView.saturateBuilds()
