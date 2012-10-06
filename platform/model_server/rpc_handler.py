@@ -8,6 +8,9 @@ class ModelServerRpcHandler(object):
 		return ConnectionFactory.get_sql_connection()
 
 	def __init__(self, rpc_noun, rpc_verb):
+		assert isinstance(rpc_noun, str)
+		assert isinstance(rpc_verb, str)
+
 		self.rpc_noun = rpc_noun
 		self.rpc_verb = rpc_verb
 		self.rpc_queue_name = "-".join(["rpc", rpc_noun, rpc_verb])

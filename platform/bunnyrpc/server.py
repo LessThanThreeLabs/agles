@@ -61,6 +61,9 @@ class Server(object):
 		:param queue_names: A list of queues we bind to. These queues are the
 							the ones we pull our rpc calls from.
 		"""
+		assert isinstance(exchange_name, str)
+		assert isinstance(queue_names, list)
+
 		self.exchange_name = exchange_name
 		self.queue_names = set(queue_names)
 		self.message_ttl = message_ttl

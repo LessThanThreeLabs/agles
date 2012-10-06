@@ -56,6 +56,9 @@ class Client(ClientBase):
 						This allows us to raise exceptions not currently
 						imported in client.py's namespace.
 		"""
+		assert isinstance(exchange_name, str)
+		assert isinstance(routing_key, str)
+
 		super(Client, self).__init__()
 		self.caller_globals_dict = globals
 		self.exchange_name = exchange_name
@@ -146,7 +149,10 @@ class Client(ClientBase):
 			raise result
 
 	def _process_result(self, proto):
+		assert proto is None or isinstance(proto, dict)
+
 		if proto["error"]:
+			assert isinstance(proto["error"], dict)
 			exc_tuple = (proto["error"]["type"],
 						 proto["error"]["message"],
 						 proto["error"]["traceback"])
