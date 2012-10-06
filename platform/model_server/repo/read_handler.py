@@ -42,7 +42,4 @@ class RepoReadHandler(ModelServerRpcHandler):
 		ssh_pubkeys = database.schema.ssh_pubkeys
 		query = ssh_pubkeys.select().where(ssh_pubkeys.c.ssh_key==key)
 		row = self._db_conn.execute(query).first()
-		if row:
-			return row[ssh_pubkeys.c.user_id]
-		else:
-			return None
+		return row[ssh_pubkeys.c.user_id] if row else None
