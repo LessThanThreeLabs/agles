@@ -28,7 +28,8 @@ class ModelServer(object):
 	]
 
 	@classmethod
-	def rpc_connect(cls, route):
+	def rpc_connect(cls, route_noun, route_verb):
+		route = '-'.join(['rpc', route_noun, route_verb])
 		return Client("model-rpc", route)
 
 	def __init__(self, channel=None):

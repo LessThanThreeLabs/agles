@@ -38,7 +38,7 @@ class RepoReadHandler(ModelServerRpcHandler):
 		row_result = self._db_conn.execute(query).first()
 		return row_result[machine.c.uri], row_result[repo.c.hash], row_result[repo.c.name]
 
-	def verify_public_key(self, key):
+	def get_user_id_from_public_key(self, key):
 		ssh_pubkeys = database.schema.ssh_pubkeys
 		query = ssh_pubkeys.select().where(ssh_pubkeys.c.ssh_key==key)
 		row = self._db_conn.execute(query).first()

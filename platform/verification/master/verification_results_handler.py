@@ -30,7 +30,7 @@ class VerificationResultsHandler(MessageHandler):
 
 	def send_merge_request(self, repo_hash, ref, parent_ref):
 		print "Sending merge request for " + str((repo_hash, ref, parent_ref,))
-		with ModelServer.rpc_connect("rpc-repo-read") as client:
+		with ModelServer.rpc_connect("repo", "read") as client:
 			repo_uri = client.get_repo_address(repo_hash)
 			print "Repo uri: " + repo_uri
 			filesystem_server_uri, repo_hash, repo_name = client.get_repo_attributes(repo_uri)
@@ -42,7 +42,7 @@ class VerificationResultsHandler(MessageHandler):
 		except MergeError:
 			merge_status = False
 		"""
-		with ModelServer.rpc_connect("rpc-repo-update") as client:
+		with ModelServer.rpc_connect("repo", "update") as client:
 					client.mark_merge(merge_status)
 		"""
 

@@ -65,7 +65,7 @@ class VerificationRequestHandler(MessageHandler):
 	def get_repo_address(self, repo_hash):
 		"""Sends out a rpc call to the model server to retrieve
 		the address of a repository based on its hash"""
-		with ModelServer.rpc_connect("rpc-repo-read") as model_server_rpc:
+		with ModelServer.rpc_connect("repo", "read") as model_server_rpc:
 			repo_address = model_server_rpc.get_repo_address(repo_hash)
 		return repo_address
 
