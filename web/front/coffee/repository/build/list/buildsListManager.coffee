@@ -4,7 +4,6 @@ window.BuildsListManager = {}
 class BuildsListManager.Model extends Backbone.Model
 
 	initialize: () =>
-		@buildsFetcher = new BuildsFetcher()
 		@buildsSearchModel = new BuildsSearch.Model()
 		@buildsSearchModel.on 'selectedFilterType', (filterType) =>
 			@set 'currentBuildsList', @_getBuildListFromType filterType
@@ -14,7 +13,7 @@ class BuildsListManager.Model extends Backbone.Model
 		for filterType in filterTypes
 			@buildsListModels.push new BuildsList.Model
 				repositoryId: @get 'repositoryId'
-				buildsFetcher: @buildsFetcher
+				buildsFetcher: new BuildsFetcher()
 				type: filterType.name
 
 		currentFilterType = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.get 'selectedType'
@@ -61,4 +60,4 @@ class BuildsListManager.View extends Backbone.View
 	_renderBuildsList: () =>
 		buildsListView = new BuildsList.View model: @model.get 'currentBuildsList'
 		@$el.find('.buildsListContainer').append buildsListView.render().el
-		buildsListView.saturateBuilds()
+		# buildsListView.saturateBuilds()

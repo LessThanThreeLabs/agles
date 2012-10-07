@@ -19,6 +19,9 @@ class BuildsSearch.View extends Backbone.View
 				<input class="searchField search-query input-small" type="text" placeholder="Search...">
 			</div>
 		</form>'
+	events:
+		'blur .searchField': '_handleKeyDown'
+		'keydown .searchField': '_handleKeyDown'
 
 	initialize: () =>
 		@buildsSearchFilterView = new BuildsSearchFilter.View model: @model.buildsSearchFilterModel
@@ -33,9 +36,18 @@ class BuildsSearch.View extends Backbone.View
 
 	_setupTypeAhead: () =>
 		$('.searchField').typeahead
-			source: (query, process) ->
-				console.log 'source called'
+			source: (query, process) =>
 				return ['jpotter', 'jchu', 'bbland']
-			updater: (item) ->
-				console.log 'updater called'
+			updater: (item) =>
+				@_updateModelWithSearchField()
 				return item
+
+
+	_handleKeyDown: (event) =>
+		@_updateModelWithSearchField()
+
+
+	_updateModelWithSearchField: () =>
+		setTimeout (()-> console.log $('.searchField').val()), 0
+		# console.log $('.searchField').val()
+		# @model.set 'query', $('.searchField').val()
