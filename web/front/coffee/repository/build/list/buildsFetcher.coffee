@@ -15,6 +15,7 @@ window.BuildsFetcher = class BuildsFetcher
 			@_fetchBuilds()
 			return true
 		else if queuePolicy is BuildsFetcher.QueuePolicy.QUEUE_IF_BUSY
+			console.log 'queued'
 			@nextQuery = query
 			@nextCallback = callback
 			return true

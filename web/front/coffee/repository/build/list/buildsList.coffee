@@ -35,15 +35,16 @@ class BuildsList.Model extends Backbone.Model
 		@_fetchInitialBuilds()
 
 
-	_numberOfBuildsToRequest: 50
+	_numberOfBuildsToRequest: 100
 	noMoreBuildsToFetch = false
 	_fetchInitialBuilds: () =>
-		@_fetchBuilds 0, @_numberOfBuildsToRequest, BuildsFetcher.QueuePolicy.QUEUE_IF_BUSY
+		queuePolicy =  BuildsFetcher.QueuePolicy.QUEUE_IF_BUSY
+		@_fetchBuilds 0, @_numberOfBuildsToRequest, queuePolicy
 
 
-	fetchMoreBuildsDoNotQueue: (callback) =>
-		console.log 'called!'
-		@_fetchBuilds @buildModels.length, @buildModels.length + @_numberOfBuildsToRequest, BuildsFetcher.QueuePolicy.DO_NOT_QUEUE, callback
+	fetchMoreBuildsDoNotQueue: () =>
+		queuePolicy =  BuildsFetcher.QueuePolicy.DO_NOT_QUEUE
+		@_fetchBuilds @buildModels.length, @buildModels.length + @_numberOfBuildsToRequest, queuePolicy
 
 
 	_fetchBuilds: (start, end, queuePolicy, callback) =>
@@ -78,7 +79,6 @@ class BuildsList.View extends Backbone.View
 	initialize: () =>
 		@model.on 'add', @_handleAdd
 		@model.on 'reset', @_handleReset
-		$(window).bind 'resize', @_windowResizeHandler
 
 
 	render: () =>
@@ -89,22 +89,10 @@ class BuildsList.View extends Backbone.View
 		return @
 
 
-	_loadBuildsToFitHeight: () =>
-		console.log 'called ' + @model.get 'type'
-		if not @model.noMoreBuildsToFetch and 
-				(@el.scrollHeight < @el.clientHeight * 2 or @model.buildModels.length is 0)
-			@model.fetchMoreBuildsDoNotQueue () =>
-				@_loadBuildsToFitHeight()
-
-
 	_scrollHandler: () =>
 		heightBeforeFetchingMoreBuilds = 100
 		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreBuilds > @el.scrollHeight
 			@model.fetchMoreBuildsDoNotQueue()
-
-
-	_windowResizeHandler: () =>
-		@_loadBuildsToFitHeight
 
 
 	_handleAdd: (buildModel, collection, options) =>
@@ -118,4 +106,4 @@ class BuildsList.View extends Backbone.View
 
 
 	_handleReset: () =>
-		console.log 'reset event!'
+		@$el.empty()

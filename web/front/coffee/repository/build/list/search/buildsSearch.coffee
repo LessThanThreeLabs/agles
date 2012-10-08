@@ -3,7 +3,7 @@ window.BuildsSearch = {}
 
 class BuildsSearch.Model extends Backbone.Model
 	defaults:
-		query: ''
+		queryString: ''
 
 	initialize: () =>
 		@buildsSearchFilterModel = new BuildsSearchFilter.Model()
@@ -30,6 +30,7 @@ class BuildsSearch.View extends Backbone.View
 	render: () =>
 		@$el.html @template()
 		@$el.find('.input-prepend').prepend @buildsSearchFilterView.render().el
+		$('.searchField').val @model.get 'queryString'
 		setTimeout (() => @_setupTypeAhead()), 100
 		return @
 
@@ -48,6 +49,4 @@ class BuildsSearch.View extends Backbone.View
 
 
 	_updateModelWithSearchField: () =>
-		setTimeout (()-> console.log $('.searchField').val()), 0
-		# console.log $('.searchField').val()
-		# @model.set 'query', $('.searchField').val()
+		setTimeout (() => @model.set 'queryString', $('.searchField').val()), 0

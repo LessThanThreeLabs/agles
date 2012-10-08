@@ -7,6 +7,8 @@ class BuildsListManager.Model extends Backbone.Model
 		@buildsSearchModel = new BuildsSearch.Model()
 		@buildsSearchModel.on 'selectedFilterType', (filterType) =>
 			@set 'currentBuildsList', @_getBuildListFromType filterType
+		@buildsSearchModel.on 'change:queryString', (model, queryString, options) =>
+			@get('currentBuildsList').set 'queryString', queryString
 
 		@buildsListModels = []
 		filterTypes = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.types
@@ -17,10 +19,10 @@ class BuildsListManager.Model extends Backbone.Model
 				type: filterType.name
 
 		currentFilterType = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.get 'selectedType'
-		@set 'currentBuildsList', @_getBuildListFromType currentFilterType
+		@set 'currentBuildsList', @_getBuildListModelFromType currentFilterType
 
 
-	_getBuildListFromType: (type) ->
+	_getBuildListModelFromType: (type) ->
 		for buildsListModel in @buildsListModels
 			return buildsListModel if buildsListModel.get('type') is type.name
 		return null
@@ -59,5 +61,4 @@ class BuildsListManager.View extends Backbone.View
 
 	_renderBuildsList: () =>
 		buildsListView = new BuildsList.View model: @model.get 'currentBuildsList'
-		@$el.find('.buildsListContainer').append buildsListView.render().el
-		# buildsListView.saturateBuilds()
+		@$el.find('.buildsListContainer').html buildsListView.render().el
