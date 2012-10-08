@@ -149,7 +149,7 @@ class Client(ClientBase):
 			raise result
 
 	def _process_result(self, proto):
-		assert proto is None or isinstance(proto, dict)
+		assert None or isinstance(proto, (dict, Exception,))
 
 		if proto["error"]:
 			assert isinstance(proto["error"], dict)

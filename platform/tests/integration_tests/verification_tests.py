@@ -39,7 +39,7 @@ class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin, 
 		cls.vagrant.teardown()
 
 	def setUp(self):
-		self.repo_dir = os.path.join(VM_DIRECTORY, "repo")
+		self.repo_dir = os.path.join(VM_DIRECTORY, "repo.git")
 		self.work_repo_dir = self.repo_dir + ".clone"
 		rmtree(self.repo_dir, ignore_errors=True)
 		rmtree(self.work_repo_dir, ignore_errors=True)
@@ -100,7 +100,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, RepoS
 		self._start_model_server()
 		self.repo_path = os.path.join(
 			self.repo_dir,
-			to_path("asdf", "repo", FileSystemRepositoryStore.DIR_LEVELS))
+			to_path("asdf", "repo.git", FileSystemRepositoryStore.DIR_LEVELS))
 
 	def tearDown(self):
 		super(VerificationRoundTripTest, self).setUp()
@@ -111,7 +111,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, RepoS
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_machine = schema.machine.insert().values(uri="fs0")
 			machine_key = conn.execute(ins_machine).inserted_primary_key[0]
-			ins_repo = schema.repo.insert().values(name="repo", hash="asdf", machine_id=machine_key)
+			ins_repo = schema.repo.insert().values(name="repo.git", hash="asdf", machine_id=machine_key)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			ins_map = schema.uri_repo_map.insert().values(uri=repo_uri, repo_id=repo_key)
 			conn.execute(ins_map)
@@ -122,7 +122,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, RepoS
 
 	def test_hello_world_repo_roundtrip(self):
 		with Client(store.rpc_exchange_name, "fs0") as client:
-			client.create_repository("asdf", "repo")
+			client.create_repository("asdf", "repo.git")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")

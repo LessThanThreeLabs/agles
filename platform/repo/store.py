@@ -76,20 +76,33 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		return cls(filesystem_repository_servers, ConnectionFactory.get_redis_connection())
 
 	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+		assert repo_name.endswith(".git")
+		assert isinstance(repo_hash, str)
+
 		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
 			client.merge_changeset(repo_hash, repo_name, ref_to_merge, ref_to_merge_into)
 
 	def create_repository(self, store_name, repo_hash, repo_name):
+		assert repo_name.endswith(".git")
+		assert isinstance(repo_hash, str)
+
 		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
 			client.create_repository(repo_hash, repo_name)
 		self._update_store_repo_count(store_name)
 
 	def delete_repository(self, store_name, repo_hash, repo_name):
+		assert repo_name.endswith(".git")
+		assert isinstance(repo_hash, str)
+
 		with Client(rpc_exchange_name, store_name) as client:
 			client.delete_repository(repo_hash, repo_name)
 		self._update_store_repo_count(store_name, -1)
 
 	def rename_repository(self, store_name, repo_hash, old_repo_name, new_repo_name):
+		assert old_repo_name.endswith(".git")
+		assert new_repo_name.endswith(".git")
+		assert isinstance(repo_hash, str)
+
 		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
 			client.rename_repository(repo_hash, old_repo_name, new_repo_name)
 
@@ -143,6 +156,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self._root_path = root_storage_directory_path
 
 	def merge_changeset(self, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+		assert repo_name.endswith(".git")
+		assert isinstance(repo_hash, str)
+
 		repo_path = self._resolve_path(repo_hash, repo_name)
 		repo = Repo(repo_path)
 		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
@@ -169,6 +185,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 						  the repository is stored under.
 		:param repo_name: The name of the new repository.
 		"""
+		assert repo_name.endswith(".git")
+		assert isinstance(repo_hash, str)
+
 		repo_path = self._resolve_path(repo_hash, repo_name)
 		if not os.path.exists(repo_path):
 			os.makedirs(repo_path)
@@ -183,6 +202,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 						  the repository is stored under.
 		:param repo_name: The name of the repository to be deleted.
 		"""
+		assert repo_name.endswith(".git")
+		assert isinstance(repo_hash, str)
+
 		repo_path = self._resolve_path(repo_hash, repo_name)
 		shutil.rmtree(repo_path)
 
@@ -194,6 +216,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 		:param old_name: The old repository name.
 		:param new_name: The new repository name.
 		"""
+		assert old_name.endswith(".git")
+		assert new_name.endswith(".git")
+		assert isinstance(repo_hash, str)
+
 		old_repo_path = self._resolve_path(repo_hash, old_name)
 		new_repo_path = self._resolve_path(repo_hash, new_name)
 		if not os.path.exists(new_repo_path):
