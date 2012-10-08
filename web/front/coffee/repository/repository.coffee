@@ -6,6 +6,7 @@ class Repository.Model extends Backbone.Model
 
 	initialize: () ->
 		@buildsListManagerModel = new BuildsListManager.Model repositoryId: @id
+		@buildDetailsModel = new BuildDetails.Model repositoryId: @id
 
 
 class Repository.View extends Backbone.View
@@ -15,11 +16,13 @@ class Repository.View extends Backbone.View
 
 	initialize: () ->
 		@buildsListManagerView = new BuildsListManager.View model: @model.buildsListManagerModel
+		@buildDetailsView = new BuildDetails.View model: @model.buildDetailsModel
 
 
 	render: () ->
 		@$el.html @template()
 		@$el.append @buildsListManagerView.render().el
+		@$el.append @buildDetailsView.render().el
 		return @
 
 
