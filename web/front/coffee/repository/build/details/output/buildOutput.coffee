@@ -10,7 +10,8 @@ class BuildOutput.Model extends Backbone.Model
 class BuildOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildOutput'
-	template: Handlebars.compile ''
+	template: Handlebars.compile '<div class="buildOutputHeader">Console Output:</div>
+		<div class="buildOutputText"></div>'
 
 	initialize: () ->
 		@model.on 'change:text', (model, text) =>
@@ -18,7 +19,7 @@ class BuildOutput.View extends Backbone.View
 				displayLine = $ '<div/>',
 					class: 'buildOutputLine'
 					text: line
-				$('.buildOutput').append displayLine
+				$('.buildOutputText').append displayLine
 
 
 	render: () ->
