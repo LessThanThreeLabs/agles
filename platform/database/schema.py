@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Text, Enum, MetaData, ForeignKey, UniqueConstraint
+from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Text, MetaData, ForeignKey, UniqueConstraint
 
 from database.engine import ConnectionFactory
 
@@ -24,7 +24,7 @@ repo = Table('repo', metadata,
 	Column('name', String, nullable=False),
 	Column('hash', String, nullable=False, index=True, unique=True),
 	Column('machine_id', Integer, ForeignKey('machine.id'), nullable=False),
-	Column('default_permissions', SmallInteger, nullable=False) # This is a bitmask
+	Column('default_permissions', SmallInteger, nullable=False)  # This is a bitmask
 )
 
 # refer to util.permissions for permission bitmask documentation
@@ -32,7 +32,7 @@ permission = Table('permission', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
 	Column('repo_hash', String, ForeignKey('repo.hash'), nullable=False, index=True),
-	Column('level', SmallInteger, nullable=False), # This is a bitmask
+	Column('level', SmallInteger, nullable=False),  # This is a bitmask
 
 	UniqueConstraint('user_id', 'repo_hash')
 )
