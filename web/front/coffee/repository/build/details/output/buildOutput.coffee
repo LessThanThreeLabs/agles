@@ -12,19 +12,23 @@ class BuildOutput.Model extends Backbone.Model
 
 		@buildOutputLineModels.on 'add', (buildOutputLineModel, collection, options) =>
 			@trigger 'addLine', buildOutputLineModel
+		@buildOutputLineModels.on 'reset', (collection, options) =>
+			@trigger 'addLines', collection
 
 
 	fetchBuildOutput: () =>
-		socket.emit 'buildOutputs:read', id: 17, (error, buildOutputData) =>
+		socket.emit 'buildOutputs:read', @get('id'), (error, buildOutputData) =>
 			throw error if error?
 
+			# Create and add all of the models at once for performance reasons.
 			lineCounter = 0
+			buildOutputLineModelAttributes = []
 			for buildOutputLine in buildOutputData.text
-				line = new BuildOutputLine.Model
-					number: lineCounter
-					text: buildOutputLine
-				@buildOutputLineModels.add line
-				++lineCounter
+				buildOutputLineModelAttributes.push
+					number: lineCounter++
+					text: @get('id') + ' ' + buildOutputLine
+
+			@buildOutputLineModels.reset buildOutputLineModelAttributes
 
 
 class BuildOutput.View extends Backbone.View
@@ -35,14 +39,20 @@ class BuildOutput.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'addLine', @_handleAddLine
+		@model.on 'addLines', @_addOutputLines
 
 
 	render: () =>
 		@$el.html @template()
+		@_addOutputLines()
+		return @
+
+
+	_addOutputLines: () =>
+		$('.buildOutputText').empty()
 		@model.buildOutputLineModels.each (buildOutputLineModel) =>
 			buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
-			@$el.append buildOutputLineView.render().el
-		return @
+			$('.buildOutputText').append buildOutputLineView.render().el
 
 
 	_handleAddLine: (buildOutputLineModel) =>

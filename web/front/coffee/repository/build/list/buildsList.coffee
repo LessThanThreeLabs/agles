@@ -16,19 +16,23 @@ class BuildsList.Model extends Backbone.Model
 		@buildModels.on 'reset', () =>
 			@trigger 'reset'
 		@buildModels.on 'change:selected', (buildModel) =>
-			@_deselectAllBuildModels buildModel
+			if buildModel.get 'selected'
+				@_deselectAllBuildModels buildModel
+				@set 'selectedBuild', buildModel
+			else
+				@set 'selectedBuild', null
 
 		@on 'change:queryString', @_resetBuildsList
 
 
 	_deselectAllBuildModels: (buildModelToExclude) =>
-		return if not buildModelToExclude.get 'selected'
 		@buildModels.each (otherBuildModel) =>
 			if otherBuildModel.id isnt buildModelToExclude.id
 				otherBuildModel.set 'selected', false
 
 
 	_resetBuildsList: () =>
+		@set 'selectedBuild', null
 		@buildModels.reset()
 		@fetchInitialBuilds()
 
