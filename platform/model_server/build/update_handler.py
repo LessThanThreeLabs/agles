@@ -1,14 +1,24 @@
+import time
+
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
+
 class Console(object):
 	Stdout, Stderr = range(2)
 
-class BuildConsoleUpdateHandler(ModelServerRpcHandler):
+
+class BuildUpdateHandler(ModelServerRpcHandler):
 
 	def __init__(self):
-		super(BuildConsoleUpdateHandler, self).__init__("build", "update")
+		super(BuildUpdateHandler, self).__init__("build", "update")
+
+	def mark_build_finished(self, build_id, status):
+		build = schema.build
+		update = build.update().where(build.c.id==build_id).values(
+			status=status, end_time=int(time.time()))
+		self._db_conn.execute(update)
 
 	def append_console_output(self, build_id, console_output, console=Console.Stdout):
 		""" The redis keys for build output are of the form build.output:build_id:console
@@ -31,8 +41,7 @@ class BuildConsoleUpdateHandler(ModelServerRpcHandler):
 		redis_conn = ConnectionFactory.get_redis_connection()
 		complete_console_output = '\n'.join(redis_conn.lrange(redis_key, 0, -1))
 
-		ins = schema.build_console.insert(build_id=build_id, type=console,
+		ins = schema.build_console.insert().values(build_id=build_id, type=console,
 			console_output = complete_console_output)
 		self._db_conn.execute(ins)
 		redis_conn.delete(redis_key)
-

@@ -4,7 +4,7 @@ from nose.tools import *
 
 from database.engine import ConnectionFactory
 from database.schema import build, build_console
-from model_server.build.update_handler import BuildConsoleUpdateHandler, Console
+from model_server.build.update_handler import BuildUpdateHandler, Console
 from util.test import BaseIntegrationTest
 from util.test.mixins import RedisTestMixin
 

@@ -3,7 +3,7 @@ import unittest
 from nose.tools import *
 
 from database.engine import ConnectionFactory
-from model_server.build.update_handler import BuildConsoleUpdateHandler, Console
+from model_server.build.update_handler import BuildUpdateHandler, Console
 from util.test.mixins import RedisTestMixin
 
 
@@ -17,7 +17,7 @@ class BuildUpdateHandlerTest(unittest.TestCase, RedisTestMixin):
 		self._stop_redis()
 
 	def console_append_test(self):
-		update_handler = BuildConsoleUpdateHandler()
+		update_handler = BuildUpdateHandler()
 
 		build_stdout = []
 		build_stderr = []
