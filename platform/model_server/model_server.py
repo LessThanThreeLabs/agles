@@ -9,9 +9,11 @@ from kombu import Connection, Exchange
 
 from bunnyrpc.client import Client
 from build.create_handler import BuildCreateHandler
+from build.read_handler import BuildReadHandler
 from build.update_handler import BuildUpdateHandler
 from change.create_handler import ChangeCreateHandler
 from change.read_handler import ChangeReadHandler
+from change.update_handler import ChangeUpdateHandler
 from repo.create_handler import RepoCreateHandler
 from repo.read_handler import RepoReadHandler
 
@@ -26,9 +28,11 @@ class ModelServer(object):
 
 	rpc_handler_classes = [
 		BuildCreateHandler,
+		BuildReadHandler,
 		BuildUpdateHandler,
 		ChangeCreateHandler,
 		ChangeReadHandler,
+		ChangeUpdateHandler,
 		RepoCreateHandler,
 		RepoReadHandler,
 	]

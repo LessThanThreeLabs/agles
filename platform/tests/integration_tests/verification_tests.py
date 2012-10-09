@@ -14,7 +14,8 @@ from verification.server.verification_result import VerificationResult
 VM_DIRECTORY = '/tmp/verification'
 
 
-class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMixin):
+class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin,
+	RabbitMixin, RepoStoreTestMixin):
 	@classmethod
 	def setup_class(cls):
 		cls.vagrant = Vagrant(VM_DIRECTORY, box_name)
@@ -26,6 +27,7 @@ class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin, 
 		cls.vagrant.teardown()
 
 	def setUp(self):
+		self._purge_queues()
 		self.repo_dir = os.path.join(VM_DIRECTORY, "repo.git")
 		self.work_repo_dir = self.repo_dir + ".clone"
 		rmtree(self.repo_dir, ignore_errors=True)
@@ -38,6 +40,7 @@ class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin, 
 		rmtree(self.repo_dir)
 		rmtree(self.work_repo_dir)
 		self._stop_model_server()
+		self._purge_queues()
 
 	def test_hello_world_repo(self):
 		repo = Repo.init(self.repo_dir, bare=True)

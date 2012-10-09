@@ -37,6 +37,17 @@ class ModelServerTestMixin(BaseTestMixin):
 		self.model_server_channel.close()
 
 
+class RabbitMixin(BaseTestMixin):
+	def _purge_queues(self):
+		command = """rabbitmqadmin -f tsv -q list queues name messages|
+			while read queue count;
+			do if [ ${count} -gt "0" ];
+				then rabbitmqadmin -q purge queue name=${queue};
+			fi;
+			done"""
+		subprocess.call(command, shell=True)
+
+
 class RepoStoreTestMixin(BaseTestMixin):
 	def _modify_commit_push(self, repo, filename, contents, parent_commits=None,
 	                        refspec="HEAD:master"):

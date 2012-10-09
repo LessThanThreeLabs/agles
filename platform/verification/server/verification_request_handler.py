@@ -32,24 +32,33 @@ class VerificationRequestHandler(MessageHandler):
 
 	def handle_message(self, body, message):
 		"""Respond to a verification event, begin verifying"""
-		change_id, commit_list = body
-		build_id = self._create_build(change_id, commit_list)
-		print "Processing verification request: " + str((change_id, commit_list,)) + " as build: " + str(build_id)
+		build_id = body
+		commit_list = self._get_commit_list(build_id)
+		print "Processing verification request: " + str((build_id, commit_list,))
+		self._start_build(build_id)
 		repo_uri = self.get_repo_uri(commit_list[0])
 		refs = self._get_ref_list(commit_list)
 		with ModelServer.rpc_connect("build", "update") as model_server_rpc:
 			stdout_handler = self._make_output_appender(model_server_rpc, build_id, Console.Stdout)
 			stderr_handler = self._make_output_appender(model_server_rpc, build_id, Console.Stderr)
-			verify_callback = self.make_verify_callback(change_id, commit_list, build_id, model_server_rpc, message)
+			verify_callback = self.make_verify_callback(build_id, model_server_rpc, message)
 			self.verify(repo_uri, refs, verify_callback,
 				stdout_handler=stdout_handler, stderr_handler=stderr_handler)
 
-	def make_verify_callback(self, change_id, commit_list, build_id, model_server_rpc, message):
+	def _get_commit_list(self, build_id):
+		with ModelServer.rpc_connect("build", "read") as model_server_rpc:
+			return model_server_rpc.get_commit_list(build_id)
+
+	def _start_build(self, build_id):
+		with ModelServer.rpc_connect("build", "update") as model_server_rpc:
+			model_server_rpc.start_build(build_id)
+
+	def make_verify_callback(self, build_id, model_server_rpc, message):
 		"""Returns the default callback function to be
 		called with a return value after verification.
 		Sends a message denoting the return value and acks"""
 		def default_verify_callback(results):
-			self.producer.publish((change_id, commit_list, results),
+			self.producer.publish((build_id, results),
 				exchange=verification_results_queue.exchange,
 				routing_key=verification_results_queue.routing_key,
 				delivery_mode=2,  # make message persistent
@@ -60,10 +69,6 @@ class VerificationRequestHandler(MessageHandler):
 			model_server_rpc.mark_build_finished(build_id, status)
 			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		return default_verify_callback
-
-	def _create_build(self, change_id, commit_list):
-		with ModelServer.rpc_connect("build", "create") as model_server_rpc:
-			return model_server_rpc.create_build(change_id, commit_list)
 
 	def verify(self, repo_uri, refs, callback, stdout_handler=None, stderr_handler=None):
 		"""Runs verification on a desired git commit"""

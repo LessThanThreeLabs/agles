@@ -26,7 +26,7 @@ VM_DIRECTORY = '/tmp/verification'
 
 
 class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
-	RepoStoreTestMixin, RedisTestMixin):
+	RabbitMixin, RepoStoreTestMixin, RedisTestMixin):
 	@classmethod
 	def setup_class(cls):
 		vagrant = Vagrant(VM_DIRECTORY, box_name)
@@ -40,6 +40,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	def setUp(self):
 		super(VerificationRoundTripTest, self).setUp()
+		self._purge_queues()
 		self.repo_dir = os.path.join(VM_DIRECTORY, 'repo')
 		self.repo_hash = "asdf"
 		self.repo_machine = "fs0"
@@ -65,6 +66,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.vm_process.terminate()
 		self.repo_store_process.terminate()
 		self._stop_redis()
+		self._purge_queues()
 
 	def _insert_repo_info(self, repo_uri):
 		with ConnectionFactory.get_sql_connection() as conn:

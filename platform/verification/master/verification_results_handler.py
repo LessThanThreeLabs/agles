@@ -1,5 +1,6 @@
 from kombu import Producer
 
+from constants import BuildStatus
 from handler import MessageHandler
 from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
@@ -17,14 +18,21 @@ class VerificationResultsHandler(MessageHandler):
 		super(VerificationResultsHandler, self).bind(channel)
 
 	def handle_message(self, body, message):
-		change_id, commit_list, results = body
-		self.handle_results(change_id, commit_list, results)
+		build_id, results = body
+		self.handle_results(build_id, results)
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
-	def handle_results(self, change_id, commit_list, results):
+	def handle_results(self, build_id, results):
 		# TODO (bbland): do something more useful than this trivial case
-		if len(commit_list) == 1 and results == VerificationResult.SUCCESS:
-			self.send_merge_request(change_id)
+		with ModelServer.rpc_connect("build", "read") as client:
+			change_id, is_primary, status, start_time, end_time = client.get_build_attributes(build_id)
+		if is_primary and results == VerificationResult.SUCCESS:
+			self.mark_change_finished(change_id)
+
+	def mark_change_finished(self, change_id):
+		with ModelServer.rpc_connect("change", "update") as client:
+			client.mark_change_finished(change_id, BuildStatus.COMPLETE)
+		self.send_merge_request(change_id)
 
 	def send_merge_request(self, change_id):
 		print "Sending merge request for " + str(change_id)

@@ -1,7 +1,7 @@
 from nose.tools import *
 
 from util.test import BaseIntegrationTest
-from util.test.mixins import ModelServerTestMixin
+from util.test.mixins import ModelServerTestMixin, RabbitMixin
 from util.permissions import RepositoryPermissions
 from util.shell import *
 from database.engine import ConnectionFactory
@@ -14,14 +14,17 @@ COMMANDS_TO_PERMISSIONS = {
 
 USER_ID_COMMANDS = ['git-receive-pack']
 
-class ShellTest(BaseIntegrationTest, ModelServerTestMixin):
+
+class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	def setUp(self):
 		super(ShellTest, self).setUp()
+		self._purge_queues()
 		self._start_model_server()
 
 	def tearDown(self):
 		super(ShellTest, self).tearDown()
 		self._stop_model_server()
+		self._purge_queues()
 
 	def _create_repo_store_machine(self):
 		ins = schema.machine.insert().values(uri="http://machine0")

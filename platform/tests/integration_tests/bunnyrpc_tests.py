@@ -5,11 +5,13 @@ from nose.tools import *
 from bunnyrpc.client import Client, RPCRequestError
 from bunnyrpc.server import Server
 from util.test import BaseIntegrationTest
+from util.test.mixins import RabbitMixin
 
 
-class BunnyRPCTest(BaseIntegrationTest):
+class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 	def setUp(self):
 		super(BunnyRPCTest, self).setUp()
+		self._purge_queues()
 		server_event = Event()
 		self.server_process = Process(target=self._runserver,
 			args=[self._TestRPCServer(), "exchange", ["queue0", "queue1"], server_event])
@@ -35,6 +37,7 @@ class BunnyRPCTest(BaseIntegrationTest):
 		super(BunnyRPCTest, self).tearDown()
 		self.server_process.terminate()
 		self.returned_msg_process.terminate()
+		self._purge_queues()
 
 	def _runserver(self, base_instance, exchange,
 				   queue_names, event, ttl=30000):
@@ -45,7 +48,7 @@ class BunnyRPCTest(BaseIntegrationTest):
 
 	def test_basic_clientserver_rpc(self):
 		with Client("exchange", "queue0") as client:
-			for i in xrange(1,10):
+			for i in xrange(1, 10):
 				server_count = client.incr()
 				assert_equals(server_count, i)
 
@@ -56,7 +59,7 @@ class BunnyRPCTest(BaseIntegrationTest):
 
 	def _run_multiclients_in_tandem(self, client0, client1):
 		try:
-			for i in xrange(1,10):
+			for i in xrange(1, 10):
 				client = client0 if i % 2 == 0 else client1
 				server_count = client.incr()
 				assert_equals(server_count, i)
@@ -91,12 +94,11 @@ class BunnyRPCTest(BaseIntegrationTest):
 			return self.count
 
 		def div(self, a, b):
-			return a/b
+			return a / b
 
 		def raise_my_error(self):
 			raise MyError
 
+
 class MyError(Exception):
 	pass
-
-
