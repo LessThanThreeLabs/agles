@@ -5,6 +5,7 @@ from handler import MessageHandler
 from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
 from settings.verification_server import *
+from util import repositories
 from verification.server.verification_result import VerificationResult
 
 
@@ -42,10 +43,10 @@ class VerificationResultsHandler(MessageHandler):
 		merge_target = change_attributes[1]
 
 		with ModelServer.rpc_connect("repo", "read") as client:
-			user_id, repo_id, ref, message, timestamp = client.get_commit_attributes(commit_id)
 			repo_uri = client.get_repo_uri(commit_id)
 			filesystem_server_uri, repo_hash, repo_name = client.get_repo_attributes(repo_uri)
 
+		ref = repositories.hidden_ref(commit_id)
 		try:
 			self.remote_repo_manager.merge_changeset(
                 filesystem_server_uri, repo_hash,
@@ -57,7 +58,7 @@ class VerificationResultsHandler(MessageHandler):
 					client.mark_merge(merge_status)
 		"""
 
-		self.producer.publish((repo_hash, ref, merge_target,),
+		self.producer.publish((repo_hash, commit_id, merge_target,),
 			exchange=merge_queue.exchange,
 			routing_key=merge_queue.routing_key,  # TODO (bbland): replace with something useful
 			delivery_mode=2,  # make message persistent

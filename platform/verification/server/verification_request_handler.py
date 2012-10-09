@@ -13,6 +13,7 @@ from model_server.build.update_handler import Console
 from remote_linter import VagrantLinter
 from remote_test_runner import VagrantNoseRunner
 from settings.verification_server import *
+from util import repositories
 from verification_result import *
 
 
@@ -48,6 +49,9 @@ class VerificationRequestHandler(MessageHandler):
 	def _get_commit_list(self, build_id):
 		with ModelServer.rpc_connect("build", "read") as model_server_rpc:
 			return model_server_rpc.get_commit_list(build_id)
+
+	def _get_ref_list(self, commit_list):
+		return [repositories.hidden_ref(commit) for commit in commit_list]
 
 	def _start_build(self, build_id):
 		with ModelServer.rpc_connect("build", "update") as model_server_rpc:
@@ -89,18 +93,14 @@ class VerificationRequestHandler(MessageHandler):
 		with ModelServer.rpc_connect("repo", "read") as model_server_rpc:
 			return model_server_rpc.get_repo_uri(commit_id)
 
-	def _get_ref_list(self, commit_list):
-		with ModelServer.rpc_connect("repo", "read") as model_server_rpc:
-			return [model_server_rpc.get_commit_attributes(commit)[2] for commit in commit_list]
-
 	def checkout_refs(self, repo_uri, refs):
 		source_repo = Repo(repo_uri)
 		ref = refs[0]
-		self.checkout_commit(source_repo, ref)
+		self.checkout_ref(source_repo, ref)
 		for ref in refs[1:]:
 			source_repo.git.merge(ref)
 
-	def checkout_commit(self, repo, ref):
+	def checkout_ref(self, repo, ref):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
 		dest_repo = repo.clone(self.source_dir)

@@ -78,12 +78,12 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			conn.execute(ins_map)
 			return repo_key
 
-	def _insert_commit_info(self, ref, repo_id):
+	def _insert_commit_info(self):
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_user = schema.user.insert().values(username="bbland", name="brian")
 			user_id = conn.execute(ins_user).inserted_primary_key[0]
-			ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
-				ref=ref, message="commit message", timestamp=int(time.time()))
+			ins_commit = schema.commit.insert().values(repo_hash=self.repo_hash, user_id=user_id,
+				message="commit message", timestamp=int(time.time()))
 			commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 			return commit_id
 
@@ -99,11 +99,12 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
 		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
-		commit_sha = self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
-			parent_commits=[init_commit], refspec="HEAD:refs/pending/1").hexsha
 
 		repo_id = self._insert_repo_info(self.repo_path)
-		commit_id = self._insert_commit_info("refs/pending/1", repo_id)
+		commit_id = self._insert_commit_info()
+
+		commit_sha = self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
+			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection('amqp://guest:guest@localhost//') as connection:
 			with connection.Producer(serializer="msgpack") as producer:

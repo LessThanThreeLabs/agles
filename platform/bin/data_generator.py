@@ -36,8 +36,7 @@ class SchemaDataGenerator(object):
 					repo_hash = conn.execute(repo_hash_query).first()[schema.repo.c.hash]
 					repos[repo_id] = repos[repo_id] + 1
 					ins_commit = schema.commit.insert().values(repo_hash=repo_hash, user_id=user_id,
-						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())),
-						ref="derp")
+						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())))
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, merge_target="target_%d" % commit,
 						number=repos[repo_id], status=random.randint(0, 3),

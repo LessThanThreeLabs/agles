@@ -19,11 +19,11 @@ class RepoReadHandler(ModelServerRpcHandler):
 		row = self._db_conn.execute(repo_id_query).first()
 		if not row:
 			return None
-		repo_id = row[commit.c.repo_id]
+		repo_hash = row[commit.c.repo_hash]
 
 		query = repo.join(
             uri_repo_map).select().where(
-			repo.c.id==repo_id)
+			repo.c.hash==repo_hash)
 		row = self._db_conn.execute(query).first()
 		if not row:
 			return None
@@ -60,7 +60,7 @@ class RepoReadHandler(ModelServerRpcHandler):
 			commit.c.id==commit_id)
 		row = self._db_conn.execute(query).first()
 		if row:
-			return row[commit.c.repo_id], row[commit.c.user_id], row[commit.c.ref], row[commit.c.message], row[commit.c.timestamp]
+			return row[commit.c.repo_id], row[commit.c.user_id], row[commit.c.message], row[commit.c.timestamp]
 		else:
 			return None
 
