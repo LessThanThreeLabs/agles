@@ -1,5 +1,6 @@
 import database.schema
 
+from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from sqlalchemy.sql import select
 
@@ -25,7 +26,7 @@ class RepoReadHandler(ModelServerRpcHandler):
 			repo.c.id==repo_id)
 		row = self._db_conn.execute(query).first()
 		if not row:
-			return Nonetes
+			return None
 		return row[uri_repo_map.c.uri]
 
 	def get_repo_name(self, repo_hash):
@@ -62,3 +63,17 @@ class RepoReadHandler(ModelServerRpcHandler):
 			return row[commit.c.repo_id], row[commit.c.user_id], row[commit.c.ref], row[commit.c.message], row[commit.c.timestamp]
 		else:
 			return None
+
+	def get_permissions(self, user_id, repo_hash):
+		permission = database.schema.permission
+		repo = database.schema.repo
+
+		query = permission.select().where(permission.c.user_id==user_id).where(permission.c.repo_hash==repo_hash)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+		if row: return row[permission.c.level]
+
+		query = repo.select().where(repo.c.hash==repo_hash)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+		return row[repo.c.default_permissions] if row else None

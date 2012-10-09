@@ -1,9 +1,10 @@
 import os
 import time
 
-from kombu import Connection
+from kombu.connection import Connection
 from shutil import rmtree
 from nose.tools import *
+from util.permissions import RepositoryPermissions
 from util.vagrant import Vagrant
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
@@ -13,7 +14,6 @@ from database import schema
 from verification.master import *
 from verification.server import *
 from settings.model_server import *
-from settings.rabbit import *
 from settings.verification_server import *
 from repo.store import FileSystemRepositoryStore
 from util.repositories import to_path
@@ -70,7 +70,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_machine = schema.machine.insert().values(uri=self.repo_machine)
 			machine_key = conn.execute(ins_machine).inserted_primary_key[0]
-			ins_repo = schema.repo.insert().values(name="repo.git", hash=self.repo_hash, machine_id=machine_key)
+			ins_repo = schema.repo.insert().values(name="repo.git", hash=self.repo_hash, machine_id=machine_key, default_permissions=RepositoryPermissions.RW)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			ins_map = schema.uri_repo_map.insert().values(uri=repo_uri, repo_id=repo_key)
 			conn.execute(ins_map)
