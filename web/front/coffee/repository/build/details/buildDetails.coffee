@@ -26,7 +26,7 @@ class BuildDetails.View extends Backbone.View
 
 	_displayBuildOutput: () =>
 		buildOutputModel = new BuildOutput.Model id: 17
-		buildOutputModel.fetch()
+		buildOutputModel.fetchBuildOutput()
 
 		buildOutputView = new BuildOutput.View model: buildOutputModel
 		@$el.append buildOutputView.render().el

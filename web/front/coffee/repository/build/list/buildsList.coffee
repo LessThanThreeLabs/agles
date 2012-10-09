@@ -6,7 +6,7 @@ class BuildsList.Model extends Backbone.Model
 		queryString: ''
 
 	initialize: () ->
-		@buildModels = new Backbone.Collection
+		@buildModels = new Backbone.Collection()
 		@buildModels.model = Build.Model
 		@buildModels.comparator = (buildModel) =>
 			return -1.0 * buildModel.get 'number'
