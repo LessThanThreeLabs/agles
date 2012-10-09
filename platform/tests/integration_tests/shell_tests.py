@@ -29,22 +29,33 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin):
 		with ConnectionFactory.get_sql_connection() as conn:
 			conn.execute(ins)
 
-	def test_reroute_param_generation(self):
-		REPO_URI = "schacon/repo.git"
+	def _setup_db_entries(self, REPO_URI):
 		machine_id = self._create_repo_store_machine()
-
-		rpc_conn = ModelServer.rpc_connect("repo", "create")
-		try:
+		with ModelServer.rpc_connect("repo", "create") as rpc_conn:
 			repo_id = rpc_conn.create_repo("repo.git", machine_id)
-		finally:
-			rpc_conn.close()
-
 		self._map_uri(REPO_URI, repo_id)
 
-		rsh = RestrictedShell(VALID_COMMANDS)
-		route, path = rsh._get_requested_params(REPO_URI)
+	def test_reroute_param_generation(self):
+		REPO_URI = "schacon/repo.git"
+		self._setup_db_entries(REPO_URI)
+
+		rsh = RestrictedGitShell(VALID_COMMANDS)
+		route, path = rsh._get_route_path(REPO_URI)
 		assert_equals(route, "http://machine0")
 		assert_not_equals(path.find("repo.git"), -1,
 						  msg="Incorrect repo for path: %s" % path)
 		assert_equals(path.count('/'), 3,
 					  msg="Incorrect directory levels for path: %s" % path)
+
+	def test_new_sshargs(self):
+		REPO_URI = "schacon/repo.git"
+		self._setup_db_entries(REPO_URI)
+
+		rsh = RestrictedGitShell(VALID_COMMANDS)
+		sshargs = rsh.new_sshargs('git-receive-pack', REPO_URI, "1")
+
+		assert_equals(len(sshargs), 3)
+		assert_equals('ssh', sshargs[0])
+		assert_equals('git@http://machine0', sshargs[1])
+		assert_is_not_none(re.match("git-receive-pack '././.+/repo.git' 1", sshargs[2]), msg="Created ssh command is not well formed.")
+
