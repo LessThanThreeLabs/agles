@@ -15,13 +15,25 @@ class BuildOutput.View extends Backbone.View
 
 	initialize: () ->
 		@model.on 'change:text', (model, text) =>
+			lineCounter = 0
 			for line in text
-				displayLine = $ '<div/>',
-					class: 'buildOutputLine'
-					text: line
-				$('.buildOutputText').append displayLine
+				$('.buildOutputText').append @_createLine lineCounter, line
+				++lineCounter
 
 
 	render: () ->
 		@$el.html @template()
 		return @
+
+
+	_createLine: (lineNumber, lineText) =>
+		displayLineNumber = $ '<div/>',
+			class: 'buildOutputLineNumber'
+			text: lineNumber
+		displayLineText = $ '<div/>',
+			class: 'buildOutputLineText'
+			text: lineText
+		displayLine = $ '<div/>',
+			class: 'buildOutputLine'
+
+		return displayLine.append(displayLineNumber).append(displayLineText)
