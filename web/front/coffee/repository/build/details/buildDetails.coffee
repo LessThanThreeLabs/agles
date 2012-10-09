@@ -15,9 +15,18 @@ class BuildDetails.View extends Backbone.View
 	className: 'buildDetails'
 	template: Handlebars.compile ''
 
-	initialize: () ->
+	initialize: () =>
 
 
-	render: () ->
+	render: () =>
 		@$el.html @template()
+		@_displayBuildOutput()
 		return @
+
+
+	_displayBuildOutput: () =>
+		buildOutputModel = new BuildOutput.Model id: 17
+		buildOutputModel.fetch()
+
+		buildOutputView = new BuildOutput.View model: buildOutputModel
+		@$el.append buildOutputView.render().el
