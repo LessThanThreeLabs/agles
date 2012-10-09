@@ -20,8 +20,6 @@ class BuildsList.Model extends Backbone.Model
 
 		@on 'change:queryString', @_resetBuildsList
 
-		@_fetchInitialBuilds()
-
 
 	_deselectAllBuildModels: (buildModelToExclude) =>
 		return if not buildModelToExclude.get 'selected'
@@ -32,12 +30,12 @@ class BuildsList.Model extends Backbone.Model
 
 	_resetBuildsList: () =>
 		@buildModels.reset()
-		@_fetchInitialBuilds()
+		@fetchInitialBuilds()
 
 
 	_numberOfBuildsToRequest: 100
 	noMoreBuildsToFetch = false
-	_fetchInitialBuilds: () =>
+	fetchInitialBuilds: () =>
 		queuePolicy =  BuildsFetcher.QueuePolicy.QUEUE_IF_BUSY
 		@_fetchBuilds 0, @_numberOfBuildsToRequest, queuePolicy
 

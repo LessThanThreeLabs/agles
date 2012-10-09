@@ -13,10 +13,12 @@ class BuildsListManager.Model extends Backbone.Model
 		@buildsListModels = []
 		filterTypes = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.types
 		for filterType in filterTypes
-			@buildsListModels.push new BuildsList.Model
+			buildListModel = new BuildsList.Model
 				repositoryId: @get 'repositoryId'
 				buildsFetcher: new BuildsFetcher()
 				type: filterType.name
+			buildListModel.fetchInitialBuilds()
+			@buildsListModels.push buildListModel
 
 		currentFilterType = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.get 'selectedType'
 		@set 'currentBuildsList', @_getBuildListModelFromType currentFilterType
