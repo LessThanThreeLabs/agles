@@ -9,12 +9,10 @@ exports.create = (modelRpcConnection) ->
 
 class BuildOutputsResource extends Resource
 	read: (socket, data, callback) ->
-		setTimeout (() =>
-			fakeOutput = 	
-				text: story
-			callback null, fakeOutput
-		), 200
-		
+		fakeOutput = 	
+			text: story
+		callback null, fakeOutput
+	
 
 
 

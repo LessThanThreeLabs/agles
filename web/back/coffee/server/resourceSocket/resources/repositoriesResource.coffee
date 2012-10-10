@@ -14,6 +14,7 @@ class RepositoriesResource extends Resource
 		fakeRepository =
 			id: data.id
 			name: 'Awesome Sauce'
+			subname: 'The best repository of all time.  OF ALL TIME!'
 		callback null, fakeRepository
 
 
