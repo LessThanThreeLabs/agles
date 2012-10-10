@@ -1,9 +1,18 @@
-# handler.py - Implementation of message handlers
-""" Contains implementation of various message
+# handler.py - Abstract message handlers
+""" Abstract message handler and two basic extending types
 """
+from model_server import ModelServer
 
 
 class MessageHandler(object):
+	def bind(self, channel):
+		raise NotImplementedError("Subclasses should override this!")
+
+	def handle_message(self, body, message):
+		raise NotImplementedError("Subclasses should override this!")
+
+
+class QueueListener(MessageHandler):
 	def __init__(self, queue):
 		self.queue = queue
 
@@ -12,5 +21,14 @@ class MessageHandler(object):
 		consumer.qos(prefetch_count=1)
 		consumer.consume()
 
-	def handle_message(self, body, message):
-		raise NotImplementedError("Subclasses should override this!")
+
+class EventSubscriber(MessageHandler):
+	def __init__(self, event, queue_name=None):
+		self.event = event
+		self.queue_name = queue_name
+
+	def bind(self, channel):
+		consumer = ModelServer.subscribe(self.event, channel, queue_name=self.queue_name,
+			callback=self.handle_message)
+		consumer.qos(prefetch_count=1)
+		consumer.consume()

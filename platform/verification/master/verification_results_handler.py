@@ -1,7 +1,7 @@
 from kombu import Producer
 
 from constants import BuildStatus
-from handler import MessageHandler
+from handler import QueueListener
 from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
 from settings.verification_server import *
@@ -9,7 +9,7 @@ from util import repositories
 from verification.server.verification_result import VerificationResult
 
 
-class VerificationResultsHandler(MessageHandler):
+class VerificationResultsHandler(QueueListener):
 	def __init__(self):
 		super(VerificationResultsHandler, self).__init__(verification_results_queue)
 		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager.create_from_settings()

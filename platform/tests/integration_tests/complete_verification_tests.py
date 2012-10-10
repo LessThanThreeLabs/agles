@@ -100,19 +100,14 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
 
-		repo_id = self._insert_repo_info(self.repo_path)
+		self._insert_repo_info(self.repo_path)
 		commit_id = self._insert_commit_info()
 
 		commit_sha = self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection('amqp://guest:guest@localhost//') as connection:
-			with connection.Producer(serializer="msgpack") as producer:
-				producer.publish((commit_id, "master"),
-					exchange=repo_update_queue.exchange,
-					routing_key=repo_update_queue.routing_key,
-					delivery_mode=1
-				)
+			ModelServer.publish("repo-update", (commit_id, "master"), connection)
 			with connection.Consumer(merge_queue, callbacks=[self._on_response]) as consumer:
 				consumer.consume()
 				self.response = None

@@ -7,7 +7,7 @@ from git import Repo
 from kombu import Producer
 
 from constants import BuildStatus
-from handler import MessageHandler
+from handler import QueueListener
 from model_server import ModelServer
 from model_server.build.update_handler import Console
 from remote_linter import VagrantLinter
@@ -17,7 +17,7 @@ from util import repositories
 from verification_result import *
 
 
-class VerificationRequestHandler(MessageHandler):
+class VerificationRequestHandler(QueueListener):
 	"""Handles verification requests sent from verification masters
 	and triggers a Verify on the commit list.
 	"""

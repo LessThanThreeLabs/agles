@@ -5,7 +5,7 @@
 This class contains the api that is exposed to clients
 and is the only point of interaction between clients and the model server.
 """
-from kombu import Connection, Exchange
+from kombu import Connection, Exchange, Queue
 
 from bunnyrpc.client import Client
 from build.create_handler import BuildCreateHandler
@@ -37,27 +37,20 @@ class ModelServer(object):
 		RepoReadHandler,
 	]
 
+	events_exchange = Exchange("events", "direct", durable=False)
+
 	@classmethod
 	def rpc_connect(cls, route_noun, route_verb):
 		route = '-'.join(['rpc', route_noun, route_verb])
 		return Client("model-rpc", route)
 
-	def __init__(self, channel=None):
-		if channel:
-			self.channel = channel
+	@classmethod
+	def subscribe(cls, event, channel, queue_name=None, callback=None):
+		if queue_name:
+			subscriber_queue = Queue(queue_name, exchange=cls.events_exchange, routing_key=event, durable=False)
 		else:
-			connection = Connection("amqp://guest:guest@localhost//")
-			self.channel = connection.channel()
-		self.producer = self.channel.Producer(serializer="msgpack")
-		self.events_exchange = Exchange("events", "direct", durable=False)
-
-	def start(self):
-		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.channel),
-			self.rpc_handler_classes)
-		while True:
-			self.channel.connection.drain_events()
-
-	def subscribe(self, event):
+			subscriber_queue = Queue(exchange=cls.events_exchange, routing_key=event, exclusive=True, durable=False)
+		return channel.Consumer(queues=subscriber_queue, callbacks=[callback])
 		"""No-op
 
 		This method is a placeholder. In the future, we may implement a callback
@@ -67,13 +60,29 @@ class ModelServer(object):
 		raise NotImplementedError(
 			"Subscription should be done by binding to the zmq address")
 
-	def publish(self, event, msg):
+	@classmethod
+	def publish(cls, event, msg, channel):
 		"""Publishes a message to a specific event channel.
 
 		:param event: The event channel to publish msg to.
 		:param msg: The msg we are publishing to the channel.
 		"""
-		self.producer.publish(msg,
-			exchange=self.events_exchange,
+		producer = channel.Producer(serializer="msgpack")
+		producer.publish(msg,
+			routing_key=event,
+			exchange=cls.events_exchange,
 			delivery_mode=2
 		)
+
+	def __init__(self, channel=None):
+		if channel:
+			self.channel = channel
+		else:
+			connection = Connection("amqp://guest:guest@localhost//")
+			self.channel = connection.channel()
+
+	def start(self):
+		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.channel),
+			self.rpc_handler_classes)
+		while True:
+			self.channel.connection.drain_events()

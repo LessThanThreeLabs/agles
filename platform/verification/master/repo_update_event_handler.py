@@ -1,14 +1,13 @@
 from kombu import Producer
 
-from handler import MessageHandler
+from handler import EventSubscriber
 from model_server import ModelServer
-from settings.model_server import repo_update_queue
 from settings.verification_server import *
 
 
-class RepoUpdateEventHandler(MessageHandler):
+class RepoUpdateEventHandler(EventSubscriber):
 	def __init__(self):
-		super(RepoUpdateEventHandler, self).__init__(repo_update_queue)
+		super(RepoUpdateEventHandler, self).__init__("repo-update", "verification-repo-update")
 
 	def bind(self, channel):
 		self.producer = Producer(channel, serializer='msgpack')
