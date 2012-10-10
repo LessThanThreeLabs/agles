@@ -9,11 +9,13 @@ from util.vagrant import Vagrant
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
 from multiprocessing import Process
+from model_server.events_broker import EventsBroker
 from database.engine import ConnectionFactory
 from database import schema
 from verification.master import *
 from verification.server import *
 from settings.model_server import *
+from settings.rabbit import connection_info
 from settings.verification_server import *
 from repo.store import FileSystemRepositoryStore
 from util.repositories import to_path
@@ -37,6 +39,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	@classmethod
 	def teardown_class(cls):
 		cls.vs_process.terminate()
+		cls.vs_process.join()
 
 	def setUp(self):
 		super(VerificationRoundTripTest, self).setUp()
@@ -64,7 +67,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		rmtree(self.repo_dir)
 		self._stop_model_server()
 		self.vm_process.terminate()
+		self.vm_process.join()
 		self.repo_store_process.terminate()
+		self.repo_store_process.join()
 		self._stop_redis()
 		self._purge_queues()
 
@@ -106,14 +111,14 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		commit_sha = self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
-		with Connection('amqp://guest:guest@localhost//') as connection:
-			ModelServer.publish("repo-update", (commit_id, "master"), connection)
+		with Connection(connection_info) as connection:
+			EventsBroker(connection).publish("repo-update", (commit_id, "master"))
 			with connection.Consumer(merge_queue, callbacks=[self._on_response]) as consumer:
 				consumer.consume()
 				self.response = None
 				start_time = time.time()
 				while self.response is None:
 					connection.drain_events()
-					assert time.time() - start_time < 90  # 90s timeout
+					assert time.time() - start_time < 60  # 60s timeout
 		work_repo.git.pull()
 		assert_equals(commit_sha, work_repo.head.commit.hexsha)

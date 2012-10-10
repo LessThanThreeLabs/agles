@@ -1,3 +1,5 @@
+import contextlib
+
 from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Text, MetaData, ForeignKey, UniqueConstraint
 
 from database.engine import ConnectionFactory
@@ -93,7 +95,9 @@ ssh_pubkeys = Table('ssh_pubkey', metadata,
 
 def reseed_db():
 	engine = ConnectionFactory.get_sql_engine()
-	metadata.drop_all(engine)
+	with contextlib.closing(engine.connect()):
+		for table in reversed(metadata.sorted_tables):
+			table.drop(engine, checkfirst=True)
 	metadata.create_all(engine)
 
 

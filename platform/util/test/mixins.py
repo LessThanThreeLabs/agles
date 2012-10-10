@@ -15,6 +15,7 @@ from kombu import Connection
 
 from database.engine import ConnectionFactory
 from model_server import ModelServer
+from settings.rabbit import connection_info
 
 
 class BaseTestMixin(object):
@@ -26,7 +27,7 @@ class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	def _start_model_server(self):
-		connection = Connection("amqp://guest:guest@localhost//")
+		connection = Connection(connection_info)
 		self.model_server_channel = connection.channel()
 		self.model_server_process = Process(target=ModelServer(self.model_server_channel).start)
 		self.model_server_process.start()

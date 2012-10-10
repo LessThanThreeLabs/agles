@@ -1,7 +1,7 @@
 # handler.py - Abstract message handlers
 """ Abstract message handler and two basic extending types
 """
-from model_server import ModelServer
+from model_server.events_broker import EventsBroker
 
 
 class MessageHandler(object):
@@ -28,7 +28,7 @@ class EventSubscriber(MessageHandler):
 		self.queue_name = queue_name
 
 	def bind(self, channel):
-		consumer = ModelServer.subscribe(self.event, channel, queue_name=self.queue_name,
+		consumer = EventsBroker(channel).subscribe(self.event, queue_name=self.queue_name,
 			callback=self.handle_message)
 		consumer.qos(prefetch_count=1)
 		consumer.consume()

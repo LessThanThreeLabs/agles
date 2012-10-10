@@ -4,7 +4,10 @@ import database.schema
 
 from constants import BuildStatus
 from database.engine import ConnectionFactory
+from kombu.connection import Connection
+from model_server.events_broker import EventsBroker
 from model_server.rpc_handler import ModelServerRpcHandler
+from settings.rabbit import connection_info
 from sqlalchemy.sql import func
 
 
@@ -22,7 +25,8 @@ class ChangeCreateHandler(ModelServerRpcHandler):
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]
 
-		create_event(commit_id, merge_target)
+		with Connection(connection_info) as connection:
+			EventsBroker(connection).publish("repo-update", (commit_id, merge_target))
 
 	def create_change(self, commit_id, merge_target):
 		change = database.schema.change

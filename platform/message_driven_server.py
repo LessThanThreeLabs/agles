@@ -1,6 +1,6 @@
 from kombu import Connection
 
-from settings.rabbit import connection_parameters
+from settings.rabbit import connection_info
 
 
 class MessageDrivenServer(object):
@@ -13,7 +13,7 @@ class MessageDrivenServer(object):
 		self.handlers = handlers
 
 	def run(self):
-		with Connection('amqp://guest:guest@localhost//') as connection:
+		with Connection(connection_info) as connection:
 			with connection.channel() as channel:
 				for handler in self.handlers:
 					handler.bind(channel)

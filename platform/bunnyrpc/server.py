@@ -23,6 +23,7 @@ import traceback
 
 from kombu.connection import Connection
 from kombu.entity import Exchange, Queue
+from settings.rabbit import connection_info
 
 
 class Server(object):
@@ -70,7 +71,7 @@ class Server(object):
 		if channel:
 			self.channel = channel
 		else:
-			connection = Connection("amqp://guest:guest@localhost//")
+			connection = Connection(connection_info)
 			self.channel = connection.channel()
 		self.consumer = self.channel.Consumer(callbacks=[self._handle_call])
 		self.consumer.qos(prefetch_count=1)
