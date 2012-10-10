@@ -8,8 +8,8 @@ class Header.Model extends Backbone.Model
 
 class Header.View extends Backbone.View
 	tagName: 'div'
-	className: 'repository'
-	template: Handlebars.compile '<div class="header">Blimp</div>'
+	className: 'header'
+	template: Handlebars.compile '<div class="title">Blimp</div>'
 
 	initialize: () ->
 
