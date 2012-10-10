@@ -37,12 +37,3 @@ class Repository.View extends Backbone.View
 		@$el.append @buildsListManagerView.render().el
 		@$el.append @buildDetailsView.render().el
 		return @
-
-
-
-
-repositoryModel = new Repository.Model id: Math.floor Math.random() * 10000
-repositoryModel.fetch()
-
-repositoryView = new Repository.View model: repositoryModel
-$('#mainContainer').append repositoryView.render().el
