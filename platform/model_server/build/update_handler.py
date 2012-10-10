@@ -19,13 +19,15 @@ class BuildUpdateHandler(ModelServerRpcHandler):
 		build = schema.build
 		update = build.update().where(build.c.id==build_id).values(
 			status=BuildStatus.RUNNING, start_time=int(time.time()))
-		self._db_conn.execute(update)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(update)
 
 	def mark_build_finished(self, build_id, status):
 		build = schema.build
 		update = build.update().where(build.c.id==build_id).values(
 			status=status, end_time=int(time.time()))
-		self._db_conn.execute(update)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(update)
 
 	def append_console_output(self, build_id, console_output, console=Console.Stdout):
 		""" The redis keys for build output are of the form build.output:build_id:console
@@ -50,5 +52,6 @@ class BuildUpdateHandler(ModelServerRpcHandler):
 
 		ins = schema.build_console.insert().values(build_id=build_id, type=console,
 			console_output = complete_console_output)
-		self._db_conn.execute(ins)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(ins)
 		redis_conn.delete(redis_key)

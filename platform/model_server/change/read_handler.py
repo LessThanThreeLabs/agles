@@ -1,5 +1,6 @@
 import database.schema
 
+from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
@@ -10,7 +11,9 @@ class ChangeReadHandler(ModelServerRpcHandler):
 	def get_change_attributes(self, change_id):
 		change = database.schema.change
 		query = change.select().where(change.c.id==change_id)
-		row = self._db_conn.execute(query).first()
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
 		if row:
 			return (row[change.c.commit_id], row[change.c.merge_target],
 				row[change.c.number], row[change.c.status],

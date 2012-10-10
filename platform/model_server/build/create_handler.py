@@ -1,6 +1,7 @@
 import database.schema
 
 from constants import BuildStatus
+from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
@@ -15,13 +16,15 @@ class BuildCreateHandler(ModelServerRpcHandler):
 
 		ins = build.insert().values(change_id=change_id, is_primary=is_primary,
 			status=BuildStatus.QUEUED)
-		result = self._db_conn.execute(ins)
-		build_id = result.inserted_primary_key[0]
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			result = sqlconn.execute(ins)
+			build_id = result.inserted_primary_key[0]
 
 		build_commits_map = database.schema.build_commits_map
 
-		for commit in commit_list:
-			ins = build_commits_map.insert().values(build_id=build_id, commit_id=commit)
-			self._db_conn.execute(ins)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			for commit in commit_list:
+				ins = build_commits_map.insert().values(build_id=build_id, commit_id=commit)
+				sqlconn.execute(ins)
 
 		return build_id

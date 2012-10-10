@@ -2,6 +2,7 @@ import os
 
 import database.schema
 
+from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
@@ -15,5 +16,6 @@ class RepoCreateHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 		repo_hash = os.urandom(16).encode('hex')
 		ins = repo.insert().values(name=repo_name, hash=repo_hash, machine_id=machine_id, default_permissions=default_permissions)
-		result = self._db_conn.execute(ins)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			result = sqlconn.execute(ins)
 		return result.inserted_primary_key[0]

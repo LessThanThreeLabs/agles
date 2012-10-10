@@ -1,6 +1,7 @@
 import time
 
 from database import schema
+from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
@@ -13,4 +14,5 @@ class ChangeUpdateHandler(ModelServerRpcHandler):
 		change = schema.change
 		update = change.update().where(change.c.id==change_id).values(
 			status=status, end_time=int(time.time()))
-		self._db_conn.execute(update)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(update)

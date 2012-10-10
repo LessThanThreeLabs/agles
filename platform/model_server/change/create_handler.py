@@ -32,13 +32,13 @@ class ChangeCreateHandler(ModelServerRpcHandler):
 
 		repo_id_query = commit.select().where(id==commit_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			results = sqlconn.execute(repo_id_query).first()
-			if results:
-				repo_id = results[commit.c.repo_id]
+			commit_result = sqlconn.execute(repo_id_query).first()
+			if commit_result:
+				repo_id = commit_result[commit.c.repo_id]
 				change_number_query = func.max(change.c.number).join(commit).filter(repo_id==repo_id)
-				results = sqlconn.execute(change_number_query).first()
-				if results:
-					prev_change_number = results[change.c.number]
+				max_change_number_result = sqlconn.execute(change_number_query).first()
+				if max_change_number_result:
+					prev_change_number = max_change_number_result[change.c.number]
 			change_number = prev_change_number + 1
 			ins = change.insert().values(commit_id=commit_id, merge_target=merge_target,
 				number=change_number, status=BuildStatus.QUEUED)

@@ -1,11 +1,7 @@
 from bunnyrpc.server import Server
-from database.engine import ConnectionFactory
 
 
 class ModelServerRpcHandler(object):
-	@property
-	def _db_conn(self):
-		return ConnectionFactory.get_sql_connection()
 
 	def __init__(self, rpc_noun, rpc_verb):
 		assert isinstance(rpc_noun, str)
