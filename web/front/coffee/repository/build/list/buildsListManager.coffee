@@ -48,7 +48,10 @@ class BuildsListManager.Model extends Backbone.Model
 class BuildsListManager.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildsListManager'
-	template: Handlebars.compile ''
+	template: Handlebars.compile '<div class="buildsListManagerContainer">
+			<div class="buildsSearchContainer"></div>
+			<div class="buildsListContainer"></div>
+		</div>'
 
 	initialize: () =>
 		@model.on 'change:currentBuildsList', (filterType) =>
@@ -59,11 +62,7 @@ class BuildsListManager.View extends Backbone.View
 
 	render: () =>
 		@$el.html @template()
-
-		@$el.append '<div class="buildsSearchContainer"></div>'
 		@$el.find('.buildsSearchContainer').append @buildsSearchView.render().el
-
-		@$el.append '<div class="buildsListContainer"></div>'
 		@_renderBuildsList()
 
 		return @

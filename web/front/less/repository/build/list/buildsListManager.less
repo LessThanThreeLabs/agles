@@ -2,17 +2,23 @@
 
 
 div.buildsListManager {
-	float: left;
-	display: table;
+	display: table-cell;
+	width: 200px;
 	height: 100%;
-	border-right: @strongBorderColor solid 1px;
 
-	.buildsSearchContainer {
-		display: table-row;
-		height: 35px;
-	}
+	.buildsListManagerContainer {
+		display: table;
+		width: 100%;
+		height: 100%;
+		border-right: @strongBorderColor solid 1px;
 
-	.buildsListContainer {
-		display: table-row;
+		.buildsSearchContainer {
+			display: table-row;
+			height: 35px;
+		}
+
+		.buildsListContainer {
+			display: table-row;
+		}
 	}
 }

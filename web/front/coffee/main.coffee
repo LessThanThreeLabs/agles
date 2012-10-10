@@ -29,4 +29,4 @@ class Main.View extends Backbone.View
 mainModel = new Main.Model()
 
 mainView = new Main.View model: mainModel
-$('body').append mainView.render().el
+$('body').prepend mainView.render().el

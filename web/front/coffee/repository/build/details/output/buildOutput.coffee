@@ -27,6 +27,7 @@ class BuildOutput.Model extends Backbone.Model
 				buildOutputLineModelAttributes.push
 					number: lineCounter++
 					text: @get('id') + ' ' + buildOutputLine
+				# break if lineCounter is 20
 
 			@buildOutputLineModels.reset buildOutputLineModelAttributes
 
@@ -34,8 +35,7 @@ class BuildOutput.Model extends Backbone.Model
 class BuildOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildOutput'
-	template: Handlebars.compile '<div class="buildOutputHeader">Console Output:</div>
-		<div class="buildOutputText"></div>'
+	template: Handlebars.compile '<div class="buildOutputText"></div>'
 
 	initialize: () =>
 		@model.on 'addLine', @_handleAddLine
@@ -50,9 +50,15 @@ class BuildOutput.View extends Backbone.View
 
 	_addOutputLines: () =>
 		$('.buildOutputText').empty()
+
+
+
+
+
 		@model.buildOutputLineModels.each (buildOutputLineModel) =>
 			buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
 			$('.buildOutputText').append buildOutputLineView.render().el
+			# $('.buildOutputText').append 'hello<br>'
 
 
 	_handleAddLine: (buildOutputLineModel) =>

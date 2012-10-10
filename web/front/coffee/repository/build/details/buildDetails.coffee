@@ -9,7 +9,10 @@ class BuildDetails.Model extends Backbone.Model
 class BuildDetails.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildDetails'
-	template: Handlebars.compile ''
+	template: Handlebars.compile '<div class="buildDetailsContents">
+			<div class="buildDetailsHeader">Console Output</div>
+			<div class="buildDetailsPanel"></div>
+		</div>'
 
 	initialize: () =>
 		@model.on 'change:build', @_loadBuild
@@ -27,7 +30,7 @@ class BuildDetails.View extends Backbone.View
 		buildOutputModel.fetchBuildOutput()
 
 		buildOutputView = new BuildOutput.View model: buildOutputModel
-		@$el.append buildOutputView.render().el
+		@$el.find('.buildDetailsPanel').append buildOutputView.render().el
 
 
 	_loadBuild: (buildDetailsModel, build) =>
