@@ -3,9 +3,11 @@ import os
 from git import Repo
 from nose.tools import *
 from shutil import rmtree
+from testconfig import config
 
 from settings.verification_server import box_name
 from util.test import BaseIntegrationTest
+from util.test.fake_build_verifier import FakeBuildVerifier
 from util.test.mixins import *
 from util.vagrant import Vagrant
 from verification.server.build_verifier import BuildVerifier
@@ -18,8 +20,11 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 	RabbitMixin, RepoStoreTestMixin):
 	@classmethod
 	def setup_class(cls):
-		vagrant = Vagrant(VM_DIRECTORY, box_name)
-		cls.verifier = BuildVerifier(vagrant)
+		if config.get("fakeverifier"):
+			cls.verifier = FakeBuildVerifier(passes=True)
+		else:
+			vagrant = Vagrant(VM_DIRECTORY, box_name)
+			cls.verifier = BuildVerifier(vagrant)
 		cls.verifier.setup()
 
 	@classmethod
@@ -43,6 +48,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._purge_queues()
 
 	def test_hello_world_repo(self):
+		if config.get("fakeverifier"):
+			self.verifier = FakeBuildVerifier(passes=True)
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
 		self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
@@ -52,6 +59,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			lambda retval: assert_equals(VerificationResult.SUCCESS, retval))
 
 	def test_bad_repo(self):
+		if config.get("fakeverifier"):
+			self.verifier = FakeBuildVerifier(passes=False)
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
 		self._modify_commit_push(work_repo, "hello.py", "4 = 'x' + 2",

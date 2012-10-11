@@ -24,6 +24,8 @@ from settings import store
 from bunnyrpc.server import Server
 from bunnyrpc.client import Client
 from git import Repo
+from testconfig import config
+from util.test.fake_build_verifier import FakeBuildVerifier
 
 VM_DIRECTORY = '/tmp/verification'
 
@@ -33,7 +35,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	@classmethod
 	def setup_class(cls):
 		vagrant = Vagrant(VM_DIRECTORY, box_name)
-		verifier = BuildVerifier(vagrant)
+		if config.get("fakeverifier"):
+			verifier = FakeBuildVerifier(passes=True)
+		else:
+			verifier = BuildVerifier(vagrant)
 		verifier.setup()
 		verification_server = VerificationServer(verifier)
 		cls.vs_process = Process(target=verification_server.run)
