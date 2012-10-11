@@ -29,6 +29,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	@classmethod
 	def teardown_class(cls):
+		rmtree(VM_DIRECTORY, ignore_errors=True)
 		cls.verifier.teardown()
 
 	def setUp(self):
