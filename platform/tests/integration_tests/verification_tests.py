@@ -8,23 +8,23 @@ from settings.verification_server import box_name
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
 from util.vagrant import Vagrant
-from verification.server.verification_request_handler import VerificationRequestHandler
+from verification.server.build_verifier import BuildVerifier
 from verification.server.verification_result import VerificationResult
 
 VM_DIRECTORY = '/tmp/verification'
 
 
-class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin,
+class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 	RabbitMixin, RepoStoreTestMixin):
 	@classmethod
 	def setup_class(cls):
-		cls.vagrant = Vagrant(VM_DIRECTORY, box_name)
-		cls.handler = VerificationRequestHandler(cls.vagrant)
-		cls.vagrant.spawn()
+		vagrant = Vagrant(VM_DIRECTORY, box_name)
+		cls.verifier = BuildVerifier(vagrant)
+		cls.verifier.setup()
 
 	@classmethod
 	def teardown_class(cls):
-		cls.vagrant.teardown()
+		cls.verifier.teardown()
 
 	def setUp(self):
 		self._purge_queues()
@@ -48,7 +48,7 @@ class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
 			refspec="HEAD:refs/pending/1")
 
-		self.handler.verify(self.repo_dir, ["refs/pending/1"],
+		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
 			lambda retval: assert_equals(VerificationResult.SUCCESS, retval))
 
 	def test_bad_repo(self):
@@ -57,5 +57,5 @@ class VerificationRequestHandlerTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._modify_commit_push(work_repo, "hello.py", "4 = 'x' + 2",
 			refspec="HEAD:refs/pending/1")
 
-		self.handler.verify(self.repo_dir, ["refs/pending/1"],
+		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
 			lambda retval: assert_equals(VerificationResult.FAILURE, retval))

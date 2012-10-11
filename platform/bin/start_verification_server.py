@@ -4,6 +4,7 @@ import os
 
 from settings.verification_server import box_name
 from verification.server import VerificationServer
+from verification.server.build_verifier import BuildVerifier
 from util.vagrant import Vagrant
 
 DEFAULT_VM_DIRECTORY = "/tmp/verification"
@@ -20,7 +21,9 @@ def main():
 	print "Starting Verification Server with vm directory %s ..." % (
 			vm_dir)
 
-	vs = VerificationServer(Vagrant(vm_dir, box_name))
+	verifier = BuildVerifier(Vagrant(vm_dir, box_name))
+	verifier.setup()
+	vs = VerificationServer(verifier)
 	vs.run()
 
 

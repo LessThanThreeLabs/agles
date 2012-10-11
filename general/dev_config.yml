@@ -1,45 +1,50 @@
 ---
-- packages:
-  - system:
-    - vim
-    - gcc
-    - g++
-    - curl
-    - libssl-dev
-    - apache2-utils
-    - redis-server
-    - libevent-dev
-  - pip:
-    - pika
-    - kombu
-    - librabbitmq
-    - sqlalchemy
-    - pyyaml
-    - msgpack-python
-    - nose
-    - beautifulsoup4
-    - dulwich
-    - ipython
-    - redis
-    - greenlet
-    - gevent
-    - gitpython
-  - gem:
-    - vagrant
-- scripts:
-  - script: ./install_node.sh
-    directory: scripts
-- packages:
-  - npm:
-    - iced-coffee-script
-- databases:
-    postgres:
-    - name: agles
-      connection-info:
-        host: localhost
-        port: 5432
-        username: postgres
-- scripts:
-  # Currently failing, unable to find amqp.js?
-  - script: npm install -d
-    directory: web/back
+setup:
+  - packages:
+    - system:
+      - vim
+      - gcc
+      - g++
+      - curl
+      - libssl-dev
+      - apache2-utils
+      - redis-server
+      - libevent-dev
+    - pip:
+      - pika
+      - kombu
+      - librabbitmq
+      - sqlalchemy
+      - pyyaml
+      - msgpack-python
+      - nose
+      - beautifulsoup4
+      - dulwich
+      - ipython
+      - redis
+      - greenlet
+      - gevent
+      - gitpython
+    - gem:
+      - vagrant
+  - scripts:
+    - script: ./install_node.sh
+      directory: scripts
+  - packages:
+    - npm:
+      - iced-coffee-script
+  - databases:
+      postgres:
+      - name: agles
+        connection-info:
+          host: localhost
+          port: 5432
+          username: postgres
+  - scripts:
+    # Currently failing, unable to find amqp.js?
+    - script: npm install -d
+      directory: web/back
+build:
+  - python:
+      path: platform/
+      test: nosetests

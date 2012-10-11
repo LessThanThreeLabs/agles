@@ -7,7 +7,7 @@ from model_server.rpc_handler import ModelServerRpcHandler
 
 
 class Console(object):
-	Stdout, Stderr = range(2)
+	General, Setup, Build, Test = range(4)
 
 
 class BuildUpdateHandler(ModelServerRpcHandler):
@@ -29,7 +29,7 @@ class BuildUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
 
-	def append_console_output(self, build_id, console_output, console=Console.Stdout):
+	def append_console_output(self, build_id, console_output, console=Console.General):
 		""" The redis keys for build output are of the form build.output:build_id:console
 		:param build_id: The build id this console is relevant to.
 		:param console_output: The new console output to append and store.
@@ -40,7 +40,7 @@ class BuildUpdateHandler(ModelServerRpcHandler):
 		redis_conn = ConnectionFactory.get_redis_connection()
 		redis_conn.rpush(redis_key, console_output)
 
-	def flush_console_output(self, build_id, console=Console.Stdout):
+	def flush_console_output(self, build_id, console=Console.General):
 		""" Flushes finalized console output to a persisted sql db.
 		:param build_id: The build id this console is relevant to.
 		:param console: The console type we are flushing.

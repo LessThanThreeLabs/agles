@@ -18,8 +18,8 @@ class VerificationServer(MessageDrivenServer):
 	lint, and run tests against commits.
 	"""
 
-	def __init__(self, vagrant):
+	def __init__(self, verifier):
 		handlers = [
-			VerificationRequestHandler(vagrant),
+			VerificationRequestHandler(verifier),
 			]
 		super(VerificationServer, self).__init__(handlers)

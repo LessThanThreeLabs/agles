@@ -82,12 +82,16 @@ def scripts(script_infos)
 	end
 end
 
-def handle_config(config_bundles)
-	config_bundles.each do |config_bundle|
-		config_bundle.each do |type, bundle|
+def handle_setup(setup_bundles)
+	setup_bundles.each do |setup_bundle|
+		setup_bundle.each do |type, bundle|
 			send(type, bundle)
 		end
 	end
+end
+
+def handle_config(config)
+	handle_setup(config["setup"]) if config.has_key? "setup"
 end
 
 config_path = "#{node[:agles][:source_path][:internal]}/#{node[:agles][:config_path]}"

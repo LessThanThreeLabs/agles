@@ -14,6 +14,7 @@ from database.engine import ConnectionFactory
 from database import schema
 from verification.master import *
 from verification.server import *
+from verification.server.build_verifier import BuildVerifier
 from settings.model_server import *
 from settings.rabbit import connection_info
 from settings.verification_server import *
@@ -32,7 +33,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	@classmethod
 	def setup_class(cls):
 		vagrant = Vagrant(VM_DIRECTORY, box_name)
-		verification_server = VerificationServer(vagrant)
+		verifier = BuildVerifier(vagrant)
+		verifier.setup()
+		verification_server = VerificationServer(verifier)
 		cls.vs_process = Process(target=verification_server.run)
 		cls.vs_process.start()
 

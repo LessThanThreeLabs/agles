@@ -19,19 +19,19 @@ class BuildUpdateHandlerTest(unittest.TestCase, RedisTestMixin):
 	def console_append_test(self):
 		update_handler = BuildUpdateHandler()
 
-		build_stdout = []
-		build_stderr = []
+		build_general = []
+		build_setup = []
 		for i in xrange(10):
-			line_stdout = "build:1, line:%s, console:stdout" % i
-			build_stdout.append(line_stdout)
-			line_stderr = "build:1, line:%s, console:stderr" % i
-			build_stderr.append(line_stderr)
-			update_handler.append_console_output(1, line_stdout)
-			update_handler.append_console_output(1, line_stderr,
-				console=Console.Stderr)
+			line_general = "build:1, line:%s, console:general" % i
+			build_general.append(line_general)
+			line_setup = "build:1, line:%s, console:setup" % i
+			build_setup.append(line_setup)
+			update_handler.append_console_output(1, line_general)
+			update_handler.append_console_output(1, line_setup,
+				console=Console.Setup)
 
-		self._assert_console_output_equal(1, '\n'.join(build_stdout), Console.Stdout)
-		self._assert_console_output_equal(1, '\n'.join(build_stderr), Console.Stderr)
+		self._assert_console_output_equal(1, '\n'.join(build_general), Console.General)
+		self._assert_console_output_equal(1, '\n'.join(build_setup), Console.Setup)
 
 	def _assert_console_output_equal(self, build_id, expected_output,
 									 console_type):
