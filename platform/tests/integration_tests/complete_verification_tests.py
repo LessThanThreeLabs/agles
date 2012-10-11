@@ -56,7 +56,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.repo_hash = "asdf"
 		self.repo_machine = "fs0"
 		rmtree(self.repo_dir, ignore_errors=True)
-		os.mkdir(self.repo_dir)
+		os.makedirs(self.repo_dir)
 		self._start_model_server()
 		self.repo_path = os.path.join(
 			self.repo_dir,
