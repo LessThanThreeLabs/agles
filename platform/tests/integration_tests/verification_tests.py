@@ -37,8 +37,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.work_repo_dir = self.repo_dir + ".clone"
 		rmtree(self.repo_dir, ignore_errors=True)
 		rmtree(self.work_repo_dir, ignore_errors=True)
-		os.mkdir(self.repo_dir)
-		os.mkdir(self.work_repo_dir)
+		os.makedirs(self.repo_dir)
+		os.makedirs(self.work_repo_dir)
 		self._start_model_server()
 
 	def tearDown(self):
