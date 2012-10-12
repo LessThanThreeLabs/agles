@@ -15,10 +15,10 @@ class Build.View extends Backbone.View
 	className: 'build'
 	template: Handlebars.compile '<div class="number">{{number}}</div>
 		<div class="status {{status}}">{{status}}</div>'
-	events: 'click': 'clickHandler'
+	events: 'click': '_clickHandler'
 
 	initialize: () =>
-		@model.on 'change:selected', @handleSelected
+		@model.on 'change:selected', @_handleSelected
 
 
 	render: () =>
@@ -28,10 +28,10 @@ class Build.View extends Backbone.View
 		return @
 
 
-	clickHandler: () =>
+	_clickHandler: () =>
 		@model.toggleSelected()
 
 
-	handleSelected: () =>
+	_handleSelected: () =>
 		if @model.get 'selected' then @$el.addClass 'selected'
 		else @$el.removeClass 'selected'

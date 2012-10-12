@@ -9,8 +9,10 @@ class RepositoryHeader.Model extends Backbone.Model
 class RepositoryHeader.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeader'
-	template: Handlebars.compile '<div class="repositoryName">{{name}}</div>
-		<div class="repositorySubname">{{subname}}</div>'
+	template: Handlebars.compile '<div class="repositoryHeaderContents">
+			<div class="repositoryName">{{name}}</div>
+			<div class="repositorySubname">{{subname}}</div>
+		</div>'
 
 	initialize: () =>
 		@model.on 'change:name', @render
