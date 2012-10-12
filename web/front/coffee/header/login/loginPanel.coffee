@@ -7,6 +7,9 @@ window.LoginPanel.renderedAlready = false
 class LoginPanel.Model extends Backbone.Model
 	defaults:
 		visible: false
+		email: ''
+		password: ''
+		rememberMe: false
 
 	initialize: () =>
 		@loginPasswordColorHashModel = new LoginPasswordColorHash.Model()
@@ -30,16 +33,16 @@ class LoginPanel.View extends Backbone.View
 			</div>
 			<div class="modal-body">
 				<form class="form-horizontal">
-					<div class="control-group">
+					<div class="control-group emailControlGroup">
 						<label class="control-label">Email</label>
 						<div class="controls">
 							<input type="text" class="loginEmail" placeholder="email">
 						</div>
 					</div>
-					<div class="control-group">
+					<div class="control-group passwordControlGroup">
 						<label class="control-label">Password</label>
 						<div class="controls loginPasswordControls">
-							<input type="password" class="loginPassword" placeholder="password">
+							<input type="password" class="loginPassword" placeholder="password"><span class="loginPasswordError help-inline"></span>
 						</div>
 					</div>
 					<div class="control-group">
@@ -96,7 +99,32 @@ class LoginPanel.View extends Backbone.View
 
 
 	_handleLoginRequest: () =>
-		console.log 'need to make login request!'
+		@_updatePasswordErrorMessage()
+		if @_isPasswordValid()
+			@_makeLoginRequest()
+
+
+	_isPasswordValid: () =>
+		return @model.get('password').length > 8
+
+
+	_makeLoginRequest: () =>
+		requestData = 
+			email: @model.get 'email'
+			password: @model.get 'password'
+			rememberMe: @model.get 'rememberMe'
+		socket.emit 'users:update', requestData, (error, userData) =>
+			throw new Error error if error?
+			console.log userData		
+
+
+	_updatePasswordErrorMessage: () =>
+		if @_isPasswordValid()
+			$('.passwordControlGroup').removeClass 'error'
+			$('.loginPasswordError').text ''
+		else
+			$('.passwordControlGroup').addClass 'error'
+			$('.loginPasswordError').text 'Password must be 8 or more characters'
 
 
 	_updateVisibility: (model, visible) =>

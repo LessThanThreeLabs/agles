@@ -1,5 +1,6 @@
 assert = require 'assert'
 
+UsersResource = require './resources/usersResource'
 OrganizationsResource = require './resources/organizationsResource'
 BuildsResource = require './resources/buildsResource'
 BuildOutputsResource = require './resources/buildOutputsResource'
@@ -7,16 +8,18 @@ RepositoriesResource = require './resources/repositoriesResource'
 
 
 exports.create = (modelRpcConnection) ->
+	usersResource = UsersResource.create modelRpcConnection
 	organizationsResource = OrganizationsResource.create modelRpcConnection
 	buildsResource = BuildsResource.create modelRpcConnection
 	buildOutputsResource = BuildOutputsResource.create modelRpcConnection
 	repositoriesResource = RepositoriesResource.create modelRpcConnection
-	return new ResourceRouter organizationsResource, buildsResource, buildOutputsResource, repositoriesResource
+	return new ResourceRouter usersResource, organizationsResource, buildsResource, buildOutputsResource, repositoriesResource
 
 
 class ResourceRouter
-	constructor: (@organizationsResource, @buildsResource, @buildOutputsResource, @repositoriesResource) ->
+	constructor: (@usersResource, @organizationsResource, @buildsResource, @buildOutputsResource, @repositoriesResource) ->
 		@allowedActions = ['create', 'read', 'update', 'delete', 'subscribe']
+		assert.ok @_checkResource @usersResource
 		assert.ok @_checkResource @organizationsResource
 		assert.ok @_checkResource @buildsResource
 		assert.ok @_checkResource @buildOutputsResource
@@ -29,6 +32,7 @@ class ResourceRouter
 
 
 	bindToResources: (socket) ->
+		@_bindToResource socket, 'users', @usersResource
 		@_bindToResource socket, 'organizations', @organizationsResource
 		@_bindToResource socket, 'builds', @buildsResource
 		@_bindToResource socket, 'buildOutputs', @buildOutputsResource
