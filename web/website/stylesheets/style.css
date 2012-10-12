@@ -1,0 +1,42 @@
+body {
+  background-image: url('../images/shattered.png');
+  background-color: #f5f2f3;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+}
+body hr {
+  color: gray;
+  background-color: gray;
+  border: 0;
+  height: 3px;
+  width: 900px;
+}
+.page .team {
+  text-align: center;
+}
+.page .team .section-content {
+  position: relative;
+  overflow: hidden;
+}
+.page .team .section-content ol {
+  padding: 0;
+}
+.page .team .section-content ol li {
+  width: 300px;
+  display: inline-block;
+  vertical-align: top;
+}
+.page .team .section-content ol li img {
+  width: 200px;
+}
+.page .team .section-content ol li .name {
+  font-size: 18px;
+  line-height: 18px;
+  font-weight: 600;
+  padding: 10px 0 5px 0;
+}
+.page .team .section-content ol li .title {
+  font-size: 14px;
+  line-height: 14px;
+  color: #808080;
+}
