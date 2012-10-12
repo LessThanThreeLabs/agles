@@ -7,7 +7,6 @@ import collections
 import os
 
 from subprocess import Popen, PIPE
-from time import sleep
 
 
 class Vagrant(object):
@@ -16,6 +15,9 @@ class Vagrant(object):
 		self.vm_directory = vm_directory
 		self.box_name = box_name
 		self.vagrant_env = self._get_vagrant_env()
+
+	def get_vm_directory(self):
+		return self.vm_directory
 
 	def init(self, stdout_handler=None, stderr_handler=None):
 		return self._vagrant_call("init", self.box_name, stdout_handler=stdout_handler, stderr_handler=stderr_handler)
@@ -71,29 +73,6 @@ class Vagrant(object):
 			if line_handler:
 				line_handler(line)
 		return line
-
-	def spawn(self):
-		self.teardown()
-		print "Spawning vm at " + self.vm_directory
-		if not os.access(self.vm_directory, os.F_OK):
-			os.mkdir(self.vm_directory)
-
-		if self.init().returncode != 0:
-			raise Exception("Couldn't initialize vagrant: " + self.vm_directory)
-		if self.up().returncode != 0:
-			raise Exception("Couldn't start vagrant vm: " + self.vm_directory)
-		sleep(1)  # TODO (bbland): decide if this is necessary
-		if self.sandbox_on().returncode != 0:
-			raise Exception("Couldn't initialize sandbox on vm: " + self.vm_directory)
-		print "Launched vm at: " + self.vm_directory
-
-	def teardown(self):
-		vagrantfile = os.path.join(self.vm_directory, "Vagrantfile")
-		if os.access(vagrantfile, os.F_OK):
-			print "Tearing down existing vm at " + self.vm_directory
-			if self.destroy().returncode != 0:
-				raise Exception("Couldn't tear down existing vm: " + self.vm_directory)
-			os.remove(vagrantfile)
 
 	def _get_vagrant_env(self):
 		vagrant_env = os.environ.copy()

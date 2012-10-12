@@ -6,9 +6,10 @@
 import os
 
 from bs4 import BeautifulSoup
+from build_command import BuildCommand
 
 
-class VagrantNoseRunner(object):
+class VagrantNoseCommand(BuildCommand):
 	"""Simple nose implementation for running tests on a vagrant vm
 	"""
 	def __init__(self, vagrant):
@@ -18,7 +19,14 @@ class VagrantNoseRunner(object):
 		self.vagrant.ssh_call("find /home/vagrant/source -name \"tests\" |" +
 				"nosetests  --with-xunit --xunit-file=/vagrant/nosetests.xml")
 		test_results = XunitParser().parse_file(
-				os.path.join(self.vagrant.vm_directory, "nosetests.xml"))
+				os.path.join(self.vagrant.get_vm_directory(), "nosetests.xml"))
+		return self._compute_return_code(test_results)
+
+	def _compute_return_code(self, test_results):
+		errors = 0
+		if test_results:
+			for suite in test_results:
+				errors = errors + suite.errors + suite.failures
 		return test_results
 
 

@@ -45,6 +45,7 @@ setup:
     - script: npm install -d
       directory: web/back
 build:
-  - python:
-      path: platform/
-      test: nosetests
+  python:
+    buildscript:
+    path: platform
+    testscript: nosetests

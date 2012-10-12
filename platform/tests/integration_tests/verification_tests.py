@@ -9,7 +9,7 @@ from settings.verification_server import box_name
 from util.test import BaseIntegrationTest
 from util.test.fake_build_verifier import FakeBuildVerifier
 from util.test.mixins import *
-from util.vagrant import Vagrant
+from vagrant.vagrant_wrapper import VagrantWrapper
 from verification.server.build_verifier import BuildVerifier
 from verification.server.verification_result import VerificationResult
 
@@ -23,8 +23,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		if config.get("fakeverifier"):
 			cls.verifier = FakeBuildVerifier(passes=True)
 		else:
-			vagrant = Vagrant(VM_DIRECTORY, box_name)
-			cls.verifier = BuildVerifier(vagrant)
+			vagrant_wrapper = VagrantWrapper.vm(VM_DIRECTORY, box_name)
+			cls.verifier = BuildVerifier(vagrant_wrapper)
 		cls.verifier.setup()
 
 	@classmethod

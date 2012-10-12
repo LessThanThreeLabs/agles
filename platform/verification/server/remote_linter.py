@@ -5,8 +5,10 @@
 
 import re
 
+from build_command import BuildCommand
 
-class VagrantLinter(object):
+
+class VagrantLintingCommand(BuildCommand):
 	"""Simple pylint implementation for running static python analysis
 	on a vagrant vm
 	"""
@@ -19,7 +21,7 @@ class VagrantLinter(object):
 		lint_parser = LintParser()
 		pylint_issues = lint_parser.parse_pylint(results.stdout)
 		errors = lint_parser.get_errors(pylint_issues)
-		return errors
+		return len(errors)
 
 
 class LintParser(object):

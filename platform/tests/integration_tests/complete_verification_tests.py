@@ -5,7 +5,7 @@ from kombu.connection import Connection
 from shutil import rmtree
 from nose.tools import *
 from util.permissions import RepositoryPermissions
-from util.vagrant import Vagrant
+from vagrant.vagrant_wrapper import VagrantWrapper
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
 from multiprocessing import Process
@@ -34,11 +34,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	RabbitMixin, RepoStoreTestMixin, RedisTestMixin):
 	@classmethod
 	def setup_class(cls):
-		vagrant = Vagrant(VM_DIRECTORY, box_name)
 		if config.get("fakeverifier"):
 			verifier = FakeBuildVerifier(passes=True)
 		else:
-			verifier = BuildVerifier(vagrant)
+			vagrant_wrapper = VagrantWrapper.vm(VM_DIRECTORY, box_name)
+			verifier = BuildVerifier(vagrant_wrapper)
 		verifier.setup()
 		verification_server = VerificationServer(verifier)
 		cls.vs_process = Process(target=verification_server.run)
