@@ -11,6 +11,10 @@ class LoginPanel.Model extends Backbone.Model
 	initialize: () =>
 		@loginPasswordColorHashModel = new LoginPasswordColorHash.Model()
 
+		@on 'change:password', () =>
+			@loginPasswordColorHashModel.set 'password', @get 'password'
+
+
 
 	toggleVisibility: () =>
 		@set 'visible', not @get('visible')
@@ -41,19 +45,22 @@ class LoginPanel.View extends Backbone.View
 					<div class="control-group">
 						<div class="controls">
 							<label class="checkbox">
-								<input type="checkbox"> Remember me
+								<input type="checkbox" class="loginRemember"> Remember me
 							</label>
 						</div>
 					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
-				<a href="#" class="btn btn-primary">Login</a>
+				<a href="#" class="btn btn-primary loginButton">Login</a>
 			</div>
 		</div>'
 
 	events:
+		'keydown .loginEmail': '_handleEmailChange'
 		'keydown .loginPassword': '_handlePasswordChange'
+		'change .loginRemember': '_handleRememberMe'
+		'click .loginButton': '_handleLoginRequest'
 
 
 	initialize: () =>
@@ -76,8 +83,20 @@ class LoginPanel.View extends Backbone.View
 		return @
 
 
+	_handleEmailChange: (event) =>
+		setTimeout (() => @model.set 'email', $('.loginEmail').val()), 0
+
+
 	_handlePasswordChange: (event) =>
-		setTimeout (() => @model.loginPasswordColorHashModel.set 'password', $('.loginPassword').val()), 0
+		setTimeout (() => @model.set 'password', $('.loginPassword').val()), 0
+
+
+	_handleRememberMe: () =>
+		console.log 'NEED TO STORE REMEMBER ME IN MODEL!  HOW SEE IF RADIO IS CHECKED?'
+
+
+	_handleLoginRequest: () =>
+		console.log 'need to make login request!'
 
 
 	_updateVisibility: (model, visible) =>
