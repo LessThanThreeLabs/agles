@@ -29,9 +29,10 @@ class RepoStoreTests(unittest.TestCase, RepoStoreTestMixin):
 	def setUp(self):
 		self.repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
 		self.store = FileSystemRepositoryStore(self.repodir)
+		self.repo_hash = 'asdfghjkl'
 		self.repo_path = os.path.join(
 			self.repodir,
-			to_path("asdf", "repo.git"))
+			to_path(self.repo_hash, "repo.git"))
 
 	def tearDown(self):
 		self._cleardir(self.repodir)
@@ -46,17 +47,17 @@ class RepoStoreTests(unittest.TestCase, RepoStoreTestMixin):
 
 	def test_repo_create(self):
 		assert_false(exists(self.repo_path), msg="Repository should not exist.")
-		self.store.create_repository("asdf", "repo.git")
+		self.store.create_repository(self.repo_hash, "repo.git")
 		assert_true(exists(self.repo_path), msg="Repository does not exist.")
 
 	def test_repo_create_remove(self):
-		self.store.create_repository("asdf", "repo.git")
+		self.store.create_repository(self.repo_hash, "repo.git")
 		assert_true(exists(self.repo_path), msg="Repository was not deleted.")
-		self.store.delete_repository("asdf", "repo.git")
+		self.store.delete_repository(self.repo_hash, "repo.git")
 		assert_false(exists(self.repo_path), msg="Repository was not deleted.")
 
 	def test_merge_pass(self):
-		self.store.create_repository("asdf", "repo.git")
+		self.store.create_repository(self.repo_hash, "repo.git")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
@@ -66,10 +67,10 @@ class RepoStoreTests(unittest.TestCase, RepoStoreTestMixin):
 		self._modify_commit_push(work_repo, "test.txt", "c2",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
-		self.store.merge_changeset("asdf", "repo.git", "refs/pending/1", "master")
+		self.store.merge_changeset(self.repo_hash, "repo.git", "refs/pending/1", "master")
 
 	def test_merge_fail(self):
-		self.store.create_repository("asdf", "repo.git")
+		self.store.create_repository(self.repo_hash, "repo.git")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
@@ -80,4 +81,4 @@ class RepoStoreTests(unittest.TestCase, RepoStoreTestMixin):
 		self._modify_commit_push(work_repo, "test.txt", "c3",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
-		assert_raises(MergeError, self.store.merge_changeset, "asdf", "repo.git", "refs/pending/1", "master")
+		assert_raises(MergeError, self.store.merge_changeset, self.repo_hash, "repo.git", "refs/pending/1", "master")

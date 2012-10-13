@@ -15,7 +15,6 @@ from database import schema
 from verification.master import *
 from verification.server import *
 from verification.server.build_verifier import BuildVerifier
-from settings.model_server import *
 from settings.rabbit import connection_info
 from settings.verification_server import *
 from repo.store import FileSystemRepositoryStore
@@ -54,7 +53,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		super(VerificationRoundTripTest, self).setUp()
 		self._purge_queues()
 		self.repo_dir = os.path.join(VM_DIRECTORY, 'repo')
-		self.repo_hash = "asdf"
+		self.repo_hash = "asdfghjkl"
 		self.repo_machine = "fs0"
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.makedirs(self.repo_dir)

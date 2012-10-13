@@ -53,7 +53,8 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		assert_equals(len(sshargs), 3)
 		assert_equals('ssh', sshargs[0])
 		assert_equals('git@http://machine0', sshargs[1])
-		assert_is_not_none(re.match("git-receive-pack '././.+/repo.git' 1", sshargs[2]), msg="Created ssh command is not well formed.")
+		assert_is_not_none(re.match("git-receive-pack '.+/.+/.+/repo.git' 1", sshargs[2]),
+			msg='Created ssh command: "%s" is not well formed.' % sshargs[2])
 
 	def test_invalid_permissions(self):
 		REPO_URI = "schacon/repo.git"

@@ -2,19 +2,25 @@
 
 import os
 
+DEFAULT_CHARS_PER_LEVEL = 2
 
 def to_path(hash, name, dir_levels=3):
 	return os.path.join(directory_treeify(hash, dir_levels), name)
 
 
-def directory_treeify(hash, dir_levels):
+def directory_treeify(hash, dir_levels=3):
 	"""Takes a hash and separates it into directories (e.g. a23fe89 => a/2/3fe89)
 
 	:param hash: The hash we are treeifying.
 	:param dir_levels: The number of directory levels to create from repo_hash.
 	:return: A string representing repo_hash with file separators up to dir_levels levels.
 	"""
-	return os.path.join(*hash[:dir_levels]) + hash[dir_levels:]
+	assert dir_levels > 0
+	assert len(hash) > (dir_levels - 1) * DEFAULT_CHARS_PER_LEVEL
+
+	pivot = dir_levels * DEFAULT_CHARS_PER_LEVEL
+	chunked_hash = map(''.join, zip(*[iter(hash[:pivot])] * DEFAULT_CHARS_PER_LEVEL))
+	return os.path.join(*chunked_hash) + hash[pivot:]
 
 
 def hidden_ref(commit_id):
