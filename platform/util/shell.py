@@ -2,8 +2,7 @@ import os
 import re
 
 from model_server import ModelServer
-from repo.store import FileSystemRepositoryStore
-from util import repositories
+from util import pathgen
 from util.permissions import RepositoryPermissions
 
 REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"
@@ -50,7 +49,7 @@ class RestrictedGitShell(object):
 
 		with ModelServer.rpc_connect("repo", "read") as modelserver_rpc_conn:
 			route, repo_hash, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
-		remote_filesystem_path = repositories.to_path(repo_hash, repo_name, FileSystemRepositoryStore.DIR_LEVELS)
+		remote_filesystem_path = pathgen.to_path(repo_hash, repo_name)
 
 		self.verify_user_permissions(command, user_id, repo_hash)
 

@@ -5,7 +5,7 @@ from handler import QueueListener
 from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
 from settings.verification_server import *
-from util import repositories
+from util import pathgen
 from verification.server.verification_result import VerificationResult
 
 
@@ -46,7 +46,7 @@ class VerificationResultsHandler(QueueListener):
 			repo_uri = client.get_repo_uri(commit_id)
 			filesystem_server_uri, repo_hash, repo_name = client.get_repo_attributes(repo_uri)
 
-		ref = repositories.hidden_ref(commit_id)
+		ref = pathgen.hidden_ref(commit_id)
 		try:
 			self.remote_repo_manager.merge_changeset(
                 filesystem_server_uri, repo_hash,

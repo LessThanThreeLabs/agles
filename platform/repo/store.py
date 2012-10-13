@@ -13,7 +13,7 @@ from git import GitCommandError, Repo
 from bunnyrpc.client import Client
 from database.engine import ConnectionFactory
 from settings.store import rpc_exchange_name, filesystem_repository_servers
-from util import repositories
+from util import pathgen
 
 
 class RemoteRepositoryManager(object):
@@ -147,8 +147,6 @@ class RepositoryStore(object):
 class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
-	DIR_LEVELS = 3
-
 	def __init__(self, root_storage_directory_path):
 		super(FileSystemRepositoryStore, self).__init__()
 		if not os.path.exists(root_storage_directory_path):
@@ -229,7 +227,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def _resolve_path(self, repo_hash, repo_name):
 		repo_path = os.path.join(self._root_path,
-								 repositories.to_path(repo_hash, repo_name, self.DIR_LEVELS))
+								 pathgen.to_path(repo_hash, repo_name))
 		return os.path.realpath(repo_path)
 
 

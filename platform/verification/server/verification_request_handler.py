@@ -5,7 +5,7 @@ from handler import QueueListener
 from model_server import ModelServer
 from model_server.build.update_handler import Console
 from settings.verification_server import *
-from util import repositories
+from util import pathgen
 from verification_result import VerificationResult
 
 
@@ -39,7 +39,7 @@ class VerificationRequestHandler(QueueListener):
 			return model_server_rpc.get_commit_list(build_id)
 
 	def _get_ref_list(self, commit_list):
-		return [repositories.hidden_ref(commit) for commit in commit_list]
+		return [pathgen.hidden_ref(commit) for commit in commit_list]
 
 	def _start_build(self, build_id):
 		with ModelServer.rpc_connect("build", "update") as model_server_rpc:

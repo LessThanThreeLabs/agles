@@ -19,7 +19,7 @@ from settings.model_server import *
 from settings.rabbit import connection_info
 from settings.verification_server import *
 from repo.store import FileSystemRepositoryStore
-from util.repositories import to_path
+from util.pathgen import to_path
 from settings import store
 from bunnyrpc.server import Server
 from bunnyrpc.client import Client
@@ -61,7 +61,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._start_model_server()
 		self.repo_path = os.path.join(
 			self.repo_dir,
-			to_path(self.repo_hash, "repo.git", FileSystemRepositoryStore.DIR_LEVELS))
+			to_path(self.repo_hash, "repo.git"))
 		self._start_redis()
 		repo_store = Server(FileSystemRepositoryStore(self.repo_dir))
 		repo_store.bind(store.rpc_exchange_name, [self.repo_machine])

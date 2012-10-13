@@ -8,7 +8,7 @@ from nose.tools import *
 from git import Repo
 from repo.store import FileSystemRepositoryStore, MergeError
 
-from util.repositories import to_path
+from util.pathgen import to_path
 from util.test.mixins import *
 
 
@@ -31,7 +31,7 @@ class RepoStoreTests(unittest.TestCase, RepoStoreTestMixin):
 		self.store = FileSystemRepositoryStore(self.repodir)
 		self.repo_path = os.path.join(
 			self.repodir,
-			to_path("asdf", "repo.git", FileSystemRepositoryStore.DIR_LEVELS))
+			to_path("asdf", "repo.git"))
 
 	def tearDown(self):
 		self._cleardir(self.repodir)
