@@ -22,7 +22,7 @@ override_attributes(
 			:internal => "/home/lt3/code/agles"
 		},
 		:config_path => "general/dev_config.yml"
-	}
+	},
 	:python => {
 		:install_method => "source",
 		:version => "2.7.3"
