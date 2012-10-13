@@ -1,6 +1,9 @@
 ---
 setup:
   - packages:
+    - scripts:
+      - script: curl -L https://get.rvm.io | bash -s stable
+      - script: rvm install 1.9.1-dev
     - system:
       - vim
       - gcc
@@ -10,6 +13,7 @@ setup:
       - apache2-utils
       - redis-server
       - libevent-dev
+      - libpq-dev
     - pip:
       - pika
       - kombu
@@ -25,10 +29,15 @@ setup:
       - greenlet
       - gevent
       - gitpython
+      - virtualenvwrapper
+      - psycopg2
+      - argparse
     - gem:
       - vagrant
   - scripts:
     - script: ./install_node.sh
+      directory: scripts
+    - script: ./install_virtualbox.sh
       directory: scripts
   - packages:
     - npm:
