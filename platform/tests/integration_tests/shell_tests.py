@@ -62,5 +62,3 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
 		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
 		assert_raises(InvalidPermissionError, rsh.new_sshargs, 'git-upload-pack', REPO_URI, "1")
-
-

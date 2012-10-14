@@ -13,6 +13,11 @@ user = Table('user', metadata,
 	Column('name', String, nullable=False)
 )
 
+media = Table('media', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('hash', String(32), nullable=False)
+)
+
 uri_repo_map = Table('uri_repo_map', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('uri', String, nullable=False, unique=True),
