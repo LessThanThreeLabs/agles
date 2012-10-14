@@ -9,7 +9,7 @@ class LoginPanel.Model extends Backbone.Model
 		visible: false
 		email: ''
 		password: ''
-		rememberMe: false
+		rememberMe: true
 
 	initialize: () =>
 		@loginPasswordColorHashModel = new LoginPasswordColorHash.Model()
@@ -95,7 +95,7 @@ class LoginPanel.View extends Backbone.View
 
 
 	_handleRememberMe: () =>
-		console.log 'NEED TO STORE REMEMBER ME IN MODEL!  HOW SEE IF RADIO IS CHECKED?'
+		@model.set 'rememberMe', $('.loginRemember').prop 'checked'
 
 
 	_handleLoginRequest: () =>
