@@ -4,12 +4,12 @@ window.CreateAccountPanelValidator = class CreateAccountPanelValidator
 
 
 	isEmailValid: () =>
-		emailRegex = new RegExp "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b"
+		emailRegex = new RegExp "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b"
 		return @model.get('email').toLowerCase().match emailRegex
 
 
 	isPasswordValid: () =>
-		return @model.get('password').length > 8
+		return @model.get('password').length >= 8
 
 
 	isVerifyPasswordValid: () =>
