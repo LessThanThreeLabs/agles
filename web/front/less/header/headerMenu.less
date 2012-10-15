@@ -1,11 +1,19 @@
 div.headerMenu {
 	display: table-cell;
-	width: 75px;
+	width: 220px;
 	vertical-align: middle;
 	font-size: 1.3em;
 	font-weight: bold;
 
-	&:hover {
-		color: #1199FF;
+	.headerMenuOption {
+		margin-right: 30px;
+
+		&:last-child {
+			margin-right: 0px;
+		}
+
+		&:hover {
+			color: #1199FF;
+		}
 	}
 }

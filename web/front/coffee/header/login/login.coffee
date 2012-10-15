@@ -9,7 +9,7 @@ class Login.Model extends Backbone.Model
 
 class Login.View extends Backbone.View
 	tagName: 'div'
-	className: 'login'
+	className: 'login headerMenuOption'
 	template: Handlebars.compile 'Login'
 	events: 'click': '_clickHandler'
 
