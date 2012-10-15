@@ -9,6 +9,9 @@ class CreateAccountPanel.Model extends Backbone.Model
 		visible: false
 		email: ''
 		password: ''
+		verifyPassword: ''
+		firstName: ''
+		lastName: ''
 
 	initialize: () =>
 
@@ -30,13 +33,32 @@ class CreateAccountPanel.View extends Backbone.View
 					<div class="control-group emailControlGroup">
 						<label class="control-label">Email</label>
 						<div class="controls">
-							<input type="text" class="createAccountEmail" placeholder="email">
+							<input type="text" class="createAccountEmail" placeholder="email"><span class="createEmailError help-inline"></span>
 						</div>
 					</div>
 					<div class="control-group passwordControlGroup">
 						<label class="control-label">Password</label>
 						<div class="controls">
 							<input type="password" class="createAccountPassword" placeholder="password"><span class="createPasswordError help-inline"></span>
+						</div>
+					</div>
+					<div class="control-group verifyPasswordControlGroup">
+						<label class="control-label">Verify Password</label>
+						<div class="controls">
+							<input type="password" class="createAccountVerifyPassword" placeholder="password again, for practice"><span class="createVerifyPasswordError help-inline"></span>
+						</div>
+					</div>
+					<div class="horizontalRule"></div>
+					<div class="control-group firstNameControlGroup">
+						<label class="control-label">First Name</label>
+						<div class="controls">
+							<input type="password" class="createAccountFirstName" placeholder="first name"><span class="createFirstNameError help-inline"></span>
+						</div>
+					</div>
+					<div class="control-group lastNameControlGroup">
+						<label class="control-label">Last Name</label>
+						<div class="controls">
+							<input type="password" class="createAccountLastName" placeholder="last name"><span class="createLastNameError help-inline"></span>
 						</div>
 					</div>
 				</form>
@@ -47,12 +69,13 @@ class CreateAccountPanel.View extends Backbone.View
 		</div>'
 
 	events:
-		'keydown .createAccountEmail': '_handleEmailChange'
-		'keydown .createAccountPassword': '_handlePasswordChange'
+		'keydown': '_handleFormEntryChange'
 		'click .createAccountButton': '_handleCreateAccount'
 
 
 	initialize: () =>
+		@formValidator = new CreateAccountPanelValidator @model
+
 		@model.on 'change:visible', @_updateVisibility
 
 		$(document).on 'show', '.createAccountModal', () =>
@@ -69,40 +92,84 @@ class CreateAccountPanel.View extends Backbone.View
 		return @
 
 
-	_handleEmailChange: (event) =>
-		setTimeout (() => @model.set 'email', $('.createAccountEmail').val()), 0
-
-
-	_handlePasswordChange: (event) =>
-		setTimeout (() => @model.set 'password', $('.createAccountPassword').val()), 0
+	_handleFormEntryChange: () =>
+		setTimeout (() =>
+			@model.set 'email', $('.createAccountEmail').val()
+			@model.set 'password', $('.createAccountPassword').val()
+			@model.set 'verifyPassword', $('.createAccountVerifyPassword').val()
+			@model.set 'firstName', $('.createAccountFirstName').val()
+			@model.set 'lastName', $('.createAccountLastName').val()
+			), 0
 
 
 	_handleCreateAccount: () =>
-		@_updatePasswordErrorMessage()
-		if @_isPasswordValid()
+		@_updateErrorMessages()
+		if @formValidator.allValid()
 			@_makeCreateAccountRequest()
-
-
-	_isPasswordValid: () =>
-		return @model.get('password').length > 8
 
 
 	_makeCreateAccountRequest: () =>
 		requestData = 
 			email: @model.get 'email'
 			password: @model.get 'password'
+			firstName: @model.get 'firstName'
+			lastName: @model.get 'lastName'
 		socket.emit 'users:create', requestData, (error, userData) =>
 			throw new Error error if error?
 			console.log userData		
 
 
+	_updateEmailErrorMessage: () =>
+		if @formValidator.isEmailValid()
+			$('.emailControlGroup').removeClass 'error'
+			$('.createEmailError').text ''
+		else
+			$('.emailControlGroup').addClass 'error'
+			$('.createEmailError').text 'Email address is invalid'
+
+
 	_updatePasswordErrorMessage: () =>
-		if @_isPasswordValid()
+		if @formValidator.isPasswordValid()
 			$('.passwordControlGroup').removeClass 'error'
 			$('.createPasswordError').text ''
 		else
 			$('.passwordControlGroup').addClass 'error'
 			$('.createPasswordError').text 'Password must be 8 or more characters'
+
+
+	_updatePasswordVerifyErrorMessage: () =>
+		if @formValidator.isVerifyPasswordValid()
+			$('.verifyPasswordControlGroup').removeClass 'error'
+			$('.createVerifyPasswordError').text ''
+		else
+			$('.verifyPasswordControlGroup').addClass 'error'
+			$('.createVerifyPasswordError').text 'Password does not match'
+
+
+	_updateFirstNameErrorMessage: () =>
+		if @formValidator.isFirstNameValid()
+			$('.firstNameControlGroup').removeClass 'error'
+			$('.createFirstNameError').text ''
+		else
+			$('.firstNameControlGroup').addClass 'error'
+			$('.createFirstNameError').text 'Invalid first name'
+
+
+	_updateLastNameErrorMessage: () =>
+		if @formValidator.isLastNameValid()
+			$('.lastNameControlGroup').removeClass 'error'
+			$('.createLastNameError').text ''
+		else
+			$('.lastNameControlGroup').addClass 'error'
+			$('.createLastNameError').text 'Invalid last name'
+
+
+	_updateErrorMessages: () =>
+		@_updateEmailErrorMessage()
+		@_updatePasswordErrorMessage()
+		@_updatePasswordVerifyErrorMessage()
+		@_updateFirstNameErrorMessage()
+		@_updateLastNameErrorMessage()
 
 
 	_updateVisibility: (model, visible) =>
