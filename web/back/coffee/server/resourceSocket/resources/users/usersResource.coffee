@@ -2,17 +2,19 @@ assert = require 'assert'
 nodemailer = require 'nodemailer'
 
 Resource = require '../resource'
+CreateAccountStore = require './createAccountStore'
 CreateAccountEmailer = require './createAccountEmailer'
 
 
 exports.create = (configurationParams, modelRpcConnection) ->
+	createAccountStore = CreateAccountStore.create configurationParams.createAccount.redisStore
 	createAccountEmailer = CreateAccountEmailer.create configurationParams.createAccount.email
-	return new UsersResource configurationParams, modelRpcConnection, createAccountEmailer
+	return new UsersResource configurationParams, modelRpcConnection, createAccountStore, createAccountEmailer
 
 
 class UsersResource extends Resource
-	constructor: (configurationParams, modelRpcConnection, @createAccountEmailer) ->
-		assert.ok @createAccountEmailer?
+	constructor: (configurationParams, modelRpcConnection, @createAccountStore, @createAccountEmailer) ->
+		assert.ok @createAccountStore? and @createAccountEmailer?
 		super configurationParams, modelRpcConnection
 
 
