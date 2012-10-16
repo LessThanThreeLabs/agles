@@ -18,9 +18,11 @@ class UsersResource extends Resource
 
 	create: (socket, data, callback) ->
 		if data.email? and data.password?
-			console.log 'need to do stuff with email and password...'
-			sendEmailToUser 'jordannpotter@gmail.com'
-			callback null, true
+			if isAccountValid(data.email, data.password, data.firstName, data.lastName)
+				@createAccountEmailer.sendEmailToUser data.firstName, data.lastName, data.email
+				callback null, true
+			else
+				callback 'Invalid account data'
 		else
 			callback 'Parsing error'
 
@@ -33,23 +35,7 @@ class UsersResource extends Resource
 			callback 'Parsing error'
 
 
-sendEmailToUser = (email) ->
-	# WANT TO BE REUSING THIS!!!!....
-	# or maybe that's what this line does in the library?....
-	mailTransport = nodemailer.createTransport 'SMTP',
-		service: 'Gmail'
-		auth:
-			user: 'create-account@lessthanthreelabs.com'
-			pass: 'tentacles69!'
 
-	mailOptions = 
-		from: 'Create Account <create-account@lessthanthreelabs.com>'
-		to: email
-		subject: 'sup nerd'
-		text: 'nerd up!'
-		html: '<b>nerd up!</b>'
-
-	mailTransport.sendMail mailOptions, (error, response) ->
-		console.log 'error: ' + error if error?
-		console.log 'response: ' + response if response?
-		console.log 'done!'
+isAccountValid = (email, password, firstName, lastName) ->
+	emailRegex = new RegExp "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b"
+	return email.toLowerCase().match(emailRegex) and password.length >= 8 and firstName isnt '' and lastName isnt ''
