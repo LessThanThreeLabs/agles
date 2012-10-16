@@ -1,5 +1,5 @@
 from boto.s3.connection import S3Connection
-from redis import Redis
+from redis import StrictRedis
 from sqlalchemy import create_engine
 
 from settings import database
@@ -19,7 +19,7 @@ class ConnectionFactory(object):
 
 	@classmethod
 	def get_redis_connection(cls):
-		return Redis(**database.redis_connection_params)
+		return StrictRedis(**database.redis_connection_params)
 
 	@classmethod
 	def get_s3_bucket(cls, bucket_name):
