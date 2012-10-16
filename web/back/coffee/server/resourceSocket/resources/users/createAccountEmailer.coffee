@@ -15,7 +15,7 @@ class CreateAccountEmailer
 
 	initialize: () =>
 		@mailTransport = nodemailer.createTransport 'SMTP',
-			service: 'Gmail'
+			service: @configurationParams.service
 			auth:
 				user: @configurationParams.authorization.username
 				pass: @configurationParams.authorization.password

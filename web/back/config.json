@@ -55,6 +55,7 @@
 
 		"createAccount": {
 			"email": {
+				"service": "Gmail",
 				"from": "Verify Account <verify-account@lessthanthreelabs.com>",
 				"authorization": {
 					"username": "verify-account@lessthanthreelabs.com",
