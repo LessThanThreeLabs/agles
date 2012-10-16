@@ -5,6 +5,6 @@ RedisStore = require('connect-redis')(express)
 
 exports.create = (configurationParams) ->
 	return new RedisStore
-		url: configurationParams.redis.sessionStore.url
-		port: configurationParams.redis.sessionStore.port
+		url: configurationParams.session.redisStore.url
+		port: configurationParams.session.redisStore.port
 		

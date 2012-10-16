@@ -34,6 +34,11 @@
 
 			"cookie": {
 				"name": "session.id"
+			},
+
+			"redisStore": {
+				"url": "127.0.0.1",
+				"port": 6379
 			}
 		},
 
@@ -48,15 +53,19 @@
 			"certrequest": "keys/certrequest.csr"
 		},
 
-		"redis": {
-			"sessionStore": {
-				"url": "127.0.0.1",
-				"port": 6379
+		"createAccount": {
+			"email": {
+				"from": "Verify Account <verify-account@lessthanthreelabs.com>",
+				"authorization": {
+					"username": "verify-account@lessthanthreelabs.com",
+					"password": "tentacles69!"
+				}
 			},
-			"createAccount": {
+
+			"redisStore": {
 				"url": "127.0.0.1",
-				"port": 6380
-			}	
+				"port": 6380	
+			}
 		}
 	},
 

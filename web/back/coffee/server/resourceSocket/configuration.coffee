@@ -75,8 +75,8 @@ class ResourceSocketConfigurer
 
 	_configureRedisStore: (socket) ->
 		socket.set 'store', new RedisStore
-			url: @configurationParams.redis.sessionStore.url
-			port: @configurationParams.redis.sessionStore.port
+			url: @configurationParams.session.redisStore.url
+			port: @configurationParams.session.redisStore.port
 			redisClient: redis.createClient()
 			redisPub: redis.createClient()
 			redisSub: redis.createClient()

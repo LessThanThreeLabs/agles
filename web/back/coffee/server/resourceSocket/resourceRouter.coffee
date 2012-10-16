@@ -1,18 +1,18 @@
 assert = require 'assert'
 
-UsersResource = require './resources/usersResource'
-OrganizationsResource = require './resources/organizationsResource'
-BuildsResource = require './resources/buildsResource'
-BuildOutputsResource = require './resources/buildOutputsResource'
-RepositoriesResource = require './resources/repositoriesResource'
+UsersResource = require './resources/users/usersResource'
+OrganizationsResource = require './resources/organizations/organizationsResource'
+BuildsResource = require './resources/builds/buildsResource'
+BuildOutputsResource = require './resources/buildOutputs/buildOutputsResource'
+RepositoriesResource = require './resources/repositories/repositoriesResource'
 
 
-exports.create = (modelRpcConnection) ->
-	usersResource = UsersResource.create modelRpcConnection
-	organizationsResource = OrganizationsResource.create modelRpcConnection
-	buildsResource = BuildsResource.create modelRpcConnection
-	buildOutputsResource = BuildOutputsResource.create modelRpcConnection
-	repositoriesResource = RepositoriesResource.create modelRpcConnection
+exports.create = (configurationParams, modelRpcConnection) ->
+	usersResource = UsersResource.create configurationParams, modelRpcConnection
+	organizationsResource = OrganizationsResource.create configurationParams, modelRpcConnection
+	buildsResource = BuildsResource.create configurationParams, modelRpcConnection
+	buildOutputsResource = BuildOutputsResource.create configurationParams, modelRpcConnection
+	repositoriesResource = RepositoriesResource.create configurationParams, modelRpcConnection
 	return new ResourceRouter usersResource, organizationsResource, buildsResource, buildOutputsResource, repositoriesResource
 
 

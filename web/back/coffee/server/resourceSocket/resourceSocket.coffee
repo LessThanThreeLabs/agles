@@ -7,7 +7,7 @@ ResourceRouter = require './resourceRouter'
 
 exports.create = (configurationParams, sessionStore, modelConnection) ->
 	configurer = Configurer.create configurationParams, modelConnection, sessionStore
-	resourceRouter = ResourceRouter.create modelConnection.rpcConnection
+	resourceRouter = ResourceRouter.create configurationParams, modelConnection.rpcConnection
 	return new ResourceSocket configurer, resourceRouter
 
 
