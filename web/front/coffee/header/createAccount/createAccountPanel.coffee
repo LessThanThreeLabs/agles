@@ -52,13 +52,13 @@ class CreateAccountPanel.View extends Backbone.View
 					<div class="control-group firstNameControlGroup">
 						<label class="control-label">First Name</label>
 						<div class="controls">
-							<input type="password" class="createAccountFirstName" placeholder="first name"><span class="createFirstNameError help-inline"></span>
+							<input type="text" class="createAccountFirstName" placeholder="first name"><span class="createFirstNameError help-inline"></span>
 						</div>
 					</div>
 					<div class="control-group lastNameControlGroup">
 						<label class="control-label">Last Name</label>
 						<div class="controls">
-							<input type="password" class="createAccountLastName" placeholder="last name"><span class="createLastNameError help-inline"></span>
+							<input type="text" class="createAccountLastName" placeholder="last name"><span class="createLastNameError help-inline"></span>
 						</div>
 					</div>
 				</form>
