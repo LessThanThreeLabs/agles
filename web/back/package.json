@@ -13,7 +13,8 @@
     "connect-redis": "git://github.com/visionmedia/connect-redis.git",
     "amqp": "git://github.com/postwait/node-amqp.git",
     "msgpack": "git://github.com/pgriess/node-msgpack.git",
-    "zombie": "git://github.com/assaf/zombie.git"
+    "zombie": "git://github.com/assaf/zombie.git",
+    "nodemailer": "git://github.com/andris9/Nodemailer.git"
   },
 
   "engines": {
