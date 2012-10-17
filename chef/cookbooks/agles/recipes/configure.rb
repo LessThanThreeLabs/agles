@@ -20,8 +20,9 @@ def pip(package_name)
 end
 
 def gem(package_name)
-	gem_package package_name do
+	rvm_gem package_name do
 		action :install
+		gem_binary "gem"
 	end
 end
 
@@ -69,7 +70,7 @@ def execute_script(script_info)
 			cwd "#{node[:agles][:source_path][:internal]}/#{script_info["directory"]}"
 		end
 		timeout script_info["timeout"].nil? ? 600 : script_info["timeout"]
-		environment ({'HOME' => '/home/vagrant'})
+		environment ({'HOME' => '/home/#{node[:user]}'})
 		action :run
 	end
 end

@@ -7,6 +7,9 @@ run_list(
 	"recipe[postgresql::client]",
 	"recipe[database]",
 	"recipe[rabbitmq]",
+	"recipe[rvm::system]",
+	"recipe[redisio::install]",
+	"recipe[agles::preconfigure]",
 	"recipe[agles::configure]"
 )
 default_attributes(
@@ -23,8 +26,8 @@ override_attributes(
 		},
 		:config_path => "general/dev_config.yml"
 	},
-	:python => {
-		:install_method => "source",
-		:version => "2.7.3"
-	}
+	#:python => {
+	#	:install_method => "source",
+	#	:version => "2.6.5"
+	#}
 )

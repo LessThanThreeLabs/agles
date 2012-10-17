@@ -2,18 +2,13 @@
 setup:
   - packages:
     - system:
-      - libyaml-dev
-  - scripts:
-    - script: curl -L https://get.rvm.io | bash -s stable
-  - packages:
-    - system:
+      - zlib1g
       - vim
       - gcc
       - g++
       - curl
       - libssl-dev
       - apache2-utils
-      - redis-server
       - libevent-dev
       - libpq-dev
     - pip:
@@ -35,6 +30,7 @@ setup:
       - psycopg2
       - argparse
       - nose-testconfig
+      - boto
     - gem:
       - vagrant
   - scripts:
