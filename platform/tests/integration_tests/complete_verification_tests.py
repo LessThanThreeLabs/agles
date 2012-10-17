@@ -34,17 +34,18 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	@classmethod
 	def setup_class(cls):
 		if config.get("fakeverifier"):
-			verifier = FakeBuildVerifier(passes=True)
+			cls.verifier = FakeBuildVerifier(passes=True)
 		else:
 			vagrant_wrapper = VagrantWrapper.vm(VM_DIRECTORY, box_name)
-			verifier = BuildVerifier(vagrant_wrapper)
-		verifier.setup()
-		verification_server = VerificationServer(verifier)
+			cls.verifier = BuildVerifier(vagrant_wrapper)
+		cls.verifier.setup()
+		verification_server = VerificationServer(cls.verifier)
 		cls.vs_process = Process(target=verification_server.run)
 		cls.vs_process.start()
 
 	@classmethod
 	def teardown_class(cls):
+		cls.verifier.teardown()
 		cls.vs_process.terminate()
 		cls.vs_process.join()
 		rmtree(VM_DIRECTORY, ignore_errors=True)
