@@ -4,8 +4,10 @@ See server.py for the RPC protocol definition.
 """
 import msgpack
 import pika
-from gevent import event, spawn, queue, monkey; monkey.patch_all(thread=False)
-from gevent.util import wrap_errors
+import gevent
+import gevent.event as event
+import gevent.monkey; gevent.monkey.patch_all(thread=False)
+import gevent.queue as queue
 
 from bunnyrpc.exceptions import RPCRequestError
 from settings.rabbit import connection_parameters
@@ -79,7 +81,7 @@ class Client(ClientBase):
 		self.connection = pika.SelectConnection(connection_parameters,
 			self._on_connected)
 
-		self.ioloop_greenlet = spawn(lambda: self.connection.ioloop.start())
+		self.ioloop_greenlet = gevent.spawn(lambda: self.connection.ioloop.start())
 		self.connection_event.wait()
 
 	def _on_connected(self, connection):
