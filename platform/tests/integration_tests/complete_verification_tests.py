@@ -45,9 +45,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	@classmethod
 	def teardown_class(cls):
-		rmtree(VM_DIRECTORY, ignore_errors=True)
 		cls.vs_process.terminate()
 		cls.vs_process.join()
+		rmtree(VM_DIRECTORY, ignore_errors=True)
 
 	def setUp(self):
 		super(VerificationRoundTripTest, self).setUp()
