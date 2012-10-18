@@ -21,13 +21,13 @@ class CreateAccountEmailer
 				pass: @configurationParams.authorization.password
 
 
-	sendEmailToUser: (firstName, lastName, email) ->
+	sendEmailToUser: (firstName, lastName, email, key) ->
 		mailOptions = 
 			from: @configurationParams.from
 			to: firstName + ' ' + lastName + ' <' + email + '>'
 			subject: 'Verify your account!'
-			text: 'nerd up!'
-			html: '<b>nerd up!</b>'
+			generateTextFromHTML: true
+			html: '<b>' + key + '</b>'
 
 		@mailTransport.sendMail mailOptions, (error, response) ->
 			console.error 'error: ' + JSON.stringify(error) if error?

@@ -1,4 +1,5 @@
 assert = require 'assert'
+crypto = require 'crypto'
 nodemailer = require 'nodemailer'
 
 Resource = require '../resource'
@@ -21,12 +22,35 @@ class UsersResource extends Resource
 	create: (socket, data, callback) ->
 		if data.email? and data.password?
 			if isAccountValid(data.email, data.password, data.firstName, data.lastName)
-				@createAccountEmailer.sendEmailToUser data.firstName, data.lastName, data.email
-				callback null, true
+				@_createKeyAndAccount data, (error, keyAndAccount) =>
+					{key, account} = keyAndAccount
+
+					@createAccountStore.addAccount key, account
+					@createAccountEmailer.sendEmailToUser data.firstName, data.lastName, data.email, key
+					
+					callback null, true
 			else
 				callback 'Invalid account data'
 		else
 			callback 'Parsing error'
+
+
+
+	_createKeyAndAccount: (data, callback) =>
+		crypto.randomBytes 24, (error, buffer) =>
+			callback error if error?
+
+			key = buffer.toString('hex').substr 0, 16
+			salt = buffer[8...24]
+
+			callback null, 
+				key: key
+				account:
+					email: data.email
+					salt: salt
+					passwordHash: crypto.createHash('sha512').update(salt).update(data.password, 'utf8').digest()
+					firstName: data.firstName
+					lastName: data.lastName
 
 
 	update: (socket, data, callback) ->
