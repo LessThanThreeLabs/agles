@@ -30,24 +30,29 @@ class Server
 		expressServer = express()
 		@configurer.configure expressServer
 
-		expressServer.get '/', (request, response) =>
-			response.render 'index', csrfToken: request.session.csrfToken
-		
-		expressServer.get '/verifyAccount', (request, response) =>
-			parsedUrl = url.parse request.url, true
-			accountKey = parsedUrl.query.account
-			
-			@stores.createAccountStore.getAccount accountKey, (error, account) ->
-				if error?
-					response.send 'Invalid link' 
-				else
-					# push new account to the model server
-					response.send "You have successfully loged in as #{account.firstName} #{account.lastName}!"
+		expressServer.get '/', @_handleIndexRequest
+		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
 
 		server = https.createServer @_getHttpsOptions(), expressServer
 		server.listen @configurer.getConfigurationParams().https.port
 
 		@resourceSocket.start server
+
+
+	_handleIndexRequest: (request, response) =>
+		response.render 'index', csrfToken: request.session.csrfToken
+
+
+	_handleVerifyAccountRequest: (request, response) =>
+		parsedUrl = url.parse request.url, true
+		accountKey = parsedUrl.query.account
+		
+		@stores.createAccountStore.getAccount accountKey, (error, account) ->
+			if error?
+				response.send 'Invalid link' 
+			else
+				# push new account to the model server
+				response.send "You have successfully loged in as #{account.firstName} #{account.lastName}!"
 
 
 	_getHttpsOptions: () ->
