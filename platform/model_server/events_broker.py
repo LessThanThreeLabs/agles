@@ -1,4 +1,4 @@
-from kombu import Exchange, Queue
+from kombu.entity import Exchange, Queue
 
 
 class EventsBroker(object):
@@ -13,14 +13,6 @@ class EventsBroker(object):
 		else:
 			subscriber_queue = Queue(exchange=self.events_exchange, routing_key=event, exclusive=True, durable=False)
 		return self.channel.Consumer(queues=subscriber_queue, callbacks=[callback])
-		"""No-op
-
-		This method is a placeholder. In the future, we may implement a callback
-		based method where calling subscribe on the server will actually subscribe
-		you to a channel.
-		"""
-		raise NotImplementedError(
-			"Subscription should be done by binding to the zmq address")
 
 	def publish(self, event, msg):
 		"""Publishes a message to a specific event channel.
