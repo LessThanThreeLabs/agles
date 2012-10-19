@@ -26,8 +26,12 @@ class CreateAccountStore
 	getAccount: (key, callback) ->
 		assert.ok key?
 		@redisConnection.get key, (error, reply) ->
-			if error? then callback error
-			else callback null, msgpack.unpack reply
+			if error? 
+				callback error
+			else if not reply? 
+				callback 'No account found'
+			else 
+				callback null, msgpack.unpack reply
 
 
 	removeAccount: (key) ->
