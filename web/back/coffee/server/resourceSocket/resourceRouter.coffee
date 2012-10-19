@@ -7,12 +7,12 @@ BuildOutputsResource = require './resources/buildOutputs/buildOutputsResource'
 RepositoriesResource = require './resources/repositories/repositoriesResource'
 
 
-exports.create = (configurationParams, modelRpcConnection) ->
-	usersResource = UsersResource.create configurationParams, modelRpcConnection
-	organizationsResource = OrganizationsResource.create configurationParams, modelRpcConnection
-	buildsResource = BuildsResource.create configurationParams, modelRpcConnection
-	buildOutputsResource = BuildOutputsResource.create configurationParams, modelRpcConnection
-	repositoriesResource = RepositoriesResource.create configurationParams, modelRpcConnection
+exports.create = (configurationParams, stores, modelRpcConnection) ->
+	usersResource = UsersResource.create configurationParams, stores, modelRpcConnection
+	organizationsResource = OrganizationsResource.create configurationParams, stores, modelRpcConnection
+	buildsResource = BuildsResource.create configurationParams, stores, modelRpcConnection
+	buildOutputsResource = BuildOutputsResource.create configurationParams, stores, modelRpcConnection
+	repositoriesResource = RepositoriesResource.create configurationParams, stores, modelRpcConnection
 	return new ResourceRouter usersResource, organizationsResource, buildsResource, buildOutputsResource, repositoriesResource
 
 

@@ -1,32 +1,42 @@
 fs = require 'fs'
 assert = require 'assert'
+url = require 'url'
 https = require 'https'
 express = require 'express'
 
 SessionStore = require './sessionStore'
+CreateAccountStore = require './createAccountStore'
 Configurer = require './configuration'
 ResourceSocket = require './resourceSocket/resourceSocket'
 
 
 exports.create = (configurationParams, modelConnection, resourceSocket) ->
-	sessionStore = SessionStore.create configurationParams
-	configurer = Configurer.create configurationParams, sessionStore
-	resourceSocket ?= ResourceSocket.create configurationParams, sessionStore, modelConnection
+	stores =
+		sessionStore: SessionStore.create configurationParams
+		createAccountStore: CreateAccountStore.create configurationParams
+	
+	configurer = Configurer.create configurationParams, stores.sessionStore
+	resourceSocket ?= ResourceSocket.create configurationParams, stores, modelConnection
 
-	return new Server configurer, modelConnection, resourceSocket, sessionStore
+	return new Server configurer, modelConnection, resourceSocket, stores
 
 
 class Server
-	constructor: (@configurer, @modelConnection, @resourceSocket, @sessionStore) ->
-		assert.ok @configurer? and @modelConnection? and @resourceSocket? and @sessionStore?
+	constructor: (@configurer, @modelConnection, @resourceSocket, @stores) ->
+		assert.ok @configurer? and @modelConnection? and @resourceSocket? and @stores?
 
 
 	start: () ->
 		expressServer = express()
 		@configurer.configure expressServer
 
-		expressServer.use '/', (request, response) =>
+		expressServer.get '/', (request, response) =>
 			response.render 'index', csrfToken: request.session.csrfToken
+		expressServer.get '/verifyAccount', (request, response) =>
+			parsedUrl = url.parse request.url, true
+			accountKey = parsedUrl.query.account
+			# @stores.createAccountStore.dostuff
+			response.send 'cool stuff...'
 
 		server = https.createServer @_getHttpsOptions(), expressServer
 		server.listen @configurer.getConfigurationParams().https.port

@@ -2,15 +2,15 @@ assert = require 'assert'
 nodemailer = require 'nodemailer'
 
 
-exports.create = (configurationParams) ->
-	createAccountEmailer = new CreateAccountEmailer configurationParams
+exports.create = (configurationParams, domainName) ->
+	createAccountEmailer = new CreateAccountEmailer configurationParams, domainName
 	createAccountEmailer.initialize()
 	return createAccountEmailer
 
 
 class CreateAccountEmailer
-	constructor: (@configurationParams) ->
-		assert.ok @configurationParams?
+	constructor: (@configurationParams, @domainName) ->
+		assert.ok @configurationParams? and @domainName?
 
 
 	initialize: () =>
@@ -22,12 +22,14 @@ class CreateAccountEmailer
 
 
 	sendEmailToUser: (firstName, lastName, email, key) ->
+		verifyUrl =  @domainName + '/verifyAccount?account=' + key
+
 		mailOptions = 
 			from: @configurationParams.from
 			to: firstName + ' ' + lastName + ' <' + email + '>'
 			subject: 'Verify your account!'
 			generateTextFromHTML: true
-			html: '<b>' + key + '</b>'
+			html: "Click to verify your account: <a href='#{verifyUrl}'>#{verifyUrl}</a>"
 
 		@mailTransport.sendMail mailOptions, (error, response) ->
 			console.error 'error: ' + JSON.stringify(error) if error?

@@ -3,8 +3,8 @@ assert = require 'assert'
 Resource = require '../resource'
 
 
-exports.create = (configurationParams, modelRpcConnection) ->
-	return new RepositoriesResource configurationParams, modelRpcConnection
+exports.create = (configurationParams, stores, modelRpcConnection) ->
+	return new RepositoriesResource configurationParams, stores, modelRpcConnection
 
 
 class RepositoriesResource extends Resource

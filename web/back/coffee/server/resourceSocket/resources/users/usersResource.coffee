@@ -7,16 +7,15 @@ CreateAccountStore = require './createAccountStore'
 CreateAccountEmailer = require './createAccountEmailer'
 
 
-exports.create = (configurationParams, modelRpcConnection) ->
-	createAccountStore = CreateAccountStore.create configurationParams.createAccount.redisStore
-	createAccountEmailer = CreateAccountEmailer.create configurationParams.createAccount.email
-	return new UsersResource configurationParams, modelRpcConnection, createAccountStore, createAccountEmailer
+exports.create = (configurationParams, stores, modelRpcConnection) ->
+	createAccountEmailer = CreateAccountEmailer.create configurationParams.createAccount.email, configurationParams.domain
+	return new UsersResource configurationParams, stores, modelRpcConnection, createAccountEmailer
 
 
 class UsersResource extends Resource
-	constructor: (configurationParams, modelRpcConnection, @createAccountStore, @createAccountEmailer) ->
-		assert.ok @createAccountStore? and @createAccountEmailer?
-		super configurationParams, modelRpcConnection
+	constructor: (configurationParams, stores, modelRpcConnection, @createAccountEmailer) ->
+		assert.ok @createAccountEmailer?
+		super configurationParams, stores, modelRpcConnection
 
 
 	create: (socket, data, callback) ->
@@ -25,7 +24,7 @@ class UsersResource extends Resource
 				@_createKeyAndAccount data, (error, keyAndAccount) =>
 					{key, account} = keyAndAccount
 
-					@createAccountStore.addAccount key, account
+					@stores.createAccountStore.addAccount key, account
 					@createAccountEmailer.sendEmailToUser data.firstName, data.lastName, data.email, key
 					
 					callback null, true
