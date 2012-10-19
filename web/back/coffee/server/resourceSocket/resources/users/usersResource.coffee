@@ -24,6 +24,9 @@ class UsersResource extends Resource
 				@_createKeyAndAccount data, (error, keyAndAccount) =>
 					{key, account} = keyAndAccount
 
+					console.log key
+					console.log account
+
 					@stores.createAccountStore.addAccount key, account
 					@createAccountEmailer.sendEmailToUser data.firstName, data.lastName, data.email, key
 					
