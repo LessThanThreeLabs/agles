@@ -51,9 +51,11 @@ class Server
 			if error?
 				response.send 'Invalid link' 
 			else
-				# push new account to the model server
 				@stores.createAccountStore.removeAccount accountKey
-				response.send "You have successfully loged in as #{account.firstName} #{account.lastName}!"
+				# push new account to the model server
+				response.render 'verifyAccount',
+					firstName: account.firstName
+					lastName: account.lastName
 
 
 	_getHttpsOptions: () ->
