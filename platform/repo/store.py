@@ -7,16 +7,26 @@ Repository management is done using gitpython.
 import os
 import shutil
 import sys
+import yaml
+
+import model_server
 
 from git import GitCommandError, Repo
 
 from bunnyrpc.client import Client
-from database.engine import ConnectionFactory
-from settings.store import rpc_exchange_name, filesystem_repository_servers
+from settings.store import rpc_exchange_name
 from util import pathgen
 
 
 class RemoteRepositoryManager(object):
+
+	def register_remote_store(self, store_name):
+		"""Registers a remote store as a managed store of this manager
+
+		:param store_name: The identifier of the remote store the repository is on
+		"""
+		raise NotImplementedError("Subclasses should override this!")
+
 	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
 		"""Merges a changeset on the remote repository with a ref.
 
@@ -63,17 +73,16 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 	"""A manager class that manages local repository stores and forwards requests to the correct store"""
 
 	SERVER_REPO_COUNT_NAME = "server_repository_count"
-	DEFAULT_RPC_TIMEOUT = 500
 
-	def __init__(self, filesystem_stores, redis_connection):
+	def __init__(self, redis_connection):
 		super(DistributedLoadBalancingRemoteRepositoryManager, self).__init__()
 		self._redisdb = redis_connection
-		self._register_filesystem_stores(filesystem_stores)
 
-	@classmethod
-	def create_from_settings(cls):
-		"""Create an instance from the settings/store.py file"""
-		return cls(filesystem_repository_servers, ConnectionFactory.get_redis_connection())
+	def register_remote_store(self, store_name):
+		if not self._redisdb.zscore(self.SERVER_REPO_COUNT_NAME, store_name):
+			self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{store_name: 0})
+		else:
+			raise StoreAlreadyRegisteredError("Store %s already registered." % store_name)
 
 	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
@@ -106,9 +115,6 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
 			client.rename_repository(repo_hash, old_repo_name, new_repo_name)
 
-	def _register_filesystem_stores(self, filesystem_stores):
-		self._initialize_store_repo_counts_if_not_exists(filesystem_stores)
-
 	def get_least_loaded_store(self):
 		"""Identifies the local store that is being least utilized. For this particular class
 		least utilized is defined as having the lowest number of repositories."""
@@ -117,19 +123,31 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		assert len(results) == 1
 		return results[0]
 
-	def _initialize_store_repo_counts_if_not_exists(self, store_names):
-		stores_to_initialize = {}
-		for store_name in store_names:
-			if not self._redisdb.zscore(self.SERVER_REPO_COUNT_NAME, store_name):
-				stores_to_initialize[store_name] = 0
-		self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **stores_to_initialize)
-
 	def _update_store_repo_count(self, store_name, amount=1):
 		self._redisdb.zincrby(self.SERVER_REPO_COUNT_NAME, store_name, amount)
 
 
 class RepositoryStore(object):
 	"""Base class for RepositoryStore"""
+	CONFIG_FILE = ".repostore_config.yml"
+
+	@classmethod
+	def create_config(cls, root_dir):
+		with model_server.ModelServer.rpc_connect("repo", "create") as conn:
+			store_name = conn.register_repostore()
+
+		config = {"store_name": store_name}
+		config_path = os.path.join(root_dir, cls.CONFIG_FILE)
+		with open(config_path, "w") as stream:
+			yaml.dump(config, stream, default_flow_style=False)
+		return config
+
+	@classmethod
+	def parse_config(cls, root_dir):
+		config_path = os.path.join(root_dir, cls.CONFIG_FILE)
+		with open(config_path) as config_file:
+			config = yaml.load(config_file.read())
+		return config
 
 	def merge_changeset(self, repo_hash, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
@@ -230,6 +248,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 								 pathgen.to_path(repo_hash, repo_name))
 		return os.path.realpath(repo_path)
 
+
+class StoreAlreadyRegisteredError(Exception):
+	def __init__(self, msg=''):
+		super(StoreAlreadyRegisteredError, self).__init__(msg)
 
 class RepositoryOperationException(Exception):
 	"""Base class for exception relating to repository management."""

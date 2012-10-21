@@ -1,6 +1,7 @@
 from kombu import Producer
 
 from constants import BuildStatus
+from database.engine import ConnectionFactory
 from handler import QueueListener
 from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
@@ -12,7 +13,7 @@ from verification.server.verification_result import VerificationResult
 class VerificationResultsHandler(QueueListener):
 	def __init__(self):
 		super(VerificationResultsHandler, self).__init__(verification_results_queue)
-		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager.create_from_settings()
+		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 
 	def bind(self, channel):
 		self.producer = Producer(channel, serializer='msgpack')

@@ -1,6 +1,8 @@
 import os
+import uuid
 
 import database.schema
+import repo.store
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
@@ -19,3 +21,9 @@ class RepoCreateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		return result.inserted_primary_key[0]
+
+	def register_repostore(self):
+		store_name = uuid.uuid1().hex
+		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager.register_remote_store(store_name)
+		return store_name
