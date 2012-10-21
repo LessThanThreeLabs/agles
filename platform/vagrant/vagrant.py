@@ -6,7 +6,7 @@
 import collections
 import os
 
-from gevent_subprocess import Popen, PIPE
+from subprocess import Popen, PIPE
 
 
 class Vagrant(object):
@@ -57,6 +57,9 @@ class Vagrant(object):
 			eline = self._handle_stream(process.stderr, stderr_lines, stderr_handler)
 			if (line == "" and eline == "" and process.returncode != None):
 				break
+		line, eline = process.communicate()
+		stdout_lines.append(line)
+		stderr_lines.append(eline)
 		stdout = "\n".join(stdout_lines)
 		stderr = "\n".join(stderr_lines)
 		returncode = process.returncode
