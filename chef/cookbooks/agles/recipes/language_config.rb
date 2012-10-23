@@ -12,6 +12,7 @@ def bashrc_configure(to_remove, to_add)
 		sed '/#{to_remove}/d' .bashrc > .bashrc
 		echo #{to_add} >> .bashrc
 		EOH
+	end
 	bash_command.run_action(:run)
 end
 
