@@ -1,7 +1,11 @@
 include_recipe "agles"
 
 def get_default_languages()
-	return {:python => nil, :ruby => nil}
+	return {:python => nil,
+				:ruby => {
+					:ruby_string => "default"
+				}
+			}
 end
 
 def bashrc_configure(to_remove, to_add)
