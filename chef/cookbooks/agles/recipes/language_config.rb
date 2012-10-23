@@ -51,8 +51,6 @@ def setup_language(language, version)
 end
 
 def handle_languages(languages)
-	puts languages
-	node[:agles][:languages] = get_default_languages
 	languages.each do |language, config|
 		version = config["version"]
 		setup_language(language, version)
@@ -63,6 +61,7 @@ def handle_config(config)
 	handle_languages(config["build"]) if config.has_key? "build"
 end
 
+node[:agles][:languages] = get_default_languages
 config_path = "#{node[:agles][:source_path][:internal]}/#{node[:agles][:config_path]}"
 if File.exist? config_path
 	config = YAML::load(File.read(config_path))

@@ -6,7 +6,8 @@
 #
 # All rights reserved - Do Not Redistribute
 #
-
 python_pip "pylint" do
-	action :install
+	if node[:agles][:languages][:python] and node[:agles][:languages][:virtualenv]
+		virtualenv node[:agles][:languages][:python][:virtualenv]
+	end
 end

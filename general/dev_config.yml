@@ -12,6 +12,7 @@ setup:
       - libevent-dev
       - libpq-dev
     - pip:
+      - amqp
       - pika
       - kombu
       - librabbitmq

@@ -76,7 +76,13 @@ Vagrant::Config.run do |config|
 		chef.add_role("verification_box")
 
 		# You may also specify custom JSON attributes:
-		# chef.json = { :mysql_password => "foo" }
+    chef.json = {
+      'rvm' => {
+        'vagrant' => {
+          'system_chef_solo' => '/opt/vagrant_ruby/bin/chef-solo'
+        }
+      }
+    }
 	end
 
   # Enable provisioning with chef server, specifying the chef server URL,
