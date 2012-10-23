@@ -2,7 +2,7 @@ import time
 
 import database.schema
 
-from constants import BuildStatus
+from shared.constants import BuildStatus
 from database.engine import ConnectionFactory
 from kombu.connection import Connection
 from model_server.events_broker import EventsBroker

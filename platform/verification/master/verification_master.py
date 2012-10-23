@@ -1,4 +1,4 @@
-from message_driven_server import MessageDrivenServer
+from shared.message_driven_server import MessageDrivenServer
 from verification_results_handler import VerificationResultsHandler
 from repo_update_event_handler import RepoUpdateEventHandler
 

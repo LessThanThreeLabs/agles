@@ -1,8 +1,8 @@
 from kombu import Producer
 
-from constants import BuildStatus
+from shared.constants import BuildStatus
 from database.engine import ConnectionFactory
-from handler import QueueListener
+from shared.handler import QueueListener
 from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
 from settings.verification_server import *

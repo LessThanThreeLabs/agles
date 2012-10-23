@@ -7,7 +7,7 @@ listener thread should respond to events by running and verifying builds on
 a spawned virtual machine.
 """
 
-from message_driven_server import MessageDrivenServer
+from shared.message_driven_server import MessageDrivenServer
 from verification.server.verification_request_handler import VerificationRequestHandler
 
 

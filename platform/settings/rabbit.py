@@ -1,6 +1,6 @@
 import pika
 
-connection_info = 'pyamqp://guest:guest@tadpole//'
+connection_info = 'pyamqp://guest:guest@localhost//'
 
 connection_parameters = pika.ConnectionParameters(
-		host='tadpole')
+		host='localhost')

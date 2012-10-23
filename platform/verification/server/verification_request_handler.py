@@ -1,7 +1,7 @@
 from kombu import Producer
 
-from constants import BuildStatus
-from handler import QueueListener
+from shared.constants import BuildStatus
+from shared.handler import QueueListener
 from model_server import ModelServer
 from model_server.build.update_handler import Console
 from settings.verification_server import *

@@ -1,6 +1,6 @@
 from kombu import Producer
 
-from handler import EventSubscriber
+from shared.handler import EventSubscriber
 from model_server import ModelServer
 from settings.verification_server import *
 

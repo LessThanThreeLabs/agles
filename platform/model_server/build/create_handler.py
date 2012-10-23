@@ -1,6 +1,6 @@
 import database.schema
 
-from constants import BuildStatus
+from shared.constants import BuildStatus
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
