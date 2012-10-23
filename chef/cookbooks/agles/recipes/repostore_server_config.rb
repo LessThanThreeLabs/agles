@@ -52,8 +52,29 @@ script "setup_openssh_for_git" do
 	EOH
 end
 
-script "symlink_git_binaries_with_dul_binaries" do
+git "/tmp/dulwich-lt3" do
+	repository "git://github.com/LessThanThreeLabs/dulwich.git"
+	reference "master"
+	action :sync
+end
+
+script "install_dulwich_remove_gitbinaries" do
 	interpreter "bash"
 	user "root"
-	cwd "/usr/bin"
+	cwd "/tmp/dulwich-lt3"
+	code <<-EOH
+		python setup.py install
+		cp bin/* /usr/bin
+		mkdir -p /usr/bin/gitbin
+		mv /usr/bin/git-* /usr/bin/gitbin
+		exit 0
+	EOH
+end
+
+link "/usr/bin/git-receive-pack" do
+	to "/usr/bin/dul-receive-pack"
+end
+
+link "/usr/bin/git-upload-pack" do
+	to "/usr/bin/dul-upload-pack"
 end
