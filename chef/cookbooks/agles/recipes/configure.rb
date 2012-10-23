@@ -24,6 +24,7 @@ end
 
 def gem(package_name)
 	rvm_gem package_name do
+		ruby_string node[:agles][:languages][:ruby][:ruby_string]
 		action :install
 	end
 end
