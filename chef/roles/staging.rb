@@ -23,9 +23,9 @@ default_attributes(
 )
 override_attributes(
 	:agles => {
-	# 	:source_path => {
-	# 		:internal => "/home/lt3/code/agles"
-	# 	},
+		:source_path => {
+			:internal => "/home/lt3/code/agles"
+		},
 		:config_path => "general/dev_config.yml"
 	}
 	# :python => {
