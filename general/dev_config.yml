@@ -33,14 +33,11 @@ setup:
       - boto
     - gem:
       - vagrant
-  - scripts:
-    - script: ./install_node.sh
-      directory: scripts
-    - script: ./install_virtualbox.sh
-      directory: scripts
-  - packages:
     - npm:
       - iced-coffee-script
+  - scripts:
+    - script: ./install_virtualbox.sh
+      directory: scripts
   - databases:
       postgres:
       - name: agles
@@ -58,3 +55,7 @@ build:
     buildscript:
     path: platform
     testscript: nosetests
+  ruby:
+    version: 1.9.3
+  node:
+    version: v0.8.9

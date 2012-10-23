@@ -12,5 +12,8 @@ when "ubuntu"
 	execute "apt-get update"
 end
 
-node[:agles][:user] = "vagrant" if node[:vagrant]
-include_recipe "rvm::vagrant" if node[:vagrant]
+if node[:vagrant]
+	node[:agles][:user] = "vagrant"
+	node[:agles][:source_path][:internal] = "/home/vagrant/source"
+	include_recipe "rvm::vagrant"
+end

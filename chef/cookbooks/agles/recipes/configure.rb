@@ -30,7 +30,7 @@ def gem(package_name)
 end
 
 def npm(package_name)
-	execute "npm install -g #{package_name}"
+	execute "npm install #{package_name}"
 end
 
 def install_packages(package_bundle)
@@ -50,7 +50,7 @@ end
 def postgres(database_info)
 	postgresql_database database_info["name"] do
 		c = database_info["connection-info"]
-		connection ({:host => c["host"], :port => c["port"], :username => c["username"], :password => node['postgresql']['password']['postgres']})
+		connection({:host => c["host"], :port => c["port"], :username => c["username"], :password => node['postgresql']['password']['postgres']})
 		action :create
 	end
 end
@@ -73,7 +73,7 @@ def execute_script(script_info)
 			cwd "#{node[:agles][:source_path][:internal]}/#{script_info["directory"]}"
 		end
 		timeout script_info["timeout"].nil? ? 600 : script_info["timeout"]
-		environment ({"HOME" => "/home/#{node[:agles][:user]}"})
+		environment({"HOME" => "/home/#{node[:agles][:user]}"})
 		action :run
 	end
 end

@@ -19,17 +19,12 @@ default_attributes(
 		:password => {
 			:postgres => "agles"
 		}
-	}
-)
-override_attributes(
+	},
 	:agles => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles"
 		},
 		:config_path => "general/dev_config.yml"
 	}
-	# :python => {
-	# 	:install_method => "source",
-	# 	:version => "2.6.5"
-	# }
 )
+override_attributes()

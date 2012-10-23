@@ -7,6 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
+include_recipe "agles"
+
 require 'fileutils'
 
 # Clone all of the code from the shared directory into the VM

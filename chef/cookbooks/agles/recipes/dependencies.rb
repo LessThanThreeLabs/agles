@@ -25,3 +25,9 @@ ruby_versions = ['1.8.7', '1.9.3']
 ruby_versions.each do |version|
 	rvm_ruby version
 end
+
+node_versions = ['v0.8.9']
+
+node_versions.each do |version|
+	agles_nodejs version
+end
