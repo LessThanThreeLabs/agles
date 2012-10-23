@@ -54,6 +54,7 @@ setup:
       directory: web/back
 build:
   python:
+    version: 2.7
     buildscript:
     path: platform
     testscript: nosetests

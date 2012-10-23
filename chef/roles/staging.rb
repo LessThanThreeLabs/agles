@@ -1,5 +1,6 @@
 name "staging"
 description "Agles staging"
+
 run_list(
 	"recipe[git]",
 	"recipe[python]",
@@ -7,9 +8,10 @@ run_list(
 	"recipe[postgresql::client]",
 	"recipe[database]",
 	"recipe[rabbitmq]",
-	"recipe[rvm::system]",
 	"recipe[redisio::install]",
-	"recipe[agles::preconfigure]",
+	"recipe[rvm::system]",
+	"recipe[agles::dependencies]",
+	"recipe[agles::language_config]",
 	"recipe[agles::configure]"
 )
 default_attributes(
@@ -21,13 +23,13 @@ default_attributes(
 )
 override_attributes(
 	:agles => {
-		:source_path => {
-			:internal => "/home/lt3/code/agles"
-		},
+	# 	:source_path => {
+	# 		:internal => "/home/lt3/code/agles"
+	# 	},
 		:config_path => "general/dev_config.yml"
-	},
-	#:python => {
-	#	:install_method => "source",
-	#	:version => "2.6.5"
-	#}
+	}
+	# :python => {
+	# 	:install_method => "source",
+	# 	:version => "2.6.5"
+	# }
 )

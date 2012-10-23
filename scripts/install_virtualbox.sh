@@ -2,7 +2,7 @@
 # Don't bother if already installed
 [ -f "/usr/bin/virtualbox" ] && exit 0
 # Add deb/key to repo
-echo "deb http://download.virtualbox.org/virtualbox/debian precise contrib non-free" >> /etc/apt/sources.list
+echo "deb http://download.virtualbox.org/virtualbox/debian `lsb_release -cs` contrib non-free" >> /etc/apt/sources.list
 wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add -
 # Update/install, including kernel modules (dkms)
 apt-get update

@@ -7,6 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
+include_recipe "agles"
+
 require 'yaml'
 
 def system(package_name)
@@ -15,6 +17,7 @@ end
 
 def pip(package_name)
 	python_pip package_name do
+		virtualenv node[:agles][:languages][:python][:virtualenv]
 		action :install
 	end
 end
@@ -22,7 +25,6 @@ end
 def gem(package_name)
 	rvm_gem package_name do
 		action :install
-		gem_binary "gem"
 	end
 end
 
@@ -70,7 +72,7 @@ def execute_script(script_info)
 			cwd "#{node[:agles][:source_path][:internal]}/#{script_info["directory"]}"
 		end
 		timeout script_info["timeout"].nil? ? 600 : script_info["timeout"]
-		environment ({'HOME' => '/home/#{node[:user]}'})
+		environment ({"HOME" => "/home/#{node[:agles][:user]}"})
 		action :run
 	end
 end

@@ -11,3 +11,6 @@ case node[:platform]
 when "ubuntu"
 	execute "apt-get update"
 end
+
+node[:agles][:user] = "vagrant" if node[:vagrant]
+include_recipe "rvm::vagrant" if node[:vagrant]
