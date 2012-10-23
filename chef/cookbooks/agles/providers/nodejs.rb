@@ -27,7 +27,6 @@ end
 
 def install_nodejs(node_version)
 	bash "install Nodejs[#{node_version}]" do
-		user node[:agles][:user]
 		cwd "/home/#{node[:agles][:user]}"
 		code <<-EOH
 		./nave.sh install #{node_version}
