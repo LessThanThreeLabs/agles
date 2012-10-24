@@ -12,11 +12,13 @@ from build_command import BuildCommand
 class VagrantNoseCommand(BuildCommand):
 	"""Simple nose implementation for running tests on a vagrant vm
 	"""
-	def __init__(self, vagrant):
+	def __init__(self, vagrant, path):
 		self.vagrant = vagrant
+		self.path = path or ''
 
 	def run(self):
-		self.vagrant.ssh_call("find /home/vagrant/source -name \"tests\" |" +
+		sourcepath = "/home/vagrant/source/" + self.path
+		self.vagrant.ssh_call("find " + sourcepath + " -name \"tests\" |" +
 				"xargs nosetests  --with-xunit --xunit-file=/vagrant/nosetests.xml")
 		test_results = XunitParser().parse_file(
 				os.path.join(self.vagrant.get_vm_directory(), "nosetests.xml"))

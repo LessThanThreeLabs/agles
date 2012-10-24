@@ -1,11 +1,11 @@
 include_recipe "agles"
 
 def get_default_languages()
-	return {:python => nil,
+	return {:python => {},
 			:ruby => {
 				:ruby_string => "default"
 			},
-			:node => nil,
+			:node => {},
 		}
 end
 
@@ -42,11 +42,11 @@ def setup_language(language, version)
 	node[:agles][:languages][language] = {:version => version}
 	case language
 	when :python
-		virtualenv_configure(version)
+		virtualenv_configure version
 	when :ruby
-		rvm_configure(version)
+		rvm_configure version
 	when :node
-		nave_configure(version)
+		nave_configure version
 	end
 end
 
@@ -65,5 +65,5 @@ node[:agles][:languages] = get_default_languages
 config_path = "#{node[:agles][:source_path][:internal]}/#{node[:agles][:config_path]}"
 if File.exist? config_path
 	config = YAML::load(File.read(config_path))
-	handle_config(config)
+	handle_config config
 end

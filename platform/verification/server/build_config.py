@@ -13,16 +13,17 @@ class BuildConfig(object):
 		return BuildConfig(NullBuildCommand(), NullBuildCommand())
 
 	@classmethod
-	def _get_language_default(cls, language, vagrant):
+	def _get_language_default(cls, language, vagrant, path):
 		if language == "python":
-			return BuildConfig(VagrantLintingCommand(vagrant), VagrantNoseCommand(vagrant))
+			return BuildConfig(VagrantLintingCommand(vagrant, path), VagrantNoseCommand(vagrant, path))
 
 	@classmethod
 	def from_config_tuple(cls, language, config, vagrant):
-		build_config = cls._get_language_default(language, vagrant)
+		path = config.get("path") if config else None
+		build_config = cls._get_language_default(language, vagrant, path)
 		if config:
 			if "buildscript" in config:
-				build_config.build_command = SimpleVagrantBuildCommand(config["buildscript"])
+				build_config.build_command = SimpleVagrantBuildCommand(config["buildscript"], path)
 			if "testscript" in config:
-				build_config.test_command = SimpleVagrantBuildCommand(config["testscript"])
+				build_config.test_command = SimpleVagrantBuildCommand(config["testscript"], path)
 		return build_config

@@ -10,4 +10,5 @@ python_pip "pylint" do
 	if node[:agles][:languages][:python] and node[:agles][:languages][:virtualenv]
 		virtualenv node[:agles][:languages][:python][:virtualenv]
 	end
+	action :install
 end
