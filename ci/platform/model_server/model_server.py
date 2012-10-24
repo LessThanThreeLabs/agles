@@ -8,14 +8,15 @@ and is the only point of interaction between clients and the model server.
 from kombu import Connection
 
 from bunnyrpc.client import Client
-from build.create_handler import BuildCreateHandler
-from build.read_handler import BuildReadHandler
-from build.update_handler import BuildUpdateHandler
-from change.create_handler import ChangeCreateHandler
-from change.read_handler import ChangeReadHandler
-from change.update_handler import ChangeUpdateHandler
-from repo.create_handler import RepoCreateHandler
-from repo.read_handler import RepoReadHandler
+from builds.create_handler import BuildsCreateHandler
+from builds.read_handler import BuildsReadHandler
+from builds.update_handler import BuildsUpdateHandler
+from build_outputs.update_handler import BuildOutputsUpdateHandler
+from changes.create_handler import ChangesCreateHandler
+from changes.read_handler import ChangesReadHandler
+from changes.update_handler import ChangesUpdateHandler
+from repos.create_handler import ReposCreateHandler
+from repos.read_handler import ReposReadHandler
 from settings.rabbit import connection_info
 
 
@@ -28,20 +29,21 @@ class ModelServer(object):
 	"""
 
 	rpc_handler_classes = [
-		BuildCreateHandler,
-		BuildReadHandler,
-		BuildUpdateHandler,
-		ChangeCreateHandler,
-		ChangeReadHandler,
-		ChangeUpdateHandler,
-		RepoCreateHandler,
-		RepoReadHandler,
+		BuildsCreateHandler,
+		BuildsReadHandler,
+		BuildsUpdateHandler,
+		BuildOutputsUpdateHandler,
+		ChangesCreateHandler,
+		ChangesReadHandler,
+		ChangesUpdateHandler,
+		ReposCreateHandler,
+		ReposReadHandler,
 	]
 
 	@classmethod
 	def rpc_connect(cls, route_noun, route_verb):
-		route = '-'.join(['rpc', route_noun, route_verb])
-		return Client("model-rpc", route)
+		route = "rpc:%s.%s" % (route_noun, route_verb)
+		return Client("model:rpc", route)
 
 	def __init__(self, channel=None):
 		if channel:

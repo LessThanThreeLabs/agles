@@ -4,9 +4,9 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
-class BuildReadHandler(ModelServerRpcHandler):
+class BuildsReadHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(BuildReadHandler, self).__init__("build", "read")
+		super(BuildsReadHandler, self).__init__("builds", "read")
 
 	def get_build_attributes(self, build_id):
 		build = database.schema.build

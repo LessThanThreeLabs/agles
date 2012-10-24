@@ -43,7 +43,7 @@ class Server(object):
 	@property
 	def deadletter_exchange_name(self):
 		assert self.exchange_name is not None
-		return "%s-dlx" % self.exchange_name
+		return "%s_dlx" % self.exchange_name
 
 	def __init__(self, base_instance):
 		"""Creates an RPC server that exposes <base_instance> methods to clients.

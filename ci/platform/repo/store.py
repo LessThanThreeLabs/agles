@@ -133,7 +133,7 @@ class RepositoryStore(object):
 
 	@classmethod
 	def create_config(cls, root_dir):
-		with model_server.ModelServer.rpc_connect("repo", "create") as conn:
+		with model_server.ModelServer.rpc_connect("repos", "create") as conn:
 			store_name = conn.register_repostore()
 
 		config = {"store_name": store_name}

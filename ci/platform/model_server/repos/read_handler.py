@@ -5,9 +5,9 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from sqlalchemy.sql import select
 
 
-class RepoReadHandler(ModelServerRpcHandler):
+class ReposReadHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(RepoReadHandler, self).__init__("repo", "read")
+		super(ReposReadHandler, self).__init__("repos", "read")
 
 	def get_repo_uri(self, commit_id):
 		commit = database.schema.commit

@@ -5,9 +5,9 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
-class BuildCreateHandler(ModelServerRpcHandler):
+class BuildsCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(BuildCreateHandler, self).__init__("build", "create")
+		super(BuildsCreateHandler, self).__init__("builds", "create")
 
 	def create_build(self, change_id, commit_list):
 		build = database.schema.build

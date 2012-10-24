@@ -6,7 +6,7 @@ import yaml
 from git import Repo
 
 from build_config import BuildConfig
-from model_server.build.update_handler import Console
+from model_server.build_outputs.update_handler import Console
 from verification_result import VerificationResult
 
 

@@ -4,9 +4,9 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
-class ChangeReadHandler(ModelServerRpcHandler):
+class ChangesReadHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(ChangeReadHandler, self).__init__("change", "read")
+		super(ChangesReadHandler, self).__init__("changes", "read")
 
 	def get_change_attributes(self, change_id):
 		change = database.schema.change

@@ -8,9 +8,9 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
-class RepoCreateHandler(ModelServerRpcHandler):
+class ReposCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(RepoCreateHandler, self).__init__("repo", "create")
+		super(ReposCreateHandler, self).__init__("repos", "create")
 
 	def create_repo(self, repo_name, machine_id, default_permissions):
 		# This is a stub that only does things that are needed for testing atm.

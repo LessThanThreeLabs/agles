@@ -49,7 +49,7 @@ def handle_languages(languages)
 end
 
 def handle_config(config)
-	handle_languages(config["build"]) if config.has_key? "build"
+	handle_languages(config["languages"]) if config.has_key? "languages"
 end
 
 config_path = "#{node[:agles][:source_path][:internal]}/#{node[:agles][:config_path]}"

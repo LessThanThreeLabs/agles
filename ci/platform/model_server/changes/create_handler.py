@@ -11,9 +11,9 @@ from settings.rabbit import connection_info
 from sqlalchemy.sql import func
 
 
-class ChangeCreateHandler(ModelServerRpcHandler):
+class ChangesCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(ChangeCreateHandler, self).__init__("change", "create")
+		super(ChangesCreateHandler, self).__init__("changes", "create")
 
 	def mark_pending_commit_and_merge_target(self, repo_hash, user_id, commit_message, merge_target):
 		commit = database.schema.commit
@@ -26,7 +26,8 @@ class ChangeCreateHandler(ModelServerRpcHandler):
 		commit_id = result.inserted_primary_key[0]
 
 		with Connection(connection_info) as connection:
-			EventsBroker(connection).publish("repo-update", (commit_id, merge_target))
+			events_broker = EventsBroker(connection)
+			events_broker.publish(events_broker.get_event("repos", "update"), (commit_id, merge_target))
 
 	def create_change(self, commit_id, merge_target):
 		change = database.schema.change

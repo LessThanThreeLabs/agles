@@ -44,7 +44,7 @@ class Client(ClientBase):
 	@property
 	def deadletter_exchange_name(self):
 		assert self.exchange_name is not None
-		return "%s-dlx" % self.exchange_name
+		return "%s_dlx" % self.exchange_name
 
 	def __init__(self, exchange_name, routing_key, globals=None):
 		"""Constructor that determines where rpc calls are sent.

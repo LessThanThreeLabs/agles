@@ -5,10 +5,10 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
-class ChangeUpdateHandler(ModelServerRpcHandler):
+class ChangesUpdateHandler(ModelServerRpcHandler):
 
 	def __init__(self):
-		super(ChangeUpdateHandler, self).__init__("change", "update")
+		super(ChangesUpdateHandler, self).__init__("changes", "update")
 
 	def mark_change_finished(self, change_id, status):
 		change = schema.change

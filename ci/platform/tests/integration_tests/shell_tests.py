@@ -39,7 +39,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
 	def _setup_db_entries(self, REPO_URI):
 		machine_id = self._create_repo_store_machine()
-		with ModelServer.rpc_connect("repo", "create") as rpc_conn:
+		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
 			repo_id = rpc_conn.create_repo("repo.git", machine_id, RepositoryPermissions.RW)
 		self._map_uri(REPO_URI, repo_id)
 

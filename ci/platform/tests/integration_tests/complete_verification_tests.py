@@ -121,7 +121,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection(connection_info) as connection:
-			EventsBroker(connection).publish("repo-update", (commit_id, "master"))
+			events_broker = EventsBroker(connection)
+			events_broker.publish(events_broker.get_event("repo", "update"), (commit_id, "master"))
 			with connection.Consumer(merge_queue, callbacks=[self._on_response]) as consumer:
 				consumer.consume()
 				self.response = None

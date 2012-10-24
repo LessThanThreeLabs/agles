@@ -26,24 +26,24 @@ class VerificationResultsHandler(QueueListener):
 
 	def handle_results(self, build_id, results):
 		# TODO (bbland): do something more useful than this trivial case
-		with ModelServer.rpc_connect("build", "read") as client:
+		with ModelServer.rpc_connect("builds", "read") as client:
 			change_id, is_primary, status, start_time, end_time = client.get_build_attributes(build_id)
 		if is_primary and results == VerificationResult.SUCCESS:
 			self.mark_change_finished(change_id)
 
 	def mark_change_finished(self, change_id):
-		with ModelServer.rpc_connect("change", "update") as client:
+		with ModelServer.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.COMPLETE)
 		self.send_merge_request(change_id)
 
 	def send_merge_request(self, change_id):
 		print "Sending merge request for " + str(change_id)
-		with ModelServer.rpc_connect("change", "read") as client:
+		with ModelServer.rpc_connect("changes", "read") as client:
 			change_attributes = client.get_change_attributes(change_id)
 		commit_id = change_attributes[0]
 		merge_target = change_attributes[1]
 
-		with ModelServer.rpc_connect("repo", "read") as client:
+		with ModelServer.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)
 			filesystem_server_uri, repo_hash, repo_name = client.get_repo_attributes(repo_uri)
 
@@ -54,6 +54,10 @@ class VerificationResultsHandler(QueueListener):
                 repo_name, ref, merge_target)
 		except MergeError:
 			merge_status = False
+		"""
+		with ModelServer.rpc_connect("repos", "update") as client:
+					client.mark_merge(merge_status)
+		"""
 
 		self.producer.publish((repo_hash, commit_id, merge_target,),
 			exchange=merge_queue.exchange,

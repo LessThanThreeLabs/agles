@@ -8,9 +8,9 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from settings.aws.s3 import media_bucket
 
 
-class UserCreateHandler(ModelServerRpcHandler):
+class UsersCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(UserCreateHandler, self).__init__("user", "create")
+		super(UsersCreateHandler, self).__init__("users", "create")
 		self.mediastore = S3MediaStore(media_bucket)
 
 	def upload_media(self, media_binary):

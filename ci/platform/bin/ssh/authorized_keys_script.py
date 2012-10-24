@@ -12,7 +12,7 @@ try:
 	if not valid_key.match(sshkey):
 		sys.exit(1)
 
-	with ModelServer.rpc_connect("repo", "read") as client:
+	with ModelServer.rpc_connect("repos", "read") as client:
 		user_id = client.get_user_id_from_public_key(sshkey)
 
 	if user_id:

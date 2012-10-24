@@ -2,7 +2,7 @@ from kombu.entity import Exchange, Queue
 
 
 class EventsBroker(object):
-	events_exchange = Exchange("events", "direct", durable=False)
+	events_exchange = Exchange("model:events", "direct", durable=False)
 
 	def __init__(self, channel):
 		self.channel = channel
@@ -26,3 +26,6 @@ class EventsBroker(object):
 			exchange=self.events_exchange,
 			delivery_mode=2
 		)
+
+	def get_event(noun, verb):
+		return "%s.%s" % (noun, verb)

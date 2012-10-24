@@ -7,7 +7,7 @@ from settings.verification_server import *
 
 class RepoUpdateEventHandler(EventSubscriber):
 	def __init__(self):
-		super(RepoUpdateEventHandler, self).__init__("repo-update", "verification-repo-update")
+		super(RepoUpdateEventHandler, self).__init__("repos-update", "verification-repo-update")
 
 	def bind(self, channel):
 		self.producer = Producer(channel, serializer='msgpack')
@@ -22,11 +22,11 @@ class RepoUpdateEventHandler(EventSubscriber):
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
 	def _create_change(self, commit_id, merge_target):
-		with ModelServer.rpc_connect("change", "create") as model_server_rpc:
+		with ModelServer.rpc_connect("changes", "create") as model_server_rpc:
 			return model_server_rpc.create_change(commit_id, merge_target)
 
 	def _create_build(self, change_id, commit_list):
-		with ModelServer.rpc_connect("build", "create") as model_server_rpc:
+		with ModelServer.rpc_connect("builds", "create") as model_server_rpc:
 			return model_server_rpc.create_build(change_id, commit_list)
 
 	def _get_commit_permutations(self, commit_id):
