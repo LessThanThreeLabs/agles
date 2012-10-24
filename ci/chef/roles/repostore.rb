@@ -6,7 +6,9 @@ run_list(
 override_attributes(
 	:agles => {
 		:source_path => {
-			:internal => "/home/lt3/code/agles"
-		},
+			:internal => "/home/lt3/code/agles",
+			:platform => "/home/lt3/code/agles/ci/platform",
+			:authorized_keys_script => "/home/lt3/code/agles/ci/platform/bin/ssh/authorized_keys_script.py"
+		}
 	}
 )

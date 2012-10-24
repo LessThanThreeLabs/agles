@@ -40,16 +40,21 @@ script "setup_openssh_for_git" do
 		# Check for AuthorizedKeysScript settings and add it if it doesn't exist
 		grep "AuthorizedKeysScript" sshd_config
 		if [ $? -ne 0 ]
-			then chmod +x #{node[:agles][:source_path][:internal]}/platform/bin/ssh/authorized_keys_script.py
+			then chmod +x #{node[:agles][:source_path][:authorized_keys_script]}
 			mv sshd_config sshd_config.bu
 			sed '/AuthorizedKeysFile/d' sshd_config.bu > sshd_config
 
 			# Setting the authorized_keys file to something that can't exist so it uses the script
-			echo "AuthorizedKeysScript #{node[:agles][:source_path][:internal]}/platform/bin/ssh/authorized_keys_script.py" >> sshd_config
+			echo "AuthorizedKeysScript #{node[:agles][:source_path][:authorized_keys_script]}" >> sshd_config
 			echo "AuthorizedKeysFile /dev/null/authorized_keys" >> sshd_config
 		fi
-		exit 0
 	EOH
+end
+
+execute "install_agles" do
+	cwd "#{node[:agles][:source_path][:platform]}"
+	user "root"
+	command "python setup.py install"
 end
 
 git "/tmp/dulwich-lt3" do
