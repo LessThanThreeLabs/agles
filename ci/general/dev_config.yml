@@ -38,7 +38,7 @@ setup:
       - iced-coffee-script
   - scripts:
     - script: ./install_virtualbox.sh
-      directory: scripts
+      directory: ci/scripts
   - databases:
       postgres:
       - name: agles
@@ -47,9 +47,8 @@ setup:
           port: 5432
           username: postgres
   - scripts:
-    # Currently failing, unable to find amqp.js?
-    - script: npm install -d
-      directory: web/back
+    - script: npm install
+      directory: ci/web/back
 build:
   python:
     version: 2.7

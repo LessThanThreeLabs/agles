@@ -12,14 +12,13 @@ class VagrantLintingCommand(BuildCommand):
 	"""Simple pylint implementation for running static python analysis
 	on a vagrant vm
 	"""
-	def __init__(self, vagrant, path):
-		self.vagrant = vagrant
+	def __init__(self, path):
 		self.path = path or ''
 
-	def run(self):
-		sourcepath = "/home/vagrant/source/" + self.path
-		results = self.vagrant.ssh_call("find " + sourcepath +
-			" -name \"*.py\" | xargs pylint --reports=n")
+	def run(self, vagrant_wrapper, output_handler):
+		source_path = "/home/vagrant/source/" + self.path
+		command = "find " + source_path + " -name \"*.py\" | xargs pylint --reports=n"
+		results = vagrant_wrapper.ssh_call(command, output_handler)
 		lint_parser = LintParser()
 		pylint_issues = lint_parser.parse_pylint(results.stdout)
 		errors = lint_parser.get_errors(pylint_issues)

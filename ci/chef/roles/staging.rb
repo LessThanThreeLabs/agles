@@ -11,7 +11,6 @@ run_list(
 	"recipe[redisio::install]",
 	"recipe[rvm::system]",
 	"recipe[agles::dependencies]",
-	"recipe[agles::language_config]",
 	"recipe[agles::configure]"
 )
 default_attributes(
@@ -24,7 +23,7 @@ default_attributes(
 		:source_path => {
 			:internal => "/home/lt3/code/agles"
 		},
-		:config_path => "general/dev_config.yml"
+		:config_path => "ci/general/dev_config.yml"
 	}
 )
 override_attributes()

@@ -1,14 +1,5 @@
 include_recipe "agles"
 
-def get_default_languages()
-	return {:python => {},
-			:ruby => {
-				:ruby_string => "default"
-			},
-			:node => {},
-		}
-end
-
 def bashrc_configure(to_remove, to_add)
 	bash "configure bashrc" do
 		user node[:agles][:user]
@@ -61,7 +52,6 @@ def handle_config(config)
 	handle_languages(config["build"]) if config.has_key? "build"
 end
 
-node[:agles][:languages] = get_default_languages
 config_path = "#{node[:agles][:source_path][:internal]}/#{node[:agles][:config_path]}"
 if File.exist? config_path
 	config = YAML::load(File.read(config_path))

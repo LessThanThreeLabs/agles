@@ -21,6 +21,6 @@ override_attributes(
 		:source_path => {
 			:external => "/vagrant"
 		},
-		:config_path => "general/dev_config.yml"
+		:config_path => "ci/general/dev_config.yml"
 	}
 )

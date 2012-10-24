@@ -27,8 +27,8 @@ class BuildVerifier(object):
 			self.checkout_refs(repo_uri, refs)
 			self.setup_vagrant_wrapper(console_appender)
 			build_configs = self.get_build_configurations()
-			self.run_build_step(build_configs)
-			self.run_test_step(build_configs)
+			self.run_build_step(build_configs, console_appender)
+			self.run_test_step(build_configs, console_appender)
 		except VerificationException, e:
 			self._mark_failure(callback, e)
 		else:
@@ -73,20 +73,22 @@ class BuildVerifier(object):
 		config_dict = config.get("build")
 		build_configs = list()
 		for language, config_dict in config_dict.iteritems():
-			build_configs.append(BuildConfig.from_config_tuple(language, config_dict, self.vagrant))
+			build_configs.append(BuildConfig.from_config_tuple(language, config_dict))
 		return build_configs
 
 	def get_default_build_configurations(self):
-		return [BuildConfig.from_config_tuple("python", None, self.vagrant_wrapper)]
+		return [BuildConfig.from_config_tuple("python", None)]
 
-	def run_build_step(self, build_configs):
+	def run_build_step(self, build_configs, console_appender):
 		for build_config in build_configs:
-			if build_config.build_command.run():
+			if build_config.build_command.run(self.vagrant_wrapper,
+				self._get_output_handler(console_appender, Console.Build)):
 				raise VerificationException("build")
 
-	def run_test_step(self, build_configs):
+	def run_test_step(self, build_configs, console_appender):
 		for build_config in build_configs:
-			if build_config.test_command.run():
+			if build_config.test_command.run(self.vagrant_wrapper,
+				self._get_output_handler(console_appender, Console.Test)):
 				raise VerificationException("test")
 
 	def _mark_success(self, callback):
