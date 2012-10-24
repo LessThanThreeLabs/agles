@@ -36,6 +36,7 @@ setup:
       - vagrant
     - npm:
       - iced-coffee-script
+      - ci/web/back
   - scripts:
     - script: ./install_virtualbox.sh
       directory: ci/scripts
@@ -46,9 +47,6 @@ setup:
           host: localhost
           port: 5432
           username: postgres
-  - scripts:
-    - script: npm install
-      directory: ci/web/back
 build:
   python:
     version: 2.7

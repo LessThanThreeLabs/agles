@@ -30,7 +30,10 @@ def gem(package_name)
 end
 
 def npm(package_name)
-	execute "npm install #{package_name}"
+	execute "npm install #{package_name}" do
+		cwd node[:agles][:source_path][:internal]
+		environment({"HOME" => "/home/#{node[:agles][:user]}"})
+	end
 end
 
 def install_packages(package_bundle)
