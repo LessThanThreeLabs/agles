@@ -3,12 +3,13 @@
 import os
 
 DEFAULT_CHARS_PER_LEVEL = 2
+DIR_LEVELS = 3
 
-def to_path(hash, name, dir_levels=3):
+def to_path(hash, name, dir_levels=DIR_LEVELS):
 	return os.path.join(directory_treeify(hash, dir_levels), name)
 
 
-def directory_treeify(hash, dir_levels=3):
+def directory_treeify(hash, dir_levels=DIR_LEVELS):
 	"""Takes a hash and separates it into directories (e.g. a23fe89 => a/2/3fe89)
 
 	:param hash: The hash we are treeifying.
