@@ -36,7 +36,7 @@ setup:
       - vagrant
     - npm:
       - iced-coffee-script
-      - ci/web/back
+      - directory: ci/web/back
   - scripts:
     - script: ./install_virtualbox.sh
       directory: ci/scripts

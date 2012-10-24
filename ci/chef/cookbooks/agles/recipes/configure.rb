@@ -11,35 +11,52 @@ include_recipe "agles"
 
 require 'yaml'
 
-def system(package_name)
-	package package_name
+def package_info(package)
+	if package.instance_of? Hash
+		package.first
+	else
+		[package, nil]
+	end
 end
 
-def pip(package_name)
+def system(package_name, package_version)
+	package package_name do
+		version package_version if package_version
+	end
+end
+
+def pip(package_name, package_version)
 	python_pip package_name do
 		virtualenv node[:agles][:languages][:python][:virtualenv]
+		version package_version if package_version
 		action :install
 	end
 end
 
-def gem(package_name)
+def gem(package_name, package_version)
 	rvm_gem package_name do
 		ruby_string node[:agles][:languages][:ruby][:ruby_string]
+		version package_version if package_version
 		action :install
 	end
 end
 
-def npm(package_name)
-	execute "npm install #{package_name}" do
-		cwd node[:agles][:source_path][:internal]
-		environment({"HOME" => "/home/#{node[:agles][:user]}"})
+def npm(package_name, package_version)
+	if package_name == "directory"
+		execute "npm install" do
+			cwd "#{node[:agles][:source_path][:internal]}/#{package_version}"
+			environment({"HOME" => "/home/#{node[:agles][:user]}"})
+		end
+	else
+		package_string = package_version ? "#{package_name}@#{package_version}" : package_name
+		execute "npm install #{package_string}"
 	end
 end
 
 def install_packages(package_bundle)
 	package_bundle.each do |type, packages|
 		packages.each do |p|
-			send(type, p)
+			send(type, *(package_info(p)))
 		end
 	end
 end
