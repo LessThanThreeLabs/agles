@@ -12,11 +12,6 @@ class LoginPanel.Model extends Backbone.Model
 		rememberMe: true
 
 	initialize: () =>
-		@loginPasswordColorHashModel = new LoginPasswordColorHash.Model()
-
-		@on 'change:password', () =>
-			@loginPasswordColorHashModel.set 'password', @get 'password'
-
 
 
 	toggleVisibility: () =>
@@ -60,15 +55,12 @@ class LoginPanel.View extends Backbone.View
 		</div>'
 
 	events:
-		'keydown .loginEmail': '_handleEmailChange'
-		'keydown .loginPassword': '_handlePasswordChange'
-		'change .loginRemember': '_handleRememberMe'
+		'keydown': '_handleFormEntryChange'
+		'change .loginRemember': '_handleFormEntryChange'
 		'click .loginButton': '_handleLoginRequest'
 
 
 	initialize: () =>
-		@loginPasswordColorHashView = new  LoginPasswordColorHash.View model: @model.loginPasswordColorHashModel
-
 		@model.on 'change:visible', @_updateVisibility
 
 		$(document).on 'show', '.loginModal', () =>
@@ -82,20 +74,15 @@ class LoginPanel.View extends Backbone.View
 		window.LoginPanel.renderedAlready = true
 
 		@$el.html @template()
-		@$el.find('.loginPasswordControls').append @loginPasswordColorHashView.render().el
 		return @
 
 
-	_handleEmailChange: (event) =>
-		setTimeout (() => @model.set 'email', $('.loginEmail').val()), 0
-
-
-	_handlePasswordChange: (event) =>
-		setTimeout (() => @model.set 'password', $('.loginPassword').val()), 0
-
-
-	_handleRememberMe: () =>
-		@model.set 'rememberMe', $('.loginRemember').prop 'checked'
+	_handleFormEntryChange: () =>
+		setTimeout (() =>
+			@model.set 'email', $('.loginEmail').val()
+			@model.set 'password', $('.loginPassword').val()
+			@model.set 'rememberMe', $('.loginRemember').prop 'checked'
+			), 0
 
 
 	_handleLoginRequest: () =>
