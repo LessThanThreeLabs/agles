@@ -24,5 +24,10 @@ class UsersCreateHandler(ModelServerRpcHandler):
 		path = self._generate_path(media_id, md5hash)
 		self.mediastore.store_media(media_binary, path)
 
+	def create(self, password_hash, information):
+		pass
+
+
+
 	def _generate_path(self, media_id, hash):
 		return util.pathgen.to_path(hash, media_id)

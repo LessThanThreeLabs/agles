@@ -19,6 +19,8 @@ class BuildsUpdateHandlerTest(unittest.TestCase, RedisTestMixin):
 	def console_append_test(self):
 		update_handler = BuildOutputsUpdateHandler()
 
+		gen_line_dict = {}
+		setup_line_dict = {}
 		build_general = []
 		build_setup = []
 		for i in xrange(10):
@@ -26,17 +28,19 @@ class BuildsUpdateHandlerTest(unittest.TestCase, RedisTestMixin):
 			build_general.append(line_general)
 			line_setup = "build:1, line:%s, console:setup" % i
 			build_setup.append(line_setup)
-			update_handler.append_console_output(1, line_general)
-			update_handler.append_console_output(1, line_setup,
+			update_handler.append_console_line(1, i, line_general)
+			gen_line_dict[str(i)] = line_general
+			update_handler.append_console_line(1, i, line_setup,
 				console=Console.Setup)
+			setup_line_dict[str(i)] = line_setup
 
-		self._assert_console_output_equal(1, '\n'.join(build_general), Console.General)
-		self._assert_console_output_equal(1, '\n'.join(build_setup), Console.Setup)
+		self._assert_console_output_equal(1, gen_line_dict, Console.General)
+		self._assert_console_output_equal(1, setup_line_dict, Console.Setup)
 
 	def _assert_console_output_equal(self, build_id, expected_output,
 									 console_type):
 		key = "build.output:%s:%s" % (build_id, console_type)
 		redis_conn = ConnectionFactory.get_redis_connection()
-		actual_output = '\n'.join(redis_conn.lrange(key, 0, -1))
+		actual_output = redis_conn.hgetall(key)
 		assert_equal(expected_output, actual_output,
 			msg="Console output for key %s not what expected" % key)

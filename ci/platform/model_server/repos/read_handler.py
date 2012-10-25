@@ -76,3 +76,20 @@ class ReposReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		return row[repo.c.default_permissions] if row else None
+
+
+	#################
+	# Front end API #
+	#################
+
+
+	def get_repo_ids(self, user_id):
+		repo = database.schema.repo
+
+
+	def get_repos(self, user_id):
+		pass
+
+	def get_repo_from_id(self, user_id, repo_id):
+		pass
+

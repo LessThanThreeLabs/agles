@@ -9,8 +9,9 @@ metadata = MetaData()
 
 user = Table('user', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('username', String, nullable=False),
-	Column('name', String, nullable=False)
+	Column('email', String, nullable=False, unique=True),
+	Column('name', String, nullable=False),
+	Column('password_hash', String, nullable=False),
 )
 
 media = Table('media', metadata,

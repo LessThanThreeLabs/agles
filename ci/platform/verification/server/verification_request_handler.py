@@ -71,5 +71,5 @@ class VerificationRequestHandler(QueueListener):
 
 	def _make_console_appender(self, model_server_rpc, build_id):
 		def console_appender(console):
-			return lambda line: model_server_rpc.append_console_output(build_id, line, console)
+			return lambda line_num, line: model_server_rpc.append_console_line(build_id, line_num, line, console)
 		return console_appender

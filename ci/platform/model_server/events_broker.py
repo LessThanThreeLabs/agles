@@ -1,5 +1,6 @@
 from kombu.entity import Exchange, Queue
 
+from util import greenlets
 
 class EventsBroker(object):
 	events_exchange = Exchange("model:events", "direct", durable=False)
@@ -12,7 +13,7 @@ class EventsBroker(object):
 			subscriber_queue = Queue(queue_name, exchange=self.events_exchange, routing_key=event, durable=False)
 		else:
 			subscriber_queue = Queue(exchange=self.events_exchange, routing_key=event, exclusive=True, durable=False)
-		return self.channel.Consumer(queues=subscriber_queue, callbacks=[callback])
+		return self.channel.Consumer(queues=subscriber_queue, callbacks=[greenlets.spawn_wrap(callback)])
 
 	def publish(self, event, msg):
 		"""Publishes a message to a specific event channel.

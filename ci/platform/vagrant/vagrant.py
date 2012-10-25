@@ -71,7 +71,7 @@ class Vagrant(object):
 			line = line.rstrip()
 			line_list.append(line)
 			if line_handler:
-				line_handler(line)
+				line_handler(len(line_list), line)
 		return line
 
 	def _get_vagrant_env(self):

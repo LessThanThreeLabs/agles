@@ -1,10 +1,7 @@
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-
-
-class Console(object):
-	General, Setup, Build, Test = range(4)
+from model_server.build_outputs import Console, REDIS_KEY_TEMPLATE
 
 
 class BuildOutputsUpdateHandler(ModelServerRpcHandler):
@@ -12,16 +9,17 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildOutputsUpdateHandler, self).__init__("build_outputs", "update")
 
-	def append_console_output(self, build_id, console_output, console=Console.General):
+	def append_console_line(self, build_id, line_num, line, console=Console.General):
 		""" The redis keys for build output are of the form build.output:build_id:console
 		:param build_id: The build id this console is relevant to.
-		:param console_output: The new console output to append and store.
+		:param line_num: The line number we're appending
+		:param line: The line to append and store.
 		:param console: The console type we are appending to.
 		"""
 
-		redis_key = "build.output:%s:%s" % (build_id, console)
+		redis_key = REDIS_KEY_TEMPLATE % (build_id, console)
 		redis_conn = ConnectionFactory.get_redis_connection()
-		redis_conn.rpush(redis_key, console_output)
+		redis_conn.hset(redis_key, line_num, line)
 
 	def flush_console_output(self, build_id, console=Console.General):
 		""" Flushes finalized console output to a persisted sql db.
@@ -29,9 +27,11 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		:param console: The console type we are flushing.
 		"""
 
-		redis_key = "build.output:%s:%s" % (build_id, console)
+		redis_key = REDIS_KEY_TEMPLATE % (build_id, console)
 		redis_conn = ConnectionFactory.get_redis_connection()
-		complete_console_output = '\n'.join(redis_conn.lrange(redis_key, 0, -1))
+		line_dict = redis_conn.hgetall(redis_key)
+		_, lines = zip(*sorted(line_dict.iteritems())) if line_dict else (None, [])
+		complete_console_output = '\n'.join(lines)
 
 		ins = schema.build_console.insert().values(build_id=build_id, type=console,
 			console_output = complete_console_output)
