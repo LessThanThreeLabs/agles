@@ -36,9 +36,8 @@ end
 
 bash "trust local postgres" do
 	code <<-EOH
-	sed -r 's/^(\\w+\\s+\\w+\\s+\\w+\\s+\\S+)\\w+$/\\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf > /etc/postgresql/9.1/main/pg_hba.conf.tmp
-	sed -r 's/^(\\w+\\s+\\w+\\s+\\w+\\s+)\\w+$/\\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf.tmp > /etc/postgresql/9.1/main/pg_hba.conf
-	rm /etc/postgresql/9.1/main/pg_hba.conf.tmp
+	sed -r 's/^(\\w+(\\s+\\S+){2,3}\\s+)\\w+$/\\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf > /etc/postgresql/9.1/main/pg_hba.conf.tmp
+	mv /etc/postgresql/9.1/main/pg_hba.conf.tmp /etc/postgresql/9.1/main/pg_hba.conf
 	EOH
 end
 
