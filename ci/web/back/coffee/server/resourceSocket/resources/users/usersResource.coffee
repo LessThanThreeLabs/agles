@@ -3,7 +3,6 @@ crypto = require 'crypto'
 nodemailer = require 'nodemailer'
 
 Resource = require '../resource'
-CreateAccountStore = require './createAccountStore'
 CreateAccountEmailer = require './createAccountEmailer'
 
 
