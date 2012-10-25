@@ -10,7 +10,7 @@ class Header.Model extends Backbone.Model
 class Header.View extends Backbone.View
 	tagName: 'div'
 	className: 'header'
-	template: Handlebars.compile '<div class="headerContents"><div class="title">Blimp</div></div>'
+	template: Handlebars.compile '<div class="title">Blimp</div>'
 
 	initialize: () ->
 		@headerMenuView = new HeaderMenu.View model: @model.headerMenuModel
@@ -18,5 +18,5 @@ class Header.View extends Backbone.View
 
 	render: () ->
 		@$el.html @template()
-		@$el.find('.headerContents').append @headerMenuView.render().el
+		@$el.append @headerMenuView.render().el
 		return @

@@ -16,7 +16,7 @@ class Repository.Model extends Backbone.Model
 class Repository.View extends Backbone.View
 	tagName: 'div'
 	className: 'repository'
-	template: Handlebars.compile '<div class="repositoryContents"></div>'
+	template: Handlebars.compile ''
 
 	initialize: () ->
 		@repositoryHeaderView = new RepositoryHeader.View model: @model.repositoryHeaderModel
@@ -25,6 +25,6 @@ class Repository.View extends Backbone.View
 
 	render: () ->
 		@$el.html @template()
-		@$el.find('.repositoryContents').append @repositoryHeaderView.render().el
-		@$el.find('.repositoryContents').append @repositoryBuildsView.render().el
+		@$el.append @repositoryHeaderView.render().el
+		@$el.append @repositoryBuildsView.render().el
 		return @

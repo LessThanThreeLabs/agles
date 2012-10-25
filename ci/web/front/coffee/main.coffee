@@ -12,7 +12,7 @@ class Main.Model extends Backbone.Model
 class Main.View extends Backbone.View
 	tagName: 'div'
 	id: 'main'
-	template: Handlebars.compile ''
+	template: Handlebars.compile '<div class="headerContainer"></div><div class="contentContainer"></div>'
 
 	initialize: () ->
 		@headerView = new Header.View model: @model.headerModel
@@ -21,8 +21,8 @@ class Main.View extends Backbone.View
 
 	render: () ->
 		@$el.html @template()
-		@$el.append @headerView.render().el
-		@$el.append @repositoryView.render().el
+		@$el.find('.headerContainer').append @headerView.render().el
+		@$el.find('.contentContainer').append @repositoryView.render().el
 		return @
 
 
