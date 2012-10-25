@@ -76,8 +76,8 @@ class Server(object):
 		else:
 			connection = Connection(connection_info)
 			self.channel = connection.channel()
+		self.channel.basic_qos(0, 1, False)
 		self.consumer = self.channel.Consumer(callbacks=[self._handle_call])
-		self.consumer.qos(prefetch_count=1)
 		self.producer = self.channel.Producer(serializer="msgpack")
 
 		self.exchange = Exchange(self.exchange_name, "direct", durable=False)

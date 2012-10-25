@@ -55,6 +55,7 @@ class VerificationRequestHandler(QueueListener):
 				exchange=verification_results_queue.exchange,
 				routing_key=verification_results_queue.routing_key,
 				delivery_mode=2,  # make message persistent
+				mandatory=True,
 			)
 			build_outputs_update_rpc.flush_console_output(build_id, Console.Setup)
 			status = BuildStatus.COMPLETE if results == VerificationResult.SUCCESS else BuildStatus.FAILED

@@ -18,8 +18,8 @@ class QueueListener(MessageHandler):
 		self.queue = queue
 
 	def bind(self, channel):
+		channel.basic_qos(0, 1, False)
 		consumer = channel.Consumer(queues=self.queue, callbacks=[greenlets.spawn_wrap(self.handle_message)])
-		consumer.qos(prefetch_count=1)
 		consumer.consume()
 
 
@@ -29,7 +29,7 @@ class EventSubscriber(MessageHandler):
 		self.queue_name = queue_name
 
 	def bind(self, channel):
+		channel.basic_qos(0, 1, False)
 		consumer = EventsBroker(channel).subscribe(self.event, queue_name=self.queue_name,
 			callback=greenlets.spawn_wrap(self.handle_message))
-		consumer.qos(prefetch_count=1)
 		consumer.consume()

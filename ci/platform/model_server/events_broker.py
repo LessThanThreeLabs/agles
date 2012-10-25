@@ -27,5 +27,5 @@ class EventsBroker(object):
 			delivery_mode=2
 		)
 
-	def get_event(noun, verb):
+	def get_event(self, noun, verb):
 		return "%s.%s" % (noun, verb)

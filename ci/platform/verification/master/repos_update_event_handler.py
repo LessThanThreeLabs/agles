@@ -5,13 +5,13 @@ from model_server import ModelServer
 from settings.verification_server import *
 
 
-class RepoUpdateEventHandler(EventSubscriber):
+class ReposUpdateEventHandler(EventSubscriber):
 	def __init__(self):
-		super(RepoUpdateEventHandler, self).__init__("repos-update", "verification-repo-update")
+		super(ReposUpdateEventHandler, self).__init__("repos.update", "verification_master:repos.update")
 
 	def bind(self, channel):
 		self.producer = Producer(channel, serializer='msgpack')
-		super(RepoUpdateEventHandler, self).bind(channel)
+		super(ReposUpdateEventHandler, self).bind(channel)
 
 	def handle_message(self, body, message):
 		commit_id, merge_target = body
@@ -40,4 +40,5 @@ class RepoUpdateEventHandler(EventSubscriber):
 			exchange=verification_request_queue.exchange,
 			routing_key=verification_request_queue.routing_key,
 			delivery_mode=2,  # make message persistent
+			mandatory=True,
 		)
