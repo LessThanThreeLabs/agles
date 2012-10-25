@@ -68,9 +68,14 @@ def packages(package_bundles)
 end
 
 def postgres(database_info)
+	postgresql_database_user database_info["username"] do
+		password ""
+		connection({:username => "postgres", :password => ""})
+		action :create
+	end
 	postgresql_database database_info["name"] do
-		c = database_info["connection-info"]
-		connection({:host => c["host"], :port => c["port"], :username => c["username"], :password => node['postgresql']['password']['postgres']})
+		username database_info["username"]
+		password ""
 		action :create
 	end
 end

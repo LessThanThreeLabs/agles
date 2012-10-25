@@ -43,10 +43,7 @@ setup:
   - databases:
       postgres:
       - name: agles
-        connection-info:
-          host: localhost
-          port: 5432
-          username: postgres
+        username: lt3
 languages:
   python:
     version: 2.7

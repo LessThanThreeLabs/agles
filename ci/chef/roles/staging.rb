@@ -14,11 +14,6 @@ run_list(
 	"recipe[agles::configure]"
 )
 default_attributes(
-	:postgresql => {
-		:password => {
-			:postgres => "agles"
-		}
-	},
 	:agles => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles"

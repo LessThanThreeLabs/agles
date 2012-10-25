@@ -9,13 +9,7 @@ run_list(
 	"recipe[rabbitmq]",
 	"recipe[agles::configure]"
 )
-default_attributes(
-	:postgresql => {
-		:password => {
-			:postgres => "agles"
-		}
-	}
-)
+default_attributes()
 override_attributes(
 	:agles => {
 		:source_path => {
