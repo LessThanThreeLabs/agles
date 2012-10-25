@@ -14,13 +14,5 @@ class RedirectServer
 	start: () ->
 		@redirectServer = express()
 		@redirectServer.get '*', (request, response) =>
-			url = @_getUrlFromHost request.headers.host
-			response.redirect 'https://' + url + ':' + @configurationParams.https.port + request.url
+			response.redirect 'https://' + request.headers.host + request.url
 		@redirectServer.listen @configurationParams.http.port 
-
-		console.log @configurationParams.http.port 
-
-
-	_getUrlFromHost: (host) =>
-		colonIndex = host.indexOf ':'
-		return host.substr 0, if colonIndex is -1 then host.length else colonIndex

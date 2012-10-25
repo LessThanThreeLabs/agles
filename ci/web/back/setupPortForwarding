@@ -1,0 +1,2 @@
+ipfw add fwd 127.0.0.1,1080 tcp from any to any 80
+ipfw add fwd 127.0.0.1,10443 tcp from any to any 443
