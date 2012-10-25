@@ -5,8 +5,11 @@ class Main.Model extends Backbone.Model
 
 	initialize: () ->
 		@headerModel = new Header.Model()
+
 		@repositoryModel = new Repository.Model id: Math.floor Math.random() * 10000
 		@repositoryModel.fetch()
+
+		@welcomeModel = new Welcome.Model()
 
 
 class Main.View extends Backbone.View
@@ -17,12 +20,14 @@ class Main.View extends Backbone.View
 	initialize: () ->
 		@headerView = new Header.View model: @model.headerModel
 		@repositoryView = new Repository.View model: @model.repositoryModel
+		@welcomeView = new Welcome.View model: @model.welcomeModel
 
 
 	render: () ->
 		@$el.html @template()
 		@$el.find('.headerContainer').append @headerView.render().el
-		@$el.find('.contentContainer').append @repositoryView.render().el
+		# @$el.find('.contentContainer').append @repositoryView.render().el
+		@$el.find('.contentContainer').append @welcomeView.render().el
 		return @
 
 
