@@ -1,6 +1,7 @@
 # handler.py - Abstract message handlers
 """ Abstract message handler and two basic extending types
 """
+from util import greenlets
 from model_server.events_broker import EventsBroker
 
 
@@ -17,7 +18,7 @@ class QueueListener(MessageHandler):
 		self.queue = queue
 
 	def bind(self, channel):
-		consumer = channel.Consumer(queues=self.queue, callbacks=[self.handle_message])
+		consumer = channel.Consumer(queues=self.queue, callbacks=[greenlets.spawn_wrap(self.handle_message)])
 		consumer.qos(prefetch_count=1)
 		consumer.consume()
 
@@ -29,6 +30,6 @@ class EventSubscriber(MessageHandler):
 
 	def bind(self, channel):
 		consumer = EventsBroker(channel).subscribe(self.event, queue_name=self.queue_name,
-			callback=self.handle_message)
+			callback=greenlets.spawn_wrap(self.handle_message))
 		consumer.qos(prefetch_count=1)
 		consumer.consume()

@@ -21,10 +21,13 @@ Protocol Definition:
 import sys
 import traceback
 
+import gevent
+import gevent.monkey; gevent.monkey.patch_all(thread=False)
+
 from kombu.connection import Connection
 from kombu.entity import Exchange, Queue
 from settings.rabbit import connection_info
-
+from util import greenlets
 
 class Server(object):
 	"""RPC Server that handles rpc calls from clients.
@@ -93,6 +96,7 @@ class Server(object):
 		map(setup_queue, self.queue_names)
 		self.consumer.consume()
 
+	@greenlets.spawn_wrap
 	def _handle_call(self, body, message):
 		message_proto = self._call(body["method"], body["args"])
 		self.producer.publish(message_proto,

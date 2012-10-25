@@ -54,10 +54,6 @@ class VerificationResultsHandler(QueueListener):
                 repo_name, ref, merge_target)
 		except MergeError:
 			merge_status = False
-		"""
-		with ModelServer.rpc_connect("repo", "update") as client:
-					client.mark_merge(merge_status)
-		"""
 
 		self.producer.publish((repo_hash, commit_id, merge_target,),
 			exchange=merge_queue.exchange,
