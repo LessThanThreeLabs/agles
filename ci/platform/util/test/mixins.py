@@ -23,13 +23,27 @@ class BaseTestMixin(object):
 	pass
 
 
+class TestProcess(Process):
+	def __init__(self, group=None, target=None, name=None, args=(), kwargs={}):
+		super(TestProcess, self).__init__(group, TestProcess._with_new_engine(target), name, args, kwargs)
+
+	@classmethod
+	def _with_new_engine(cls, method):
+		def wrapped_method(method):
+			def internal(*args, **kwargs):
+				ConnectionFactory.recreate_engine()
+				method(*args, **kwargs)
+			return internal
+		return wrapped_method(method)
+
+
 class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	def _start_model_server(self):
 		connection = Connection(connection_info)
 		self.model_server_channel = connection.channel()
-		self.model_server_process = Process(target=ModelServer(self.model_server_channel).start)
+		self.model_server_process = TestProcess(target=ModelServer(self.model_server_channel).start)
 		self.model_server_process.start()
 
 	def _stop_model_server(self):

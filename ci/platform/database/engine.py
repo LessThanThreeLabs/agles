@@ -7,7 +7,9 @@ from settings.aws import access_key_id, secret_access_key
 
 
 class ConnectionFactory(object):
-	_ENGINE = create_engine(database.sql_database_url)
+	@classmethod
+	def recreate_engine(cls):
+		cls._ENGINE = create_engine(database.sql_database_url)
 
 	@classmethod
 	def get_sql_engine(cls):
@@ -26,3 +28,4 @@ class ConnectionFactory(object):
 		s3conn = S3Connection(access_key_id, secret_access_key)
 		return s3conn.get_bucket(bucket_name)
 
+ConnectionFactory.recreate_engine()

@@ -1,11 +1,11 @@
-from multiprocessing import Process, Event
+from multiprocessing import Event
 
 from nose.tools import *
 
 from bunnyrpc.client import Client, RPCRequestError
 from bunnyrpc.server import Server
 from util.test import BaseIntegrationTest
-from util.test.mixins import RabbitMixin
+from util.test.mixins import RabbitMixin, TestProcess
 
 
 class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
@@ -13,18 +13,18 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		super(BunnyRPCTest, self).setUp()
 		self._purge_queues()
 		server_event = Event()
-		self.server_process = Process(target=self._runserver,
+		self.server_process = TestProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "exchange", ["queue0", "queue1"], server_event])
 		self.server_process.start()
 
 		ttl_event = Event()
-		self.ttl_process = Process(target=self._runserver,
+		self.ttl_process = TestProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "ttl_exchange", ["queue"], ttl_event],
 				  kwargs=dict(ttl=0))
 		self.ttl_process.start()
 
 		return_event = Event()
-		self.returned_msg_process = Process(target=self._runserver,
+		self.returned_msg_process = TestProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "returned_exchange", [], return_event])
 		self.returned_msg_process.start()
 

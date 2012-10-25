@@ -8,7 +8,6 @@ from util.permissions import RepositoryPermissions
 from vagrant.vagrant_wrapper import VagrantWrapper
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
-from multiprocessing import Process
 from model_server.events_broker import EventsBroker
 from database.engine import ConnectionFactory
 from database import schema
@@ -40,7 +39,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			cls.verifier = BuildVerifier(vagrant_wrapper)
 		cls.verifier.setup()
 		verification_server = VerificationServer(cls.verifier)
-		cls.vs_process = Process(target=verification_server.run)
+		cls.vs_process = TestProcess(target=verification_server.run)
 		cls.vs_process.start()
 
 	@classmethod
@@ -65,10 +64,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._start_redis()
 		repo_store = Server(FileSystemRepositoryStore(self.repo_dir))
 		repo_store.bind(store.rpc_exchange_name, [self.repo_machine])
-		self.repo_store_process = Process(target=repo_store.run)
+		self.repo_store_process = TestProcess(target=repo_store.run)
 		self.repo_store_process.start()
 		verification_master = VerificationMaster()
-		self.vm_process = Process(target=verification_master.run)
+		self.vm_process = TestProcess(target=verification_master.run)
 		self.vm_process.start()
 
 	def tearDown(self):
