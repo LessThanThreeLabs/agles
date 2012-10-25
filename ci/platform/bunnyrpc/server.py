@@ -21,7 +21,7 @@ Protocol Definition:
 import sys
 import traceback
 
-import eventlet; eventlet.monkey_patch()
+import eventlet; eventlet.monkey_patch(os=False)
 
 from kombu.connection import Connection
 from kombu.entity import Exchange, Queue
