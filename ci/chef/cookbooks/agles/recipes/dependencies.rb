@@ -31,3 +31,16 @@ node_versions = ['v0.8.9']
 node_versions.each do |version|
 	agles_nodejs version
 end
+
+# Setup postgresql local connection trusting
+
+bash "trust local postgres" do
+	code <<-EOH
+	sed -r 's/^(\\w+\\s+\\w+\\s+\\w+\\s+)\\w+$/\\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf > /etc/postgresql/9.1/main/pg_hba.conf.tmp
+	sed -r 's/^(\\w+\\s+\\w+\\s+\\w+\\s+\\S+)\\w+$/\\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf.tmp > /etc/postgresql/9.1/main/pg_hba.conf
+	EOH
+end
+
+service "postgresql" do
+	action :reload
+end
