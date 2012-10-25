@@ -74,8 +74,7 @@ def postgres(database_info)
 		action :create
 	end
 	postgresql_database database_info["name"] do
-		username database_info["username"]
-		password ""
+		connection({:username => database_info["username"], :password => ""})
 		action :create
 	end
 end
