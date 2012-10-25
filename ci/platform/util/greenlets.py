@@ -1,6 +1,6 @@
-import gevent
+import eventlet
 
 def spawn_wrap(func):
 	def wrapper(*args, **kwargs):
-		gevent.spawn(func, *args, **kwargs)
+		eventlet.spawn(func, *args, **kwargs)
 	return wrapper

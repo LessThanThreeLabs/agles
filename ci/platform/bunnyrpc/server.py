@@ -21,8 +21,7 @@ Protocol Definition:
 import sys
 import traceback
 
-import gevent
-import gevent.monkey; gevent.monkey.patch_all(thread=False)
+import eventlet; eventlet.monkey_patch()
 
 from kombu.connection import Connection
 from kombu.entity import Exchange, Queue

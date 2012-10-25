@@ -4,10 +4,7 @@ See server.py for the RPC protocol definition.
 """
 import msgpack
 import pika
-import gevent
-import gevent.event as event
-import gevent.monkey; gevent.monkey.patch_all(thread=False)
-import gevent.queue as queue
+import eventlet; eventlet.monkey_patch()
 
 from bunnyrpc.exceptions import RPCRequestError
 from settings.rabbit import connection_parameters
@@ -65,8 +62,7 @@ class Client(ClientBase):
 		self.caller_globals_dict = globals
 		self.exchange_name = exchange_name
 		self.routing_key = routing_key
-		self.result_queue = queue.Queue()
-		self.connection_event = event.Event()
+		self.result = None
 		self.connection = None
 		self.channel = None
 		self.ioloop_greenlet = None
@@ -80,9 +76,7 @@ class Client(ClientBase):
 	def _connect(self):
 		self.connection = pika.SelectConnection(connection_parameters,
 			self._on_connected)
-
-		self.ioloop_greenlet = gevent.spawn(lambda: self.connection.ioloop.start())
-		self.connection_event.wait()
+		self.connection.ioloop.start()
 
 	def _on_connected(self, connection):
 		connection.channel(self._on_chan_open)
@@ -111,7 +105,7 @@ class Client(ClientBase):
 
 	def _on_queue_bind(self, frame):
 		self.channel.basic_consume(self._on_response, queue=self.response_mq)
-		self.connection_event.set()
+		self.connection.ioloop.poller.open = False
 
 	def _on_response(self, ch, method, props, body):
 		ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -122,12 +116,14 @@ class Client(ClientBase):
 			queue_result = RPCRequestError("The server failed to process your call")
 		else:
 			queue_result = msgpack.unpackb(body)
-		self.result_queue.put(queue_result)
+		self.message_result = queue_result
+		self.connection.ioloop.poller.open = False
 
 	def _on_return(self, method, props, body):
 		# Greenlets do not propogate errors to the parent, so we send it over as an Exception
 		error = RPCRequestError("The request was rejected and returned without being processed.")
-		self.result_queue.put(error)
+		self.message_result = error
+		self.connection.ioloop.poller.open = False
 
 	def _remote_call(self, remote_method, *args, **kwargs):
 		"""Calls the remote method on the server.
@@ -142,7 +138,9 @@ class Client(ClientBase):
 				content_type="application/x-msgpack"),
 			body=msgpack.packb(proto),
 			mandatory=True)
-		result = self.result_queue.get()
+		self.connection.ioloop.poller.open = True
+		self.connection.ioloop.start()
+		result = self.message_result
 		# result is an Exception if the greenlet raised. Process the result,
 		# or reraise the Exception in the parent if it is an Exception
 		try:
@@ -165,5 +163,5 @@ class Client(ClientBase):
 
 	def close(self):
 		"""Closes the rabbit connection and cleans up resources."""
+		self.connection.ioloop.poller.open = False
 		self.connection.close()
-		self.ioloop_greenlet.join()
