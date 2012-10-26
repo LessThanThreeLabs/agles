@@ -93,9 +93,6 @@ class Chef
             :environment => exec_env
         end
         i.run_action(:run) if install_now
-        # Fix strange bug with "nil" ruby
-        rm = execute "rm -rf /usr/local/rvm/rubies/nil"
-        rm.run_action(:run) if install_now
       end
 
       def upgrade_rvm(opts = {})
@@ -180,9 +177,9 @@ class Chef
         end
 
         # set a default ruby
-        rvm_default_ruby opts[:default_ruby] do
-          user  opts[:user]
-        end
+#        rvm_default_ruby opts[:default_ruby] do
+#          user  opts[:user]
+#        end
 
         # install global gems
         opts[:global_gems].each do |gem|
