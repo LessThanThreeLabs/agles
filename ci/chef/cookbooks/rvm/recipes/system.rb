@@ -23,9 +23,6 @@ perform_install_rubies  = node['rvm']['install_rubies'] == true ||
                   node['rvm']['install_rubies'] == "true"
 
 if perform_install_rubies
-  # Fix strange bug with "nil" ruby
-  execute "rm -rf /usr/local/rvm/rubies/nil"
-  update_installed_rubies
   install_rubies  :rubies => node['rvm']['rubies'],
                   :default_ruby => node['rvm']['default_ruby'],
                   :global_gems => node['rvm']['global_gems'],

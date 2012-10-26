@@ -22,6 +22,9 @@
 class Chef
   module RVM
     module RecipeHelpers
+
+      include Chef::RVM::RubyHelpers
+
       def build_script_flags(version, branch)
         script_flags = ""
         if version || (branch && branch != "none")
@@ -90,6 +93,9 @@ class Chef
             :environment => exec_env
         end
         i.run_action(:run) if install_now
+        # Fix strange bug with "nil" ruby
+        rm = execute "rm -rf /usr/local/rvm/rubies/nil"
+        rm.run_action(:run) if install_now
       end
 
       def upgrade_rvm(opts = {})
