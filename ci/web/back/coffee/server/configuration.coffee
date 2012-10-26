@@ -20,14 +20,14 @@ class ServerConfigurer
 	configure: (server) ->
 		server.configure () =>
 			# ORDER HERE IS VERY IMPORTANT!!!!
+			server.use express.compress()
+			@_configureStaticServer server
 			server.use express.cookieParser()
 			server.use express.bodyParser()  # need this?
 			server.use express.query()  # need this?
-			server.use express.compress()
 			@_configureSessionLogic server
 			server.use csrf()
 			@_configureViewEngine server
-			@_configureStaticServer server
 
 		server.configure 'development', () ->
 			server.use express.errorHandler 
@@ -48,13 +48,6 @@ class ServerConfigurer
 			server.use staticDirectory,
 				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory, maxAge: 0
 				# TODO: determine correct maxage!!!!
-
-
-	_configureStaticCache: (server) ->
-		if @configurationParams.staticFiles.cache.enabled
-			server.use express.staticCache
-				maxObjects: @configurationParams.staticFiles.cache.maxObjects
-				maxLength: @configurationParams.staticFiles.cache.maxLength
 
 
 	_configureSessionLogic: (server) ->
