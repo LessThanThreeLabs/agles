@@ -8,7 +8,7 @@ from database.engine import ConnectionFactory
 from database import schema
 
 COMMANDS_TO_PERMISSIONS = {
-	'git-receive-pack': RepositoryPermissions.RW,
+	'git-receive-pack': RepositoryPermissions.NONE,
 	'git-upload-pack': RepositoryPermissions.RWA
 }
 

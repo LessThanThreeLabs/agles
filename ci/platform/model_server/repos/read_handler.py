@@ -1,8 +1,12 @@
+from sqlalchemy import and_
+
 import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from sqlalchemy.sql import select
+from util.database import to_dict
+from util.permissions import RepositoryPermissions
 
 
 class ReposReadHandler(ModelServerRpcHandler):
@@ -65,17 +69,16 @@ class ReposReadHandler(ModelServerRpcHandler):
 
 	def get_permissions(self, user_id, repo_hash):
 		permission = database.schema.permission
-		repo = database.schema.repo
 
-		query = permission.select().where(permission.c.user_id==user_id).where(permission.c.repo_hash==repo_hash)
+		query = permission.select().where(
+			and_(
+				permission.c.user_id==user_id,
+				permission.c.repo_hash==repo_hash
+			)
+		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-		if row: return row[permission.c.level]
-
-		query = repo.select().where(repo.c.hash==repo_hash)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row = sqlconn.execute(query).first()
-		return row[repo.c.default_permissions] if row else None
+		return row[permission.c.permissions] if row else RepositoryPermissions.NONE
 
 
 	#################
@@ -83,13 +86,45 @@ class ReposReadHandler(ModelServerRpcHandler):
 	#################
 
 
-	def get_repo_ids(self, user_id):
+	def _get_visible_repos(self, user_id):
+		repo = database.schema.repo
+		permission = database.schema.permission
+
+		query = repo.join(permission).select().where(permission.c.user_id==user_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			rows = sqlconn.execute(query)
+		return filter(lambda row: RepositoryPermissions.has_permissions(
+			row[permission.c.permissions], RepositoryPermissions.RW), rows)
+
+
+	def get_writable_repo_ids(self, user_id):
 		repo = database.schema.repo
 
+		visible_rows = self._get_visible_repos(user_id)
+		return map(lambda row: row[repo.c.id], visible_rows)
 
-	def get_repos(self, user_id):
-		pass
+	def get_writable_repos(self, user_id):
+		repo = database.schema.repo
+
+		visible_rows = self._get_visible_repos(user_id)
+		return map(to_dict, visible_rows)
 
 	def get_repo_from_id(self, user_id, repo_id):
-		pass
+		repo = database.schema.repo
+		permission = database.schema.permission
 
+		query = repo.join(permission).select().where(
+			and_(
+				repo.c.id==repo_id,
+				permission.c.user_id==user_id
+			)
+		)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+
+		if not row or not RepositoryPermissions.has_permissions(
+				row[permission.c.permissions], RepositoryPermissions.R):
+			return {}
+		else:
+			return to_dict(row, repo.columns)

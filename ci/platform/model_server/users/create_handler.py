@@ -25,8 +25,14 @@ class UsersCreateHandler(ModelServerRpcHandler):
 		self.mediastore.store_media(media_binary, path)
 
 	def create(self, password_hash, information):
-		pass
+		assert "email" in information
+		assert "name" in information
 
+		user = database.schema.user
+		ins = user.insert().values(password_hash=password_hash, **information)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			result = sqlconn.execute(ins)
+		return result.inserted_primary_key[0]
 
 
 	def _generate_path(self, media_id, hash):

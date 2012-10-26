@@ -40,7 +40,7 @@ permission = Table('permission', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
 	Column('repo_hash', String, ForeignKey('repo.hash'), nullable=False, index=True),
-	Column('level', SmallInteger, nullable=False),  # This is a bitmask
+	Column('permissions', SmallInteger, nullable=False),  # This is a bitmask
 
 	UniqueConstraint('user_id', 'repo_hash')
 )

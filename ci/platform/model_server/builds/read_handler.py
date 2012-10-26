@@ -11,15 +11,12 @@ class BuildsReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildsReadHandler, self).__init__("builds", "read")
 
-	def get_build_attributes(self, build_id):
+	def get_build_from_id(self, build_id):
 		build = database.schema.build
 		query = build.select().where(build.c.id==build_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-		if row:
-			return (row[build.c.change_id], row[build.c.is_primary],
-				row[build.c.status], row[build.c.start_time],
-				row[build.c.end_time])
+		return to_dict(row, build.columns)
 
 	def get_commit_list(self, build_id):
 		build_commits_map = database.schema.build_commits_map
@@ -27,7 +24,12 @@ class BuildsReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return [row[build_commits_map.c.commit_id] for row in sqlconn.execute(query)]
 
-	def get_builds_in_range(self, user, repo_id, type, start_index_inclusive,
+	# TODO (jchu): code this function
+	def _has_permissions(self, user_id, obj):
+		return True
+
+	# TODO (jchu): we currently do nothing with the :type: parameter
+	def get_builds_in_range(self, user_id, repo_id, type, start_index_inclusive,
 							end_index_exclusive):
 		build = database.schema.build
 		change = database.schema.change
@@ -42,4 +44,5 @@ class BuildsReadHandler(ModelServerRpcHandler):
 		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			return map(lambda row: to_dict(row, build.columns), sqlconn.execute(query))
+			builds = map(lambda row: to_dict(row, build.columns), sqlconn.execute(query))
+		return filter(lambda build: self._has_permissions(user_id, build), builds)

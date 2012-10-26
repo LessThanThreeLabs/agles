@@ -7,7 +7,7 @@ class RepositoryPermissions(Permissions):
 	""" Permissions are currently stored as bitmasks. These methods should be
 	used to operate on the bitmasks to do comparisons and permissions checks.
 	"""
-
+	NONE = 0
 	R = 0b1
 	RW = 0b11
 	RWA = 0b111

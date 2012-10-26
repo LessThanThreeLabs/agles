@@ -29,12 +29,10 @@ class TestProcess(Process):
 
 	@classmethod
 	def _with_new_engine(cls, method):
-		def wrapped_method(method):
-			def internal(*args, **kwargs):
-				ConnectionFactory.recreate_engine()
-				method(*args, **kwargs)
-			return internal
-		return wrapped_method(method)
+		def wrapped_method(*args, **kwargs):
+			ConnectionFactory.recreate_engine()
+			method(*args, **kwargs)
+		return wrapped_method
 
 
 class ModelServerTestMixin(BaseTestMixin):
