@@ -22,9 +22,6 @@
 class Chef
   module RVM
     module RecipeHelpers
-
-      include Chef::RVM::RubyHelpers
-
       def build_script_flags(version, branch)
         script_flags = ""
         if version || (branch && branch != "none")
@@ -177,9 +174,13 @@ class Chef
         end
 
         # set a default ruby
-#        rvm_default_ruby opts[:default_ruby] do
-#          user  opts[:user]
-#        end
+       rvm_default_ruby opts[:default_ruby] do
+         user  opts[:user]
+       end
+
+        execute "rm -r /usr/local/rvm/rubies/nil" do
+          only_if { File.exists? "/usr/local/rvm/rubies/nil" }
+        end
 
         # install global gems
         opts[:global_gems].each do |gem|
