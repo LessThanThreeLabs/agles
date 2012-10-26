@@ -27,6 +27,10 @@ class TestProcess(Process):
 	def __init__(self, group=None, target=None, name=None, args=(), kwargs={}):
 		super(TestProcess, self).__init__(group, TestProcess._with_new_engine(target), name, args, kwargs)
 
+	def start(self):
+		super(TestProcess, self).start()
+		ConnectionFactory.recreate_engine()
+
 	@classmethod
 	def _with_new_engine(cls, method):
 		def wrapped_method(*args, **kwargs):
