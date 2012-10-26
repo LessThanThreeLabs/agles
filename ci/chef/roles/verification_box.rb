@@ -12,3 +12,9 @@ run_list(
 	"recipe[agles::configure]",
 	"recipe[agles::verification_box]"
 )
+
+default_attributes(
+	:rvm => {
+		:default_ruby => "ruby-1.9.3-p286"
+	}
+)

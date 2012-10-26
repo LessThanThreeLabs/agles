@@ -19,6 +19,9 @@ default_attributes(
 			:internal => "/home/lt3/code/agles"
 		},
 		:config_path => "ci/general/dev_config.yml"
+	},
+	:rvm => {
+		:default_ruby => "ruby-1.9.3-p286"
 	}
 )
 override_attributes()
