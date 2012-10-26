@@ -4,7 +4,6 @@ See server.py for the RPC protocol definition.
 """
 import msgpack
 import pika
-import eventlet; eventlet.monkey_patch(os=False)
 
 from bunnyrpc.exceptions import RPCRequestError
 from settings.rabbit import connection_parameters
