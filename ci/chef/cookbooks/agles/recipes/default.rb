@@ -16,5 +16,4 @@ if node[:vagrant]
 	node[:agles][:user] = "vagrant"
 	node[:agles][:source_path][:internal] = "/home/vagrant/source"
 	include_recipe "rvm::vagrant"
-	execute "rm -rf /usr/local/rvm/rubies/nil"
 end
