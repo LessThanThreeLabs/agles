@@ -6,12 +6,12 @@ window.LoginPanel.renderedAlready = false
 
 class LoginPanel.Model extends Backbone.Model
 	defaults:
+		mode: 'initialScreen'
 		visible: false
-		email: ''
-		password: ''
-		rememberMe: true
 
 	initialize: () =>
+		@loginBasicInformationPanelModel = new LoginBasicInformationPanel.Model()
+		@loginAdvancedInformationPanelModel = new LoginAdvancedInformationPanel.Model()
 
 
 	toggleVisibility: () =>
@@ -26,41 +26,25 @@ class LoginPanel.View extends Backbone.View
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 				<h3>Login</h3>
 			</div>
-			<div class="modal-body">
-				<form class="form-horizontal">
-					<div class="control-group emailControlGroup">
-						<label class="control-label">Email</label>
-						<div class="controls">
-							<input type="text" class="loginEmail" placeholder="email">
-						</div>
-					</div>
-					<div class="control-group passwordControlGroup">
-						<label class="control-label">Password</label>
-						<div class="controls loginPasswordControls">
-							<input type="password" class="loginPassword" placeholder="password"><span class="loginPasswordError help-inline"></span>
-						</div>
-					</div>
-					<div class="control-group">
-						<div class="controls">
-							<label class="checkbox">
-								<input type="checkbox" class="loginRemember"> Remember me
-							</label>
-						</div>
-					</div>
-				</form>
+			<div class="modal-body formContents">
+				<!-- Content goes here -->
 			</div>
 			<div class="modal-footer">
+				<a href="#" class="btn btn-primary createAccountButton">Create Account</a>
 				<a href="#" class="btn btn-primary loginButton">Login</a>
 			</div>
 		</div>'
 
 	events:
-		'keydown': '_handleFormEntryChange'
-		'change .loginRemember': '_handleFormEntryChange'
-		'click .loginButton': '_handleLoginRequest'
+		'click .createAccountButton': '_handleCreateAccountClick'
+		'click .loginButton': '_handleLoginClick'
 
 
 	initialize: () =>
+		@loginBasicInformationPanelView = new LoginBasicInformationPanel.View model: @model.loginBasicInformationPanelModel
+		@loginAdvancedInformationPanelView = new LoginAdvancedInformationPanel.View model: @model.loginAdvancedInformationPanelModel
+
+		@model.on 'change:mode', @_updateMode
 		@model.on 'change:visible', @_updateVisibility
 
 		$(document).on 'show', '.loginModal', () =>
@@ -74,47 +58,62 @@ class LoginPanel.View extends Backbone.View
 		window.LoginPanel.renderedAlready = true
 
 		@$el.html @template()
+		@_loadInitialView()
 		return @
 
 
-	_handleFormEntryChange: () =>
-		setTimeout (() =>
-			@model.set 'email', $('.loginEmail').val()
-			@model.set 'password', $('.loginPassword').val()
-			@model.set 'rememberMe', $('.loginRemember').prop 'checked'
-			), 0
+	_updateMode: (model, mode) =>
+		if mode is 'initial'
+			@_loadInitialView()
+		else if mode is 'createAccount'
+			@_loadCreateAccountView()
 
 
-	_handleLoginRequest: () =>
-		@_updatePasswordErrorMessage()
-		if @_isPasswordValid()
-			@_makeLoginRequest()
+	_loadInitialView: () =>
+		@$el.find('.formContents').html @loginBasicInformationPanelView.render().el
+
+		@$el.find('.loginButton').stop true, true
+		@$el.find('.loginButton').show()
 
 
-	_isPasswordValid: () =>
-		return @model.get('password').length > 8
+	_loadCreateAccountView: () =>
+		@loginAdvancedInformationPanelView.$el.hide()
+
+		@$el.find('.formContents').append '<div class="horizontalRule"></div>'
+		@$el.find('.formContents').append @loginAdvancedInformationPanelView.render().el
+
+		@loginAdvancedInformationPanelView.$el.show 500, () =>
+			# only hide the login button if the modal is still open!
+			if @model.get 'visible'
+				@$el.find('.loginButton').hide 250
 
 
-	_makeLoginRequest: () =>
-		requestData = 
-			email: @model.get 'email'
-			password: @model.get 'password'
-			rememberMe: @model.get 'rememberMe'
-		socket.emit 'users:update', requestData, (error, userData) =>
-			throw new Error error if error?
-			console.log userData		
+	_handleCreateAccountClick: () =>
+		@model.set 'mode', 'createAccount'
 
 
-	_updatePasswordErrorMessage: () =>
-		if @_isPasswordValid()
-			$('.passwordControlGroup').removeClass 'error'
-			$('.loginPasswordError').text ''
-		else
-			$('.passwordControlGroup').addClass 'error'
-			$('.loginPasswordError').text 'Password must be 8 or more characters'
+	_handleLoginClick: () =>
+		console.log 'login request'
+		# @_makeLoginRequest()
+
+
+	# _makeLoginRequest: () =>
+	# 	requestData = 
+	# 		email: @model.get 'email'
+	# 		password: @model.get 'password'
+	# 		rememberMe: @model.get 'rememberMe'
+	# 	socket.emit 'users:update', requestData, (error, userData) =>
+	# 		if error?
+	# 			console.log error
+	# 		else
+	# 			console.log userData  # need to update login information
+	# 			@model.set 'visible', false
 
 
 	_updateVisibility: (model, visible) =>
-		if visible then $('.loginModal').modal 'show'
-		else $('.loginModal').modal 'hide'
+		if visible 
+			$('.loginModal').modal 'show'
+		else 
+			$('.loginModal').modal 'hide'
+			@model.set 'mode', 'initial'
 		

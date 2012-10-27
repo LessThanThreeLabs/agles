@@ -15,18 +15,37 @@ class CreateAccountHandler
 
 
 	handleRequest: (socket, data, callback) =>
-		if @accountInformationValidator.isEmailValid data.email is not 'ok'
-			callback @accountInformationValidator.isEmailValid data.email
-		else if @accountInformationValidator.isPasswordValid data.password is not 'ok'
-			callback @accountInformationValidator.isPasswordValid data.password
-		else if @accountInformationValidator.isFirstNameValid data.firstName is not 'ok'
-			callback @accountInformationValidator.isFirstNameValid data.firstName
-		else if @accountInformationValidator.isLastNameValid data.lastName is not 'ok'
-			callback @accountInformationValidator.isLastNameValid data.lastName
-		else if @_checkIfEmailAlreadyExists data.email
-			callback 'Email is already in use'
+		errors = _getErrors socket, data
+
+		if Object.keys(errors).length isnt 0
+			callback errors, false
 		else
 			@_performCreateAccountRequest socket, data, callback
+
+
+	_getErrors: (socket, data, callback) =>
+		errors = {}
+
+		if @_checkIfEmailAlreadyExists data.email
+			errors.email = 'Email is already in use'
+
+		# can override the email error
+		if @accountInformationValidator.isEmailValid data.email is not 'ok'
+			errors.email = @accountInformationValidator.isEmailValid data.email
+
+		if @accountInformationValidator.isPasswordValid data.password is not 'ok'
+			errors.password = @accountInformationValidator.isPasswordValid data.password
+		
+		if @accountInformationValidator.isFirstNameValid data.firstName is not 'ok'
+			errors.firstName = @accountInformationValidator.isFirstNameValid data.firstName
+		
+		if @accountInformationValidator.isLastNameValid data.lastName is not 'ok'
+			errors.lastName = @accountInformationValidator.isLastNameValid data.lastName
+		
+		if @_checkIfEmailAlreadyExists data.email
+			errors.email = 'Email is already in use'
+
+		return errors
 
 
 	_checkIfEmailAlreadyExists: (email) =>
