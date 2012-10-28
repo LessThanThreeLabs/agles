@@ -16,7 +16,7 @@ class LoginBasicInformationPanel.View extends Backbone.View
 				<label class="control-label">Email</label>
 				<div class="controls loginEmailControls">
 					<input type="email" class="loginEmail" placeholder="email" maxlength=256 autocomplete="on">
-					<span class="emailError help-inline"></span>
+					<br><span class="fieldError emailError help-inline"></span>
 				</div>
 			</div>
 
@@ -24,7 +24,7 @@ class LoginBasicInformationPanel.View extends Backbone.View
 				<label class="control-label">Password</label>
 				<div class="controls loginPasswordControls">
 					<input type="password" class="loginPassword" placeholder="password" maxlength=256>
-					<span class="passwordError help-inline"></span>
+					<br><span class="fieldError passwordError help-inline"></span>
 				</div>
 			</div>
 
@@ -40,6 +40,7 @@ class LoginBasicInformationPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @template()
+		@clearErrors()
 		return @
 
 
@@ -51,23 +52,28 @@ class LoginBasicInformationPanel.View extends Backbone.View
 			), 0
 
 
-	updateInvalidEmailMessage: (visible, errorMessage) =>
-		assert.ok errorMessage?
+	clearErrors: () =>
+		@displayErrors {}
 
+
+	displayErrors: (errors = {}) =>
+		if errors.email?
+			 @_updateInvalidMessage $('.emailControlGroup'), $('.emailError'), true, errors.email
+		else 
+			@_updateInvalidMessage $('.emailControlGroup'), $('.emailError'), false
+
+		if errors.password?
+			@_updateInvalidMessage $('.passwordControlGroup'), $('.passwordError'), true, errors.password
+		else 
+			@_updateInvalidMessage $('.passwordControlGroup'), $('.passwordError'), false
+
+
+	_updateInvalidMessage: (controlGroup, fieldError, visible, errorMessage) =>
 		if visible
-			$('.emailControlGroup').addClass 'error'
-			$('.emailError').text errorMessage
+			controlGroup.addClass 'error'
+			fieldError.text errorMessage
+			fieldError.show()
 		else
-			$('.emailControlGroup').removeClass 'error'
-			$('.emailError').text ''
-
-
-	updateInvalidPasswordMessage: (visible, errorMessage) =>
-		assert.ok errorMessage?
-
-		if visible
-			$('.passwordControlGroup').addClass 'error'
-			$('.passwordError').text errorMessage
-		else
-			$('.passwordControlGroup').removeClass 'error'
-			$('.passwordError').text ''
+			controlGroup.removeClass 'error'
+			fieldError.text ''
+			fieldError.hide()

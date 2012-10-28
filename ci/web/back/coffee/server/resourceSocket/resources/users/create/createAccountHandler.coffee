@@ -15,12 +15,13 @@ class CreateAccountHandler
 
 
 	handleRequest: (socket, data, callback) =>
-		errors = _getErrors socket, data
+		errors = @_getErrors socket, data
 
 		if Object.keys(errors).length isnt 0
 			callback errors, false
 		else
-			@_performCreateAccountRequest socket, data, callback
+			callback null, true
+			# @_performRequest socket, data, callback
 
 
 	_getErrors: (socket, data, callback) =>
@@ -30,16 +31,16 @@ class CreateAccountHandler
 			errors.email = 'Email is already in use'
 
 		# can override the email error
-		if @accountInformationValidator.isEmailValid data.email is not 'ok'
+		if @accountInformationValidator.isEmailValid(data.email) isnt 'ok'
 			errors.email = @accountInformationValidator.isEmailValid data.email
 
-		if @accountInformationValidator.isPasswordValid data.password is not 'ok'
+		if @accountInformationValidator.isPasswordValid(data.password) isnt 'ok'
 			errors.password = @accountInformationValidator.isPasswordValid data.password
 		
-		if @accountInformationValidator.isFirstNameValid data.firstName is not 'ok'
+		if @accountInformationValidator.isFirstNameValid(data.firstName) isnt 'ok'
 			errors.firstName = @accountInformationValidator.isFirstNameValid data.firstName
 		
-		if @accountInformationValidator.isLastNameValid data.lastName is not 'ok'
+		if @accountInformationValidator.isLastNameValid(data.lastName) isnt 'ok'
 			errors.lastName = @accountInformationValidator.isLastNameValid data.lastName
 		
 		if @_checkIfEmailAlreadyExists data.email

@@ -6,7 +6,7 @@ window.LoginPanel.renderedAlready = false
 
 class LoginPanel.Model extends Backbone.Model
 	defaults:
-		mode: 'initialScreen'
+		mode: 'initial'
 		visible: false
 
 	initialize: () =>
@@ -89,12 +89,31 @@ class LoginPanel.View extends Backbone.View
 
 
 	_handleCreateAccountClick: () =>
-		@model.set 'mode', 'createAccount'
+		if @model.get('mode') is 'initial'
+			@model.set 'mode', 'createAccount'
+		else if @model.get('mode') is 'createAccount'
+			@_performCreateAccountRequest()
 
 
 	_handleLoginClick: () =>
 		console.log 'login request'
 		# @_makeLoginRequest()
+
+
+	_performCreateAccountRequest: () =>
+		requestData =
+			email: @model.loginBasicInformationPanelModel.get 'email'
+			password: @model.loginBasicInformationPanelModel.get 'password'
+			rememberMe: @model.loginBasicInformationPanelModel.get 'rememberMe'
+			firstName: @model.loginAdvancedInformationPanelModel.get 'firstName'
+			lastName: @model.loginAdvancedInformationPanelModel.get 'lastName'
+
+		socket.emit 'users:create', requestData, (errors, result) =>
+			@loginBasicInformationPanelView.displayErrors errors
+			@loginAdvancedInformationPanelView.displayErrors errors
+
+			if not errors?
+				console.log 'Successfully created an account!  Do stuff here!!'
 
 
 	# _makeLoginRequest: () =>

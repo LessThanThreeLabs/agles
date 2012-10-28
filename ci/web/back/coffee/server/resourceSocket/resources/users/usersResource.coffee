@@ -20,7 +20,7 @@ class UsersResource extends Resource
 
 
 	create: (socket, data, callback) ->
-		if data.email? and data.password? and data.firstName? and data.lastName?
+		if data.email? and data.password? and data.rememberMe? and data.firstName? and data.lastName?
 			@createAccountHandler.handleRequest socket, data, callback
 		else
 			callback 'Parsing error'
