@@ -82,14 +82,25 @@ class LoginPanel.View extends Backbone.View
 			@_loadCreateAccountEmailSentView()
 
 
+	_changeButtonVisibility: (button, visible) =>
+		button.stop true, true
+		if visible then button.show()
+		else button.hide()
+
+
 	_loadInitialView: () =>
 		@$el.find('.formContents').html @loginBasicInformationPanelView.render().el
-
-		@$el.find('.loginButton').stop true, true
-		@$el.find('.loginButton').show()
+		@_changeButtonVisibility @$el.find('.createAccountButton'), true
+		@_changeButtonVisibility @$el.find('.loginButton'), true
+		@_changeButtonVisibility @$el.find('.okButton'), false
 
 
 	_loadCreateAccountView: () =>
+		@$el.find('.formContents').html @loginBasicInformationPanelView.render().el
+		@_changeButtonVisibility @$el.find('.createAccountButton'), true
+		@_changeButtonVisibility @$el.find('.loginButton'), true
+		@_changeButtonVisibility @$el.find('.okButton'), false
+
 		@loginAdvancedInformationPanelView.$el.hide()
 
 		@$el.find('.formContents').append '<div class="horizontalRule"></div>'
@@ -103,6 +114,9 @@ class LoginPanel.View extends Backbone.View
 
 	_loadCreateAccountEmailSentView: () =>
 		@$el.find('.formContents').html @loginCreateAccountEmailSentPanelView.render().el
+		@_changeButtonVisibility @$el.find('.createAccountButton'), false
+		@_changeButtonVisibility @$el.find('.loginButton'), false
+		@_changeButtonVisibility @$el.find('.okButton'), true
 
 
 	_handleCreateAccountClick: () =>
