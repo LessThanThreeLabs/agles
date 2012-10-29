@@ -1,6 +1,7 @@
 import os
 import time
 
+from hashlib import sha512
 from kombu.connection import Connection
 from shutil import rmtree
 from nose.tools import *
@@ -93,7 +94,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	def _insert_commit_info(self):
 		with ConnectionFactory.get_sql_connection() as conn:
-			ins_user = schema.user.insert().values(email="bbland@lt3.com", name="brian", password_hash="123")
+			ins_user = schema.user.insert().values(email="bbland@lt3.com", name="brian", password_hash=sha512("").digest(), salt="1234567890123456")
 			user_id = conn.execute(ins_user).inserted_primary_key[0]
 			ins_commit = schema.commit.insert().values(repo_hash=self.repo_hash, user_id=user_id,
 				message="commit message", timestamp=int(time.time()))

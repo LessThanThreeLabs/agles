@@ -1,6 +1,6 @@
 import contextlib
 
-from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Text, MetaData, ForeignKey, UniqueConstraint
+from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Text, LargeBinary, MetaData, ForeignKey, UniqueConstraint
 
 from database.engine import ConnectionFactory
 
@@ -11,7 +11,8 @@ user = Table('user', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('email', String, nullable=False, unique=True),
 	Column('name', String, nullable=False),
-	Column('password_hash', String, nullable=False),
+	Column('password_hash', LargeBinary(64), nullable=False),
+	Column('salt', String(16), nullable=False)
 )
 
 media = Table('media', metadata,
