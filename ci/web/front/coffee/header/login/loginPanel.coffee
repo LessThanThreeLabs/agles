@@ -12,6 +12,14 @@ class LoginPanel.Model extends Backbone.Model
 	initialize: () =>
 		@loginBasicInformationPanelModel = new LoginBasicInformationPanel.Model()
 		@loginAdvancedInformationPanelModel = new LoginAdvancedInformationPanel.Model()
+		@loginCreateAccountEmailSentPanelModel = new LoginCreateAccountEmailSentPanel.Model()
+
+		@loginBasicInformationPanelModel.on 'change:email', () =>
+			@loginCreateAccountEmailSentPanelModel.set 'email', @loginBasicInformationPanelModel.get 'email'
+		@loginAdvancedInformationPanelModel.on 'change:firstName', () =>
+			@loginCreateAccountEmailSentPanelModel.set 'firstName', @loginAdvancedInformationPanelModel.get 'firstName'
+		@loginAdvancedInformationPanelModel.on 'change:lastName', () =>
+			@loginCreateAccountEmailSentPanelModel.set 'lastName', @loginAdvancedInformationPanelModel.get 'lastName'
 
 
 	toggleVisibility: () =>
@@ -32,17 +40,20 @@ class LoginPanel.View extends Backbone.View
 			<div class="modal-footer">
 				<a href="#" class="btn btn-primary createAccountButton">Create Account</a>
 				<a href="#" class="btn btn-primary loginButton">Login</a>
+				<a href="#" class="btn btn-primary okButton">Ok</a>
 			</div>
 		</div>'
 
 	events:
 		'click .createAccountButton': '_handleCreateAccountClick'
 		'click .loginButton': '_handleLoginClick'
+		'click .okButton': '_handleOkClick'
 
 
 	initialize: () =>
 		@loginBasicInformationPanelView = new LoginBasicInformationPanel.View model: @model.loginBasicInformationPanelModel
 		@loginAdvancedInformationPanelView = new LoginAdvancedInformationPanel.View model: @model.loginAdvancedInformationPanelModel
+		@loginCreateAccountEmailSentPanelView = new LoginCreateAccountEmailSentPanel.View model: @model.loginCreateAccountEmailSentPanelModel
 
 		@model.on 'change:mode', @_updateMode
 		@model.on 'change:visible', @_updateVisibility
@@ -67,6 +78,8 @@ class LoginPanel.View extends Backbone.View
 			@_loadInitialView()
 		else if mode is 'createAccount'
 			@_loadCreateAccountView()
+		else if mode is 'createAccountEmailSent'
+			@_loadCreateAccountEmailSentView()
 
 
 	_loadInitialView: () =>
@@ -88,6 +101,10 @@ class LoginPanel.View extends Backbone.View
 				@$el.find('.loginButton').hide 250
 
 
+	_loadCreateAccountEmailSentView: () =>
+		@$el.find('.formContents').html @loginCreateAccountEmailSentPanelView.render().el
+
+
 	_handleCreateAccountClick: () =>
 		if @model.get('mode') is 'initial'
 			@model.set 'mode', 'createAccount'
@@ -98,6 +115,10 @@ class LoginPanel.View extends Backbone.View
 	_handleLoginClick: () =>
 		console.log 'login request'
 		# @_makeLoginRequest()
+
+
+	_handleOkClick: () =>
+		@model.set 'visible', false
 
 
 	_performCreateAccountRequest: () =>
@@ -113,7 +134,7 @@ class LoginPanel.View extends Backbone.View
 			@loginAdvancedInformationPanelView.displayErrors errors
 
 			if not errors?
-				console.log 'Successfully created an account!  Do stuff here!!'
+				@model.set 'mode', 'createAccountEmailSent'
 
 
 	# _makeLoginRequest: () =>

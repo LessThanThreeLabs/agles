@@ -27,10 +27,6 @@ class CreateAccountHandler
 	_getErrors: (socket, data, callback) =>
 		errors = {}
 
-		if @_checkIfEmailAlreadyExists data.email
-			errors.email = 'Email is already in use'
-
-		# can override the email error
 		if @accountInformationValidator.isEmailValid(data.email) isnt 'ok'
 			errors.email = @accountInformationValidator.isEmailValid data.email
 
@@ -43,7 +39,8 @@ class CreateAccountHandler
 		if @accountInformationValidator.isLastNameValid(data.lastName) isnt 'ok'
 			errors.lastName = @accountInformationValidator.isLastNameValid data.lastName
 		
-		if @_checkIfEmailAlreadyExists data.email
+		# check if the email is already taken last, since it's the most expensive
+		if Object.keys(errors) is 0 and @_checkIfEmailAlreadyExists data.email
 			errors.email = 'Email is already in use'
 
 		return errors
