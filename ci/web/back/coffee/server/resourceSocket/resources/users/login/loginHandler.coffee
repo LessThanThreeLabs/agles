@@ -12,5 +12,7 @@ class LoginHandler
 
 	handleRequest: (socket, data, callback) =>
 		console.log 'need to handle login'
-		callback null, 'some data here...'
+		callback null, 
+			firstName: 'Jordan'
+			lastName: 'Potter'
 		

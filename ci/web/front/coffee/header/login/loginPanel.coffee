@@ -96,6 +96,7 @@ class LoginPanel.View extends Backbone.View
 
 
 	_loadCreateAccountView: () =>
+		console.log 'rerendering issues!!'
 		@$el.find('.formContents').html @loginBasicInformationPanelView.render().el
 		@_changeButtonVisibility @$el.find('.createAccountButton'), true
 		@_changeButtonVisibility @$el.find('.loginButton'), true
@@ -151,17 +152,18 @@ class LoginPanel.View extends Backbone.View
 				@model.set 'mode', 'createAccountEmailSent'
 
 
-	# _makeLoginRequest: () =>
-	# 	requestData = 
-	# 		email: @model.get 'email'
-	# 		password: @model.get 'password'
-	# 		rememberMe: @model.get 'rememberMe'
-	# 	socket.emit 'users:update', requestData, (error, userData) =>
-	# 		if error?
-	# 			console.log error
-	# 		else
-	# 			console.log userData  # need to update login information
-	# 			@model.set 'visible', false
+	_makeLoginRequest: () =>
+		requestData = 
+			email: @model.loginBasicInformationPanelModel.get 'email'
+			password: @model.loginBasicInformationPanelModel.get 'password'
+			rememberMe: @model.loginBasicInformationPanelModel.get 'rememberMe'
+		
+		socket.emit 'users:update', requestData, (errors, userData) =>
+			@loginBasicInformationPanelView.displayErrors errors
+
+			if not errors?
+				console.log userData  # need to update login information
+				@model.set 'visible', false
 
 
 	_updateVisibility: (model, visible) =>

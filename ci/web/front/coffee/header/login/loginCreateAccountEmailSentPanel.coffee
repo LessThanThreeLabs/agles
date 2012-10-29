@@ -11,7 +11,8 @@ class LoginCreateAccountEmailSentPanel.Model extends Backbone.Model
 class LoginCreateAccountEmailSentPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'loginCreateAccountEmailSentPanel'
-	template: Handlebars.compile 'Thanks {{firstName}} {{lastName}}!  An email has been sent to {{email}} for you to verify your account!'
+	template: Handlebars.compile '<p>Thanks {{firstName}} {{lastName}}!
+		An email has been sent to {{email}} for you to verify your account!</p>'
 
 	render: () =>
 		console.log @model

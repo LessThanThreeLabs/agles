@@ -41,11 +41,16 @@ class LoginBasicInformationPanel.View extends Backbone.View
 	render: () =>
 		@$el.html @template()
 		@clearErrors()
+
+		console.log 'just called render.  model:'
+		console.log @model
+		
 		return @
 
 
 	_handleFormEntryChange: () =>
 		setTimeout (() =>
+			console.log $('.loginEmail').val()
 			@model.set 'email', $('.loginEmail').val()
 			@model.set 'password', $('.loginPassword').val()
 			@model.set 'rememberMe', $('.loginRemember').prop 'checked'
