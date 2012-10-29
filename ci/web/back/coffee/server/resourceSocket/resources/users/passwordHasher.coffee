@@ -12,8 +12,6 @@ class PasswordHasher
 			if error
 				callback error
 			else
-				console.log 'password: ' + password
-
 				callback null,
 					salt: salt
 					passwordHash: crypto.createHash('sha512').update(salt).update(password, 'utf8').digest()

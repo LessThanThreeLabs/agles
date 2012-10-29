@@ -28,7 +28,6 @@ class CreateAccountHandler
 		errors = {}
 
 		if @accountInformationValidator.isEmailValid(data.email) isnt 'ok'
-			console.log 'bad email: ' + data.email
 			errors.email = @accountInformationValidator.isEmailValid data.email
 
 		if @accountInformationValidator.isPasswordValid(data.password) isnt 'ok'

@@ -77,6 +77,21 @@ class LoginPanel.View extends Backbone.View
 		return @
 
 
+	_handleCreateAccountClick: () =>
+		if @model.get('mode') is 'initial'
+			@model.set 'mode', 'createAccount'
+		else if @model.get('mode') is 'createAccount'
+			@_performCreateAccountRequest()
+
+
+	_handleLoginClick: () =>
+		@_performLoginRequest()
+
+
+	_handleOkClick: () =>
+		@model.set 'visible', false
+
+
 	_updateMode: (model, mode) =>
 		if mode is 'initial'
 			@_loadInitialView()
@@ -92,24 +107,31 @@ class LoginPanel.View extends Backbone.View
 		else button.hide()
 
 
-	_loadInitialView: () =>
-		@loginBasicInformationPanelView.$el.show()
-		@loginAdvancedInformationPanelView.$el.hide()
-		@loginCreateAccountEmailSentPanelView.$el.hide()
+	_changeButtonVisibilities: (createAccountButtonVisible, loginButtonVisible, okButtonVisible) =>
+		@_changeButtonVisibility @$el.find('.createAccountButton'), createAccountButtonVisible
+		@_changeButtonVisibility @$el.find('.loginButton'), loginButtonVisible
+		@_changeButtonVisibility @$el.find('.okButton'), okButtonVisible
 
-		@_changeButtonVisibility @$el.find('.createAccountButton'), true
-		@_changeButtonVisibility @$el.find('.loginButton'), true
-		@_changeButtonVisibility @$el.find('.okButton'), false
+
+	_changePanelVisibility: (panel, visible) =>
+		if visible then panel.show()
+		else panel.hide()
+
+
+	_changePanelVisibilities: (basicInformationPanelVisible, advancedInformationPanelVisible, emailSentVisible) =>
+		@_changePanelVisibility @loginBasicInformationPanelView.$el, basicInformationPanelVisible
+		@_changePanelVisibility @loginAdvancedInformationPanelView.$el, advancedInformationPanelVisible
+		@_changePanelVisibility @loginCreateAccountEmailSentPanelView.$el, emailSentVisible
+
+
+	_loadInitialView: () =>
+		@_changePanelVisibilities true, false, false
+		@_changeButtonVisibilities true, true, false
 
 
 	_loadCreateAccountView: () =>
-		@loginBasicInformationPanelView.$el.show()
-		@loginAdvancedInformationPanelView.$el.hide()
-		@loginCreateAccountEmailSentPanelView.$el.hide()
-
-		@_changeButtonVisibility @$el.find('.createAccountButton'), true
-		@_changeButtonVisibility @$el.find('.loginButton'), true
-		@_changeButtonVisibility @$el.find('.okButton'), false
+		@_changePanelVisibilities true, false, false
+		@_changeButtonVisibilities true, true, false
 
 		@loginAdvancedInformationPanelView.$el.show 500, () =>
 			# only hide the login button if the modal is still open!
@@ -121,28 +143,8 @@ class LoginPanel.View extends Backbone.View
 		# rerender the email sent panel so the user's information will appear in it
 		@loginCreateAccountEmailSentPanelView.render()
 
-		@loginBasicInformationPanelView.$el.hide()
-		@loginAdvancedInformationPanelView.$el.hide()
-		@loginCreateAccountEmailSentPanelView.$el.show()
-
-		@_changeButtonVisibility @$el.find('.createAccountButton'), false
-		@_changeButtonVisibility @$el.find('.loginButton'), false
-		@_changeButtonVisibility @$el.find('.okButton'), true
-
-
-	_handleCreateAccountClick: () =>
-		if @model.get('mode') is 'initial'
-			@model.set 'mode', 'createAccount'
-		else if @model.get('mode') is 'createAccount'
-			@_performCreateAccountRequest()
-
-
-	_handleLoginClick: () =>
-		@_makeLoginRequest()
-
-
-	_handleOkClick: () =>
-		@model.set 'visible', false
+		@_changePanelVisibilities false, false, true
+		@_changeButtonVisibilities false, false, true
 
 
 	_performCreateAccountRequest: () =>
@@ -161,7 +163,7 @@ class LoginPanel.View extends Backbone.View
 				@model.set 'mode', 'createAccountEmailSent'
 
 
-	_makeLoginRequest: () =>
+	_performLoginRequest: () =>
 		requestData = 
 			email: @model.loginBasicInformationPanelModel.get 'email'
 			password: @model.loginBasicInformationPanelModel.get 'password'
@@ -181,7 +183,7 @@ class LoginPanel.View extends Backbone.View
 		else 
 			$('.loginModal').modal 'hide'
 			@model.set 'mode', 'initial'
-			
+
 			@loginBasicInformationPanelView.clear()
 			@loginAdvancedInformationPanelView.clear()
 		
