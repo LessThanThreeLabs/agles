@@ -2,6 +2,7 @@ from kombu.entity import Exchange, Queue
 
 from util import greenlets
 
+
 class EventsBroker(object):
 	events_exchange = Exchange("model:events", "direct", durable=False)
 
