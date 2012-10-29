@@ -69,6 +69,10 @@ class LoginPanel.View extends Backbone.View
 		window.LoginPanel.renderedAlready = true
 
 		@$el.html @template()
+		@$el.find('.formContents').append @loginBasicInformationPanelView.render().el
+		@$el.find('.formContents').append @loginAdvancedInformationPanelView.render().el
+		@$el.find('.formContents').append @loginCreateAccountEmailSentPanelView.render().el
+
 		@_loadInitialView()
 		return @
 
@@ -89,23 +93,23 @@ class LoginPanel.View extends Backbone.View
 
 
 	_loadInitialView: () =>
-		@$el.find('.formContents').html @loginBasicInformationPanelView.render().el
+		@loginBasicInformationPanelView.$el.show()
+		@loginAdvancedInformationPanelView.$el.hide()
+		@loginCreateAccountEmailSentPanelView.$el.hide()
+
 		@_changeButtonVisibility @$el.find('.createAccountButton'), true
 		@_changeButtonVisibility @$el.find('.loginButton'), true
 		@_changeButtonVisibility @$el.find('.okButton'), false
 
 
 	_loadCreateAccountView: () =>
-		console.log 'rerendering issues!!'
-		@$el.find('.formContents').html @loginBasicInformationPanelView.render().el
+		@loginBasicInformationPanelView.$el.show()
+		@loginAdvancedInformationPanelView.$el.hide()
+		@loginCreateAccountEmailSentPanelView.$el.hide()
+
 		@_changeButtonVisibility @$el.find('.createAccountButton'), true
 		@_changeButtonVisibility @$el.find('.loginButton'), true
 		@_changeButtonVisibility @$el.find('.okButton'), false
-
-		@loginAdvancedInformationPanelView.$el.hide()
-
-		@$el.find('.formContents').append '<div class="horizontalRule"></div>'
-		@$el.find('.formContents').append @loginAdvancedInformationPanelView.render().el
 
 		@loginAdvancedInformationPanelView.$el.show 500, () =>
 			# only hide the login button if the modal is still open!
@@ -114,7 +118,13 @@ class LoginPanel.View extends Backbone.View
 
 
 	_loadCreateAccountEmailSentView: () =>
-		@$el.find('.formContents').html @loginCreateAccountEmailSentPanelView.render().el
+		# rerender the email sent panel so the user's information will appear in it
+		@loginCreateAccountEmailSentPanelView.render()
+
+		@loginBasicInformationPanelView.$el.hide()
+		@loginAdvancedInformationPanelView.$el.hide()
+		@loginCreateAccountEmailSentPanelView.$el.show()
+
 		@_changeButtonVisibility @$el.find('.createAccountButton'), false
 		@_changeButtonVisibility @$el.find('.loginButton'), false
 		@_changeButtonVisibility @$el.find('.okButton'), true
@@ -171,4 +181,7 @@ class LoginPanel.View extends Backbone.View
 		else 
 			$('.loginModal').modal 'hide'
 			@model.set 'mode', 'initial'
+			
+			@loginBasicInformationPanelView.clear()
+			@loginAdvancedInformationPanelView.clear()
 		

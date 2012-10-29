@@ -30,6 +30,14 @@ class LoginAdvancedInformationPanel.View extends Backbone.View
 	events:
 		'keydown': '_handleFormEntryChange'
 
+
+	initialize: () =>
+		@model.on 'change:firstName', () =>
+			$('.loginFirstName').val @model.get 'firstName'
+		@model.on 'change:lastName', () =>
+			$('.loginLastName').val @model.get 'lastName'
+
+
 	render: () =>
 		@$el.html @template()
 		@clearErrors()
@@ -41,6 +49,17 @@ class LoginAdvancedInformationPanel.View extends Backbone.View
 			@model.set 'firstName', $('.loginFirstName').val()
 			@model.set 'lastName', $('.loginLastName').val()
 			), 0
+
+
+	clear: () =>
+		@clearFields()
+		@clearErrors()
+
+
+	clearFields: () =>
+		@model.set
+			firstName: ''
+			lastName: ''
 
 
 	clearErrors: () =>

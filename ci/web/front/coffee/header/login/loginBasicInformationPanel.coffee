@@ -30,31 +30,48 @@ class LoginBasicInformationPanel.View extends Backbone.View
 
 			<div class="control-group">
 				<div class="controls loginRememberMeControls">
-					<label class="checkbox"><input type="checkbox" class="loginRemember"> Remember me</label>
+					<label class="checkbox"><input type="checkbox" class="loginRememberMe"> Remember me</label>
 				</div>
 			</div>
 		</form>'
 	events:
 		'keydown': '_handleFormEntryChange'
-		'change .loginRemember': '_handleFormEntryChange'
+		'change .loginRememberMe': '_handleFormEntryChange'
+
+
+	initialize: () =>
+		@model.on 'change:email', () =>
+			$('.loginEmail').val @model.get 'email'
+		@model.on 'change:password', () =>
+			$('.loginPassword').val @model.get 'password'
+		@model.on 'change:rememberMe', () =>
+			$('.loginRememberMe').prop 'checked', @model.get 'rememberMe'
+
 
 	render: () =>
 		@$el.html @template()
 		@clearErrors()
-
-		console.log 'just called render.  model:'
-		console.log @model
-		
 		return @
 
 
 	_handleFormEntryChange: () =>
 		setTimeout (() =>
-			console.log $('.loginEmail').val()
 			@model.set 'email', $('.loginEmail').val()
 			@model.set 'password', $('.loginPassword').val()
-			@model.set 'rememberMe', $('.loginRemember').prop 'checked'
+			@model.set 'rememberMe', $('.loginRememberMe').prop 'checked'
 			), 0
+
+
+	clear: () =>
+		@clearFields()
+		@clearErrors()
+
+
+	clearFields: () =>
+		@model.set
+			email: ''
+			password: ''
+			rememberMe: false
 
 
 	clearErrors: () =>
