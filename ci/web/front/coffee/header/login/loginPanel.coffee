@@ -128,8 +128,7 @@ class LoginPanel.View extends Backbone.View
 
 
 	_handleLoginClick: () =>
-		console.log 'login request'
-		# @_makeLoginRequest()
+		@_makeLoginRequest()
 
 
 	_handleOkClick: () =>

@@ -21,7 +21,7 @@ class CreateAccountEmailer
 				pass: @configurationParams.authorization.password
 
 
-	sendEmailToUser: (firstName, lastName, email, key) ->
+	sendEmailToUser: (firstName, lastName, email, key, callback) ->
 		verifyUrl =  @domainName + '/verifyAccount?account=' + key
 
 		mailOptions = 
@@ -32,4 +32,5 @@ class CreateAccountEmailer
 			html: "Click to verify your account: <a href='#{verifyUrl}'>#{verifyUrl}</a>"
 
 		@mailTransport.sendMail mailOptions, (error, response) ->
-			console.error 'error: ' + JSON.stringify(error) if error?
+			console.error 'error in createAccountEmailer: ' + JSON.stringify(error) if error?
+			callback error, response
