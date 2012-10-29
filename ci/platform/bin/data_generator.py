@@ -4,10 +4,12 @@ import random
 import string
 import time
 
+from hashlib import sha512
 from database import schema
 from database.engine import ConnectionFactory
 from util.permissions import RepositoryPermissions
 
+NUM_REPOS = 3
 
 class SchemaDataGenerator(object):
 	def __init__(self, seed=None):
@@ -17,19 +19,30 @@ class SchemaDataGenerator(object):
 		schema.reseed_db()
 		with ConnectionFactory.get_sql_connection() as conn:
 			repos = dict()
+			repo_hashes = []
 			for machine in range(random.randint(1, 3)):
 				ins_machine = schema.machine.insert().values(uri="machine_%d" % machine)
 				machine_id = conn.execute(ins_machine).inserted_primary_key[0]
-				for repo in range(random.randint(1, 3)):
+
+				for repo in range(random.randint(1, NUM_REPOS)):
 					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, hash="hash_%d,%d" % (machine, repo),
 						machine_id=machine_id, default_permissions=RepositoryPermissions.RW)
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
 					ins_map = schema.uri_repo_map.insert().values(uri="uri_%d_%d" % (machine, repo), repo_id=repo_id)
 					conn.execute(ins_map)
 					repos[repo_id] = 0
+					repo_hashes.append("hash_%d,%d" % (machine, repo))
+
 			for user in range(random.randint(1, 10)):
-				ins_user = schema.user.insert().values(username="user_%d" % user, name="name_%d" % user)
+				ins_user = schema.user.insert().values(name="name_%d" % user, email="%d@b.com" % user,
+					password_hash=sha512(str(user)).digest(), salt='a'*16)
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
+
+				repo_hash = random.choice(repo_hashes)
+				permissions = random.choice(RepositoryPermissions.valid_permissions())
+				ins_permission = schema.permission.insert().values(user_id=user_id, repo_hash=repo_hash, permissions=permissions)
+				conn.execute(ins_permission)
+
 				for commit in range(random.randint(1, 100)):
 					repo_id = random.choice(repos.keys())
 					repo_hash_query = schema.repo.select().where(schema.repo.c.id==repo_id)
@@ -49,6 +62,7 @@ class SchemaDataGenerator(object):
 					build_id = conn.execute(ins_build).inserted_primary_key[0]
 					ins_map = schema.build_commits_map.insert().values(build_id=build_id, commit_id=commit_id)
 					conn.execute(ins_map)
+
 					for console_type in range(2):
 						ins_console = schema.build_console.insert().values(build_id=build_id, type=console_type,
 							console_output=self.generate_console_output())

@@ -15,3 +15,7 @@ class RepositoryPermissions(Permissions):
 	@classmethod
 	def has_permissions(cls, permissions, permissions_to_check):
 		return (permissions & permissions_to_check) == permissions_to_check
+
+	@classmethod
+	def valid_permissions(cls):
+		return [cls.NONE, cls.R, cls.RW, cls.RWA]
