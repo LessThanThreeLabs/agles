@@ -11,6 +11,7 @@ setup:
       - apache2-utils
       - libevent-dev
       - libpq-dev
+      - lessc
     - pip:
       - amqp
       - pika
@@ -36,6 +37,7 @@ setup:
       - vagrant
     - npm:
       - iced-coffee-script
+      - less
       - directory: ci/web/back
   - scripts:
     - script: ./install_virtualbox.sh
@@ -47,9 +49,8 @@ setup:
 languages:
   python:
     version: 2.7
-    buildscript:
-    path: platform
-    testscript: nosetests
+    path: ci/platform
+    testscript: nosetests --tc=fakeverifier:True
   ruby:
     version: 1.9.3
   node:

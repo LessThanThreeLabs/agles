@@ -28,13 +28,20 @@ class VerificationResultsHandler(QueueListener):
 		# TODO (bbland): do something more useful than this trivial case
 		with ModelServer.rpc_connect("builds", "read") as client:
 			build = client.get_build_from_id(build_id)
-		if build["is_primary"] and results == VerificationResult.SUCCESS:
-			self.mark_change_finished(build["change_id"])
+		if build["is_primary"]:
+			if results == VerificationResult.SUCCESS:
+				self._mark_change_finished(build["change_id"])
+			else:
+				self._mark_change_failed(build["change_id"])
 
-	def mark_change_finished(self, change_id):
+	def _mark_change_finished(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.COMPLETE)
 		self.send_merge_request(change_id)
+
+	def _mark_change_failed(self, change_id):
+		with ModelServer.rpc_connect("changes", "update") as client:
+			client.mark_change_finished(change_id, BuildStatus.FAILED)
 
 	def send_merge_request(self, change_id):
 		print "Sending merge request for " + str(change_id)
@@ -58,7 +65,6 @@ class VerificationResultsHandler(QueueListener):
 		with ModelServer.rpc_connect("repos", "update") as client:
 					client.mark_merge(merge_status)
 		"""
-
 		self.producer.publish((repo_hash, commit_id, merge_target,),
 			exchange=merge_queue.exchange,
 			routing_key=merge_queue.routing_key,  # TODO (bbland): replace with something useful

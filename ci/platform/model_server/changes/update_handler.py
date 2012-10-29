@@ -2,7 +2,10 @@ import time
 
 from database import schema
 from database.engine import ConnectionFactory
+from kombu.connection import Connection
+from model_server.events_broker import EventsBroker
 from model_server.rpc_handler import ModelServerRpcHandler
+from settings.rabbit import connection_info
 
 
 class ChangesUpdateHandler(ModelServerRpcHandler):
@@ -16,3 +19,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 			status=status, end_time=int(time.time()))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
+
+		with Connection(connection_info) as connection:
+			events_broker = EventsBroker(connection)
+			events_broker.publish(events_broker.get_event("changes", "update"), ())
