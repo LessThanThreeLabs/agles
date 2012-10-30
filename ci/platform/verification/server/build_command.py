@@ -10,7 +10,7 @@ class NullBuildCommand(object):
 
 class SimpleVagrantBuildCommand(BuildCommand):
 	def __init__(self, command):
-		super(BuildCommand, self).__init__(self)
+		super(BuildCommand, self).__init__()
 		self.command = command
 
 	def run(self, vagrant_wrapper, output_handler):
