@@ -170,7 +170,9 @@ class LoginPanel.View extends Backbone.View
 			@loginBasicInformationPanelView.displayErrors errors
 
 			if not errors?
-				console.log userData  # need to update login information
+				window.globalAccount.set
+					firstName: userData.firstName
+					lastName: userData.lastName
 				@model.set 'visible', false
 
 
