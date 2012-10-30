@@ -1,29 +1,32 @@
 fs = require 'fs'
 assert = require 'assert'
 url = require 'url'
-https = require 'https'
+# https = require 'https'
+spdy = require 'spdy'
 express = require 'express'
 
 SessionStore = require './sessionStore'
 CreateAccountStore = require './createAccountStore'
 Configurer = require './configuration'
 ResourceSocket = require './resourceSocket/resourceSocket'
+SpdyCache = require './spdyCache/spdyCache'
 
 
-exports.create = (configurationParams, modelConnection, resourceSocket) ->
+exports.create = (configurationParams, modelConnection) ->
 	stores =
 		sessionStore: SessionStore.create configurationParams
 		createAccountStore: CreateAccountStore.create configurationParams
 	
 	configurer = Configurer.create configurationParams, stores.sessionStore
-	resourceSocket ?= ResourceSocket.create configurationParams, stores, modelConnection
+	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection
+	spdyCache = SpdyCache.create configurationParams
 
-	return new Server configurer, modelConnection, resourceSocket, stores
+	return new Server configurer, modelConnection, resourceSocket, spdyCache, stores
 
 
 class Server
-	constructor: (@configurer, @modelConnection, @resourceSocket, @stores) ->
-		assert.ok @configurer? and @modelConnection? and @resourceSocket? and @stores?
+	constructor: (@configurer, @modelConnection, @resourceSocket, @spdyCache, @stores) ->
+		assert.ok @configurer? and @modelConnection? and @resourceSocket? and @spdyCache? and @stores?
 
 
 	start: () ->
@@ -33,13 +36,18 @@ class Server
 		expressServer.get '/', @_handleIndexRequest
 		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
 
-		server = https.createServer @_getHttpsOptions(), expressServer
+		server = spdy.createServer @_getHttpsOptions(), expressServer
 		server.listen @configurer.getConfigurationParams().https.port
 
 		@resourceSocket.start server
 
+		@spdyCache.load (error) =>
+			throw error if error?
+			console.log '...server ready'
+
 
 	_handleIndexRequest: (request, response) =>
+		@spdyCache.pushFiles request, response
 		response.render 'index', csrfToken: request.session.csrfToken
 
 

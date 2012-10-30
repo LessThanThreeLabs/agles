@@ -83,6 +83,7 @@ class ResourceSocketConfigurer
 
 
 	_configureModelEvents: (socket) ->
+		console.log 'what is this for? (configuration for socketio...)'
 		@modelConnection.setSocketsToFireEventsOn socket.sockets
 
 

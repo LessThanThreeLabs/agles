@@ -28,6 +28,10 @@
 				"enabled": true,
 				"maxObjects": 128,
 				"maxLength": 262144
+			},
+
+			"spdy": {
+				"filesToCacheFile": "filesToCacheInSpdy.json"
 			}
 		},
 
