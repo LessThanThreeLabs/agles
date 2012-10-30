@@ -26,7 +26,7 @@ setup:
       - ipython
       - redis
       - greenlet
-      - gevent
+      - eventlet
       - gitpython
       - virtualenvwrapper
       - psycopg2
@@ -42,6 +42,7 @@ setup:
   - scripts:
     - script: ./install_virtualbox.sh
       directory: ci/scripts
+    - script: vagrant gem install sahara
   - databases:
       postgres:
       - name: agles

@@ -85,6 +85,7 @@ class RedisTestMixin(BaseTestMixin):
 
 		while True:
 			self._redis_process.poll()
+			assert self._redis_process.returncode is None
 			line = self._redis_process.stdout.readline()
 			if line.find("The server is now ready to accept connections") != -1:
 				break
