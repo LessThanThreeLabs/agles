@@ -9,7 +9,7 @@ from util.database import to_dict
 
 class UserReadHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(UserReadHandler, self).__init__("repos", "read")
+		super(UserReadHandler, self).__init__("users", "read")
 
 	def _get_user_row(self, email, password_hash):
 		user = database.schema.user
@@ -28,7 +28,7 @@ class UserReadHandler(ModelServerRpcHandler):
 		user = database.schema.user
 
 		row = self._get_user_row(email, password_hash)
-		return row[user.c.row]
+		return row[user.c.id] if row else None
 
 	def get_user(self, email, password_hash):
 		user = database.schema.user

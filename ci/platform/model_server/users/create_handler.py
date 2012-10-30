@@ -24,7 +24,7 @@ class UsersCreateHandler(ModelServerRpcHandler):
 		path = self._generate_path(media_id, md5hash)
 		self.mediastore.store_media(media_binary, path)
 
-	def create(self, password_hash, information):
+	def create_user(self, password_hash, information):
 		assert "email" in information
 		assert "name" in information
 

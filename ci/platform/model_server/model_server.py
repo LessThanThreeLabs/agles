@@ -18,6 +18,8 @@ from changes.update_handler import ChangesUpdateHandler
 from repos.create_handler import ReposCreateHandler
 from repos.read_handler import ReposReadHandler
 from settings.rabbit import connection_info
+from users.create_handler import UsersCreateHandler
+from users.read_handler import UserReadHandler
 
 
 class ModelServer(object):
@@ -38,6 +40,8 @@ class ModelServer(object):
 		ChangesUpdateHandler,
 		ReposCreateHandler,
 		ReposReadHandler,
+		UsersCreateHandler,
+		UserReadHandler
 	]
 
 	@classmethod
