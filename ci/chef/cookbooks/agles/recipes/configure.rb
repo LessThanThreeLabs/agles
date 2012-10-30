@@ -96,6 +96,9 @@ def execute_script(script_info)
 		if not script_info["directory"].nil?
 			cwd "#{node[:agles][:source_path][:internal]}/#{script_info["directory"]}"
 		end
+		if script_info["user"]
+			user node[:agles][:user]
+		end
 		timeout script_info["timeout"].nil? ? 600 : script_info["timeout"]
 		environment({"HOME" => "/home/#{node[:agles][:user]}"})
 		action :run
