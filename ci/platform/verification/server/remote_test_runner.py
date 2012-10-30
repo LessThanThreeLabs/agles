@@ -17,7 +17,8 @@ class VagrantNoseCommand(BuildCommand):
 
 	def run(self, vagrant_wrapper, output_handler):
 		source_path = "/home/vagrant/source/" + self.path
-		command = "".join(["find " + source_path + " -name \"tests\" |",
+		command = "".join(["source .python.sh",
+			"find " + source_path + " -name \"tests\" |",
 			"xargs nosetests  --with-xunit --xunit-file=/vagrant/nosetests.xml"])
 		vagrant_wrapper.ssh_call(command, output_handler)
 		test_results = XunitParser().parse_file(

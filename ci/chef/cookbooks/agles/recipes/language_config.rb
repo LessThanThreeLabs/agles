@@ -1,31 +1,28 @@
 include_recipe "agles"
 
-def bashrc_configure(to_remove, to_add)
-	bash "configure bashrc" do
-		user node[:agles][:user]
-		cwd "/home/#{node[:agles][:user]}"
-		code <<-EOH
-		sed '/#{to_remove}/d' .bashrc > .tmpbashrc
-		mv .tmpbashrc .bashrc
-		echo #{to_add} >> .bashrc
-		EOH
-	end.run_action(:run)
+def language_configure(language, command)
+	file "/home/#{node[:agles][:user]}/.#{language}.sh" do
+		owner node[:agles][:user]
+		content command
+	end
 end
 
 def virtualenv_configure(new_virtualenv)
 	node[:agles][:languages][:python][:virtualenv] = "/home/#{node[:agles][:user]}/#{new_virtualenv}"
-	bashrc_configure("source .*\\/bin\\/activate", "source #{new_virtualenv}/bin/activate")
+	language_configure("python", "source #{new_virtualenv}/bin/activate")
 end
 
 def rvm_configure(new_ruby)
 	node[:agles][:languages][:ruby][:ruby_string] = new_ruby
-	bashrc_configure("rvm use", "rvm use #{new_ruby}")
+	language_configure("ruby", "rvm use #{new_ruby}")
 end
 
 def nave_configure(new_node)
+	node[:agles][:languages][:node][:node_version] = new_node
 	execute "./nave.sh usemain #{new_node}" do
 		cwd "/home/#{node[:agles][:user]}"
 	end
+	langauge_configure("node", "./nave.sh use #{new_node}")
 end
 
 def setup_language(language, version)

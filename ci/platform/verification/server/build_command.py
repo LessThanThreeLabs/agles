@@ -9,10 +9,12 @@ class NullBuildCommand(object):
 
 
 class SimpleVagrantBuildCommand(BuildCommand):
-	def __init__(self, command):
+	def __init__(self, language, command):
 		super(BuildCommand, self).__init__()
+		self.language = language
 		self.command = command
 
 	def run(self, vagrant_wrapper, output_handler):
-		results = vagrant_wrapper.ssh_call(self.command, output_handler)
+		full_command = "source .%s.sh; cd source; %s" % (self.language, self.command)
+		results = vagrant_wrapper.ssh_call(full_command, output_handler)
 		return results.returncode

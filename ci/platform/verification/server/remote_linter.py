@@ -17,7 +17,7 @@ class VagrantLintingCommand(BuildCommand):
 
 	def run(self, vagrant_wrapper, output_handler):
 		source_path = "/home/vagrant/source/" + self.path
-		command = "find " + source_path + " -name \"*.py\" | xargs pylint --reports=n"
+		command = "source .python.sh; find " + source_path + " -name \"*.py\" | xargs pylint --reports=n"
 		results = vagrant_wrapper.ssh_call(command, output_handler)
 		lint_parser = LintParser()
 		pylint_issues = lint_parser.parse_pylint(results.stdout)
