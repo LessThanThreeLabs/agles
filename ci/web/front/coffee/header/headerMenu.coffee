@@ -4,7 +4,8 @@ window.HeaderMenu = {}
 class HeaderMenu.Model extends Backbone.Model
 
 	initialize: () ->
-		@loginModel = new Login.Model()
+		@accountHeaderOptionModel = new AccountHeaderOption.Model()
+		@loginHeaderOptionModel = new LoginHeaderOption.Model()
 
 
 class HeaderMenu.View extends Backbone.View
@@ -13,10 +14,12 @@ class HeaderMenu.View extends Backbone.View
 	template: Handlebars.compile ''
 
 	initialize: () ->
-		@loginView = new Login.View model: @model.loginModel
+		@accountHeaderOptionView = new AccountHeaderOption.View model: @model.accountHeaderOptionModel
+		@loginHeaderOptionView = new LoginHeaderOption.View model: @model.loginHeaderOptionModel
 
 
 	render: () ->
 		@$el.html @template()
-		@$el.append @loginView.render().el
+		@$el.append @accountHeaderOptionView.render().el
+		@$el.append @loginHeaderOptionView.render().el
 		return @

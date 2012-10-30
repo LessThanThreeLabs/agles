@@ -140,9 +140,6 @@ class LoginPanel.View extends Backbone.View
 
 
 	_loadCreateAccountEmailSentView: () =>
-		# rerender the email sent panel so the user's information will appear in it
-		@loginCreateAccountEmailSentPanelView.render()
-
 		@_changePanelVisibilities false, false, true
 		@_changeButtonVisibilities false, false, true
 

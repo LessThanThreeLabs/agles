@@ -1,15 +1,15 @@
-window.Login = {}
+window.LoginHeaderOption = {}
 
 
-class Login.Model extends Backbone.Model
+class LoginHeaderOption.Model extends Backbone.Model
 
 	initialize: () ->
 		@loginPanelModel = new LoginPanel.Model()
 
 
-class Login.View extends Backbone.View
+class LoginHeaderOption.View extends Backbone.View
 	tagName: 'div'
-	className: 'login headerMenuOption'
+	className: 'loginHeaderOption headerMenuOption'
 	template: Handlebars.compile 'Login'
 	events: 'click': '_clickHandler'
 

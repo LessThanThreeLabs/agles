@@ -14,8 +14,12 @@ class LoginCreateAccountEmailSentPanel.View extends Backbone.View
 	template: Handlebars.compile '<p>Thanks {{firstName}} {{lastName}}!
 		An email has been sent to {{email}} for you to verify your account!</p>'
 
+	initialize: () =>
+		@model.on 'change', () =>
+			render()
+
+
 	render: () =>
-		console.log @model
 		@$el.html @template
 			firstName: @model.get 'firstName'
 			lastName: @model.get 'lastName'
