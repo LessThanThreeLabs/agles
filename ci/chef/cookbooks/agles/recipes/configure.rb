@@ -91,14 +91,14 @@ def execute_script(script_info)
 	name = script_info["script"]
 	rvm_shell name do
 		code name
+		if node[:agles][:languages][:ruby][:ruby_string]
+			ruby_string node[:agles][:languages][:ruby][:ruby_string]
+		end
 		if script_info["background"]
 			command "#{name} &"
 		end
 		if not script_info["directory"].nil?
 			cwd "#{node[:agles][:source_path][:internal]}/#{script_info["directory"]}"
-		end
-		if script_info["user"]
-			user node[:agles][:user]
 		end
 		timeout script_info["timeout"].nil? ? 600 : script_info["timeout"]
 		environment({"HOME" => "/home/#{node[:agles][:user]}"})
