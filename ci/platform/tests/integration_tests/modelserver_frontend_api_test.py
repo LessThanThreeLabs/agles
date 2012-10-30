@@ -36,10 +36,14 @@ buildCompileLines[] : dict = getCompilationOutput(userId, buildId)
 buildTestLines[] : dict = getTestOutput(userId, buildId)
 <more to be added>
 '''
+import database
+
 from hashlib import sha512
 
 from nose.tools import *
 
+from database.engine import ConnectionFactory
+from util.permissions import RepositoryPermissions
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
 from model_server import ModelServer
@@ -48,12 +52,14 @@ from model_server import ModelServer
 class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
 	EMAIL = "jchu@lt3.com"
+	REPO_NAME = "r"
 
 	def setUp(self):
 		super(ModelServerFrontEndApiTest, self).setUp()
 		self._purge_queues()
 		self._start_model_server()
 		self._create_user()
+		self._create_repo()
 
 	def tearDown(self):
 		super(ModelServerFrontEndApiTest, self).tearDown()
@@ -95,3 +101,51 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			user = conn.get_user_from_id(self.user_id)
 		self._assert_dict_subset(self.user_info, user)
 
+#####################
+#	REPOS
+#####################
+
+	def _create_repo(self):
+		machine = database.schema.machine
+		permission = database.schema.permission
+		repo = database.schema.repo
+
+		machine_ins = machine.insert().values(uri="http://machine0")
+
+		with ConnectionFactory.get_sql_connection() as conn:
+			result = conn.execute(machine_ins)
+			self.machine_id = result.inserted_primary_key[0]
+
+		with ModelServer.rpc_connect("repos", "create") as conn:
+			self.repo_id = conn.create_repo(self.REPO_NAME, self.machine_id, RepositoryPermissions.RW)
+
+		with ConnectionFactory.get_sql_connection() as conn:
+			query = repo.select().where(repo.c.id==self.repo_id)
+			row = conn.execute(query).first()
+			self.repo_hash = row[repo.c.hash]
+			permission_ins = permission.insert().values(user_id=self.user_id, repo_hash=self.repo_hash, permissions=RepositoryPermissions.RW)
+			conn.execute(permission_ins)
+
+	def test_get_writable_repo_ids(self):
+		with ModelServer.rpc_connect("repos", "read") as conn:
+			writable_repo_ids = conn.get_writable_repo_ids(self.user_id)
+		assert_in(self.repo_id, writable_repo_ids)
+
+	def test_get_writable_repos(self):
+		with ModelServer.rpc_connect("repos", "read") as conn:
+			writable_repos = conn.get_writable_repos(self.user_id)
+		repo = list(writable_repos).pop()
+		assert_equals(self.repo_id, repo["id"])
+		assert_equals(self.REPO_NAME, repo["name"])
+		assert_equals(self.repo_hash, repo["hash"])
+		assert_equals(self.machine_id, repo["machine_id"])
+		assert_equals(RepositoryPermissions.RW, repo["default_permissions"])
+
+	def test_get_repo_from_id(self):
+		with ModelServer.rpc_connect("repos", "read") as conn:
+			repo = conn.get_repo_from_id(self.user_id, self.repo_id)
+		assert_equals(self.repo_id, repo["id"])
+		assert_equals(self.REPO_NAME, repo["name"])
+		assert_equals(self.repo_hash, repo["hash"])
+		assert_equals(self.machine_id, repo["machine_id"])
+		assert_equals(RepositoryPermissions.RW, repo["default_permissions"])

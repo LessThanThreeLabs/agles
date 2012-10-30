@@ -90,7 +90,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 		permission = database.schema.permission
 
-		query = repo.join(permission).select().where(permission.c.user_id==user_id)
+		query = repo.join(permission).select().apply_labels().where(permission.c.user_id==user_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			rows = sqlconn.execute(query)
 		return filter(lambda row: RepositoryPermissions.has_permissions(
@@ -107,13 +107,14 @@ class ReposReadHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 
 		visible_rows = self._get_visible_repos(user_id)
-		return map(to_dict, visible_rows)
+		return map(lambda row: to_dict(row, repo.columns, tablename=repo.name),
+			visible_rows)
 
 	def get_repo_from_id(self, user_id, repo_id):
 		repo = database.schema.repo
 		permission = database.schema.permission
 
-		query = repo.join(permission).select().where(
+		query = repo.join(permission).select().apply_labels().where(
 			and_(
 				repo.c.id==repo_id,
 				permission.c.user_id==user_id
@@ -127,4 +128,4 @@ class ReposReadHandler(ModelServerRpcHandler):
 				row[permission.c.permissions], RepositoryPermissions.R):
 			return {}
 		else:
-			return to_dict(row, repo.columns)
+			return to_dict(row, repo.columns, tablename=repo.name)

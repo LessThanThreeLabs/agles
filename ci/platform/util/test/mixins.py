@@ -47,6 +47,7 @@ class ModelServerTestMixin(BaseTestMixin):
 		self.model_server_channel = connection.channel()
 		self.model_server_process = TestProcess(target=ModelServer(self.model_server_channel).start)
 		self.model_server_process.start()
+		ConnectionFactory.recreate_engine()
 
 	def _stop_model_server(self):
 		self.model_server_process.terminate()
