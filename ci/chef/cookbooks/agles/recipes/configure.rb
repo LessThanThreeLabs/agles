@@ -89,7 +89,8 @@ end
 
 def execute_script(script_info)
 	name = script_info["script"]
-	execute name do
+	rvm_shell name do
+		code name
 		if script_info["background"]
 			command "#{name} &"
 		end
