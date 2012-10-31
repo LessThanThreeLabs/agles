@@ -14,7 +14,7 @@ setup:
       - lessc
     - pip:
       - amqp
-      - pika
+      - pika: 0.9.5
       - kombu
       - librabbitmq
       - sqlalchemy
