@@ -12,3 +12,9 @@ python_pip "pylint" do
 	end
 	action :install
 end
+
+postgresql_database_user node[:agles][:user] do
+	password ""
+	connection({:username => "postgres", :password => ""})
+	action :create
+end

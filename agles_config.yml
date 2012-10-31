@@ -33,8 +33,6 @@ setup:
       - argparse
       - nose-testconfig
       - boto
-    - gem:
-      - vagrant
     - npm:
       - iced-coffee-script
       - less

@@ -7,7 +7,7 @@ run_list(
 	"recipe[postgresql::server]",
 	"recipe[postgresql::client]",
 	"recipe[database]",
-	"recipe[rabbitmq]",
+	"recipe[agles::rabbitmq]",
 	"recipe[redisio::install]",
 	"recipe[rvm::system]",
 	"recipe[agles::dependencies]",

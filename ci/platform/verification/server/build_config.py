@@ -24,7 +24,7 @@ class BuildConfig(object):
 		build_config = cls._get_language_default(language, path)
 		if config:
 			if "buildscript" in config:
-				build_config.build_command = SimpleVagrantBuildCommand(language, config["buildscript"])
+				build_config.build_command = SimpleVagrantBuildCommand(language, config["buildscript"], path)
 			if "testscript" in config:
-				build_config.test_command = SimpleVagrantBuildCommand(language, config["testscript"])
+				build_config.test_command = SimpleVagrantBuildCommand(language, config["testscript"], path)
 		return build_config
