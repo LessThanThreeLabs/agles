@@ -1,7 +1,6 @@
 fs = require 'fs'
 assert = require 'assert'
 url = require 'url'
-# https = require 'https'
 spdy = require 'spdy'
 express = require 'express'
 

@@ -23,7 +23,7 @@ class ServerConfigurer
 			server.use express.compress()
 			@_configureStaticServer server
 			server.use express.cookieParser()
-			server.use express.bodyParser()  # need this?
+			# server.use express.bodyParser()  # need this?
 			server.use express.query()  # need this?
 			@_configureSessionLogic server
 			server.use csrf()
@@ -57,6 +57,7 @@ class ServerConfigurer
 	    	cookie:
 	    		path: '/',
 	    		httpOnly: true,
-	    		secure: true,
+	    		# secure: true,
 	    		maxAge: 14400000
 	    	store: @sessionStore
+	    console.log 'need to make our cookies secure'
