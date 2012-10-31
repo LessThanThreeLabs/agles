@@ -26,7 +26,7 @@ class SpdyCache
 		useGzip = @_canUseGzip request.headers
 		@_pushFilesOfType request, response, 'css', useGzip
 		@_pushFilesOfType request, response, 'js', useGzip
-		@_pushFilesOfType request, response, 'img', useGzip
+		@_pushFilesOfType request, response, 'img', false  # don't gzip images, they're already compressed
 
 
 	_canUseGzip: (headers) =>
@@ -46,10 +46,15 @@ class SpdyCache
 
 	_pushFile: (request, response, file, useGzip) =>
 		headers = 'content-type': file.contentType
+		# headers['accept-ranges'] = 'bytes' if file.name is 'img/awesomeFace.png'
+		# headers['content-length'] = 58865 if file.name is 'img/awesomeFace.png'
 		headers['content-encoding'] = 'gzip' if useGzip
+
+		# if file.name is 'img/awesomeFace.png'
+		# 	console.log file.plain
 
 		response.push '/' + file.name, headers, (error, stream) =>
 			if error?
 				console.error error
 			else
-				stream.end if useGzip then file.gzip else file.plainText
+				stream.end if useGzip then file.gzip else file.plain

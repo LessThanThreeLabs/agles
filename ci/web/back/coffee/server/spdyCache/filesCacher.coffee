@@ -31,14 +31,19 @@ class FilesCacher
 
 		await
 			for fileType of @files
+				continue if not @_shouldGzip fileType
 				gzipErrors[fileType] = []
 				for file, index in @files[fileType]
-					zlib.gzip file.plainText, defer gzipErrors[fileType][index], @files[fileType][index].gzip
+					zlib.gzip file.plain, defer gzipErrors[fileType][index], @files[fileType][index].gzip
 
 		if @_containsAnyErrors gzipErrors
 			callback 'Unable to gzip all the files'
 		else
 			callback()
+
+
+	_shouldGzip: (fileType) =>
+		return fileType is 'css' or fileType is 'js'
 
 
 	_containsAnyErrors: (gzipErrors) =>

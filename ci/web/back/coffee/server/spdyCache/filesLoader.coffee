@@ -24,15 +24,13 @@ class FilesLoader
 				@_loadFiles filesToLoad, callback
 
 
-
-
 	_loadFiles: (filesToCache, callback) =>
 		loadedFiles = {}
 		loadedFileErrors = {}
 
 		await
 			for fileType, contentTypes of filesToCache
-				@_loadFilesForContentTypes contentTypes, defer loadedFileErrors[fileType], loadedFiles[fileType] 
+				@_loadFilesForContentTypes fileType, contentTypes, defer loadedFileErrors[fileType], loadedFiles[fileType] 
 
 		anyErrors = false
 		for fileType, error of loadedFileErrors
@@ -42,7 +40,7 @@ class FilesLoader
 		else callback null, loadedFiles
 
 
-	_loadFilesForContentTypes: (contentTypes, callback) =>
+	_loadFilesForContentTypes: (fileType, contentTypes, callback) =>
 		loadedFiles = []
 		loadedFileErrors = []
 
@@ -52,7 +50,7 @@ class FilesLoader
 					loadedFiles[index] = {}
 					loadedFiles[index].name = fileName
 					loadedFiles[index].contentType = contentType
-					fs.readFile @_getFileLocation(fileName), 'ascii', defer loadedFileErrors[index], loadedFiles[index].plainText
+					fs.readFile @_getFileLocation(fileName), @_getFileEncoding(fileType), defer loadedFileErrors[index], loadedFiles[index].plain
 
 		anyErrors = loadedFileErrors.some (fileError) =>
 			return fileError?
@@ -61,40 +59,12 @@ class FilesLoader
 		else callback null, loadedFiles
 
 
-
-
-
-
-
-	# _loadFiles: (filesToCache, callback) =>
-	# 	loadedFiles = {}
-	# 	loadedFileErrors = {}
-
-	# 	await
-	# 		for fileType in Object.keys filesToCache
-	# 			loadedFiles[fileType] = []
-	# 			loadedFileErrors[fileType] = []
-
-	# 			for contentType of 
-	# 				for fileName, index in filesToCache[fileType]
-	# 				loadedFiles[fileType][index] = {}
-	# 				loadedFiles[fileType][index].name = fileName
-	# 				fs.readFile @_getFileLocation(fileName), 'ascii', defer loadedFileErrors[fileType][index], loadedFiles[fileType][index].plainText		
-
-	# 	if @_containsAnyErrors loadedFileErrors
-	# 		callback 'Unable to load all the files'
-	# 	else
-	# 		callback null, loadedFiles
-
-
-	# _containsAnyErrors: (loadedFileErrors) =>
-	# 	for fileType in Object.keys loadedFileErrors
-	# 		anyErrors = loadedFileErrors[fileType].some (fileError) =>
-	# 			return fileError?
-	# 		return true if anyErrors
-
-	# 	return false
-
-
 	_getFileLocation: (fileName) =>
 		return @configurationParams.staticFiles.rootDirectory + '/' + fileName
+
+
+	_getFileEncoding: (fileType) =>
+		if fileType is 'css' or fileType is 'js'
+			return 'ascii'
+		else
+			return 'binary'
