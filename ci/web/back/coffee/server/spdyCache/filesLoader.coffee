@@ -30,7 +30,7 @@ class FilesLoader
 
 		await
 			for fileType, contentTypes of filesToCache
-				@_loadFilesForContentTypes fileType, contentTypes, defer loadedFileErrors[fileType], loadedFiles[fileType] 
+				@_loadFilesForContentTypes contentTypes, defer loadedFileErrors[fileType], loadedFiles[fileType] 
 
 		anyErrors = false
 		for fileType, error of loadedFileErrors
@@ -40,7 +40,7 @@ class FilesLoader
 		else callback null, loadedFiles
 
 
-	_loadFilesForContentTypes: (fileType, contentTypes, callback) =>
+	_loadFilesForContentTypes: (contentTypes, callback) =>
 		loadedFiles = []
 		loadedFileErrors = []
 
@@ -50,7 +50,7 @@ class FilesLoader
 					loadedFiles[index] = {}
 					loadedFiles[index].name = fileName
 					loadedFiles[index].contentType = contentType
-					fs.readFile @_getFileLocation(fileName), @_getFileEncoding(fileType), defer loadedFileErrors[index], loadedFiles[index].plain
+					fs.readFile @_getFileLocation(fileName), 'binary', defer loadedFileErrors[index], loadedFiles[index].plain
 
 		anyErrors = loadedFileErrors.some (fileError) =>
 			return fileError?
@@ -61,10 +61,3 @@ class FilesLoader
 
 	_getFileLocation: (fileName) =>
 		return @configurationParams.staticFiles.rootDirectory + '/' + fileName
-
-
-	_getFileEncoding: (fileType) =>
-		if fileType is 'css' or fileType is 'js'
-			return 'ascii'
-		else
-			return 'binary'
