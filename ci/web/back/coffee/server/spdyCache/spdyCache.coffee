@@ -24,8 +24,9 @@ class SpdyCache
 			return
 
 		useGzip = @_canUseGzip request.headers
-		@_pushFilesOfType request, response, 'css', 'text/css', useGzip
-		@_pushFilesOfType request, response, 'js', 'application/javascript', useGzip
+		@_pushFilesOfType request, response, 'css', useGzip
+		@_pushFilesOfType request, response, 'js', useGzip
+		@_pushFilesOfType request, response, 'img', useGzip
 
 
 	_canUseGzip: (headers) =>
@@ -37,17 +38,18 @@ class SpdyCache
 			return encoding is 'gzip'
 
 
-	_pushFilesOfType: (request, response, fileType, contentType, useGzip) =>
+	_pushFilesOfType: (request, response, fileType, useGzip) =>
 		files = @filesCacher.getFiles fileType
 		for file in files
-			headers = 'content-type': contentType
-			headers['content-encoding'] = 'gzip' if useGzip
-			@_pushFile request, response, file, headers, useGzip
+			@_pushFile request, response, file, useGzip
 
 
-	_pushFile: (request, response, file, headers, useGzip) =>
+	_pushFile: (request, response, file, useGzip) =>
+		headers = 'content-type': file.contentType
+		headers['content-encoding'] = 'gzip' if useGzip
+
 		response.push '/' + file.name, headers, (error, stream) =>
 			if error?
 				console.error error
-				return
-			stream.end if useGzip then file.gzip else file.plainText
+			else
+				stream.end if useGzip then file.gzip else file.plainText

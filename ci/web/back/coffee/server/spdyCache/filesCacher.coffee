@@ -30,7 +30,7 @@ class FilesCacher
 		gzipErrors = {}
 
 		await
-			for fileType in Object.keys @files
+			for fileType of @files
 				gzipErrors[fileType] = []
 				for file, index in @files[fileType]
 					zlib.gzip file.plainText, defer gzipErrors[fileType][index], @files[fileType][index].gzip
