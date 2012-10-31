@@ -23,22 +23,31 @@ class SpdyCache
 			console.log 'spdy not supported!'
 			return
 
-		console.log request.headers['accept-encoding']
-		# send every file over the stream, possibly already compressed
-
-		@_pushFilesOfType request, response, 'css', 'text/css'
-		@_pushFilesOfType request, response, 'js', 'application/javascript'
+		useGzip = @_canUseGzip request.headers
+		@_pushFilesOfType request, response, 'css', 'text/css', useGzip
+		@_pushFilesOfType request, response, 'js', 'application/javascript', useGzip
 
 
-	_pushFilesOfType: (request, response, fileType, contentType) =>
+	_canUseGzip: (headers) =>
+		return false if not headers['accept-encoding']?
+		return true if headers['accept-encoding'].trim() is '*'
+
+		encodings = headers['accept-encoding'].split ','
+		return encodings.some (encoding) =>
+			return encoding is 'gzip'
+
+
+	_pushFilesOfType: (request, response, fileType, contentType, useGzip) =>
 		files = @filesCacher.getFiles fileType
 		for file in files
-			@_pushFile request, response, file, 'content-type': contentType
+			headers = 'content-type': contentType
+			headers['content-encoding'] = 'gzip' if useGzip
+			@_pushFile request, response, file, headers, useGzip
 
 
-	_pushFile: (request, response, file, headers) =>
+	_pushFile: (request, response, file, headers, useGzip) =>
 		response.push '/' + file.name, headers, (error, stream) =>
 			if error?
 				console.error error
 				return
-			stream.end file.plainText
+			stream.end if useGzip then file.gzip else file.plainText

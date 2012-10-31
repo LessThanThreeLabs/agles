@@ -57,7 +57,7 @@ class Server
 		
 		@stores.createAccountStore.getAccount accountKey, (error, account) =>
 			if error?
-				response.send 'Invalid link' 
+				response.send 'Invalid link'
 			else
 				@stores.createAccountStore.removeAccount accountKey
 				# push new account to the model server
