@@ -5,7 +5,7 @@
 This class contains the api that is exposed to clients
 and is the only point of interaction between clients and the model server.
 """
-from kombu import Connection
+from kombu.connection import Connection
 
 from bunnyrpc.client import Client
 from builds.create_handler import BuildsCreateHandler

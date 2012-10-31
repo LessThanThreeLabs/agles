@@ -1,4 +1,4 @@
-from kombu import Connection
+from kombu.connection import Connection
 
 from settings.rabbit import connection_info
 

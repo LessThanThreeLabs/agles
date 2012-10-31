@@ -8,6 +8,11 @@ import os
 
 from subprocess import Popen, PIPE
 
+import eventlet
+
+from eventlet.green import select
+from util import greenlets
+
 
 class Vagrant(object):
 	"""A wrapper for a Vagrant virtual machine"""
@@ -47,32 +52,36 @@ class Vagrant(object):
 		command = ["vagrant"] + list(args)
 		process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=self.vm_directory,
 				env=self.vagrant_env)
-		stdout_lines = list()
-		stderr_lines = list()
+
 		stdout_handler = kwargs.get("stdout_handler")
 		stderr_handler = kwargs.get("stderr_handler")
-		while True:
-			process.poll()
-			line = self._handle_stream(process.stdout, stdout_lines, stdout_handler)
-			eline = self._handle_stream(process.stderr, stderr_lines, stderr_handler)
-			if (line == "" and eline == "" and process.returncode != None):
-				break
+
+		stdout_greenlet = eventlet.spawn(self._handle_stream, process.stdout, stdout_handler)
+		stderr_greenlet = eventlet.spawn(self._handle_stream, process.stderr, stderr_handler)
+
+		stdout_lines = stdout_greenlet.wait()
+		stderr_lines = stderr_greenlet.wait()
+
 		line, eline = process.communicate()
 		stdout_lines.append(line)
 		stderr_lines.append(eline)
 		stdout = "\n".join(stdout_lines)
 		stderr = "\n".join(stderr_lines)
-		returncode = process.returncode
+		returncode = process.poll()
 		return VagrantResults(returncode, stdout, stderr)
 
-	def _handle_stream(self, stream, line_list, line_handler):
-		line = stream.readline()
-		if line:
+	def _handle_stream(self, stream, line_handler):
+		lines = list()
+		while True:
+			select.select([stream], [], [])
+			line = stream.readline()
+			if line == "":
+				break
 			line = line.rstrip()
-			line_list.append(line)
+			lines.append(line)
 			if line_handler:
-				line_handler(len(line_list), line)
-		return line
+				line_handler(len(lines), line)
+		return lines
 
 	def _get_vagrant_env(self):
 		vagrant_env = os.environ.copy()

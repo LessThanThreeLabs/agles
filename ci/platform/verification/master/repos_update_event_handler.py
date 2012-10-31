@@ -1,4 +1,4 @@
-from kombu import Producer
+from kombu.messaging import Producer
 
 from shared.handler import EventSubscriber
 from model_server import ModelServer

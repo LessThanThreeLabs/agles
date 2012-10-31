@@ -22,7 +22,7 @@ def nave_configure(new_node)
 	execute "./nave.sh usemain #{new_node}" do
 		cwd "/home/#{node[:agles][:user]}"
 	end
-	langauge_configure("node", "./nave.sh use #{new_node}")
+	language_configure("node", "./nave.sh use #{new_node}")
 end
 
 def setup_language(language, version)

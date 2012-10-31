@@ -17,7 +17,7 @@ class VagrantLintingCommand(BuildCommand):
 
 	def run(self, vagrant_wrapper, output_handler):
 		source_path = "/home/vagrant/source/" + self.path
-		command = "source .python.sh; find " + source_path + " -name \"*.py\" | xargs pylint --reports=n"
+		command = "source .python.sh; find " + source_path + " -name \"__init__.py\" | sed -e s/\\\\/__init__.py$// | xargs pylint --reports=n"
 		results = vagrant_wrapper.ssh_call(command, output_handler)
 		lint_parser = LintParser()
 		pylint_issues = lint_parser.parse_pylint(results.stdout)
@@ -29,7 +29,7 @@ class LintParser(object):
 	"""Simple parser which converts pylint basic output into a python
 	dictionary map
 	"""
-	ISSUE_TYPES = ['C', 'R', 'W', 'E', 'F']
+	ISSUE_TYPES = ['C', 'R', 'I', 'W', 'E', 'F']
 
 	def __init__(self):
 		pass

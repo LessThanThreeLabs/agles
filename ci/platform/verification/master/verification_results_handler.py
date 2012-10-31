@@ -1,4 +1,4 @@
-from kombu import Producer
+from kombu.messaging import Producer
 
 from shared.constants import BuildStatus
 from database.engine import ConnectionFactory

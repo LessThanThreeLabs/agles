@@ -11,7 +11,7 @@ import subprocess
 
 from multiprocessing import Process
 
-from kombu import Connection
+from kombu.connection import Connection
 
 from database.engine import ConnectionFactory
 from model_server import ModelServer

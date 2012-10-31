@@ -1,5 +1,4 @@
 from build_command import NullBuildCommand, SimpleVagrantBuildCommand
-from remote_linter import VagrantLintingCommand
 from remote_test_runner import VagrantNoseCommand
 
 
@@ -14,10 +13,10 @@ class BuildConfig(object):
 
 	@classmethod
 	def _get_language_default(cls, language, path):
+		build_config = cls._get_default()
 		if language == "python":
-			return BuildConfig(VagrantLintingCommand(path), VagrantNoseCommand(path))
-		else:
-			return cls._get_default()
+			build_config.test_command = VagrantNoseCommand(path)
+		return build_config
 
 	@classmethod
 	def from_config_tuple(cls, language, config):

@@ -1,4 +1,4 @@
-from kombu import Exchange, Queue
+from kombu.entity import Exchange, Queue
 
 exchange = Exchange("verification", "direct", durable=True)
 verification_request_queue = Queue("verification:request", exchange=exchange, routing_key="verification:request", durable=False)

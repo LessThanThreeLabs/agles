@@ -39,6 +39,11 @@ setup:
       - iced-coffee-script
       - less
       - directory: ci/web/back
+  - scripts:
+    - script: ./install_virtualbox.sh
+      directory: ci/scripts
+    - script: vagrant gem install sahara
+      user: true
   - databases:
       postgres:
       - name: agles

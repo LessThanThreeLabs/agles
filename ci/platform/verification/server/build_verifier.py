@@ -70,7 +70,7 @@ class BuildVerifier(object):
 			return self.get_default_build_configurations()
 		with open(config_path) as config_file:
 			config = yaml.load(config_file.read())
-		config_dict = config.get("build")
+		config_dict = config.get("languages")
 		build_configs = list()
 		for language, config_dict in config_dict.iteritems():
 			build_configs.append(BuildConfig.from_config_tuple(language, config_dict))

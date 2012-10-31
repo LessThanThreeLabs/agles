@@ -1,10 +1,10 @@
 #!/usr/bin/python
 import argparse
+import hashlib
 import random
 import string
 import time
 
-from hashlib import sha512
 from database import schema
 from database.engine import ConnectionFactory
 from util.permissions import RepositoryPermissions
@@ -35,7 +35,7 @@ class SchemaDataGenerator(object):
 
 			for user in range(random.randint(1, 10)):
 				ins_user = schema.user.insert().values(name="name_%d" % user, email="%d@b.com" % user,
-					password_hash=sha512(str(user)).digest(), salt='a'*16)
+					password_hash=hashlib.sha512(str(user)).digest(), salt='a'*16)
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 				repo_hash = random.choice(repo_hashes)
