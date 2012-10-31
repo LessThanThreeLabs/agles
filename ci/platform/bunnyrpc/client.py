@@ -142,13 +142,12 @@ class Client(ClientBase):
 		result = self.message_result
 		# result is an Exception if the greenlet raised. Process the result,
 		# or reraise the Exception in the parent if it is an Exception
-		try:
-			return self._process_result(result)
-		except TypeError:
+		if isinstance(result, Exception):
 			raise result
+		return self._process_result(result)
 
 	def _process_result(self, proto):
-		assert None or isinstance(proto, (dict, Exception,))
+		assert None or isinstance(proto, dict)
 
 		if proto["error"]:
 			assert isinstance(proto["error"], dict)
@@ -156,7 +155,10 @@ class Client(ClientBase):
 						 proto["error"]["message"],
 						 proto["error"]["traceback"])
 			eval_str = "%s(r''' %s\n RemoteTraceback (most recent call last):%s ''')" % exc_tuple
-			raise eval(eval_str, self.caller_globals_dict)
+			try:
+				raise eval(eval_str, self.caller_globals_dict)
+			except NameError:
+				raise RPCRequestError(msg=eval_str)
 		else:
 			return proto["value"]
 
