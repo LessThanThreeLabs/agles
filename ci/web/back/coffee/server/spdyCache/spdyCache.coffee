@@ -28,7 +28,7 @@ class SpdyCache
 		@_pushFilesOfType request, response, 'js', useGzip
 		@_pushFilesOfType request, response, 'img', false  # don't gzip images, they're already compressed
 
-		
+		console.log 'gzipping fonts not supported in chrome!?!'
 		@_pushFilesOfType request, response, 'font', false
 
 
