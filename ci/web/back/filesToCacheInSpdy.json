@@ -31,6 +31,7 @@
 
 	"js": { 
 		"application/javascript": [
+			"js/libs/socket.io.js",
 			"js/libs/stacktrace.js",
 			"js/libs/assert.js",
 			"js/libs/jquery.js",
