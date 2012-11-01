@@ -8,6 +8,7 @@
     "commander": "git://github.com/visionmedia/commander.js.git",
     "express":  "git://github.com/visionmedia/express.git",
     "spdy": "git://github.com/indutny/node-spdy.git",
+    "cookie": "git://github.com/shtylman/node-cookie.git",
     "hbs": "git://github.com/donpark/hbs.git",
     "socket.io": "git://github.com/LearnBoost/socket.io.git",
     "redis": "git://github.com/mranney/node_redis.git",

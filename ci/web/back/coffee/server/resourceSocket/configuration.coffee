@@ -1,6 +1,7 @@
 fs = require 'fs'
 assert = require 'assert'
 redis = require 'redis'
+cookieParser = require 'cookie'
 
 RedisStore = require 'socket.io/lib/stores/redis'
 Session = require('express').session.Session;
@@ -45,7 +46,7 @@ class ResourceSocketConfigurer
 	_handleSessionAuthorization: (socket, handshakeData, callback) ->
 		try
 			sessionId = @_getSessionIdFromCookie handshakeData
-			console.log 'HACK UNTIL FIXED IN EXPRESS 3.0'
+			console.log 'HACK UNTIL FIXED IN EXPRESS 3.0 ' + sessionId
 			sessionId = sessionId.substring 2, 26
 
 			@sessionStore.get sessionId, (error, session) =>
