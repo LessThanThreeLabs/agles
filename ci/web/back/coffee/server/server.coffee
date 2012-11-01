@@ -47,6 +47,7 @@ class Server
 
 	_handleIndexRequest: (request, response) =>
 		@spdyCache.pushFiles request, response
+		console.log 'shouldnt we save index.hbs locally?'
 		response.render 'index', csrfToken: request.session.csrfToken
 
 

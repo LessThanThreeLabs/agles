@@ -4,6 +4,8 @@
 	<title>Love</title>
 </head>
 <body>
+	<script>var csrfToken = '{{csrfToken}}'</script>
+
 	<link href='https://fonts.googleapis.com/css?family=Ubuntu|Lobster|Knewave|Molle:400italic|Montserrat+Alternates|Finger+Paint|Source+Code+Pro' rel='stylesheet' type='text/css'>
 
 	<link rel="stylesheet" type="text/css" href="css/libs/bootstrap.css" />	
@@ -46,14 +48,7 @@
 	<script src="js/libs/backbone/iosync.js"></script>
 	<script src="js/libs/backbone/iobind.productionModeShouldUseMinified.js"></script>
 
-	<script>
-	  var socket = io.connect('https://' + window.location.host + '?csrfToken={{csrfToken}}', { resource: 'socket'});
-	  socket.on('news', function (data) {
-	    console.log(data);
-	    socket.emit('my other event', { my: 'data' });
-	  });
-	</script>
-
+	<script src="js/src/socket.js"></script>
 	<script src="js/src/globalAccount.js"></script>
 
 	<script src="js/src/welcome/welcome.js"></script>	
