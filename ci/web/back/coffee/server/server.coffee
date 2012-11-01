@@ -42,29 +42,19 @@ class Server
 
 		@spdyCache.load (error) =>
 			throw error if error?
-			console.log '...server ready'
+
+			@_createCssString()
+			@_createJsString()
+
+			console.log 'Server running!'
 
 
 	_handleIndexRequest: (request, response) =>
 		@spdyCache.pushFiles request, response
-		console.log 'shouldnt we save index.hbs locally?'
-		
-		cssFiles = @_getCssString @spdyCache.getFileNames 'css'
-		jsFiles = @_getJsStrings @spdyCache.getFileNames 'js'
 		response.render 'index', 
 			csrfToken: request.session.csrfToken
-			cssFiles: cssFiles.join('\n')
-			jsFiles: jsFiles.join('\n')
-
-
-	_getCssString: (cssFileNames) =>
-		return cssFileNames.map (cssFileName) =>
-			return "<link rel='stylesheet' type='text/css' href='#{cssFileName}' />"
-
-
-	_getJsStrings: (jsFileNames) =>
-		return jsFileNames.map (jsFileName) =>
-			return "<script src='#{jsFileName}'></script>"
+			cssFiles: @cssFilesString
+			jsFiles: @jsFilesString
 
 
 	_handleVerifyAccountRequest: (request, response) =>
@@ -81,6 +71,20 @@ class Server
 					firstName: account.firstName
 					lastName: account.lastName
 
+
+	_createCssString: () =>
+		cssFileNames = @spdyCache.getFileNames 'css'
+		formatedCssFiles = cssFileNames.map (cssFileName) =>
+			return "<link rel='stylesheet' type='text/css' href='#{cssFileName}' />"
+		@cssFilesString = formatedCssFiles.join '\n'
+
+
+	_createJsString: () =>
+		jsFileNames = @spdyCache.getFileNames 'js'
+		formattedJsFiles = jsFileNames.map (jsFileName) =>
+			return "<script src='#{jsFileName}'></script>"
+		@jsFilesString = formattedJsFiles.join '\n'
+		
 
 	_getHttpsOptions: () ->
 		options = 
