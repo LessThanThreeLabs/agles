@@ -4,8 +4,8 @@
 
   "dependencies" : {
     "iced-coffee-script": "x.x.x",
-    "nodetime": "x.x.x",
-    "cookie": "x.x.x",
+    "nodetime": "git://github.com/nodetime/nodetime.git",
+    "commander": "git://github.com/visionmedia/commander.js.git",
     "express":  "git://github.com/visionmedia/express.git",
     "spdy": "git://github.com/indutny/node-spdy.git",
     "hbs": "git://github.com/donpark/hbs.git",

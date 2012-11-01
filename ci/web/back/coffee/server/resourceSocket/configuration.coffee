@@ -1,7 +1,6 @@
 fs = require 'fs'
 assert = require 'assert'
 redis = require 'redis'
-cookieParser = require 'cookie'
 
 RedisStore = require 'socket.io/lib/stores/redis'
 Session = require('express').session.Session;
