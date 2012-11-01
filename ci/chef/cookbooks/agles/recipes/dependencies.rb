@@ -7,16 +7,24 @@ apt_repository "deadsnakes" do
 end
 
 python_versions = ['2.5', '2.6', '2.7', '3.2', '3.3']
+pip_packages = ['nose']
 
 python_versions.each do |version|
-	package "python#{version}" do
+	package "python#{version}-dev" do
 		options("--force-yes")
 	end
-	python_virtualenv "/home/#{node[:agles][:user]}/#{version}" do
+	virtualenv_name = "/home/#{node[:agles][:user]}/#{version}"
+	python_virtualenv virtualenv_name do
 		interpreter "python#{version}"
 		owner node[:agles][:user]
 		group node[:agles][:user]
 		action :create
+	end
+	pip_packages.each do |pip_package|
+		python_pip pip_package do
+			virtualenv virtualenv_name
+			action :install
+		end
 	end
 end
 
