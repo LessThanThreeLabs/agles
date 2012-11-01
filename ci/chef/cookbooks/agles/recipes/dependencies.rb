@@ -13,7 +13,7 @@ python_versions.each do |version|
 	package "python#{version}-dev" do
 		options("--force-yes")
 	end
-	virtualenv_name = "/home/#{node[:agles][:user]}/#{version}"
+	virtualenv_name = "/home/#{node[:agles][:user]}/virtualenvs/#{version}"
 	python_virtualenv virtualenv_name do
 		interpreter "python#{version}"
 		owner node[:agles][:user]
