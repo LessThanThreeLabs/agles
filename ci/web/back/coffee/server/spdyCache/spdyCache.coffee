@@ -27,6 +27,7 @@ class SpdyCache
 		@_pushFilesOfType request, response, 'css', useGzip
 		@_pushFilesOfType request, response, 'js', useGzip
 		@_pushFilesOfType request, response, 'img', false  # don't gzip images, they're already compressed
+		@_pushFilesOfType request, response, 'font', useGzip
 
 
 	_canUseGzip: (headers) =>

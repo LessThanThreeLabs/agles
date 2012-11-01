@@ -81,5 +81,13 @@
 			"img/background.png",
 			"img/awesomeFace.png"
 		]
+	},
+
+	"font": {
+		"application/x-font-ttf": [
+			"font/lobster.ttf",
+			"font/sourceCodePro.ttf",
+			"font/ubuntu.ttf"
+		]
 	}
 }
