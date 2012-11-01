@@ -3,6 +3,8 @@
 		"text/css": [
 			"css/libs/bootstrap.css",
 
+			"css/src/fonts.css",
+
 			"css/src/welcome/welcome.css",
 
 			"css/src/repository/build/build.css",
@@ -80,14 +82,6 @@
 		"image/png": [
 			"img/background.png",
 			"img/awesomeFace.png"
-		]
-	},
-
-	"font": {
-		"application/x-font-ttf": [
-			"font/lobster.ttf",
-			"font/sourceCodePro.ttf",
-			"font/ubuntu.ttf"
 		]
 	}
 }

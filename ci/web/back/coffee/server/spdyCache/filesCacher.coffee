@@ -43,7 +43,7 @@ class FilesCacher
 
 
 	_shouldGzip: (fileType) =>
-		return fileType is 'css' or fileType is 'js'
+		return fileType is 'css' or fileType is 'js' or fileType is 'font'
 
 
 	_containsAnyErrors: (gzipErrors) =>
