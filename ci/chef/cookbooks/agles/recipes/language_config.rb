@@ -8,8 +8,8 @@ def language_configure(language, command)
 end
 
 def virtualenv_configure(new_virtualenv)
-	node[:agles][:languages][:python][:virtualenv] = "/home/#{node[:agles][:user]}/#{new_virtualenv}"
-	language_configure("python", "source #virtualenvs/{new_virtualenv}/bin/activate")
+	node[:agles][:languages][:python][:virtualenv] = "/home/#{node[:agles][:user]}/virtualenvs/#{new_virtualenv}"
+	language_configure("python", "source virtualenvs/#{new_virtualenv}/bin/activate")
 end
 
 def rvm_configure(new_ruby)
