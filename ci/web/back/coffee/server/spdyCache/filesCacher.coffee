@@ -31,9 +31,9 @@ class FilesCacher
 
 		await
 			for fileType of @files
-				continue if not @_shouldGzip fileType
 				gzipErrors[fileType] = []
 				for file, index in @files[fileType]
+					continue if not @_shouldGzip file.contentType
 					zlib.gzip file.plain, defer gzipErrors[fileType][index], @files[fileType][index].gzip
 
 		if @_containsAnyErrors gzipErrors
@@ -42,8 +42,14 @@ class FilesCacher
 			callback()
 
 
-	_shouldGzip: (fileType) =>
-		return fileType is 'css' or fileType is 'js' or fileType is 'font'
+	_shouldGzip: (contentType) =>
+		switch contentType
+			when 'text/css', 'application/javascript'
+				return true
+			when 'image/png', 'application/x-font-woff'
+				return false
+			else
+				throw new Error 'Unaccounted for content type'
 
 
 	_containsAnyErrors: (gzipErrors) =>
@@ -53,6 +59,11 @@ class FilesCacher
 			return true if anyErrors
 
 		return false
+
+
+	getFileTypes: () =>
+		assert.ok @files?
+		return Object.keys @files
 
 
 	getFiles: (fileType) =>

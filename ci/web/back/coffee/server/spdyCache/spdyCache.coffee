@@ -24,12 +24,8 @@ class SpdyCache
 			return
 
 		useGzip = @_canUseGzip request.headers
-		@_pushFilesOfType request, response, 'css', useGzip
-		@_pushFilesOfType request, response, 'js', useGzip
-		@_pushFilesOfType request, response, 'img', false  # don't gzip images, they're already compressed
-
-		console.log 'gzipping fonts not supported in chrome!?!'
-		@_pushFilesOfType request, response, 'font', false
+		for fileType in @filesCacher.getFileTypes()
+			@_pushFilesOfType request, response, fileType, useGzip	
 
 
 	_canUseGzip: (headers) =>
@@ -48,6 +44,8 @@ class SpdyCache
 
 
 	_pushFile: (request, response, file, useGzip) =>
+		useGzip = false if not file.gzip?
+
 		headers = 'content-type': file.contentType
 		headers['content-encoding'] = 'gzip' if useGzip
 

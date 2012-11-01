@@ -86,10 +86,10 @@
 	},
 
 	"font": {
-		"application/x-font-ttf": [
-			"font/lobster.ttf",
-			"font/sourceCodePro.ttf",
-			"font/ubuntu.ttf"
+		"application/x-font-woff": [
+			"font/lobster/lobster.woff",
+			"font/sourceCodePro/sourceCodePro.woff",
+			"font/ubuntu/ubuntu.woff"
 		]
 	}
 }
