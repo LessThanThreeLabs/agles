@@ -23,5 +23,5 @@
     "npm":  "x.x.x"
   },
 
-  "test": "should do something here..."
+  "test": "echo should do something here..."
 }

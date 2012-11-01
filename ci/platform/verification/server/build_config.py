@@ -16,6 +16,11 @@ class BuildConfig(object):
 		build_config = cls._get_default()
 		if language == "python":
 			build_config.test_command = VagrantNoseCommand(path)
+		if language == "ruby":
+			build_config.build_command = SimpleVagrantBuildCommand("ruby", "bundler install", path)
+			build_config.test_command = SimpleVagrantBuildCommand("ruby", "rake", path)
+		if language == "nodejs":
+			build_config.test_command = SimpleVagrantBuildCommand("nodejs", "npm test", path)
 		return build_config
 
 	@classmethod

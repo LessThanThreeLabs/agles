@@ -14,7 +14,7 @@ setup:
       - lessc
     - pip:
       - amqp
-      - pika
+      - pika: 0.9.5
       - kombu
       - librabbitmq
       - sqlalchemy
@@ -55,5 +55,5 @@ languages:
     testscript: nosetests --tc=fakeverifier:True
   ruby:
     version: 1.9.3
-  node:
+  nodejs:
     version: v0.8.9

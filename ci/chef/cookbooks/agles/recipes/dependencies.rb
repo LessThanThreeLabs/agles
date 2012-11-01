@@ -29,9 +29,16 @@ python_versions.each do |version|
 end
 
 ruby_versions = ['1.8.7', '1.9.3']
+gem_packages = ['bundler']
 
 ruby_versions.each do |version|
 	rvm_ruby version
+	gem_packages.each do |gem_package|
+		rvm_gem gem_package do
+			ruby_string version
+			action :install
+		end
+	end
 end
 
 node_versions = ['v0.8.9']

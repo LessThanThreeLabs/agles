@@ -48,5 +48,8 @@ languages:
     testscript: nosetests --tc=fakeverifier:True
   ruby:
     version: 1.9.3
-  node:
+    buildscript:
+    testscript:
+  nodejs:
     version: v0.8.9
+    path: ci/web/back
