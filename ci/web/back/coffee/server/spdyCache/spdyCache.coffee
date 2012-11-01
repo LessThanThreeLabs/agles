@@ -54,3 +54,10 @@ class SpdyCache
 			else
 				data = if useGzip then file.gzip else file.plain
 				stream.end data, 'binary'
+
+
+	getFileNames: (fileType) =>
+		files = @filesCacher.getFiles fileType
+
+		return files.map (file) =>
+			return file.name

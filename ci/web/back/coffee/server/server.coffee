@@ -48,7 +48,23 @@ class Server
 	_handleIndexRequest: (request, response) =>
 		@spdyCache.pushFiles request, response
 		console.log 'shouldnt we save index.hbs locally?'
-		response.render 'index', csrfToken: request.session.csrfToken
+		
+		cssFiles = @_getCssString @spdyCache.getFileNames 'css'
+		jsFiles = @_getJsStrings @spdyCache.getFileNames 'js'
+		response.render 'index', 
+			csrfToken: request.session.csrfToken
+			cssFiles: cssFiles.join('\n')
+			jsFiles: jsFiles.join('\n')
+
+
+	_getCssString: (cssFileNames) =>
+		return cssFileNames.map (cssFileName) =>
+			return "<link rel='stylesheet' type='text/css' href='#{cssFileName}' />"
+
+
+	_getJsStrings: (jsFileNames) =>
+		return jsFileNames.map (jsFileName) =>
+			return "<script src='#{jsFileName}'></script>"
 
 
 	_handleVerifyAccountRequest: (request, response) =>
