@@ -20,12 +20,17 @@ exports.create = (configurationParams, modelConnection, port) ->
 	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection
 	spdyCache = SpdyCache.create configurationParams
 
-	return new Server configurer, modelConnection, resourceSocket, spdyCache, stores, port
+	httpsOptions =
+		key: fs.readFileSync configurationParams.security.key
+		cert: fs.readFileSync configurationParams.security.certificate
+		ca: fs.readFileSync configurationParams.security.certrequest
+
+	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, spdyCache, stores
 
 
 class Server
-	constructor: (@configurer, @modelConnection, @resourceSocket, @spdyCache, @stores, @port) ->
-		assert.ok @configurer? and @modelConnection? and @resourceSocket? and @spdyCache? and @stores? and @port?
+	constructor: (@configurer, @httpsOptions, @port, @modelConnection, @resourceSocket, @spdyCache, @stores) ->
+		assert.ok @configurer? and @httpsOptions? and @port? and @modelConnection? and @resourceSocket? and @spdyCache? and @stores?
 
 
 	start: () ->
@@ -35,7 +40,7 @@ class Server
 		expressServer.get '/', @_handleIndexRequest
 		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
 
-		server = spdy.createServer @_getHttpsOptions(), expressServer
+		server = spdy.createServer @httpsOptions, expressServer
 		server.listen @port
 
 		@resourceSocket.start server
@@ -85,9 +90,3 @@ class Server
 			return "<script src='#{jsFileName}'></script>"
 		@jsFilesString = formattedJsFiles.join '\n'
 		
-
-	_getHttpsOptions: () ->
-		options = 
-			key: fs.readFileSync @configurer.getConfigurationParams().security.key
-			cert: fs.readFileSync @configurer.getConfigurationParams().security.certificate
-			ca: fs.readFileSync @configurer.getConfigurationParams().security.certrequest

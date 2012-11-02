@@ -13,10 +13,6 @@ class ServerConfigurer
 		assert.ok @configurationParams? and @sessionStore?
 
 
-	getConfigurationParams: () ->
-		return @configurationParams
-
-
 	configure: (server) ->
 		server.configure () =>
 			# ORDER HERE IS VERY IMPORTANT!!!!
