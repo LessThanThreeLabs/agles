@@ -1,8 +1,10 @@
-os = require 'os'
-cluster = require 'cluster'
 profiler = require 'nodetime'
 configuration = require('./configuration')
 environment = require('./environment')
+
+ModelConnection = require './modelConnection/modelConnection'
+Server = require './server/server'
+RedirectServer = require './server/redirectServer'
 
 
 startEverything = () ->
@@ -10,7 +12,10 @@ startEverything = () ->
 	environment.setEnvironmentMode configurationParams.mode
 	startProfiler configurationParams.profiler
 
-	createServers configurationParams.server
+	modelConnection = ModelConnection.create configurationParams.modelConnection
+	modelConnection.connect (error) ->
+		throw error if error?
+		createServers configurationParams.server, modelConnection
 
 
 startProfiler = (profilerConfigurationParams) ->
@@ -20,14 +25,12 @@ startProfiler = (profilerConfigurationParams) ->
 		silent: profilerConfigurationParams.silent
 
 
-createServers = (serverConfigurationParams) ->
-	numWorkers = if serverConfigurationParams.cluster then os.cpus().length else 1
+createServers = (serverConfigurationParams, modelConnection) ->
+	redirectServer = RedirectServer.create serverConfigurationParams.http.defaultPort
+	redirectServer.start()
 
-	cluster.setupMaster exec: "js/worker"
-	cluster.fork() for num in [0...numWorkers]
-	
-	console.log numWorkers + ' servers started on port ' + serverConfigurationParams.http.port + ' (http)' +
-		' and port ' + serverConfigurationParams.https.port + ' (https)'
+	server = Server.create serverConfigurationParams, modelConnection, serverConfigurationParams.https.defaultPort
+	server.start()
 
 
 startEverything()
