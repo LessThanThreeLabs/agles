@@ -9,31 +9,35 @@ RedirectServer = require './server/redirectServer'
 
 
 startEverything = () ->
-	configurationParams = configuration.getConfigurationParams './config.json'
-	environment.setEnvironmentMode configurationParams.mode
-	startProfiler configurationParams.profiler
+	commandLineParser = CommandLineParser.create()
+
+	configurationParams = _getConfigurationFile commandLineParser.getConfigFile()
+	httpPort = commandLineParser.getHttpPort() ? configurationParams.server.http.defaultPort
+	httpsPort = commandLineParser.getHttpsPort() ? configurationParams.server.https.defaultPort
 
 	modelConnection = ModelConnection.create configurationParams.modelConnection
 	modelConnection.connect (error) ->
 		throw error if error?
-		createServers configurationParams.server, modelConnection
+		createServers configurationParams.server, httpPort, httpsPort, modelConnection
+
+	_startProfiler configurationParams.profiler
 
 
-startProfiler = (profilerConfigurationParams) ->
+_getConfigurationFile = (configFile = './config.json') =>
+	return configuration.getConfigurationParams configFile
+
+
+_startProfiler = (profilerConfigurationParams) ->
 	profiler.profile
 		appName: profilerConfigurationParams.applicationName
 		accountKey: profilerConfigurationParams.accountKey
 		silent: profilerConfigurationParams.silent
 
 
-createServers = (serverConfigurationParams, modelConnection) ->
-	commandLineParser = CommandLineParser.create serverConfigurationParams
-
-	httpPort = commandLineParser.getHttpPort() ? serverConfigurationParams.http.defaultPort
+createServers = (serverConfigurationParams, httpPort, httpsPort, modelConnection) ->
 	redirectServer = RedirectServer.create httpPort
 	redirectServer.start()
 
-	httpsPort = commandLineParser.getHttpsPort() ? serverConfigurationParams.https.defaultPort
 	server = Server.create serverConfigurationParams, modelConnection, httpsPort
 	server.start()
 
