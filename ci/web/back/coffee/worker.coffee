@@ -20,10 +20,10 @@ startWorker = () ->
 
 
 createServers = (serverConfigurationParams, modelConnection) ->
-	redirectServer = RedirectServer.create serverConfigurationParams
+	redirectServer = RedirectServer.create serverConfigurationParams.http.defaultPort
 	redirectServer.start()
 
-	server = Server.create serverConfigurationParams, modelConnection
+	server = Server.create serverConfigurationParams, modelConnection, serverConfigurationParams.https.defaultPort
 	server.start()
 
 

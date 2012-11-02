@@ -11,7 +11,7 @@ ResourceSocket = require './resourceSocket/resourceSocket'
 SpdyCache = require './spdyCache/spdyCache'
 
 
-exports.create = (configurationParams, modelConnection) ->
+exports.create = (configurationParams, modelConnection, port) ->
 	stores =
 		sessionStore: SessionStore.create configurationParams
 		createAccountStore: CreateAccountStore.create configurationParams
@@ -20,12 +20,12 @@ exports.create = (configurationParams, modelConnection) ->
 	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection
 	spdyCache = SpdyCache.create configurationParams
 
-	return new Server configurer, modelConnection, resourceSocket, spdyCache, stores
+	return new Server configurer, modelConnection, resourceSocket, spdyCache, stores, port
 
 
 class Server
-	constructor: (@configurer, @modelConnection, @resourceSocket, @spdyCache, @stores) ->
-		assert.ok @configurer? and @modelConnection? and @resourceSocket? and @spdyCache? and @stores?
+	constructor: (@configurer, @modelConnection, @resourceSocket, @spdyCache, @stores, @port) ->
+		assert.ok @configurer? and @modelConnection? and @resourceSocket? and @spdyCache? and @stores? and @port?
 
 
 	start: () ->
@@ -36,7 +36,7 @@ class Server
 		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
 
 		server = spdy.createServer @_getHttpsOptions(), expressServer
-		server.listen @configurer.getConfigurationParams().https.port
+		server.listen @port
 
 		@resourceSocket.start server
 

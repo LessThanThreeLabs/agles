@@ -10,25 +10,17 @@
 	"server": {
 		"domain": "127.0.0.1",
 
-		"cluster": false,
-
 		"http": {
-			"port": 1080
+			"defaultPort": 80
 		},
 
 		"https": {
-			"port": 10443
+			"defaultPort": 443
 		},
 
 		"staticFiles": {
 			"rootDirectory": "front",
 			"staticDirectories": ["/js", "/css", "/img", "/font"],
-
-			"cache": {
-				"enabled": true,
-				"maxObjects": 128,
-				"maxLength": 262144
-			},
 
 			"spdy": {
 				"filesToCacheFile": "filesToCacheInSpdy.json"

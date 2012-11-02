@@ -2,17 +2,17 @@ assert = require 'assert'
 express = require 'express'
 
 
-exports.create = (configurationParams) ->
-	return new RedirectServer configurationParams
+exports.create = (port) ->
+	return new RedirectServer port
 
 
 class RedirectServer
-	constructor: (@configurationParams) ->
-		assert.ok @configurationParams?
+	constructor: (@port) ->
+		assert.ok @port?
 
 
 	start: () ->
 		@redirectServer = express()
 		@redirectServer.get '*', (request, response) =>
 			response.redirect 'https://' + request.headers.host + request.url
-		@redirectServer.listen @configurationParams.http.port 
+		@redirectServer.listen @port
