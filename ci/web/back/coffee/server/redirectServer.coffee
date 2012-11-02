@@ -11,8 +11,17 @@ class RedirectServer
 		assert.ok @port?
 
 
-	start: () ->
+	start: () =>
 		@redirectServer = express()
 		@redirectServer.get '*', (request, response) =>
-			response.redirect 'https://' + request.headers.host + request.url
+			response.redirect 'https://' + @_getHostWithoutPort(request.headers.host) + request.url
+			# response.redirect 'https://' + request.headers.host + request.url
 		@redirectServer.listen @port
+
+
+	_getHostWithoutPort: (host) =>
+		colonIndex = host.indexOf ':'
+		if colonIndex isnt -1
+			return host.substr 0, colonIndex
+		else
+			return host

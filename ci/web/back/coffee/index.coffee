@@ -2,6 +2,7 @@ profiler = require 'nodetime'
 configuration = require('./configuration')
 environment = require('./environment')
 
+CommandLineParser = require './commandLineParser'
 ModelConnection = require './modelConnection/modelConnection'
 Server = require './server/server'
 RedirectServer = require './server/redirectServer'
@@ -26,10 +27,14 @@ startProfiler = (profilerConfigurationParams) ->
 
 
 createServers = (serverConfigurationParams, modelConnection) ->
-	redirectServer = RedirectServer.create serverConfigurationParams.http.defaultPort
+	commandLineParser = CommandLineParser.create serverConfigurationParams
+
+	httpPort = commandLineParser.getHttpPort() ? serverConfigurationParams.http.defaultPort
+	redirectServer = RedirectServer.create httpPort
 	redirectServer.start()
 
-	server = Server.create serverConfigurationParams, modelConnection, serverConfigurationParams.https.defaultPort
+	httpsPort = commandLineParser.getHttpsPort() ? serverConfigurationParams.https.defaultPort
+	server = Server.create serverConfigurationParams, modelConnection, httpsPort
 	server.start()
 
 
