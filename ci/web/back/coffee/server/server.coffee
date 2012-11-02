@@ -71,7 +71,7 @@ class Server
 				response.send 'Invalid link'
 			else
 				@stores.createAccountStore.removeAccount accountKey
-				# push new account to the model server
+				console.log 'need to push new account to the model server'
 				response.render 'verifyAccount',
 					firstName: account.firstName
 					lastName: account.lastName
