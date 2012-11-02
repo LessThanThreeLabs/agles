@@ -36,7 +36,6 @@ class ResourceSocketConfigurer
 
 	_configureAuthorization: (socket) ->
 		socket.set 'authorization', (handshakeData, callback) =>
-			console.log 'resource socket config: do we need to check if secure here?'
 			if handshakeData.xdomain
 				callback 'Cross domain sockets not allowed', false
 			else
@@ -83,7 +82,6 @@ class ResourceSocketConfigurer
 
 
 	_configureModelEvents: (socket) ->
-		console.log 'what is this for? (configuration for socketio...)'
 		@modelConnection.setSocketsToFireEventsOn socket.sockets
 
 
