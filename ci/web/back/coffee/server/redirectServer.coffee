@@ -15,7 +15,6 @@ class RedirectServer
 		@redirectServer = express()
 		@redirectServer.get '*', (request, response) =>
 			response.redirect 'https://' + @_getHostWithoutPort(request.headers.host) + request.url
-			# response.redirect 'https://' + request.headers.host + request.url
 		@redirectServer.listen @port
 
 
