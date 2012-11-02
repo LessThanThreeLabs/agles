@@ -36,7 +36,7 @@ class FilesLoader
 		for fileType, error of loadedFileErrors
 			anyErrors = true if error?
 
-		if anyErrors then callback 'Unable to load files'
+		if anyErrors then callback JSON.stringify loadedFileErrors
 		else callback null, loadedFiles
 
 
@@ -52,10 +52,12 @@ class FilesLoader
 					loadedFiles[index].contentType = contentType
 					fs.readFile @_getFileLocation(fileName), 'binary', defer loadedFileErrors[index], loadedFiles[index].plain
 
-		anyErrors = loadedFileErrors.some (fileError) =>
-			return fileError?
+		combinedErrors = loadedFileErrors.reduce ((previous, current) =>
+				return previous + ' ' + (current ? '')
+			), ''
+		trimmedErrors = combinedErrors.trim()
 
-		if anyErrors then callback 'Unable to load files'
+		if trimmedErrors isnt '' then callback trimmedErrors
 		else callback null, loadedFiles
 
 
