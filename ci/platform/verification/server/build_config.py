@@ -25,7 +25,7 @@ class BuildConfig(object):
 	@classmethod
 	def _construct_build_command(cls, language, command):
 		if command is not None:
-			return SimpleVagrantBuildCommand(language, command.rtrim().split("\n"))
+			return SimpleVagrantBuildCommand(language, command.rstrip().split("\n"))
 		return NullBuildCommand()
 
 	@classmethod
