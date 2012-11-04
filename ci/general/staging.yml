@@ -12,6 +12,7 @@ setup:
       - libevent-dev
       - libpq-dev
       - lessc
+      - haproxy
     - pip:
       - amqp
       - pika: 0.9.5
