@@ -1,5 +1,20 @@
 include_recipe "agles"
 
+dependencies = {
+		:python => {
+			:versions => ['2.5', '2.6', '2.7', '3.2', '3.3'],
+			:packages => ['nose']
+			},
+		:ruby => {
+			:versions => ['1.8.7', '1.9.3'],
+			:packages => ['bundler']
+			},
+		:nodejs => {
+			:versions => ['v0.8.9'],
+			:packages => []
+			}
+		}
+
 apt_repository "deadsnakes" do
 	uri "http://ppa.launchpad.net/fkrull/deadsnakes/ubuntu"
 	distribution node['lsb']['codename']
@@ -9,7 +24,7 @@ end
 python_versions = ['2.5', '2.6', '2.7', '3.2', '3.3']
 pip_packages = ['nose']
 
-python_versions.each do |version|
+dependencies[:python][:versions].each do |version|
 	package "python#{version}-dev" do
 		options("--force-yes")
 	end
@@ -20,7 +35,7 @@ python_versions.each do |version|
 		group node[:agles][:user]
 		action :create
 	end
-	pip_packages.each do |pip_package|
+	dependencies[:python][:packages].each do |pip_package|
 		python_pip pip_package do
 			virtualenv virtualenv_name
 			action :install
@@ -28,12 +43,9 @@ python_versions.each do |version|
 	end
 end
 
-ruby_versions = ['1.8.7', '1.9.3']
-gem_packages = ['bundler']
-
-ruby_versions.each do |version|
+dependencies[:ruby][:versions].each do |version|
 	rvm_ruby version
-	gem_packages.each do |gem_package|
+	dependencies[:ruby][:packages].each do |gem_package|
 		rvm_gem gem_package do
 			ruby_string version
 			action :install
@@ -41,9 +53,7 @@ ruby_versions.each do |version|
 	end
 end
 
-node_versions = ['v0.8.9']
-
-node_versions.each do |version|
+dependencies[:nodejs][:versions].each do |version|
 	agles_nodejs version
 end
 
