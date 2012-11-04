@@ -12,6 +12,9 @@ Vagrant::Config.run do |config|
   # Get Agles root directory
   agles_root = ENV["AGLES_ROOT"]
 
+  # Get provisioner role
+  provisioner_role = ENV["AGLES_ROLE"] or "verification_box"
+
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
   # config.vm.box_url = "http://domain.com/path/to/above.box"
@@ -73,7 +76,7 @@ Vagrant::Config.run do |config|
 		chef.cookbooks_path = chef_path + "/cookbooks"
 		chef.roles_path = chef_path + "/roles"
 		# chef.data_bags_path = "/var/chef/cookbooks/verification/data_bags"
-		chef.add_role("verification_box")
+		chef.add_role(provisioner_role)
 
 		# You may also specify custom JSON attributes:
     chef.json = {

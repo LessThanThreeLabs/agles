@@ -90,6 +90,7 @@ class Vagrant(object):
 						os.path.join("..",
 								os.path.join("..",
 										".."))))
+		return vagrant_env
 
 
 VagrantResults = collections.namedtuple(
