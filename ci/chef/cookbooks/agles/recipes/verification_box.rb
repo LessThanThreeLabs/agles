@@ -24,9 +24,10 @@ file "/home/#{node[:agles][:user]}/.validator.sh" do
 	mode "0755"
 	content <<-EOH
 		#!/bin/bash
+		sudo su -m
 		for command in "$@"
 			do echo \\$$command
-			sudo $command
+			$command
 			r=$?
 			if [ $r -ne 0 ]
 				then echo "$command failed with return code: $r"
