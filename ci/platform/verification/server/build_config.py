@@ -1,5 +1,4 @@
 from build_command import NullBuildCommand, SimpleVagrantBuildCommand
-from remote_test_runner import VagrantNoseCommand
 
 
 class BuildConfig(object):
