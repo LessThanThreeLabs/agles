@@ -31,7 +31,7 @@
 		]
 	},
 
-	"js": { 
+	"js": {
 		"application/javascript": [
 			"js/libs/socket.io.js",
 			"js/libs/stacktrace.js",
@@ -87,7 +87,7 @@
 
 	"font": {
 		"application/x-font-woff": [
-			"font/lobster/lobster.woff",
+			"font/lobster/Lobster.woff",
 			"font/sourceCodePro/sourceCodePro.woff",
 			"font/ubuntu/ubuntu.woff"
 		]
