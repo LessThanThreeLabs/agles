@@ -65,6 +65,7 @@
 			"js/src/repository/information/repositoryHeader.js",
 			"js/src/repository/repository.js",
 
+			"js/src/header/repository/repositoryHeaderOption.js",
 			"js/src/header/account/accountHeaderOption.js",
 			"js/src/header/login/loginCreateAccountEmailSentPanel.js",
 			"js/src/header/login/loginAdvancedInformationPanel.js",
