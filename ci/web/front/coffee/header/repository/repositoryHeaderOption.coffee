@@ -15,12 +15,12 @@ class RepositoryHeaderOption.View extends Backbone.View
 	className: 'repositoryHeaderOption headerMenuOption'
 	template: Handlebars.compile '<div class="dropdown">
 			<span class="dropdown-toggle" data-toggle="dropdown" href="#">Repositories</span>
-			<ul class="dropdown-menu" role="menu">
-				<li><a tabindex="-1" href="#">Repository #1</a></li>
-				<li><a tabindex="-1" href="#">Repository #2</a></li>
-				<li><a tabindex="-1" href="#">Repository #3</a></li>
+			<ul class="dropdown-menu pull-right" role="menu">
+				<li><a href="#">Repository #1</a></li>
+				<li><a href="#">Repository #2</a></li>
+				<li><a href="#">Repository #3</a></li>
 				<li class="divider"></li>
-				<li><a tabindex="-1" href="#">More options</a></li>
+				<li><a href="/repository/create">Create repository</a></li>
 			</ul>
 		</div>'
 
