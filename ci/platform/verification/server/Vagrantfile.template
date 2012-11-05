@@ -13,7 +13,7 @@ Vagrant::Config.run do |config|
   agles_root = ENV["AGLES_ROOT"]
 
   # Get provisioner role
-  provisioner_role = ENV["AGLES_ROLE"] or "verification_box"
+  provisioner_role = (ENV["AGLES_ROLE"] or "verification_box")
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
