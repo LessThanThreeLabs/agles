@@ -1,20 +1,28 @@
 div.headerMenu {
 	display: table-cell;
+	vertical-align: top;
 	text-align: right;
-	vertical-align: middle;
-	font-size: 1.3em;
+	font-size: 1.2em;
 	font-weight: bold;
+	height: 100%;
+	width: 300px;
 
 	.headerMenuOption {
-		display: inline-block;
-		margin-right: 30px;
+		@backgroundColorTransitionTime: 0.5s;
+		transition: background-color @backgroundColorTransitionTime ease-out;
+		-moz-transition: background-color @backgroundColorTransitionTime ease-out;
+		-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+		-o-transition: background-color @backgroundColorTransitionTime ease-out;
 
-		&:last-child {
-			margin-right: 100px;
-		}
+		@height: 35px;
+		display: inline-block;
+		height: @height;
+		line-height: @height;  // hack so that text will be vertically centered
+		padding-left: 15px;
+		padding-right: 15px;
 
 		&:hover {
-			color: #1199FF;
+			background-color: rgba(255, 255, 255, 0.4);
 		}
 	}
 }
