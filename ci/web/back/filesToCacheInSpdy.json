@@ -87,7 +87,7 @@
 
 	"font": {
 		"application/x-font-woff": [
-			"font/lobster/Lobster.woff",
+			"font/lobster/lobster.woff",
 			"font/sourceCodePro/sourceCodePro.woff",
 			"font/ubuntu/ubuntu.woff"
 		]
