@@ -6,7 +6,7 @@ elif [ -d 'js' ]; then
 	mkdir -p logs/redis
 	redis-server conf/redis/sessionStoreRedis.conf &
 	redis-server conf/redis/createAccountRedis.conf &
-	node --harmony js/index.js &
+	node --harmony js/index.js && fg
 else
 	echo 'You must first compile coffeescript into javascript by running compile.sh'
 fi
