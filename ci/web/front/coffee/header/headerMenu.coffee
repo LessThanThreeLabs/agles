@@ -19,6 +19,10 @@ class HeaderMenu.View extends Backbone.View
 		@accountHeaderOptionView = new AccountHeaderOption.View model: @model.accountHeaderOptionModel
 		@loginHeaderOptionView = new LoginHeaderOption.View model: @model.loginHeaderOptionModel
 
+		@repositoryHeaderOptionView.on 'repositorySelected', (repositoryId) =>
+			console.log 'headerMenu - repo selected'
+			@trigger 'repositorySelected', repositoryId
+
 
 	render: () ->
 		@$el.html @template()

@@ -29,6 +29,7 @@ class RepositoryHeaderOption.View extends Backbone.View
 
 	_clickHandler: () =>
 		console.log 'clicked'
+		@trigger 'repositorySelected', 17
 
 
 	_fixVisibility: () =>
