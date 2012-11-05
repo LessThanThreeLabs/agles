@@ -4,9 +4,9 @@ window.HeaderMenu = {}
 class HeaderMenu.Model extends Backbone.Model
 
 	initialize: () ->
-		@repositoryHeaderOptionModel = new RepositoryHeaderOption.Model()
 		@accountHeaderOptionModel = new AccountHeaderOption.Model()
 		@loginHeaderOptionModel = new LoginHeaderOption.Model()
+		@repositoryHeaderOptionModel = new RepositoryHeaderOption.Model()
 
 
 class HeaderMenu.View extends Backbone.View
@@ -15,18 +15,14 @@ class HeaderMenu.View extends Backbone.View
 	template: Handlebars.compile ''
 
 	initialize: () ->
-		@repositoryHeaderOptionView = new RepositoryHeaderOption.View model: @model.repositoryHeaderOptionModel
 		@accountHeaderOptionView = new AccountHeaderOption.View model: @model.accountHeaderOptionModel
 		@loginHeaderOptionView = new LoginHeaderOption.View model: @model.loginHeaderOptionModel
-
-		@repositoryHeaderOptionView.on 'repositorySelected', (repositoryId) =>
-			console.log 'headerMenu - repo selected'
-			@trigger 'repositorySelected', repositoryId
+		@repositoryHeaderOptionView = new RepositoryHeaderOption.View model: @model.repositoryHeaderOptionModel
 
 
 	render: () ->
 		@$el.html @template()
-		@$el.append @repositoryHeaderOptionView.render().el
 		@$el.append @accountHeaderOptionView.render().el
 		@$el.append @loginHeaderOptionView.render().el
+		@$el.append @repositoryHeaderOptionView.render().el
 		return @

@@ -15,9 +15,6 @@ class Header.View extends Backbone.View
 	initialize: () ->
 		@headerMenuView = new HeaderMenu.View model: @model.headerMenuModel
 
-		@headerMenuView.on 'repositorySelected', (repositoryId) =>
-			console.log 'repository selected ' + repositoryId
-
 
 	render: () ->
 		@$el.html @template()

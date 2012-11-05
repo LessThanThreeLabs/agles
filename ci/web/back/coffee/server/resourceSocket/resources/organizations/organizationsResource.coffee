@@ -9,4 +9,3 @@ exports.create = (configurationParams, stores, modelRpcConnection) ->
 
 class OrganizationsResource extends Resource
 	create: (session, data, callback) ->
-		

@@ -13,8 +13,18 @@ class RepositoryHeaderOption.Model extends Backbone.Model
 class RepositoryHeaderOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeaderOption headerMenuOption'
-	template: Handlebars.compile 'Repositories'
-	events: 'click': '_clickHandler'
+	template: Handlebars.compile '<div class="dropdown">
+			<span class="dropdown-toggle" data-toggle="dropdown" href="#">Repositories</span>
+			<ul class="dropdown-menu" role="menu">
+				<li><a tabindex="-1" href="#">Repository #1</a></li>
+				<li><a tabindex="-1" href="#">Repository #2</a></li>
+				<li><a tabindex="-1" href="#">Repository #3</a></li>
+				<li class="divider"></li>
+				<li><a tabindex="-1" href="#">More options</a></li>
+			</ul>
+		</div>'
+
+	# events: 'click': '_clickHandler'
 
 
 	initialize: () ->

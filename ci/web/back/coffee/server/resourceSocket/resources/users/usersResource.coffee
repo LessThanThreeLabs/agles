@@ -21,7 +21,7 @@ class UsersResource extends Resource
 		super configurationParams, stores, modelRpcConnection
 
 
-	create: (socket, data, callback) ->
+	create: (socket, data, callback) =>
 		if data.email? and data.password? and data.rememberMe? and data.firstName? and data.lastName?
 			@createAccountHandler.handleRequest socket, data, callback
 		else
