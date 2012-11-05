@@ -2,9 +2,14 @@ window.LoginHeaderOption = {}
 
 
 class LoginHeaderOption.Model extends Backbone.Model
+	defaults:
+		visible: true
 
 	initialize: () ->
 		@loginPanelModel = new LoginPanel.Model()
+
+		window.globalAccount.on 'change:firstName', () =>
+			@set 'visible', false
 
 
 class LoginHeaderOption.View extends Backbone.View
@@ -16,6 +21,9 @@ class LoginHeaderOption.View extends Backbone.View
 
 	initialize: () ->
 		@loginPanelView = new LoginPanel.View model: @model.loginPanelModel
+
+		@model.on 'change:visible', () =>
+			@_fixVisibility()
 
 
 	render: () ->
@@ -30,3 +38,7 @@ class LoginHeaderOption.View extends Backbone.View
 
 	_clickHandler: () =>
 		@model.loginPanelModel.toggleVisibility()
+
+
+	_fixVisibility: () =>
+		@$el.toggle @model.get 'visible'

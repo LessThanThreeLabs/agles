@@ -16,7 +16,7 @@ class LoginCreateAccountEmailSentPanel.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change', () =>
-			render()
+			@render()
 
 
 	render: () =>
