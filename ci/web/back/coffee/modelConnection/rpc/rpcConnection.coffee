@@ -11,6 +11,9 @@ exports.create = (configurationParams, connection) ->
 
 
 class RpcConnection
+	NOUNS: ['users', 'organizations', 'builds', 'repositories', 'buildOutputs']
+	VERBS: ['create', 'read', 'update', 'delete']
+
 	constructor: (@configurationParams, @connection) ->
 		assert.ok @connection? and @configurationParams?
 		@messageIdGenerator = MessageIdGenerator.create()
@@ -27,7 +30,7 @@ class RpcConnection
 
 
 	_createNounHandles: (callback) ->
-		for noun in ['users', 'organizations', 'builds', 'repositories', 'buildOutputs']
+		for noun in @NOUNS
 			@[noun] = {}
 			@_createVerbHandles noun
 
@@ -35,7 +38,7 @@ class RpcConnection
 
 
 	_createVerbHandles: (noun) ->
-		for verb in ['create', 'read', 'update', 'delete']
+		for verb in @VERBS
 			route = noun + '-' + verb
 			handler = RpcHandler.create route, @rpcBroker
 			@[noun][verb] = RpcHandlerFunctionProxy.create handler
