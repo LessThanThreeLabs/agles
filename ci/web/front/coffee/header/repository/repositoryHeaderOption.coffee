@@ -9,6 +9,7 @@ class RepositoryHeaderOption.Model extends Backbone.Model
 	initialize: () ->
 		window.globalAccount.on 'change:firstName change:lastName', () =>
 			console.log 'user logged in -- need to update repositories'
+			@set 'repositories', ['Repository #1', 'Repository #2', 'Repository #3']
 
 
 class RepositoryHeaderOption.View extends Backbone.View
@@ -26,9 +27,6 @@ class RepositoryHeaderOption.View extends Backbone.View
 		{{/if}}
 		<li><a href="/repository/create">Create repository</a></li>'
 
-	# events: 'click': '_clickHandler'
-
-
 	initialize: () ->
 		@model.on 'change:repositories', () =>
 			@_updateDropdownContents()
@@ -43,20 +41,9 @@ class RepositoryHeaderOption.View extends Backbone.View
 
 
 	_updateDropdownContents: () =>
-		console.log @model.get 'repositories'
 		@$el.find('.dropdownContents').html @dropdownContentsTemplate
 			repositories: @model.get 'repositories'
 
 
-	_clickHandler: () =>
-		console.log 'clicked'
-		@trigger 'repositorySelected', 17
-
-
 	_fixVisibility: () =>
 		@$el.toggle @model.get 'visible'
-
-
-	_updateRepositoryList: () =>
-		@model.set 'repositories',
-			['Repository #1', 'Repository #2', 'Repository #3']
