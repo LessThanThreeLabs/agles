@@ -11,7 +11,13 @@ exports.create = (configurationParams, connection) ->
 
 
 class RpcConnection
-	NOUNS: ['users', 'organizations', 'builds', 'repositories', 'buildOutputs']
+	NOUNS: [
+		{localName: 'users', 			rpcName: 'users'}
+		{localName: 'organizations', 	rpcName: 'organizations'}
+		{localName: 'builds', 			rpcName: 'builds'}
+		{localName: 'repositories', 	rpcName: 'repositories'}
+		{localName: 'buildOutputs', 	rpcName: 'build_outputs'} 
+	]
 	VERBS: ['create', 'read', 'update', 'delete']
 
 	constructor: (@configurationParams, @connection) ->
@@ -31,7 +37,7 @@ class RpcConnection
 
 	_createNounHandles: (callback) ->
 		for noun in @NOUNS
-			@[noun] = {}
+			@[noun.localName] = {}
 			@_createVerbHandles noun
 
 		callback null
@@ -39,6 +45,6 @@ class RpcConnection
 
 	_createVerbHandles: (noun) ->
 		for verb in @VERBS
-			route = noun + '-' + verb
+			route = noun.rpcName + '.' + verb
 			handler = RpcHandler.create route, @rpcBroker
-			@[noun][verb] = RpcHandlerFunctionProxy.create handler
+			@[noun.localName][verb] = RpcHandlerFunctionProxy.create handler
