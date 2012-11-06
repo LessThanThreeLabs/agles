@@ -9,8 +9,11 @@ class RepositoryHeaderOption.Model extends Backbone.Model
 	initialize: () ->
 		window.globalAccount.on 'change:firstName change:lastName', () =>
 			console.log 'user logged in -- need to update repositories'
-			@set 'repositories', ['Repository #1', 'Repository #2', 'Repository #3']
-
+			@set 'repositories', [
+				{name: 'Repository #1', id: 17}, 
+				{name: 'Repository #2', id: 18}, 
+				{name: 'Repository #3', id: 19}
+			]
 
 class RepositoryHeaderOption.View extends Backbone.View
 	tagName: 'div'
@@ -20,14 +23,18 @@ class RepositoryHeaderOption.View extends Backbone.View
 			<ul class="dropdown-menu dropdownContents pull-right" role="menu"></ul>
 		</div>'
 	dropdownContentsTemplate: Handlebars.compile '{{#each repositories}}
-			<li><a href="#">{{this}}</a></li>
+			<li><a class="repository" repositoryId={{this.id}}>{{this.name}}</a></li>
 		{{/each}}
 		{{#if repositories}}
 			<li class="divider"></li>
 		{{/if}}
 		<li><a href="/repository/create">Create repository</a></li>'
+	events:
+		'click .repository': '_handleSelection'
 
 	initialize: () ->
+		@router = new Backbone.Router()
+
 		@model.on 'change:repositories', () =>
 			@_updateDropdownContents()
 		@model.on 'change:visible', () =>
@@ -38,6 +45,13 @@ class RepositoryHeaderOption.View extends Backbone.View
 		@$el.html @template()
 		@_updateDropdownContents()
 		return @
+
+
+	_handleSelection: (event) =>
+		repositoryId = $(event.target).attr 'repositoryId'
+		assert.ok repositoryId?
+
+		@router.navigate 'repository/' + repositoryId, trigger: true
 
 
 	_updateDropdownContents: () =>

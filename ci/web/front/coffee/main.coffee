@@ -31,7 +31,17 @@ class Main.View extends Backbone.View
 		return @
 
 
+class Main.Router extends Backbone.Router
+	routes:
+		'repository/:repositoryNumber': 'loadRepsitory'
+
+	loadRepsitory: (repositoryNumber) =>
+		console.log 'need to load repository ' + repositoryNumber
+
+
 mainModel = new Main.Model()
 
 mainView = new Main.View model: mainModel
 $('body').prepend mainView.render().el
+
+mainRouter = new Main.Router()
