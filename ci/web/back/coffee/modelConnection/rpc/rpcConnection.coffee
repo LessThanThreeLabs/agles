@@ -27,7 +27,7 @@ class RpcConnection
 
 
 	_createNounHandles: (callback) ->
-		for noun in ['users', 'organizations', 'builds', 'repositories']
+		for noun in ['users', 'organizations', 'builds', 'repositories', 'buildOutputs']
 			@[noun] = {}
 			@_createVerbHandles noun
 
