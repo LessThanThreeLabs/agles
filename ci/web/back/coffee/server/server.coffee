@@ -40,6 +40,9 @@ class Server
 		expressServer.get '/', @_handleIndexRequest
 		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
 
+		# should server static content from here too
+		# (in memory)
+
 		server = spdy.createServer @httpsOptions, expressServer
 		server.listen @port
 
