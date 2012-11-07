@@ -6,20 +6,20 @@ class Main.Model extends Backbone.Model
 
 	defaults:
 		mode: 'welcome'
+		repositoryNumber: null
 
 
 	initialize: () =>
 		@headerModel = new Header.Model()
-
-		@repositoryModel = new Repository.Model id: Math.floor Math.random() * 10000
-		@repositoryModel.fetch()
-
 		@welcomeModel = new Welcome.Model()
 
 
 	validate: (attributes) =>
 		if attributes.mode not in @ALLOWED_MODES
-			return false
+			return new Error 'Invalid mode'
+
+		if attributes.mode is 'repository' and not attributes.repositoryNumber?
+			return new Error 'No repository number provided'
 
 		return
 
@@ -31,10 +31,9 @@ class Main.View extends Backbone.View
 
 	initialize: () ->
 		@headerView = new Header.View model: @model.headerModel
-		@repositoryView = new Repository.View model: @model.repositoryModel
 		@welcomeView = new Welcome.View model: @model.welcomeModel
 
-		@model.on 'change:mode', () =>
+		@model.on 'change:mode change:repositoryNumber', () =>
 			@_updateContent()
 
 
@@ -48,11 +47,26 @@ class Main.View extends Backbone.View
 	_updateContent: () =>
 		switch @model.get 'mode'
 			when 'welcome'
-				@$el.find('.contentContainer').html @welcomeView.render().el
+				@_loadWelcome()
 			when 'repository'
-				@$el.find('.contentContainer').html @repositoryView.render().el
+				@_loadRepository @model.get 'repositoryNumber'
 			else	
 				console.error 'Unaccounted for mode'
+
+
+	_loadWelcome: () =>
+		@$el.find('.contentContainer').html @welcomeView.render().el
+		console.log 'NEED TO UNSUBSCRIBE FROM REPO NOTIFICATIONS HERE!!'
+
+
+	_loadRepository: (repositoryNumber) =>
+		assert.ok repositoryNumber?
+
+		repositoryModel = new Repository.Model id: repositoryNumber
+		repositoryModel.fetch()
+
+		repositoryView = new Repository.View model: repositoryModel
+		@$el.find('.contentContainer').html repositoryView.render().el
 
 
 class Main.Router extends Backbone.Router
@@ -65,8 +79,9 @@ class Main.Router extends Backbone.Router
 
 
 	loadRepsitory: (repositoryNumber) =>
-		console.log 'need to load repository ' + repositoryNumber
-		mainModel.set 'mode', 'repository'
+		mainModel.set 
+			mode: 'repository'
+			repositoryNumber: repositoryNumber
 
 
 mainModel = new Main.Model()
