@@ -89,7 +89,8 @@ class Vagrant(object):
 				os.path.join(__file__,
 						os.path.join("..",
 								os.path.join("..",
-										".."))))
+										os.path.join("..",
+											"..")))))
 		return vagrant_env
 
 
