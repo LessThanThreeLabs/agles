@@ -11,7 +11,7 @@ class Welcome.View extends Backbone.View
 	template: Handlebars.compile '<div class="welcomeContents">
 			<div class="description">Tentacles!</div>
 			<div>
-				<img class="welcomeImage" src="img/awesomeFace.png">
+				<img class="welcomeImage" src="/img/awesomeFace.png">
 			</div>
 		</div>'
 

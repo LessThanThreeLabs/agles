@@ -1,98 +1,98 @@
 {
 	"css": {
 		"text/css": [
-			"css/libs/bootstrap.css",
+			"/css/libs/bootstrap.css",
 
-			"css/src/fonts.css",
+			"/css/src/fonts.css",
 
-			"css/src/welcome/welcome.css",
+			"/css/src/welcome/welcome.css",
 
-			"css/src/repository/build/build.css",
-			"css/src/repository/build/list/search/buildsSearchFilterSelector.css",
-			"css/src/repository/build/list/search/buildsSearchFilter.css",
-			"css/src/repository/build/list/search/buildsSearch.css",
-			"css/src/repository/build/list/buildsList.css",
-			"css/src/repository/build/list/buildsListManager.css",
-			"css/src/repository/build/details/output/buildOutputLine.css",
-			"css/src/repository/build/details/output/buildOutput.css",
-			"css/src/repository/build/details/buildDetails.css",
-			"css/src/repository/build/repositoryBuilds.css",
-			"css/src/repository/information/repositoryHeader.css",
-			"css/src/repository/repository.css",
+			"/css/src/repository/build/build.css",
+			"/css/src/repository/build/list/search/buildsSearchFilterSelector.css",
+			"/css/src/repository/build/list/search/buildsSearchFilter.css",
+			"/css/src/repository/build/list/search/buildsSearch.css",
+			"/css/src/repository/build/list/buildsList.css",
+			"/css/src/repository/build/list/buildsListManager.css",
+			"/css/src/repository/build/details/output/buildOutputLine.css",
+			"/css/src/repository/build/details/output/buildOutput.css",
+			"/css/src/repository/build/details/buildDetails.css",
+			"/css/src/repository/build/repositoryBuilds.css",
+			"/css/src/repository/information/repositoryHeader.css",
+			"/css/src/repository/repository.css",
 
-			"css/src/header/login/loginCreateAccountEmailSentPanel.css",
-			"css/src/header/login/loginBasicInformationPanel.css",
-			"css/src/header/login/loginPanel.css",
-			"css/src/header/login/loginHeaderOption.css",
-			"css/src/header/headerMenu.css",
-			"css/src/header/header.css",
+			"/css/src/header/login/loginCreateAccountEmailSentPanel.css",
+			"/css/src/header/login/loginBasicInformationPanel.css",
+			"/css/src/header/login/loginPanel.css",
+			"/css/src/header/login/loginHeaderOption.css",
+			"/css/src/header/headerMenu.css",
+			"/css/src/header/header.css",
 
-			"css/src/main.css"
+			"/css/src/main.css"
 		]
 	},
 
 	"js": {
 		"application/javascript": [
-			"js/libs/socket.io.js",
-			"js/libs/stacktrace.js",
-			"js/libs/assert.js",
-			"js/libs/jquery.js",
-			"js/libs/bootstrap.js",
-			"js/libs/handlebars.js",
-			"js/libs/underscore.js",
-			"js/libs/backbone/backbone.js",
-			"js/libs/backbone/iosync.js",
-			"js/libs/backbone/iobind.productionModeShouldUseMinified.js",
+			"/js/libs/socket.io.js",
+			"/js/libs/stacktrace.js",
+			"/js/libs/assert.js",
+			"/js/libs/jquery.js",
+			"/js/libs/bootstrap.js",
+			"/js/libs/handlebars.js",
+			"/js/libs/underscore.js",
+			"/js/libs/backbone/backbone.js",
+			"/js/libs/backbone/iosync.js",
+			"/js/libs/backbone/iobind.productionModeShouldUseMinified.js",
 
-			"js/src/globalAccount.js",
-			"js/src/socket.js",
+			"/js/src/globalAccount.js",
+			"/js/src/socket.js",
 
-			"js/src/welcome/welcome.js",
+			"/js/src/welcome/welcome.js",
 
-			"js/src/repository/build/build.js",
-			"js/src/repository/build/list/buildsFetcher.js",
-			"js/src/repository/build/list/search/buildsQuery.js",
-			"js/src/repository/build/list/search/buildsSearchFilterType.js",
-			"js/src/repository/build/list/search/buildsSearchFilterSelector.js",
-			"js/src/repository/build/list/search/buildsSearchFilter.js",
-			"js/src/repository/build/list/search/buildsSearch.js",
-			"js/src/repository/build/list/buildsList.js",
-			"js/src/repository/build/list/buildsListManager.js",
-			"js/src/repository/build/details/output/buildOutputLine.js",
-			"js/src/repository/build/details/output/buildOutput.js",
-			"js/src/repository/build/details/buildDetails.js",
-			"js/src/repository/build/repositoryBuilds.js",
-			"js/src/repository/information/repositoryHeader.js",
-			"js/src/repository/repository.js",
+			"/js/src/repository/build/build.js",
+			"/js/src/repository/build/list/buildsFetcher.js",
+			"/js/src/repository/build/list/search/buildsQuery.js",
+			"/js/src/repository/build/list/search/buildsSearchFilterType.js",
+			"/js/src/repository/build/list/search/buildsSearchFilterSelector.js",
+			"/js/src/repository/build/list/search/buildsSearchFilter.js",
+			"/js/src/repository/build/list/search/buildsSearch.js",
+			"/js/src/repository/build/list/buildsList.js",
+			"/js/src/repository/build/list/buildsListManager.js",
+			"/js/src/repository/build/details/output/buildOutputLine.js",
+			"/js/src/repository/build/details/output/buildOutput.js",
+			"/js/src/repository/build/details/buildDetails.js",
+			"/js/src/repository/build/repositoryBuilds.js",
+			"/js/src/repository/information/repositoryHeader.js",
+			"/js/src/repository/repository.js",
 
-			"js/src/header/repository/repositoryHeaderOption.js",
-			"js/src/header/account/accountHeaderOption.js",
-			"js/src/header/login/loginCreateAccountEmailSentPanel.js",
-			"js/src/header/login/loginAdvancedInformationPanel.js",
-			"js/src/header/login/loginBasicInformationPanel.js",
-			"js/src/header/login/loginPanel.js",
-			"js/src/header/login/loginHeaderOption.js",
-			"js/src/header/headerMenu.js",
-			"js/src/header/header.js",
+			"/js/src/header/repository/repositoryHeaderOption.js",
+			"/js/src/header/account/accountHeaderOption.js",
+			"/js/src/header/login/loginCreateAccountEmailSentPanel.js",
+			"/js/src/header/login/loginAdvancedInformationPanel.js",
+			"/js/src/header/login/loginBasicInformationPanel.js",
+			"/js/src/header/login/loginPanel.js",
+			"/js/src/header/login/loginHeaderOption.js",
+			"/js/src/header/headerMenu.js",
+			"/js/src/header/header.js",
 
-			"js/src/main.js",
+			"/js/src/main.js",
 
-			"js/src/history.js"
+			"/js/src/history.js"
 		]
 	},
 
 	"img": {
 		"image/png": [
-			"img/background.png",
-			"img/awesomeFace.png"
+			"/img/background.png",
+			"/img/awesomeFace.png"
 		]
 	},
 
 	"font": {
 		"application/x-font-woff": [
-			"font/lobster/lobster.woff",
-			"font/sourceCodePro/sourceCodePro.woff",
-			"font/ubuntu/ubuntu.woff"
+			"/font/lobster/lobster.woff",
+			"/font/sourceCodePro/sourceCodePro.woff",
+			"/font/ubuntu/ubuntu.woff"
 		]
 	}
 }

@@ -62,4 +62,4 @@ class FilesLoader
 
 
 	_getFileLocation: (fileName) =>
-		return @configurationParams.staticFiles.rootDirectory + '/' + fileName
+		return @configurationParams.staticFiles.rootDirectory + fileName

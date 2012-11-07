@@ -49,7 +49,7 @@ class SpdyCache
 		headers = 'content-type': file.contentType
 		headers['content-encoding'] = 'gzip' if useGzip
 
-		response.push '/' + file.name, headers, (error, stream) =>
+		response.push file.name, headers, (error, stream) =>
 			if error?
 				console.error error
 			else

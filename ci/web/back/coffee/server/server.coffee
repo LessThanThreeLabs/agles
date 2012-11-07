@@ -38,6 +38,8 @@ class Server
 		@configurer.configure expressServer
 
 		expressServer.get '/', @_handleIndexRequest
+		expressServer.get '/repository/:id', @_handleIndexRequest
+
 		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
 
 		# should server static content from here too
