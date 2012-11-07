@@ -3,9 +3,9 @@ window.BuildsSearchFilterSelector = {}
 
 class BuildsSearchFilterSelector.Model extends Backbone.Model
 	types: [
-		new BuildsSearchFilterType 'everyone', 'Everyone', 'View builds created by eveyone,<br>including you.', 'img/icons/everyone.svg'
-		new BuildsSearchFilterType 'user', 'User', 'View your builds and code <br> reviews assigned to you.', 'img/icons/user.svg'
-		new BuildsSearchFilterType 'important', 'Important', 'View builds that need attention.', 'img/icons/critical.svg'
+		new BuildsSearchFilterType 'everyone', 'Everyone', 'View builds created by eveyone,<br>including you.', '/img/icons/everyone.svg'
+		new BuildsSearchFilterType 'user', 'User', 'View your builds and code <br> reviews assigned to you.', '/img/icons/user.svg'
+		new BuildsSearchFilterType 'important', 'Important', 'View builds that need attention.', '/img/icons/critical.svg'
 	]
 
 
