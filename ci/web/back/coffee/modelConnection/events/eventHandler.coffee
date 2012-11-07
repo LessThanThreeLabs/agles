@@ -1,14 +1,19 @@
 assert = require 'assert'
 
 
-exports.create = (configurationParams, sockets) ->
-	return new EventHandler configurationParams, sockets
+exports.create = (configurationParams, connection) ->
+	return new EventHandler configurationParams, connection
 
 
 class EventHandler
-	constructor: (@configurationParams, @sockets) ->
-		assert.ok @configurationParams? and @sockets?
+	constructor: (@configurationParams, @connection) ->
+		assert.ok @configurationParams? and @connection?
 
 
-	beginListening: () ->
+	connect: (callback) =>
+		console.log 'need to connect to event framework in rabbitmq'
+		callback()
 		
+
+	setSockets: (@sockets) =>
+		assert.ok sockets

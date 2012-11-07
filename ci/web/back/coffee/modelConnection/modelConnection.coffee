@@ -18,13 +18,23 @@ class ModelConnection
 		@connection = amqp.createConnection @configurationParams.messageBroker
 		@connection.on 'ready', () =>
 			@rpcConnection = RpcConnection.create @configurationParams, @connection
-			@rpcConnection.connect callback
+			@eventHandler = EventHandler.create @configurationParams, @connection
+			
+			await
+				@rpcConnection.connect defer rpcConnectionError
+				@eventHandler.connect defer eventHandlerError
+
+			if rpcConnectionError?
+				callback rpcConnectionError
+			else if eventHandlerError?
+				callback eventHandlerError
+			else
+				callback null
+
 		@connection.on 'error', (error) =>
 			callback error
 
 
 	setSocketsToFireEventsOn: (sockets) ->
-		assert.ok sockets?
-		@eventHandler = EventHandler.create @configurationParams, sockets
-		@eventHandler.beginListening()
+		@eventHandler.setSockets sockets
 		
