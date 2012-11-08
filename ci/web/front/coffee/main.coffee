@@ -6,7 +6,7 @@ class Main.Model extends Backbone.Model
 
 	defaults:
 		mode: 'welcome'
-		repositoryNumber: null
+		repositoryId: null
 
 
 	initialize: () =>
@@ -19,8 +19,8 @@ class Main.Model extends Backbone.Model
 		if attributes.mode not in @ALLOWED_MODES
 			return new Error 'Invalid mode'
 
-		if attributes.mode is 'repository' and not attributes.repositoryNumber?
-			return new Error 'No repository number provided'
+		if attributes.mode is 'repository' and not attributes.repositoryId?
+			return new Error 'No repository id provided'
 
 		return
 
@@ -35,7 +35,7 @@ class Main.View extends Backbone.View
 		@welcomeView = new Welcome.View model: @model.welcomeModel
 		@repositoryView = new Repository.View model: @model.repositoryModel
 
-		@model.on 'change:mode change:repositoryNumber', () =>
+		@model.on 'change:mode change:repositoryId', () =>
 			@_updateContent()
 
 
@@ -51,7 +51,7 @@ class Main.View extends Backbone.View
 			when 'welcome'
 				@_loadWelcome()
 			when 'repository'
-				@_loadRepository @model.get 'repositoryNumber'
+				@_loadRepository @model.get 'repositoryId'
 			else	
 				console.error 'Unaccounted for mode'
 
@@ -61,24 +61,25 @@ class Main.View extends Backbone.View
 		console.log 'NEED TO UNSUBSCRIBE FROM REPO NOTIFICATIONS HERE!!'
 
 
-	_loadRepository: (repositoryNumber) =>
-		assert.ok repositoryNumber?
+	_loadRepository: (repositoryId) =>
+		assert.ok repositoryId?
+		@model.repositoryModel.set 'repositoryId', repositoryId
 		@$el.find('.contentContainer').html @repositoryView.render().el
 
 
 class Main.Router extends Backbone.Router
 	routes:
 		'': 'loadIndex'
-		'repository/:repositoryNumber': 'loadRepsitory'
+		'repository/:repositoryId': 'loadRepsitory'
 
 	loadIndex: () =>
 		mainModel.set 'mode', 'welcome'
 
 
-	loadRepsitory: (repositoryNumber) =>
+	loadRepsitory: (repositoryId) =>
 		mainModel.set 
 			mode: 'repository'
-			repositoryNumber: repositoryNumber
+			repositoryId: repositoryId
 
 
 mainModel = new Main.Model()

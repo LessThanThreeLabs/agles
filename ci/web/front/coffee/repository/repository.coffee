@@ -16,7 +16,7 @@ class Repository.Model extends Backbone.Model
 
 	validate: (attributes) =>
 		if not attributes.repositoryId?
-			return false
+			return new Error 'Invalid repository id'
 		return
 
 
