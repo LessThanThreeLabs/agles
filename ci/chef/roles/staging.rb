@@ -11,7 +11,7 @@ run_list(
 	"recipe[redisio::install]",
 	"recipe[rvm::system]",
 	"recipe[agles::dependencies]",
-	"recipe[agles::configure]"
+	"recipe[agles::setup_config]"
 )
 default_attributes(
 	:agles => {
