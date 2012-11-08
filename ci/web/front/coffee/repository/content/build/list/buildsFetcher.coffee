@@ -28,12 +28,14 @@ window.BuildsFetcher = class BuildsFetcher
 		assert.ok @currentQuery? and @currentCallback?
 
 		requestData = 
-			repositoryId: @currentQuery.repositoryId
-			type: @currentQuery.type
-			queryString: @currentQuery.queryString
-			range:
-				start: @currentQuery.start
-				end: @currentQuery.end
+			method: 'range'
+			args:
+				repositoryId: @currentQuery.repositoryId
+				type: @currentQuery.type
+				queryString: @currentQuery.queryString
+				range:
+					start: @currentQuery.start
+					end: @currentQuery.end
 
 		socket.emit 'builds:read', requestData, (error, buildsData) =>
 			callback = @currentCallback

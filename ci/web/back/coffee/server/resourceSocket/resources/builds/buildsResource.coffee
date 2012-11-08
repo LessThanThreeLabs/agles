@@ -2,14 +2,22 @@ assert = require 'assert'
 
 Resource = require '../resource'
 
+BuildsReadHandler = require './handlers/buildsReadHandler'
 
 exports.create = (configurationParams, stores, modelConnection) ->
-	return new BuildsResource configurationParams, stores, modelConnection
+	readHandler = BuildsReadHandler.create modelConnection.rpcConnection
+	return new BuildsResource configurationParams, stores, modelConnection, readHandler
 
 
 class BuildsResource extends Resource
-	read: (socket, data, callback) ->
-		if data.id?
+	constructor: (configurationParams, stores, modelConnection, @readHandler) ->
+		super configurationParams, stores, modelConnection
+
+
+	read: (socket, data, callback) =>
+		@_call @readHandler, socket, data, callback
+
+	###	if data.id?
 			callabck 'Havent implemented this read yet...'
 			# @modelConnection.rpcConnection.getBuild socket.session.user, data.repositoryId, data.id, callback
 		else if data.range? and data.repositoryId? and data.type? and data.queryString?
@@ -20,7 +28,7 @@ class BuildsResource extends Resource
 			# 	data.range.start, data.range.end, callback
 		else
 			callback 'Parsing error'
-
+###
 
 
 createFakeBuild = (repositoryId, number, numberOffset) ->

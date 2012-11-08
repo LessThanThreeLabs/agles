@@ -24,3 +24,15 @@ module.exports = class Resource
 
 	subscribe: (socket, data, callback) ->
 		callback 'subscribe not written yet' if callback?
+
+
+	_call: (handler, socket, data, callback) ->
+		assert.ok data?
+		if data.method? and data.args?
+			if typeof handler[data.method] is 'function'
+				handler[data.method] socket, data.args, callback
+			else
+				callback 'Class #{handler} has no method #{data.method}'
+		else
+			handler.default socket, data, callback
+			

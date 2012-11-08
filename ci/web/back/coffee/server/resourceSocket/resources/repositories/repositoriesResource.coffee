@@ -2,25 +2,24 @@ assert = require 'assert'
 
 Resource = require '../resource'
 
+RepositoriesReadHandler = require './handlers/repositoriesReadHandler'
+RepositoriesSubscribeHandler = require './handlers/repositoriesSubscribeHandler'
 
 exports.create = (configurationParams, stores, modelConnection) ->
-	return new RepositoriesResource configurationParams, stores, modelConnection
+	readHandler = RepositoriesReadHandler.create modelConnection.rpcConnection
+	subscribeHandler = RepositoriesSubscribeHandler.create modelConnection.rpcConnection
+	return new RepositoriesResource configurationParams, stores, modelConnection, readHandler, subscribeHandler
 
 
 class RepositoriesResource extends Resource
-	@allowedSubscriptionTypes = ['general', 'builds']
-
-	read: (socket, data, callback) ->
-		fakeRepository =
-			id: data.id
-			name: 'Agles CI'
-			description: 'Dedicated to saving the world, one ci at a time.'
-			url: 'https://agles.blimp.com/awesome.git'
-		callback null, fakeRepository
+	constructor: (configurationParams, stores, modelConnection, @readHandler, @subscribeHandler) ->
+		super configurationParams, stores, modelConnection
 
 
-	subscribe: (socket, data, callback) ->
-		console.log 'need to check that the user is allowed to register for these events...'
-		@modelConnection.eventConnection.repositories.registerForEvents socket, data.id
-		callback null, 'Ok'
+	read: (socket, data, callback) =>
+		@_call @readHandler, socket, data, callback
+
+
+	subscribe: (socket, data, callback) =>
+		@_call @subscribeHandler, socket, data, callback
 		

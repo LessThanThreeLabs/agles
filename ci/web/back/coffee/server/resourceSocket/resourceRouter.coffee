@@ -18,17 +18,6 @@ exports.create = (configurationParams, stores, modelConnection) ->
 
 class ResourceRouter
 	constructor: (@usersResource, @organizationsResource, @buildsResource, @buildOutputsResource, @repositoriesResource) ->
-		@allowedActions = ['create', 'read', 'update', 'delete', 'subscribe']
-		assert.ok @_checkResource @usersResource
-		assert.ok @_checkResource @organizationsResource
-		assert.ok @_checkResource @buildsResource
-		assert.ok @_checkResource @buildOutputsResource
-		assert.ok @_checkResource @repositoriesResource
-
-
-	_checkResource: (resource) ->
-		for action in @allowedActions
-			assert.ok typeof resource[action] == 'function'
 
 
 	bindToResources: (socket) ->
@@ -40,7 +29,8 @@ class ResourceRouter
 
 
 	_bindToResource: (socket, name, resource) ->
-		for action in @allowedActions
+		allowedActions = (key for key in Object.keys(resource) when typeof resource[key] is 'function')
+		for action in allowedActions
 			@_bindToResourceFunction socket, name, action, resource
 
 
@@ -50,5 +40,5 @@ class ResourceRouter
 			# if not socket.session.user?
 			# 	callback 'No user associated with resource request'
 			# else
-				socket.session.user = 'fake user'
-				resource[action] socket, data, callback
+			socket.session.user = 'fake user'
+			resource[action] socket, data, callback

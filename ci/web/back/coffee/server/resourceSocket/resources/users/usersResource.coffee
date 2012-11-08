@@ -6,30 +6,28 @@ AccountInformationValidator = require './accountInformationValidator'
 CreateAccountHandler = require './create/createAccountHandler'
 LoginHandler = require './login/loginHandler'
 
+UsersCreateHandler = require './handlers/usersCreateHandler'
+UsersUpdateHandler = require './handlers/usersUpdateHandler'
 
 exports.create = (configurationParams, stores, modelConnection) ->
 	passwordHasher = PasswordHasher.create()
 	accountInformationValidator = AccountInformationValidator.create()
 	createAccountHandler = CreateAccountHandler.create configurationParams, stores.createAccountStore, modelConnection.rpcConnection, passwordHasher, accountInformationValidator
 	loginHandler = LoginHandler.create configurationParams, modelConnection.rpcConnection, passwordHasher
-	return new UsersResource configurationParams, stores, modelConnection, createAccountHandler, loginHandler
+	createHandler = UsersCreateHandler.create modelConnection.rpcConnection, createAccountHandler
+	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, loginHandler
+	return new UsersResource configurationParams, stores, modelConnection, createHandler, updateHandler
 
 
 class UsersResource extends Resource
-	constructor: (configurationParams, stores, modelConnection, @createAccountHandler, @loginHandler) ->
-		assert.ok @createAccountHandler? and @loginHandler?
+	constructor: (configurationParams, stores, modelConnection, @createHandler, @updateHandler) ->
+		assert.ok @createHandler? and @updateHandler?
 		super configurationParams, stores, modelConnection
 
 
 	create: (socket, data, callback) =>
-		if data.email? and data.password? and data.rememberMe? and data.firstName? and data.lastName?
-			@createAccountHandler.handleRequest socket, data, callback
-		else
-			callback 'Parsing error'
+		@_call @createHandler, socket, data, callback
 
 
 	update: (socket, data, callback) =>
-		if data.email? and data.password? and data.rememberMe?
-			@loginHandler.handleRequest socket, data, callback
-		else
-			callback 'Parsing error'
+		@_call @updateHandler, socket, data, callback
