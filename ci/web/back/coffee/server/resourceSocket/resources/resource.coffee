@@ -2,8 +2,8 @@ assert = require 'assert'
 
 
 module.exports = class Resource
-	constructor: (@configurationParams, @stores, @modelRpcConnection) ->
-		assert.ok @configurationParams? and @stores? and @modelRpcConnection?
+	constructor: (@configurationParams, @stores, @modelConnection) ->
+		assert.ok @configurationParams? and @stores? and @modelConnection?
 
 
 	create: (socket, data, callback) ->

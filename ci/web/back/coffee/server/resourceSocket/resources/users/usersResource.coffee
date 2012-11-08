@@ -7,18 +7,18 @@ CreateAccountHandler = require './create/createAccountHandler'
 LoginHandler = require './login/loginHandler'
 
 
-exports.create = (configurationParams, stores, modelRpcConnection) ->
+exports.create = (configurationParams, stores, modelConnection) ->
 	passwordHasher = PasswordHasher.create()
 	accountInformationValidator = AccountInformationValidator.create()
-	createAccountHandler = CreateAccountHandler.create configurationParams, stores.createAccountStore, modelRpcConnection, passwordHasher, accountInformationValidator
-	loginHandler = LoginHandler.create configurationParams, modelRpcConnection, passwordHasher
-	return new UsersResource configurationParams, stores, modelRpcConnection, createAccountHandler, loginHandler
+	createAccountHandler = CreateAccountHandler.create configurationParams, stores.createAccountStore, modelConnection.rpcConnection, passwordHasher, accountInformationValidator
+	loginHandler = LoginHandler.create configurationParams, modelConnection.rpcConnection, passwordHasher
+	return new UsersResource configurationParams, stores, modelConnection, createAccountHandler, loginHandler
 
 
 class UsersResource extends Resource
-	constructor: (configurationParams, stores, modelRpcConnection, @createAccountHandler, @loginHandler) ->
+	constructor: (configurationParams, stores, modelConnection, @createAccountHandler, @loginHandler) ->
 		assert.ok @createAccountHandler? and @loginHandler?
-		super configurationParams, stores, modelRpcConnection
+		super configurationParams, stores, modelConnection
 
 
 	create: (socket, data, callback) =>
