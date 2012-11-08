@@ -13,5 +13,5 @@ class UserEventHandler extends EventHandler
 		console.log 'need to register for user events'
 
 
-	processEvent: (message, headers, deliveryInfo) =>
+	processEvent: (data) =>
 		console.log 'need to handle user event...'

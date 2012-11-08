@@ -13,5 +13,5 @@ class OrganizationEventEventHandler extends EventHandler
 		console.log 'need to register for organization events'
 
 
-	processEvent: (message, headers, deliveryInfo) =>
+	processEvent: (data) =>
 		console.log 'need to handle organization event...'

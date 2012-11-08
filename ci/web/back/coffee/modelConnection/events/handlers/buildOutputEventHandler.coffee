@@ -13,5 +13,5 @@ class BuildEventEventHandler extends EventHandler
 		console.log 'need to register for build output events'
 
 
-	processEvent: (message, headers, deliveryInfo) =>
+	processEvent: (data) =>
 		console.log 'need to handle build output event...'

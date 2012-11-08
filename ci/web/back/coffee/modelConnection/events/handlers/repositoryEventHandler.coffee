@@ -13,5 +13,5 @@ class RepositoryEventHandler extends EventHandler
 		console.log 'need to register for repository events'
 		
 
-	processEvent: (message, headers, deliveryInfo) =>
+	processEvent: (data) =>
 		console.log 'need to handle repository event...'

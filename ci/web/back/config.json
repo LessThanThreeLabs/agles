@@ -87,7 +87,7 @@
 
 		"events": {
 			"exchange": "model:events",
-			"queueNamePrefix": "81029415dd"
+			"queueNamePrefix": "webserver_queue_name_prefix"
 		}
 	}
 }

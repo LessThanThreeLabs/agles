@@ -40,18 +40,18 @@ class EventConnection
 
 
 	_connectHandlers: (callback) =>
-		queueNamePreface = @configurationParams.events.queueNamePrefix
+		queueNamePrefix = @configurationParams.events.queueNamePrefix
 
 		@userEventConnection = ResourceEventConnection.create @connection, 
-			@exchange, 'users', queueNamePreface + '_users', @users
+			@exchange, 'users', queueNamePrefix + '_users', @users
 		@organizationEventConnection = ResourceEventConnection.create @connection, 
-			@exchange, 'organizations', queueNamePreface + '_organizations', @organizations
+			@exchange, 'organizations', queueNamePrefix + '_organizations', @organizations
 		@buildEventConnection = ResourceEventConnection.create @connection, 
-			@exchange, 'builds', queueNamePreface + '_builds', @builds
+			@exchange, 'builds', queueNamePrefix + '_builds', @builds
 		@buildOutputEventConnection = ResourceEventConnection.create @connection, 
-			@exchange, 'buildOutputs', queueNamePreface + '_buildOutputs', @buildOutputs
+			@exchange, 'buildOutputs', queueNamePrefix + '_buildOutputs', @buildOutputs
 		@repositoryEventConnection = ResourceEventConnection.create @connection, 
-			@exchange, 'repositories', queueNamePreface + '_repositories', @repositories
+			@exchange, 'repositories', queueNamePrefix + '_repositories', @repositories
 
 		await
 			@userEventConnection.connect defer userEventConnectionError
@@ -64,5 +64,7 @@ class EventConnection
 			buildEventConnectionError, buildOutputEventConnectionError, repositoryEventConnectionError]
 		errors = (error for error in connectionErrors when error?)
 
-		if errors.length is 0 then callback()
-		else callback errors
+		if errors.length is 0 
+			callback()
+		else 
+			callback errors

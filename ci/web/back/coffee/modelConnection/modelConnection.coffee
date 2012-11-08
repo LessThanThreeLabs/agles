@@ -26,8 +26,10 @@ class ModelConnection
 
 			errors = (error for error in [rpcConnectionError, eventConnectionError] when error?)
 
-			if errors.length is 0 then callback()
-			else callback errors
+			if errors.length is 0 
+				callback()
+			else 
+				callback errors
 
 
 		@connection.on 'error', (error) =>
