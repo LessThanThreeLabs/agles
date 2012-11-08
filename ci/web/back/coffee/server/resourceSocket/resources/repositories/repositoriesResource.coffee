@@ -19,7 +19,7 @@ class RepositoriesResource extends Resource
 
 
 	subscribe: (socket, data, callback) ->
-		assert.ok data.id? and data.type? and data.type in @allowedSubscriptionTypes
-		socket.join 'repositoryId=' + data.id + ' - ' + data.type
+		console.log 'need to check that the user is allowed to register for these events...'
+		@modelConnection.eventConnection.repositories.registerForEvents socket, data.id
 		callback null, 'Ok'
 		
