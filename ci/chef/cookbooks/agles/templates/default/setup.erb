@@ -1,5 +1,4 @@
 #!/bin/bash
-languages=`ls /home/<%= @user %>/scripts/language`
-for language in $languages
+for language in `ls -r /home/<%= @user %>/scripts/language`
 	do source /home/<%= @user %>/scripts/language/$language
 done

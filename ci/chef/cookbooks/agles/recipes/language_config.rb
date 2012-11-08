@@ -17,12 +17,16 @@ def rvm_configure(new_ruby)
 	language_configure("ruby", "rvm use #{new_ruby}")
 end
 
-def nave_configure(new_node)
+def nvm_configure(new_node)
+	new_node = "v#{new_node}" if not new_node.start_with? "v"
 	node[:agles][:languages][:node][:node_version] = new_node
-	execute "./nave.sh usemain #{new_node}" do
-		cwd "/home/#{node[:agles][:user]}"
+	link "/usr/local/bin/node" do
+		to "/home/#{node[:agles][:user]}/#{new_node}/bin/node"
 	end
-	language_configure("nodejs", "source ./nave.sh use #{new_node}")
+	link "/usr/local/bin/npm" do
+		to "/home/#{node[:agles][:user]}/#{new_node}/bin/npm"
+	end
+	language_configure("nodejs", "source ./nvm.sh\nnvm use #{new_node}")
 end
 
 def setup_language(language, version)
@@ -34,7 +38,7 @@ def setup_language(language, version)
 	when :ruby
 		rvm_configure version
 	when :nodejs
-		nave_configure version
+		nvm_configure version
 	end
 end
 

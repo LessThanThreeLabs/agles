@@ -19,7 +19,7 @@ setup:
     - pip:
       - amqp
       - pika: 0.9.5
-      - kombu
+      - kombu: 2.4.7
       - librabbitmq
       - sqlalchemy
       - pyyaml

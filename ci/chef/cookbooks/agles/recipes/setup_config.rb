@@ -49,7 +49,7 @@ def npm(package_name, package_version)
 		end
 	else
 		package_string = package_version ? "#{package_name}@#{package_version}" : package_name
-		execute "npm install #{package_string}"
+		execute "npm install -g #{package_string}"
 	end
 end
 
