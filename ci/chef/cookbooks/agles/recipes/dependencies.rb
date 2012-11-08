@@ -22,7 +22,7 @@ apt_repository "deadsnakes" do
 end
 
 python_versions = ['2.5', '2.6', '2.7', '3.2', '3.3']
-pip_packages = ['nose']
+pip_packages = ['distribute', 'nose']
 
 dependencies[:python][:versions].each do |version|
 	package "python#{version}-dev" do

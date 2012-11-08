@@ -33,7 +33,7 @@ def setup_language(language, version)
 		virtualenv_configure version
 	when :ruby
 		rvm_configure version
-	when :node
+	when :nodejs
 		nave_configure version
 	end
 end
