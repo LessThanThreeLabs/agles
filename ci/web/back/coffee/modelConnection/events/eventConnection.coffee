@@ -25,7 +25,7 @@ class EventConnection
 
 
 	setSockets: (@sockets, callback) ->
-		assert.ok sockets?
+		assert.ok sockets? and @exchange?
 		@_createHandlers callback
 
 
