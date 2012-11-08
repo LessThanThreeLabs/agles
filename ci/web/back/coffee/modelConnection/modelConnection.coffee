@@ -1,8 +1,8 @@
 assert = require 'assert'
 amqp = require 'amqp'
 
-EventHandler = require './events/eventHandler'
 RpcConnection = require './rpc/rpcConnection'
+EventConnection = require './events/eventConnection'
 
 
 exports.create = (configurationParams) ->
@@ -18,23 +18,22 @@ class ModelConnection
 		@connection = amqp.createConnection @configurationParams.messageBroker
 		@connection.on 'ready', () =>
 			@rpcConnection = RpcConnection.create @configurationParams, @connection
-			@eventHandler = EventHandler.create @configurationParams, @connection
+			@eventConnection = EventConnection.create @configurationParams, @connection
 			
 			await
 				@rpcConnection.connect defer rpcConnectionError
-				@eventHandler.connect defer eventHandlerError
+				@eventConnection.connect defer eventConnectionError
 
-			if rpcConnectionError?
-				callback rpcConnectionError
-			else if eventHandlerError?
-				callback eventHandlerError
-			else
-				callback null
+			errors = (error for error in [rpcConnectionError, eventConnectionError] when error?)
+
+			if errors.length is 0 then callback()
+			else callback errors
+
 
 		@connection.on 'error', (error) =>
 			callback error
 
 
-	setSocketsToFireEventsOn: (sockets) ->
-		@eventHandler.setSockets sockets
+	setSocketsToFireEventsOn: (sockets, callback) ->
+		@eventConnection.setSockets sockets, callback
 		

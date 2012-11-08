@@ -78,15 +78,16 @@
 		},
 
 		"rpc": {
-			"exchange": "model-rpc",
+			"exchange": "model:rpc",
 
 			"deadLetter": {
-				"exchange": "model-rpc-deadLetter"
+				"exchange": "model:rpc_dlx"
 			}
 		},
 
 		"events": {
-			"exchange": "model-events"
+			"exchange": "model:events",
+			"queueNamePrefix": "81029415dd"
 		}
 	}
 }

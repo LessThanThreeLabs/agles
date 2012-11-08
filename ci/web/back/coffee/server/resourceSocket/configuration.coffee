@@ -82,7 +82,8 @@ class ResourceSocketConfigurer
 
 
 	_configureModelEvents: (socket) ->
-		@modelConnection.setSocketsToFireEventsOn socket.sockets
+		@modelConnection.setSocketsToFireEventsOn socket.sockets, (error) =>
+			throw error if error?
 
 
 	configureConnection: (socket) ->
