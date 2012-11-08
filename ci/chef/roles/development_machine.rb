@@ -7,7 +7,7 @@ run_list(
 	"recipe[postgresql::client]",
 	"recipe[database]",
 	"recipe[rabbitmq]",
-	"recipe[agles::configure]"
+	"recipe[agles::setup_config]"
 )
 default_attributes()
 override_attributes(

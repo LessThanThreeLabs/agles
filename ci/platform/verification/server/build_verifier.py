@@ -5,8 +5,8 @@ import yaml
 
 from git import Repo
 
-from build_config import BuildConfig
 from model_server.build_outputs.update_handler import Console
+from verification_config import VerificationConfig
 from verification_result import VerificationResult
 
 
@@ -26,9 +26,9 @@ class BuildVerifier(object):
 		try:
 			self.checkout_refs(repo_uri, refs)
 			self.setup_vagrant_wrapper(console_appender)
-			build_configs = self.get_build_configurations()
-			self.run_build_step(build_configs, console_appender)
-			self.run_test_step(build_configs, console_appender)
+			verification_config = self.get_verification_configurations()
+			self.run_build_step(verification_config.build_commands, console_appender)
+			self.run_test_step(verification_config.test_commands, console_appender)
 		except VerificationException, e:
 			self._mark_failure(callback, e)
 		else:
@@ -63,32 +63,27 @@ class BuildVerifier(object):
 		if returncode != 0:
 			raise VerificationException("vm provisioning", returncode=returncode)
 
-	def get_build_configurations(self):
+	def get_verification_configurations(self):
 		"""Reads in the yaml config file contained in the checked
 		out user repository which this server is verifying"""
 		config_path = os.path.join(self.source_dir, "agles_config.yml")
-		if not os.access(config_path, os.F_OK):
-			return self.get_default_build_configurations()
-		with open(config_path) as config_file:
-			config = yaml.load(config_file.read())
-		config_dict = config.get("languages")
-		build_configs = list()
-		for language, config_dict in config_dict.iteritems():
-			build_configs.append(BuildConfig.from_config_tuple(language, config_dict))
-		return build_configs
+		if os.access(config_path, os.F_OK):
+			with open(config_path) as config_file:
+				config = yaml.load(config_file.read())
+		else:
+			config = dict()
+		verification_config = VerificationConfig(config.get("build"), config.get("test"))
+		return verification_config
 
-	def get_default_build_configurations(self):
-		return [BuildConfig.from_config_tuple("python", None)]
-
-	def run_build_step(self, build_configs, console_appender):
-		for build_config in build_configs:
-			if build_config.build_command.run(self.vagrant_wrapper,
+	def run_build_step(self, build_commands, console_appender):
+		for build_command in build_commands:
+			if build_command.run(self.vagrant_wrapper,
 				self._get_output_handler(console_appender, Console.Build)):
 				raise VerificationException("build")
 
-	def run_test_step(self, build_configs, console_appender):
-		for build_config in build_configs:
-			if build_config.test_command.run(self.vagrant_wrapper,
+	def run_test_step(self, test_commands, console_appender):
+		for test_command in test_commands:
+			if test_command.run(self.vagrant_wrapper,
 				self._get_output_handler(console_appender, Console.Test)):
 				raise VerificationException("test")
 

@@ -6,34 +6,40 @@
 #
 # All rights reserved - Do Not Redistribute
 #
-python_pip "pylint" do
-	if node[:agles][:languages][:python] and node[:agles][:languages][:virtualenv]
-		virtualenv node[:agles][:languages][:python][:virtualenv]
-	end
-	action :install
-end
-
 postgresql_database_user node[:agles][:user] do
 	password ""
 	connection({:username => "postgres", :password => ""})
 	action :create
 end
 
-file "/home/#{node[:agles][:user]}/.validator.sh" do
-	user node[:agles][:user]
+directory "/home/#{node[:agles][:user]}/scripts" do
+	owner node[:agles][:user]
+end
+
+directory "/home/#{node[:agles][:user]}/scripts/build" do
+	owner node[:agles][:user]
+end
+
+directory "/home/#{node[:agles][:user]}/scripts/test" do
+	owner node[:agles][:user]
+end
+
+directory "/home/#{node[:agles][:user]}/scripts/language" do
+	owner node[:agles][:user]
+end
+
+#validator.sh, currently unused
+cookbook_file "/home/#{node[:agles][:user]}/scripts/validator.sh" do
+	owner node[:agles][:user]
 	mode "0755"
-	content <<-EOH
-		#!/bin/bash
-		sudo su -m
-		for command in "$@"
-			do echo \\$$command
-			$command
-			r=$?
-			if [ $r -ne 0 ]
-				then echo "$command failed with return code: $r"
-				exit $r
-			fi
-		done
-		EOH
-	action :create
+end
+
+#setup.sh, to be sourced before running any build/test commands
+template "/home/#{node[:agles][:user]}/scripts/setup.sh" do
+	source "setup.erb"
+	owner node[:agles][:user]
+	mode "0755"
+	variables(
+		:user => node[:agles][:user]
+	)
 end

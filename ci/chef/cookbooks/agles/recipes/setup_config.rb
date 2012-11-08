@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: agles
-# Recipe:: configure
+# Recipe:: setup_config
 #
 # Copyright 2012, Less Than Three Labs
 #

@@ -10,8 +10,6 @@ run_list(
 	"recipe[redisio::install]",
 	"recipe[rvm::system]",
 	"recipe[agles::dependencies]",
-	"recipe[agles::language_config]",
-	"recipe[agles::configure]",
 	"recipe[agles::verification_box]"
 )
 

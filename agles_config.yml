@@ -1,4 +1,8 @@
----
+--- %Agles:0.0.1
+languages:
+  python: 2.7
+  ruby: 1.9.3
+  nodejs: 0.8.9
 setup:
   - packages:
     - system:
@@ -41,15 +45,17 @@ setup:
       postgres:
       - name: agles
         username: lt3
-languages:
-  python:
-    version: 2.7
+build:
+  platform:
     path: ci/platform
-    testscript: nosetests --tc=fakeverifier:True
-  ruby:
-    version: 1.9.3
-    buildscript:
-    testscript:
-  nodejs:
-    version: v0.8.9
+    script: python setup.py install
+  web:
     path: ci/web/back
+    script: ./compile.sh
+test:
+  platform:
+    path: ci/platform
+    script: nosetests --tc=fakeverifier:True
+  web:
+    path: ci/web/back
+    script: npm test

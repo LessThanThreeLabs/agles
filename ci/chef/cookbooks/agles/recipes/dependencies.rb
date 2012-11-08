@@ -10,7 +10,7 @@ dependencies = {
 			:packages => ['bundler']
 			},
 		:nodejs => {
-			:versions => ['v0.8.9'],
+			:versions => ['0.8.9'],
 			:packages => []
 			}
 		}

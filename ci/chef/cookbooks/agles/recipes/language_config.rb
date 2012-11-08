@@ -1,7 +1,7 @@
 include_recipe "agles"
 
 def language_configure(language, command)
-	file "/home/#{node[:agles][:user]}/.#{language}.sh" do
+	file "/home/#{node[:agles][:user]}/scripts/language/#{language}.sh" do
 		owner node[:agles][:user]
 		content command
 	end
@@ -39,8 +39,7 @@ def setup_language(language, version)
 end
 
 def handle_languages(languages)
-	languages.each do |language, config|
-		version = config["version"]
+	languages.each do |language, version|
 		setup_language(language, version)
 	end
 end
