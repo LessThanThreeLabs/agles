@@ -23,7 +23,3 @@ class ResourceSocket
 		@socketio.sockets.on 'connection', (socket) =>
 			@configurer.configureConnection socket
 			@resourceRouter.bindToResources socket
-
-			socket.emit 'news', hello: 'world'
-			socket.on 'my other event', (data) ->
-				console.log 'data: ' + data
