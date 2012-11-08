@@ -20,6 +20,7 @@
 			
 			"/css/src/repository/content/repositoryContent.css",
 
+			"/css/src/repository/header/url/repositoryUrlPanel.css",
 			"/css/src/repository/header/repositoryHeader.css",
 
 			"/css/src/repository/repository.css",
@@ -69,6 +70,7 @@
 
 			"/js/src/repository/content/repositoryContent.js",
 
+			"/js/src/repository/header/url/repositoryUrlPanel.js",
 			"/js/src/repository/header/repositoryHeader.js",
 
 			"/js/src/repository/repository.js",

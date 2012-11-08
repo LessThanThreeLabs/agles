@@ -4,13 +4,17 @@ window.RepositoryHeader = {}
 class RepositoryHeader.Model extends Backbone.Model
 	default:
 		repositoryId: null
-		name: 'test'
-		description: 'test'
-		url: 'test'
+		name: ''
+		description: ''
+		url: ''
 
 	initialize: () =>
+		@repositoryUrlPanelModel = new RepositoryUrlPanel.Model()
+
 		@on 'change:repositoryId', () =>
-			@_getNameAndDescription()
+			@_getRepositoryInformation()
+		@on 'change:url', () =>
+			@repositoryUrlPanelModel.set 'url', @get 'url'
 
 
 	validate: (attributes) =>
@@ -29,11 +33,10 @@ class RepositoryHeader.Model extends Backbone.Model
 		return
 
 
-	_getNameAndDescription: () =>
+	_getRepositoryInformation: () =>
 		requestData = id: @get 'repositoryId'
 		socket.emit 'repositories:read', requestData, (error, data) =>
 			console.error error if error?
-			console.log data
 			@set data if data?
 
 
@@ -41,14 +44,14 @@ class RepositoryHeader.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeader'
 	template: Handlebars.compile '<div class="repositoryNameAndDescription">
-			<div class="repositoryName">{{name}}</div>
+			<div class="repositoryName">> {{name}}</div>
 			<div class="repositoryDescription">{{description}}</div>
 		</div>
-		<div class="repositoryUrlContainer">
-			<span class="repositoryUrlLabel">Url:</span><input type="text" class="repositoryUrl" value="{{url}}" readonly>
-		</div>'
+		<div class="repositoryUrlContainer"></div>'
 
 	initialize: () =>
+		@repositoryUrlPanelView = new RepositoryUrlPanel.View model: @model.repositoryUrlPanelModel
+
 		@model.on 'change:name', @render
 		@model.on 'change:description', @render
 
@@ -57,5 +60,5 @@ class RepositoryHeader.View extends Backbone.View
 		@$el.html @template
 			name: @model.get 'name'
 			description: @model.get 'description'
-			url: @model.get 'url'
+		@$el.find('.repositoryUrlContainer').html @repositoryUrlPanelView.render().el
 		return @
