@@ -7,17 +7,21 @@
 
 			"/css/src/welcome/welcome.css",
 
-			"/css/src/repository/build/build.css",
-			"/css/src/repository/build/list/search/buildsSearchFilterSelector.css",
-			"/css/src/repository/build/list/search/buildsSearchFilter.css",
-			"/css/src/repository/build/list/search/buildsSearch.css",
-			"/css/src/repository/build/list/buildsList.css",
-			"/css/src/repository/build/list/buildsListManager.css",
-			"/css/src/repository/build/details/output/buildOutputLine.css",
-			"/css/src/repository/build/details/output/buildOutput.css",
-			"/css/src/repository/build/details/buildDetails.css",
-			"/css/src/repository/build/repositoryBuilds.css",
-			"/css/src/repository/information/repositoryHeader.css",
+			"/css/src/repository/content/build/build.css",
+			"/css/src/repository/content/build/list/search/buildsSearchFilterSelector.css",
+			"/css/src/repository/content/build/list/search/buildsSearchFilter.css",
+			"/css/src/repository/content/build/list/search/buildsSearch.css",
+			"/css/src/repository/content/build/list/buildsList.css",
+			"/css/src/repository/content/build/list/buildsListManager.css",
+			"/css/src/repository/content/build/details/output/buildOutputLine.css",
+			"/css/src/repository/content/build/details/output/buildOutput.css",
+			"/css/src/repository/content/build/details/buildDetails.css",
+			"/css/src/repository/content/build/repositoryBuilds.css",
+			
+			"/css/src/repository/content/repositoryContent.css",
+
+			"/css/src/repository/header/repositoryHeader.css",
+
 			"/css/src/repository/repository.css",
 
 			"/css/src/header/login/loginCreateAccountEmailSentPanel.css",
@@ -49,20 +53,24 @@
 
 			"/js/src/welcome/welcome.js",
 
-			"/js/src/repository/build/build.js",
-			"/js/src/repository/build/list/buildsFetcher.js",
-			"/js/src/repository/build/list/search/buildsQuery.js",
-			"/js/src/repository/build/list/search/buildsSearchFilterType.js",
-			"/js/src/repository/build/list/search/buildsSearchFilterSelector.js",
-			"/js/src/repository/build/list/search/buildsSearchFilter.js",
-			"/js/src/repository/build/list/search/buildsSearch.js",
-			"/js/src/repository/build/list/buildsList.js",
-			"/js/src/repository/build/list/buildsListManager.js",
-			"/js/src/repository/build/details/output/buildOutputLine.js",
-			"/js/src/repository/build/details/output/buildOutput.js",
-			"/js/src/repository/build/details/buildDetails.js",
-			"/js/src/repository/build/repositoryBuilds.js",
-			"/js/src/repository/information/repositoryHeader.js",
+			"/js/src/repository/content/build/build.js",
+			"/js/src/repository/content/build/list/buildsFetcher.js",
+			"/js/src/repository/content/build/list/search/buildsQuery.js",
+			"/js/src/repository/content/build/list/search/buildsSearchFilterType.js",
+			"/js/src/repository/content/build/list/search/buildsSearchFilterSelector.js",
+			"/js/src/repository/content/build/list/search/buildsSearchFilter.js",
+			"/js/src/repository/content/build/list/search/buildsSearch.js",
+			"/js/src/repository/content/build/list/buildsList.js",
+			"/js/src/repository/content/build/list/buildsListManager.js",
+			"/js/src/repository/content/build/details/output/buildOutputLine.js",
+			"/js/src/repository/content/build/details/output/buildOutput.js",
+			"/js/src/repository/content/build/details/buildDetails.js",
+			"/js/src/repository/content/build/repositoryBuilds.js",
+
+			"/js/src/repository/content/repositoryContent.js",
+
+			"/js/src/repository/header/repositoryHeader.js",
+
 			"/js/src/repository/repository.js",
 
 			"/js/src/header/repository/repositoryHeaderOption.js",

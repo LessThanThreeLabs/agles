@@ -12,6 +12,7 @@ class Main.Model extends Backbone.Model
 	initialize: () =>
 		@headerModel = new Header.Model()
 		@welcomeModel = new Welcome.Model()
+		@repositoryModel = new Repository.Model()
 
 
 	validate: (attributes) =>
@@ -32,6 +33,7 @@ class Main.View extends Backbone.View
 	initialize: () ->
 		@headerView = new Header.View model: @model.headerModel
 		@welcomeView = new Welcome.View model: @model.welcomeModel
+		@repositoryView = new Repository.View model: @model.repositoryModel
 
 		@model.on 'change:mode change:repositoryNumber', () =>
 			@_updateContent()
@@ -61,12 +63,7 @@ class Main.View extends Backbone.View
 
 	_loadRepository: (repositoryNumber) =>
 		assert.ok repositoryNumber?
-
-		repositoryModel = new Repository.Model id: repositoryNumber
-		repositoryModel.fetch()
-
-		repositoryView = new Repository.View model: repositoryModel
-		@$el.find('.contentContainer').html repositoryView.render().el
+		@$el.find('.contentContainer').html @repositoryView.render().el
 
 
 class Main.Router extends Backbone.Router

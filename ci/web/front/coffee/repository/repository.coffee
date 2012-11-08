@@ -2,15 +2,22 @@ window.Repository = {}
 
 
 class Repository.Model extends Backbone.Model
-	urlRoot: 'repositories'
+	default:
+		repositoryId: null
 
 	initialize: () ->
-		@repositoryHeaderModel = new RepositoryHeader.Model repositoryId: @get 'id'
-		@repositoryBuildsModel = new RepositoryBuilds.Model repositoryId: @get 'id'
+		@repositoryHeaderModel = new RepositoryHeader.Model repositoryId: @get 'repositoryId'
+		@repositoryContentModel = new RepositoryContent.Model repositoryId: @get 'repositoryId'
 
-		@on 'change', () =>
-			@repositoryHeaderModel.set 'name', @get 'name'
-			@repositoryHeaderModel.set 'subname', @get 'subname'
+		@on 'change:repositoryId', () =>
+			@repositoryHeaderModel.set 'repositoryId', @get 'repositoryId'
+			@repositoryContentModel.set 'repositoryId', @get 'repositoryId'
+
+
+	validate: (attributes) =>
+		if not attributes.repositoryId?
+			return false
+		return
 
 
 class Repository.View extends Backbone.View
@@ -20,11 +27,11 @@ class Repository.View extends Backbone.View
 
 	initialize: () ->
 		@repositoryHeaderView = new RepositoryHeader.View model: @model.repositoryHeaderModel
-		@repositoryBuildsView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
+		@repositoryContentView = new RepositoryContent.View model: @model.repositoryContentModel
 
 
 	render: () ->
 		@$el.html @template()
 		@$el.append @repositoryHeaderView.render().el
-		@$el.append @repositoryBuildsView.render().el
+		@$el.append @repositoryContentView.render().el
 		return @
