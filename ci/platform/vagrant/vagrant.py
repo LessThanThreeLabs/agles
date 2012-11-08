@@ -24,47 +24,44 @@ class Vagrant(object):
 	def get_vm_directory(self):
 		return self.vm_directory
 
-	def init(self, stdout_handler=None, stderr_handler=None):
-		return self._vagrant_call("init", self.box_name, stdout_handler=stdout_handler, stderr_handler=stderr_handler)
+	def init(self, output_handler=None):
+		return self._vagrant_call("init", self.box_name, output_handler=output_handler)
 
-	def up(self, stdout_handler=None, stderr_handler=None):
-		return self._vagrant_call("up", stdout_handler=stdout_handler, stderr_handler=stderr_handler)
+	def up(self, output_handler=None):
+		return self._vagrant_call("up", output_handler=output_handler)
 
-	def destroy(self, stdout_handler=None, stderr_handler=None):
-		return self._vagrant_call("destroy", "-f", stdout_handler=stdout_handler, stderr_handler=stderr_handler)
+	def destroy(self, output_handler=None):
+		return self._vagrant_call("destroy", "-f", output_handler=output_handler)
 
-	def provision(self, stdout_handler=None, stderr_handler=None):
-		return self._vagrant_call("provision", stdout_handler=stdout_handler, stderr_handler=stderr_handler)
+	def provision(self, output_handler=None):
+		return self._vagrant_call("provision", output_handler=output_handler)
 
-	def ssh_call(self, command, stdout_handler=None, stderr_handler=None):
-		return self._vagrant_call("ssh", "-c", command, stdout_handler=stdout_handler, stderr_handler=stderr_handler)
+	def ssh_call(self, command, output_handler=None):
+		return self._vagrant_call("ssh", "-c", command, output_handler=output_handler)
 
-	def sandbox_on(self, stdout_handler=None, stderr_handler=None):
-		return self._vagrant_call("sandbox", "on", stdout_handler=stdout_handler, stderr_handler=stderr_handler)
+	def sandbox_on(self, output_handler=None):
+		return self._vagrant_call("sandbox", "on", output_handler=output_handler)
 
-	def sandbox_off(self, stdout_handler=None, stderr_handler=None):
-		return self._vagrant_call("sandbox", "off", stdout_handler=stdout_handler, stderr_handler=stderr_handler)
+	def sandbox_off(self, output_handler=None):
+		return self._vagrant_call("sandbox", "off", output_handler=output_handler)
 
-	def sandbox_rollback(self, stdout_handler=None, stderr_handler=None):
-		return self._vagrant_call("sandbox", "rollback", stdout_handler=stdout_handler, stderr_handler=stderr_handler)
+	def sandbox_rollback(self, output_handler=None):
+		return self._vagrant_call("sandbox", "rollback", output_handler=output_handler)
 
 	def _vagrant_call(self, *args, **kwargs):
 		command = ["vagrant"] + list(args)
 		process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=self.vm_directory,
 				env=self.vagrant_env)
 
-		stdout_handler = kwargs.get("stdout_handler")
-		stderr_handler = kwargs.get("stderr_handler")
+		output_handler = kwargs.get("output_handler")
 
-		stdout_greenlet = eventlet.spawn(self._handle_stream, process.stdout, stdout_handler)
-		stderr_greenlet = eventlet.spawn(self._handle_stream, process.stderr, stderr_handler)
+		self._output = list()
+		stdout_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
+		stderr_greenlet = eventlet.spawn(self._handle_stream, process.stderr, output_handler)
 
 		stdout_lines = stdout_greenlet.wait()
 		stderr_lines = stderr_greenlet.wait()
 
-		line, eline = process.communicate()
-		stdout_lines.append(line)
-		stderr_lines.append(eline)
 		stdout = "\n".join(stdout_lines)
 		stderr = "\n".join(stderr_lines)
 		returncode = process.poll()
@@ -79,8 +76,9 @@ class Vagrant(object):
 				break
 			line = line.rstrip()
 			lines.append(line)
+			self._output.append(line)
 			if line_handler:
-				line_handler(len(lines), line)
+				line_handler(len(self._output), line)
 		return lines
 
 	def _get_vagrant_env(self):

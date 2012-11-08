@@ -14,31 +14,31 @@ class VagrantWrapper(object):
 		return VagrantWrapper(Vagrant(vm_directory, box_name))
 
 	def init(self, output_handler=None):
-		return self.vagrant.init(stdout_handler=output_handler, stderr_handler=output_handler)
+		return self.vagrant.init(output_handler=output_handler)
 
 	def up(self, output_handler=None):
-		return self.vagrant.up(stdout_handler=output_handler, stderr_handler=output_handler)
+		return self.vagrant.up(output_handler=output_handler)
 
 	def destroy(self, output_handler=None):
-		return self.vagrant.destroy(stdout_handler=output_handler, stderr_handler=output_handler)
+		return self.vagrant.destroy(output_handler=output_handler)
 
 	def provision(self, output_handler=None, role=None):
 		self.vagrant.vagrant_env["AGLES_ROLE"] = role
-		results = self.vagrant.provision(stdout_handler=output_handler, stderr_handler=output_handler)
+		results = self.vagrant.provision(output_handler=output_handler)
 		del self.vagrant.vagrant_env["AGLES_ROLE"]
 		return results
 
 	def ssh_call(self, command, output_handler=None):
-		return self.vagrant.ssh_call(command, stdout_handler=output_handler, stderr_handler=output_handler)
+		return self.vagrant.ssh_call(command, output_handler=output_handler)
 
 	def sandbox_on(self, output_handler=None):
-		return self.vagrant.sandbox_on(stdout_handler=output_handler, stderr_handler=output_handler)
+		return self.vagrant.sandbox_on(output_handler=output_handler)
 
 	def sandbox_off(self, output_handler=None):
-		return self.vagrant.sandbox_off(stdout_handler=output_handler, stderr_handler=output_handler)
+		return self.vagrant.sandbox_off(output_handler=output_handler)
 
 	def sandbox_rollback(self, output_handler=None):
-		return self.vagrant.sandbox_rollback(stdout_handler=output_handler, stderr_handler=output_handler)
+		return self.vagrant.sandbox_rollback(output_handler=output_handler)
 
 	def get_vm_directory(self):
 		return self.vagrant.get_vm_directory()

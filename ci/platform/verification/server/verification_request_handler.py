@@ -70,6 +70,6 @@ class VerificationRequestHandler(QueueListener):
 			return model_server_rpc.get_repo_uri(commit_id)
 
 	def _make_console_appender(self, model_server_rpc, build_id):
-		def console_appender(console):
-			return lambda line_num, line: model_server_rpc.append_console_line(build_id, line_num, line, console)
+		def console_appender(console, subcategory):
+			return lambda line_num, line: model_server_rpc.append_console_line(build_id, line_num, line, console, subcategory)
 		return console_appender

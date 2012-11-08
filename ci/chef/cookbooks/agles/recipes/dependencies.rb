@@ -3,7 +3,7 @@ include_recipe "agles"
 dependencies = {
 		:python => {
 			:versions => ['2.5', '2.6', '2.7', '3.2', '3.3'],
-			:packages => ['nose']
+			:packages => ['distribute', 'nose']
 			},
 		:ruby => {
 			:versions => ['1.8.7', '1.9.3'],
@@ -20,9 +20,6 @@ apt_repository "deadsnakes" do
 	distribution node['lsb']['codename']
 	components ["main"]
 end
-
-python_versions = ['2.5', '2.6', '2.7', '3.2', '3.3']
-pip_packages = ['distribute', 'nose']
 
 dependencies[:python][:versions].each do |version|
 	package "python#{version}-dev" do

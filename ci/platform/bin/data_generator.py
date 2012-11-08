@@ -11,6 +11,7 @@ from util.permissions import RepositoryPermissions
 
 NUM_REPOS = 3
 
+
 class SchemaDataGenerator(object):
 	def __init__(self, seed=None):
 		random.seed(seed)
@@ -65,7 +66,7 @@ class SchemaDataGenerator(object):
 
 					for console_type in range(2):
 						ins_console = schema.build_console.insert().values(build_id=build_id, type=console_type,
-							console_output=self.generate_console_output())
+							subcategory="category", console_output=self.generate_console_output())
 						conn.execute(ins_console)
 
 	def generate_console_output(self):

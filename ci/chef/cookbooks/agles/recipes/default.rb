@@ -9,7 +9,9 @@
 
 case node[:platform]
 when "ubuntu"
-	execute "apt-get update"
+	execute "apt-get update" do
+		ignore_failure true
+	end
 end
 
 if node[:vagrant]

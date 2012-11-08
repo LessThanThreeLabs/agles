@@ -31,9 +31,12 @@ def main():
 	def callback(results):
 		print "Verification results: %s" % str(results)
 
-	def console_appender(console):
+	def console_appender(console, subcategory):
 		def output_handler(line, contents):
-			print "(%s,%s): %s" % (console, line, contents)
+			if subcategory:
+				print "(%s,%s,%s): %s" % (console, subcategory, line, contents)
+			else:
+				print "(%s,%s): %s" % (console, line, contents)
 		return output_handler
 
 	verifier.verify(args.repo_uri, [""], callback, console_appender)

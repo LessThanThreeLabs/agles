@@ -48,8 +48,8 @@ class BuildVerifier(object):
 		dest_repo.git.fetch("origin", ref)
 		dest_repo.git.checkout("FETCH_HEAD")
 
-	def _get_output_handler(self, console_appender, console):
-		return console_appender(console) if console_appender else None
+	def _get_output_handler(self, console_appender, console, subcategory=""):
+		return console_appender(console, subcategory) if console_appender else None
 
 	def setup_vagrant_wrapper(self, console_appender):
 		"""Rolls back and provisions the contained vagrant wrapper for
@@ -78,13 +78,13 @@ class BuildVerifier(object):
 	def run_build_step(self, build_commands, console_appender):
 		for build_command in build_commands:
 			if build_command.run(self.vagrant_wrapper,
-				self._get_output_handler(console_appender, Console.Build)):
+				self._get_output_handler(console_appender, Console.Build, build_command.name)):
 				raise VerificationException("build")
 
 	def run_test_step(self, test_commands, console_appender):
 		for test_command in test_commands:
 			if test_command.run(self.vagrant_wrapper,
-				self._get_output_handler(console_appender, Console.Test)):
+				self._get_output_handler(console_appender, Console.Test, test_command.name)):
 				raise VerificationException("test")
 
 	def _mark_success(self, callback):
