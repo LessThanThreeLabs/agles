@@ -1,1 +1,1 @@
-rpc_exchange_name = 'repostore-rpc'
+rpc_exchange_name = 'repostore:rpc'
