@@ -138,6 +138,7 @@ class RepositoryStore(object):
 
 		config = {"store_name": store_name}
 		config_path = os.path.join(root_dir, cls.CONFIG_FILE)
+		os.makedirs(root_dir)
 		with open(config_path, "w") as stream:
 			yaml.dump(config, stream, default_flow_style=False)
 		return config
