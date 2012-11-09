@@ -10,6 +10,7 @@ class RepositoryHeader.Model extends Backbone.Model
 
 	initialize: () =>
 		@repositoryUrlPanelModel = new RepositoryUrlPanel.Model()
+		@repositoryHeaderMenuModel = new RepositoryHeaderMenu.Model()
 
 		@on 'change:repositoryId', () =>
 			@_getRepositoryInformation()
@@ -44,13 +45,17 @@ class RepositoryHeader.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeader'
 	template: Handlebars.compile '<div class="repositoryNameAndDescription">
-			<div class="repositoryName">> {{name}}</div>
-			<div class="repositoryDescription">{{description}}</div>
+			<span class="repositoryName">> {{name}}</span><br>
+			<span class="repositoryDescription">{{description}}</span>
 		</div>
-		<div class="repositoryUrlContainer"></div>'
+		<div class="repositoryUrlAndMenu">
+			<div class="repositoryUrlAndMenuContainer">
+			</div>
+		</div>'
 
 	initialize: () =>
 		@repositoryUrlPanelView = new RepositoryUrlPanel.View model: @model.repositoryUrlPanelModel
+		@repositoryHeaderMenuView = new RepositoryHeaderMenu.View model: @model.repositoryHeaderMenuModel
 
 		@model.on 'change:name', @render
 		@model.on 'change:description', @render
@@ -60,5 +65,7 @@ class RepositoryHeader.View extends Backbone.View
 		@$el.html @template
 			name: @model.get 'name'
 			description: @model.get 'description'
-		@$el.find('.repositoryUrlContainer').html @repositoryUrlPanelView.render().el
+		@$el.find('.repositoryUrlAndMenuContainer').append @repositoryUrlPanelView.render().el
+		@$el.find('.repositoryUrlAndMenuContainer').append '<div class="urlAndMenuSpacer"></div>'
+		@$el.find('.repositoryUrlAndMenuContainer').append @repositoryHeaderMenuView.render().el
 		return @

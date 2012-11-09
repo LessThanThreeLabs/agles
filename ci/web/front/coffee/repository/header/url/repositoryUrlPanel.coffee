@@ -17,8 +17,9 @@ class RepositoryUrlPanel.Model extends Backbone.Model
 class RepositoryUrlPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryUrlPanel'
-	template: Handlebars.compile '<img src="/img/icons/link.svg" class="repositoryLinkImage"><div class="repositoryUrl">{{url}}</div>'
-	# template: Handlebars.compile '<div class="repositoryLinkImage"></div><div class="repositoryUrl">hello</div>'
+	template: Handlebars.compile '<div class="relativePositionWrapper">
+			<img src="/img/icons/link.svg" class="repositoryLinkImage"><div class="repositoryUrl">{{url}}</div>
+		</div>'
 
 	initialize: () =>
 		@model.on 'change:url', @render
