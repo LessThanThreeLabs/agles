@@ -18,8 +18,7 @@ remote_file "/tmp/openssh-6.0p1.tar.gz" do
 	mode "0644"
 end
 
-script "patch_install_openssh" do
-	interpreter "bash"
+bash "patch_install_openssh" do
 	user "root"
 	cwd "/tmp"
 	code <<-EOH
@@ -32,8 +31,7 @@ script "patch_install_openssh" do
 	EOH
 end
 
-script "setup_openssh_for_git" do
-	interpreter "bash"
+bash "setup_openssh_for_git" do
 	user "root"
 	cwd "/usr/local/etc"
 	code <<-EOH
@@ -52,7 +50,7 @@ script "setup_openssh_for_git" do
 end
 
 execute "install_agles" do
-	cwd "#{node[:agles][:source_path][:platform]}"
+	cwd node[:agles][:source_path][:platform]
 	user "root"
 	command "python setup.py install"
 end
@@ -63,8 +61,7 @@ git "/tmp/dulwich-lt3" do
 	action :sync
 end
 
-script "install_dulwich_remove_gitbinaries" do
-	interpreter "bash"
+bash "install_dulwich_remove_gitbinaries" do
 	user "root"
 	cwd "/tmp/dulwich-lt3"
 	code <<-EOH
