@@ -21,7 +21,7 @@ class RestrictedGitShell(object):
 		path = "'%s'" % path
 		command_parts = [command, path, user_id] if command in self.user_id_commands else [command, path]
 		full_command = ' '.join(command_parts)
-		return "ssh", uri, full_command
+		return "ssh", "ssh", "-p", "2222", uri, full_command
 
 	def _replace_paths(self, orig_args_str, new_path):
 		return re.sub(REPO_PATH_PATTERN, new_path, orig_args_str)
@@ -53,7 +53,7 @@ class RestrictedGitShell(object):
 
 		self.verify_user_permissions(command, user_id, repo_hash)
 
-		return self._create_ssh_exec_args(route, command, remote_filesystem_path, user_id)
+		return self._create_ssh_exec_args(route, command, "/tmp/repositories/" + remote_filesystem_path, user_id)
 
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
@@ -63,7 +63,7 @@ class RestrictedGitShell(object):
 		command, repo_path, user_id = command_parts
 		if command in self.commands_to_permissions:
 			args = self.new_sshargs(command, repo_path.strip("'"), user_id)
-			os.execl(*args)
+			os.execlp(*args)
 		else:
 			raise InvalidCommandError(command)
 
