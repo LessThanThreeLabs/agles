@@ -20,7 +20,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		timestamp = int(time.time())
 		ins = commit.insert().values(repo_hash=repo_hash, user_id=user_id,
-			commit_message=commit_message, timestamp=timestamp)
+			message=commit_message, timestamp=timestamp)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]
