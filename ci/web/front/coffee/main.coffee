@@ -6,7 +6,6 @@ class Main.Model extends Backbone.Model
 
 	defaults:
 		mode: 'welcome'
-		repositoryId: null
 
 
 	initialize: () =>
@@ -18,10 +17,6 @@ class Main.Model extends Backbone.Model
 	validate: (attributes) =>
 		if attributes.mode not in @ALLOWED_MODES
 			return new Error 'Invalid mode'
-
-		if attributes.mode is 'repository' and not attributes.repositoryId?
-			return new Error 'No repository id provided'
-
 		return
 
 
@@ -49,43 +44,32 @@ class Main.View extends Backbone.View
 	_updateContent: () =>
 		switch @model.get 'mode'
 			when 'welcome'
-				@_loadWelcome()
+				@$el.find('.contentContainer').html @welcomeView.render().el
 			when 'repository'
-				@_loadRepository @model.get 'repositoryId'
+				@$el.find('.contentContainer').html @repositoryView.render().el
 			else	
 				console.error 'Unaccounted for mode'
-
-
-	_loadWelcome: () =>
-		@$el.find('.contentContainer').html @welcomeView.render().el
-		console.log 'NEED TO UNSUBSCRIBE FROM REPO NOTIFICATIONS HERE!!'
-
-
-	_loadRepository: (repositoryId) =>
-		assert.ok repositoryId?
-		@model.repositoryModel.set 'repositoryId', repositoryId
-		@$el.find('.contentContainer').html @repositoryView.render().el
 
 
 class Main.Router extends Backbone.Router
 	routes:
 		'': 'loadIndex'
-		'repository/:repositoryId': 'loadRepsitory'
-		'repository/:repositoryId/:view': 'blah'
+
+		'repository/:repositoryId': 'loadRepository'
+		'repository/:repositoryId/:repositoryMode': 'loadRepository'
 
 	loadIndex: () =>
 		mainModel.set 'mode', 'welcome'
 
 
-	loadRepsitory: (repositoryId) =>
-		console.log 'loadRepsitory ' + repositoryId
-		mainModel.set 
-			mode: 'repository'
-			repositoryId: repositoryId
+	loadRepository: (repositoryId, repositoryMode) =>
+		mainModel.set 'mode', 'repository'
 
+		if repositoryId?
+			mainModel.repositoryModel.set 'repositoryId', repositoryId
+		if repositoryMode?
+			mainModel.repositoryModel.set 'repositoryMode', repositoryMode
 
-	blah: (repositoryId, view) =>
-		console.log 'blah ' + repositoryId + ' - ' + view
 
 
 mainModel = new Main.Model()

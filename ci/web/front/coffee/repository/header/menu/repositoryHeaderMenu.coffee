@@ -13,12 +13,17 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		selectedMenuOptionName: null
 
 	initialize: () =>
-		@on 'change:repositoryId', @_updateAllowMenuOptions
+		@router = new Backbone.Router()
+
+		@on 'change:repositoryId', () =>
+			@_updateAllowMenuOptions()
+		@on 'change:selectedMenuOptionName', () =>
+			@router.navigate 'repository/' + @get('repositoryId') + '/' + @get('selectedMenuOptionName'), trigger: true
 
 
 	validate: (attributes) =>
-		if not attributes.repositoryId?
-			return new Error 'Invalid repository id'
+		if selectedMenuOptionName? and not MENU_OPTIONS[selectedMenuOptionName]?
+			return new Error 'Invalid selected menu option name'
 		return
 
 

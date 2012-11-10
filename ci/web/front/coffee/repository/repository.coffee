@@ -4,6 +4,7 @@ window.Repository = {}
 class Repository.Model extends Backbone.Model
 	default:
 		repositoryId: null
+		repositoryMode: null
 
 	initialize: () ->
 		@repositoryHeaderModel = new RepositoryHeader.Model repositoryId: @get 'repositoryId'
@@ -12,6 +13,8 @@ class Repository.Model extends Backbone.Model
 		@on 'change:repositoryId', () =>
 			@repositoryHeaderModel.set 'repositoryId', @get 'repositoryId'
 			@repositoryContentModel.set 'repositoryId', @get 'repositoryId'
+		@on 'change:repositoryMode', () =>
+			@repositoryHeaderModel.set 'mode', @get 'repositoryMode'
 
 
 	validate: (attributes) =>

@@ -7,6 +7,7 @@ class RepositoryHeader.Model extends Backbone.Model
 		name: ''
 		description: ''
 		url: ''
+		mode: null
 
 	initialize: () =>
 		@repositoryHeaderBasicInformationModel = new RepositoryHeaderBasicInformation.Model()
@@ -22,6 +23,8 @@ class RepositoryHeader.Model extends Backbone.Model
 			@repositoryHeaderBasicInformationModel.set 'description', @get 'description'
 		@on 'change:url', () =>
 			@repositoryUrlPanelModel.set 'url', @get 'url'
+		@on 'change:mode', () =>
+			@repositoryHeaderMenuModel.set 'selectedMenuOptionName', @get 'mode'
 
 
 	validate: (attributes) =>
