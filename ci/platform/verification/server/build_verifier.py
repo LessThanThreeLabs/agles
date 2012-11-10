@@ -3,7 +3,7 @@ import shutil
 
 import yaml
 
-from git import Repo
+from git import Git, Repo
 
 from model_server.build_outputs.update_handler import Console
 from verification_config import VerificationConfig
@@ -29,12 +29,15 @@ class BuildVerifier(object):
 			verification_config = self.get_verification_configurations()
 			self.run_build_step(verification_config.build_commands, console_appender)
 			self.run_test_step(verification_config.test_commands, console_appender)
-		except VerificationException, e:
+		except Exception, e:
 			self._mark_failure(callback, e)
 		else:
 			self._mark_success(callback)
 
 	def checkout_refs(self, repo_uri, refs):
+		if os.access(self.source_dir, os.F_OK):
+			shutil.rmtree(self.source_dir)
+		Git().clone(repo_uri, self.source_dir)
 		source_repo = Repo(repo_uri)
 		ref = refs[0]
 		self.checkout_ref(source_repo, ref)
@@ -42,11 +45,8 @@ class BuildVerifier(object):
 			source_repo.git.merge(ref)
 
 	def checkout_ref(self, repo, ref):
-		if os.access(self.source_dir, os.F_OK):
-			shutil.rmtree(self.source_dir)
-		dest_repo = repo.clone(self.source_dir)
-		dest_repo.git.fetch("origin", ref)
-		dest_repo.git.checkout("FETCH_HEAD")
+		repo.git.fetch("origin", ref)
+		repo.git.checkout("FETCH_HEAD")
 
 	def _get_output_handler(self, console_appender, console, subcategory=""):
 		return console_appender(console, subcategory) if console_appender else None
