@@ -39,6 +39,7 @@ class Server
 
 		expressServer.get '/', @_handleIndexRequest
 		expressServer.get '/repository/:id', @_handleIndexRequest
+		expressServer.get '/repository/:id/:view', @_handleIndexRequest
 
 		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
 

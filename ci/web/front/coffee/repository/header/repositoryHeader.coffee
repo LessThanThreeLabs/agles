@@ -9,11 +9,17 @@ class RepositoryHeader.Model extends Backbone.Model
 		url: ''
 
 	initialize: () =>
+		@repositoryHeaderBasicInformationModel = new RepositoryHeaderBasicInformation.Model()
 		@repositoryUrlPanelModel = new RepositoryUrlPanel.Model()
 		@repositoryHeaderMenuModel = new RepositoryHeaderMenu.Model()
 
 		@on 'change:repositoryId', () =>
+			@repositoryHeaderMenuModel.set 'repositoryId', @get 'repositoryId'
 			@_getRepositoryInformation()
+		@on 'change:name', () =>
+			@repositoryHeaderBasicInformationModel.set 'name', @get 'name'
+		@on 'change:description', () =>
+			@repositoryHeaderBasicInformationModel.set 'description', @get 'description'
 		@on 'change:url', () =>
 			@repositoryUrlPanelModel.set 'url', @get 'url'
 
@@ -44,27 +50,21 @@ class RepositoryHeader.Model extends Backbone.Model
 class RepositoryHeader.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeader'
-	template: Handlebars.compile '<div class="repositoryNameAndDescription">
-			<span class="repositoryName">> {{name}}</span><br>
-			<span class="repositoryDescription">{{description}}</span>
-		</div>
+	template: Handlebars.compile '<div class="repositoryNameAndDescription"></div>
 		<div class="repositoryUrlAndMenu">
 			<div class="repositoryUrlAndMenuContainer">
 			</div>
 		</div>'
 
 	initialize: () =>
+		@repositoryHeaderBasicInformationView = new RepositoryHeaderBasicInformation.View model: @model.repositoryHeaderBasicInformationModel
 		@repositoryUrlPanelView = new RepositoryUrlPanel.View model: @model.repositoryUrlPanelModel
 		@repositoryHeaderMenuView = new RepositoryHeaderMenu.View model: @model.repositoryHeaderMenuModel
 
-		@model.on 'change:name', @render
-		@model.on 'change:description', @render
-
 
 	render: () =>
-		@$el.html @template
-			name: @model.get 'name'
-			description: @model.get 'description'
+		@$el.html @template()
+		@$el.find('.repositoryNameAndDescription').append @repositoryHeaderBasicInformationView.render().el
 		@$el.find('.repositoryUrlAndMenuContainer').append @repositoryUrlPanelView.render().el
 		@$el.find('.repositoryUrlAndMenuContainer').append '<div class="urlAndMenuSpacer"></div>'
 		@$el.find('.repositoryUrlAndMenuContainer').append @repositoryHeaderMenuView.render().el

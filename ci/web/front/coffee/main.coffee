@@ -35,7 +35,7 @@ class Main.View extends Backbone.View
 		@welcomeView = new Welcome.View model: @model.welcomeModel
 		@repositoryView = new Repository.View model: @model.repositoryModel
 
-		@model.on 'change:mode change:repositoryId', () =>
+		@model.on 'change:mode', () =>
 			@_updateContent()
 
 
@@ -71,15 +71,21 @@ class Main.Router extends Backbone.Router
 	routes:
 		'': 'loadIndex'
 		'repository/:repositoryId': 'loadRepsitory'
+		'repository/:repositoryId/:view': 'blah'
 
 	loadIndex: () =>
 		mainModel.set 'mode', 'welcome'
 
 
 	loadRepsitory: (repositoryId) =>
+		console.log 'loadRepsitory ' + repositoryId
 		mainModel.set 
 			mode: 'repository'
 			repositoryId: repositoryId
+
+
+	blah: (repositoryId, view) =>
+		console.log 'blah ' + repositoryId + ' - ' + view
 
 
 mainModel = new Main.Model()

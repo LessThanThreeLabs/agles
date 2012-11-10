@@ -16,8 +16,11 @@ div.repositoryHeaderMenu {
 		.repositoryMenuOption {
 			display: table-cell;
 			width: 50px;
+			text-align: center;
+			vertical-align: middle;
 			border-top: 1px solid @borderColor;
 			border-right: 1px solid @borderColor;
+			border-bottom: 1px solid @borderColor;
 
 			&:nth-child(2) {
 				border-left: 1px solid @borderColor;
@@ -25,6 +28,14 @@ div.repositoryHeaderMenu {
 				-moz-border-radius-topleft: 5px;
 				-webkit-border-top-left-radius: 5px;
 				border-top-left-radius: 5px;
+			}
+
+			&.selected {
+				border-bottom: 0px;
+			}
+
+			.repositoryMenuOptionImage {
+				width: 20px;
 			}
 		}
 	}
