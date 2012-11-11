@@ -11,14 +11,30 @@ class LoginHandler
 
 
 	handleRequest: (socket, data, callback) =>
-		console.log 'need to handle login'
+		# socket.session.userId = user_id
+		# socket.session.save()
+
+		@modelRpcConnection.users.read.get_salt data.email, (error, salt) =>
+			if error?
+				callback "Login Failed"
+				return
+
+			hashedPassword = @passwordHasher.hashPasswordWithSalt data.password, salt
+			@modelRpcConnection.users.read.get_user data.email, hashedPassword, (error, user) =>
+				if error?
+					callback "Login Failed"
+					return
+
+				socket.session.userId = user.id
+				socket.session.save()
+				callback error, user
 
 		# modelRpcConnection.users.read.getPasswordSalt email, (error, result) =>
 		# 	hashedPassword = @passwordHasher.hashPasswordWithSalt password, result.salt
 		# 	modelRpcConnection.users.read.get email, hashedPassword, (error, result) =>
 		# 		console.log 'got user: ' + result.user
 
-		callback null, 
-			firstName: 'Jordan'
-			lastName: 'Potter'
+		#callback null, 
+		#	firstName: 'Jordan'
+		#	lastName: 'Potter'
 			

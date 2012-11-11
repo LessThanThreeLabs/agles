@@ -15,8 +15,6 @@ class UsersUpdateHandler extends Handler
 
 	# THIS ISN'T NECESSARY...
 	default: (socket, data, callback) =>
-		@modelRpcConnection.users.read.get_user_from_id 1
-
 		if data.email? and data.password? and data.rememberMe?
 			@loginHandler.handleRequest socket, data, callback
 		else
@@ -33,4 +31,7 @@ class UsersUpdateHandler extends Handler
 	#   firstName: <string>
 	#   lastName: <string>
 	login: (socket, data, callback) =>
-		callback 'Has not been implemented yet!'
+		if data.email? and data.password? and data.rememberMe?
+			@loginHandler.handleRequest socket, data, callback
+		else
+			callback 'Malformed request.'

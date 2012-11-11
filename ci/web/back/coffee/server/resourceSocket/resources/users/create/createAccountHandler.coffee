@@ -57,7 +57,7 @@ class CreateAccountHandler
 
 			@createAccountStore.addAccount key, account
 			@createAccountEmailer.sendEmailToUser data.firstName, data.lastName, data.email, key
-					
+			
 			callback null, true
 
 
@@ -74,10 +74,12 @@ class CreateAccountHandler
 			key = keyBuffer.toString('hex')
 			salt = passwordHashInfo.salt
 			passwordHash = passwordHashInfo.passwordHash
-
-			callback null, key,
+			userToCreate = 
 				email: data.email
 				salt: salt
 				passwordHash: passwordHash
 				firstName: data.firstName
 				lastName: data.lastName
+				rememberMe: data.rememberMe
+
+			callback null, key, userToCreate

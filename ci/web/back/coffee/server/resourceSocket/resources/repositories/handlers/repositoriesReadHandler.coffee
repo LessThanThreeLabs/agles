@@ -9,10 +9,9 @@ exports.create = (modelRpcConnection) ->
 
 class RepositoriesReadHandler extends Handler
 	default: (socket, data, callback) =>
-		fakeRepository =
-			id: data.id
-			name: 'Agles CI'
-			description: 'Dedicated to saving the world, one ci at a time.'
-			url: 'https://agles.blimp.com/awesome.git'
-		callback null, fakeRepository
+		assert.ok socket.session.userId? and data.repoId?
+		userId = socket.session.userId
+		console.log 'fehfeh'
+		repo = @modelRpcConnection.repos.read.get_repo_from_id(userId, data.repoId)
+		callback null, repo
 		

@@ -71,14 +71,16 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 ###################
 
 	def _create_user(self):
+		self.password_hash = sha512().digest()
 		with ModelServer.rpc_connect("users", "create") as conn:
 			self.user_info = {
 				"email": self.EMAIL,
-				"name": "asdf",
-				"salt": "a"*16
+				"first_name": "asdf",
+				"last_name": "bdsf",
+				"salt": "a"*16,
+				"password_hash": self.password_hash
 			}
-			self.password_hash = sha512().digest()
-			self.user_id = conn.create_user(self.password_hash, self.user_info)
+			self.user_id = conn.create_user(self.user_info)
 
 	def _assert_dict_subset(self, expected, actual):
 		for key in expected.iterkeys():

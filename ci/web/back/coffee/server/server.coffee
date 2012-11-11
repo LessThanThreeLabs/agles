@@ -75,13 +75,24 @@ class Server
 		
 		@stores.createAccountStore.getAccount accountKey, (error, account) =>
 			if error?
-				response.send 'Invalid link'
+				response.end 'Invalid link'
 			else
 				@stores.createAccountStore.removeAccount accountKey
-				console.log 'need to push new account to the model server'
-				response.render 'verifyAccount',
-					firstName: account.firstName
-					lastName: account.lastName
+				userToCreate =
+					email: account.email
+					salt: account.salt
+					password_hash: account.passwordHash
+					first_name: account.firstName
+					last_name: account.lastName
+
+				@modelConnection.rpcConnection.users.create.create_user userToCreate, (error, userId) =>
+					if error?
+						response.end 'User Creation Failed'
+					else
+						request.session.userId = userId
+						response.render 'verifyAccount',
+							firstName: account.firstName
+							lastName: account.lastName
 
 
 	_createCssString: () =>

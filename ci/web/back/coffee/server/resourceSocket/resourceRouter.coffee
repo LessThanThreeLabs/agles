@@ -25,7 +25,7 @@ class ResourceRouter
 		@_bindToResource socket, 'organizations', @organizationsResource
 		@_bindToResource socket, 'builds', @buildsResource
 		@_bindToResource socket, 'buildOutputs', @buildOutputsResource
-		@_bindToResource socket, 'repositories', @repositoriesResource
+		@_bindToResource socket, 'repos', @repositoriesResource
 
 
 	_bindToResource: (socket, name, resource) ->

@@ -24,12 +24,15 @@ class UsersCreateHandler(ModelServerRpcHandler):
 		path = self._generate_path(media_id, md5hash)
 		self.mediastore.store_media(media_binary, path)
 
-	def create_user(self, password_hash, information):
+	def create_user(self, information):
 		assert "email" in information
-		assert "name" in information
+		assert "first_name" in information
+		assert "last_name" in information
+		assert "salt" in information
+		assert "password_hash" in information
 
 		user = database.schema.user
-		ins = user.insert().values(password_hash=password_hash, **information)
+		ins = user.insert().values(**information)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		return result.inserted_primary_key[0]
