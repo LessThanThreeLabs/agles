@@ -14,6 +14,9 @@ class RepositoryHeader.Model extends Backbone.Model
 		@repositoryUrlPanelModel = new RepositoryUrlPanel.Model()
 		@repositoryHeaderMenuModel = new RepositoryHeaderMenu.Model()
 
+		@repositoryHeaderMenuModel.on 'change:selectedMenuOptionName', () =>
+			@set 'mode', @repositoryHeaderMenuModel.get 'selectedMenuOptionName'
+
 		@on 'change:repositoryId', () =>
 			@repositoryHeaderMenuModel.set 'repositoryId', @get 'repositoryId'
 			@_getRepositoryInformation()

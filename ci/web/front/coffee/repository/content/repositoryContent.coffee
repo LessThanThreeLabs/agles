@@ -4,25 +4,30 @@ window.RepositoryContent = {}
 class RepositoryContent.Model extends Backbone.Model
 	default:
 		repositoryId: null
+		mode: null
 
 	initialize: () ->
+		@repositoryBuildsModel = new RepositoryBuilds.Model repositoryId: @get 'repositoryId'
+
 		@on 'change:repositoryId', () =>
-			# @repositoryHeaderModel.set 'repositoryId', @get 'repositoryId'
-
-
-	validate: (attributes) =>
-		if not attributes.repositoryId?
-			return false
-		return
+			@repositoryBuildsModel.set 'repositoryId', @get 'repositoryId'
 
 
 class RepositoryContent.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryContent'
-	template: Handlebars.compile ''
 
-	initialize: () ->
+	initialize: () =>
+		@model.on 'change:mode', @render
 
-	render: () ->
-		@$el.html @template()
+
+	render: () =>
+		@_renderCurrentView()
 		return @
+
+
+	_renderCurrentView: () =>
+		switch @model.get 'mode'
+			when 'builds'
+				repositoryBuildsView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
+				@$el.html repositoryBuildsView.render().el

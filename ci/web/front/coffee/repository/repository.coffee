@@ -10,6 +10,9 @@ class Repository.Model extends Backbone.Model
 		@repositoryHeaderModel = new RepositoryHeader.Model repositoryId: @get 'repositoryId'
 		@repositoryContentModel = new RepositoryContent.Model repositoryId: @get 'repositoryId'
 
+		@repositoryHeaderModel.on 'change:mode', () =>
+			@repositoryContentModel.set 'mode', @repositoryHeaderModel.get 'mode'
+
 		@on 'change:repositoryId', () =>
 			@repositoryHeaderModel.set 'repositoryId', @get 'repositoryId'
 			@repositoryContentModel.set 'repositoryId', @get 'repositoryId'
