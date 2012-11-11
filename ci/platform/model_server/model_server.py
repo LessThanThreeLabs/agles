@@ -19,7 +19,7 @@ from repos.create_handler import ReposCreateHandler
 from repos.read_handler import ReposReadHandler
 from settings.rabbit import connection_info
 from users.create_handler import UsersCreateHandler
-from users.read_handler import UserReadHandler
+from users.read_handler import UsersReadHandler
 
 
 class ModelServer(object):
@@ -41,7 +41,7 @@ class ModelServer(object):
 		ReposCreateHandler,
 		ReposReadHandler,
 		UsersCreateHandler,
-		UserReadHandler
+		UsersReadHandler
 	]
 
 	@classmethod

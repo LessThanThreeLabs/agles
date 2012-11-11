@@ -7,9 +7,9 @@ import database.schema
 from database.engine import ConnectionFactory
 from util.database import to_dict
 
-class UserReadHandler(ModelServerRpcHandler):
+class UsersReadHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(UserReadHandler, self).__init__("users", "read")
+		super(UsersReadHandler, self).__init__("users", "read")
 
 	def _get_user_row(self, email, password_hash):
 		user = database.schema.user
@@ -37,6 +37,7 @@ class UserReadHandler(ModelServerRpcHandler):
 		return to_dict(row, user.columns)
 
 	def get_user_from_id(self, user_id):
+		print user_id
 		user = database.schema.user
 
 		query = user.select().where(user.c.id==user_id)
