@@ -12,12 +12,14 @@ exports.create = (configurationParams, connection) ->
 
 class RpcConnection
 	NOUNS: [
-		{localName: 'users', 			rpcName: 'users'}
-		{localName: 'organizations', 	rpcName: 'organizations'}
-		{localName: 'builds', 			rpcName: 'builds'}
-		{localName: 'repositories', 	rpcName: 'repositories'}
-		{localName: 'buildOutputs', 	rpcName: 'build_outputs'} 
+		{localName: 'users', 			rpcName: 'rpc:users'}
+		{localName: 'organizations', 	rpcName: 'rpc:organizations'}
+		{localName: 'builds', 			rpcName: 'rpc:builds'}
+		{localName: 'repos',		 	rpcName: 'rpc:repos'}
+		{localName: 'buildOutputs', 	rpcName: 'rpc:build_outputs'} 
+		{localName: 'changes', 			rpcName: 'rpc:changes'}
 	]
+
 	VERBS: ['create', 'read', 'update', 'delete']
 
 	constructor: (@configurationParams, @connection) ->

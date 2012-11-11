@@ -14,6 +14,8 @@ class UsersUpdateHandler extends Handler
 
 
 	default: (socket, data, callback) =>
+		@modelRpcConnection.users.read.get_user_from_id 1
+
 		if data.email? and data.password? and data.rememberMe?
 			@loginHandler.handleRequest socket, data, callback
 		else

@@ -32,14 +32,14 @@ class RpcBroker
 		callback null
 
 
-	callFunction: (route, functionName, args, callback) ->
-		assert.ok route? and functionName? and args? and callback?
+	callFunction: (route, methodName, args, callback) ->
+		assert.ok route? and methodName? and args? and callback?
 
 		messageId = @messageIdGenerator.generateUniqueId()
 		@messageIdsToCallbacks[messageId] = callback
 
 		message = msgpack.pack
-			function: functionName
+			method: methodName
 			args: args
 
 		@exchange.publish route, message,
