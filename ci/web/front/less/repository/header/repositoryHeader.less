@@ -2,24 +2,30 @@ div.repositoryHeader {
 	display: table-row;
 	height: 70px;
 
-	.repositoryNameAndDescription {
-		display: table-cell;
-		vertical-align: top;
-		border-bottom: 1px solid #AAAAAA;
-	}
+	.repositoryHeaderContainer {
+		display: table;
+		width: 100%;
+		height: 100%;
 
-	.repositoryUrlAndMenu {
-		display: table-cell;
-		width: 350px;
+		.repositoryNameAndDescription {
+			display: table-cell;
+			vertical-align: top;
+			border-bottom: 1px solid #AAAAAA;
+		}
 
-		.repositoryUrlAndMenuContainer {
-			display: table;
-			width: 100%;
-			height: 100%;
+		.repositoryUrlAndMenu {
+			display: table-cell;
+			width: 350px;
 
-			.urlAndMenuSpacer {
-				display: table-row;
-				height: 10px;
+			.repositoryUrlAndMenuContainer {
+				display: table;
+				width: 100%;
+				height: 100%;
+
+				.urlAndMenuSpacer {
+					display: table-row;
+					height: 10px;
+				}
 			}
 		}
 	}
