@@ -4,7 +4,7 @@ window.RepositoryBuilds = {}
 class RepositoryBuilds.Model extends Backbone.Model
 
 	initialize: () ->
-		# @buildsListManagerModel = new BuildsListManager.Model repositoryId: @get 'repositoryId'
+		@buildsListManagerModel = new BuildsListManager.Model repositoryId: @get 'repositoryId'
 		# @buildDetailsModel = new BuildDetails.Model repositoryId: @get 'repositoryId'
 
 		# @buildsListManagerModel.on 'selectedBuild', @_handleSelectedBuild
@@ -17,7 +17,7 @@ class RepositoryBuilds.Model extends Backbone.Model
 class RepositoryBuilds.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryBuilds'
-	template: Handlebars.compile '<div class="repositoryBuildsContents"></div>'
+	template: Handlebars.compile ''
 
 	initialize: () ->
 		# @buildsListManagerView = new BuildsListManager.View model: @model.buildsListManagerModel
@@ -26,6 +26,7 @@ class RepositoryBuilds.View extends Backbone.View
 
 	render: () ->
 		@$el.html @template()
-		# @$el.find('.repositoryBuildsContents').append @buildsListManagerView.render().el
+		buildsListManagerView = new BuildsListManager.View model: @model.buildsListManagerModel
+		@$el.append buildsListManagerView.render().el
 		# @$el.find('.repositoryBuildsContents').append @buildDetailsView.render().el
 		return @
