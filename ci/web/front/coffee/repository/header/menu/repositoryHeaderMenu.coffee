@@ -49,8 +49,8 @@ class RepositoryHeaderMenu.View extends Backbone.View
 	template: Handlebars.compile '<div class="repositoryHeaderMenuOptions">
 			<div class="blankRepositoryMenuOption"></div>
 			{{#each options}}
-			<div class="repositoryMenuOption" optionName="{{name}}">
-				<img src="{{{imageSource}}}" class="repositoryMenuOptionImage" optionName="{{name}}" title="{{tooltipText}}" />
+			<div class="repositoryMenuOption" optionName="{{name}}" title="{{tooltipText}}" >
+				<img src="{{{imageSource}}}" class="repositoryMenuOptionImage" optionName="{{name}}" />
 			</div>
 			{{/each}}
 		</div>'
@@ -69,7 +69,7 @@ class RepositoryHeaderMenu.View extends Backbone.View
 		# was changed before the dom was rendered.
 		@_handleSelectedMenuOption()
 
-		Tipped.create '.repositoryMenuOptionImage'
+		Tipped.create '.repositoryMenuOption', skin: 'default'
 
 		return @
 
