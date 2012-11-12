@@ -98,9 +98,10 @@ class Server(object):
 	@greenlets.spawn_wrap
 	def _handle_call(self, body, message):
 		message_proto = self._call(body["method"], body["args"])
+		correlation_id = message.properties.get("correlation_id")
 		self.producer.publish(message_proto,
-			exchange=self.exchange,
 			routing_key=message.properties["reply_to"],
+			correlation_id=correlation_id,
 			delivery_mode=2
 		)
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
