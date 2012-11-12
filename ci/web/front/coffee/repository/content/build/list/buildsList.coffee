@@ -51,7 +51,7 @@ class BuildsList.Model extends Backbone.Model
 		return if @noMoreBuildsToFetch
 
 		queuePolicy =  BuildsFetcher.QueuePolicy.DO_NOT_QUEUE
-		@_fetchBuilds @buildModels.length, @buildModels.length + @_numberOfBuildsToRequest, queuePolicy
+		@_fetchBuilds @buildModels.length, @buildModels.length + @NUMBER_OF_BUILDS_TO_REQUEST, queuePolicy
 
 
 	_fetchBuilds: (start, end, queuePolicy) =>
