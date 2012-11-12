@@ -2,6 +2,10 @@
 @waitingColor: #888888;
 @failedColor:  #FF4D4D;
 
+@successBackgroundColor: rgba(0, 160, 0, 0.05);
+@waitingBackgroundColor: rgba(200, 200, 200, 0.2);
+@failedBackgroundColor:  rgba(160, 0, 0, 0.05);
+
 
 @fadeInOpacity: 1.0;
 @keyframes fadeIn { 
@@ -37,8 +41,25 @@ div.build {
 	-webkit-animation: fadeIn @fadeInTransitionTime;
 	-o-animation: fadeIn @fadeInTransitionTime;
 
-	&.selected {
-		box-shadow: 0px 0px 50px 0px #888888;
+	@backgroundColorTransitionTime: 1.0s;
+	transition: background-color @backgroundColorTransitionTime ease-out;
+	-moz-transition: background-color @backgroundColorTransitionTime ease-out;
+	-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+	-o-transition: background-color @backgroundColorTransitionTime ease-out;
+
+	&.success {
+		&.selected { background-color: @successBackgroundColor; }
+		.statusText { color: @successColor; }
+	}
+
+	&.waiting {
+		&.selected { background-color: @waitingBackgroundColor; }
+		.statusText { color: @waitingColor; }
+	}
+
+	&.failed {
+		&.selected { background-color: @failedBackgroundColor; }
+		.statusText { color: @failedColor; }
 	}
 
 	.number {
@@ -46,12 +67,9 @@ div.build {
 		color: #444444;
 	}
 
-	.status {
+	.statusText {
 		font-size: 1.0em;
-		&.success { color: @successColor; }
-		&.waiting { color: @waitingColor; }
-		&.failed  { color: @failedColor;  }
 	}
 
-	&:hover  { box-shadow: 0px 0px 50px 0px #888888; }
+	&:hover  { background-color: @waitingBackgroundColor; }
 }
