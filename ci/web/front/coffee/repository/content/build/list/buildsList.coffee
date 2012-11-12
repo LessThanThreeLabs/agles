@@ -99,7 +99,7 @@ class BuildsList.View extends Backbone.View
 
 
 	_scrollHandler: () =>
-		heightBeforeFetchingMoreBuilds = 100
+		heightBeforeFetchingMoreBuilds = 200
 		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreBuilds > @el.scrollHeight
 			@model.fetchMoreBuildsDoNotQueue()
 
