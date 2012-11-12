@@ -2,6 +2,7 @@
 	"css": {
 		"text/css": [
 			"/css/libs/bootstrap.css",
+			"/css/libs/tipped.css",
 
 			"/css/src/fonts.css",
 
@@ -45,6 +46,7 @@
 			"/js/libs/assert.js",
 			"/js/libs/jquery.js",
 			"/js/libs/bootstrap.js",
+			"/js/libs/tipped.js",
 			"/js/libs/handlebars.js",
 			"/js/libs/underscore.js",
 			"/js/libs/backbone/backbone.js",
