@@ -56,7 +56,7 @@ class BuildsList.Model extends Backbone.Model
 
 	_fetchBuilds: (start, end, queuePolicy) =>
 		assert.ok start < end and queuePolicy? and not @noMoreBuildsToFetch
-		return if not @get('repositoryId')?
+		return if not @get('repositoryId')? or not @get('listType')?
 
 		buildsQuery = new BuildsQuery @get('repositoryId'), @get('listType'), @get('queryString'), start, end
 		@buildsFetcher.runQuery buildsQuery, queuePolicy, (error, result) =>
@@ -65,7 +65,7 @@ class BuildsList.Model extends Backbone.Model
 				return
 
 			# It's possible this is being called for an old query
-			return if result.listType isnt @get 'listType'
+			return if result.type isnt @get 'listType'
 			return if result.queryString isnt @get 'queryString'
 
 			# If we didn't receive as many builds as we were 

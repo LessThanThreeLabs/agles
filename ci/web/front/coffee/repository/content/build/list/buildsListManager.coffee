@@ -2,7 +2,7 @@ window.BuildsListManager = {}
 
 
 class BuildsListManager.Model extends Backbone.Model
-	defaults:
+	default:
 		repositoryId: null
 
 	initialize: () =>
@@ -30,6 +30,9 @@ class BuildsListManager.Model extends Backbone.Model
 		# @get('currentBuildsList').on 'change:selectedBuild', @_handleSelectedBuild
 
 		@buildsListModel = new BuildsList.Model repositoryId: @get 'repositoryId'
+
+		# TEMPORARY!!
+		@buildsListModel.set 'listType', 'all'
 
 		@on 'change:repositoryId', () =>
 			@buildsListModel.set 'repositoryId', @get 'repositoryId'
@@ -69,6 +72,6 @@ class BuildsListManager.View extends Backbone.View
 		# @$el.find('.buildsSearchContainer').append buildsSearchView.render().el
 
 		buildsListView = new BuildsList.View model: @model.buildsListModel
-		# @$el.find('.buildsListContainer').html buildsListView.render().el
+		@$el.find('.buildsListContainer').html buildsListView.render().el
 
 		return @
