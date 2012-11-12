@@ -2,7 +2,9 @@ window.BuildDetails = {}
 
 
 class BuildDetails.Model extends Backbone.Model
-	
+	defaults:
+		build: null
+
 	initialize: () =>
 
 
@@ -15,7 +17,8 @@ class BuildDetails.View extends Backbone.View
 		</div>'
 
 	initialize: () =>
-		@model.on 'change:build', @_loadBuild
+		@model.on 'change:build', @render
+
 
 	render: () =>
 		@$el.html @template()
@@ -26,12 +29,8 @@ class BuildDetails.View extends Backbone.View
 	_displayBuildOutput: () =>
 		return if not @model.get('build')?
 
-		buildOutputModel = new BuildOutput.Model id: @model.get('build').get('id')
-		buildOutputModel.fetchBuildOutput()
+		# buildOutputModel = new BuildOutput.Model id: @model.get('build').get('id')
+		# buildOutputModel.fetchBuildOutput()
 
-		buildOutputView = new BuildOutput.View model: buildOutputModel
-		@$el.find('.buildDetailsPanel').append buildOutputView.render().el
-
-
-	_loadBuild: (buildDetailsModel, build) =>
-		@render()
+		# buildOutputView = new BuildOutput.View model: buildOutputModel
+		# @$el.find('.buildDetailsPanel').append buildOutputView.render().el
