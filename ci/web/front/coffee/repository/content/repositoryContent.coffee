@@ -31,3 +31,5 @@ class RepositoryContent.View extends Backbone.View
 			when 'builds'
 				repositoryBuildsView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
 				@$el.html repositoryBuildsView.render().el
+			else
+				console.error 'Unaccounted for mode ' + @model.get 'mode' if @model.get('mode')?

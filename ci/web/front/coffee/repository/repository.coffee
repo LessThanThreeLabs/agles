@@ -11,6 +11,7 @@ class Repository.Model extends Backbone.Model
 		@repositoryContentModel = new RepositoryContent.Model repositoryId: @get 'repositoryId'
 
 		@repositoryHeaderModel.on 'change:mode', () =>
+			@set 'repositoryMode', @repositoryHeaderModel.get 'mode'
 			@repositoryContentModel.set 'mode', @repositoryHeaderModel.get 'mode'
 
 		@on 'change:repositoryId', () =>
