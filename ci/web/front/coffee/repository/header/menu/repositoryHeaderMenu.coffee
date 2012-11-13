@@ -22,7 +22,7 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		@on 'change:selectedMenuOptionName', () =>
 			@router.navigate 'repository/' + @get('repositoryId') + '/' + @get('selectedMenuOptionName'), trigger: true
 		@on 'change:url', () =>
-			@repositoryUrlPanelModel.set 'url', @get 'url'
+			@repositoryUrlTrinketModel.set 'url', @get 'url'
 
 
 	validate: (attributes) =>
