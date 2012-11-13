@@ -24,6 +24,7 @@
 			"/css/src/repository/header/repositoryHeaderBasicInformation.css",
 			"/css/src/repository/header/repositoryHeader.css",
 
+			"/css/src/repository/create/createRepository.css",
 			"/css/src/repository/repository.css",
 
 			"/css/src/header/login/loginCreateAccountEmailSentPanel.css",
@@ -99,6 +100,14 @@
 		"image/png": [
 			"/img/background.png",
 			"/img/awesomeFace.png"
+		],
+
+		"image/svg+xml": [
+			"/img/icons/link.svg",
+			"/img/icons/sourceCode.svg",
+			"/img/icons/builds.svg",
+			"/img/icons/settings.svg",
+			"/img/icons/admin.svg"
 		]
 	},
 
