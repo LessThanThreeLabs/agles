@@ -92,6 +92,7 @@ build_console = Table('build_console', metadata,
 machine = Table('machine', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('uri', String, nullable=False, unique=True),
+	Column('host_name', String, nullable=False),
 	Column('repositories_path', String, nullable=False)
 )
 

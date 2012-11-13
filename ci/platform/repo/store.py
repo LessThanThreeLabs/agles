@@ -6,6 +6,7 @@ Repository management is done using gitpython.
 
 import os
 import shutil
+import socket
 import sys
 import yaml
 
@@ -133,8 +134,9 @@ class RepositoryStore(object):
 
 	@classmethod
 	def create_config(cls, root_dir):
+		host_name = socket.gethostbyname(socket.getfqdn())  # ridiculous hack
 		with model_server.ModelServer.rpc_connect("repos", "create") as conn:
-			store_name = conn.register_repostore()
+			store_name = conn.register_repostore(host_name, root_dir)
 
 		config = {"store_name": store_name}
 		config_path = os.path.join(root_dir, cls.CONFIG_FILE)
