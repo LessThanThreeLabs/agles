@@ -1,5 +1,5 @@
-name "staging"
-description "Agles staging"
+name "staging_config"
+description "Agles staging configuration"
 
 run_list(
 	"recipe[git]",

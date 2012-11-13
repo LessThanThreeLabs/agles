@@ -1,7 +1,7 @@
-name "verification_server"
-description "Agles verification server"
+name "model_server"
+description "Agles model server"
 run_list(
-	"recipe[agles::verification_server]"
+	"recipe[agles::model_server]"
 )
 override_attributes(
 	:agles => {

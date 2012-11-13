@@ -1,7 +1,8 @@
 name "repostore"
 description "Agles sets up sshd for a repostore"
 run_list(
-	"recipe[agles::repostore_server_config]"
+	"recipe[agles::repostore_server_config]",
+	"recipe[agles::filesystem_repo_server]"
 )
 override_attributes(
 	:agles => {
