@@ -57,7 +57,6 @@ class VerificationRequestHandler(QueueListener):
 				delivery_mode=2,  # make message persistent
 				mandatory=True,
 			)
-			build_outputs_update_rpc.flush_console_output(build_id, Console.Setup)
 			status = BuildStatus.COMPLETE if results == VerificationResult.SUCCESS else BuildStatus.FAILED
 			builds_update_rpc.mark_build_finished(build_id, status)
 			message.channel.basic_ack(delivery_tag=message.delivery_tag)
@@ -71,5 +70,9 @@ class VerificationRequestHandler(QueueListener):
 
 	def _make_console_appender(self, model_server_rpc, build_id):
 		def console_appender(console, subcategory):
-			return lambda line_num, line: model_server_rpc.append_console_line(build_id, line_num, line, console, subcategory)
+			def append(line_num, line):
+				model_server_rpc.append_console_line(build_id, line_num, line, console, subcategory)
+
+			def flush():
+				model_server_rpc.flush_console_output(build_id, console, subcategory)
 		return console_appender

@@ -27,7 +27,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._purge_queues()
 
 	def _create_repo_store_machine(self):
-		ins = schema.machine.insert().values(uri="http://machine0")
+		ins = schema.machine.insert().values(uri="http://machine0", host_name="localhost", repositories_path="/tmp")
 		with ConnectionFactory.get_sql_connection() as conn:
 			result = conn.execute(ins)
 			return result.inserted_primary_key[0]

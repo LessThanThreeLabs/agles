@@ -110,7 +110,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		permission = database.schema.permission
 		repo = database.schema.repo
 
-		machine_ins = machine.insert().values(uri="http://machine0")
+		machine_ins = machine.insert().values(uri="http://machine0", host_name="localhost", repositories_path="/tmp")
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			result = conn.execute(machine_ins)

@@ -64,6 +64,9 @@ class Vagrant(object):
 		stdout_lines = stdout_greenlet.wait()
 		stderr_lines = stderr_greenlet.wait()
 
+		if output_handler:
+			output_handler.flush()
+
 		stdout = "\n".join(stdout_lines)
 		stderr = "\n".join(stderr_lines)
 		returncode = process.poll()
@@ -80,7 +83,7 @@ class Vagrant(object):
 			lines.append(line)
 			self._output.append(line)
 			if line_handler:
-				line_handler(len(self._output), line)
+				line_handler.append(len(self._output), line)
 		return lines
 
 	def _get_vagrant_env(self):
