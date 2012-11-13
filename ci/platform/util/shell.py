@@ -53,7 +53,7 @@ class RestrictedGitShell(object):
 
 		self.verify_user_permissions(command, user_id, repo_hash)
 
-		return self._create_ssh_exec_args(route, command, repo_path + remote_filesystem_path, user_id)
+		return self._create_ssh_exec_args(route, command, remote_filesystem_path, user_id)
 
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
