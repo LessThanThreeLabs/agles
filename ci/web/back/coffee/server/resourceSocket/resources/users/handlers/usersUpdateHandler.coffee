@@ -13,6 +13,7 @@ class UsersUpdateHandler extends Handler
 		super modelRpcConnection
 
 
+	# THIS ISN'T NECESSARY...
 	default: (socket, data, callback) =>
 		@modelRpcConnection.users.read.get_user_from_id 1
 
@@ -20,3 +21,16 @@ class UsersUpdateHandler extends Handler
 			@loginHandler.handleRequest socket, data, callback
 		else
 			callback 'Parsing error'
+
+
+	# -- GIVEN --
+	# data =
+	#   email: <string>
+	#   password: <string>
+	# -- RETURNED --
+	# errors = UNDEFINED RIGHT NOW
+	# result =
+	#   firstName: <string>
+	#   lastName: <string>
+	login: (socket, data, callback) =>
+		callback 'Has not been implemented yet!'
