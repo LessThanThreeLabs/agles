@@ -97,6 +97,7 @@ machine = Table('machine', metadata,
 ssh_pubkeys = Table('ssh_pubkey', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
+	Column('alias', String, nullable=False),
 	Column('ssh_key', String, nullable=False, unique=True)
 )
 

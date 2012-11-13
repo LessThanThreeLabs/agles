@@ -16,8 +16,8 @@ class VagrantWrapper(object):
 	def init(self, output_handler=None):
 		return self.vagrant.init(output_handler=output_handler)
 
-	def up(self, output_handler=None):
-		return self.vagrant.up(output_handler=output_handler)
+	def up(self, provision=True, output_handler=None):
+		return self.vagrant.up(provision=provision, output_handler=output_handler)
 
 	def destroy(self, output_handler=None):
 		return self.vagrant.destroy(output_handler=output_handler)
@@ -51,9 +51,8 @@ class VagrantWrapper(object):
 
 		if self.init(output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Couldn't initialize vagrant")
-		if self.up(output_handler).returncode != 0:
+		if self.up(False, output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Couldn't start vagrant vm")
-		sleep(1)  # TODO (bbland): decide if this is necessary
 		if self.sandbox_on(output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Couldn't initialize sandbox on vm")
 		print "Launched vm at: " + self.get_vm_directory()

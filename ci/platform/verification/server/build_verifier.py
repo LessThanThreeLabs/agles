@@ -38,15 +38,12 @@ class BuildVerifier(object):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
 		Git().clone(repo_uri, self.source_dir)
-		source_repo = Repo(repo_uri)
+		repo = Repo(self.source_dir)
 		ref = refs[0]
-		self.checkout_ref(source_repo, ref)
-		for ref in refs[1:]:
-			source_repo.git.merge(ref)
-
-	def checkout_ref(self, repo, ref):
 		repo.git.fetch("origin", ref)
 		repo.git.checkout("FETCH_HEAD")
+		for ref in refs[1:]:
+			repo.git.merge(ref)
 
 	def _get_output_handler(self, console_appender, console, subcategory=""):
 		return console_appender(console, subcategory) if console_appender else None

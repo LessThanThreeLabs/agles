@@ -27,7 +27,9 @@ class Vagrant(object):
 	def init(self, output_handler=None):
 		return self._vagrant_call("init", self.box_name, output_handler=output_handler)
 
-	def up(self, output_handler=None):
+	def up(self, provision=True, output_handler=None):
+		if not provision:
+			return self._vagrant_call("up", "--no-provision", output_handler=output_handler)
 		return self._vagrant_call("up", output_handler=output_handler)
 
 	def destroy(self, output_handler=None):
