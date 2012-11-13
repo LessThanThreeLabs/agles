@@ -6,14 +6,15 @@ class BuildsListManager.Model extends Backbone.Model
 		repositoryId: null
 
 	initialize: () =>
-		# @buildsSearchModel = new BuildsSearch.Model()
+		@buildsSearchModel = new BuildsSearch.Model()
 		# @buildsSearchModel.on 'selectedFilterType', (filterType) =>
 		# 	console.log 'updated the filter type'
 		# 	@get('currentBuildsList').off 'change:selectedBuild', @_handleSelectedBuild
 		# 	@set 'currentBuildsList', @_getBuildListFromType filterType
 		# 	@get('currentBuildsList').on 'change:selectedBuild', @_handleSelectedBuild
-		# @buildsSearchModel.on 'change:queryString', (model, queryString, options) =>
-		# 	@get('currentBuildsList').set 'queryString', queryString
+		@buildsSearchModel.on 'change:queryString', () =>
+			console.log @buildsSearchModel.get 'queryString'
+			# @get('currentBuildsList').set 'queryString', @buildsSearchModel.get 'queryString'
 
 		# @buildsListModels = []
 		# filterTypes = @buildsSearchModel.buildsSearchFilterModel.buildsSearchFilterSelectorModel.types
@@ -68,8 +69,8 @@ class BuildsListManager.View extends Backbone.View
 	render: () =>
 		@$el.html @template()
 		
-		# buildsSearchView = new BuildsSearch.View model: @model.buildsSearchModel
-		# @$el.find('.buildsSearchContainer').append buildsSearchView.render().el
+		buildsSearchView = new BuildsSearch.View model: @model.buildsSearchModel
+		@$el.find('.buildsSearchContainer').html buildsSearchView.render().el
 
 		buildsListView = new BuildsList.View model: @model.buildsListModel
 		@$el.find('.buildsListContainer').html buildsListView.render().el
