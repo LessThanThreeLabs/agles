@@ -3,7 +3,6 @@ from kombu.messaging import Producer
 from shared.constants import BuildStatus
 from shared.handler import QueueListener
 from model_server import ModelServer
-from model_server.build_outputs.update_handler import Console
 from settings.verification_server import *
 from util import pathgen
 from verification_result import VerificationResult
@@ -69,10 +68,16 @@ class VerificationRequestHandler(QueueListener):
 			return model_server_rpc.get_repo_uri(commit_id)
 
 	def _make_console_appender(self, model_server_rpc, build_id):
-		def console_appender(console, subcategory):
-			def append(line_num, line):
-				model_server_rpc.append_console_line(build_id, line_num, line, console, subcategory)
+		class ConsoleAppender(object):
+			def __init__(self, console, subcategory):
+				self.model_server_rpc = model_server_rpc
+				self.build_id = build_id
+				self.console = console
+				self.subcategory = subcategory
 
-			def flush():
-				model_server_rpc.flush_console_output(build_id, console, subcategory)
-		return console_appender
+			def append(self, line_num, line):
+				self.model_server_rpc.append_console_line(self.build_id, line_num, line, self.console, self.subcategory)
+
+			def flush(self):
+				self.model_server_rpc.flush_console_output(build_id, self.console, self.subcategory)
+		return ConsoleAppender.__init__

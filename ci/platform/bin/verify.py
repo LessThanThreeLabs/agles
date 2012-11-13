@@ -32,15 +32,21 @@ def main():
 	def callback(results):
 		print "Verification results: %s" % str(results)
 
-	def console_appender(console, subcategory):
-		def output_handler(line, contents):
-			if subcategory:
-				print "(%s,%s,%s): %s" % (console, subcategory, line, contents)
-			else:
-				print "(%s,%s): %s" % (console, line, contents)
-		return output_handler
+	class ConsoleAppender(object):
+		def __init__(self, console, subcategory):
+			self.console = console
+			self.subcategory = subcategory
 
-	verifier.verify(args.repo_uri, [""], callback, console_appender)
+		def append(self, line, contents):
+			if self.subcategory:
+				print "(%s,%s,%s): %s" % (self.console, self.subcategory, line, contents)
+			else:
+				print "(%s,%s): %s" % (self.console, self.line, contents)
+
+		def flush(self):
+			print "Flushed"
+
+	verifier.verify(args.repo_uri, [""], callback, ConsoleAppender)
 
 
 main()
