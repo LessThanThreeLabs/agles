@@ -12,7 +12,7 @@ execute "Stop verification server" do
 	returns [0, 1]
 end
 
-execute "Start verification server" do
-	command "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py &"
+rvm_shell "Start verification server" do
+	code "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py &"
 	user node[:agles][:user]
 end

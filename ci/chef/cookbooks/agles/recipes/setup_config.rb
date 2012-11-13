@@ -101,7 +101,7 @@ def execute_script(script_info)
 			ruby_string node[:agles][:languages][:ruby][:ruby_string]
 		end
 		if script_info["background"]
-			command "#{name} &"
+			code "#{name} &"
 		end
 		if not script_info["directory"].nil?
 			cwd "#{node[:agles][:source_path][:internal]}/#{script_info["directory"]}"
