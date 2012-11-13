@@ -193,7 +193,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 		finally:
 			repo_slave.git.reset(hard=True)
 
-
 	def create_repository(self, repo_hash, repo_name):
 		"""Creates a new server side repository. Raises an exception on failure.
 		We create bare repositories because they are server side.
@@ -254,17 +253,20 @@ class StoreAlreadyRegisteredError(Exception):
 	def __init__(self, msg=''):
 		super(StoreAlreadyRegisteredError, self).__init__(msg)
 
+
 class RepositoryOperationException(Exception):
 	"""Base class for exception relating to repository management."""
 
 	def __init__(self, msg=''):
 		super(RepositoryOperationException, self).__init__(msg)
 
+
 class MergeError(RepositoryOperationException):
 	"""Indicates an exception occurred during an attempted merge."""
 
 	def __init__(self, msg=''):
 		super(MergeError, self).__init__(msg)
+
 
 class RepositoryAlreadyExistsException(RepositoryOperationException):
 	"""Indicates an exception occurred due to a repository already existing."""
