@@ -14,7 +14,8 @@ end
 
 node[:agles][:verification][:server_count].to_i.times do |server_num|
 	rvm_shell "Start verification server" do
-		code "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v /tmp/verification/#{server_num}"
+		code "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v /tmp/verification/#{server_num} &"
 		user node[:agles][:user]
 	end
+	execute "sleep 20"  # This is horrible
 end

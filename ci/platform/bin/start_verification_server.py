@@ -31,9 +31,7 @@ def main():
 		verifier.setup()
 
 	vs = VerificationServer(verifier)
-	vs_process = Process(target=vs.run)
-	vs_process.daemon = True
-	vs_process.start()
+	vs.run()
 
 
 main()
