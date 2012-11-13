@@ -9,7 +9,7 @@
 
 execute "Stop verification server" do
 	command "killall -9 start_verification_server.py"
-	ignore_failure true
+	returns [0, 1]
 end
 
 execute "Start verification server" do

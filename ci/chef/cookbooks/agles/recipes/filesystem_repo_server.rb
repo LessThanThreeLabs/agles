@@ -1,6 +1,6 @@
 execute "Stop filesystem repo server" do
 	command "killall -9 start_filesystem_repo_server.py"
-	ignore_failure true
+	returns [0, 1]
 end
 
 execute "Start filesystem repo server" do

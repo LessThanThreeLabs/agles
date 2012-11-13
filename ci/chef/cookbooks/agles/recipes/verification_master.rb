@@ -9,7 +9,7 @@
 
 execute "Stop verification master" do
 	command "killall -9 start_verification_master.py"
-	ignore_failure true
+	returns [0, 1]
 end
 
 execute "Start verification master" do
