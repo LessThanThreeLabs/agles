@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 
 import yaml
 
@@ -57,6 +58,7 @@ class BuildVerifier(object):
 		returncode = self.vagrant_wrapper.sandbox_rollback().returncode
 		if returncode != 0:
 			raise VerificationException("vm rollback", returncode=returncode)
+		time.sleep(1)  # Sadly seems necessary
 		returncode = self.vagrant_wrapper.provision(output_handler=output_handler,
 			role="verification_box_run").returncode
 		if returncode != 0:
