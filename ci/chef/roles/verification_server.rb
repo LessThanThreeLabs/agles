@@ -1,6 +1,7 @@
 name "verification_server"
 description "Agles verification server"
 run_list(
+	"recipe[rvm]",
 	"recipe[agles::verification_server]"
 )
 override_attributes(
