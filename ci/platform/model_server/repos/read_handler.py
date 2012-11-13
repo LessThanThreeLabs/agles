@@ -43,7 +43,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 		uri_repo_map = database.schema.uri_repo_map
 		repo = database.schema.repo
 		machine = database.schema.machine
-		query = select([machine.c.uri, repo.c.hash, repo.c.name], from_obj=[
+		query = select([machine.c.uri, machine.c.repositories_path, repo.c.hash, repo.c.name], from_obj=[
             uri_repo_map.select().where(uri_repo_map.c.uri==requested_repo_uri).alias().join(repo).join(machine)])
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row_result = sqlconn.execute(query).first()
