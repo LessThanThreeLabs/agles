@@ -7,7 +7,7 @@ from testconfig import config
 
 from settings.verification_server import box_name
 from util.test import BaseIntegrationTest
-from util.test.fake_build_verifier import FakeBuildVerifier
+from util.test.fake_build_verifier import FakeBuildVerifier, FakeUriTranslator
 from util.test.mixins import *
 from vagrant.vagrant_wrapper import VagrantWrapper
 from verification.server.build_verifier import BuildVerifier
@@ -24,7 +24,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			cls.verifier = FakeBuildVerifier(passes=True)
 		else:
 			vagrant_wrapper = VagrantWrapper.vm(VM_DIRECTORY, box_name)
-			cls.verifier = BuildVerifier(vagrant_wrapper)
+			cls.verifier = BuildVerifier(vagrant_wrapper, FakeUriTranslator())
 		cls.verifier.setup()
 
 	@classmethod

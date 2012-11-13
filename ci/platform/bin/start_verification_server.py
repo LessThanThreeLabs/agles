@@ -3,6 +3,7 @@ import argparse
 import os
 
 from settings.verification_server import box_name
+from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer
 from verification.server.build_verifier import BuildVerifier
 from vagrant.vagrant_wrapper import VagrantWrapper
@@ -23,7 +24,7 @@ def main():
 	print "Starting Verification Server with vm directory %s ..." % (
 			vm_dir)
 
-	verifier = BuildVerifier(VagrantWrapper.vm(vm_dir, box_name))
+	verifier = BuildVerifier(VagrantWrapper.vm(vm_dir, box_name), RepositoryUriTranslator())
 	if not args.fast_startup:
 		verifier.setup()
 	vs = VerificationServer(verifier)

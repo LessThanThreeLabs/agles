@@ -16,3 +16,8 @@ class FakeBuildVerifier(object):
 			callback(VerificationResult.SUCCESS)
 		else:
 			callback(VerificationResult.FAILURE)
+
+
+class FakeUriTranslator(object):
+	def translate(self, repo_uri):
+		return repo_uri

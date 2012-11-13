@@ -11,8 +11,9 @@ from verification_result import VerificationResult
 
 
 class BuildVerifier(object):
-	def __init__(self, vagrant_wrapper):
+	def __init__(self, vagrant_wrapper, uri_translator):
 		self.vagrant_wrapper = vagrant_wrapper
+		self.uri_translator = uri_translator
 		self.source_dir = os.path.join(vagrant_wrapper.get_vm_directory(), "source")
 
 	def setup(self):
@@ -37,7 +38,8 @@ class BuildVerifier(object):
 	def checkout_refs(self, repo_uri, refs):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
-		Git().clone(repo_uri, self.source_dir)
+		checkout_url = self.uri_translator.translate(repo_uri)
+		Git().clone(checkout_url, self.source_dir)
 		repo = Repo(self.source_dir)
 		ref = refs[0]
 		repo.git.fetch("origin", ref)

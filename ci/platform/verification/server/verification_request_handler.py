@@ -5,7 +5,6 @@ from shared.handler import QueueListener
 from model_server import ModelServer
 from model_server.build_outputs.update_handler import Console
 from settings.verification_server import *
-from util import pathgen
 from verification_result import VerificationResult
 
 
