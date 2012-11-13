@@ -28,6 +28,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		with Connection(connection_info) as connection:
 			events_broker = EventsBroker(connection)
 			events_broker.publish(events_broker.get_event("repos", "update"), (commit_id, merge_target))
+		return commit_id
 
 	def create_change(self, commit_id, merge_target):
 		change = database.schema.change
