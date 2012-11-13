@@ -5,6 +5,7 @@ import os
 DEFAULT_CHARS_PER_LEVEL = 2
 DIR_LEVELS = 3
 
+
 def to_path(hash, name, dir_levels=DIR_LEVELS):
 	return os.path.join(directory_treeify(hash, dir_levels), name)
 

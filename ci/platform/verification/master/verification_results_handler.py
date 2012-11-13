@@ -52,7 +52,7 @@ class VerificationResultsHandler(QueueListener):
 
 		with ModelServer.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)
-			filesystem_server_uri, repo_hash, repo_name = client.get_repo_attributes(repo_uri)
+			filesystem_server_uri, repos_path, repo_hash, repo_name = client.get_repo_attributes(repo_uri)
 
 		ref = pathgen.hidden_ref(commit_id)
 		try:

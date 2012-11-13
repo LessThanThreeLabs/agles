@@ -91,7 +91,8 @@ build_console = Table('build_console', metadata,
 
 machine = Table('machine', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('uri', String, nullable=False, unique=True)
+	Column('uri', String, nullable=False, unique=True),
+	Column('repositories_path', String, nullable=False)
 )
 
 ssh_pubkeys = Table('ssh_pubkey', metadata,

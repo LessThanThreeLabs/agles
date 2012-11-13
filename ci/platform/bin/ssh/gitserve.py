@@ -25,7 +25,7 @@ def main():
 		rsh = RestrictedGitShell(commands_to_permissions, user_id_commands)
 		rsh.handle_command(command)
 	else:
-		print "Shell access not permitted"
+		print "You have been successfully authenticated, but shell access is not permitted."
 
 
 if __name__ == "__main__":

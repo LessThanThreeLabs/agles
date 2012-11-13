@@ -47,7 +47,7 @@ class ReposReadHandler(ModelServerRpcHandler):
             uri_repo_map.select().where(uri_repo_map.c.uri==requested_repo_uri).alias().join(repo).join(machine)])
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row_result = sqlconn.execute(query).first()
-		return row_result[machine.c.uri], row_result[repo.c.hash], row_result[repo.c.name]
+		return row_result[machine.c.uri], row_result[machine.c.repositories_path], row_result[repo.c.hash], row_result[repo.c.name]
 
 	def get_user_id_from_public_key(self, key):
 		ssh_pubkeys = database.schema.ssh_pubkeys

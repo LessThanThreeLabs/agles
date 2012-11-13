@@ -48,12 +48,12 @@ class RestrictedGitShell(object):
 		requested_repo_uri = self._get_requested_repo_uri(repo_path)
 
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			route, repo_hash, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
-		remote_filesystem_path = pathgen.to_path(repo_hash, repo_name)
+			route, repos_path, repo_hash, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+		remote_filesystem_path = os.join(repos_path, pathgen.to_path(repo_hash, repo_name))
 
 		self.verify_user_permissions(command, user_id, repo_hash)
 
-		return self._create_ssh_exec_args(route, command, "/tmp/repositories/" + remote_filesystem_path, user_id)
+		return self._create_ssh_exec_args(route, command, repo_path + remote_filesystem_path, user_id)
 
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
