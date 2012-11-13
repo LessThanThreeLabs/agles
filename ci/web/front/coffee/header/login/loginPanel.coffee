@@ -162,9 +162,11 @@ class LoginPanel.View extends Backbone.View
 
 	_performLoginRequest: () =>
 		requestData = 
-			email: @model.loginBasicInformationPanelModel.get 'email'
-			password: @model.loginBasicInformationPanelModel.get 'password'
-			rememberMe: @model.loginBasicInformationPanelModel.get 'rememberMe'
+			method: 'login'
+			args:
+				email: @model.loginBasicInformationPanelModel.get 'email'
+				password: @model.loginBasicInformationPanelModel.get 'password'
+				rememberMe: @model.loginBasicInformationPanelModel.get 'rememberMe'
 		
 		socket.emit 'users:update', requestData, (errors, userData) =>
 			@loginBasicInformationPanelView.displayErrors errors

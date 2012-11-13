@@ -11,7 +11,6 @@ class RepositoriesReadHandler extends Handler
 	default: (socket, data, callback) =>
 		assert.ok socket.session.userId? and data.repoId?
 		userId = socket.session.userId
-		console.log 'fehfeh'
 		repo = @modelRpcConnection.repos.read.get_repo_from_id(userId, data.repoId)
 		callback null, repo
 		

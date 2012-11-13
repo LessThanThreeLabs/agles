@@ -13,14 +13,6 @@ class UsersUpdateHandler extends Handler
 		super modelRpcConnection
 
 
-	# THIS ISN'T NECESSARY...
-	default: (socket, data, callback) =>
-		if data.email? and data.password? and data.rememberMe?
-			@loginHandler.handleRequest socket, data, callback
-		else
-			callback 'Parsing error'
-
-
 	# -- GIVEN --
 	# data =
 	#   email: <string>
