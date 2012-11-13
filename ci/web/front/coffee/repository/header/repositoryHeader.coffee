@@ -59,8 +59,8 @@ class RepositoryHeader.View extends Backbone.View
 	template: Handlebars.compile '<div class="repositoryHeaderContainer">
 			<div class="repositoryNameAndDescription"></div>
 			<div class="repositoryUrlAndMenu">
-				<div class="repositoryUrlAndMenuContainer">
-				</div>
+				<!--<div class="repositoryUrlAndMenuContainer">
+				</div>-->
 			</div>
 		</div>'
 
@@ -73,7 +73,8 @@ class RepositoryHeader.View extends Backbone.View
 	render: () =>
 		@$el.html @template()
 		@$el.find('.repositoryNameAndDescription').append @repositoryHeaderBasicInformationView.render().el
-		@$el.find('.repositoryUrlAndMenuContainer').append @repositoryUrlPanelView.render().el
-		@$el.find('.repositoryUrlAndMenuContainer').append '<div class="urlAndMenuSpacer"></div>'
-		@$el.find('.repositoryUrlAndMenuContainer').append @repositoryHeaderMenuView.render().el
+		# @$el.find('.repositoryUrlAndMenuContainer').append @repositoryUrlPanelView.render().el
+		# @$el.find('.repositoryUrlAndMenuContainer').append '<div class="urlAndMenuSpacer"></div>'
+		# @$el.find('.repositoryUrlAndMenuContainer').append @repositoryHeaderMenuView.render().el
+		@$el.find('.repositoryUrlAndMenu').append @repositoryHeaderMenuView.render().el
 		return @
