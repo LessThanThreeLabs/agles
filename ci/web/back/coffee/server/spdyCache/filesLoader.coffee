@@ -43,14 +43,16 @@ class FilesLoader
 	_loadFilesForContentTypes: (contentTypes, callback) =>
 		loadedFiles = []
 		loadedFileErrors = []
+		index = 0
 
 		await
 			for contentType, files of contentTypes
-				for fileName, index in files
+				for fileName in files
 					loadedFiles[index] = {}
 					loadedFiles[index].name = fileName
 					loadedFiles[index].contentType = contentType
 					fs.readFile @_getFileLocation(fileName), 'binary', defer loadedFileErrors[index], loadedFiles[index].plain
+					++index
 
 		combinedErrors = loadedFileErrors.reduce ((previous, current) =>
 				return previous + ' ' + (current ? '')

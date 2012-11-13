@@ -44,7 +44,7 @@ class FilesCacher
 
 	_shouldGzip: (contentType) =>
 		switch contentType
-			when 'text/css', 'application/javascript'
+			when 'text/css', 'application/javascript', 'image/svg+xml'
 				return true
 			when 'image/png', 'application/x-font-woff'
 				return false
