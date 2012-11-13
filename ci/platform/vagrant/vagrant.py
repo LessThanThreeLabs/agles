@@ -88,12 +88,6 @@ class Vagrant(object):
 
 	def _get_vagrant_env(self):
 		vagrant_env = os.environ.copy()
-		vagrant_env["AGLES_ROOT"] = os.path.realpath(
-				os.path.join(__file__,
-						os.path.join("..",
-								os.path.join("..",
-										os.path.join("..",
-											"..")))))
 		return vagrant_env
 
 

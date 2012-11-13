@@ -2,6 +2,8 @@
 import argparse
 import os
 
+from multiprocessing import Process
+
 from settings.verification_server import box_name
 from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer
@@ -27,8 +29,11 @@ def main():
 	verifier = BuildVerifier(VagrantWrapper.vm(vm_dir, box_name), RepositoryUriTranslator())
 	if not args.fast_startup:
 		verifier.setup()
+
 	vs = VerificationServer(verifier)
-	vs.run()
+	vs_process = Process(target=vs.run)
+	vs_process.daemon = True
+	vs_process.start()
 
 
 main()
