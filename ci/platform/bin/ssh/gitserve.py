@@ -20,10 +20,13 @@ user_id_commands = ["git-receive-pack"]
 
 def main():
 	user_id = sys.argv[1]
-	command = os.environ["SSH_ORIGINAL_COMMAND"] + ' ' + user_id
-	rsh = RestrictedGitShell(commands_to_permissions, user_id_commands)
-	rsh.handle_command(command)
-	
+	if "SSH_ORIGINAL_COMMAND" in os.environ:
+		command = os.environ["SSH_ORIGINAL_COMMAND"] + ' ' + user_id
+		rsh = RestrictedGitShell(commands_to_permissions, user_id_commands)
+		rsh.handle_command(command)
+	else:
+		print "Shell access not permitted"
+
 
 if __name__ == "__main__":
 	main()
