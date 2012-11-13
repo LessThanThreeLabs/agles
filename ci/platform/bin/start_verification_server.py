@@ -14,7 +14,9 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-v", "--vm_dir",
 			help="The root directory for the virtual machine")
-	parser.set_defaults(vm_dir=DEFAULT_VM_DIRECTORY)
+	parser.add_argument("-f", "--fast_startup", action='store_true',
+			help="Skips teardown step at beginning")
+	parser.set_defaults(vm_dir=DEFAULT_VM_DIRECTORY, fast_startup=False)
 	args = parser.parse_args()
 
 	vm_dir = os.path.realpath(args.vm_dir)
@@ -22,7 +24,8 @@ def main():
 			vm_dir)
 
 	verifier = BuildVerifier(VagrantWrapper.vm(vm_dir, box_name))
-	verifier.setup()
+	if not args.fast_startup:
+		verifier.setup()
 	vs = VerificationServer(verifier)
 	vs.run()
 
