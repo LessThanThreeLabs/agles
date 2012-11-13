@@ -80,4 +80,4 @@ class VerificationRequestHandler(QueueListener):
 
 			def flush(self):
 				self.model_server_rpc.flush_console_output(build_id, self.console, self.subcategory)
-		return ConsoleAppender.__init__
+		return ConsoleAppender
