@@ -8,7 +8,7 @@
 #
 
 execute "Stop verification server" do
-	command "killall -9 #{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py"
+	command "killall -9 start_verification_server.py"
 end
 
 execute "Start verification server" do

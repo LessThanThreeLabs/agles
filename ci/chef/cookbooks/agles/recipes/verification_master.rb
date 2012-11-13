@@ -8,7 +8,7 @@
 #
 
 execute "Stop verification master" do
-	command "killall -9 #{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_master.py"
+	command "killall -9 start_verification_master.py"
 end
 
 execute "Start verification master" do
