@@ -42,17 +42,19 @@ window.BuildsFetcher = class BuildsFetcher
 		# 	@_runNextQuery()
 		# 	callback error, buildsData
 
-		console.log 'creating and returning fake builds'
-		buildsData = createFakeBuilds @currentQuery.repositoryId, @currentQuery.start, @currentQuery.end
-		result =
-			type: @currentQuery.type
-			queryString: @currentQuery.queryString
-			builds: buildsData
+		setTimeout (() =>
+			console.log 'creating and returning fake builds'
+			buildsData = createFakeBuilds @currentQuery.repositoryId, @currentQuery.start, @currentQuery.end
+			result =
+				type: @currentQuery.type
+				queryString: @currentQuery.queryString
+				builds: buildsData
 
-		callback = @currentCallback
-		@_runNextQuery()
-		callback null, result
-		console.log 'returned stuff'
+			callback = @currentCallback
+			@_runNextQuery()
+			callback null, result
+			console.log 'returned stuff'
+			), 500
 
 		return true
 

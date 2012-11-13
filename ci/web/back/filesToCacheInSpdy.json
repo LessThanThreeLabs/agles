@@ -9,8 +9,6 @@
 			"/css/src/welcome/welcome.css",
 
 			"/css/src/repository/content/build/build.css",
-			"/css/src/repository/content/build/list/search/buildsSearchFilterSelector.css",
-			"/css/src/repository/content/build/list/search/buildsSearchFilter.css",
 			"/css/src/repository/content/build/list/search/buildsSearch.css",
 			"/css/src/repository/content/build/list/buildsList.css",
 			"/css/src/repository/content/build/list/buildsListManager.css",
@@ -62,9 +60,6 @@
 			"/js/src/repository/content/build/build.js",
 			"/js/src/repository/content/build/list/buildsFetcher.js",
 			"/js/src/repository/content/build/list/search/buildsQuery.js",
-			"/js/src/repository/content/build/list/search/buildsSearchFilterType.js",
-			"/js/src/repository/content/build/list/search/buildsSearchFilterSelector.js",
-			"/js/src/repository/content/build/list/search/buildsSearchFilter.js",
 			"/js/src/repository/content/build/list/search/buildsSearch.js",
 			"/js/src/repository/content/build/list/buildsList.js",
 			"/js/src/repository/content/build/list/buildsListManager.js",

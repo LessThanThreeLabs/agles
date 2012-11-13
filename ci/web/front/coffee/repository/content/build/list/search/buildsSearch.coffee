@@ -13,6 +13,7 @@ class BuildsSearch.View extends Backbone.View
 	className: 'buildsSearch'
 	template: Handlebars.compile '<input type="search" class="buildsSearchField" placeholder="search..." maxlength=256 autocomplete="on">'
 	events:
+		'blur .buildsSearchField': '_handleKeyDown'
 		'keyup .buildsSearchField': '_handleKeyDown'
 
 	initialize: () =>
