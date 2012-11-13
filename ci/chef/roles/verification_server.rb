@@ -8,6 +8,9 @@ override_attributes(
 	:agles => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles",
+		},
+		:verification => {
+			:server_count => 3
 		}
 	}
 )
