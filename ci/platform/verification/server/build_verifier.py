@@ -80,13 +80,13 @@ class BuildVerifier(object):
 		for build_command in build_commands:
 			if build_command.run(self.vagrant_wrapper,
 				self._get_output_handler(console_appender, Console.Build, build_command.name)):
-				raise VerificationException("build")
+				raise VerificationException("Building: %s" % build_command.name)
 
 	def run_test_step(self, test_commands, console_appender):
 		for test_command in test_commands:
 			if test_command.run(self.vagrant_wrapper,
 				self._get_output_handler(console_appender, Console.Test, test_command.name)):
-				raise VerificationException("test")
+				raise VerificationException("Testing: %s" % test_command.name)
 
 	def _mark_success(self, callback):
 		"""Calls the callback function with a success code"""
