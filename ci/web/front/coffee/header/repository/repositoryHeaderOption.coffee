@@ -28,9 +28,10 @@ class RepositoryHeaderOption.View extends Backbone.View
 		{{#if repositories}}
 			<li class="divider"></li>
 		{{/if}}
-		<li><a href="/repository/create">Create repository</a></li>'
+		<li><a class="createRepository">Create repository</a></li>'
 	events:
-		'click .repository': '_handleSelection'
+		'click .repository': '_handleRepositorySelection'
+		'click .createRepository': '_handleCreateRepository'
 
 	initialize: () ->
 		@router = new Backbone.Router()
@@ -47,11 +48,15 @@ class RepositoryHeaderOption.View extends Backbone.View
 		return @
 
 
-	_handleSelection: (event) =>
+	_handleRepositorySelection: (event) =>
 		repositoryId = $(event.target).attr 'repositoryId'
 		assert.ok repositoryId?
 
 		@router.navigate 'repository/' + repositoryId, trigger: true
+
+
+	_handleCreateRepository: (event) =>
+		@router.navigate 'create/repository', trigger: true
 
 
 	_updateDropdownContents: () =>

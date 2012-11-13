@@ -2,7 +2,7 @@ window.Main = {}
 
 
 class Main.Model extends Backbone.Model
-	ALLOWED_MODES: ['welcome', 'repository']
+	ALLOWED_MODES: ['welcome', 'repository', 'createRepository']
 
 	defaults:
 		mode: 'welcome'
@@ -12,6 +12,7 @@ class Main.Model extends Backbone.Model
 		@headerModel = new Header.Model()
 		@welcomeModel = new Welcome.Model()
 		@repositoryModel = new Repository.Model()
+		@createRepositoryModel = new CreateRepository.Model()
 
 
 	validate: (attributes) =>
@@ -26,17 +27,14 @@ class Main.View extends Backbone.View
 	template: Handlebars.compile '<div class="headerContainer"></div><div class="contentContainer"></div>'
 
 	initialize: () ->
-		@headerView = new Header.View model: @model.headerModel
-		@welcomeView = new Welcome.View model: @model.welcomeModel
-		@repositoryView = new Repository.View model: @model.repositoryModel
-
 		@model.on 'change:mode', () =>
 			@_updateContent()
 
 
 	render: () ->
 		@$el.html @template()
-		@$el.find('.headerContainer').append @headerView.render().el
+		headerView = new Header.View model: @model.headerModel
+		@$el.find('.headerContainer').append headerView.render().el
 		@_updateContent()
 		return @
 
@@ -44,9 +42,14 @@ class Main.View extends Backbone.View
 	_updateContent: () =>
 		switch @model.get 'mode'
 			when 'welcome'
-				@$el.find('.contentContainer').html @welcomeView.render().el
+				welcomeView = new Welcome.View model: @model.welcomeModel
+				@$el.find('.contentContainer').html welcomeView.render().el
 			when 'repository'
-				@$el.find('.contentContainer').html @repositoryView.render().el
+				repositoryView = new Repository.View model: @model.repositoryModel
+				@$el.find('.contentContainer').html repositoryView.render().el
+			when 'createRepository'
+				createRepositoryView = new CreateRepository.View model: @model.createRepositoryModel
+				@$el.find('.contentContainer').html createRepositoryView.render().el
 			else	
 				console.error 'Unaccounted for mode'
 
@@ -57,6 +60,7 @@ class Main.Router extends Backbone.Router
 
 		'repository/:repositoryId': 'loadRepository'
 		'repository/:repositoryId/:repositoryMode': 'loadRepository'
+		'create/repository': 'createRepository'
 
 	loadIndex: () =>
 		mainModel.set 'mode', 'welcome'
@@ -69,6 +73,10 @@ class Main.Router extends Backbone.Router
 			mainModel.repositoryModel.set 'repositoryId', repositoryId
 		if repositoryMode?
 			mainModel.repositoryModel.set 'repositoryMode', repositoryMode
+
+
+	createRepository: () =>
+		mainModel.set 'mode', 'createRepository'
 
 
 

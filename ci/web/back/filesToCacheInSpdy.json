@@ -76,6 +76,7 @@
 			"/js/src/repository/header/repositoryHeaderBasicInformation.js",
 			"/js/src/repository/header/repositoryHeader.js",
 
+			"/js/src/repository/create/createRepository.js",
 			"/js/src/repository/repository.js",
 
 			"/js/src/header/repository/repositoryHeaderOption.js",
