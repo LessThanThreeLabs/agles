@@ -7,18 +7,22 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		'builds': new RepositoryHeaderMenuOption 'builds', 'Builds', '/img/icons/builds.svg'
 		'settings': new RepositoryHeaderMenuOption 'settings', 'Settings', '/img/icons/settings.svg'
 		'admin': new RepositoryHeaderMenuOption 'admin', 'Admin', '/img/icons/admin.svg'
-	default:
+	defaults:
 		repositoryId: null
 		menuOptions: []
 		selectedMenuOptionName: null
+		url: ''
 
 	initialize: () =>
+		@repositoryUrlTrinketModel = new RepositoryUrlTrinket.Model()
 		@router = new Backbone.Router()
 
 		@on 'change:repositoryId', () =>
 			@_updateAllowMenuOptions()
 		@on 'change:selectedMenuOptionName', () =>
 			@router.navigate 'repository/' + @get('repositoryId') + '/' + @get('selectedMenuOptionName'), trigger: true
+		@on 'change:url', () =>
+			@repositoryUrlPanelModel.set 'url', @get 'url'
 
 
 	validate: (attributes) =>
@@ -47,7 +51,7 @@ class RepositoryHeaderMenu.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeaderMenu'
 	template: Handlebars.compile '<div class="repositoryHeaderMenuOptions">
-			<div class="blankRepositoryMenuOption"></div>
+			<div class="repositoryMenuTrinkets"></div>
 			{{#each options}}
 			<div class="repositoryMenuOption" optionName="{{name}}" title="{{tooltipText}}" >
 				<img src="{{{imageSource}}}" class="repositoryMenuOptionImage" optionName="{{name}}" />
@@ -64,6 +68,9 @@ class RepositoryHeaderMenu.View extends Backbone.View
 
 	render: () =>
 		@$el.html @template options: @model.get 'menuOptions'
+
+		repositoryUrlTrinketView = new RepositoryUrlTrinket.View model: @model.repositoryUrlTrinketModel
+		@$el.find('.repositoryMenuTrinkets').append repositoryUrlTrinketView.render().el
 
 		# Needed for when the selected menu option 
 		# was changed before the dom was rendered.

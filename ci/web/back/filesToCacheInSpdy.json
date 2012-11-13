@@ -20,7 +20,7 @@
 			"/css/src/repository/content/repositoryContent.css",
 
 			"/css/src/repository/header/menu/repositoryHeaderMenu.css",
-			"/css/src/repository/header/url/repositoryUrlPanel.css",
+			"/css/src/repository/header/menu/trinkets/url/repositoryUrlPanel.css",
 			"/css/src/repository/header/repositoryHeaderBasicInformation.css",
 			"/css/src/repository/header/repositoryHeader.css",
 
@@ -72,7 +72,7 @@
 
 			"/js/src/repository/header/menu/repositoryHeaderMenuOption.js",
 			"/js/src/repository/header/menu/repositoryHeaderMenu.js",
-			"/js/src/repository/header/url/repositoryUrlPanel.js",
+			"/js/src/repository/header/menu/trinkets/url/repositoryUrlPanel.js",
 			"/js/src/repository/header/repositoryHeaderBasicInformation.js",
 			"/js/src/repository/header/repositoryHeader.js",
 
