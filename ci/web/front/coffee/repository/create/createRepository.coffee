@@ -18,7 +18,23 @@ class CreateRepository.View extends Backbone.View
 					Name
 				</div>
 				<div class="createRepositoryValue">
-					<input type="text" class="repositoryNameField" placeholder="name" maxlength=64>
+					<input type="text" class="repositoryNameField" placeholder="name" maxlength=32>
+				</div>
+			</div>
+			<div class="createRepositoryRow">
+				<div class="createRepositoryLabel">
+					Description
+				</div>
+				<div class="createRepositoryValue">
+					<textarea type="text" class="repositoryDescriptionField" placeholder="description" maxlength=256></textarea>
+				</div>
+			</div>
+			<div class="createRepositoryRow">
+				<div class="createRepositoryLabel">
+					Default permissions
+				</div>
+				<div class="createRepositoryValue">
+					Default permissions here
 				</div>
 			</div>
 		</div>'
