@@ -4,9 +4,9 @@ window.CreateRepository = {}
 class CreateRepository.Model extends Backbone.Model
 	ALLOWED_PERMISSIONS: ['read', 'write', 'admin']
 	defaults:
-		name: null
-		description: null
-		defaultPermissions: null
+		name: ''
+		description: ''
+		defaultPermissions: 'write'
 
 	initialize: () =>
 
@@ -24,6 +24,7 @@ class CreateRepository.View extends Backbone.View
 				</div>
 				<div class="createRepositoryValue">
 					<input type="text" class="repositoryNameField" placeholder="name" maxlength=32>
+					<div class="errorText repositoryNameErrorText"></div>
 				</div>
 			</div>
 			<div class="createRepositoryEmptyRow"></div>
@@ -33,6 +34,7 @@ class CreateRepository.View extends Backbone.View
 				</div>
 				<div class="createRepositoryValue">
 					<textarea type="text" class="repositoryDescriptionField" placeholder="description" maxlength=256></textarea>
+					<div class="errorText repositoryDescriptionErrorText"></div>
 				</div>
 			</div>
 			<div class="createRepositoryEmptyRow"></div>
@@ -63,6 +65,11 @@ class CreateRepository.View extends Backbone.View
 
 	render: () =>
 		@$el.html @template()
+
+		@$el.find('.repositoryNameField').val @model.get 'name'
+		@$el.find('.repositoryDescriptionField').val @model.get 'description'
+		@$el.find('.defaultPermissionsOption[type=' + @model.get('defaultPermissions') + ']').addClass 'active'
+
 		return @
 
 
@@ -84,8 +91,32 @@ class CreateRepository.View extends Backbone.View
 		
 		console.log 'need to make request with:'
 		console.log requestData
+		console.log 'checking of these fields needs to be done on the webserver...'
 
 		# socket.emit 'repositories:create', requestData, (errors, repository) =>
 		# 	console.log 'navigate page to repository ' + repository.id
 		repository = id: 17
 		@router.navigate 'repository/' + repository.id, trigger: true
+
+
+	_clearErrors: () =>
+		@_displayErrors {}
+
+
+	_displayErrors: (errors = {}) =>
+		nameError = @$el.find('.repositoryNameErrorText')
+		descriptionError = @$el.find('.repositoryDescriptionErrorText')
+
+		if errors.name?
+			nameError.text errors.name
+			nameError.show()
+		else 
+			nameError.text ''
+			nameError.hide()
+
+		if errors.description?
+			descriptionError.text errors.description
+			descriptionError.show()
+		else
+			descriptionError.text ''
+			descriptionError.hide()

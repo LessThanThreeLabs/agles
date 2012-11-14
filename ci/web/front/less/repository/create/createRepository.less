@@ -1,7 +1,6 @@
 div.createRepository {
 	display: table-cell;
 	vertical-align: middle;
-	text-align: center;
 
 	.createRepositoryInformation {
 		margin-left: auto;
@@ -39,6 +38,7 @@ div.createRepository {
 
 			.createRepositoryValue {
 				display: table-cell;
+				text-align: center;
 
 				input {
 					margin: 0px;
@@ -50,6 +50,14 @@ div.createRepository {
 					width: 250px;
 					height: 100px;
 					resize: none;
+				}
+
+				.errorText {
+					display: none;
+					padding-top: 5px;
+					padding-left: 5px;
+					text-align: left;
+					color: rgba(200, 0, 0, 1.0);
 				}
 			}
 		}
