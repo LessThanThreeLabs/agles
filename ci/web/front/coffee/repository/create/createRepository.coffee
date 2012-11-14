@@ -17,32 +17,32 @@ class CreateRepository.View extends Backbone.View
 	template: Handlebars.compile '<div class="createRepositoryInformation">
 			Specify the details of your repository.
 		</div>
-		<div class="createRepositoryForm">
-			<div class="createRepositoryRow">
-				<div class="createRepositoryLabel">
+		<div class="prettyForm createRepositoryForm">
+			<div class="prettyFormRow createRepositoryRow">
+				<div class="prettyFormRow createRepositoryLabel">
 					Name
 				</div>
-				<div class="createRepositoryValue">
+				<div class="prettyFormValue createRepositoryValue">
 					<input type="text" class="repositoryNameField" placeholder="name" maxlength=32>
 					<div class="errorText repositoryNameErrorText"></div>
 				</div>
 			</div>
-			<div class="createRepositoryEmptyRow"></div>
-			<div class="createRepositoryRow">
-				<div class="createRepositoryLabel">
+			<div class="prettyFormEmptyRow createRepositoryEmptyRow"></div>
+			<div class="prettyFormRow createRepositoryRow">
+				<div class="prettyFormLabel createRepositoryLabel">
 					Description
 				</div>
-				<div class="createRepositoryValue">
+				<div class="prettyFormValue createRepositoryValue">
 					<textarea type="text" class="repositoryDescriptionField" placeholder="description" maxlength=256></textarea>
 					<div class="errorText repositoryDescriptionErrorText"></div>
 				</div>
 			</div>
-			<div class="createRepositoryEmptyRow"></div>
-			<div class="createRepositoryRow">
-				<div class="createRepositoryLabel">
+			<div class="prettyFormEmptyRow createRepositoryEmptyRow"></div>
+			<div class="prettyFormRow createRepositoryRow">
+				<div class="prettyFormRow createRepositoryLabel">
 					Default permissions
 				</div>
-				<div class="createRepositoryValue">
+				<div class="prettyFormValue createRepositoryValue">
 					<div class="btn-group" data-toggle="buttons-radio">
 						<button class="btn defaultPermissionsOption readPermissionsOption" type="read">Read</button>
 						<button class="btn defaultPermissionsOption writePermissionsOption" type="write">Write</button>
