@@ -2,7 +2,7 @@ window.Main = {}
 
 
 class Main.Model extends Backbone.Model
-	ALLOWED_MODES: ['welcome', 'repository', 'createRepository']
+	ALLOWED_MODES: ['welcome', 'account', 'repository', 'createRepository']
 
 	defaults:
 		mode: 'welcome'
@@ -11,6 +11,7 @@ class Main.Model extends Backbone.Model
 	initialize: () =>
 		@headerModel = new Header.Model()
 		@welcomeModel = new Welcome.Model()
+		@accountModel = new Account.Model()
 		@repositoryModel = new Repository.Model()
 		@createRepositoryModel = new CreateRepository.Model()
 
@@ -42,7 +43,10 @@ class Main.View extends Backbone.View
 	_updateContent: () =>
 		switch @model.get 'mode'
 			when 'welcome'
-				welcomeView = new Welcome.View model: @model.welcomeModel
+				welcomeView = new Account.View model: @model.accountModel
+				@$el.find('.contentContainer').html accountView.render().el
+			when 'account'
+				accountView = new Welcome.View model: @model.welcomeModel
 				@$el.find('.contentContainer').html welcomeView.render().el
 			when 'repository'
 				repositoryView = new Repository.View model: @model.repositoryModel
@@ -58,13 +62,20 @@ class Main.Router extends Backbone.Router
 	routes:
 		'': 'loadIndex'
 
+		'account': 'loadAccount'
+
 		'repository/:repositoryId': 'loadRepository'
 		'repository/:repositoryId/:repositoryMode': 'loadRepository'
+
 		'create/repository': 'createRepository'
 
 	loadIndex: () =>
 		mainModel.set 'mode', 'welcome'
 
+
+	loadAccount: () =>
+		mainModel.set 'mode', 'account'
+		
 
 	loadRepository: (repositoryId, repositoryMode) =>
 		mainModel.set 'mode', 'repository'
