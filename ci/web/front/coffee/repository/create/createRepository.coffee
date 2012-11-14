@@ -58,6 +58,7 @@ class CreateRepository.View extends Backbone.View
 		'click .createRepositoryButton': '_handleCreateRepository'
 
 	initialize: () =>
+		@router = new Backbone.Router()
 
 
 	render: () =>
@@ -86,3 +87,5 @@ class CreateRepository.View extends Backbone.View
 
 		# socket.emit 'repositories:create', requestData, (errors, repository) =>
 		# 	console.log 'navigate page to repository ' + repository.id
+		repository = id: 17
+		@router.navigate 'repository/' + repository.id, trigger: true
