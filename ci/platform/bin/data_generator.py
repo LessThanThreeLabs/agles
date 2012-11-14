@@ -10,6 +10,7 @@ from database.engine import ConnectionFactory
 from util.permissions import RepositoryPermissions
 
 NUM_REPOS = 3
+REPOSITORIES_PATH = 'repos'
 
 
 class SchemaDataGenerator(object):
@@ -22,7 +23,7 @@ class SchemaDataGenerator(object):
 			repos = dict()
 			repo_hashes = []
 			for machine in range(random.randint(1, 3)):
-				ins_machine = schema.machine.insert().values(uri="machine_%d" % machine)
+				ins_machine = schema.machine.insert().values(uri="machine_%d" % machine, repositories_path=REPOSITORIES_PATH, host_name=hashlib.sha1(str(machine)).hexdigest())
 				machine_id = conn.execute(ins_machine).inserted_primary_key[0]
 
 				for repo in range(random.randint(1, NUM_REPOS)):
@@ -35,7 +36,7 @@ class SchemaDataGenerator(object):
 					repo_hashes.append("hash_%d,%d" % (machine, repo))
 
 			for user in range(random.randint(1, 10)):
-				ins_user = schema.user.insert().values(name="name_%d" % user, email="%d@b.com" % user,
+				ins_user = schema.user.insert().values(first_name="firstname_%d" % user, last_name="lastname_%d" % user, email="%d@b.com" % user,
 					password_hash=hashlib.sha512(str(user)).digest(), salt='a'*16)
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
