@@ -57,10 +57,11 @@ class VerificationResultsHandler(QueueListener):
 		ref = pathgen.hidden_ref(commit_id)
 		try:
 			self.remote_repo_manager.merge_changeset(
-                machine_uri, repo_hash,
-                repo_name, ref, merge_target)
-		except MergeError:
+				machine_uri, repo_hash,
+				repo_name, ref, merge_target)
+		except MergeError as e:
 			merge_status = False
+			raise e
 		"""
 		with ModelServer.rpc_connect("repos", "update") as client:
 					client.mark_merge(merge_status)
