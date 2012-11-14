@@ -13,9 +13,10 @@ execute "Stop verification server" do
 end
 
 node[:agles][:verification][:server_count].to_i.times do |server_num|
-	rvm_shell "Start verification server" do
+	rvm_shell "Start verification server #{server_num}}" do
 		code <<-EOH
 		cd /tmp/verification/#{server_num}
+		vagrant destroy -f
 		vagrant init precise64_verification
 		vagrant up --no-provision
 		vagrant sandbox on
