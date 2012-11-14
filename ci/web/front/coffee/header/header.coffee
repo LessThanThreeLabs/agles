@@ -10,9 +10,12 @@ class Header.Model extends Backbone.Model
 class Header.View extends Backbone.View
 	tagName: 'div'
 	className: 'header'
-	template: Handlebars.compile '<div class="title">Blimp</div>'
+	template: Handlebars.compile '<div class="headerContent"><span class="title">Blimp</span></div>'
+	events: 'click .title': '_handleTitleClick'
+
 
 	initialize: () ->
+		@router = new Backbone.Router()
 		@headerMenuView = new HeaderMenu.View model: @model.headerMenuModel
 
 
@@ -20,3 +23,7 @@ class Header.View extends Backbone.View
 		@$el.html @template()
 		@$el.append @headerMenuView.render().el
 		return @
+
+
+	_handleTitleClick: () =>
+		@router.navigate '/', trigger: true
