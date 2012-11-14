@@ -38,6 +38,7 @@ class Server
 		@configurer.configure expressServer
 
 		expressServer.get '/', @_handleIndexRequest
+		expressServer.get '/account', @_handleIndexRequest
 		expressServer.get '/repository/:id', @_handleIndexRequest
 		expressServer.get '/repository/:id/:view', @_handleIndexRequest
 		expressServer.get '/create/repository', @_handleIndexRequest
