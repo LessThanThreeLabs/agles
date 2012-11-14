@@ -8,6 +8,13 @@ exports.create = (modelRpcConnection) ->
 
 
 class BuildsReadHandler extends Handler
+
+	# -- GIVEN --
+	# data =
+	#   id: <integer>
+	# -- RETURNED --
+	# result =
+	#    EVERYTHING for now...
 	default: (socket, data, callback) =>
 		assert.ok socket.session.userId? and data.buildId?
 		userId = socket.session.userId
@@ -15,6 +22,15 @@ class BuildsReadHandler extends Handler
 		callback null, buildData
 
 
+	# -- GIVEN --
+	# data =
+	#   repositoryId: <integer>
+	#   queryString: <string>
+	#   range:
+	#     start: <integer>
+	#     end: <integer>
+	# -- RETURNED --
+	# result = [<buildObjects>, ...]
 	range: (socket, args, callback) =>
 		assert.ok socket.session.userId? and args.repoId? and args.type? and args.startIndexInclusive? and args.endIndexExclusive? and args.queryString?
 		userId = socket.session.userId
