@@ -183,8 +183,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo = Repo(repo_path)
 		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
 		try:
+			repo_slave.git.fetch()
 			repo_slave.git.checkout("origin/" + ref_to_merge_into, "-B", ref_to_merge_into)
-			repo_slave.git.pull()
 			repo_slave.git.fetch("origin", ref_to_merge)
 			repo_slave.git.merge("FETCH_HEAD")
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
