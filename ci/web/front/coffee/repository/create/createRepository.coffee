@@ -18,31 +18,31 @@ class CreateRepository.View extends Backbone.View
 			Specify the details of your repository.
 		</div>
 		<div class="prettyForm createRepositoryForm">
-			<div class="prettyFormRow createRepositoryRow">
-				<div class="prettyFormRow createRepositoryLabel">
+			<div class="prettyFormRow">
+				<div class="prettyFormRow">
 					Name
 				</div>
-				<div class="prettyFormValue createRepositoryValue">
+				<div class="prettyFormValue">
 					<input type="text" class="repositoryNameField" placeholder="name" maxlength=32>
-					<div class="errorText repositoryNameErrorText"></div>
+					<div class="prettyFormErrorText repositoryNameErrorText"></div>
 				</div>
 			</div>
-			<div class="prettyFormEmptyRow createRepositoryEmptyRow"></div>
-			<div class="prettyFormRow createRepositoryRow">
-				<div class="prettyFormLabel createRepositoryLabel">
+			<div class="prettyFormEmptyRow"></div>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel">
 					Description
 				</div>
-				<div class="prettyFormValue createRepositoryValue">
+				<div class="prettyFormValue">
 					<textarea type="text" class="repositoryDescriptionField" placeholder="description" maxlength=256></textarea>
-					<div class="errorText repositoryDescriptionErrorText"></div>
+					<div class="prettyFormErrorText repositoryDescriptionErrorText"></div>
 				</div>
 			</div>
-			<div class="prettyFormEmptyRow createRepositoryEmptyRow"></div>
-			<div class="prettyFormRow createRepositoryRow">
-				<div class="prettyFormRow createRepositoryLabel">
+			<div class="prettyFormEmptyRow"></div>
+			<div class="prettyFormRow">
+				<div class="prettyFormRow">
 					Default permissions
 				</div>
-				<div class="prettyFormValue createRepositoryValue">
+				<div class="prettyFormValue">
 					<div class="btn-group" data-toggle="buttons-radio">
 						<button class="btn defaultPermissionsOption readPermissionsOption" type="read">Read</button>
 						<button class="btn defaultPermissionsOption writePermissionsOption" type="write">Write</button>
