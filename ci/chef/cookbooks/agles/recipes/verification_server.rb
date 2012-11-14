@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-execute "Stop verification server" do
+execute "Stop verification servers" do
 	command "killall -9 start_verification_server.py"
 	returns [0, 1]
 end
@@ -19,6 +19,7 @@ node[:agles][:verification][:server_count].to_i.times do |server_num|
 		vagrant destroy -f
 		vagrant init precise64_verification
 		vagrant up --no-provision
+		sleep 2
 		vagrant sandbox on
 		#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v /tmp/verification/#{server_num} -f &
 		EOH

@@ -89,6 +89,7 @@ class Client(ClientBase):
 	def _on_exchange_declare(self, frame):
 		self.channel.queue_declare(
 			exclusive=True,
+			auto_delete=True,
 			callback=self._on_queue_declare)
 
 	def _on_queue_declare(self, frame):
