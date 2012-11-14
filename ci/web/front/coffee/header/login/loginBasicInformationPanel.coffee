@@ -55,6 +55,7 @@ class LoginBasicInformationPanel.View extends Backbone.View
 
 
 	_handleFormEntryChange: () =>
+		console.log 'loginBasicInformationPanel -- ...think this is wrong'
 		setTimeout (() =>
 			@model.set 'email', $('.loginEmail').val()
 			@model.set 'password', $('.loginPassword').val()
