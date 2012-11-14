@@ -25,7 +25,7 @@ class BuildsReadHandler(ModelServerRpcHandler):
 		if row:
 			repo_id = row[repo.c.id]
 			if self._has_permissions(user_id, repo_id):
-				return to_dict(row, build.columns, tablename='build')
+				return to_dict(row, build.columns, tablename=build.name)
 		return {}
 
 	def get_commit_list(self, build_id):
@@ -62,10 +62,12 @@ class BuildsReadHandler(ModelServerRpcHandler):
 
 		if not self._has_permissions(user_id, repo_id):
 			return []
+		if not query_string:
+			raise InvalidQueryError
 
 		query_string = "%" + query_string + "%"
 
-		query = build.join(change).join(commit).join(repo).join(user).select().where(
+		query = build.join(change).join(commit).join(repo).join(user).select().apply_labels().where(
 			and_(
 				repo.c.id==repo_id,
 				or_(
@@ -78,5 +80,10 @@ class BuildsReadHandler(ModelServerRpcHandler):
 			start_index_inclusive - 1)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			builds = map(lambda row: to_dict(row, build.columns), sqlconn.execute(query))
-		return builds
+			builds = map(lambda row: to_dict(row, build.columns,
+				tablename=build.name), sqlconn.execute(query))
+			return builds
+
+
+class InvalidQueryError(Exception):
+	pass

@@ -36,9 +36,9 @@ class BuildsReadHandler extends Handler
 	range: (socket, args, callback) =>
 		assert.ok socket.session.userId? and args.repoId? and args.start? and args.numResults? and args.queryString?
 		userId = socket.session.userId
-		@modelRpcConnection.builds.read.query_builds userId, args.repoId,
-				args.queryString, args.start, args.numResults, (error, builds) =>
-			if error?
-				callback "Couldn't query for builds"
-			else
-				callback null, builds
+		await @modelRpcConnection.builds.read.query_builds userId, args.repoId, 
+				args.queryString, args.start, args.numResults, defer error, builds
+		if error?
+			callback "Couldn't query for builds"
+		else
+			callback null, builds

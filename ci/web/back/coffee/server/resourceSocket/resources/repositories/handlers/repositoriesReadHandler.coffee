@@ -1,4 +1,4 @@
-ssert = require 'assert'
+assert = require 'assert'
 
 Handler = require '../../handler'
 
@@ -18,6 +18,10 @@ class RepositoriesReadHandler extends Handler
 	default: (socket, data, callback) =>
 		assert.ok socket.session.userId? and data.repoId?
 		userId = socket.session.userId
-		repo = @modelRpcConnection.repos.read.get_repo_from_id(userId, data.repoId)
-		callback null, repo
-		
+		await @modelRpcConnection.repos.read.get_repo_from_id userId, 
+				data.repoId, defer error, repo
+		if error?
+			callback "Could not read repo"
+		else
+			callback null, repo
+ 
