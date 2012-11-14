@@ -53,6 +53,7 @@ class VagrantWrapper(object):
 			raise VagrantException(self.vagrant, "Couldn't initialize vagrant")
 		if self.up(False, output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Couldn't start vagrant vm")
+		sleep(2)  # Lamesauce
 		if self.sandbox_on(output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Couldn't initialize sandbox on vm")
 		print "Launched vm at: " + self.get_vm_directory()
