@@ -43,11 +43,11 @@ class Main.View extends Backbone.View
 	_updateContent: () =>
 		switch @model.get 'mode'
 			when 'welcome'
-				welcomeView = new Account.View model: @model.accountModel
-				@$el.find('.contentContainer').html accountView.render().el
-			when 'account'
-				accountView = new Welcome.View model: @model.welcomeModel
+				welcomeView = new Welcome.View model: @model.welcomeModel
 				@$el.find('.contentContainer').html welcomeView.render().el
+			when 'account'
+				accountView = new Account.View model: @model.accountModel
+				@$el.find('.contentContainer').html accountView.render().el
 			when 'repository'
 				repositoryView = new Repository.View model: @model.repositoryModel
 				@$el.find('.contentContainer').html repositoryView.render().el
