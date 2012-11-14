@@ -26,8 +26,8 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._stop_model_server()
 		self._purge_queues()
 
-	def _create_repo_store_machine(self):
-		ins = schema.machine.insert().values(uri="http://machine0", host_name="localhost", repositories_path="/tmp")
+	def _create_repo_store(self):
+		ins = schema.repostore.insert().values(uri="afjfaio", host_name="localhost", repositories_path="/tmp")
 		with ConnectionFactory.get_sql_connection() as conn:
 			result = conn.execute(ins)
 			return result.inserted_primary_key[0]
@@ -38,9 +38,9 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 			conn.execute(ins)
 
 	def _setup_db_entries(self, REPO_URI):
-		machine_id = self._create_repo_store_machine()
+		repostore_id = self._create_repo_store()
 		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
-			repo_id = rpc_conn.create_repo("repo.git", machine_id, RepositoryPermissions.RW)
+			repo_id = rpc_conn.create_repo("repo.git", repostore_id, RepositoryPermissions.RW)
 		self._map_uri(REPO_URI, repo_id)
 
 	def test_new_sshargs(self):
@@ -50,12 +50,13 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
 		sshargs = rsh.new_sshargs('git-receive-pack', REPO_URI, "1")
 
+		print sshargs
 		assert_equals(len(sshargs), 6)
 		assert_equals('ssh', sshargs[0])
 		assert_equals('ssh', sshargs[1])
-		assert_equals('git@http://machine0', sshargs[2])
-		assert_equals('-p', sshargs[3])
-		assert_equals('2222', sshargs[4])
+		assert_equals('-p', sshargs[2])
+		assert_equals('2222', sshargs[3])
+		assert_equals('git@localhost', sshargs[4])
 		assert_is_not_none(re.match("git-receive-pack '.+/.+/.+/repo.git' 1", sshargs[5]),
 			msg='Created ssh command: "%s" is not well formed.' % sshargs[5])
 

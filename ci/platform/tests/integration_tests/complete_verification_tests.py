@@ -84,9 +84,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	def _insert_repo_info(self, repo_uri):
 		with ConnectionFactory.get_sql_connection() as conn:
-			ins_machine = schema.machine.insert().values(uri=self.repo_machine, host_name="localhost", repositories_path=self.repo_dir)
-			machine_key = conn.execute(ins_machine).inserted_primary_key[0]
-			ins_repo = schema.repo.insert().values(name="repo.git", hash=self.repo_hash, machine_id=machine_key, default_permissions=RepositoryPermissions.RW)
+			ins_machine = schema.repostore.insert().values(uri=self.repo_machine, host_name="localhost", repositories_path=self.repo_dir)
+			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
+			ins_repo = schema.repo.insert().values(name="repo.git", hash=self.repo_hash, repostore_id=repostore_key, default_permissions=RepositoryPermissions.RW)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			ins_map = schema.uri_repo_map.insert().values(uri=repo_uri, repo_id=repo_key)
 			conn.execute(ins_map)
@@ -94,7 +94,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	def _insert_commit_info(self):
 		with ConnectionFactory.get_sql_connection() as conn:
-			ins_user = schema.user.insert().values(email="bbland@lt3.com", name="brian", password_hash=sha512("").digest(), salt="1234567890123456")
+			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=sha512("").digest(), salt="1234567890123456")
 			user_id = conn.execute(ins_user).inserted_primary_key[0]
 			ins_commit = schema.commit.insert().values(repo_hash=self.repo_hash, user_id=user_id,
 				message="commit message", timestamp=int(time.time()))

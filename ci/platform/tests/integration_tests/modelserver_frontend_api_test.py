@@ -108,18 +108,18 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 #####################
 
 	def _create_repo(self):
-		machine = database.schema.machine
+		repostore = database.schema.repostore
 		permission = database.schema.permission
 		repo = database.schema.repo
 
-		machine_ins = machine.insert().values(uri="http://machine0", host_name="localhost", repositories_path="/tmp")
+		repostore_ins = repostore.insert().values(uri="http://machine0", host_name="localhost", repositories_path="/tmp")
 
 		with ConnectionFactory.get_sql_connection() as conn:
-			result = conn.execute(machine_ins)
-			self.machine_id = result.inserted_primary_key[0]
+			result = conn.execute(repostore_ins)
+			self.repostore_id = result.inserted_primary_key[0]
 
 		with ModelServer.rpc_connect("repos", "create") as conn:
-			self.repo_id = conn.create_repo(self.REPO_NAME, self.machine_id, RepositoryPermissions.RW)
+			self.repo_id = conn.create_repo(self.REPO_NAME, self.repostore_id, RepositoryPermissions.RW)
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			query = repo.select().where(repo.c.id==self.repo_id)
@@ -140,7 +140,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		assert_equals(self.repo_id, repo["id"])
 		assert_equals(self.REPO_NAME, repo["name"])
 		assert_equals(self.repo_hash, repo["hash"])
-		assert_equals(self.machine_id, repo["machine_id"])
+		assert_equals(self.repostore_id, repo["repostore_id"])
 		assert_equals(RepositoryPermissions.RW, repo["default_permissions"])
 
 	def test_get_repo_from_id(self):
@@ -149,5 +149,5 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		assert_equals(self.repo_id, repo["id"])
 		assert_equals(self.REPO_NAME, repo["name"])
 		assert_equals(self.repo_hash, repo["hash"])
-		assert_equals(self.machine_id, repo["machine_id"])
+		assert_equals(self.repostore_id, repo["repostore_id"])
 		assert_equals(RepositoryPermissions.RW, repo["default_permissions"])

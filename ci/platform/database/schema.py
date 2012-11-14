@@ -33,7 +33,7 @@ repo = Table('repo', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('name', String, nullable=False),
 	Column('hash', String, nullable=False, index=True, unique=True),
-	Column('machine_id', Integer, ForeignKey('machine.id'), nullable=False),
+	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
 	Column('default_permissions', SmallInteger, nullable=False)  # This is a bitmask
 )
 
@@ -90,7 +90,7 @@ build_console = Table('build_console', metadata,
 	UniqueConstraint('build_id', 'type')
 )
 
-machine = Table('machine', metadata,
+repostore = Table('repostore', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('uri', String, nullable=False, unique=True),
 	Column('host_name', String, nullable=False),
