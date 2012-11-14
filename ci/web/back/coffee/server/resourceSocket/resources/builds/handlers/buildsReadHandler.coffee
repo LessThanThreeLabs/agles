@@ -16,24 +16,29 @@ class BuildsReadHandler extends Handler
 	# result =
 	#    EVERYTHING for now...
 	default: (socket, data, callback) =>
-		assert.ok socket.session.userId? and data.buildId?
+		assert.ok socket.session.userId? and data.id?
 		userId = socket.session.userId
-		buildData = @modelRpcConnection.builds.read.get_build_from_id userId, data.buildId
-		callback null, buildData
+		@modelRpcConnection.builds.read.get_build_from_id userId, data.id, (error, buildData) =>
+			if error?
+				callback "Cannot locate build"
+			else
+				callback null, buildData
 
 
 	# -- GIVEN --
 	# data =
 	#   repositoryId: <integer>
 	#   queryString: <string>
-	#   range:
-	#     start: <integer>
-	#     end: <integer>
+	#   start: <integer>
+	#   numResults: <integer>
 	# -- RETURNED --
 	# result = [<buildObjects>, ...]
 	range: (socket, args, callback) =>
-		assert.ok socket.session.userId? and args.repoId? and args.type? and args.startIndexInclusive? and args.endIndexExclusive? and args.queryString?
+		assert.ok socket.session.userId? and args.repoId? and args.start? and args.numResults? and args.queryString?
 		userId = socket.session.userId
-		builds = @modelRpcConnection.builds.read.get_builds_in_range userId, args.repoId,
-				args.type, args.startIndexInclusive, args.endIndexExclusive, args.queryString
-		callback null, builds
+		@modelRpcConnection.builds.read.query_builds userId, args.repoId,
+				args.queryString, args.start, args.numResults, (error, builds) =>
+			if error?
+				callback "Couldn't query for builds"
+			else
+				callback null, builds

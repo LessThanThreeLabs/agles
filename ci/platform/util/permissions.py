@@ -13,8 +13,8 @@ class RepositoryPermissions(Permissions):
 	RWA = 0b111
 
 	@classmethod
-	def has_permissions(cls, permissions, permissions_to_check):
-		return (permissions & permissions_to_check) == permissions_to_check
+	def has_permissions(cls, given_permissions, required_permissions):
+		return (given_permissions & required_permissions) == required_permissions
 
 	@classmethod
 	def valid_permissions(cls):
