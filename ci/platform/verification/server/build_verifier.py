@@ -27,7 +27,7 @@ class BuildVerifier(object):
 		"""Runs verification on a desired git commit"""
 		try:
 			self.checkout_refs(repo_uri, refs)
-			self.setup_vagrant_wrapper(console_appender)
+			self._setup_vagrant_wrapper(console_appender)
 			verification_config = self.get_verification_configurations()
 			self.run_build_step(verification_config.build_commands, console_appender)
 			self.run_test_step(verification_config.test_commands, console_appender)
@@ -35,6 +35,8 @@ class BuildVerifier(object):
 			self._mark_failure(callback, e)
 		else:
 			self._mark_success(callback)
+		finally:
+			self._rollback_vagrant_wrapper()
 
 	def checkout_refs(self, repo_uri, refs):
 		if os.access(self.source_dir, os.F_OK):
@@ -51,18 +53,18 @@ class BuildVerifier(object):
 	def _get_output_handler(self, console_appender, console, subcategory=""):
 		return console_appender(console, subcategory) if console_appender else None
 
-	def setup_vagrant_wrapper(self, console_appender):
-		"""Rolls back and provisions the contained vagrant wrapper for
-		analysis and test running"""
+	def _setup_vagrant_wrapper(self, console_appender):
+		"""Provisions the contained vagrant wrapper for analysis and test running"""
 		output_handler = self._get_output_handler(console_appender, Console.Setup)
-		returncode = self.vagrant_wrapper.sandbox_rollback().returncode
-		if returncode != 0:
-			raise VerificationException("vm rollback", returncode=returncode)
-		time.sleep(1)  # Sadly seems necessary
 		returncode = self.vagrant_wrapper.provision(output_handler=output_handler,
 			role="verification_box_run").returncode
 		if returncode != 0:
 			raise VerificationException("vm provisioning", returncode=returncode)
+
+	def _rollback_vagrant_wrapper(self):
+		returncode = self.vagrant_wrapper.sandbox_rollback().returncode
+		if returncode != 0:
+			print "Failed to roll back vm"  # Should be logged somewhere
 
 	def get_verification_configurations(self):
 		"""Reads in the yaml config file contained in the checked
