@@ -9,10 +9,6 @@ class CreateRepository.Model extends Backbone.Model
 		defaultPermissions: null
 
 	initialize: () =>
-		@on 'change:name', () =>
-			console.log 'name: ' + @get 'name'
-		@on 'change:description', () =>
-			console.log 'description ' + @get 'description'
 
 
 class CreateRepository.View extends Backbone.View
@@ -46,9 +42,9 @@ class CreateRepository.View extends Backbone.View
 				</div>
 				<div class="createRepositoryValue">
 					<div class="btn-group" data-toggle="buttons-radio">
-						<button class="btn">Read</button>
-						<button class="btn">Write</button>
-						<button class="btn">Admin</button>
+						<button class="btn defaultPermissionsOption readPermissionsOption" type="read">Read</button>
+						<button class="btn defaultPermissionsOption writePermissionsOption" type="write">Write</button>
+						<button class="btn defaultPermissionsOption adminPermissionsOption" type="admin">Admin</button>
 					</div>
 				</div>
 			</div>
@@ -58,7 +54,7 @@ class CreateRepository.View extends Backbone.View
 		</div>'
 	events: 
 		'keyup': '_handleFormEntryChange'
-		# 'change .loginRememberMe': '_handleFormEntryChange'
+		'click .defaultPermissionsOption': '_handleDefaultPermissionsSelection'
 		'click .createRepositoryButton': '_handleCreateRepository'
 
 	initialize: () =>
@@ -72,8 +68,21 @@ class CreateRepository.View extends Backbone.View
 	_handleFormEntryChange: () =>
 		@model.set 'name', @$el.find('.repositoryNameField').val()
 		@model.set 'description', @$el.find('.repositoryDescriptionField').val()
-		console.log 'need to also update the default permissions'
+
+
+	_handleDefaultPermissionsSelection: (event) =>
+		type = $(event.target).attr 'type'
+		@model.set 'defaultPermissions', type
 
 
 	_handleCreateRepository: () =>
-		console.log 'need to create the repository'
+		requestData =
+			name: @model.get 'name'
+			description: @model.get 'description'
+			defaultPermissions: @model.get 'defaultPermissions'
+		
+		console.log 'need to make request with:'
+		console.log requestData
+
+		# socket.emit 'repositories:create', requestData, (errors, repository) =>
+		# 	console.log 'navigate page to repository ' + repository.id
