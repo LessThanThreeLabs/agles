@@ -8,9 +8,11 @@ class RepositoryContent.Model extends Backbone.Model
 
 	initialize: () ->
 		@repositoryBuildsModel = new RepositoryBuilds.Model repositoryId: @get 'repositoryId'
+		@repositoryAdminModel = new RepositoryAdmin.Model repositoryId: @get 'repositoryId'
 
 		@on 'change:repositoryId', () =>
 			@repositoryBuildsModel.set 'repositoryId', @get 'repositoryId'
+			@repositoryAdminModel.set 'repositoryId', @get 'repositoryId'
 
 
 class RepositoryContent.View extends Backbone.View
@@ -31,5 +33,8 @@ class RepositoryContent.View extends Backbone.View
 			when 'builds'
 				repositoryBuildsView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
 				@$el.html repositoryBuildsView.render().el
+			when 'admin'
+				repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
+				@$el.html repositoryAdminView.render().el
 			else
 				console.error 'Unaccounted for mode ' + @model.get 'mode' if @model.get('mode')?

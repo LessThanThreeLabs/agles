@@ -63,6 +63,8 @@
 
 			"/js/src/account/account.js",
 
+			"/js/src/repository/content/admin/repositoryAdmin.js",
+
 			"/js/src/repository/content/build/build.js",
 			"/js/src/repository/content/build/list/buildsFetcher.js",
 			"/js/src/repository/content/build/list/search/buildsQuery.js",
