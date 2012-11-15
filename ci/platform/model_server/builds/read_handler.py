@@ -12,21 +12,13 @@ class BuildsReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildsReadHandler, self).__init__("builds", "read")
 
-	def get_build_from_id(self, user_id, build_id):
+	def get_build_from_id(self, build_id):
 		build = database.schema.build
-		change = database.schema.change
-		commit = database.schema.commit
-		repo = database.schema.repo
 
-		query = build.join(change).join(commit).join(repo).select().apply_labels().where(build.c.id==build_id)
+		query = build.select().where(build.c.id==build_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-
-		if row:
-			repo_id = row[repo.c.id]
-			if self._has_permissions(user_id, repo_id):
-				return to_dict(row, build.columns, tablename=build.name)
-		return {}
+		return to_dict(row, build.columns)
 
 	def get_commit_list(self, build_id):
 		build_commits_map = database.schema.build_commits_map
@@ -50,6 +42,26 @@ class BuildsReadHandler(ModelServerRpcHandler):
 			return False
 		return RepositoryPermissions.has_permissions(
 			row[permission.c.permissions], RepositoryPermissions.R)
+
+##################
+# Front end API
+##################
+
+	def get_visible_build_from_id(self, user_id, build_id):
+		build = database.schema.build
+		change = database.schema.change
+		commit = database.schema.commit
+		repo = database.schema.repo
+
+		query = build.join(change).join(commit).join(repo).select().apply_labels().where(build.c.id==build_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+
+		if row:
+			repo_id = row[repo.c.id]
+			if self._has_permissions(user_id, repo_id):
+				return to_dict(row, build.columns, tablename=build.name)
+		return {}
 
 	# TODO (jchu): This query is SLOW AS BALLS
 	def query_builds(self, user_id, repo_id, query_string, start_index_inclusive,
