@@ -107,16 +107,15 @@ class CreateRepository.View extends Backbone.View
 		nameError = @$el.find('.repositoryNameErrorText')
 		descriptionError = @$el.find('.repositoryDescriptionErrorText')
 
-		if errors.name?
-			nameError.text errors.name
-			nameError.show()
-		else 
-			nameError.text ''
-			nameError.hide()
+		@_displayErrorForField nameError, errors.name
+		@_displayErrorForField descriptionError, errors.description
 
-		if errors.description?
-			descriptionError.text errors.description
-			descriptionError.show()
+
+	_displayErrorForField: (errorView, errorText) =>
+		if errorText?
+			errorView.text errorText
+			errorView.show()
 		else
-			descriptionError.text ''
-			descriptionError.hide()
+			errorView.text ''
+			errorView.hide()
+			

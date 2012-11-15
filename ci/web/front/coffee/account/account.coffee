@@ -24,7 +24,7 @@ class Account.View extends Backbone.View
 				</div>
 				<div class="prettyFormValue">
 					<input type="text" class="accountFirstNameField" placeholder="first" maxlength=64>
-					<div class="prettyFormSaveText">Saved</div>
+					<div class="prettyFormSaveText accountFirstNameSavedText">Saved</div>
 					<div class="prettyFormErrorText accountFirstNameErrorText"></div>
 				</div>
 			</div>
@@ -35,7 +35,7 @@ class Account.View extends Backbone.View
 				</div>
 				<div class="prettyFormValue">
 					<input type="text" class="accountLastNameField" placeholder="last" maxlength=64>
-					<div class="prettyFormSaveText">Saved</div>
+					<div class="prettyFormSaveText accountLastNameSavedText">Saved</div>
 					<div class="prettyFormErrorText accountLastNameErrorText"></div>
 				</div>
 			</div>
@@ -46,7 +46,7 @@ class Account.View extends Backbone.View
 				</div>
 				<div class="prettyFormValue">
 					<textarea type="text" class="accountSshKeyField" placeholder="ssh key" maxlength=256></textarea>
-					<div class="prettyFormSaveText">Saved</div>
+					<div class="prettyFormSaveText accountSshKeySavedText">Saved</div>
 					<div class="prettyFormErrorText accountSshKeyErrorText"></div>
 				</div>
 			</div>
@@ -67,5 +67,45 @@ class Account.View extends Backbone.View
 		@model.set 'lastName', @$el.find('.accountLastNameField').val()
 
 
-	_handleSubmitChange: () =>
-		console.log 'need to submit change!'
+	_handleSubmitChange: (event) =>
+		console.log 'Need to submit account change!'
+
+		errors = {}
+		@_displayErrors errors
+		@_showCorrectSavedMessage($(event.target)) if not errors? or Object.keys(errors).length is 0
+
+
+	_showCorrectSavedMessage: (field) =>
+		@$el.find('.accountFirstNameSavedText').hide()
+		@$el.find('.accountLastNameSavedText').hide()
+		@$el.find('.accountSshKeySavedText').hide()
+
+		if field.hasClass 'accountFirstNameField'
+			@$el.find('.accountFirstNameSavedText').show()
+		if field.hasClass 'accountLastNameField'
+			@$el.find('.accountLastNameSavedText').show()
+		if field.hasClass 'accountSshKeyField'
+			@$el.find('.accountSshKeySavedText').show()
+
+
+	_clearErrors: () =>
+		@_displayErrors {}
+
+
+	_displayErrors: (errors = {}) =>
+		firstNameError = @$el.find('.accountFirstNameErrorText')
+		lastNameError = @$el.find('.accountLastNameErrorText')
+		sshKeyError = @$el.find('.accountSshKeyErrorText')
+
+		@_displayErrorForField firstNameError, errors.firstName
+		@_displayErrorForField lastNameError, errors.lastName
+		@_displayErrorForField sshKeyError, errors.sshKey
+
+
+	_displayErrorForField: (errorView, errorText) =>
+		if errorText?
+			errorView.text errorText
+			errorView.show()
+		else
+			errorView.text ''
+			errorView.hide()
