@@ -7,7 +7,6 @@ setup:
   - packages:
     - system:
       - zlib1g
-      - vim
       - gcc
       - g++
       - curl
@@ -27,16 +26,14 @@ setup:
       - nose
       - beautifulsoup4
       - dulwich
-      - ipython
       - redis
       - greenlet
       - eventlet
       - gitpython
-      - virtualenvwrapper
       - psycopg2
       - argparse
       - nose-testconfig
-      - boto
+#     - boto
     - npm:
       - iced-coffee-script
       - less

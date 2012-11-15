@@ -49,7 +49,7 @@ class VerificationRequestHandler(QueueListener):
 		"""Returns the default callback function to be
 		called with a return value after verification.
 		Sends a message denoting the return value and acks"""
-		def default_verify_callback(results):
+		def default_verify_callback(results, cleanup_function=lambda: None):
 			self.producer.publish((build_id, results),
 				exchange=verification_results_queue.exchange,
 				routing_key=verification_results_queue.routing_key,
@@ -58,7 +58,10 @@ class VerificationRequestHandler(QueueListener):
 			)
 			status = BuildStatus.COMPLETE if results == VerificationResult.SUCCESS else BuildStatus.FAILED
 			builds_update_rpc.mark_build_finished(build_id, status)
-			message.channel.basic_ack(delivery_tag=message.delivery_tag)
+			try:
+				cleanup_function()
+			finally:
+				message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		return default_verify_callback
 
 	def get_repo_uri(self, commit_id):

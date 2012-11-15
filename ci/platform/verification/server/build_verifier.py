@@ -35,8 +35,6 @@ class BuildVerifier(object):
 			self._mark_failure(callback, e)
 		else:
 			self._mark_success(callback)
-		finally:
-			self._rollback_vagrant_wrapper()
 
 	def checkout_refs(self, repo_uri, refs):
 		if os.access(self.source_dir, os.F_OK):
@@ -99,12 +97,12 @@ class BuildVerifier(object):
 	def _mark_success(self, callback):
 		"""Calls the callback function with a success code"""
 		print "Completed build request"
-		callback(VerificationResult.SUCCESS)
+		callback(VerificationResult.SUCCESS, self._rollback_vagrant_wrapper)
 
 	def _mark_failure(self, callback, exception):
 		"""Calls the callback function with a failure code"""
 		print "Failed build request: " + str(exception)
-		callback(VerificationResult.FAILURE)
+		callback(VerificationResult.FAILURE, self._rollback_vagrant_wrapper)
 
 
 class VerificationException(Exception):

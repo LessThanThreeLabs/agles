@@ -57,7 +57,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
-			lambda retval: assert_equals(VerificationResult.SUCCESS, retval))
+			lambda retval, cleanup=None: assert_equals(VerificationResult.SUCCESS, retval))
 
 	def test_bad_repo(self):
 		if config.get("fakeverifier"):
@@ -68,4 +68,4 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
-			lambda retval: assert_equals(VerificationResult.FAILURE, retval))
+			lambda retval, cleanup=None: assert_equals(VerificationResult.FAILURE, retval))
