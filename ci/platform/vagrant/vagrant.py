@@ -32,6 +32,11 @@ class Vagrant(object):
 			return self._vagrant_call("up", "--no-provision", output_handler=output_handler)
 		return self._vagrant_call("up", output_handler=output_handler)
 
+	def halt(self, force=False, output_handler=None):
+		if force:
+			return self._vagrant_call("halt", "-f", output_handler=output_handler)
+		return self._vagrant_call("halt", output_handler=output_handler)
+
 	def destroy(self, output_handler=None):
 		return self._vagrant_call("destroy", "-f", output_handler=output_handler)
 
@@ -84,6 +89,7 @@ class Vagrant(object):
 			self._output.append(line)
 			if line_handler:
 				line_handler.append(len(self._output), line)
+			eventlet.greenthread.sleep()  # Allows for fairer scheduling between stdin and stdout
 		return lines
 
 	def _get_vagrant_env(self):

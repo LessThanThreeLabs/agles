@@ -19,7 +19,7 @@ node[:agles][:verification][:server_count].to_i.times do |server_num|
 		vagrant destroy -f
 		vagrant init precise64_verification
 		vagrant up --no-provision
-		vagrant ssh -c true
+		vagrant ssh -c "sleep 2"
 		vagrant sandbox on
 		#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v /tmp/verification/#{server_num} -f &
 		EOH

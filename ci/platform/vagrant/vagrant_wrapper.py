@@ -19,6 +19,9 @@ class VagrantWrapper(object):
 	def up(self, provision=True, output_handler=None):
 		return self.vagrant.up(provision=provision, output_handler=output_handler)
 
+	def halt(self, force=False, output_handler=None):
+		return self.vagrant.halt(force=False, output_handler=output_handler)
+
 	def destroy(self, output_handler=None):
 		return self.vagrant.destroy(output_handler=output_handler)
 
@@ -53,7 +56,7 @@ class VagrantWrapper(object):
 			raise VagrantException(self.vagrant, "Couldn't initialize vagrant")
 		if self.up(False, output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Couldn't start vagrant vm")
-		self.ssh_call("true")  # Expected to validate ssh daemon before snapshotting
+		self.ssh_call("sleep 2")  # Expected to validate ssh daemon before snapshotting
 		if self.sandbox_on(output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Couldn't initialize sandbox on vm")
 		print "Launched vm at: " + self.get_vm_directory()

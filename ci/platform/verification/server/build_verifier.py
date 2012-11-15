@@ -65,6 +65,12 @@ class BuildVerifier(object):
 		returncode = self.vagrant_wrapper.sandbox_rollback().returncode
 		if returncode != 0:
 			print "Failed to roll back vm"  # Should be logged somewhere
+		returncode = self.vagrant_wrapper.halt(force=True)
+		if returncode != 0:
+			print "Failed to shut down vm"  # Should be logged somewhere
+		returncode = self.vagrant_wrapper.up(provision=False)
+		if returncode != 0:
+			print "Failed to re-launch vm"  # Should be logged somewhere
 
 	def get_verification_configurations(self):
 		"""Reads in the yaml config file contained in the checked
