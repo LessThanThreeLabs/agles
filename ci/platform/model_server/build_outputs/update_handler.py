@@ -1,3 +1,5 @@
+from sqlalchemy import and_
+
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
@@ -33,13 +35,29 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		:param build_id: The build id this console is relevant to.
 		:param console: The console type we are flushing.
 		"""
+		build_console = schema.build_console
 
 		redis_key = REDIS_KEY_TEMPLATE % (build_id, console, subcategory)
 		redis_conn = ConnectionFactory.get_redis_connection()
 		complete_console_output = self._compact_output(redis_conn, redis_key)
 
-		ins = schema.build_console.insert().values(build_id=build_id, type=console,
-			subcategory=subcategory, console_output=complete_console_output)
+		whereclause = and_(
+			build_console.c.build_id==build_id,
+			build_console.c.type==console,
+			build_console.c.subcategory==subcategory
+		)
+
+		query = build_console.select().where(whereclause)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(ins)
+			row = sqlconn.execute(query).first()
+
+		if row:
+			statement = build_console.update().values(
+				console_output=complete_console_output).where(whereclause)
+		else:
+			statement = build_console.insert().values(build_id=build_id, type=console,
+				subcategory=subcategory, console_output=complete_console_output)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(statement)
 		redis_conn.delete(redis_key)
