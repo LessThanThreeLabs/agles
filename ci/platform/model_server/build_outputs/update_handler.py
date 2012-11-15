@@ -21,6 +21,13 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		redis_conn = ConnectionFactory.get_redis_connection()
 		redis_conn.hset(redis_key, line_num, line)
 
+	def _compact_output(self, redis_conn, redis_key):
+		line_dict = redis_conn.hgetall(redis_key)
+		_, lines = zip(*sorted(line_dict.iteritems(),
+			key=lambda tup: int(tup[0]))) if line_dict else (None, [])
+		complete_console_output = '\n'.join(lines)
+		return complete_console_output
+
 	def flush_console_output(self, build_id, console=Console.General, subcategory=""):
 		""" Flushes finalized console output to a persisted sql db.
 		:param build_id: The build id this console is relevant to.
@@ -29,9 +36,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
 		redis_key = REDIS_KEY_TEMPLATE % (build_id, console, subcategory)
 		redis_conn = ConnectionFactory.get_redis_connection()
-		line_dict = redis_conn.hgetall(redis_key)
-		_, lines = zip(*sorted(line_dict.iteritems(), key=int)) if line_dict else (None, [])
-		complete_console_output = '\n'.join(lines)
+		complete_console_output = self._compact_output(redis_conn, redis_key)
 
 		ins = schema.build_console.insert().values(build_id=build_id, type=console,
 			subcategory=subcategory, console_output=complete_console_output)

@@ -1,59 +1,63 @@
-from datetime import datetime
+import unittest
 
 from nose.tools import *
+from sqlalchemy import and_
 
 from database.engine import ConnectionFactory
-from database.schema import build, build_console
-from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, Console
+from database.schema import *
+from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, Console, REDIS_KEY_TEMPLATE
 from util.test import BaseIntegrationTest
 from util.test.mixins import RedisTestMixin
 
-# We currently have commented out this test until we have the ability to create
-# builds without foreign key errors.
 
-"""
-class BuildUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
+class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 	def setUp(self):
-		super(BuildUpdateHandlerTest, self).setUp()
+		super(BuildsUpdateHandlerTest, self).setUp()
 		self._start_redis()
-		# TODO(jchu): When jpotter gets his crap together, use the actual create method
-		ins = build.insert().values(commit_id=1, number=1, status='done',
-			start_time=datetime.now(), end_time=datetime.now())
-		sql_conn = ConnectionFactory.get_sql_connection()
-		try:
-			self.build_id = sql_conn.execute(ins).inserted_primary_key
-		finally:
-			sql_conn.close()
 
 	def tearDown(self):
-		super(BuildUpdateHandlerTest, self).tearDown()
+		super(BuildsUpdateHandlerTest, self).tearDown()
 		self._stop_redis()
 
-	def console_flush_test(self):
-		update_handler = BuildConsoleUpdateHandler()
+	def console_append_test(self):
+		update_handler = BuildOutputsUpdateHandler()
 
-		build_stdout = []
-		build_stderr = []
+		gen_line_dict = {}
+		setup_line_dict = {}
+		build_general = []
+		build_setup = []
 		for i in xrange(10):
-			line_stdout = "build:1, line:%s, console:stdout" % i
-			build_stdout.append(line_stdout)
-			line_stderr = "build:1, line:%s, console:stderr" % i
-			build_stderr.append(line_stderr)
-			update_handler.append_console_output(self.build_id, line_stdout)
-			update_handler.append_console_output(self.build_id, line_stderr,
-				console=Console.Stderr)
+			line_general = "build:1, line:%s, console:general" % i
+			build_general.append(line_general)
+			line_setup = "build:1, line:%s, console:setup" % i
+			build_setup.append(line_setup)
+			update_handler.append_console_line(1, i, line_general)
+			gen_line_dict[str(i)] = line_general
+			update_handler.append_console_line(1, i, line_setup,
+				console=Console.Setup, subcategory="unittest")
+			setup_line_dict[str(i)] = line_setup
 
-		update_handler.flush_console_output(self.build_id, console=Console.Stdout)
-		update_handler.flush_console_output(self.build_id, console=Console.Stderr)
+		self._assert_console_output_equal(1, gen_line_dict, Console.General)
+		self._assert_console_output_equal(1, setup_line_dict, Console.Setup, "unittest")
 
-		self._assert_db_console_output_equals(self.build_id, build_stdout, Console.Stdout)
-		self._assert_db_console_output_equals(self.build_id, build_stderr, Console.Stderr)
+	def console_flush_test(self):
+		update_handler = BuildOutputsUpdateHandler()
+		lines = []
+		for i in xrange(11):
+			line = str(i)
+			update_handler.append_console_line(1, i, line)
+			lines.append(line)
 
-	def _assert_db_console_output_equals(self, build_id, expected, console):
-		query = build_console.select().where(build_console.c.build_id==build_id,
-			build_console.c.type==console)
-		sql_conn = ConnectionFactory.get_sql_connection()
-		row = sql_conn.execute(query).fetchone()
-		assert_equals(expected, row[build_console.c.console_output],
-			msg="DB and expected console output do not match")
-"""
+		output = '\n'.join(lines)
+		redis_key = REDIS_KEY_TEMPLATE % (1, Console.General, '')
+		db_output = update_handler._compact_output(
+			ConnectionFactory.get_redis_connection(),redis_key)
+		assert_equal(output, db_output)
+
+	def _assert_console_output_equal(self, build_id, expected_output,
+									 console_type, subcategory=""):
+		key = REDIS_KEY_TEMPLATE % (build_id, console_type, subcategory)
+		redis_conn = ConnectionFactory.get_redis_connection()
+		actual_output = redis_conn.hgetall(key)
+		assert_equal(expected_output, actual_output,
+			msg="Console output for key %s not what expected" % key)

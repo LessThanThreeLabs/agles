@@ -87,7 +87,7 @@ build_console = Table('build_console', metadata,
 	Column('subcategory', String, nullable=False),
 	Column('console_output', Text, nullable=False),
 
-	UniqueConstraint('build_id', 'type')
+	UniqueConstraint('build_id', 'type', 'subcategory')
 )
 
 repostore = Table('repostore', metadata,
