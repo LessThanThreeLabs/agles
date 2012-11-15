@@ -30,7 +30,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		redis_key = REDIS_KEY_TEMPLATE % (build_id, console, subcategory)
 		redis_conn = ConnectionFactory.get_redis_connection()
 		line_dict = redis_conn.hgetall(redis_key)
-		_, lines = zip(*sorted(line_dict.iteritems())) if line_dict else (None, [])
+		_, lines = zip(*sorted(line_dict.iteritems(), key=int)) if line_dict else (None, [])
 		complete_console_output = '\n'.join(lines)
 
 		ins = schema.build_console.insert().values(build_id=build_id, type=console,
