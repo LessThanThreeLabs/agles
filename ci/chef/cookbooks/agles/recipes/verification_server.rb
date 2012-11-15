@@ -21,7 +21,7 @@ node[:agles][:verification][:server_count].to_i.times do |server_num|
 		vagrant up --no-provision
 		vagrant ssh -c "sleep 2"
 		vagrant sandbox on
-		#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v /tmp/verification/#{server_num} -f &>> /tmp/verification/#{server_num}/server.log &
+		#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v /tmp/verification/#{server_num} -f >> /tmp/verification/#{server_num}/server.log 2>&1 &
 		EOH
 		user node[:agles][:user]
 	end
