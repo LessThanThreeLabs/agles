@@ -65,10 +65,10 @@ class BuildVerifier(object):
 		returncode = self.vagrant_wrapper.sandbox_rollback().returncode
 		if returncode != 0:
 			print "Failed to roll back vm"  # Should be logged somewhere
-		returncode = self.vagrant_wrapper.halt(force=True)
+		returncode = self.vagrant_wrapper.halt(force=True).returncode
 		if returncode != 0:
 			print "Failed to shut down vm"  # Should be logged somewhere
-		returncode = self.vagrant_wrapper.up(provision=False)
+		returncode = self.vagrant_wrapper.up(provision=False).returncode
 		if returncode != 0:
 			print "Failed to re-launch vm"  # Should be logged somewhere
 
