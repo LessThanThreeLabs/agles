@@ -34,17 +34,19 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 	_updateAllowMenuOptions: () =>
 		console.log 'repositoryHeaderMenu.coffee - should make a server call to determine menu options'
 		
-		result =
-			menuOptions: ['source', 'builds', 'settings', 'admin']
-			defaultOption: 'builds'
-		assert.ok result.defaultOption in result.menuOptions
+		setTimeout (() =>
+			result =
+				menuOptions: ['source', 'builds', 'settings', 'admin']
+				defaultOption: 'builds'
+			assert.ok result.defaultOption in result.menuOptions
 
-		allowedOptions = result.menuOptions.map (option) =>
-			assert.ok @MENU_OPTIONS[option]?
-			return @MENU_OPTIONS[option]
+			allowedOptions = result.menuOptions.map (option) =>
+				assert.ok @MENU_OPTIONS[option]?
+				return @MENU_OPTIONS[option]
 
-		@set 'menuOptions', allowedOptions
-		@set 'selectedMenuOptionName', result.defaultOption
+			@set 'menuOptions', allowedOptions
+			@set('selectedMenuOptionName', result.defaultOption) if not @get('selectedMenuOptionName')?
+			), 200
 
 
 class RepositoryHeaderMenu.View extends Backbone.View
