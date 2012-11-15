@@ -23,8 +23,7 @@ class Account.View extends Backbone.View
 					First Name
 				</div>
 				<div class="prettyFormValue">
-					<input type="text" class="accountFirstNameField" placeholder="first" maxlength=64>
-					<div class="prettyFormSaveText accountFirstNameSavedText">Saved</div>
+					<input type="text" class="accountFirstNameField" placeholder="first" maxlength=64><span class="prettyFormSaveText accountFirstNameSavedText">Saved</span>
 					<div class="prettyFormErrorText accountFirstNameErrorText"></div>
 				</div>
 			</div>
@@ -34,8 +33,7 @@ class Account.View extends Backbone.View
 					Last Name
 				</div>
 				<div class="prettyFormValue">
-					<input type="text" class="accountLastNameField" placeholder="last" maxlength=64>
-					<div class="prettyFormSaveText accountLastNameSavedText">Saved</div>
+					<input type="text" class="accountLastNameField" placeholder="last" maxlength=64><span class="prettyFormSaveText accountLastNameSavedText">Saved</span>
 					<div class="prettyFormErrorText accountLastNameErrorText"></div>
 				</div>
 			</div>
@@ -45,8 +43,7 @@ class Account.View extends Backbone.View
 					SSH Key
 				</div>
 				<div class="prettyFormValue">
-					<textarea type="text" class="accountSshKeyField" placeholder="ssh key" maxlength=256></textarea>
-					<div class="prettyFormSaveText accountSshKeySavedText">Saved</div>
+					<textarea type="text" class="accountSshKeyField" placeholder="ssh key" maxlength=256></textarea><span class="prettyFormSaveText accountSshKeySavedText">Saved</span>
 					<div class="prettyFormErrorText accountSshKeyErrorText"></div>
 				</div>
 			</div>
@@ -76,16 +73,16 @@ class Account.View extends Backbone.View
 
 
 	_showCorrectSavedMessage: (field) =>
-		@$el.find('.accountFirstNameSavedText').hide()
-		@$el.find('.accountLastNameSavedText').hide()
-		@$el.find('.accountSshKeySavedText').hide()
+		@$el.find('.accountFirstNameSavedText').css 'visibility', 'hidden'
+		@$el.find('.accountLastNameSavedText').css 'visibility', 'hidden'
+		@$el.find('.accountSshKeySavedText').css 'visibility', 'hidden'
 
 		if field.hasClass 'accountFirstNameField'
-			@$el.find('.accountFirstNameSavedText').show()
+			@$el.find('.accountFirstNameSavedText').css 'visibility', 'visible'
 		if field.hasClass 'accountLastNameField'
-			@$el.find('.accountLastNameSavedText').show()
+			@$el.find('.accountLastNameSavedText').css 'visibility', 'visible'
 		if field.hasClass 'accountSshKeyField'
-			@$el.find('.accountSshKeySavedText').show()
+			@$el.find('.accountSshKeySavedText').css 'visibility', 'visible'
 
 
 	_clearErrors: () =>
