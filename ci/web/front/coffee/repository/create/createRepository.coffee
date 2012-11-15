@@ -19,7 +19,7 @@ class CreateRepository.View extends Backbone.View
 		</div>
 		<div class="prettyForm createRepositoryForm">
 			<div class="prettyFormRow">
-				<div class="prettyFormRow">
+				<div class="prettyFormLabel">
 					Name
 				</div>
 				<div class="prettyFormValue">
@@ -39,7 +39,7 @@ class CreateRepository.View extends Backbone.View
 			</div>
 			<div class="prettyFormEmptyRow"></div>
 			<div class="prettyFormRow">
-				<div class="prettyFormRow">
+				<div class="prettyFormLabel">
 					Default permissions
 				</div>
 				<div class="prettyFormValue">

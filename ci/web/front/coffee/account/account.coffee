@@ -16,14 +16,56 @@ class Account.Model extends Backbone.Model
 class Account.View extends Backbone.View
 	tagName: 'div'
 	className: 'account'
-	template: Handlebars.compile 'Account stuff here'
-	# events: 
-	# 	'keyup': '_handleFormEntryChange'
-	# 	'click .defaultPermissionsOption': '_handleDefaultPermissionsSelection'
-	# 	'click .createRepositoryButton': '_handleCreateRepository'
+	template: Handlebars.compile '</div>
+		<div class="prettyForm accountForm">
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel">
+					First Name
+				</div>
+				<div class="prettyFormValue">
+					<input type="text" class="accountFirstNameField" placeholder="first" maxlength=64>
+					<div class="prettyFormSaveText">Saved</div>
+					<div class="prettyFormErrorText accountFirstNameErrorText"></div>
+				</div>
+			</div>
+			<div class="prettyFormEmptyRow"></div>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel">
+					Last Name
+				</div>
+				<div class="prettyFormValue">
+					<input type="text" class="accountLastNameField" placeholder="last" maxlength=64>
+					<div class="prettyFormSaveText">Saved</div>
+					<div class="prettyFormErrorText accountLastNameErrorText"></div>
+				</div>
+			</div>
+			<div class="prettyFormEmptyRow"></div>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel">
+					SSH Key
+				</div>
+				<div class="prettyFormValue">
+					<textarea type="text" class="accountSshKeyField" placeholder="ssh key" maxlength=256></textarea>
+					<div class="prettyFormSaveText">Saved</div>
+					<div class="prettyFormErrorText accountSshKeyErrorText"></div>
+				</div>
+			</div>
+		</div>'
+	events: 
+		'keyup': '_handleFormEntryChange'
+		'blur .prettyFormValue': '_handleSubmitChange'
 
 	initialize: () ->
 
 	render: () ->
 		@$el.html @template()
 		return @
+
+
+	_handleFormEntryChange: () =>
+		@model.set 'firstName', @$el.find('.accountFirstNameField').val()
+		@model.set 'lastName', @$el.find('.accountLastNameField').val()
+
+
+	_handleSubmitChange: () =>
+		console.log 'need to submit change!'

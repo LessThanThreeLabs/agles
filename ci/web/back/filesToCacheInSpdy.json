@@ -9,6 +9,8 @@
 
 			"/css/src/welcome/welcome.css",
 
+			"/css/src/account/account.css",
+
 			"/css/src/repository/content/build/build.css",
 			"/css/src/repository/content/build/list/search/buildsSearch.css",
 			"/css/src/repository/content/build/list/buildsList.css",
