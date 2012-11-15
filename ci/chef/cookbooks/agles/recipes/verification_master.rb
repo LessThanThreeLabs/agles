@@ -13,6 +13,6 @@ execute "Stop verification master" do
 end
 
 execute "Start verification master" do
-	command "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_master.py &"
+	command "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_master.py & >> /tmp/verification/master.log"
 	user node[:agles][:user]
 end
