@@ -12,13 +12,15 @@ class RepositoryAdmin.Model extends Backbone.Model
 		@repositoryAdminMenuModel = new RepositoryAdminMenu.Model
 			options: menuOptions
 			selectedOptionName: menuOptions[0].name
+
 		@repositoryAdminContentModel = new RepositoryAdminContent.Model()
+		@repositoryAdminContentModel.set 'mode', @repositoryAdminMenuModel.get 'selectedOptionName'
 
 		@on 'change:repositoryId', () =>
 			@repositoryAdminContentModel.set 'repositoryId', @get 'repositoryId'
 
-		@repositoryAdminMenuModel.on 'change:selectedOption', ()  =>
-			console.log 'need to handle menu change'
+		@repositoryAdminMenuModel.on 'change:selectedOptionName', ()  =>
+			@repositoryAdminContentModel.set 'mode', @repositoryAdminMenuModel.get 'selectedOptionName'
 
 
 class RepositoryAdmin.View extends Backbone.View

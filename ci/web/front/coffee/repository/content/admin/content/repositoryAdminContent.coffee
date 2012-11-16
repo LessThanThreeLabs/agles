@@ -7,31 +7,31 @@ class RepositoryAdminContent.Model extends Backbone.Model
 		mode: null
 
 	initialize: () ->
+		@generalPanelModel = new RepositoryAdminGeneralPanel.Model()
 
 
 class RepositoryAdminContent.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminContent'
 
-	initialize: () ->
+	initialize: () =>
 		@model.on 'change:mode', @render
 
 
-	render: () ->
-		# @_renderCurrentView()
-		@$el.html 'hello'
+	render: () =>
+		@_renderCurrentView()
 		return @
 
 
 	_renderCurrentView: () =>
 		switch @model.get 'mode'
 			when 'general'
-				console.log 'general'
-				# repositoryBuildsView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
-				# @$el.html repositoryBuildsView.render().el
-			when 'members'
-				console.log 'members'
+				generalPanelView = new RepositoryAdminGeneralPanel.View model: @model.generalPanelModel
+				@$el.html generalPanelView.render().el
+			# when 'members'
+			# 	console.log 'members'
 				# repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
 				# @$el.html repositoryAdminView.render().el
 			else
+				@$el.html '&nbsp'
 				console.error 'Unaccounted for mode ' + @model.get 'mode' if @model.get('mode')?

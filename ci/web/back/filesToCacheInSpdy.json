@@ -67,6 +67,7 @@
 
 			"/js/src/account/account.js",
 
+			"/js/src/repository/content/admin/content/repositoryAdminGeneralPanel.js",
 			"/js/src/repository/content/admin/content/repositoryAdminContent.js",
 			"/js/src/repository/content/admin/menu/repositoryAdminMenuOption.js",
 			"/js/src/repository/content/admin/menu/repositoryAdminMenu.js",
