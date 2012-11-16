@@ -176,7 +176,7 @@ class LoginPanel.View extends Backbone.View
 					firstName: userData.firstName
 					lastName: userData.lastName
 				@model.set 'visible', false
-			console.log errors
+			console.error errors
 
 
 	_updateVisibility: (model, visible) =>
