@@ -5,6 +5,7 @@ Repository management is done using gitpython.
 """
 
 import os
+import re
 import shutil
 import socket
 import sys
@@ -183,9 +184,12 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo = Repo(repo_path)
 		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
 		try:
-			repo_slave.git.fetch()
-			repo_slave.git.checkout("origin/" + ref_to_merge_into, "-B", ref_to_merge_into)
-			repo_slave.git.fetch("origin", ref_to_merge)
+			repo_slave.git.fetch()  # update branches
+			remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
+			remote_branch_exists = re.search("\\s+" + remote_branch + "$", repo_slave.git.branch("-r"), re.MULTILINE)
+			repo_slave.git.fetch("origin", ref_to_merge)  # point FETCH_HEAD at ref to merge
+			checkout_branch = remote_branch if remote_branch_exists else "FETCH_HEAD"
+			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
 			repo_slave.git.merge("FETCH_HEAD")
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 		except GitCommandError, e:
