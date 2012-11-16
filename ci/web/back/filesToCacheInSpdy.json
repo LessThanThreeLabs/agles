@@ -11,6 +11,10 @@
 
 			"/css/src/account/account.css",
 
+			"/css/src/repository/content/admin/content/repositoryAdminContent.css",
+			"/css/src/repository/content/admin/menu/repositoryAdminMenu.css",
+			"/css/src/repository/content/admin/repositoryAdmin.css",
+
 			"/css/src/repository/content/build/build.css",
 			"/css/src/repository/content/build/list/search/buildsSearch.css",
 			"/css/src/repository/content/build/list/buildsList.css",
@@ -63,6 +67,8 @@
 
 			"/js/src/account/account.js",
 
+			"/js/src/repository/content/admin/content/repositoryAdminContent.js",
+			"/js/src/repository/content/admin/menu/repositoryAdminMenu.js",
 			"/js/src/repository/content/admin/repositoryAdmin.js",
 
 			"/js/src/repository/content/build/build.js",
