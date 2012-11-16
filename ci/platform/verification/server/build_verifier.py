@@ -5,7 +5,7 @@ import yaml
 
 from git import Git, Repo
 
-from model_server.build_outputs.update_handler import ConsoleType
+from model_server.build_outputs import ConsoleType
 from verification_config import VerificationConfig
 from verification_result import VerificationResult
 

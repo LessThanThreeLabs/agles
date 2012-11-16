@@ -3,7 +3,7 @@ from sqlalchemy import and_
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from model_server.build_outputs import ConsoleType, REDIS_KEY_TEMPLATE
+from model_server.build_outputs import REDIS_KEY_TEMPLATE
 
 
 class BuildOutputsUpdateHandler(ModelServerRpcHandler):

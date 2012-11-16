@@ -2,7 +2,8 @@ from nose.tools import *
 
 from database.engine import ConnectionFactory
 from database.schema import *
-from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, ConsoleType, REDIS_KEY_TEMPLATE
+from model_server.build_outputs import ConsoleType
+from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, REDIS_KEY_TEMPLATE
 from util.test import BaseIntegrationTest
 from util.test.mixins import RedisTestMixin
 
