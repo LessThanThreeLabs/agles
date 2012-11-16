@@ -61,7 +61,7 @@ class VerificationResultsHandler(QueueListener):
 				repo_name, ref, merge_target)
 		except MergeError as e:
 			merge_status = False
-			raise e
+			print e  # Should alert the user somehow
 		"""
 		with ModelServer.rpc_connect("repos", "update") as client:
 					client.mark_merge(merge_status)
