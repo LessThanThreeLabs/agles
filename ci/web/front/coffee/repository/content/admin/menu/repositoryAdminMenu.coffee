@@ -2,11 +2,9 @@ window.RepositoryAdminMenu = {}
 
 
 class RepositoryAdminMenu.Model extends Backbone.Model
-	defaults:
-		options: ['first option', 'second option', 'third option', 'fourth option']
-		selectedOption: 'first option'
 
 	initialize: () ->
+		assert.ok @get('selectedOption') in @get('options')
 
 
 class RepositoryAdminMenu.View extends Backbone.View

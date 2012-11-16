@@ -6,7 +6,9 @@ class RepositoryAdmin.Model extends Backbone.Model
 		repositoryId: null
 
 	initialize: () ->
-		@repositoryAdminMenuModel = new RepositoryAdminMenu.Model()
+		@repositoryAdminMenuModel = new RepositoryAdminMenu.Model
+			options: ['General', 'Members']
+			selectedOption: 'General'
 		@repositoryAdminContentModel = new RepositoryAdminContent.Model()
 
 		@on 'change:repositoryId', () =>
