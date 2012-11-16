@@ -16,7 +16,7 @@ directory "/home/#{node[:agles][:user]}/scripts" do
 	owner node[:agles][:user]
 end
 
-directory "/home/#{node[:agles][:user]}/scripts/build" do
+directory "/home/#{node[:agles][:user]}/scripts/compile" do
 	owner node[:agles][:user]
 end
 
@@ -34,7 +34,7 @@ cookbook_file "/home/#{node[:agles][:user]}/scripts/validator.sh" do
 	mode "0755"
 end
 
-#setup.sh, to be sourced before running any build/test commands
+#setup.sh, to be sourced before running any compile/test commands
 template "/home/#{node[:agles][:user]}/scripts/setup.sh" do
 	source "setup.erb"
 	owner node[:agles][:user]
