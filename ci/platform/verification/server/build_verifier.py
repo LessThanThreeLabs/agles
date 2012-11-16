@@ -1,12 +1,11 @@
 import os
 import shutil
-import time
 
 import yaml
 
 from git import Git, Repo
 
-from model_server.build_outputs.update_handler import Console
+from model_server.build_outputs.update_handler import ConsoleType
 from verification_config import VerificationConfig
 from verification_result import VerificationResult
 
@@ -29,7 +28,7 @@ class BuildVerifier(object):
 			self.checkout_refs(repo_uri, refs)
 			self._setup_vagrant_wrapper(console_appender)
 			verification_config = self.get_verification_configurations()
-			self.run_build_step(verification_config.build_commands, console_appender)
+			self.run_compile_step(verification_config.compile_commands, console_appender)
 			self.run_test_step(verification_config.test_commands, console_appender)
 		except Exception, e:
 			self._mark_failure(callback, e)
@@ -48,12 +47,12 @@ class BuildVerifier(object):
 		for ref in refs[1:]:
 			repo.git.merge(ref)
 
-	def _get_output_handler(self, console_appender, console, subcategory=""):
-		return console_appender(console, subcategory) if console_appender else None
+	def _get_output_handler(self, console_appender, type, subtype=""):
+		return console_appender(type, subtype) if console_appender else None
 
 	def _setup_vagrant_wrapper(self, console_appender):
 		"""Provisions the contained vagrant wrapper for analysis and test running"""
-		output_handler = self._get_output_handler(console_appender, Console.Setup)
+		output_handler = self._get_output_handler(console_appender, ConsoleType.Setup, "chef")
 		returncode = self.vagrant_wrapper.provision(output_handler=output_handler,
 			role="verification_box_run").returncode
 		if returncode != 0:
@@ -79,29 +78,29 @@ class BuildVerifier(object):
 				config = yaml.load(config_file.read())
 		else:
 			config = dict()
-		verification_config = VerificationConfig(config.get("build"), config.get("test"))
+		verification_config = VerificationConfig(config.get("compile"), config.get("test"))
 		return verification_config
 
-	def run_build_step(self, build_commands, console_appender):
-		for build_command in build_commands:
-			if build_command.run(self.vagrant_wrapper,
-				self._get_output_handler(console_appender, Console.Build, build_command.name)):
-				raise VerificationException("Building: %s" % build_command.name)
+	def run_compile_step(self, compile_commands, console_appender):
+		for compile_command in compile_commands:
+			if compile_command.run(self.vagrant_wrapper,
+				self._get_output_handler(console_appender, ConsoleType.Compile, compile_command.name)):
+				raise VerificationException("Compiling: %s" % compile_command.name)
 
 	def run_test_step(self, test_commands, console_appender):
 		for test_command in test_commands:
 			if test_command.run(self.vagrant_wrapper,
-				self._get_output_handler(console_appender, Console.Test, test_command.name)):
+				self._get_output_handler(console_appender, ConsoleType.Test, test_command.name)):
 				raise VerificationException("Testing: %s" % test_command.name)
 
 	def _mark_success(self, callback):
 		"""Calls the callback function with a success code"""
-		print "Completed build request"
+		print "Completed verification request"
 		callback(VerificationResult.SUCCESS, self._rollback_vagrant_wrapper)
 
 	def _mark_failure(self, callback, exception):
 		"""Calls the callback function with a failure code"""
-		print "Failed build request: " + str(exception)
+		print "Failed verification request: " + str(exception)
 		callback(VerificationResult.FAILURE, self._rollback_vagrant_wrapper)
 
 

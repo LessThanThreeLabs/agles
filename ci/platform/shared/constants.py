@@ -1,2 +1,5 @@
 class BuildStatus(object):
-	QUEUED, RUNNING, COMPLETE, FAILED = range(4)
+	QUEUED = "queued"
+	RUNNING = "running"
+	COMPLETE = "complete"
+	FAILED = "failed"

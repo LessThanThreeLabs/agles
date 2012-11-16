@@ -33,15 +33,15 @@ def main():
 		print "Verification results: %s" % str(results)
 
 	class ConsoleAppender(object):
-		def __init__(self, console, subcategory):
-			self.console = console
-			self.subcategory = subcategory
+		def __init__(self, type, subtype):
+			self.type = type
+			self.subtype = subtype
 
 		def append(self, line, contents):
-			if self.subcategory:
-				print "(%s,%s,%s): %s" % (self.console, self.subcategory, line, contents)
+			if self.subtype:
+				print "(%s,%s,%s): %s" % (self.type, self.subtype, line, contents)
 			else:
-				print "(%s,%s): %s" % (self.console, self.line, contents)
+				print "(%s,%s): %s" % (self.type, self.line, contents)
 
 		def flush(self):
 			print "Flushed"

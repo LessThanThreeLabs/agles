@@ -42,17 +42,17 @@ setup:
       postgres:
       - name: agles
         username: lt3
-build:
-  platform:
-    path: ci/platform
-    script: python setup.py install
-  web:
-    path: ci/web/back
-    script: ./compile.sh
+compile:
+  - platform:
+      path: ci/platform
+      script: python setup.py install
+  - web:
+      path: ci/web/back
+      script: ./compile.sh
 test:
-  platform:
-    path: ci/platform
-    script: nosetests --tc=fakeverifier:True
-  web:
-    path: ci/web/back
-    script: npm test
+  - platform:
+      path: ci/platform
+      script: nosetests --tc=fakeverifier:True
+  - web:
+      path: ci/web/back
+      script: npm test

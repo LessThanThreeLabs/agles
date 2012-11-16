@@ -1,9 +1,12 @@
-from vagrant.vagrant_command import SimpleVagrantBuildCommand, SimpleVagrantTestCommand
+from vagrant.vagrant_command import SimpleVagrantCompileCommand, SimpleVagrantTestCommand
 
 
 class VerificationConfig(object):
-	def __init__(self, build_commands, test_commands):
-		self.build_commands = [SimpleVagrantBuildCommand(name)
-			for name in build_commands.iterkeys()] if build_commands else []
-		self.test_commands = [SimpleVagrantTestCommand(name)
-			for name in test_commands.iterkeys()] if test_commands else []
+	def __init__(self, compile_commands, test_commands):
+		self.compile_commands = [SimpleVagrantCompileCommand(self._get_command_name(command))
+			for command in compile_commands] if compile_commands else []
+		self.test_commands = [SimpleVagrantTestCommand(self._get_command_name(command))
+			for command in test_commands.iterkeys()] if test_commands else []
+
+	def _get_command_name(self, command):
+		return command.iterkeys().next()

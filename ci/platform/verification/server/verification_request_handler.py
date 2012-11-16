@@ -72,15 +72,15 @@ class VerificationRequestHandler(QueueListener):
 
 	def _make_console_appender(self, model_server_rpc, build_id):
 		class ConsoleAppender(object):
-			def __init__(self, console, subcategory):
+			def __init__(self, type, subtype):
 				self.model_server_rpc = model_server_rpc
 				self.build_id = build_id
-				self.console = console
-				self.subcategory = subcategory
+				self.type = type
+				self.subtype = subtype
 
 			def append(self, line_num, line):
-				self.model_server_rpc.append_console_line(self.build_id, line_num, line, self.console, self.subcategory)
+				self.model_server_rpc.append_console_line(self.build_id, line_num, line, self.type, self.subtype)
 
 			def flush(self):
-				self.model_server_rpc.flush_console_output(build_id, self.console, self.subcategory)
+				self.model_server_rpc.flush_console_output(build_id, self.type, self.subtype)
 		return ConsoleAppender

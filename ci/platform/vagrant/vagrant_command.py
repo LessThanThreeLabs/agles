@@ -20,9 +20,9 @@ class SimpleVagrantCommand(VagrantCommand):
 		return results.returncode
 
 
-class SimpleVagrantBuildCommand(SimpleVagrantCommand):
+class SimpleVagrantCompileCommand(SimpleVagrantCommand):
 	def __init__(self, name):
-		super(SimpleVagrantBuildCommand, self).__init__("build", name)
+		super(SimpleVagrantCompileCommand, self).__init__("compile", name)
 
 
 class SimpleVagrantTestCommand(SimpleVagrantCommand):

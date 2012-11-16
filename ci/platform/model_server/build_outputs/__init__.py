@@ -1,8 +1,7 @@
-REDIS_KEY_TEMPLATE = "build.output:%s:%s:%s"  # build_id, console, subcategory
+REDIS_KEY_TEMPLATE = "build.output:%s:%s:%s"  # build_id, type, subtype
 
 
-class Console(object):
-	General = "general"
+class ConsoleType(object):
 	Setup = "setup"
-	Build = "build"
+	Compile = "compile"
 	Test = "test"
