@@ -6,7 +6,7 @@ class VerificationConfig(object):
 		self.compile_commands = [SimpleVagrantCompileCommand(self._get_command_name(command))
 			for command in compile_commands] if compile_commands else []
 		self.test_commands = [SimpleVagrantTestCommand(self._get_command_name(command))
-			for command in test_commands.iterkeys()] if test_commands else []
+			for command in test_commands] if test_commands else []
 
 	def _get_command_name(self, command):
 		return command.iterkeys().next()
