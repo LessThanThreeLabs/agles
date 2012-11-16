@@ -3,7 +3,7 @@ from nose.tools import *
 from database.engine import ConnectionFactory
 from database.schema import *
 from model_server.build_outputs import ConsoleType
-from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, REDIS_KEY_TEMPLATE
+from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, REDIS_SUBTYPE_KEY
 from util.test import BaseIntegrationTest
 from util.test.mixins import RedisTestMixin
 
@@ -48,14 +48,14 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 			lines.append(line)
 
 		output = '\n'.join(lines)
-		redis_key = REDIS_KEY_TEMPLATE % (1, ConsoleType.Setup, '')
+		redis_key = REDIS_SUBTYPE_KEY % (1, ConsoleType.Setup, '')
 		db_output = update_handler._compact_output(
 			ConnectionFactory.get_redis_connection(), redis_key)
 		assert_equal(output, db_output)
 
 	def _assert_console_output_equal(self, build_id, expected_output,
 									 type, subtype=""):
-		key = REDIS_KEY_TEMPLATE % (build_id, type, subtype)
+		key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
 		redis_conn = ConnectionFactory.get_redis_connection()
 		actual_output = redis_conn.hgetall(key)
 		assert_equal(expected_output, actual_output,

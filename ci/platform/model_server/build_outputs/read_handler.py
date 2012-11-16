@@ -4,7 +4,7 @@ from sqlalchemy import and_
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from model_server.build_outputs import REDIS_KEY_TEMPLATE
+from model_server.build_outputs import REDIS_SUBTYPE_KEY
 from util.permissions import RepositoryPermissions
 
 class BuildOutputsReadHandler(ModelServerRpcHandler):
@@ -12,7 +12,7 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 		super(BuildOutputsReadHandler, self).__init__("build_outputs", "read")
 
 	def get_console_output(self, user_id, build_id, console):
-		redis_key = REDIS_KEY_TEMPLATE % (build_id, console)
+		redis_key = REDIS_SUBTYPE_KEY % (build_id, console)
 
 		redis_conn = ConnectionFactory.get_redis_connection()
 		if redis_conn.exists(redis_key):

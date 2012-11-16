@@ -1,15 +1,27 @@
+import collections
+
 from sqlalchemy import and_
 
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from model_server.build_outputs import REDIS_KEY_TEMPLATE
+from model_server.build_outputs import REDIS_SUBTYPE_KEY, REDIS_TYPE_KEY
 
 
 class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
 	def __init__(self):
 		super(BuildOutputsUpdateHandler, self).__init__("build_outputs", "update")
+
+	def init_subtypes(self, build_id, type, subtypes):
+		assert isinstance(subtypes, collections.Iterable)
+
+		trans = lambda subtype: REDIS_SUBTYPE_KEY % (build_id, type, subtype)
+		subtype_keys = map(trans, subtypes)
+		redis_key = REDIS_TYPE_KEY % (build_id, type)
+
+		redis_conn = ConnectionFactory.get_redis_connection()
+		redis_conn.rpush(redis_key, *subtype_keys)
 
 	def append_console_line(self, build_id, line_num, line, type, subtype=""):
 		""" The redis keys for build output are of the form build.output:build_id:type:subtype
@@ -20,7 +32,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		:param subtype: The console subtype we are appending to.
 		"""
 
-		redis_key = REDIS_KEY_TEMPLATE % (build_id, type, subtype)
+		redis_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
 		redis_conn = ConnectionFactory.get_redis_connection()
 		redis_conn.hset(redis_key, line_num, line)
 
@@ -39,7 +51,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		"""
 		build_console = schema.build_console
 
-		redis_key = REDIS_KEY_TEMPLATE % (build_id, type, subtype)
+		redis_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
 		redis_conn = ConnectionFactory.get_redis_connection()
 		complete_console_output = self._compact_output(redis_conn, redis_key)
 
