@@ -11,6 +11,7 @@ from bunnyrpc.client import Client
 from builds.create_handler import BuildsCreateHandler
 from builds.read_handler import BuildsReadHandler
 from builds.update_handler import BuildsUpdateHandler
+from build_outputs.read_handler import BuildOutputsReadHandler
 from build_outputs.update_handler import BuildOutputsUpdateHandler
 from changes.create_handler import ChangesCreateHandler
 from changes.read_handler import ChangesReadHandler
@@ -34,6 +35,7 @@ class ModelServer(object):
 		BuildsCreateHandler,
 		BuildsReadHandler,
 		BuildsUpdateHandler,
+		BuildOutputsReadHandler,
 		BuildOutputsUpdateHandler,
 		ChangesCreateHandler,
 		ChangesReadHandler,

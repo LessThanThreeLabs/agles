@@ -9,17 +9,14 @@ exports.create = (modelRpcConnection) ->
 
 class BuildOutputsReadHandler extends Handler
 
-	# not sure this is needed...
 	default: (socket, data, callback) =>
-		assert.ok socket.session.userId and data.buildId? and data.console?
-		userId = socket.session.userId
-		output = @modelRpcConnection.buildOutputs.read.get_console_output userId, data.buildId, data.console
-		callback null, output
+		callback 'Not yet implemented...'
 
 
 	# -- GIVEN --
 	# data =
 	#   buildId: <string>
+	#	consoleType: <string>
 	# -- RETURNED --
 	# result =
 	#   lines: [
@@ -27,4 +24,11 @@ class BuildOutputsReadHandler extends Handler
 	#     text: <string>
 	#   ]
 	getOutputForBuild: (socket, data, callback) =>
-		callback 'Not yet implemented...'
+		assert.ok socket.session.userId and data.buildId? and data.consoleType?
+		userId = socket.session.userId
+		output = @modelRpcConnection.buildOutputs.read.get_console_output userId, 
+				data.buildId, data.consoleType, (error, lines) =>
+					if error?
+						callback "Could not read build output"
+					else
+						callback null, lines
