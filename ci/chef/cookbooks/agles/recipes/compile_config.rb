@@ -15,8 +15,8 @@ end
 
 def handle_compiles(compiles)
 	compiles.each do |compile|
-		name = compile.first
-		config = compile.last
+		name = compile.keys.first
+		config = compile.values.first
 		path = config["path"]
 		command = config["script"]
 		create_compilescript(name, path, command)

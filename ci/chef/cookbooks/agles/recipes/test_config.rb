@@ -15,8 +15,8 @@ end
 
 def handle_tests(tests)
 	tests.each do |test|
-		name = test.first
-		config = test.last
+		name = test.keys.first
+		config = test.values.first
 		path = config["path"]
 		command = config["script"]
 		create_testscript(name, path, command)
