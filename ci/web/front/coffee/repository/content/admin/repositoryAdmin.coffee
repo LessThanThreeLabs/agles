@@ -6,9 +6,12 @@ class RepositoryAdmin.Model extends Backbone.Model
 		repositoryId: null
 
 	initialize: () ->
+		menuOptions = [new RepositoryAdminMenuOption('general', 'General'), 
+			new RepositoryAdminMenuOption('members', 'Members')]
+
 		@repositoryAdminMenuModel = new RepositoryAdminMenu.Model
-			options: ['General', 'Members']
-			selectedOption: 'General'
+			options: menuOptions
+			selectedOptionName: menuOptions[0].name
 		@repositoryAdminContentModel = new RepositoryAdminContent.Model()
 
 		@on 'change:repositoryId', () =>
@@ -28,7 +31,7 @@ class RepositoryAdmin.View extends Backbone.View
 		repositoryAdminMenuView = new RepositoryAdminMenu.View model: @model.repositoryAdminMenuModel
 		@$el.html repositoryAdminMenuView.render().el
 
-		repositoryAdminContentView = new RepositoryAdminContent.View model: @model.repositoryAdminContent
+		repositoryAdminContentView = new RepositoryAdminContent.View model: @model.repositoryAdminContentModel
 		@$el.append repositoryAdminContentView.render().el
 
 		return @

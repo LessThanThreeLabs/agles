@@ -4,7 +4,8 @@ window.RepositoryAdminMenu = {}
 class RepositoryAdminMenu.Model extends Backbone.Model
 
 	initialize: () ->
-		assert.ok @get('selectedOption') in @get('options')
+		assert.ok @get('options').some (option) =>
+			return option.name is @get 'selectedOptionName'
 
 
 class RepositoryAdminMenu.View extends Backbone.View
@@ -12,7 +13,7 @@ class RepositoryAdminMenu.View extends Backbone.View
 	className: 'repositoryAdminMenu'
 	template: Handlebars.compile '<div class="menuOptions">
 			{{#each options}}
-				<div class="menuOption" optionName="{{this}}">{{this}}</div>
+				<div class="menuOption" optionName="{{name}}">{{title}}</div>
 			{{/each}}
 		</div>'
 	events:
@@ -20,7 +21,7 @@ class RepositoryAdminMenu.View extends Backbone.View
 
 	initialize: () ->
 		@model.on 'change:options', @render
-		@model.on 'change:selectedOption', @_handleSelectedOptionChange
+		@model.on 'change:selectedOptionName', @_handleSelectedOptionChange
 
 
 	render: () ->
@@ -33,11 +34,11 @@ class RepositoryAdminMenu.View extends Backbone.View
 		optionName = $(event.target).attr 'optionName'
 		assert.ok optionName? and optionName.length isnt ''
 
-		@model.set 'selectedOption', optionName
+		@model.set 'selectedOptionName', optionName
 
 
 	_handleSelectedOptionChange: () =>
 		@$el.find('.menuOption').removeClass 'selected'
 
-		optionName = @model.get 'selectedOption'
+		optionName = @model.get 'selectedOptionName'
 		@$el.find(".menuOption[optionName='#{optionName}']").addClass 'selected'
