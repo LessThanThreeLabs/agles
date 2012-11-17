@@ -3,3 +3,4 @@ class BuildStatus(object):
 	RUNNING = "running"
 	COMPLETE = "complete"
 	FAILED = "failed"
+	MERGE_FAILURE = "merge failure"

@@ -23,9 +23,10 @@ class VerificationResultsHandler(QueueListener):
 		build_id, results = body
 		try:
 			self.handle_results(build_id, results)
-			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		except Exception as e:
 			print e  # Should alert the user somehow
+		finally:
+			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
 	def handle_results(self, build_id, results):
 		# TODO (bbland): do something more useful than this trivial case
@@ -46,6 +47,10 @@ class VerificationResultsHandler(QueueListener):
 		with ModelServer.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.FAILED)
 
+	def _mark_change_merge_failure(self, change_id):
+		with ModelServer.rpc_connect("changes", "update") as client:
+			client.mark_change_finished(change_id, BuildStatus.MERGE_FAILURE)
+
 	def send_merge_request(self, change_id):
 		print "Sending merge request for " + str(change_id)
 		with ModelServer.rpc_connect("changes", "read") as client:
@@ -63,6 +68,7 @@ class VerificationResultsHandler(QueueListener):
 				machine_uri, repo_hash,
 				repo_name, ref, merge_target)
 		except MergeError as e:
+			self._mark_change_merge_failure(change_id)
 			# merge_status = False
 			raise e  # Should alert the user somehow
 		"""
