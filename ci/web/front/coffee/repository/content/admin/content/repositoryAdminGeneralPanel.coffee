@@ -14,7 +14,7 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminGeneralPanel'
 	template: Handlebars.compile '</div>
-		<div class="prettyForm">
+		<div class="prettyForm generalAdminForm">
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">
 					Description
