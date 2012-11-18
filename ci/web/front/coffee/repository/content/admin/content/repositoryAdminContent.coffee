@@ -8,6 +8,7 @@ class RepositoryAdminContent.Model extends Backbone.Model
 
 	initialize: () ->
 		@generalPanelModel = new RepositoryAdminGeneralPanel.Model()
+		@membersPanelModel = new RepositoryAdminMembersPanel.Model()
 
 
 class RepositoryAdminContent.View extends Backbone.View
@@ -28,10 +29,9 @@ class RepositoryAdminContent.View extends Backbone.View
 			when 'general'
 				generalPanelView = new RepositoryAdminGeneralPanel.View model: @model.generalPanelModel
 				@$el.html generalPanelView.render().el
-			# when 'members'
-			# 	console.log 'members'
-				# repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
-				# @$el.html repositoryAdminView.render().el
+			when 'members'
+				membersPanelView = new RepositoryAdminMembersPanel.View model: @model.membersPanelView
+				@$el.html membersPanelView.render().el
 			else
 				@$el.html '&nbsp'
 				console.error 'Unaccounted for mode ' + @model.get 'mode' if @model.get('mode')?

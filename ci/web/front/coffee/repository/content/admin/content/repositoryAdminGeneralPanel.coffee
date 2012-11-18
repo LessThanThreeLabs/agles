@@ -4,8 +4,7 @@ window.RepositoryAdminGeneralPanel = {}
 class RepositoryAdminGeneralPanel.Model extends Backbone.Model
 	defaults:
 		repositoryId: null
-		repositoryName: null
-		repositoryDescription: null
+		description: null
 
 	initialize: () ->
 
