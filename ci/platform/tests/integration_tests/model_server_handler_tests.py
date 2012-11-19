@@ -3,7 +3,7 @@ from nose.tools import *
 from database.engine import ConnectionFactory
 from database.schema import *
 from model_server.build_outputs import ConsoleType
-from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, REDIS_SUBTYPE_KEY
+from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, REDIS_SUBTYPE_KEY, REDIS_TYPE_KEY
 from util.test import BaseIntegrationTest
 from util.test.mixins import RedisTestMixin
 
@@ -16,6 +16,21 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 	def tearDown(self):
 		super(BuildsUpdateHandlerTest, self).tearDown()
 		self._stop_redis()
+
+	def init_subtypes_test(self):
+		build_id = 1
+		type = ConsoleType.Setup
+		subtypes = ['sub1', 'sub2', 'sub3']
+
+		update_hander = BuildOutputsUpdateHandler()
+		update_hander.init_subtypes(build_id, type, subtypes)
+
+		redis_conn = ConnectionFactory.get_redis_connection()
+		type_key = REDIS_TYPE_KEY % (build_id, type)
+		def check_subtype(subtype):
+			subtype_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
+			priority = redis_conn.hget(type_key, subtype_key)
+			assert_equals(priority, subtypes.index(subtype))
 
 	def console_append_test(self):
 		update_handler = BuildOutputsUpdateHandler()
@@ -50,7 +65,10 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 		output = '\n'.join(lines)
 		redis_key = REDIS_SUBTYPE_KEY % (1, ConsoleType.Setup, '')
 		db_output = update_handler._compact_output(
-			ConnectionFactory.get_redis_connection(), redis_key)
+			ConnectionFactory.get_redis_connection(),
+			1,
+			ConsoleType.Setup,
+			'')
 		assert_equal(output, db_output)
 
 	def _assert_console_output_equal(self, build_id, expected_output,
