@@ -12,7 +12,12 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminInviteMembersPanel'
 	template: Handlebars.compile '<div class="inviteForm">
-			<input type="text" class="inviteMembersField" placeholder="emails"><button class="inviteButton">Invite</button>
+			<div class="inviteMembersFieldContainer">
+				<input type="text" class="inviteMembersField" placeholder="emails">
+			</div>
+			<div class="inviteButtonContainer">
+				<button class="inviteButton">Invite</button>
+			</div>
 		</div>
 		<div class="inviteMembersHint">Seperate multiple email addresses with commas</div>'
 	# events: 
