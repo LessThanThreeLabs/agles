@@ -11,6 +11,8 @@
 
 			"/css/src/account/account.css",
 
+			"/css/src/repository/content/admin/content/members/repositoryAdminInviteMembersPanel.css",
+			"/css/src/repository/content/admin/content/members/repositoryAdminMembersPanel.css",
 			"/css/src/repository/content/admin/content/general/repositoryAdminGeneralPanel.css",
 			"/css/src/repository/content/admin/content/repositoryAdminContent.css",
 			"/css/src/repository/content/admin/menu/repositoryAdminMenu.css",

@@ -11,7 +11,10 @@ class RepositoryAdminInviteMembersPanel.Model extends Backbone.Model
 class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminInviteMembersPanel'
-	template: Handlebars.compile 'hello'
+	template: Handlebars.compile '<div class="inviteForm">
+			<input type="text" class="inviteMembersField" placeholder="emails"><button class="inviteButton">Invite</button>
+		</div>
+		<div class="inviteMembersHint">Seperate multiple email addresses with commas</div>'
 	# events: 
 	# 	'keyup': '_handleFormEntryChange'
 	# 	'blur .prettyFormValue': '_handleSubmitChange'

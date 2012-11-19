@@ -6,12 +6,16 @@ class RepositoryAdminMembersPanel.Model extends Backbone.Model
 		repositoryId: null
 
 	initialize: () ->
+		@inviteMembersPanelModel = new RepositoryAdminInviteMembersPanel.Model()
 
 
 class RepositoryAdminMembersPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminMembersPanel'
-	template: Handlebars.compile 'hello'
+	template: Handlebars.compile '<div class="inviteMembers">
+			<div class="inviteMembersTitle">Invite Members</div>
+			<div class="inviteMembersContent"></div>
+		</div>'
 	# events: 
 	# 	'keyup': '_handleFormEntryChange'
 	# 	'blur .prettyFormValue': '_handleSubmitChange'
@@ -20,6 +24,10 @@ class RepositoryAdminMembersPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @template()
+
+		inviteMembersPanelView = new RepositoryAdminInviteMembersPanel.View model: @model.inviteMembersPanelModel
+		@$el.find('.inviteMembersContent').html inviteMembersPanelView.render().el
+
 		return @
 
 

@@ -30,7 +30,7 @@ class RepositoryAdminContent.View extends Backbone.View
 				generalPanelView = new RepositoryAdminGeneralPanel.View model: @model.generalPanelModel
 				@$el.html generalPanelView.render().el
 			when 'members'
-				membersPanelView = new RepositoryAdminMembersPanel.View model: @model.membersPanelView
+				membersPanelView = new RepositoryAdminMembersPanel.View model: @model.membersPanelModel
 				@$el.html membersPanelView.render().el
 			else
 				@$el.html '&nbsp'
