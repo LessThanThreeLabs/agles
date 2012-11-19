@@ -4,8 +4,11 @@ window.RepositoryAdminInviteMembersPanel = {}
 class RepositoryAdminInviteMembersPanel.Model extends Backbone.Model
 	defaults:
 		repositoryId: null
+		emails: null
 
 	initialize: () ->
+		@on 'change:emails', () =>
+			console.log @get 'emails'
 
 
 class RepositoryAdminInviteMembersPanel.View extends Backbone.View
@@ -19,10 +22,11 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 				<button class="inviteButton">Invite</button>
 			</div>
 		</div>
+		<div class="prettyFormErrorText repositoryInviteMembersErrorText"></div>
 		<div class="inviteMembersHint">Seperate multiple email addresses with commas</div>'
-	# events: 
-	# 	'keyup': '_handleFormEntryChange'
-	# 	'blur .prettyFormValue': '_handleSubmitChange'
+	events: 
+		'keyup': '_handleFormEntryChange'
+		'click .inviteButton': '_handleSubmit'
 
 	initialize: () =>
 
@@ -31,38 +35,32 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 		return @
 
 
-	# _handleFormEntryChange: () =>
-	# 	@model.set 'description', @$el.find('.repositoryDescriptionField').val()
+	_handleFormEntryChange: () =>
+		@model.set 'emails', @$el.find('.inviteMembersField').val()
 
 
-	# _handleSubmitChange: (event) =>
-	# 	console.log 'Need to submit repository change!'
+	_handleSubmit: (event) =>
+		console.log 'Need to submit repository change!'
 
-	# 	errors = {}
-	# 	@_displayErrors errors
-	# 	@_showCorrectSavedMessage($(event.target)) if not errors? or Object.keys(errors).length is 0
+		errors = invite: 'couldnt invite the peoples'
+		@_displayErrors errors
 
-
-	# _showCorrectSavedMessage: (field) =>
-	# 	@$el.find('.repositoryDescriptionSavedText').css 'visibility', 'hidden'
-
-	# 	if field.hasClass 'repositoryDescriptionField'
-	# 		@$el.find('.repositoryDescriptionSavedText').css 'visibility', 'visible'
+		console.log 'tell the user which were successful'
 
 
-	# _clearErrors: () =>
-	# 	@_displayErrors {}
+	_clearErrors: () =>
+		@_displayErrors {}
 
 
-	# _displayErrors: (errors = {}) =>
-	# 	repositoryDescriptionError = @$el.find('.repositoryDescriptionErrorText')
-	# 	@_displayErrorForField repositoryDescriptionError, errors.description
+	_displayErrors: (errors = {}) =>
+		inviteMembersError = @$el.find('.repositoryInviteMembersErrorText')
+		@_displayErrorForField inviteMembersError, errors.invite
 
 
-	# _displayErrorForField: (errorView, errorText) =>
-	# 	if errorText?
-	# 		errorView.text errorText
-	# 		errorView.show()
-	# 	else
-	# 		errorView.text ''
-	# 		errorView.hide()
+	_displayErrorForField: (errorView, errorText) =>
+		if errorText?
+			errorView.text errorText
+			errorView.show()
+		else
+			errorView.text ''
+			errorView.hide()
