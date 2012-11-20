@@ -23,7 +23,7 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 			</div>
 		</div>
 		<div class="repositoryInviteMembersSentText">Emails sent</div>
-		<div class="prettyFormErrorText repositoryInviteMembersErrorText"></div>
+		<div class="repositoryInviteMembersErrorText"></div>
 		<div class="inviteMembersHint">Separate multiple email addresses with commas</div>'
 	events: 
 		'keyup': '_handleFormEntryChange'
