@@ -5,6 +5,7 @@
 
 import collections
 import os
+import re
 
 from subprocess import Popen, PIPE
 
@@ -23,6 +24,11 @@ class Vagrant(object):
 
 	def get_vm_directory(self):
 		return self.vm_directory
+
+	def status(self):
+		status_output = self._vagrant_call("status").stdout
+		match = re.search("default\\s+(.*)", status_output, re.MULTILINE)
+		return match.group(1).rstrip() if match else "not created"
 
 	def init(self, output_handler=None):
 		return self._vagrant_call("init", self.box_name, output_handler=output_handler)

@@ -47,15 +47,15 @@ class VagrantWrapper(object):
 		return self.vagrant.get_vm_directory()
 
 	def spawn(self, output_handler=None):
-		self.teardown()
-		print "Spawning vm at " + self.get_vm_directory()
 		if not os.access(self.get_vm_directory(), os.F_OK):
 			os.mkdir(self.get_vm_directory())
-
-		if self.init(output_handler).returncode != 0:
-			raise VagrantException(self.vagrant, "Couldn't initialize vagrant")
-		if self.up(False, output_handler).returncode != 0:
-			raise VagrantException(self.vagrant, "Couldn't start vagrant vm")
+		while not self.vagrant.status() == "running":
+			self.teardown()
+			print "Spawning vm at " + self.get_vm_directory()
+			if self.init(output_handler).returncode != 0:
+				raise VagrantException(self.vagrant, "Couldn't initialize vagrant")
+			if self.up(False, output_handler).returncode != 0:
+				raise VagrantException(self.vagrant, "Couldn't start vagrant vm")
 		self.ssh_call("sleep 2")  # Expected to validate ssh daemon before snapshotting
 		if self.sandbox_on(output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Couldn't initialize sandbox on vm")
