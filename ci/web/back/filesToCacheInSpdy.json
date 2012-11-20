@@ -70,6 +70,7 @@
 
 			"/js/src/account/account.js",
 
+			"/js/src/repository/content/admin/content/members/repositoryAdminMemberPermissionsPanel.js",
 			"/js/src/repository/content/admin/content/members/repositoryAdminInviteMembersPanel.js",
 			"/js/src/repository/content/admin/content/members/repositoryAdminMembersPanel.js",
 			"/js/src/repository/content/admin/content/general/repositoryAdminGeneralPanel.js",
