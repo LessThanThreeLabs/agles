@@ -52,6 +52,7 @@ class BuildVerifier(object):
 
 	def _setup_vagrant_wrapper(self, console_appender):
 		"""Provisions the contained vagrant wrapper for analysis and test running"""
+		self._get_output_handler(console_appender, ConsoleType.Setup).declare_commands(["chef"])
 		output_handler = self._get_output_handler(console_appender, ConsoleType.Setup, "chef")
 		returncode = self.vagrant_wrapper.provision(output_handler=output_handler,
 			role="verification_box_run").returncode
@@ -82,12 +83,14 @@ class BuildVerifier(object):
 		return verification_config
 
 	def run_compile_step(self, compile_commands, console_appender):
+		self._get_output_handler(console_appender, ConsoleType.Compile).declare_commands([command.name for command in compile_commands])
 		for compile_command in compile_commands:
 			if compile_command.run(self.vagrant_wrapper,
 				self._get_output_handler(console_appender, ConsoleType.Compile, compile_command.name)):
 				raise VerificationException("Compiling: %s" % compile_command.name)
 
 	def run_test_step(self, test_commands, console_appender):
+		self._get_output_handler(console_appender, ConsoleType.Test).declare_commands([command.name for command in test_commands])
 		for test_command in test_commands:
 			if test_command.run(self.vagrant_wrapper,
 				self._get_output_handler(console_appender, ConsoleType.Test, test_command.name)):

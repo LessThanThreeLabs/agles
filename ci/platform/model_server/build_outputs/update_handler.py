@@ -22,7 +22,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		redis_conn = ConnectionFactory.get_redis_connection()
 		redis_key = REDIS_TYPE_KEY % (build_id, type)
 		[redis_conn.hset(redis_key, subtype_key, priority)
-		 for priority, subtype_key in enumerate(subtype_keys)]
+		for priority, subtype_key in enumerate(subtype_keys)]
 
 	def append_console_line(self, build_id, line_num, line, type, subtype=""):
 		""" The redis keys for build output are of the form build.output:build_id:type:subtype

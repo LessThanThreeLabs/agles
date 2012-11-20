@@ -78,6 +78,9 @@ class VerificationRequestHandler(QueueListener):
 				self.type = type
 				self.subtype = subtype
 
+			def declare_commands(self, commands):
+				self.model_server_rpc.init_subtypes(self.build_id, self.type, commands)
+
 			def append(self, line_num, line):
 				self.model_server_rpc.append_console_line(self.build_id, line_num, line, self.type, self.subtype)
 
