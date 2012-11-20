@@ -17,8 +17,6 @@ node[:agles][:verification][:server_count].to_i.times do |server_num|
 	rvm_shell "Start verification server #{server_num}}" do
 		code <<-EOH
 		cd #{vagrant_path}
-		vagrant destroy -f
-		rm Vagrantfile
 		vagrant init precise64_verification
 		while [ "`vagrant status | grep default | sed -e 's/default\\s*\\(.*\\)/\\1/'`" != "running" ]
 			do vagrant destroy -f
