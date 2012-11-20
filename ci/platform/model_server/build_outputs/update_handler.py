@@ -39,7 +39,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
 	def _get_priority(self, redis_conn, build_id, type, subtype):
 		type_key = REDIS_TYPE_KEY % (build_id, type)
-		subtype_key = REDIS_SUBTYPE_KEY % (build_id, id, type)
+		subtype_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
 
 		return int(redis_conn.hget(type_key, subtype_key))
 
@@ -53,7 +53,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
 	def _remove_tmpdata(self, redis_conn, build_id, type, subtype):
 		type_key = REDIS_TYPE_KEY % (build_id, type)
-		subtype_key = REDIS_SUBTYPE_KEY % (build_id, id, type)
+		subtype_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
 
 		# remove from initialization priority list
 		redis_conn.hdel(type_key, subtype_key)
