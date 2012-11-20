@@ -94,7 +94,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	def _insert_commit_info(self):
 		with ConnectionFactory.get_sql_connection() as conn:
-			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=sha512("").digest(), salt="1234567890123456")
+			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=sha512("").hexdigest(), salt="1234567890123456")
 			user_id = conn.execute(ins_user).inserted_primary_key[0]
 			ins_commit = schema.commit.insert().values(repo_hash=self.repo_hash, user_id=user_id,
 				message="commit message", timestamp=int(time.time()))

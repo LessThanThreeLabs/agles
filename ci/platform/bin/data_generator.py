@@ -9,6 +9,10 @@ from database import schema
 from database.engine import ConnectionFactory
 from util.permissions import RepositoryPermissions
 
+ADMIN_EMAIL = 'admin@admin.com'
+ADMIN_PASSWORD = 'admin123'
+ADMIN_SALT = 'a'*16
+
 NUM_REPOS = 3
 REPOSITORIES_PATH = 'repos'
 
@@ -19,6 +23,19 @@ class SchemaDataGenerator(object):
 
 	def generate(self):
 		schema.reseed_db()
+		hash = hashlib.sha512()
+		hash.update(ADMIN_SALT)
+		hash.update(ADMIN_PASSWORD.encode('utf8'))
+		ins_admin = schema.user.insert().values(
+			email="admin@admin.com",
+			first_name="admin",
+			last_name="admin",
+			password_hash=hash.hexdigest(),
+			salt=ADMIN_SALT
+		)
+		with ConnectionFactory.get_sql_connection() as conn:
+			self.admin_id = conn.execute(ins_admin).inserted_primary_key[0]
+
 		with ConnectionFactory.get_sql_connection() as conn:
 			repos = dict()
 			repo_hashes = []
@@ -37,7 +54,7 @@ class SchemaDataGenerator(object):
 
 			for user in range(random.randint(1, 10)):
 				ins_user = schema.user.insert().values(first_name="firstname_%d" % user, last_name="lastname_%d" % user, email="%d@b.com" % user,
-					password_hash=hashlib.sha512(str(user)).digest(), salt='a'*16)
+					password_hash=hashlib.sha512(str(user)).hexdigest(), salt='a'*16)
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 				repo_hash = random.choice(repo_hashes)
@@ -49,7 +66,7 @@ class SchemaDataGenerator(object):
 					repo_id = random.choice(repos.keys())
 					repo_hash_query = schema.repo.select().where(schema.repo.c.id==repo_id)
 					repo_hash = conn.execute(repo_hash_query).first()[schema.repo.c.hash]
-					repos[repo_id] = repos[repo_id] + 1
+					repos[repo_id] += 1
 					ins_commit = schema.commit.insert().values(repo_hash=repo_hash, user_id=user_id,
 						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())))
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
@@ -65,10 +82,24 @@ class SchemaDataGenerator(object):
 					ins_map = schema.build_commits_map.insert().values(build_id=build_id, commit_id=commit_id)
 					conn.execute(ins_map)
 
-					for console_type in range(2):
+					for priority, console_type in enumerate(range(2)):
 						ins_console = schema.build_console.insert().values(build_id=build_id, type=console_type,
-							subtype="subtype", console_output=self.generate_console_output())
+							subtype="subtype", subtype_priority=priority, console_output=self.generate_console_output())
 						conn.execute(ins_console)
+
+		self._grantall_to_admin(repo_hashes)
+
+	def _grantall_to_admin(self, repo_hashes):
+		insert_values = []
+		for repo_hash in repo_hashes:
+			insert_values.append({
+				'user_id': self.admin_id,
+				'repo_hash': repo_hash,
+				'permissions': RepositoryPermissions.RWA
+			})
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(schema.permission.insert(), insert_values)
 
 	def generate_console_output(self):
 		output = ""

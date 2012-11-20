@@ -22,4 +22,4 @@ class PasswordHasher
 
 
 	_saltPassword: (password, salt) =>
-		crypto.createHash('sha512').update(salt, 'binary').update(password, 'utf8').digest('binary')		
+		crypto.createHash('sha512').update(salt, 'binary').update(password, 'utf8').digest('hex')

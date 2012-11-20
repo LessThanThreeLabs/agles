@@ -54,7 +54,6 @@ class UsersReadHandler(ModelServerRpcHandler):
 			raise NoSuchUserError
 
 	def get_user_from_id(self, user_id):
-		print user_id
 		user = database.schema.user
 
 		query = user.select().where(user.c.id==user_id)
