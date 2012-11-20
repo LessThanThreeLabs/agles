@@ -22,6 +22,7 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 				<button class="inviteButton">Invite</button>
 			</div>
 		</div>
+		<div class="repositoryInviteMembersSentText">Emails sent</div>
 		<div class="prettyFormErrorText repositoryInviteMembersErrorText"></div>
 		<div class="inviteMembersHint">Separate multiple email addresses with commas</div>'
 	events: 
@@ -42,10 +43,11 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 	_handleSubmit: (event) =>
 		console.log 'Need to submit repository change!'
 
-		errors = invite: 'couldnt invite the peoples'
+		errors = invite: 'Couldnt invite the peoples'
 		@_displayErrors errors
 
-		console.log 'tell the user which were successful'
+		showSentMessage = not errors? or Object.keys(errors).length is 0
+		@$el.find('.repositoryInviteMembersSentText').toggle showSentMessage
 
 
 	_clearErrors: () =>
