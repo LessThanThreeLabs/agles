@@ -188,9 +188,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 			remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
 			remote_branch_exists = re.search("\\s+" + remote_branch + "$", repo_slave.git.branch("-r"), re.MULTILINE)
 			repo_slave.git.fetch("origin", ref_to_merge)  # point FETCH_HEAD at ref to merge
+			repo_slave.git.checkout("FETCH_HEAD")
+			ref_sha = repo_slave.head.commit.hexsha
 			checkout_branch = remote_branch if remote_branch_exists else "FETCH_HEAD"
 			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
-			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % repo_slave.commit(checkout_branch).message)
+			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 		except GitCommandError, e:
 			stacktrace = sys.exc_info()[2]
