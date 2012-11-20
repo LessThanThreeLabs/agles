@@ -21,9 +21,6 @@ class RepositoryAdminMembersPanel.View extends Backbone.View
 			<div class="memberPermissionsTitle">Member Permissions</div>
 			<div class="memberPermissionsContent"></div>
 		</div>'
-	# events: 
-	# 	'keyup': '_handleFormEntryChange'
-	# 	'blur .prettyFormValue': '_handleSubmitChange'
 
 	initialize: () =>
 
@@ -37,4 +34,3 @@ class RepositoryAdminMembersPanel.View extends Backbone.View
 		@$el.find('.memberPermissionsContent').html memberPermissionsPanelView.render().el
 
 		return @
-		
