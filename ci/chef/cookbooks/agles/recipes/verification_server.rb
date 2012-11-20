@@ -13,15 +13,20 @@ execute "Stop verification servers" do
 end
 
 node[:agles][:verification][:server_count].to_i.times do |server_num|
+	vagrant_path = "/tmp/verification/#{server_num}"
 	rvm_shell "Start verification server #{server_num}}" do
 		code <<-EOH
-		cd /tmp/verification/#{server_num}
+		cd #{vagrant_path}
 		vagrant destroy -f
+		rm Vagrantfile
 		vagrant init precise64_verification
-		vagrant up --no-provision
+		while [ "`vagrant status | grep default | sed -e 's/default\\s*\\(.*\\)/\\1/'`" != "running" ]
+			do vagrant destroy -f
+			vagrant up --no-provision
+		done
 		vagrant ssh -c "sleep 2"
 		vagrant sandbox on
-		#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v /tmp/verification/#{server_num} -f >> /tmp/verification/#{server_num}/server.log 2>&1 &
+		#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{vagrant_path} -f >> #{vagrant_path}/server.log 2>&1 &
 		EOH
 		user node[:agles][:user]
 	end
