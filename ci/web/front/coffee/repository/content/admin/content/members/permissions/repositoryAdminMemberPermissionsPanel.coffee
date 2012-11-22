@@ -48,6 +48,9 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 				<div class="prettyTableColumn">Email</div>
 				<div class="prettyTableColumn">First Name</div>
 				<div class="prettyTableColumn">Last Name</div>
+				<div class="prettyTableColumn readPermissionColumn">R</div>
+				<div class="prettyTableColumn readWritePermissionColumn">R/W</div>
+				<div class="prettyTableColumn readWriteAdminPermissionColumn">R/W/A</div>
 			</div>
 		</div>'
 

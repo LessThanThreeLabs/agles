@@ -23,7 +23,10 @@ class MemberPermissions.View extends Backbone.View
 	template: Handlebars.compile '
 		<div class="prettyTableColumn">{{email}}</div>
 		<div class="prettyTableColumn">{{firstName}}</div>
-		<div class="prettyTableColumn">{{lastName}}</div>'
+		<div class="prettyTableColumn">{{lastName}}</div>
+		<div class="prettyTableColumn"><input type="radio" name="{{email}}PermissionsRadio"></div>
+		<div class="prettyTableColumn"><input type="radio" name="{{email}}PermissionsRadio"></div>
+		<div class="prettyTableColumn"><input type="radio" name="{{email}}PermissionsRadio"></div>'
 
 	initialize: () =>
 
