@@ -19,8 +19,11 @@ class MemberPermissions.Model extends Backbone.Model
 
 class MemberPermissions.View extends Backbone.View
 	tagName: 'div'
-	className: 'memberPermissions'
-	template: Handlebars.compile '{{email}} {{firstName}} {{lastName}}'
+	className: 'memberPermissions prettyTableRow'
+	template: Handlebars.compile '
+		<div class="prettyTableColumn">{{email}}</div>
+		<div class="prettyTableColumn">{{firstName}}</div>
+		<div class="prettyTableColumn">{{lastName}}</div>'
 
 	initialize: () =>
 

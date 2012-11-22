@@ -18,27 +18,37 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 		console.log 'need to fetch members'
 
 		member1 =
-			email: 'fake@email.com'
+			email: 'cc.fake@email.com'
 			firstName: 'fake'
 			lastName: 'email'
 			permissions: 'r'
 		member2 =
-			email: 'fake@email2.com'
+			email: 'aa.fake@email2.com'
+			firstName: 'faker'
+			lastName: 'email'
+			permissions: 'r/w'
+		member3 =
+			email: 'bb.fake@email2.com'
 			firstName: 'faker'
 			lastName: 'email'
 			permissions: 'r/w'
 
 		@memberPermissionsModels.add [member1, member2]
 
+		setTimeout (() =>
+				@memberPermissionsModels.add [member3]			
+			), 1000
+
 
 class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminMemberPermissionsPanel'
-	template: Handlebars.compile '<div class="prettyTable>
+	template: Handlebars.compile '<div class="prettyTable permissionsTable">
 			<div class="prettyTableTitleRow">
-				<!-- stuff here... -->
+				<div class="prettyTableColumn">Email</div>
+				<div class="prettyTableColumn">First Name</div>
+				<div class="prettyTableColumn">Last Name</div>
 			</div>
-			<div class="memberPermissionsRows"></div>
 		</div>'
 
 	initialize: () =>
@@ -56,8 +66,9 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 
 
 	_insertBuildAtIndex: (memberPermissionView, index) =>
-		console.log 'repo admin member permission panel -- this is all wrong...'
-		if index == 0 
-			@$el.find('.memberPermissionsRows').prepend memberPermissionView
+		memberPermissionRowsOffset = 2
+
+		if index is 0
+			@$el.find('.permissionsTable').append memberPermissionView
 		else
-			@$el.find('.memberPermissionsRows .memberPermissions:nth-child('+ index + ')').after memberPermissionView
+			@$el.find('.permissionsTable .memberPermissions:nth-child('+ (index+1) + ')').after memberPermissionView

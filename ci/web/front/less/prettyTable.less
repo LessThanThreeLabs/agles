@@ -1,0 +1,24 @@
+.prettyTable {
+	display: table;
+
+	.prettyTableTitleRow {
+		font-weight: bold;
+	}
+
+	.prettyTableRow, .prettyTableTitleRow {
+		display: table-row;
+
+		.prettyTableColumn {
+			display: table-cell;
+			padding: 5px 20px 5px 20px;
+
+			&:first-child {
+				padding-left: 0px;
+			}
+
+			&:last-child {
+				padding-right: 0px;
+			}
+		}
+	}
+}

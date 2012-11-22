@@ -5,12 +5,14 @@
 			"/css/libs/tipped.css",
 
 			"/css/src/fonts.css",
+			"/css/src/prettyTable.css",
 			"/css/src/prettyForm.css",
 
 			"/css/src/welcome/welcome.css",
 
 			"/css/src/account/account.css",
 
+			"/css/src/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.css",
 			"/css/src/repository/content/admin/content/members/repositoryAdminInviteMembersPanel.css",
 			"/css/src/repository/content/admin/content/members/repositoryAdminMembersPanel.css",
 			"/css/src/repository/content/admin/content/general/repositoryAdminGeneralPanel.css",
@@ -71,8 +73,7 @@
 			"/js/src/account/account.js",
 
 			"/js/src/repository/content/admin/content/members/permissions/memberPermissions.js",
-
-			"/js/src/repository/content/admin/content/members/repositoryAdminMemberPermissionsPanel.js",
+			"/js/src/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.js",
 			"/js/src/repository/content/admin/content/members/repositoryAdminInviteMembersPanel.js",
 			"/js/src/repository/content/admin/content/members/repositoryAdminMembersPanel.js",
 			"/js/src/repository/content/admin/content/general/repositoryAdminGeneralPanel.js",
