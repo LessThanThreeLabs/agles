@@ -27,7 +27,13 @@ class LoginHandler
 
 				socket.session.userId = user.id
 				socket.session.save()
-				callback error, user
+				callback error, @_sanitize(user)
+
+	_sanitize: (user) =>
+		firstName: user.first_name
+		lastName: user.last_name
+		email: user.email
+		id: user.id
 
 		# modelRpcConnection.users.read.getPasswordSalt email, (error, result) =>
 		# 	hashedPassword = @passwordHasher.hashPasswordWithSalt password, result.salt
