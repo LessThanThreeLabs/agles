@@ -1,17 +1,20 @@
 include_recipe "agles"
 
 dependencies = {
+		:system_packages => ['gcc', 'g++', 'apache2-utils', 'libevent-dev'],
 		:python => {
 			:versions => ['2.5', '2.6', '2.7', '3.2', '3.3'],
-			:packages => ['distribute', 'nose']
+			:packages => ['distribute', 'nose', 'sqlalchemy', 'redis', 'greenlet', 'eventlet',
+				'gevent', 'psycopg2', 'argparse']
 			},
 		:ruby => {
 			:versions => ['1.8.7', '1.9.3'],
-			:packages => ['bundler']
+			:packages => ['bundler', 'rspec']
 			},
 		:nodejs => {
 			:versions => ['0.8.9'],
-			:packages => []
+			:packages => ['nodetime', 'commander', 'express', 'spdy', 'cookie', 'hbs',
+				'socket.io', 'redis', 'connect-redis', 'zombie', 'nodemailer']
 			}
 		}
 
@@ -19,6 +22,10 @@ apt_repository "deadsnakes" do
 	uri "http://ppa.launchpad.net/fkrull/deadsnakes/ubuntu"
 	distribution node['lsb']['codename']
 	components ["main"]
+end
+
+dependencies[:system_packages].each do |system_package|
+	package system_package
 end
 
 dependencies[:python][:versions].each do |version|
