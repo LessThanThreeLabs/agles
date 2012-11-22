@@ -4,8 +4,8 @@ dependencies = {
 		:system_packages => ['gcc', 'g++', 'apache2-utils', 'libevent-dev'],
 		:python => {
 			:versions => ['2.5', '2.6', '2.7', '3.2', '3.3'],
-			:packages => ['distribute', 'nose', 'sqlalchemy', 'redis', 'greenlet', 'eventlet',
-				'gevent', 'psycopg2', 'argparse']
+			:packages => ['distribute', 'nose', 'sqlalchemy', 'redis', 'greenlet',
+				'psycopg2', 'argparse']
 			},
 		:ruby => {
 			:versions => ['1.8.7', '1.9.3'],
