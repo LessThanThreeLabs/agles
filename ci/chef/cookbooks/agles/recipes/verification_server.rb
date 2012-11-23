@@ -19,7 +19,7 @@ node[:agles][:verification][:server_count].to_i.times do |server_num|
 		mkdir -p #{vagrant_path}
 		cd #{vagrant_path}
 		vagrant init precise64_verification
-		while [ "`vagrant status | grep default | sed -e 's/default\\s+\\(.*\\)/\\1/'`" != 'running' ]
+		while [ "`vagrant status | grep default | sed -e 's/default\\s\\+\\(.*\\)/\\1/'`" != 'running' ]
 			do vagrant destroy -f
 			vagrant up --no-provision
 		done
