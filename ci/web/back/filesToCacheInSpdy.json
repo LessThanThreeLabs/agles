@@ -12,6 +12,7 @@
 
 			"/css/src/account/account.css",
 
+			"/css/src/repository/content/admin/content/members/permissions/memberPermissions.css",
 			"/css/src/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.css",
 			"/css/src/repository/content/admin/content/members/repositoryAdminInviteMembersPanel.css",
 			"/css/src/repository/content/admin/content/members/repositoryAdminMembersPanel.css",

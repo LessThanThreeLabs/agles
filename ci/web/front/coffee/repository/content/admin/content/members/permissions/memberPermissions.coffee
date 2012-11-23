@@ -24,11 +24,13 @@ class MemberPermissions.View extends Backbone.View
 		<div class="prettyTableColumn">{{email}}</div>
 		<div class="prettyTableColumn">{{firstName}}</div>
 		<div class="prettyTableColumn">{{lastName}}</div>
-		<div class="prettyTableColumn permissionsRadio"><input type="radio" value="r" name="{{email}}PermissionsRadio"></div>
-		<div class="prettyTableColumn permissionsRadio"><input type="radio" value="r/w" name="{{email}}PermissionsRadio"></div>
-		<div class="prettyTableColumn permissionsRadio"><input type="radio" value="r/w/a" name="{{email}}PermissionsRadio"></div>'
+		<div class="prettyTableColumn permissionsRadio readPermissionColumn"><input type="radio" value="r" name="{{email}}PermissionsRadio"></div>
+		<div class="prettyTableColumn permissionsRadio readWritePermissionColumn"><input type="radio" value="r/w" name="{{email}}PermissionsRadio"></div>
+		<div class="prettyTableColumn permissionsRadio readWriteAdminPermissionColumn"><input type="radio" value="r/w/a" name="{{email}}PermissionsRadio"></div>
+		<div class="prettyTableColumn removeMemberColumn"><img src="/img/icons/removeMember.svg" class="removeMemberImage"></div>'
 	events:
 		'change .permissionsRadio': '_handlePermissionsChange'
+		'click .removeMemberImage': '_handleRemoveMember'
 
 	initialize: () =>
 
@@ -47,4 +49,8 @@ class MemberPermissions.View extends Backbone.View
 
 	_handlePermissionsChange: (event) =>
 		permissions = $(event.target).val()
-		console.log 'need to change member permissions to: ' + permissions
+		console.log '>> need to change member permissions to: ' + permissions
+
+
+	_handleRemoveMember: () =>
+		console.log '>> need to remove member'
