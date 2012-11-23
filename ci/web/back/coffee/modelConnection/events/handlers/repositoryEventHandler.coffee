@@ -1,6 +1,6 @@
 assert = require 'assert'
 
-EventHandler = require './EventHandler'
+EventHandler = require './eventHandler'
 
 
 exports.create = (sockets) ->
