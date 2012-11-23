@@ -14,8 +14,9 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 
 
 	fetchMembersIfNecassary: () =>
-		# DON'T FETCH MEMBERS IF MEMBERS HAVE BEEN FETCHED BEFORE!!!!
-		console.log 'need to fetch members'
+		return if @memberPermissionsModels.length isnt 0
+
+		console.log '>> need to fetch members'
 
 		member1 =
 			email: 'cc.fake@email.com'
@@ -58,18 +59,25 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 	initialize: () =>
 		@model.memberPermissionsModels.on 'add', (memberPermissionsModel, collection, options) =>
 			memberPermissionView = new MemberPermissions.View model: memberPermissionsModel
-			@_insertBuildAtIndex memberPermissionView.render().el, options.index
+			@_insertMemberAtIndex memberPermissionView.render().el, options.index
 		@model.memberPermissionsModels.on 'reset', () =>
 			@$el.html @template()
 
 
 	render: () =>
 		@$el.html @template()
+		@_addCurrentMembers()
 		@model.fetchMembersIfNecassary()
 		return @
 
 
-	_insertBuildAtIndex: (memberPermissionView, index) =>
+	_addCurrentMembers: () =>
+		@model.memberPermissionsModels.each (memberPermissionsModel) =>
+			memberPermissionView = new MemberPermissions.View model: memberPermissionsModel
+			@$el.find('.permissionsTable').append memberPermissionView.render().el
+
+
+	_insertMemberAtIndex: (memberPermissionView, index) =>
 		memberPermissionRowsOffset = 2
 
 		if index is 0
