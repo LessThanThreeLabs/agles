@@ -15,6 +15,7 @@ ADMIN_SALT = 'a'*16
 
 NUM_REPOS = 3
 REPOSITORIES_PATH = 'repos'
+VALID_STATUSES = ['success', 'waiting', 'failed']
 
 
 class SchemaDataGenerator(object):
@@ -71,11 +72,11 @@ class SchemaDataGenerator(object):
 						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())))
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, merge_target="target_%d" % commit,
-						number=repos[repo_id], status=random.randint(0, 3),
+						number=repos[repo_id], status=random.choice(VALID_STATUSES),
 						start_time=int(time.time()) + random.randint(-10000, 10000),
 						end_time=int(time.time()) + random.randint(10000, 12000))
 					change_id = conn.execute(ins_change).inserted_primary_key[0]
-					ins_build = schema.build.insert().values(change_id=change_id, is_primary=True, status=random.randint(0, 3),
+					ins_build = schema.build.insert().values(change_id=change_id, is_primary=True, status=random.choice(VALID_STATUSES),
 						start_time=int(time.time()) + random.randint(-10000, 10000),
 						end_time=int(time.time()) + random.randint(10000, 12000))
 					build_id = conn.execute(ins_build).inserted_primary_key[0]

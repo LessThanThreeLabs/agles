@@ -61,7 +61,7 @@ class BuildsList.Model extends Backbone.Model
 		buildsQuery = new BuildsQuery @get('repositoryId'), @get('listType'), @get('queryString'), start, end
 		@buildsFetcher.runQuery buildsQuery, queuePolicy, (error, result) =>
 			if error? 
-				console.error 'Error when retrieving builds ' + error
+				console.error 'Error when retrieving builds: ' + error
 				return
 
 			# It's possible this is being called for an old query
@@ -72,7 +72,7 @@ class BuildsList.Model extends Backbone.Model
 			#   expecting, we must have reached the end.
 			@noMoreBuildsToFetch = (end - start > result.builds.length)
 
-			@buildModels.add result.builds
+			@buildModels.add result.builds, (model, error) => console.log error
 
 
 class BuildsList.View extends Backbone.View

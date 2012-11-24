@@ -34,11 +34,21 @@ class BuildsReadHandler extends Handler
 	# -- RETURNED --
 	# result = [<buildObjects>, ...]
 	range: (socket, args, callback) =>
-		assert.ok socket.session.userId? and args.repoId? and args.start? and args.numResults? and args.queryString?
+		assert.ok socket.session.userId? and args.repositoryId? and args.start? and args.numResults? and args.queryString?
 		userId = socket.session.userId
-		@modelRpcConnection.builds.read.query_builds userId, args.repoId, 
+		@modelRpcConnection.builds.read.query_builds userId, args.repositoryId, 
 				args.queryString, args.start, args.numResults, (error, builds) =>
 					if error?
 						callback "Couldn't query for builds"
 					else
-						callback null, builds
+						sanitizedBuilds = (@_sanitize build, args.repositoryId for build in builds)
+						callback null, sanitizedBuilds
+
+
+	_sanitize: (build, repositoryId) =>
+		id: build.id
+		repositoryId: repositoryId
+		number: build.id
+		status: build.status
+		startTime: build.start_time
+		endTime: build.end_time

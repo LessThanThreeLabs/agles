@@ -74,8 +74,6 @@ class BuildsReadHandler(ModelServerRpcHandler):
 
 		if not self._has_permissions(user_id, repo_id):
 			return []
-		if not query_string:
-			raise InvalidQueryError
 
 		query_string = "%" + query_string + "%"
 
@@ -89,13 +87,9 @@ class BuildsReadHandler(ModelServerRpcHandler):
 			)
 		)
 		query = query.order_by(build.c.id.desc()).limit(num_results).offset(
-			start_index_inclusive - 1)
+			start_index_inclusive)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			builds = map(lambda row: to_dict(row, build.columns,
 				tablename=build.name), sqlconn.execute(query))
 			return builds
-
-
-class InvalidQueryError(Exception):
-	pass

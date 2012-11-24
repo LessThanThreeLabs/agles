@@ -8,7 +8,7 @@ window.BuildsFetcher = class BuildsFetcher
 
 	runQuery: (query, queuePolicy, callback) =>
 		assert.ok query? and queuePolicy? and callback?
-
+		console.log query
 		if not @currentQuery?
 			@currentQuery = query
 			@currentCallback = callback
@@ -25,37 +25,32 @@ window.BuildsFetcher = class BuildsFetcher
 
 	_fetchBuilds: () =>
 		console.log 'fetchBuilds called!'
-		assert.ok @currentQuery? and @currentCallback?
+		assert.ok @currentQuery? and @currentQuery.repositoryId? and @currentQuery.queryString?
+		assert.ok @currentCallback?
+		
+		requestData = 
+			method: 'range'
+			args:
+		 		repositoryId: @currentQuery.repositoryId
+		 		type: @currentQuery.type
+		 		queryString: @currentQuery.queryString
+		 		start: @currentQuery.start
+		 		numResults: @currentQuery.end - @currentQuery.start
 
-		# requestData = 
-		# 	method: 'range'
-		# 	args:
-		# 		repositoryId: @currentQuery.repositoryId
-		# 		type: @currentQuery.type
-		# 		queryString: @currentQuery.queryString
-		# 		range:
-		# 			start: @currentQuery.start
-		# 			end: @currentQuery.end
-
-		# socket.emit 'builds:read', requestData, (error, buildsData) =>
-		# 	callback = @currentCallback
-		# 	@_runNextQuery()
-		# 	callback error, buildsData
-
-		setTimeout (() =>
-			console.log 'creating and returning fake builds'
-			buildsData = createFakeBuilds @currentQuery.repositoryId, @currentQuery.start, @currentQuery.end
-			result =
-				type: @currentQuery.type
-				queryString: @currentQuery.queryString
-				builds: buildsData
-
-			callback = @currentCallback
-			@_runNextQuery()
-			callback null, result
-			console.log 'returned stuff'
-			), 500
-
+		socket.emit 'builds:read', requestData, (error, buildsData) =>
+			if error?
+				callback = @currentCallback
+				@_runNextQuery()
+				callback error
+			else
+				result = 
+					type: @currentQuery.type
+					queryString: @currentQuery.queryString
+					builds: buildsData
+				callback = @currentCallback
+				@_runNextQuery()
+				console.log result
+				callback null, result
 		return true
 
 
@@ -71,27 +66,3 @@ window.BuildsFetcher = class BuildsFetcher
 window.BuildsFetcher.QueuePolicy =
 	QUEUE_IF_BUSY: 'queueIfBusy'
 	DO_NOT_QUEUE: 'doNotQueue'
-
-
-
-
-
-
-createFakeBuilds = (repositoryId, start, end) ->
-	numberOffset = Math.floor Math.random() * 10000
-	fakeBuilds = (createFakeBuild repositoryId, number, numberOffset for number in [start...end])
-	return fakeBuilds
-
-
-createFakeBuild = (repositoryId, number, numberOffset) ->
-	fakeBuild =
-		id: Math.floor Math.random() * 100000
-		repositoryId: repositoryId
-		number: number + numberOffset
-		status: getRandomStatus()
-		startTime: 'second breakfast'
-		endTime: 'pumping in da club'
-
-
-getRandomStatus = () ->
-	return if Math.random() > .35 then 'success' else 'failed'
