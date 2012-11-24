@@ -72,7 +72,9 @@ class BuildsList.Model extends Backbone.Model
 			#   expecting, we must have reached the end.
 			@noMoreBuildsToFetch = (end - start > result.builds.length)
 
-			@buildModels.add result.builds, (model, error) => console.log error
+			@buildModels.add result.builds, 
+				error: (model, error) => 
+					console.error error
 
 
 class BuildsList.View extends Backbone.View
