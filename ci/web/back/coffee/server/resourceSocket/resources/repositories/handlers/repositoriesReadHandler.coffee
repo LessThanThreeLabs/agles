@@ -16,8 +16,13 @@ class RepositoriesReadHandler extends Handler
 	# result =
 	#   EVERYTHING for now...
 	default: (socket, data, callback) =>
-		assert.ok socket.session.userId? and data.id?
+		assert.ok data.id?
 		userId = socket.session.userId
+		
+		if not userId?
+			callback "404"
+			return
+
 		@modelRpcConnection.repos.read.get_repo_from_id userId, data.id, (error, repo) =>
 			if error?
 				callback "Could not read repo"

@@ -47,7 +47,7 @@ class RepositoryHeader.Model extends Backbone.Model
 
 	_getRepositoryInformation: () =>
 		requestData = id: @get 'repositoryId'
-		socket.emit 'repositories:read', requestData, (error, data) =>
+		socket.emit 'repos:read', requestData, (error, data) =>
 			console.error error if error?
 			@set data if data?
 
