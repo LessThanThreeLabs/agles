@@ -92,7 +92,6 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 
 		build_console = database.schema.build_console
 		query = self._subtypes_query(build_id, console)
-		print query
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			subtype_to_output = {}
 			for row in sqlconn.execute(query):

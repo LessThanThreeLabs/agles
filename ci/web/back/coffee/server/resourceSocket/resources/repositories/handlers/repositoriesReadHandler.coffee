@@ -35,6 +35,19 @@ class RepositoriesReadHandler extends Handler
 					callback null, (@_sanitize repo for repo in repositories)
 
 
+	getMenuOptions: (socket, args, callback) =>
+		assert.ok socket.session.userId?
+		assert.ok args.repositoryId?
+
+		userId = socket.session.userId
+		@modelRpcConnection.repos.read.get_visible_repo_menuoptions userId, args.repositoryId, 
+			(error, menuOptions) =>
+				if error?
+					callback error
+				else
+					callback null, menuOptions
+
+
 	_sanitize: (repository) =>
 		id: repository.id
 		name: repository.name

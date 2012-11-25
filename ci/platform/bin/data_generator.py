@@ -9,9 +9,14 @@ from database import schema
 from database.engine import ConnectionFactory
 from util.permissions import RepositoryPermissions
 
+SALT = 'a'*16
+
 ADMIN_EMAIL = 'admin@admin.com'
 ADMIN_PASSWORD = 'admin123'
-ADMIN_SALT = 'a'*16
+
+USER_EMAIL = 'user@user.com'
+USER_PASSWORD = 'user123'
+
 
 NUM_REPOS = 3
 REPOSITORIES_PATH = 'repos'
@@ -25,17 +30,26 @@ class SchemaDataGenerator(object):
 	def generate(self):
 		schema.reseed_db()
 		hash = hashlib.sha512()
-		hash.update(ADMIN_SALT)
+		hash.update(SALT)
 		hash.update(ADMIN_PASSWORD.encode('utf8'))
 		ins_admin = schema.user.insert().values(
 			email="admin@admin.com",
 			first_name="admin",
 			last_name="admin",
 			password_hash=hash.hexdigest(),
-			salt=ADMIN_SALT
+			salt=SALT
 		)
+		ins_user = schema.user.insert().values(
+			email="user@user.com",
+			first_name="user",
+			last_name="user",
+			password_hash=hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).hexdigest(),
+			salt=SALT
+		)
+
 		with ConnectionFactory.get_sql_connection() as conn:
 			self.admin_id = conn.execute(ins_admin).inserted_primary_key[0]
+			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			repos = dict()
@@ -88,15 +102,16 @@ class SchemaDataGenerator(object):
 							subtype="subtype", subtype_priority=priority, console_output=self.generate_console_output())
 						conn.execute(ins_console)
 
-		self._grantall_to_admin(repo_hashes)
+		self._grantall(self.admin_id, repo_hashes, RepositoryPermissions.RWA)
+		self._grantall(self.user_id, repo_hashes, RepositoryPermissions.R)
 
-	def _grantall_to_admin(self, repo_hashes):
+	def _grantall(self, user_id, repo_hashes, permissions):
 		insert_values = []
 		for repo_hash in repo_hashes:
 			insert_values.append({
-				'user_id': self.admin_id,
+				'user_id': user_id,
 				'repo_hash': repo_hash,
-				'permissions': RepositoryPermissions.RWA
+				'permissions': permissions
 			})
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:

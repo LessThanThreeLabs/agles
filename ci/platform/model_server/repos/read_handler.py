@@ -8,7 +8,6 @@ from sqlalchemy.sql import select
 from util.database import to_dict
 from util.permissions import RepositoryPermissions
 
-
 class ReposReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposReadHandler, self).__init__("repos", "read")
@@ -98,6 +97,26 @@ class ReposReadHandler(ModelServerRpcHandler):
 		return filter(lambda row: RepositoryPermissions.has_permissions(
 			row[permission.c.permissions], RepositoryPermissions.RW), rows)
 
+	def get_visible_repo_menuoptions(self, user_id, repo_id):
+		repo = database.schema.repo
+		permission = database.schema.permission
+
+		query = repo.join(permission).select().apply_labels().where(
+			and_(
+				permission.c.user_id==user_id,
+				repo.c.id==repo_id
+			)
+		)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+
+		default_menuoptions = ['source', 'builds', 'settings']
+		if row and RepositoryPermissions.has_permissions(
+				row[permission.c.permissions], RepositoryPermissions.RWA):
+			return default_menuoptions + ['admin']
+		else:
+			return default_menuoptions
 
 	def get_writable_repo_ids(self, user_id):
 		repo = database.schema.repo
