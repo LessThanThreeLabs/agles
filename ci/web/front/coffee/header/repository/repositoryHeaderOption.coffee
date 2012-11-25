@@ -9,11 +9,17 @@ class RepositoryHeaderOption.Model extends Backbone.Model
 	initialize: () ->
 		window.globalAccount.on 'change:firstName change:lastName', () =>
 			console.log 'user logged in -- need to update repositories'
-			@set 'repositories', [
-				{name: 'Repository #1', id: 17}, 
-				{name: 'Repository #2', id: 18}, 
-				{name: 'Repository #3', id: 19}
-			]
+
+			requestData = 
+				method: 'writableRepositories'
+				args: {}
+
+			socket.emit 'repos:read', requestData, (error, repositoriesData) =>
+				if error?
+					console.log error
+				else
+					@set 'repositories', repositoriesData
+
 
 class RepositoryHeaderOption.View extends Backbone.View
 	tagName: 'div'

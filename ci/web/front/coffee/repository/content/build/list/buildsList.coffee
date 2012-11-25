@@ -3,6 +3,7 @@ window.BuildsList = {}
 
 class BuildsList.Model extends Backbone.Model
 	NUMBER_OF_BUILDS_TO_REQUEST: 100
+	noMoreBuildsToFetch: false
 	defaults:
 		repositoryId: null
 		queryString: ''
@@ -38,10 +39,10 @@ class BuildsList.Model extends Backbone.Model
 	_resetBuildsList: () =>
 		@set 'selectedBuild', null
 		@buildModels.reset()
+		@noMoreBuildsToFetch = false
 		@fetchInitialBuilds()
 
 
-	noMoreBuildsToFetch: false
 	fetchInitialBuilds: () =>
 		queuePolicy =  BuildsFetcher.QueuePolicy.QUEUE_IF_BUSY
 		@_fetchBuilds 0, @NUMBER_OF_BUILDS_TO_REQUEST, queuePolicy
@@ -55,7 +56,9 @@ class BuildsList.Model extends Backbone.Model
 
 
 	_fetchBuilds: (start, end, queuePolicy) =>
-		assert.ok start < end and queuePolicy? and not @noMoreBuildsToFetch
+		assert.ok start < end 
+		assert.ok queuePolicy? 
+		assert.ok not @noMoreBuildsToFetch
 		return if not @get('repositoryId')? or not @get('listType')?
 
 		buildsQuery = new BuildsQuery @get('repositoryId'), @get('listType'), @get('queryString'), start, end

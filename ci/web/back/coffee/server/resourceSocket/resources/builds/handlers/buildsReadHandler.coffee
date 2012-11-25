@@ -34,8 +34,12 @@ class BuildsReadHandler extends Handler
 	# -- RETURNED --
 	# result = [<buildObjects>, ...]
 	range: (socket, args, callback) =>
-		assert.ok socket.session.userId? and args.repositoryId? and args.start? and args.numResults? and args.queryString?
+		assert.ok args.repositoryId? and args.start? and args.numResults? and args.queryString?
 		userId = socket.session.userId
+		if not userId?
+			callback '404'
+			return
+			
 		@modelRpcConnection.builds.read.query_builds userId, args.repositoryId, 
 				args.queryString, args.start, args.numResults, (error, builds) =>
 					if error?
@@ -52,3 +56,4 @@ class BuildsReadHandler extends Handler
 		status: build.status
 		startTime: build.start_time
 		endTime: build.end_time
+		

@@ -8,13 +8,6 @@ exports.create = (modelRpcConnection) ->
 
 
 class RepositoriesReadHandler extends Handler
-
-	# -- GIVEN --
-	# data =
-	#   id: <integer>
-	# -- RETURNED --
-	# result =
-	#   EVERYTHING for now...
 	default: (socket, data, callback) =>
 		assert.ok data.id?
 		userId = socket.session.userId
@@ -28,4 +21,21 @@ class RepositoriesReadHandler extends Handler
 				callback "Could not read repo"
 			else
 				callback null, repo
- 
+
+
+	writableRepositories: (socket, args, callback) =>
+		userId = socket.session.userId
+		if not userId?
+			callback null, []
+		else
+			@modelRpcConnection.repos.read.get_writable_repos userId, (error, repositories) =>
+				if error?
+					callback error
+				else
+					callback null, (@_sanitize repo for repo in repositories)
+
+
+	_sanitize: (repository) =>
+		id: repository.id
+		name: repository.name
+		defaultPermissions: repository.defaultPermissions
