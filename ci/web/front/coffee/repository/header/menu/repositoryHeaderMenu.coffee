@@ -20,7 +20,9 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		@on 'change:repositoryId', () =>
 			@_updateAllowMenuOptions()
 		@on 'change:selectedMenuOptionName', () =>
-			@router.navigate 'repository/' + @get('repositoryId') + '/' + @get('selectedMenuOptionName'), trigger: true
+			urlToNavigateTo = 'repository/' + @get('repositoryId') + '/' + @get('selectedMenuOptionName')
+			if location.href.indexOf(urlToNavigateTo) is -1
+				@router.navigate urlToNavigateTo, trigger: true
 		@on 'change:url', () =>
 			@repositoryUrlTrinketModel.set 'url', @get 'url'
 

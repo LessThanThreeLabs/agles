@@ -4,20 +4,21 @@ window.RepositoryBuilds = {}
 class RepositoryBuilds.Model extends Backbone.Model
 	default:
 		repositoryId: null
+		selectedBuildId: null
 
 	initialize: () ->
 		@buildsListManagerModel = new BuildsListManager.Model repositoryId: @get 'repositoryId'
 		@buildDetailsModel = new BuildDetails.Model repositoryId: @get 'repositoryId'
 
-		@buildsListManagerModel.on 'selectedBuild', @_handleSelectedBuild
+		@buildsListManagerModel.on 'selectedBuild', (buildModel) =>
+			@set 'selectedBuildId', buildModel?.get 'id'
 
 		@on 'change:repositoryId', () =>
 			@buildsListManagerModel.set 'repositoryId', @get 'repositoryId'
 			@buildDetailsModel.set 'repositoryId', @get 'repositoryId'
 
-
-	_handleSelectedBuild: (buildModel) =>
-		@buildDetailsModel.set 'buildId', buildModel?.get('id')
+		@on 'change:selectedBuildId', () =>
+			@buildDetailsModel.set 'buildId', @get 'selectedBuildId'
 
 
 class RepositoryBuilds.View extends Backbone.View

@@ -66,6 +66,7 @@ class Main.Router extends Backbone.Router
 
 		'repository/:repositoryId': 'loadRepository'
 		'repository/:repositoryId/:repositoryMode': 'loadRepository'
+		'repository/:repositoryId/builds/:buildId': 'loadRepositoryBuild'
 
 		'create/repository': 'createRepository'
 
@@ -84,6 +85,13 @@ class Main.Router extends Backbone.Router
 			mainModel.repositoryModel.set 'repositoryId', repositoryId
 		if repositoryMode?
 			mainModel.repositoryModel.set 'repositoryMode', repositoryMode
+
+
+	loadRepositoryBuild: (repositoryId, buildId) =>
+		@loadRepository repositoryId, 'builds'
+
+		if buildId?
+			mainModel.repositoryModel.repositoryContentModel.repositoryBuildsModel.set 'selectedBuildId', buildId
 
 
 	createRepository: () =>

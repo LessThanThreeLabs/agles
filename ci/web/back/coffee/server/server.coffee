@@ -39,8 +39,9 @@ class Server
 
 		expressServer.get '/', @_handleIndexRequest
 		expressServer.get '/account', @_handleIndexRequest
-		expressServer.get '/repository/:id', @_handleIndexRequest
-		expressServer.get '/repository/:id/:view', @_handleIndexRequest
+		expressServer.get '/repository/:repositoryId', @_handleIndexRequest
+		expressServer.get '/repository/:repositoryId/:repositoryView', @_handleIndexRequest
+		expressServer.get '/repository/:repositoryId/builds/:buildId', @_handleIndexRequest
 		expressServer.get '/create/repository', @_handleIndexRequest
 
 		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
