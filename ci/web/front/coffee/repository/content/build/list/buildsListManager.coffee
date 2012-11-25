@@ -11,6 +11,8 @@ class BuildsListManager.Model extends Backbone.Model
 			@buildsListModel.set 'queryString', @buildsSearchModel.get 'queryString'
 
 		@buildsListModel = new BuildsList.Model repositoryId: @get 'repositoryId'
+		@buildsListModel.on 'change:selectedBuild', () =>
+			@trigger 'selectedBuild', @buildsListModel.get 'selectedBuild'
 
 		# TEMPORARY!!
 		@buildsListModel.set 'listType', 'all'

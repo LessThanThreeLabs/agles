@@ -6,9 +6,6 @@ class BuildDetails.Model extends Backbone.Model
 		buildId: null
 
 	initialize: () =>
-		@on 'change: buildId', () =>
-			console.log '~~ buildId changed to: ' + @get 'buildId'
-
 
 
 class BuildDetails.View extends Backbone.View
@@ -30,10 +27,7 @@ class BuildDetails.View extends Backbone.View
 
 
 	_displayBuildOutput: () =>
-		console.log 'called'
 		return if not @model.get('buildId')?
-
-		console.log 'here'
 
 		buildOutputModel = new BuildOutput.Model id: @model.get('buildId')
 		buildOutputModel.fetchBuildOutput()

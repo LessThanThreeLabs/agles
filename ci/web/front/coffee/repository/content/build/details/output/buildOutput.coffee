@@ -15,24 +15,25 @@ class BuildOutput.Model extends Backbone.Model
 
 	fetchBuildOutput: () =>
 		console.log '>> needs to fetch output text'
-		@buildOutputLineModels.reset @_createFackOutputLines
+		@buildOutputLineModels.reset @_createFakeOutputLines()
 
 
 # NOT REAL ==>
-	_createFackOutputLines: () =>
+	_createFakeOutputLines: () =>
 		return (@_createFakeLine num for num in [0...900])
 
 
 	_createFakeLine: (number) =>
-		return number: number
+		return toReturn = 
+			number: number
 			text: @_createRandomText()
 
 
 	_createRandomText: () =>
 		toReturn = ''
-		characters = 'abcdefghijklmnopqrstuvwxyz'
+		characters = 'abcdefghijklmnopqrstuvwxyz '
 
-		for num in [0...25]
+		for num in [0...80]
 			toReturn += characters.charAt Math.floor(Math.random() * characters.length)
 
 		return toReturn
@@ -60,7 +61,7 @@ class BuildOutput.View extends Backbone.View
 
 		@model.buildOutputLineModels.each (buildOutputLineModel) =>
 			buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
-			$('.buildOutputText').append buildOutputLineView.render().el
+			@$el.find('.buildOutputText').append buildOutputLineView.render().el
 
 
 	_handleAddLine: (buildOutputLineModel) =>
