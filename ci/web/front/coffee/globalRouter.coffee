@@ -55,6 +55,9 @@ class GlobalRouterModel extends Backbone.Model
 		if attributes.repositoryView? and attributes.repositoryView not in @VALID_REPOSITORY_VIEWS
 			return new Error 'Invalid repository view'
 
+		if attributes.repositoryId? and attributes.repositoryId < 0
+			return new Error 'Invalid repository id'
+
 		return
 
 

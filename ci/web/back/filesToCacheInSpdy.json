@@ -67,6 +67,7 @@
 			"/js/libs/backbone/iobind.productionModeShouldUseMinified.js",
 
 			"/js/src/globalAccount.js",
+			"/js/src/globalRouter.js",
 			"/js/src/socket.js",
 
 			"/js/src/welcome/welcome.js",

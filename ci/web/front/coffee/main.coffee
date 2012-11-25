@@ -2,11 +2,6 @@ window.Main = {}
 
 
 class Main.Model extends Backbone.Model
-	ALLOWED_MODES: ['welcome', 'account', 'repository', 'createRepository']
-
-	defaults:
-		mode: 'welcome'
-
 
 	initialize: () =>
 		@headerModel = new Header.Model()
@@ -16,19 +11,13 @@ class Main.Model extends Backbone.Model
 		@createRepositoryModel = new CreateRepository.Model()
 
 
-	validate: (attributes) =>
-		if attributes.mode not in @ALLOWED_MODES
-			return new Error 'Invalid mode'
-		return
-
-
 class Main.View extends Backbone.View
 	tagName: 'div'
 	id: 'main'
 	template: Handlebars.compile '<div class="headerContainer"></div><div class="contentContainer"></div>'
 
 	initialize: () ->
-		@model.on 'change:mode', () =>
+		window.globalRouterModel.on 'change:view', () =>
 			@_updateContent()
 
 
@@ -41,7 +30,7 @@ class Main.View extends Backbone.View
 
 
 	_updateContent: () =>
-		switch @model.get 'mode'
+		switch window.globalRouterModel.get 'view'
 			when 'welcome'
 				welcomeView = new Welcome.View model: @model.welcomeModel
 				@$el.find('.contentContainer').html welcomeView.render().el
@@ -55,53 +44,10 @@ class Main.View extends Backbone.View
 				createRepositoryView = new CreateRepository.View model: @model.createRepositoryModel
 				@$el.find('.contentContainer').html createRepositoryView.render().el
 			else	
-				console.error 'Unaccounted for mode'
-
-
-class Main.Router extends Backbone.Router
-	routes:
-		'': 'loadIndex'
-
-		'account': 'loadAccount'
-
-		'repository/:repositoryId': 'loadRepository'
-		'repository/:repositoryId/:repositoryMode': 'loadRepository'
-		'repository/:repositoryId/builds/:buildId': 'loadRepositoryBuild'
-
-		'create/repository': 'createRepository'
-
-	loadIndex: () =>
-		mainModel.set 'mode', 'welcome'
-
-
-	loadAccount: () =>
-		mainModel.set 'mode', 'account'
-		
-
-	loadRepository: (repositoryId, repositoryMode) =>
-		mainModel.set 'mode', 'repository'
-
-		if repositoryId?
-			mainModel.repositoryModel.set 'repositoryId', repositoryId
-		if repositoryMode?
-			mainModel.repositoryModel.set 'repositoryMode', repositoryMode
-
-
-	loadRepositoryBuild: (repositoryId, buildId) =>
-		@loadRepository repositoryId, 'builds'
-
-		if buildId?
-			mainModel.repositoryModel.repositoryContentModel.repositoryBuildsModel.set 'selectedBuildId', buildId
-
-
-	createRepository: () =>
-		mainModel.set 'mode', 'createRepository'
-
+				console.error 'Unaccounted for view ' + window.globalRouterModel.get 'view'
 
 
 mainModel = new Main.Model()
 
 mainView = new Main.View model: mainModel
 $('body').prepend mainView.render().el
-
-mainRouter = new Main.Router()

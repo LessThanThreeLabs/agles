@@ -8,7 +8,6 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		'settings': new RepositoryHeaderMenuOption 'settings', 'Settings', '/img/icons/settings.svg'
 		'admin': new RepositoryHeaderMenuOption 'admin', 'Admin', '/img/icons/admin.svg'
 	defaults:
-		repositoryId: null
 		menuOptions: []
 		selectedMenuOptionName: null
 		url: ''
@@ -17,27 +16,22 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		@repositoryUrlTrinketModel = new RepositoryUrlTrinket.Model()
 		@router = new Backbone.Router()
 
-		@on 'change:repositoryId', () =>
-			@_updateAllowMenuOptions()
 		@on 'change:selectedMenuOptionName', () =>
-			urlToNavigateTo = 'repository/' + @get('repositoryId') + '/' + @get('selectedMenuOptionName')
-			if location.href.indexOf(urlToNavigateTo) is -1
-				@router.navigate urlToNavigateTo, trigger: true
+			window.globalRouterModel.set 'repositoryView', @get('selectedMenuOptionName'),
+				error: (model, error) => console.error error
 		@on 'change:url', () =>
 			@repositoryUrlTrinketModel.set 'url', @get 'url'
 
-
-	validate: (attributes) =>
-		if selectedMenuOptionName? and not MENU_OPTIONS[selectedMenuOptionName]?
-			return new Error 'Invalid selected menu option name'
-		return
+		window.globalRouterModel.on 'change:repositoryId', () =>
+			@clear()
+			@_updateAllowedMenuOptions()
 
 
 	_updateAllowMenuOptions: () =>
 		requestData =
 			method: 'getMenuOptions'
 			args:
-				repositoryId: @get 'repositoryId'
+				repositoryId: window.globalRouterModel.get 'repositoryId'
 
 		socket.emit 'repos:read', requestData, (error, menuOptions) =>
 			if error?
@@ -57,6 +51,12 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 			@set('selectedMenuOptionName', result.defaultOption) if not @get('selectedMenuOptionName')?
 
 
+	validate: (attributes) =>
+		if selectedMenuOptionName? and not MENU_OPTIONS[selectedMenuOptionName]?
+			return new Error 'Invalid selected menu option name'
+		return
+
+
 class RepositoryHeaderMenu.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeaderMenu'
@@ -70,6 +70,7 @@ class RepositoryHeaderMenu.View extends Backbone.View
 		</div>'
 	events:
 		'click .repositoryMenuOption': '_handleClick'
+
 
 	initialize: () =>
 		@model.on 'change:menuOptions', @render

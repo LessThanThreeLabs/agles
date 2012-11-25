@@ -3,11 +3,9 @@ window.RepositoryHeaderBasicInformation = {}
 
 class RepositoryHeaderBasicInformation.Model extends Backbone.Model
 	default:
-		repositoryId: null
 		name: ''
 		description: ''
 
-	initialize: () =>
 
 	validate: (attributes) =>
 		if attributes.name? and attributes.name.length is 0
@@ -24,6 +22,7 @@ class RepositoryHeaderBasicInformation.View extends Backbone.View
 	className: 'repositoryHeaderBasicInformation'
 	template: Handlebars.compile '<span class="repositoryName">> {{name}}</span><br>
 			<span class="repositoryDescription">{{description}}</span>'
+
 
 	initialize: () =>
 		@model.on 'change:name', @render
