@@ -3,13 +3,49 @@ class GlobalRouterModel extends Backbone.Model
 	VALID_REPOSITORY_VIEWS: ['source', 'builds', 'settings', 'admin']
 
 	defaults:
-		view: null
+		view: 'welcome'
 
 		repositoryId: null
 		repositoryView: null
 
 		buildId: null
 		buildView: null
+
+
+	initialize: () =>
+		@on 'change', @_navigate
+
+
+	_navigate: () =>
+		switch @get 'view'
+			when 'welcome'
+				globalRouter.navigate '/', trigger: true
+			when 'account'
+				globalRouter.navigate '/account', trigger: true
+			when 'repository'
+				@_navigateToRepository()
+			when 'createRepository'
+				globalRouter.navigate '/create/repository', trigger: true
+			else
+				console.error 'Unaccounted for view ' + @get 'view'
+
+
+	_navigateToRepository: () =>
+		assert.ok @get('view') is 'repository' and @get('repositoryId')?
+
+		url = '/repository/' + @get 'repositoryId'
+
+		if @get('repositoryView')?
+			url += '/' + @get 'repositoryView'
+
+			if @get('buildId')?
+				assert.ok @get('repositoryView') is 'builds'
+				url += '/' + @get 'buildId'
+
+				if @get('buildView')?
+					url += '/' + @get 'buildView'
+
+		globalRouter.navigate url, trigger: true
 
 
 	validate: (attributes) =>
@@ -34,6 +70,7 @@ class GlobalRouter extends Backbone.Router
 		'repository/:repositoryId/builds/:buildId/:buildView': 'loadRepositoryBuild'
 
 		'create/repository': 'createRepository'
+
 
 	loadIndex: () =>
 		attributesToSet =
