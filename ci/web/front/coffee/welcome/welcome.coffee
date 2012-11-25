@@ -9,7 +9,7 @@ class Welcome.View extends Backbone.View
 	tagName: 'div'
 	className: 'welcome'
 	template: Handlebars.compile '<div class="welcomeContents">
-			<div class="description">Tentacles!</div>
+			<div class="description">Hello!</div>
 			<div>
 				<img class="welcomeImage" src="/img/awesomeFace.png">
 			</div>
