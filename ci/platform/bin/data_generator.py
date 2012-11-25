@@ -15,7 +15,7 @@ ADMIN_SALT = 'a'*16
 
 NUM_REPOS = 3
 REPOSITORIES_PATH = 'repos'
-VALID_STATUSES = ['success', 'waiting', 'failed']
+VnALID_STATUSES = ['success', 'waiting', 'failed']
 
 
 class SchemaDataGenerator(object):
