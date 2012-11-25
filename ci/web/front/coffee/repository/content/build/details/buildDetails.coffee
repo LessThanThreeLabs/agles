@@ -3,21 +3,24 @@ window.BuildDetails = {}
 
 class BuildDetails.Model extends Backbone.Model
 	defaults:
-		build: null
+		buildId: null
 
 	initialize: () =>
+		@on 'change: buildId', () =>
+			console.log '~~ buildId changed to: ' + @get 'buildId'
+
 
 
 class BuildDetails.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildDetails'
 	template: Handlebars.compile '<div class="buildDetailsContents">
-			<div class="buildDetailsHeader">Console Output</div>
+			<div class="buildDetailsHeader">Console Output I HATE THIS HEADER</div>
 			<div class="buildDetailsPanel"></div>
 		</div>'
 
 	initialize: () =>
-		@model.on 'change:build', @render
+		@model.on 'change:buildId', @render
 
 
 	render: () =>
@@ -27,10 +30,13 @@ class BuildDetails.View extends Backbone.View
 
 
 	_displayBuildOutput: () =>
-		return if not @model.get('build')?
+		console.log 'called'
+		return if not @model.get('buildId')?
 
-		# buildOutputModel = new BuildOutput.Model id: @model.get('build').get('id')
-		# buildOutputModel.fetchBuildOutput()
+		console.log 'here'
 
-		# buildOutputView = new BuildOutput.View model: buildOutputModel
-		# @$el.find('.buildDetailsPanel').append buildOutputView.render().el
+		buildOutputModel = new BuildOutput.Model id: @model.get('buildId')
+		buildOutputModel.fetchBuildOutput()
+
+		buildOutputView = new BuildOutput.View model: buildOutputModel
+		@$el.find('.buildDetailsPanel').html buildOutputView.render().el

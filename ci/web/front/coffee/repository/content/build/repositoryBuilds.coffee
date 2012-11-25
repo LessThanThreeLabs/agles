@@ -17,7 +17,7 @@ class RepositoryBuilds.Model extends Backbone.Model
 
 
 	_handleSelectedBuild: (buildModel) =>
-		@buildDetailsModel.set 'build', buildModel
+		@buildDetailsModel.set 'buildId', buildModel.get 'id'
 
 
 class RepositoryBuilds.View extends Backbone.View

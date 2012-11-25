@@ -2,6 +2,9 @@ window.BuildOutputLine = {}
 
 
 class BuildOutputLine.Model extends Backbone.Model
+	defaults:
+		number: null
+		text: null
 
 	initialize: () =>
 

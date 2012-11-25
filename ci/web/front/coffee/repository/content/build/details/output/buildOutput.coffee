@@ -3,6 +3,8 @@ window.BuildOutput = {}
 
 class BuildOutput.Model extends Backbone.Model
 	urlRoot: 'buildOutputs'
+	defaults:
+		buildId: null
 
 	initialize: () =>
 		@buildOutputLineModels = new Backbone.Collection()
@@ -10,26 +12,31 @@ class BuildOutput.Model extends Backbone.Model
 		@buildOutputLineModels.comparator = (buildOutputLineModel) =>
 			return buildOutputLineModel.get 'number'
 
-		@buildOutputLineModels.on 'add', (buildOutputLineModel, collection, options) =>
-			@trigger 'addLine', buildOutputLineModel
-		@buildOutputLineModels.on 'reset', (collection, options) =>
-			@trigger 'addLines', collection
-
 
 	fetchBuildOutput: () =>
-		socket.emit 'buildOutputs:read', @get('id'), (error, buildOutputData) =>
-			throw error if error?
+		console.log '>> needs to fetch output text'
+		@buildOutputLineModels.reset @_createFackOutputLines
 
-			# Create and add all of the models at once for performance reasons.
-			lineCounter = 0
-			buildOutputLineModelAttributes = []
-			for buildOutputLine in buildOutputData.text
-				buildOutputLineModelAttributes.push
-					number: lineCounter++
-					text: @get('id') + ' ' + buildOutputLine
-				# break if lineCounter is 20
 
-			@buildOutputLineModels.reset buildOutputLineModelAttributes
+# NOT REAL ==>
+	_createFackOutputLines: () =>
+		return (@_createFakeLine num for num in [0...900])
+
+
+	_createFakeLine: (number) =>
+		return number: number
+			text: @_createRandomText()
+
+
+	_createRandomText: () =>
+		toReturn = ''
+		characters = 'abcdefghijklmnopqrstuvwxyz'
+
+		for num in [0...25]
+			toReturn += characters.charAt Math.floor(Math.random() * characters.length)
+
+		return toReturn
+# <== NOT REAL
 
 
 class BuildOutput.View extends Backbone.View
@@ -38,34 +45,30 @@ class BuildOutput.View extends Backbone.View
 	template: Handlebars.compile '<div class="buildOutputText"></div>'
 
 	initialize: () =>
-		@model.on 'addLine', @_handleAddLine
-		@model.on 'addLines', @_addOutputLines
+		@model.buildOutputLineModels.on 'addLine', @_handleAddLine
+		@model.buildOutputLineModels.on 'reset', @_initializeOutputText
 
 
 	render: () =>
 		@$el.html @template()
-		@_addOutputLines()
+		@_initializeOutputText()
 		return @
 
 
-	_addOutputLines: () =>
+	_initializeOutputText: () =>
 		$('.buildOutputText').empty()
-
-
-
-
 
 		@model.buildOutputLineModels.each (buildOutputLineModel) =>
 			buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
 			$('.buildOutputText').append buildOutputLineView.render().el
-			# $('.buildOutputText').append 'hello<br>'
 
 
 	_handleAddLine: (buildOutputLineModel) =>
-		buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
-		@_insertBuildOutputLineAtIndex buildOutputLineView.render().el, buildOutputLineModel.get 'number'
+		console.log 'need to do something here...'
+		# buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
+		# @_insertBuildOutputLineAtIndex buildOutputLineView.render().el, buildOutputLineModel.get 'number'
 
 
-	_insertBuildOutputLineAtIndex: (buildOutputLineView, index) =>
-		if index == 0 then $('.buildOutputText').prepend buildOutputLineView
-		else $('.buildOutputText .buildOutputLine:nth-child(' + index + ')').after buildOutputLineView
+	# _insertBuildOutputLineAtIndex: (buildOutputLineView, index) =>
+	# 	if index == 0 then $('.buildOutputText').prepend buildOutputLineView
+	# 	else $('.buildOutputText .buildOutputLine:nth-child(' + index + ')').after buildOutputLineView
