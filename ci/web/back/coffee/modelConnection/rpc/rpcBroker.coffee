@@ -51,12 +51,8 @@ class RpcBroker
 
 		console.log 'INSTEAD OF FROMID, CAN WE JUST GET THE CLIENT INFORMATION, MAYBE?'
 
-		console.log 'sent: ' + JSON.stringify msgpack.unpack message
-
 
 	_handleResponse: (message, headers, deliveryInformation) =>
-		console.log 'received: ' + JSON.stringify msgpack.unpack message.data
-
 		messageId = deliveryInformation.correlationId
 		data = msgpack.unpack message.data
 
