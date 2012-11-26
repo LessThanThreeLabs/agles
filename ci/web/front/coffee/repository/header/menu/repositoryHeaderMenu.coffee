@@ -28,7 +28,7 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 			@_updateAllowedMenuOptions()
 
 
-	_updateAllowMenuOptions: () =>
+	_updateAllowedMenuOptions: () =>
 		requestData =
 			method: 'getMenuOptions'
 			args:
