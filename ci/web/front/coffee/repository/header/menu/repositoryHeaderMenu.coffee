@@ -40,8 +40,8 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 				return
 
 			result =
-				menuOptions: menuOptions
-				defaultOption: 'builds'
+				menuOptions: menuOptions.options
+				defaultOption: menuOptions.default
 			assert.ok result.defaultOption in result.menuOptions
 
 			allowedOptions = result.menuOptions.map (option) =>

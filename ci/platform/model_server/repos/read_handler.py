@@ -111,12 +111,15 @@ class ReposReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
-		default_menuoptions = ['source', 'builds', 'settings']
+		options = {
+			'default': 'builds',
+			'options': ['source', 'builds', 'settings']
+		}
+
 		if row and RepositoryPermissions.has_permissions(
 				row[permission.c.permissions], RepositoryPermissions.RWA):
-			return default_menuoptions + ['admin']
-		else:
-			return default_menuoptions
+			options['options'].append('admin')
+		return options
 
 	def get_writable_repo_ids(self, user_id):
 		repo = database.schema.repo
