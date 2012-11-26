@@ -54,21 +54,13 @@ class BuildVerifier(object):
 		"""Provisions the contained vagrant wrapper for analysis and test running"""
 		self._get_output_handler(console_appender, ConsoleType.Setup).declare_commands(["chef"])
 		output_handler = self._get_output_handler(console_appender, ConsoleType.Setup, "chef")
-		returncode = self.vagrant_wrapper.provision(output_handler=output_handler,
-			role="verification_box_run").returncode
+		returncode = self.vagrant_wrapper.provision(role="verification_box_run",
+			output_handler=output_handler).returncode
 		if returncode != 0:
 			raise VerificationException("vm provisioning", returncode=returncode)
 
 	def _rollback_vagrant_wrapper(self):
-		returncode = self.vagrant_wrapper.sandbox_rollback().returncode
-		if returncode != 0:
-			print "Failed to roll back vm"  # Should be logged somewhere
-		returncode = self.vagrant_wrapper.halt(force=True).returncode
-		if returncode != 0:
-			print "Failed to shut down vm"  # Should be logged somewhere
-		returncode = self.vagrant_wrapper.up(provision=False).returncode
-		if returncode != 0:
-			print "Failed to re-launch vm"  # Should be logged somewhere
+		self.vagrant_wrapper.safe_rollback()
 
 	def get_verification_configurations(self):
 		"""Reads in the yaml config file contained in the checked

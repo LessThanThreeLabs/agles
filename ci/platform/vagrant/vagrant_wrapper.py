@@ -25,7 +25,7 @@ class VagrantWrapper(object):
 	def destroy(self, output_handler=None):
 		return self.vagrant.destroy(output_handler=output_handler)
 
-	def provision(self, output_handler=None, role=None):
+	def provision(self, role=None, output_handler=None):
 		self.vagrant.vagrant_env["AGLES_ROLE"] = role
 		results = self.vagrant.provision(output_handler=output_handler)
 		del self.vagrant.vagrant_env["AGLES_ROLE"]
@@ -33,6 +33,9 @@ class VagrantWrapper(object):
 
 	def ssh_call(self, command, output_handler=None):
 		return self.vagrant.ssh_call(command, output_handler=output_handler)
+
+	def vbox_call(self, command, output_handler=None):
+		return self.vagrant.vbox_call(command, output_handler=output_handler)
 
 	def sandbox_on(self, output_handler=None):
 		return self.vagrant.sandbox_on(output_handler=output_handler)
@@ -53,12 +56,13 @@ class VagrantWrapper(object):
 			self.teardown()
 			print "Spawning vm at " + self.get_vm_directory()
 			if self.init(output_handler).returncode != 0:
-				raise VagrantException(self.vagrant, "Couldn't initialize vagrant")
+				raise VagrantException(self.vagrant, "Failed to initialize vagrant")
 			if self.up(False, output_handler).returncode != 0:
-				raise VagrantException(self.vagrant, "Couldn't start vagrant vm")
-		self.ssh_call("sleep 2")  # Expected to validate ssh daemon before snapshotting
+				raise VagrantException(self.vagrant, "Failed to start vagrant vm")
+		if self.vbox_call("/usr/bin/sudo dhclient").returncode != 0:
+			raise VagrantException(self.vagrant, "Failed to verify DHCP server on vm")
 		if self.sandbox_on(output_handler).returncode != 0:
-			raise VagrantException(self.vagrant, "Couldn't initialize sandbox on vm")
+			raise VagrantException(self.vagrant, "Failed to initialize sandbox on vm")
 		print "Launched vm at: " + self.get_vm_directory()
 
 	def teardown(self, output_handler=None):
@@ -66,8 +70,14 @@ class VagrantWrapper(object):
 		if os.access(vagrantfile, os.F_OK):
 			print "Tearing down existing vm at " + self.get_vm_directory()
 			if self.destroy(output_handler).returncode != 0:
-				raise VagrantException(self, "Couldn't tear down existing vm")
+				raise VagrantException(self, "Failed to tear down existing vm")
 			os.remove(vagrantfile)
+
+	def safe_rollback(self, output_handler=None):
+		if self.sandbox_rollback(output_handler).returncode != 0:
+			raise VagrantException(self.vagrant, "Failed to roll back vm")
+		if self.vbox_call("/usr/bin/sudo dhclient").returncode != 0:
+			raise VagrantException(self.vagrant, "Failed to verify DHCP server on vm")
 
 
 class VagrantException(Exception):

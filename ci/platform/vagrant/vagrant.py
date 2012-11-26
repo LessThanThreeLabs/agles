@@ -4,6 +4,7 @@
 """
 
 import collections
+import json
 import os
 import re
 
@@ -51,6 +52,13 @@ class Vagrant(object):
 
 	def ssh_call(self, command, output_handler=None):
 		return self._vagrant_call("ssh", "-c", command, output_handler=output_handler)
+
+	def vbox_call(self, command, output_handler=None):
+		vbox_id = self._get_vbox_id()
+		return self._vagrant_call("VBoxManage", "guestcontrol", vbox_id, "exec",
+			"--username", "vagrant", "--password", "vagrant",
+			"--wait-stdout", "--wait-stderr",
+			*command.split())
 
 	def sandbox_on(self, output_handler=None):
 		return self._vagrant_call("sandbox", "on", output_handler=output_handler)
@@ -101,6 +109,10 @@ class Vagrant(object):
 	def _get_vagrant_env(self):
 		vagrant_env = os.environ.copy()
 		return vagrant_env
+
+	def _get_vbox_id(self):
+		with open(os.path.join(self.vm_directory, ".vagrant")) as json_file:
+			return json.load(json_file)["active"]["default"]
 
 
 VagrantResults = collections.namedtuple(
