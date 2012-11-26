@@ -8,6 +8,7 @@ from kombu.connection import Connection
 from model_server.events_broker import EventsBroker
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.rabbit import connection_info
+from sqlalchemy import select
 from sqlalchemy.sql import func
 
 
@@ -36,15 +37,15 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		prev_change_number = 0
 
-		repo_id_query = commit.select().where(id==commit_id)
+		repo_hash_query = commit.select().where(commit.c.id==commit_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			commit_result = sqlconn.execute(repo_id_query).first()
+			commit_result = sqlconn.execute(repo_hash_query).first()
 			if commit_result:
-				repo_id = commit_result[commit.c.repo_id]
-				change_number_query = func.max(change.c.number).join(commit).filter(repo_id==repo_id)
+				repo_hash = commit_result[commit.c.repo_hash]
+				change_number_query = select([func.max(change.c.number)], commit.c.repo_hash==repo_hash, [change, commit])
 				max_change_number_result = sqlconn.execute(change_number_query).first()
 				if max_change_number_result:
-					prev_change_number = max_change_number_result[change.c.number]
+					prev_change_number = max_change_number_result[0]
 			change_number = prev_change_number + 1
 			ins = change.insert().values(commit_id=commit_id, merge_target=merge_target,
 				number=change_number, status=BuildStatus.QUEUED)
