@@ -5,8 +5,6 @@ class BuildsSearch.Model extends Backbone.Model
 	defaults:
 		queryString: ''
 
-	initialize: () =>
-
 
 class BuildsSearch.View extends Backbone.View
 	tagName: 'div'

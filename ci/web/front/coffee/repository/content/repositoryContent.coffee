@@ -12,16 +12,14 @@ class RepositoryContent.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryContent'
 
+
 	initialize: () =>
-		window.globalRouterModel.on 'change:repositoryView', @_renderCurrentView
+		window.globalRouterModel.on 'change:repositoryView', @render
 
 
 	render: () =>
-		@_renderCurrentView()
-		return @
+		@$el.html '&nbsp'
 
-
-	_renderCurrentView: () =>
 		switch window.globalRouterModel.get 'repositoryView'
 			when 'builds'
 				repositoryBuildsView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
@@ -32,4 +30,6 @@ class RepositoryContent.View extends Backbone.View
 			when null
 				# repository view hasn't been selected yet
 			else
-				console.error 'Unaccounted for mode ' + window.globalRouterModel.get 'repositoryView'
+				console.error 'Unaccounted for view ' + window.globalRouterModel.get 'repositoryView'
+
+		return @

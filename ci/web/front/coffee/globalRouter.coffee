@@ -1,6 +1,7 @@
 class GlobalRouterModel extends Backbone.Model
 	VALID_VIEWS: ['welcome', 'account', 'repository', 'createRepository']
 	VALID_REPOSITORY_VIEWS: ['source', 'builds', 'settings', 'admin']
+	VALID_BUILD_VIEWS: ['information', 'compilation', 'test']
 
 	defaults:
 		view: 'welcome'
@@ -57,6 +58,9 @@ class GlobalRouterModel extends Backbone.Model
 
 		if attributes.repositoryId? and attributes.repositoryId < 0
 			return new Error 'Invalid repository id'
+
+		if attributes.buildView? and attributes.buildView not in @VALID_BUILD_VIEWS
+			return new Error "Invalid build view"
 
 		return
 
