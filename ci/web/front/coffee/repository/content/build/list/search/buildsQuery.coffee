@@ -1,3 +1,3 @@
 window.BuildsQuery = class BuildsQuery
-	constructor: (@repositoryId, @type, @queryString, @start, @end) ->
-		assert.ok @repositoryId? and @type? and @queryString? and @start? and @end?
+	constructor: (@repositoryId, @queryString, @startNumber, @numberToRetrieve) ->
+		assert.ok @repositoryId? and @queryString? and @startNumber? and @numberToRetrieve?

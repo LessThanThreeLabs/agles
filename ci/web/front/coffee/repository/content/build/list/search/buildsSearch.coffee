@@ -16,12 +16,19 @@ class BuildsSearch.View extends Backbone.View
 		'blur .buildsSearchField': '_handleKeyDown'
 		'keyup .buildsSearchField': '_handleKeyDown'
 
+
 	initialize: () =>
+		@model.on 'change:queryString', @_syncModelToView
+
 
 	render: () =>
 		@$el.html @template()
-		$('.buildsSearchField').val @model.get 'queryString'
+		@_syncModelToView()
 		return @
+
+
+	_syncModelToView: () =>
+		$('.buildsSearchField').val @model.get 'queryString'
 
 
 	_handleKeyDown: (event) =>

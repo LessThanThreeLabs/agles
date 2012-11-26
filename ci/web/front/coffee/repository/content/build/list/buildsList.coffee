@@ -5,10 +5,8 @@ class BuildsList.Model extends Backbone.Model
 	NUMBER_OF_BUILDS_TO_REQUEST: 100
 	noMoreBuildsToFetch: false
 	defaults:
-		repositoryId: null
 		queryString: ''
-		listType: null
-		selectedBuild: null
+
 
 	initialize: () ->
 		@buildsFetcher = new BuildsFetcher()
@@ -18,29 +16,32 @@ class BuildsList.Model extends Backbone.Model
 		@buildModels.comparator = (buildModel) =>
 			return -1.0 * buildModel.get 'number'
 
-		@buildModels.on 'change:selected', (buildModel) =>
-			if buildModel.get 'selected'
-				@_deselectAllOtherBuildModels buildModel
-				@set 'selectedBuild', buildModel
-			else
-				@set 'selectedBuild', null
+		@buildModels.on 'change:selected', @_handleBuildSelection
 
-		@on 'change:queryString change:listType change:repositoryId', @_resetBuildsList
+		@on 'change:queryString', () =>
+			@_resetBuildsList()
+			@fetchInitialBuilds()
+		window.globalRouterModel.on 'change:repositoryId', () =>
+			@_resetBuildsList()
 
-		@fetchInitialBuilds()
+
+	_handleBuildSelection: (buildModel) =>
+		if buildModel.get 'selected'
+			@_deselectAllOtherBuildModels buildModel
+			window.globalRouterModel.set 'buildId', buildModel.get 'id'
+		else
+			window.globalRouterModel.set 'buildId', null
 
 
 	_deselectAllOtherBuildModels: (buildModelToExclude) =>
 		@buildModels.each (otherBuildModel) =>
-			if otherBuildModel.id isnt buildModelToExclude.id
+			if otherBuildModel.get('id') isnt buildModelToExclude.get('id')
 				otherBuildModel.set 'selected', false
 
 
 	_resetBuildsList: () =>
-		@set 'selectedBuild', null
-		@buildModels.reset()
 		@noMoreBuildsToFetch = false
-		@fetchInitialBuilds()
+		@buildModels.reset()
 
 
 	fetchInitialBuilds: () =>
@@ -52,28 +53,24 @@ class BuildsList.Model extends Backbone.Model
 		return if @noMoreBuildsToFetch
 
 		queuePolicy =  BuildsFetcher.QueuePolicy.DO_NOT_QUEUE
-		@_fetchBuilds @buildModels.length, @buildModels.length + @NUMBER_OF_BUILDS_TO_REQUEST, queuePolicy
+		@_fetchBuilds @buildModels.length, @NUMBER_OF_BUILDS_TO_REQUEST, queuePolicy
 
 
-	_fetchBuilds: (start, end, queuePolicy) =>
-		assert.ok start < end 
-		assert.ok queuePolicy? 
-		assert.ok not @noMoreBuildsToFetch
-		return if not @get('repositoryId')? or not @get('listType')?
+	_fetchBuilds: (startNumber, numberToRetrieve, queuePolicy) =>
+		assert.ok startNumber >= 0 and numberToRetrieve > 0 and queuePolicy? and not @noMoreBuildsToFetch
 
-		buildsQuery = new BuildsQuery @get('repositoryId'), @get('listType'), @get('queryString'), start, end
+		buildsQuery = new BuildsQuery window.globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
 		@buildsFetcher.runQuery buildsQuery, queuePolicy, (error, result) =>
-			if error? 
-				console.error 'Error when retrieving builds: ' + error
+			if error?
+				console.error error
 				return
 
 			# It's possible this is being called for an old query
-			return if result.type isnt @get 'listType'
 			return if result.queryString isnt @get 'queryString'
 
 			# If we didn't receive as many builds as we were 
 			#   expecting, we must have reached the end.
-			@noMoreBuildsToFetch = (end - start > result.builds.length)
+			@noMoreBuildsToFetch = result.builds.length < numberToRetrieve
 
 			@buildModels.add result.builds, 
 				error: (model, error) => 
@@ -88,18 +85,14 @@ class BuildsList.View extends Backbone.View
 		'scroll': '_scrollHandler'
 
 	initialize: () =>
-		@model.buildModels.on 'add', (buildModel, collection, options) =>
-			buildView = new Build.View model: buildModel
-			@_insertBuildAtIndex buildView.render().el, options.index
+		@model.buildModels.on 'add', @_handleAddedBuild
 		@model.buildModels.on 'reset', () =>
 			@$el.empty()
 
 
 	render: () =>
 		@$el.html @template()
-		@model.buildModels.each (buildModel) =>
-			buildView = new Build.View model: buildModel
-			@$el.append buildView.render().el
+		@model.fetchInitialBuilds()
 		return @
 
 
@@ -107,6 +100,11 @@ class BuildsList.View extends Backbone.View
 		heightBeforeFetchingMoreBuilds = 200
 		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreBuilds > @el.scrollHeight
 			@model.fetchMoreBuildsDoNotQueue()
+
+
+	_handleAddedBuild: (buildModel, collection, options) =>
+		buildView = new Build.View model: buildModel
+		@_insertBuildAtIndex buildView.render().el, options.index
 
 
 	_insertBuildAtIndex: (buildView, index) =>

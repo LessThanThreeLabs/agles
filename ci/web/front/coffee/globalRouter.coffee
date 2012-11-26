@@ -100,7 +100,7 @@ class GlobalRouter extends Backbone.Router
 	loadRepository: (repositoryId, repositoryView) =>
 		attributesToSet =
 			view: 'repository'
-			repositoryId: repositoryId ? null
+			repositoryId: if isNaN(parseInt(repositoryId)) then null else parseInt(repositoryId)
 			repositoryView: repositoryView ? null
 			buildId: null
 			buildView: null
@@ -111,9 +111,9 @@ class GlobalRouter extends Backbone.Router
 	loadRepositoryBuild: (repositoryId, buildId, buildView) =>
 		attributesToSet =
 			view: 'repository'
-			repositoryId: repositoryId ? null
+			repositoryId: if isNaN(parseInt(repositoryId)) then null else parseInt(repositoryId)
 			repositoryView: 'builds'
-			buildId: buildId ? null
+			buildId: if isNaN(parseInt(buildId)) then null else parseInt(buildId)
 			buildView: buildView ? null
 		globalRouterModel.set attributesToSet, 
 			error: (model, error) => console.error error

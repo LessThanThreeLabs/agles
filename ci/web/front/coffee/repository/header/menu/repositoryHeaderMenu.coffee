@@ -17,8 +17,9 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		@router = new Backbone.Router()
 
 		@on 'change:selectedMenuOptionName', () =>
-			window.globalRouterModel.set 'repositoryView', @get('selectedMenuOptionName'),
-				error: (model, error) => console.error error
+			if @get('selectedMenuOptionName')?
+				window.globalRouterModel.set 'repositoryView', @get('selectedMenuOptionName'),
+					error: (model, error) => console.error error
 		@on 'change:url', () =>
 			@repositoryUrlTrinketModel.set 'url', @get 'url'
 

@@ -8,14 +8,12 @@ window.BuildsFetcher = class BuildsFetcher
 
 	runQuery: (query, queuePolicy, callback) =>
 		assert.ok query? and queuePolicy? and callback?
-		console.log query
 		if not @currentQuery?
 			@currentQuery = query
 			@currentCallback = callback
 			@_fetchBuilds()
 			return true
 		else if queuePolicy is BuildsFetcher.QueuePolicy.QUEUE_IF_BUSY
-			console.log 'queued'
 			@nextQuery = query
 			@nextCallback = callback
 			return true
@@ -24,7 +22,6 @@ window.BuildsFetcher = class BuildsFetcher
 
 
 	_fetchBuilds: () =>
-		console.log 'fetchBuilds called!'
 		assert.ok @currentQuery? and @currentQuery.repositoryId? and @currentQuery.queryString?
 		assert.ok @currentCallback?
 		
@@ -32,10 +29,9 @@ window.BuildsFetcher = class BuildsFetcher
 			method: 'range'
 			args:
 		 		repositoryId: @currentQuery.repositoryId
-		 		type: @currentQuery.type
 		 		queryString: @currentQuery.queryString
-		 		start: @currentQuery.start
-		 		numResults: @currentQuery.end - @currentQuery.start
+		 		start: @currentQuery.startNumber
+		 		numResults: @currentQuery.numberToRetrieve
 
 		socket.emit 'builds:read', requestData, (error, buildsData) =>
 			if error?
@@ -44,14 +40,11 @@ window.BuildsFetcher = class BuildsFetcher
 				callback error
 			else
 				result = 
-					type: @currentQuery.type
 					queryString: @currentQuery.queryString
 					builds: buildsData
 				callback = @currentCallback
 				@_runNextQuery()
-				console.log result
 				callback null, result
-		return true
 
 
 	_runNextQuery: () =>

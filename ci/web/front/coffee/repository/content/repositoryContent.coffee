@@ -2,17 +2,10 @@ window.RepositoryContent = {}
 
 
 class RepositoryContent.Model extends Backbone.Model
-	default:
-		repositoryId: null
-		mode: null
 
 	initialize: () ->
-		@repositoryBuildsModel = new RepositoryBuilds.Model repositoryId: @get 'repositoryId'
-		@repositoryAdminModel = new RepositoryAdmin.Model repositoryId: @get 'repositoryId'
-
-		@on 'change:repositoryId', () =>
-			@repositoryBuildsModel.set 'repositoryId', @get 'repositoryId'
-			@repositoryAdminModel.set 'repositoryId', @get 'repositoryId'
+		@repositoryBuildsModel = new RepositoryBuilds.Model()
+		@repositoryAdminModel = new RepositoryAdmin.Model()
 
 
 class RepositoryContent.View extends Backbone.View
@@ -20,7 +13,7 @@ class RepositoryContent.View extends Backbone.View
 	className: 'repositoryContent'
 
 	initialize: () =>
-		@model.on 'change:mode', @render
+		window.globalRouterModel.on 'change:repositoryView', @_renderCurrentView
 
 
 	render: () =>
@@ -29,12 +22,14 @@ class RepositoryContent.View extends Backbone.View
 
 
 	_renderCurrentView: () =>
-		switch @model.get 'mode'
+		switch window.globalRouterModel.get 'repositoryView'
 			when 'builds'
 				repositoryBuildsView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
 				@$el.html repositoryBuildsView.render().el
 			when 'admin'
 				repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
 				@$el.html repositoryAdminView.render().el
+			when null
+				# repository view hasn't been selected yet
 			else
-				console.error 'Unaccounted for mode ' + @model.get 'mode' if @model.get('mode')?
+				console.error 'Unaccounted for mode ' + window.globalRouterModel.get 'repositoryView'

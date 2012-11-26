@@ -2,23 +2,15 @@ window.BuildsListManager = {}
 
 
 class BuildsListManager.Model extends Backbone.Model
-	default:
-		repositoryId: null
 
 	initialize: () =>
 		@buildsSearchModel = new BuildsSearch.Model()
 		@buildsSearchModel.on 'change:queryString', () =>
 			@buildsListModel.set 'queryString', @buildsSearchModel.get 'queryString'
 
-		@buildsListModel = new BuildsList.Model repositoryId: @get 'repositoryId'
-		@buildsListModel.on 'change:selectedBuild', () =>
-			@trigger 'selectedBuild', @buildsListModel.get 'selectedBuild'
-
-		# TEMPORARY!!
-		@buildsListModel.set 'listType', 'all'
-
-		@on 'change:repositoryId', () =>
-			@buildsListModel.set 'repositoryId', @get 'repositoryId'
+		@buildsListModel = new BuildsList.Model()
+		@buildsListModel.on 'change:queryString', () =>
+			@buildsSearchModel.set 'queryString', @buildsListModel.get 'queryString'
 
 
 class BuildsListManager.View extends Backbone.View

@@ -9,6 +9,12 @@ class Build.Model extends Backbone.Model
 		status: 'waiting'
 		selected: false
 
+
+	initialize: () =>
+		if window.globalRouterModel.get('buildId') is @get('id')
+			@set 'selected', true
+
+
 	toggleSelected: () =>
 		@set 'selected', not @get 'selected'
 
