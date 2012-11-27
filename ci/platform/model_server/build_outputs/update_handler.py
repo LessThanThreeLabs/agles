@@ -32,10 +32,35 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		:param type: The console type we are appending to.
 		:param subtype: The console subtype we are appending to.
 		"""
+		build_console = schema.build_console
+		query = build_console.select().where(
+			and_(
+				build_console.c.build_id==build_id,
+				build_console.c.type==type,
+				build_console.c.subtype==subtype,
+			)
+		)
 
-		redis_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
-		redis_conn = ConnectionFactory.get_redis_connection()
-		redis_conn.hset(redis_key, line_num, line)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+			if row:
+				line = row[build_console.c.console_output] + "\n" + line
+				delete = build_console.delete().where(build_console.c.id==row[build_console.c.id])
+				sqlconn.execute(delete)
+
+			ins = build_console.insert().values(
+				build_id=build_id,
+				type=type,
+				subtype=subtype,
+				console_output=line,
+				subtype_priority=1,
+			)
+			sqlconn.execute(ins)
+
+
+		#redis_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
+		#redis_conn = ConnectionFactory.get_redis_connection()
+		#redis_conn.hset(redis_key, line_num, line)
 
 	def _get_priority(self, redis_conn, build_id, type, subtype):
 		type_key = REDIS_TYPE_KEY % (build_id, type)
@@ -65,7 +90,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		:param type: The console type we are flushing.
 		:param subtype: The console subtype we are flushing.
 		"""
-		build_console = schema.build_console
+		"""build_console = schema.build_console
 
 		redis_conn = ConnectionFactory.get_redis_connection()
 		subtype_priority = self._get_priority(
@@ -98,3 +123,6 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(statement)
 		self._remove_tmpdata(redis_conn, build_id, type, subtype)
+		"""
+		# TODO: REFACTOR ALL THIS SHIT
+		pass

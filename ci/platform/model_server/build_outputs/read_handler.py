@@ -1,11 +1,14 @@
 import database.schema
 
+from collections import defaultdict
+
 from sqlalchemy import and_
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from model_server.build_outputs import REDIS_TYPE_KEY, parse_subtype
 from util.permissions import RepositoryPermissions
+from util.database import to_dict
 
 class BuildOutputsReadHandler(ModelServerRpcHandler):
 	def __init__(self):
@@ -79,6 +82,30 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 				[(row[build_console.c.subtype], row[build_console.c.priority])
 					for row in sqlconn.execute(query)]
 			)
+
+	# this is a hack
+	def majortypes(self, user_id, build_id):
+		build_console = database.schema.build_console
+
+		query = build_console.select().where(
+			build_console.c.build_id==build_id
+		)
+
+		result = defaultdict(list)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			for row in sqlconn.execute(query):
+				type = row[build_console.c.type]
+				rowid = row[build_console.c.id]
+				result[type].append(rowid)
+		return dict(result)
+
+	def console_output(self, user_id, build_output_id):
+		build_console = database.schema.build_console
+		query = build_console.select().where(build_console.c.id==build_output_id)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+		return to_dict(row, build_console.columns)
 
 	def get_console_output(self, user_id, build_id, console):
 		if not self._has_permission(user_id, build_id):
