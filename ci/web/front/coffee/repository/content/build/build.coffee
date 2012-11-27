@@ -2,11 +2,11 @@ window.Build = {}
 
 
 class Build.Model extends Backbone.Model
-	ALLOWED_STATUS: ['success', 'waiting', 'failed']
+	ALLOWED_STATUS: ['passed', 'running', 'failed', 'queued']
 
 	urlRoot: 'builds'
 	defaults:
-		status: 'waiting'
+		status: 'queued'
 		selected: false
 
 

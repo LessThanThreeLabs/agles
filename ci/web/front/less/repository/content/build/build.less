@@ -1,9 +1,9 @@
-@successColor: #66A366;
-@waitingColor: #888888;
+@passedColor: #66A366;
+@runningColor: #888888;
 @failedColor:  #FF4D4D;
 
-@successBackgroundColor: rgba(0, 160, 0, 0.05);
-@waitingBackgroundColor: rgba(200, 200, 200, 0.2);
+@passedBackgroundColor: rgba(0, 160, 0, 0.05);
+@runningBackgroundColor: rgba(200, 200, 200, 0.2);
 @failedBackgroundColor:  rgba(160, 0, 0, 0.05);
 
 
@@ -47,14 +47,14 @@ div.build {
 	-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
 	-o-transition: background-color @backgroundColorTransitionTime ease-out;
 
-	&.success {
-		&.selected { background-color: @successBackgroundColor; }
-		.statusText { color: @successColor; }
+	&.passed {
+		&.selected { background-color: @passedBackgroundColor; }
+		.statusText { color: @passedColor; }
 	}
 
-	&.waiting {
-		&.selected { background-color: @waitingBackgroundColor; }
-		.statusText { color: @waitingColor; }
+	&.running, &.queued {
+		&.selected { background-color: @runningBackgroundColor; }
+		.statusText { color: @runningColor; }
 	}
 
 	&.failed {
@@ -71,5 +71,5 @@ div.build {
 		font-size: 1.0em;
 	}
 
-	&:hover  { background-color: @waitingBackgroundColor; }
+	&:hover  { background-color: @runningBackgroundColor; }
 }
