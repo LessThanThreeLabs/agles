@@ -18,8 +18,16 @@ def handle_compiles(compiles)
 		name = compile.keys.first
 		config = compile.values.first
 		path = config["path"]
-		command = config["script"]
-		create_compilescript(name, path, command)
+		commands = config["script"]
+		if not commands.is_a? Array
+			commands = [commands]
+		end
+		validator_command = ""
+		commands.each do |command|
+			command = command.gsub("\n", "\\n")
+			validator_command += "/home/#{node[:agles][:user]}/scripts/validator.sh \"#{command}\"\n"
+		end
+		create_compilescript(name, path, validator_command)
 	end
 end
 

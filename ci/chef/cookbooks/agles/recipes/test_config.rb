@@ -18,8 +18,16 @@ def handle_tests(tests)
 		name = test.keys.first
 		config = test.values.first
 		path = config["path"]
-		command = config["script"]
-		create_testscript(name, path, command)
+		commands = config["script"]
+		if not commands.is_a? Array
+			commands = [commands]
+		end
+		validator_command = ""
+		commands.each do |command|
+			command = command.gsub("\n", "\\n")
+			validator_command += "/home/#{node[:agles][:user]}/scripts/validator.sh \"#{command}\"\n"
+		end
+		create_testscript(name, path, validator_command)
 	end
 end
 
