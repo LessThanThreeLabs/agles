@@ -1,6 +1,6 @@
 include_recipe "agles"
 
-def create_compilescript(name, path, command)
+def create_compilescript(name, path, validated_commands)
 	template "/home/#{node[:agles][:user]}/scripts/compile/#{name}.sh" do
 		source "shell_command.erb"
 		owner node[:agles][:user]
@@ -8,7 +8,7 @@ def create_compilescript(name, path, command)
 		variables(
 			:user => node[:agles][:user],
 			:path => path,
-			:command => command
+			:validated_commands => validated_commands
 		)
 	end
 end
@@ -22,12 +22,10 @@ def handle_compiles(compiles)
 		if not commands.is_a? Array
 			commands = [commands]
 		end
-		validator_command = ""
-		commands.each do |command|
-			command = command.gsub("\n", "\\n")
-			validator_command += "/home/#{node[:agles][:user]}/scripts/validator.sh \"#{command}\"\n"
+		commands = commands.map do |command|
+			command.gsub("\n", "\\n")
 		end
-		create_compilescript(name, path, validator_command)
+		create_compilescript(name, path, commands)
 	end
 end
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 command=$*
-echo \\$ $command
+echo -e \$ $command
 timeout 120 bash -c "`echo -e $command`"
 r=$?
 if [ $r -eq 124 ]

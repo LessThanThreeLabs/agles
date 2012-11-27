@@ -1,6 +1,6 @@
 include_recipe "agles"
 
-def create_testscript(name, path, command)
+def create_testscript(name, path, validated_commands)
 	template "/home/#{node[:agles][:user]}/scripts/test/#{name}.sh" do
 		source "shell_command.erb"
 		owner node[:agles][:user]
@@ -8,7 +8,7 @@ def create_testscript(name, path, command)
 		variables(
 			:user => node[:agles][:user],
 			:path => path,
-			:command => command
+			:validated_commands => validated_commands
 		)
 	end
 end
@@ -22,12 +22,10 @@ def handle_tests(tests)
 		if not commands.is_a? Array
 			commands = [commands]
 		end
-		validator_command = ""
 		commands.each do |command|
-			command = command.gsub("\n", "\\n")
-			validator_command += "/home/#{node[:agles][:user]}/scripts/validator.sh \"#{command}\"\n"
+			command.gsub("\n", "\\n")
 		end
-		create_testscript(name, path, validator_command)
+		create_testscript(name, path, commands)
 	end
 end
 
