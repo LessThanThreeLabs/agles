@@ -5,6 +5,5 @@ class VerificationUser(object):
 class BuildStatus(object):
 	QUEUED = "queued"
 	RUNNING = "running"
-	COMPLETE = "complete"
+	PASSED = "passed"
 	FAILED = "failed"
-	MERGE_FAILURE = "merge failure"

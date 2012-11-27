@@ -65,4 +65,4 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._setup_db_entries(REPO_URI)
 
 		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
-		assert_raises(InvalidPermissionError, rsh.new_sshargs, 'git-upload-pack', REPO_URI, "1")
+		assert_raises(InvalidPermissionError, rsh.new_sshargs, 'git-upload-pack', REPO_URI, "2")

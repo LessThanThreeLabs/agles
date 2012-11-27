@@ -40,7 +40,7 @@ class VerificationResultsHandler(QueueListener):
 
 	def _mark_change_finished(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
-			client.mark_change_finished(change_id, BuildStatus.COMPLETE)
+			client.mark_change_finished(change_id, BuildStatus.PASSED)
 		self.send_merge_request(change_id)
 
 	def _mark_change_failed(self, change_id):
@@ -49,7 +49,7 @@ class VerificationResultsHandler(QueueListener):
 
 	def _mark_change_merge_failure(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
-			client.mark_change_finished(change_id, BuildStatus.MERGE_FAILURE)
+			client.mark_change_finished(change_id, BuildStatus.FAILED)
 
 	def send_merge_request(self, change_id):
 		print "Sending merge request for " + str(change_id)

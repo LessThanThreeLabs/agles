@@ -19,7 +19,7 @@ class RestrictedGitShell(object):
 	def _create_ssh_exec_args(self, route, command, path, user_id):
 		uri = "git@%s" % route
 		path = "'%s'" % path
-		command_parts = [command, path, str(user_id)] if command in self.user_id_commands else [command, path]
+		command_parts = [command, path, user_id] if command in self.user_id_commands else [command, path]
 		full_command = ' '.join(command_parts)
 		return "ssh", "ssh", "-p", "2222", uri, full_command
 
@@ -33,7 +33,7 @@ class RestrictedGitShell(object):
 
 	def verify_user_permissions(self, command, user_id, repo_hash):
 		with ModelServer.rpc_connect("repos", "read") as client:
-			permissions = client.get_permissions(user_id, repo_hash)
+			permissions = client.get_permissions(int(user_id), repo_hash)
 		if not RepositoryPermissions.has_permissions(permissions, self.commands_to_permissions[command]):
 			raise InvalidPermissionError("User %s does not have the necessary permissions to run %s on repository %s" % (user_id, command, repo_hash))
 
@@ -61,7 +61,6 @@ class RestrictedGitShell(object):
 			raise InvalidCommandError(full_ssh_command)
 
 		command, repo_path, user_id = command_parts
-		user_id = int(user_id)
 		if command in self.commands_to_permissions:
 			args = self.new_sshargs(command, repo_path.strip("'"), user_id)
 			os.execlp(*args)

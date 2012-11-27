@@ -56,7 +56,7 @@ class VerificationRequestHandler(QueueListener):
 				delivery_mode=2,  # make message persistent
 				mandatory=True,
 			)
-			status = BuildStatus.COMPLETE if results == VerificationResult.SUCCESS else BuildStatus.FAILED
+			status = BuildStatus.PASSED if results == VerificationResult.SUCCESS else BuildStatus.FAILED
 			builds_update_rpc.mark_build_finished(build_id, status)
 			try:
 				cleanup_function()

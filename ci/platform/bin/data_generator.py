@@ -20,7 +20,7 @@ USER_PASSWORD = 'user123'
 
 NUM_REPOS = 3
 REPOSITORIES_PATH = 'repos'
-VALID_STATUSES = ['success', 'waiting', 'failed']
+VALID_STATUSES = ['queued', 'running', 'passed', 'failed']
 
 
 class SchemaDataGenerator(object):
