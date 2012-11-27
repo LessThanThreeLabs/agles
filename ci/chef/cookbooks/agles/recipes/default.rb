@@ -7,6 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
+include_recipe 'rvm'
+
 case node[:platform]
 when "ubuntu"
 	execute "apt-get update" do

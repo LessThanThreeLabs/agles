@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-include_recipe "agles"
+include_recipe 'agles'
 
 require 'yaml'
 
