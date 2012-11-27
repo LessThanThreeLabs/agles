@@ -30,4 +30,5 @@ def main():
 	fs_repo_server.run()
 
 
-main()
+if __name__ == "__main__":
+	main()

@@ -49,4 +49,5 @@ def main():
 	verifier.verify(args.repo_uri, [""], callback, ConsoleAppender)
 
 
-main()
+if __name__ == "__main__":
+	main()

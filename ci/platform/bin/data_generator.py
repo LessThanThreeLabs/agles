@@ -134,4 +134,6 @@ def main():
 	generator = SchemaDataGenerator(args.seed)
 	generator.generate()
 
-main()
+
+if __name__ == "__main__":
+	main()
