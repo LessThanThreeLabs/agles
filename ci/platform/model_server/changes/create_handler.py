@@ -44,7 +44,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				repo_hash = commit_result[commit.c.repo_hash]
 				change_number_query = select([func.max(change.c.number)], commit.c.repo_hash==repo_hash, [change, commit])
 				max_change_number_result = sqlconn.execute(change_number_query).first()
-				if max_change_number_result:
+				if max_change_number_result and max_change_number_result[0]:
 					prev_change_number = max_change_number_result[0]
 			change_number = prev_change_number + 1
 			ins = change.insert().values(commit_id=commit_id, merge_target=merge_target,
