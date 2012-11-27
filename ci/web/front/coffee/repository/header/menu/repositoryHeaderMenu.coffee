@@ -39,17 +39,14 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 				console.error error
 				return
 
-			result =
-				menuOptions: menuOptions.options
-				defaultOption: menuOptions.default
-			assert.ok result.defaultOption in result.menuOptions
+			assert.ok menuOptions.default in menuOptions.options
 
-			allowedOptions = result.menuOptions.map (option) =>
+			allowedOptions = menuOptions.options.map (option) =>
 				assert.ok @MENU_OPTIONS[option]?
 				return @MENU_OPTIONS[option]
 
 			@set 'menuOptions', allowedOptions
-			@set('selectedMenuOptionName', result.defaultOption) if not @get('selectedMenuOptionName')?
+			@set('selectedMenuOptionName', menuOptions.default) if not @get('selectedMenuOptionName')?
 
 
 	validate: (attributes) =>
