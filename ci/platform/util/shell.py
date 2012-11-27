@@ -19,7 +19,7 @@ class RestrictedGitShell(object):
 	def _create_ssh_exec_args(self, route, command, path, user_id):
 		uri = "git@%s" % route
 		path = "'%s'" % path
-		command_parts = [command, path, user_id] if command in self.user_id_commands else [command, path]
+		command_parts = [command, path, str(user_id)] if command in self.user_id_commands else [command, path]
 		full_command = ' '.join(command_parts)
 		return "ssh", "ssh", "-p", "2222", uri, full_command
 
