@@ -1,21 +1,21 @@
-window.BuildOutput = {}
+window.ConsoleTextOutput = {}
 
 
-class BuildOutput.Model extends Backbone.Model
-	urlRoot: 'buildOutputs'
+class ConsoleTextdOutput.Model extends Backbone.Model
 	defaults:
-		buildId: null
+		id: null
+		title: null
 
 	initialize: () =>
-		@buildOutputLineModels = new Backbone.Collection()
-		@buildOutputLineModels.model = BuildOutputLine.Model
-		@buildOutputLineModels.comparator = (buildOutputLineModel) =>
-			return buildOutputLineModel.get 'number'
+		@consoleTextOutputLineModels = new Backbone.Collection()
+		@consoleTextOutputLineModels.model = ConsoleTextOutputLine.Model
+		@consoleTextOutputLineModels.comparator = (consoleTextOutputLine) =>
+			return consoleTextOutputLine.get 'number'
 
 
 	fetchBuildOutput: () =>
 		console.log '>> needs to fetch output text'
-		@buildOutputLineModels.reset @_createFakeOutputLines()
+		@consoleTextOutputLineModels.reset @_createFakeOutputLines()
 
 
 # NOT REAL ==>
@@ -40,28 +40,30 @@ class BuildOutput.Model extends Backbone.Model
 # <== NOT REAL
 
 
-class BuildOutput.View extends Backbone.View
+class ConsoleTextdOutput.View extends Backbone.View
 	tagName: 'div'
-	className: 'buildOutput'
-	template: Handlebars.compile '<div class="buildOutputText"></div>'
+	className: 'consoleTextOutput'
+	template: Handlebars.compile '<div class="title">{{title}}</div><div class="output"></div>'
 
 	initialize: () =>
-		@model.buildOutputLineModels.on 'addLine', @_handleAddLine
-		@model.buildOutputLineModels.on 'reset', @_initializeOutputText
+		@model.on 'change:title', @render
+		@model.consoleTextOutputLineModels.on 'addLine', @_handleAddLine
+		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText
 
 
 	render: () =>
-		@$el.html @template()
+		@$el.html @template
+			title: @model.get 'title'
 		@_initializeOutputText()
 		return @
 
 
 	_initializeOutputText: () =>
-		$('.buildOutputText').empty()
+		$('.output').empty()
 
-		@model.buildOutputLineModels.each (buildOutputLineModel) =>
-			buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
-			@$el.find('.buildOutputText').append buildOutputLineView.render().el
+		@model.consoleTextOutputLineModels.each (consoleTextOutputLineModel) =>
+			consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
+			@$el.find('.output').append consoleTextOutputLineView.render().el
 
 
 	_handleAddLine: (buildOutputLineModel) =>
