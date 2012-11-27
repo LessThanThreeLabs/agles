@@ -52,11 +52,11 @@ class ReposReadHandler(ModelServerRpcHandler):
 		return row_result[repostore.c.uri], row_result[repostore.c.host_name], row_result[repostore.c.repositories_path], row_result[repo.c.hash], row_result[repo.c.name]
 
 	def get_user_id_from_public_key(self, key):
-		ssh_pubkeys = database.schema.ssh_pubkeys
-		query = ssh_pubkeys.select().where(ssh_pubkeys.c.ssh_key==key)
+		ssh_pubkey = database.schema.ssh_pubkey
+		query = ssh_pubkey.select().where(ssh_pubkey.c.ssh_key==key)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-		return row[ssh_pubkeys.c.user_id] if row else None
+		return row[ssh_pubkey.c.user_id] if row else None
 
 	def get_commit_attributes(self, commit_id):
 		commit = database.schema.commit
