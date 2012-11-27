@@ -23,6 +23,7 @@ class BuildDetails.View extends Backbone.View
 			when 'information'
 				console.log 'buildDetails -- information view not implemented yet'
 			when 'compilation'
+				console.log 'buildDetails -- this model should be contained in its parent model'
 				consoleCompilationOutputModel = new ConsoleCompilationOutput.Model()
 				consoleCompilationOutputView = new ConsoleCompilationOutput.View model: consoleCompilationOutputModel
 				@$el.find('.buildDetailsContent').html consoleCompilationOutputView.render().el

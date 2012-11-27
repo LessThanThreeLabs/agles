@@ -17,8 +17,23 @@ class ConsoleTextOutput.Model extends Backbone.Model
 	fetchOutput: () =>
 		console.log '>> needs to fetch output text'
 		setTimeout (() =>
+			@set 'title', 'hello ' + @get 'id'
 			@consoleTextOutputLineModels.reset @_createFakeOutputLines()
 			), 500
+
+
+		# THIS SHOULD ACTUALLY BE A FETCH!!!!
+	# 	socket.emit 'buildOutputs:read', id: @get('id'), (error, result) =>
+	# 		if error?
+	# 			console.error error
+	# 			return
+
+	# 		@set 'title', result.subtype
+	# 		@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.text
+
+
+	# _generateLineModelsFromText: (text) =>
+	# 	return @_createFakeOutputLines
 
 
 # NOT REAL ==>
