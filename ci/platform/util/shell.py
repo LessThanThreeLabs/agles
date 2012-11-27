@@ -61,6 +61,7 @@ class RestrictedGitShell(object):
 			raise InvalidCommandError(full_ssh_command)
 
 		command, repo_path, user_id = command_parts
+		user_id = int(user_id)
 		if command in self.commands_to_permissions:
 			args = self.new_sshargs(command, repo_path.strip("'"), user_id)
 			os.execlp(*args)
@@ -73,8 +74,10 @@ class InvalidCommandError(Exception):
 		super(InvalidCommandError, self).__init__(
 			'"%s" cannot be executed in this restricted shell.' % command)
 
+
 class MalformedCommandError(Exception):
 	pass
+
 
 class InvalidPermissionError(Exception):
 	pass

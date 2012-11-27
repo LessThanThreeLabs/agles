@@ -9,6 +9,7 @@ from sqlalchemy.sql import select
 from util.database import to_dict
 from util.permissions import RepositoryPermissions
 
+
 class ReposReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposReadHandler, self).__init__("repos", "read")
@@ -70,6 +71,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 			return None
 
 	def get_permissions(self, user_id, repo_hash):
+		assert isinstance(user_id, int)
 		if user_id == VerificationUser.id:
 			return RepositoryPermissions.RWA
 		permission = database.schema.permission
