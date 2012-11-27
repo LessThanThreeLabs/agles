@@ -1,7 +1,8 @@
 window.ConsoleTextOutput = {}
 
 
-class ConsoleTextdOutput.Model extends Backbone.Model
+class ConsoleTextOutput.Model extends Backbone.Model
+	urlRoot: 'buildOutputs'
 	defaults:
 		id: null
 		title: null
@@ -13,14 +14,16 @@ class ConsoleTextdOutput.Model extends Backbone.Model
 			return consoleTextOutputLine.get 'number'
 
 
-	fetchBuildOutput: () =>
+	fetchOutput: () =>
 		console.log '>> needs to fetch output text'
-		@consoleTextOutputLineModels.reset @_createFakeOutputLines()
+		setTimeout (() =>
+			@consoleTextOutputLineModels.reset @_createFakeOutputLines()
+			), 500
 
 
 # NOT REAL ==>
 	_createFakeOutputLines: () =>
-		return (@_createFakeLine num for num in [0...900])
+		return (@_createFakeLine num for num in [0...10])
 
 
 	_createFakeLine: (number) =>
@@ -40,7 +43,7 @@ class ConsoleTextdOutput.Model extends Backbone.Model
 # <== NOT REAL
 
 
-class ConsoleTextdOutput.View extends Backbone.View
+class ConsoleTextOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleTextOutput'
 	template: Handlebars.compile '<div class="title">{{title}}</div><div class="output"></div>'
@@ -54,12 +57,12 @@ class ConsoleTextdOutput.View extends Backbone.View
 	render: () =>
 		@$el.html @template
 			title: @model.get 'title'
-		@_initializeOutputText()
+		@model.fetchOutput()
 		return @
 
 
 	_initializeOutputText: () =>
-		$('.output').empty()
+		@$el.find('.output').empty()
 
 		@model.consoleTextOutputLineModels.each (consoleTextOutputLineModel) =>
 			consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel

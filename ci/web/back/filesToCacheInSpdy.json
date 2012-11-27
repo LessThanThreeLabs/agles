@@ -25,8 +25,9 @@
 			"/css/src/repository/content/build/list/search/buildsSearch.css",
 			"/css/src/repository/content/build/list/buildsList.css",
 			"/css/src/repository/content/build/list/buildsListManager.css",
-			"/css/src/repository/content/build/details/output/buildOutputLine.css",
-			"/css/src/repository/content/build/details/output/buildOutput.css",
+
+			"/css/src/repository/content/build/details/consoleTextOutput/consoleTextOutputLine.css",
+			"/css/src/repository/content/build/details/consoleTextOutput/consoleTextOutput.css",
 			"/css/src/repository/content/build/details/buildDetails.css",
 			"/css/src/repository/content/build/repositoryBuilds.css",
 			
@@ -91,9 +92,12 @@
 			"/js/src/repository/content/build/list/search/buildsSearch.js",
 			"/js/src/repository/content/build/list/buildsList.js",
 			"/js/src/repository/content/build/list/buildsListManager.js",
-			"/js/src/repository/content/build/details/output/buildOutputLine.js",
-			"/js/src/repository/content/build/details/output/buildOutput.js",
+
+			"/js/src/repository/content/build/details/consoleTextOutput/consoleTextOutputLine.js",
+			"/js/src/repository/content/build/details/consoleTextOutput/consoleTextOutput.js",
+			"/js/src/repository/content/build/details/compilation/consoleCompilationOutput.js",
 			"/js/src/repository/content/build/details/buildDetails.js",
+
 			"/js/src/repository/content/build/repositoryBuilds.js",
 
 			"/js/src/repository/content/repositoryContent.js",

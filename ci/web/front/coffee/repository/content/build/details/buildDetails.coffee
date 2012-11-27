@@ -4,6 +4,7 @@ window.BuildDetails = {}
 class BuildDetails.Model extends Backbone.Model
 
 	initialize: () =>
+		@consoleCompilationOutputModel = new ConsoleCompilationOutput.Model()
 
 
 class BuildDetails.View extends Backbone.View
@@ -16,13 +17,14 @@ class BuildDetails.View extends Backbone.View
 
 
 	render: () =>
-		@$el.html '&nbsp'
+		@$el.html '<div class="buildDetailsContent">&nbsp</div>'
 
 		switch window.globalRouterModel.get 'buildView'
 			when 'information'
 				console.log 'buildDetails -- information view not implemented yet'
 			when 'compilation'
-				console.log 'buildDetails -- compilation view not implemented yet'
+				consoleCompilationOutputView = new ConsoleCompilationOutput.View model: @model.consoleCompilationOutputModel
+				@$el.find('.buildDetailsContent').html consoleCompilationOutputView.render().el
 			when 'test'
 				console.log 'buildDetails -- test view not implemented yet'
 			when null
