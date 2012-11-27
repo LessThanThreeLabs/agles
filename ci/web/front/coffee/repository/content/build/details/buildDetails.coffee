@@ -17,7 +17,9 @@ class BuildDetails.View extends Backbone.View
 
 
 	render: () =>
-		@$el.html '<div class="buildDetailsContent">&nbsp</div>'
+		@$el.html '<div class="buildDetailsContentContainer">
+				<div class="buildDetailsContent">&nbsp</div>
+			</div>'
 
 		switch window.globalRouterModel.get 'buildView'
 			when 'information'
