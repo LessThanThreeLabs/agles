@@ -6,32 +6,24 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 		consoleTextOutputModels: null
 
 
-	loadOutput: () =>
-		if window.globalRouterModel.get('buildId')?
-			@set 'consoleTextOutputModels', (@_createFakeOutputModel num for num in [0...5])
-		else
-			@set 'consoleTextOutputModels', []
-
-
-	_createFakeOutputModel: (number) =>
-		return new ConsoleTextOutput.Model id: number
-
-
 	fetchOutput: () =>
-		requestData:
+		if not window.globalRouterModel.get('buildId')?
+			@set 'consoleTextOutputModels', []
+			return
+
+		requestData =
 			method: 'buildOutputIds'
-			args: {}
+			args:
+				buildId: window.globalRouterModel.get('buildId')
 		socket.emit 'buildOutputs:read', requestData, (error, buildOutputIds) =>
 			if error?
 				console.error error
 				return
 
-			console.log buildOutputIds
-
 			consoleOutputModels = []
 			for buildOutputTypeKey, buildOutputTypeValue of buildOutputIds
-				for buildOutputId in buildOutputTypeValue.outputIds
-					consoleOutputModels.append new ConsoleTextOutput.Model id: buildOutputId
+				for buildOutputId in buildOutputTypeValue
+					consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
 
 			@set 'consoleTextOutputModels', consoleOutputModels
 
@@ -42,13 +34,13 @@ class ConsoleCompilationOutput.View extends Backbone.View
 
 
 	initialize: () =>
-		window.globalRouterModel.on 'change:buildId', @model.loadOutput
+		window.globalRouterModel.on 'change:buildId', @model.fetchOutput
 		@model.on 'change:consoleTextOutputModels', @_addOutput
 
 
 	render: () =>
 		@$el.html '&nbsp'
-		@model.loadOutput()
+		@model.fetchOutput()
 		return @
 
 

@@ -7,6 +7,7 @@ class ConsoleTextOutput.Model extends Backbone.Model
 		id: null
 		title: null
 
+
 	initialize: () =>
 		@consoleTextOutputLineModels = new Backbone.Collection()
 		@consoleTextOutputLineModels.model = ConsoleTextOutputLine.Model
@@ -15,55 +16,26 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 
 	fetchOutput: () =>
-		console.log '>> needs to fetch output text'
-		setTimeout (() =>
-			@set 'title', 'hello ' + @get 'id'
-			@consoleTextOutputLineModels.reset @_createFakeOutputLines()
-			), 500
+		console.log 'consoleTextOutput -- this should actually be a fetch'
+
+		socket.emit 'buildOutputs:read', id: @get('id'), (error, result) =>
+			if error?
+				console.error error
+				return
+
+			@set 'title', result.subtype
+			@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
 
 
-		# THIS SHOULD ACTUALLY BE A FETCH!!!!
-	# 	socket.emit 'buildOutputs:read', id: @get('id'), (error, result) =>
-	# 		if error?
-	# 			console.error error
-	# 			return
-
-	# 		@set 'title', result.subtype
-	# 		@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.text
+	_generateLineModelsFromText: (text) =>
+		lines = text.split '\n'
+		return (@_generateLineModel number, line for line, number in lines)
 
 
-	# _generateLineModelsFromText: (text) =>
-	# 	text = 'abc\ndef\nghi'
-	# 	lines = text.split '\n'
-	# 	return (@_generateLineModel number, line for line, number in lines)
-
-
-	# _generateLineModel: (number, line) =>
-	# 	return toReturn =
-	# 		number: number
-	# 		text: line
-
-
-# NOT REAL ==>
-	_createFakeOutputLines: () =>
-		return (@_createFakeLine num for num in [0...10])
-
-
-	_createFakeLine: (number) =>
-		return toReturn = 
+	_generateLineModel: (number, line) =>
+		return toReturn =
 			number: number
-			text: @_createRandomText()
-
-
-	_createRandomText: () =>
-		toReturn = ''
-		characters = 'abcdefghijklmnopqrstuvwxyz '
-
-		for num in [0...80]
-			toReturn += characters.charAt Math.floor(Math.random() * characters.length)
-
-		return toReturn
-# <== NOT REAL
+			text: line
 
 
 class ConsoleTextOutput.View extends Backbone.View
