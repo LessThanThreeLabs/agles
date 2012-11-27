@@ -9,7 +9,7 @@ from database import schema
 from database.engine import ConnectionFactory
 from util.permissions import RepositoryPermissions
 
-SALT = 'a'*16
+SALT = 'a' * 16
 
 ADMIN_EMAIL = 'admin@admin.com'
 ADMIN_PASSWORD = 'admin123'

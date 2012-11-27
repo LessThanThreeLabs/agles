@@ -100,7 +100,7 @@ repostore = Table('repostore', metadata,
 	UniqueConstraint('host_name', 'repositories_path')
 )
 
-ssh_pubkeys = Table('ssh_pubkey', metadata,
+ssh_pubkey = Table('ssh_pubkey', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
 	Column('alias', String, nullable=False),

@@ -4,6 +4,7 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from shared.constants import VerificationUser
 from sqlalchemy.sql import select
 from util.database import to_dict
 from util.permissions import RepositoryPermissions
@@ -69,6 +70,8 @@ class ReposReadHandler(ModelServerRpcHandler):
 			return None
 
 	def get_permissions(self, user_id, repo_hash):
+		if user_id == VerificationUser.id:
+			return RepositoryPermissions.RWA
 		permission = database.schema.permission
 
 		query = permission.select().where(

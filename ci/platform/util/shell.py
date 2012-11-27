@@ -37,14 +37,14 @@ class RestrictedGitShell(object):
 		if not RepositoryPermissions.has_permissions(permissions, self.commands_to_permissions[command]):
 			raise InvalidPermissionError("User %s does not have the necessary permissions to run %s on repository %s" % (user_id, command, repo_hash))
 
-	def _validify(self, repo_path):
+	def _validate(self, repo_path):
 		if not repo_path.endswith(".git"):
 			raise MalformedCommandError('repo_path: %s. Repositories must end in ".git".' % repo_path)
 		if ".." in repo_path:
 			raise MalformedCommandError('repo_path: %s. Repository path cannot contain "..".' % repo_path)
 
 	def new_sshargs(self, command, repo_path, user_id):
-		self._validify(repo_path)
+		self._validate(repo_path)
 		requested_repo_uri = self._get_requested_repo_uri(repo_path)
 
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:

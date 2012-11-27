@@ -9,6 +9,11 @@ Vagrant::Config.run do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "$box_name"
 
+  # Set the specs of the virtual machine
+  config.vm.customize ["modifyvm", :id,
+    "--memory", 1024,
+    "--cpus", 2]
+
   # Get Agles root directory
   agles_root = ENV["AGLES_ROOT"]
 
