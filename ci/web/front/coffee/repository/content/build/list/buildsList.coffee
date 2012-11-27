@@ -28,9 +28,16 @@ class BuildsList.Model extends Backbone.Model
 	_handleBuildSelection: (buildModel) =>
 		if buildModel.get 'selected'
 			@_deselectAllOtherBuildModels buildModel
-			window.globalRouterModel.set 'buildId', buildModel.get 'id'
+			window.globalRouterModel.set 
+				'buildId': buildModel.get 'id'
+				'buildView': 'compilation'
 		else
-			window.globalRouterModel.set 'buildId', null
+			# we use a timeout here to make sure that we don't set the buildId to null
+			# when we're switching between two different build ids
+			setTimeout (() =>
+				if window.globalRouterModel.get('buildId') is buildModel.get('id')
+					window.globalRouterModel.set 'buildId', null
+				), 0
 
 
 	_deselectAllOtherBuildModels: (buildModelToExclude) =>
