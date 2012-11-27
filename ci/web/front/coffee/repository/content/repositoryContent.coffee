@@ -3,9 +3,8 @@ window.RepositoryContent = {}
 
 class RepositoryContent.Model extends Backbone.Model
 
-	initialize: () ->
-		@repositoryBuildsModel = new RepositoryBuilds.Model()
-		@repositoryAdminModel = new RepositoryAdmin.Model()
+	initialize: () =>
+		
 
 
 class RepositoryContent.View extends Backbone.View
@@ -22,10 +21,12 @@ class RepositoryContent.View extends Backbone.View
 
 		switch window.globalRouterModel.get 'repositoryView'
 			when 'builds'
-				repositoryBuildsView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
+				repositoryBuildsModel = new RepositoryBuilds.Model()
+				repositoryBuildsView = new RepositoryBuilds.View model: repositoryBuildsModel
 				@$el.html repositoryBuildsView.render().el
 			when 'admin'
-				repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
+				repositoryAdminModel = new RepositoryAdmin.Model()
+				repositoryAdminView = new RepositoryAdmin.View model: repositoryAdminModel
 				@$el.html repositoryAdminView.render().el
 			when null
 				# repository view hasn't been selected yet

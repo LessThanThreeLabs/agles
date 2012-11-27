@@ -2,9 +2,15 @@ window.ConsoleCompilationOutput = {}
 
 
 class ConsoleCompilationOutput.Model extends Backbone.Model
+	defaults:
+		consoleTextOutputModels: null
 
-	initialize: () =>
-		@consoleTextOutputModels = (@_createFakeOutputModel num for num in [0...5])
+
+	loadOutput: () =>
+		if window.globalRouterModel.get('buildId')?
+			@set 'consoleTextOutputModels', (@_createFakeOutputModel num for num in [0...5])
+		else
+			@set 'consoleTextOutputModels', []
 
 
 	_createFakeOutputModel: (number) =>
@@ -16,14 +22,21 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 class ConsoleCompilationOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleCompilationOutput'
-	template: Handlebars.compile ''
+
+
+	initialize: () =>
+		window.globalRouterModel.on 'change:buildId', @model.loadOutput
+		@model.on 'change:consoleTextOutputModels', @_addOutput
 
 
 	render: () =>
-		@$el.html @template()
+		@$el.html '&nbsp'
+		@model.loadOutput()
+		return @
 
-		for consoleTextOutputModel in @model.consoleTextOutputModels
+
+	_addOutput: () =>
+		@$el.empty()
+		for consoleTextOutputModel in @model.get 'consoleTextOutputModels'
 			consoleTextOutputView = new ConsoleTextOutput.View model: consoleTextOutputModel
 			@$el.append consoleTextOutputView.render().el
-
-		return @
