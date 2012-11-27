@@ -33,7 +33,15 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 
 	# _generateLineModelsFromText: (text) =>
-	# 	return @_createFakeOutputLines
+	# 	text = 'abc\ndef\nghi'
+	# 	lines = text.split '\n'
+	# 	return (@_generateLineModel number, line for line, number in lines)
+
+
+	# _generateLineModel: (number, line) =>
+	# 	return toReturn =
+	# 		number: number
+	# 		text: line
 
 
 # NOT REAL ==>
