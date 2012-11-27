@@ -4,7 +4,7 @@ window.ConsoleCompilationOutput = {}
 class ConsoleCompilationOutput.Model extends Backbone.Model
 
 	initialize: () =>
-		@consoleTextOutputModels = (@_createFakeOutputModel num for num in [0...3])
+		@consoleTextOutputModels = (@_createFakeOutputModel num for num in [0...5])
 
 
 	_createFakeOutputModel: (number) =>

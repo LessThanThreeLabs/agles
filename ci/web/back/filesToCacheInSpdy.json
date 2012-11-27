@@ -28,6 +28,7 @@
 
 			"/css/src/repository/content/build/details/consoleTextOutput/consoleTextOutputLine.css",
 			"/css/src/repository/content/build/details/consoleTextOutput/consoleTextOutput.css",
+			"/css/src/repository/content/build/details/compilation/consoleCompilationOutput.css",
 			"/css/src/repository/content/build/details/buildDetails.css",
 			"/css/src/repository/content/build/repositoryBuilds.css",
 			
