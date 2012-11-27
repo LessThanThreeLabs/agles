@@ -2,5 +2,5 @@
 source /home/<%= @user %>/scripts/setup.sh
 cd /home/<%= @user %>/source/<%= @path %>
 <% for @command in @validated_commands %>
-/home/<%= @user %>/scripts/validator.sh "<%= command %>"
+/home/<%= @user %>/scripts/validator.sh "<%= @command %>"
 <% end %>
