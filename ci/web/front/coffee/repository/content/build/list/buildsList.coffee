@@ -64,7 +64,10 @@ class BuildsList.Model extends Backbone.Model
 
 
 	_fetchBuilds: (startNumber, numberToRetrieve, queuePolicy) =>
-		assert.ok startNumber >= 0 and numberToRetrieve > 0 and queuePolicy? and not @noMoreBuildsToFetch
+		assert.ok startNumber >= 0
+		assert.ok numberToRetrieve > 0 
+		assert.ok queuePolicy? 
+		assert.ok not @noMoreBuildsToFetch
 
 		buildsQuery = new BuildsQuery window.globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
 		@buildsFetcher.runQuery buildsQuery, queuePolicy, (error, result) =>

@@ -10,7 +10,19 @@ exports.create = (modelRpcConnection) ->
 class BuildOutputsReadHandler extends Handler
 
 	default: (socket, data, callback) =>
-		callback 'Not yet implemented...'
+		@modelRpcConnection.buildOutputs.read.console_output socket.session.userId, data.id, (error, result) =>
+			if error?
+				callback error
+			else
+				callback null, result
+
+
+	buildOutputIds: (socket, args, callback) =>
+		@modelRpcConnection.buildOutputs.read.majortypes socket.session.userId, args.buildId, (error, result) =>
+			if error?
+				callback "hi"
+			else
+				callback null, result
 
 
 	# -- GIVEN --
@@ -24,11 +36,13 @@ class BuildOutputsReadHandler extends Handler
 	#     text: <string>
 	#   ]
 	getOutputForBuild: (socket, data, callback) =>
-		assert.ok socket.session.userId and data.buildId? and data.consoleType?
+		assert.ok socket.session.userId?
+		assert.ok data.buildId? 
 		userId = socket.session.userId
-		output = @modelRpcConnection.buildOutputs.read.get_console_output userId, 
-				data.buildId, data.consoleType, (error, lines) =>
-					if error?
-						callback "Could not read build output"
-					else
-						callback null, lines
+
+#		output = @modelRpcConnection.buildOutputs.read.get_console_output userId, 
+#				data.buildId, data.consoleType, (error, lines) =>
+#					if error?
+#						callback "Could not read build output"
+#					else
+#						callback null, lines
