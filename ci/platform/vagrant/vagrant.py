@@ -8,7 +8,7 @@ import json
 import os
 import re
 
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 
 import eventlet
 
@@ -71,25 +71,21 @@ class Vagrant(object):
 
 	def _vagrant_call(self, *args, **kwargs):
 		command = ["vagrant"] + list(args)
-		process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=self.vm_directory,
+		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=self.vm_directory,
 				env=self.vagrant_env)
 
 		output_handler = kwargs.get("output_handler")
 
 		self._output = list()
-		stdout_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
-		stderr_greenlet = eventlet.spawn(self._handle_stream, process.stderr, output_handler)
-
-		stdout_lines = stdout_greenlet.wait()
-		stderr_lines = stderr_greenlet.wait()
+		output_greenlet = eventlet.spawn(self._handle_stream, process.output, output_handler)
+		output_lines = output_greenlet.wait()
 
 		if output_handler:
 			output_handler.flush()
 
-		stdout = "\n".join(stdout_lines)
-		stderr = "\n".join(stderr_lines)
+		output = "\n".join(output_lines)
 		returncode = process.poll()
-		return VagrantResults(returncode, stdout, stderr)
+		return VagrantResults(returncode, output)
 
 	def _handle_stream(self, stream, line_handler):
 		lines = list()
@@ -116,4 +112,4 @@ class Vagrant(object):
 
 
 VagrantResults = collections.namedtuple(
-	"VagrantResults", ["returncode", "stdout", "stderr"])
+	"VagrantResults", ["returncode", "output"])
