@@ -26,8 +26,6 @@ class ConsoleTextOutput.Model extends Backbone.Model
 			@set 'title', result.subtype
 			@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
 
-			@beginPolling()
-
 
 	_generateLineModelsFromText: (text) =>
 		lines = text.split '\n'
@@ -40,23 +38,6 @@ class ConsoleTextOutput.Model extends Backbone.Model
 			text: line
 
 
-	beginPolling: () =>
-		setInterval (() =>
-			socket.emit 'buildOutputs:read', id: @get('id'), (error, result) =>
-				if error?
-					console.error error
-					return
-
-				lineModels = @_generateLineModelsFromText result.console_output
-				newLineModels = lineModels.filter (lineModel) =>
-					return @consoleTextOutputLineModels.every (oldLineModel) =>
-						oldLineModel.get('number') isnt lineModel.number
-
-				@consoleTextOutputLineModels.add newLineModels
-
-			), 2000
-
-
 class ConsoleTextOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleTextOutput'
@@ -64,7 +45,7 @@ class ConsoleTextOutput.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change:title', @render
-		@model.consoleTextOutputLineModels.on 'add', @_handleAddLine
+		@model.consoleTextOutputLineModels.on 'addLine', @_handleAddLine
 		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText
 
 
@@ -83,10 +64,8 @@ class ConsoleTextOutput.View extends Backbone.View
 			@$el.find('.output').append consoleTextOutputLineView.render().el
 
 
-	_handleAddLine: (consoleTextOutputLineModel, collection, options) =>
-		consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
-		@$el.find('.output').append consoleTextOutputLineView.render().el
-
+	_handleAddLine: (buildOutputLineModel) =>
+		console.log 'need to do something here...'
 		# buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
 		# @_insertBuildOutputLineAtIndex buildOutputLineView.render().el, buildOutputLineModel.get 'number'
 

@@ -27,6 +27,29 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 
 			@set 'consoleTextOutputModels', consoleOutputModels
 
+			@_beginPolling()
+
+
+	_beginPolling: () =>
+		setInterval (() =>
+			requestData =
+				method: 'buildOutputIds'
+				args:
+					buildId: window.globalRouterModel.get('buildId')
+					
+			socket.emit 'buildOutputs:read', requestData, (error, buildOutputIds) =>
+				if error?
+					console.error error
+					return
+
+				consoleOutputModels = []
+				for buildOutputTypeKey, buildOutputTypeValue of buildOutputIds
+					for buildOutputId in buildOutputTypeValue
+						consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
+
+				@set 'consoleTextOutputModels', consoleOutputModels
+			), 3000
+
 
 class ConsoleCompilationOutput.View extends Backbone.View
 	tagName: 'div'
