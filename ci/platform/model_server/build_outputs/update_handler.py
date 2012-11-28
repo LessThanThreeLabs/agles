@@ -45,17 +45,19 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 			if row:
 				line = row[build_console.c.console_output] + "\n" + line
-				delete = build_console.delete().where(build_console.c.id==row[build_console.c.id])
-				sqlconn.execute(delete)
-
-			ins = build_console.insert().values(
-				build_id=build_id,
-				type=type,
-				subtype=subtype,
-				console_output=line,
-				subtype_priority=1,
-			)
-			sqlconn.execute(ins)
+				update = build_console.update().where(build_console.c.id==row[build_console.c.id]).values(
+					console_output=line
+				)
+				sqlconn.execute(update)
+			else:
+				ins = build_console.insert().values(
+					build_id=build_id,
+					type=type,
+					subtype=subtype,
+					console_output=line,
+					subtype_priority=1,
+				)
+				sqlconn.execute(ins)
 
 
 		#redis_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
