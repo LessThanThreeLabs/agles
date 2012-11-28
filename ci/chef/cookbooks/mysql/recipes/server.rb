@@ -61,13 +61,6 @@ package node['mysql']['package_name'] do
   action :install
 end
 
-directory "#{node['mysql']['conf_dir']}/mysql/conf.d" do
-  owner "mysql"
-  group "mysql"
-  action :create
-  recursive true
-end
-
 service "mysql" do
   service_name node['mysql']['service_name']
   if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
@@ -106,7 +99,7 @@ unless Chef::Config[:solo]
   end
 end
 
-# set the root password on platforms 
+# set the root password on platforms
 # that don't support pre-seeding
 unless platform?(%w{debian ubuntu})
 
@@ -137,4 +130,5 @@ execute "mysql-install-privileges" do
   command "#{node['mysql']['mysql_bin']} -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }\"#{node['mysql']['server_root_password']}\" < #{grants_path}"
   action :nothing
   subscribes :run, resources("template[#{grants_path}]"), :immediately
+  ignore_failure true # "Can't connect to MySQL" monkeyfix
 end

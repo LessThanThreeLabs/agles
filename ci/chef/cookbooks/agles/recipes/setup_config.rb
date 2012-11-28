@@ -85,6 +85,23 @@ def postgres(database_info)
 	end
 end
 
+def mysql(database_info)
+	mysql_database_user database_info["username"] do
+		password ""
+		connection({:username => "root", :password => ""})
+		action :create
+	end
+	mysql_database_user database_info["username"] do
+		password ""
+		connection({:username => "root", :password => ""})
+		action :grant
+	end
+	mysql_database_user database_info["name"] do
+		connection({:username => "root", :password => ""})
+		action :create
+	end
+end
+
 def databases(database_bundles)
 	database_bundles.each do |type, databases|
 		databases.each do |database|
