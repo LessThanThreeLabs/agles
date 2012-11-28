@@ -22,6 +22,7 @@ class BuildOutputsReadHandler extends Handler
 			if error?
 				callback "hi"
 			else
+				delete result.chef
 				callback null, result
 
 
