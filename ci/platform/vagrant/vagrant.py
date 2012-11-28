@@ -77,7 +77,7 @@ class Vagrant(object):
 		output_handler = kwargs.get("output_handler")
 
 		self._output = list()
-		output_greenlet = eventlet.spawn(self._handle_stream, process.output, output_handler)
+		output_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
 		output_lines = output_greenlet.wait()
 
 		if output_handler:
