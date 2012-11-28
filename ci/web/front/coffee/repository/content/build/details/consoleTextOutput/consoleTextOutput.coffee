@@ -24,7 +24,9 @@ class ConsoleTextOutput.Model extends Backbone.Model
 				return
 
 			@set 'title', result.subtype
-			@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
+
+			if result.console_output?
+				@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
 
 
 		@_beginPolling()
@@ -40,7 +42,7 @@ class ConsoleTextOutput.Model extends Backbone.Model
 				return if not result.console_output?
 				@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
 			), 3000
-		
+
 
 	_generateLineModelsFromText: (text) =>
 		lines = text.split '\n'
