@@ -2,14 +2,15 @@ class GlobalAccount extends Backbone.Model
 	defaults:
 		firstName: ''
 		lastName: ''
-		image: null
-
-	initialize: () =>
 
 
-	validate: () =>
+	validate: (attributes) =>
+		if attributes.firstName is ''
+			return new Error 'Invalid first name'
+		if attributes.lastName is ''
+			return new Error 'Invalid last name'
+
 		return
 
 
-# !!!! SINGLETON !!!!
 window.globalAccount = new GlobalAccount()
