@@ -68,6 +68,8 @@
 			"/js/libs/backbone/iosync.js",
 			"/js/libs/backbone/iobind.productionModeShouldUseMinified.js",
 
+			"/js/src/setup.js",
+
 			"/js/src/globalAccount.js",
 			"/js/src/globalRouter.js",
 			"/js/src/history.js",
