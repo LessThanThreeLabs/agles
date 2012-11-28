@@ -16,13 +16,26 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 	def init_subtypes(self, build_id, type, subtypes):
 		assert isinstance(subtypes, collections.Iterable)
 
-		trans = lambda subtype: REDIS_SUBTYPE_KEY % (build_id, type, subtype)
-		subtype_keys = map(trans, subtypes)
+		build_console = schema.build_console
 
-		redis_conn = ConnectionFactory.get_redis_connection()
-		redis_key = REDIS_TYPE_KEY % (build_id, type)
-		[redis_conn.hset(redis_key, subtype_key, priority)
-		for priority, subtype_key in enumerate(subtype_keys)]
+		for subtype in subtypes:
+			with ConnectionFactory.get_sql_connection() as sqlconn:
+				ins = build_console.insert().values(
+					build_id=build_id,
+					type=type,
+					subtype=subtype,
+					subtype_priority=1,
+					console_output="",
+				)
+				sqlconn.execute(ins)
+
+		#trans = lambda subtype: REDIS_SUBTYPE_KEY % (build_id, type, subtype)
+		#subtype_keys = map(trans, subtypes)
+
+		#redis_conn = ConnectionFactory.get_redis_connection()
+		#redis_key = REDIS_TYPE_KEY % (build_id, type)
+		#[redis_conn.hset(redis_key, subtype_key, priority)
+		#for priority, subtype_key in enumerate(subtype_keys)]
 
 	def append_console_line(self, build_id, line_num, line, type, subtype=""):
 		""" The redis keys for build output are of the form build.output:build_id:type:subtype
@@ -50,14 +63,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 				)
 				sqlconn.execute(update)
 			else:
-				ins = build_console.insert().values(
-					build_id=build_id,
-					type=type,
-					subtype=subtype,
-					console_output=line,
-					subtype_priority=1,
-				)
-				sqlconn.execute(ins)
+				raise "fail"
 
 
 		#redis_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)
