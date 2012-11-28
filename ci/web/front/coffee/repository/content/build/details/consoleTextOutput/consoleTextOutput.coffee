@@ -27,6 +27,21 @@ class ConsoleTextOutput.Model extends Backbone.Model
 			@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
 
 
+		@_beginPolling()
+
+
+	_beginPolling: () =>
+		setInterval (() =>
+			socket.emit 'buildOutputs:read', id: @get('id'), (error, result) =>
+				if error?
+					console.error error
+					return
+
+				return if not result.console_output?
+				@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
+			), 3000
+		
+
 	_generateLineModelsFromText: (text) =>
 		lines = text.split '\n'
 		return (@_generateLineModel number, line for line, number in lines)
