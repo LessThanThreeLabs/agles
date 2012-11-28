@@ -26,8 +26,11 @@ class BuildVerifier(object):
 		"""Runs verification on a desired git commit"""
 		try:
 			self.checkout_refs(repo_uri, refs)
-			self._setup_vagrant_wrapper(console_appender)
 			verification_config = self.get_verification_configurations()
+			self._get_output_handler(console_appender, ConsoleType.Setup).declare_commands(["chef"])
+			self._get_output_handler(console_appender, ConsoleType.Compile).declare_commands([command.name for command in verification_config.compile_commands])
+			self._get_output_handler(console_appender, ConsoleType.Test).declare_commands([command.name for command in verification_config.test_commands])
+			self._setup_vagrant_wrapper(console_appender)
 			self.run_compile_step(verification_config.compile_commands, console_appender)
 			self.run_test_step(verification_config.test_commands, console_appender)
 		except Exception, e:
@@ -52,7 +55,6 @@ class BuildVerifier(object):
 
 	def _setup_vagrant_wrapper(self, console_appender):
 		"""Provisions the contained vagrant wrapper for analysis and test running"""
-		self._get_output_handler(console_appender, ConsoleType.Setup).declare_commands(["chef"])
 		output_handler = self._get_output_handler(console_appender, ConsoleType.Setup, "chef")
 		returncode = self.vagrant_wrapper.provision(role="verification_box_run",
 			output_handler=output_handler).returncode
@@ -75,14 +77,12 @@ class BuildVerifier(object):
 		return verification_config
 
 	def run_compile_step(self, compile_commands, console_appender):
-		self._get_output_handler(console_appender, ConsoleType.Compile).declare_commands([command.name for command in compile_commands])
 		for compile_command in compile_commands:
 			if compile_command.run(self.vagrant_wrapper,
 				self._get_output_handler(console_appender, ConsoleType.Compile, compile_command.name)):
 				raise VerificationException("Compiling: %s" % compile_command.name)
 
 	def run_test_step(self, test_commands, console_appender):
-		self._get_output_handler(console_appender, ConsoleType.Test).declare_commands([command.name for command in test_commands])
 		for test_command in test_commands:
 			if test_command.run(self.vagrant_wrapper,
 				self._get_output_handler(console_appender, ConsoleType.Test, test_command.name)):
