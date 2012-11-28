@@ -6,7 +6,6 @@ class ConsoleTextOutput.Model extends Backbone.Model
 	defaults:
 		id: null
 		title: null
-		currentText: null
 
 
 	initialize: () =>
@@ -23,8 +22,6 @@ class ConsoleTextOutput.Model extends Backbone.Model
 			if error?
 				console.error error
 				return
-
-			@set 'currentText', result.console_output
 
 			@set 'title', result.subtype
 			@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
@@ -50,15 +47,12 @@ class ConsoleTextOutput.Model extends Backbone.Model
 					console.error error
 					return
 
-				text = result.console_output
-				text = text.substr @get('currentText').length + 1
-				@set 'currentText', result.console_output
+				lineModels = @_generateLineModelsFromText result.console_output
+				newLineModels = lineModels.filter (lineModel) =>
+					return @consoleTextOutputLineModels.every (oldLineModel) =>
+						oldLineModel.get('number') isnt lineModel.number
 
-				lines = text.split '\n'
-
-				startNumber = @consoleTextOutputLineModels.length
-				@consoleTextOutputLineModels.add (@_generateLineModel (startNumber + number), line for line, number in lines)
-
+				@consoleTextOutputLineModels.add newLineModels
 
 			), 2000
 
