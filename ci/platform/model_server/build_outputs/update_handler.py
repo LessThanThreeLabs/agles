@@ -25,7 +25,6 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 					type=type,
 					subtype=subtype,
 					subtype_priority=1,
-					console_output="",
 				)
 				sqlconn.execute(ins)
 
@@ -57,7 +56,9 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			if row:
-				line = row[build_console.c.console_output] + "\n" + line
+				if row[build_console.c.console_output]:
+					line = row[build_console.c.console_output] + "\n" + line
+				
 				update = build_console.update().where(build_console.c.id==row[build_console.c.id]).values(
 					console_output=line
 				)

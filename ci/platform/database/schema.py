@@ -86,7 +86,7 @@ build_console = Table('build_console', metadata,
 	Column('type', String, nullable=False),
 	Column('subtype', String, nullable=False),
 	Column('subtype_priority', Integer, nullable=False),
-	Column('console_output', Text, nullable=False),
+	Column('console_output', Text),
 
 	UniqueConstraint('build_id', 'type', 'subtype')
 )
