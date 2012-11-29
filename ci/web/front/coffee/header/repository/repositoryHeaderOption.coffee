@@ -22,7 +22,7 @@ class RepositoryHeaderOption.Model extends Backbone.Model
 
 
 	validate: (attributes) =>
-		for repository in @get('repositories')
+		for repository in attributes.repositories
 			if not repository.id? or repository.id < 0 or not repository.name? or repository.name is ''
 				return new Error 'Invalid repository'
 		return

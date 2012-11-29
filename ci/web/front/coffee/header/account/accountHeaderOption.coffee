@@ -33,7 +33,7 @@ class AccountHeaderOption.View extends Backbone.View
 		window.globalAccount.off null, null, @
 
 
-	render: () ->
+	render: () =>
 		@$el.html @template
 			firstName: @model.get 'firstName'
 			lastName: @model.get 'lastName'
