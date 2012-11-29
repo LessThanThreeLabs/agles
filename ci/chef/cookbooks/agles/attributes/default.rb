@@ -18,3 +18,7 @@ default[:agles][:languages] = {
 	},
 	:node => {},
 }
+
+override['mysql']['server_root_password'] = ''
+override['mysql']['server_repl_password'] = ''
+override['mysql']['server_debian_password'] = ''

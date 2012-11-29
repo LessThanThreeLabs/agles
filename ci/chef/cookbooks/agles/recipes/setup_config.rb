@@ -68,8 +68,9 @@ def packages(package_bundles)
 end
 
 def postgres(database_info)
+	passwd = database_info["password"].to_s
 	postgresql_database_user database_info["username"] do
-		password ""
+		password passwd
 		connection({:username => "postgres", :password => ""})
 		action :create
 	end
@@ -79,26 +80,27 @@ def postgres(database_info)
 	end
 	postgresql_database_user database_info["username"] do
 		database_name database_info["name"]
-		password ""
+		password passwd
 		connection({:username => "postgres", :password => ""})
 		action :grant
 	end
 end
 
 def mysql(database_info)
+	passwd = database_info["password"].to_s
 	mysql_database_user database_info["username"] do
-		password ""
+		password passwd
+		connection({:username => "root", :password => ""})
+		action :create
+	end
+	mysql_database database_info["name"] do
 		connection({:username => "root", :password => ""})
 		action :create
 	end
 	mysql_database_user database_info["username"] do
-		password ""
+		password passwd
 		connection({:username => "root", :password => ""})
 		action :grant
-	end
-	mysql_database_user database_info["name"] do
-		connection({:username => "root", :password => ""})
-		action :create
 	end
 end
 

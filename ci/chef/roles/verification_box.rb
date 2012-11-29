@@ -6,6 +6,7 @@ run_list(
 	"recipe[postgresql::client]",
 	"recipe[mysql::server]",
 	"recipe[mysql::client]",
+	"recipe[mysql::ruby]",
 	"recipe[database]",
 	"recipe[agles::rabbitmq]",
 	"recipe[agles::copy_source]",
