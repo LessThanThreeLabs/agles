@@ -86,9 +86,17 @@ build_console = Table('build_console', metadata,
 	Column('type', String, nullable=False),
 	Column('subtype', String, nullable=False),
 	Column('subtype_priority', Integer, nullable=False),
-	Column('console_output', Text),
 
 	UniqueConstraint('build_id', 'type', 'subtype')
+)
+
+console_output = Table('console_output', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('build_console_id', Integer, ForeignKey('build_console.id'), nullable=False),
+	Column('line_number', Integer, nullable=False),
+	Column('line', String, nullable=False),
+
+	UniqueConstraint('build_console_id', 'line_number')
 )
 
 repostore = Table('repostore', metadata,
