@@ -29,7 +29,7 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 				for buildOutputId in buildOutputTypeValue
 					consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
 
-			consoleTextOutputModels.reset consoleOutputModels,
+			@consoleTextOutputModels.reset consoleOutputModels,
 				error: (model, error) => console.error error
 
 
@@ -57,6 +57,7 @@ class ConsoleCompilationOutput.View extends Backbone.View
 
 	_addOutput: () =>
 		@$el.html @html
-		for consoleTextOutputModel in @model.consoleTextOutputModels
+		@model.consoleTextOutputModels.each (consoleTextOutputModel) =>
 			consoleTextOutputView = new ConsoleTextOutput.View model: consoleTextOutputModel
 			@$el.append consoleTextOutputView.render().el
+			
