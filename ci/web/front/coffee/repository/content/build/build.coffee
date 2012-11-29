@@ -12,7 +12,8 @@ class Build.Model extends Backbone.Model
 
 	initialize: () =>
 		if window.globalRouterModel.get('buildId') is @get('id')
-			@set 'selected', true
+			@set 'selected', true,
+				error: (model, error) => console.error error
 
 
 	toggleSelected: () =>
@@ -20,7 +21,7 @@ class Build.Model extends Backbone.Model
 
 
 	validate: (attributes) =>
-		if attributes.status? and attributes.status not in @ALLOWED_STATUS
+		if attributes.status not in @ALLOWED_STATUS
 			return new Error 'Invalid status'
 		return
 
@@ -32,18 +33,24 @@ class Build.View extends Backbone.View
 		<div class="statusText">{{status}}</div>'
 	events: 'click': '_clickHandler'
 
+
 	initialize: () =>
-		@model.on 'chaneg:status', @_handleStatusChange
+		@model.on 'chaneg:status', @render
 		@model.on 'change:selected', @_handleSelected
+
+
+	onDispose: () =>
+		@model.off null, null, @
 
 
 	render: () =>
 		@$el.html @template
 			number: @model.get 'number'
 			status: @model.get 'status'
+			
+		@$el.addClass @model.get 'status'
 
 		@_handleSelected()
-		@_handleStatusChange()
 
 		return @
 
@@ -55,8 +62,3 @@ class Build.View extends Backbone.View
 	_handleSelected: () =>
 		if @model.get 'selected' then @$el.addClass 'selected'
 		else @$el.removeClass 'selected'
-
-
-	_handleStatusChange: () =>
-		@$el.removeClass @model.ALLOWED_STATUS.join ' '
-		@$el.addClass @model.get 'status'

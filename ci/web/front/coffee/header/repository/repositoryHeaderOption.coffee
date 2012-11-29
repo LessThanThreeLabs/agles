@@ -6,25 +6,32 @@ class RepositoryHeaderOption.Model extends Backbone.Model
 		repositories: null
 		visible: true
 
-	initialize: () ->
-		window.globalAccount.on 'change:firstName change:lastName', () =>
-			console.log 'user logged in -- need to update repositories'
 
-			requestData = 
-				method: 'writableRepositories'
-				args: {}
+	fetchRepositories: () =>
+		requestData = 
+			method: 'writableRepositories'
+			args: {}
 
-			socket.emit 'repos:read', requestData, (error, repositoriesData) =>
-				if error?
-					console.log error
-				else
-					@set 'repositories', repositoriesData
+		socket.emit 'repos:read', requestData, (error, repositoriesData) =>
+			if error?
+				console.log error
+				return
+	
+			@set 'repositories', repositoriesData,
+				error: (model, error) => console.error error
+
+
+	validate: (attributes) =>
+		for repository in @get('repositories')
+			if not repository.id? or repository.id < 0 or not repository.name? or repository.name is ''
+				return new Error 'Invalid repository'
+		return
 
 
 class RepositoryHeaderOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeaderOption headerMenuOption'
-	template: Handlebars.compile '<div class="dropdown">
+	html: '<div class="dropdown">
 			<span class="dropdown-toggle" data-toggle="dropdown" href="#">Repositories</span>
 			<ul class="dropdown-menu dropdownContents pull-right" role="menu"></ul>
 		</div>'
@@ -39,17 +46,22 @@ class RepositoryHeaderOption.View extends Backbone.View
 		'click .repository': '_handleRepositorySelection'
 		'click .createRepository': '_handleCreateRepository'
 
-	initialize: () ->
-		@router = new Backbone.Router()
 
-		@model.on 'change:repositories', () =>
-			@_updateDropdownContents()
-		@model.on 'change:visible', () =>
-			@_fixVisibility()
+	initialize: () ->
+		@model.on 'change:repositories', @_updateDropdownContents
+		@model.on 'change:visible', @_fixVisibility
+
+		window.globalAccount.on 'change:firstName change:lastName', () =>
+			@model.fetchRepositories()
+
+
+	onDispose: () =>
+		@model.off null, null, @
+		window.globalAccount.off null, null, @
 
 
 	render: () ->
-		@$el.html @template()
+		@$el.html @html
 		@_updateDropdownContents()
 		return @
 
@@ -58,11 +70,14 @@ class RepositoryHeaderOption.View extends Backbone.View
 		repositoryId = $(event.target).attr 'repositoryId'
 		assert.ok repositoryId?
 
-		@router.navigate 'repository/' + repositoryId, trigger: true
+		window.globalRouterModel.set
+			view: 'repository'
+			repositoryId: repositoryId
 
 
 	_handleCreateRepository: (event) =>
-		@router.navigate 'create/repository', trigger: true
+		window.globalRouterModel.set
+			view: 'createRepository'
 
 
 	_updateDropdownContents: () =>

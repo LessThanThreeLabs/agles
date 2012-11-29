@@ -29,6 +29,10 @@ class RepositoryHeaderBasicInformation.View extends Backbone.View
 		@model.on 'change:description', @render
 
 
+	onDispose: () =>
+		@model.off null, null, @
+
+
 	render: () =>
 		@$el.html @template
 			name: @model.get 'name'

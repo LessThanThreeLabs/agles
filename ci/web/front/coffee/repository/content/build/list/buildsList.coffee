@@ -18,12 +18,6 @@ class BuildsList.Model extends Backbone.Model
 
 		@buildModels.on 'change:selected', @_handleBuildSelection
 
-		@on 'change:queryString', () =>
-			@_resetBuildsList()
-			@fetchInitialBuilds()
-		window.globalRouterModel.on 'change:repositoryId', () =>
-			@_resetBuildsList()
-
 
 	_handleBuildSelection: (buildModel) =>
 		if buildModel.get 'selected'
@@ -46,7 +40,7 @@ class BuildsList.Model extends Backbone.Model
 				otherBuildModel.set 'selected', false
 
 
-	_resetBuildsList: () =>
+	resetBuildsList: () =>
 		@noMoreBuildsToFetch = false
 		@buildModels.reset()
 
@@ -64,10 +58,7 @@ class BuildsList.Model extends Backbone.Model
 
 
 	_fetchBuilds: (startNumber, numberToRetrieve, queuePolicy) =>
-		assert.ok startNumber >= 0
-		assert.ok numberToRetrieve > 0 
-		assert.ok queuePolicy? 
-		assert.ok not @noMoreBuildsToFetch
+		assert.ok startNumber >= 0 and numberToRetrieve > 0 and queuePolicy? and not @noMoreBuildsToFetch
 
 		buildsQuery = new BuildsQuery window.globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
 		@buildsFetcher.runQuery buildsQuery, queuePolicy, (error, result) =>
@@ -83,25 +74,37 @@ class BuildsList.Model extends Backbone.Model
 			@noMoreBuildsToFetch = result.builds.length < numberToRetrieve
 
 			@buildModels.add result.builds, 
-				error: (model, error) => 
-					console.error error
+				error: (model, error) => console.error error
 
 
 class BuildsList.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildsList'
-	template: Handlebars.compile ''
-	events:
-		'scroll': '_scrollHandler'
+	html: '&nbsp'
+	events:	'scroll': '_scrollHandler'
+
 
 	initialize: () =>
+		@model.on 'change:queryString', () =>
+			@model.resetBuildsList()
+			@model.fetchInitialBuilds()
+
 		@model.buildModels.on 'add', @_handleAddedBuild
 		@model.buildModels.on 'reset', () =>
 			@$el.empty()
 
+		window.globalRouterModel.on 'change:repositoryId', () =>
+			@model.resetBuildsList()
+
+
+	onDispose: () =>
+		@model.off null, null, @
+		@model.buildModels.off null, null, @
+		window.globalRouterModel.off null, null, @
+
 
 	render: () =>
-		@$el.html @template()
+		@$el.html @html
 		@model.fetchInitialBuilds()
 		return @
 
@@ -118,5 +121,7 @@ class BuildsList.View extends Backbone.View
 
 
 	_insertBuildAtIndex: (buildView, index) =>
-		if index == 0 then $('.buildsList').prepend buildView
-		else $('.buildsList .build:nth-child(' + index + ')').after buildView
+		if index == 0
+			@$el.prepend buildView
+		else 
+			@$el.find('.build:nth-child(' + index + ')').after buildView

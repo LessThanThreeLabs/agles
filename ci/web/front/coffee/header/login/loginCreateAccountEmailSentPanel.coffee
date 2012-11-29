@@ -15,8 +15,11 @@ class LoginCreateAccountEmailSentPanel.View extends Backbone.View
 		An email has been sent to {{email}} for you to verify your account!</p>'
 
 	initialize: () =>
-		@model.on 'change', () =>
-			@render()
+		@model.on 'change', @render
+
+
+	onDispose: () =>
+		@model.off null, null, @
 
 
 	render: () =>

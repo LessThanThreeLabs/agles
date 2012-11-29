@@ -12,6 +12,7 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		selectedMenuOptionName: null
 		url: ''
 
+
 	initialize: () =>
 		@repositoryUrlTrinketModel = new RepositoryUrlTrinket.Model()
 		@router = new Backbone.Router()
@@ -23,12 +24,10 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		@on 'change:url', () =>
 			@repositoryUrlTrinketModel.set 'url', @get 'url'
 
-		window.globalRouterModel.on 'change:repositoryId', () =>
-			@clear()
-			@_updateAllowedMenuOptions()
 
+	fetchAllowedMenuOptions: () =>
+		@clear()
 
-	_updateAllowedMenuOptions: () =>
 		requestData =
 			method: 'getMenuOptions'
 			args:
@@ -45,8 +44,12 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 				assert.ok @MENU_OPTIONS[option]?
 				return @MENU_OPTIONS[option]
 
-			@set 'menuOptions', allowedOptions
-			@set('selectedMenuOptionName', menuOptions.default) if not @get('selectedMenuOptionName')?
+			@set 'menuOptions', allowedOptions,
+				error: (model, error) => console.error error
+
+			if not @get('selectedMenuOptionName')?
+				@set 'selectedMenuOptionName', menuOptions.default,
+					error: (model, error) => console.error error
 
 
 	validate: (attributes) =>
@@ -66,20 +69,30 @@ class RepositoryHeaderMenu.View extends Backbone.View
 			</div>
 			{{/each}}
 		</div>'
-	events:
-		'click .repositoryMenuOption': '_handleClick'
+	events: 'click .repositoryMenuOption': '_handleClick'
 
 
 	initialize: () =>
+		@repositoryUrlTrinketView = new RepositoryUrlTrinket.View model: @model.repositoryUrlTrinketModel
+
 		@model.on 'change:menuOptions', @render
 		@model.on 'change:selectedMenuOptionName', @_handleSelectedMenuOption
+
+		window.globalRouterModel.on 'change:repositoryId', () =>
+			@model.fetchAllowedMenuOptions()
+
+
+	onDispose: () =>
+		@model.off null, null, @
+		widnow.globalRouterModel.off null, null, @
+
+		@repositoryUrlTrinketView.dispose()
 
 
 	render: () =>
 		@$el.html @template options: @model.get 'menuOptions'
 
-		repositoryUrlTrinketView = new RepositoryUrlTrinket.View model: @model.repositoryUrlTrinketModel
-		@$el.find('.repositoryMenuTrinkets').append repositoryUrlTrinketView.render().el
+		@$el.find('.repositoryMenuTrinkets').append @repositoryUrlTrinketView.render().el
 
 		# Needed for when the selected menu option 
 		# was changed before the dom was rendered.

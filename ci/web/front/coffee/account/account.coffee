@@ -5,12 +5,11 @@ class Account.Model extends Backbone.Model
 	defaults:
 		firstName: null
 		lastName: null
-		image: null
+
 
 	initialize: () ->
 		@set 'firstName', window.globalAccount.get 'firstName'
 		@set 'lastName', window.globalAccount.get 'lastName'
-		@set 'image', window.globalAccount.get 'image'
 
 
 class Account.View extends Backbone.View
@@ -52,7 +51,6 @@ class Account.View extends Backbone.View
 		'keyup': '_handleFormEntryChange'
 		'blur .prettyFormValue': '_handleSubmitChange'
 
-	initialize: () ->
 
 	render: () ->
 		@$el.html @template()
@@ -65,7 +63,8 @@ class Account.View extends Backbone.View
 
 
 	_handleSubmitChange: (event) =>
-		console.log 'Need to submit account change!'
+		console.log '>> Need to submit account change!'
+		console.log 'this belongs in the model...'
 
 		errors = {}
 		@_displayErrors errors

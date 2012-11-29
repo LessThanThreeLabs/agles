@@ -10,7 +10,7 @@ class LoginAdvancedInformationPanel.Model extends Backbone.Model
 class LoginAdvancedInformationPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'loginAdvancedInformationPanel'
-	template: Handlebars.compile '<form class="form-horizontal">
+	html: '<form class="form-horizontal">
 			<div class="control-group firstNameControlGroup">
 				<label class="control-label">First Name</label>
 				<div class="controls loginFirstNameControls">
@@ -27,8 +27,7 @@ class LoginAdvancedInformationPanel.View extends Backbone.View
 				</div>
 			</div>
 		</form>'
-	events:
-		'keydown': '_handleFormEntryChange'
+	events: 'keydown': '_handleFormEntryChange'
 
 
 	initialize: () =>
@@ -38,8 +37,12 @@ class LoginAdvancedInformationPanel.View extends Backbone.View
 			$('.loginLastName').val @model.get 'lastName'
 
 
+	onDispose: () =>
+		@model.off null, null, @
+		
+
 	render: () =>
-		@$el.html @template()
+		@$el.html @html
 		@clearErrors()
 		return @
 

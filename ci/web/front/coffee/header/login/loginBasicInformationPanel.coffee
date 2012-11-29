@@ -11,7 +11,7 @@ class LoginBasicInformationPanel.Model extends Backbone.Model
 class LoginBasicInformationPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'loginBasicInformationPanel'
-	template: Handlebars.compile '<form class="form-horizontal">
+	html: '<form class="form-horizontal">
 			<div class="control-group emailControlGroup">
 				<label class="control-label">Email</label>
 				<div class="controls loginEmailControls">
@@ -48,8 +48,12 @@ class LoginBasicInformationPanel.View extends Backbone.View
 			$('.loginRememberMe').prop 'checked', @model.get 'rememberMe'
 
 
+	dispose: () =>
+		@model.off null, null, @
+
+
 	render: () =>
-		@$el.html @template()
+		@$el.html @html
 		@clearErrors()
 		return @
 

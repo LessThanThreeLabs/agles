@@ -56,6 +56,6 @@ window.BuildsFetcher = class BuildsFetcher
 		@_fetchBuilds() if @currentQuery?
 
 
-window.BuildsFetcher.QueuePolicy =
+BuildsFetcher.QueuePolicy =
 	QUEUE_IF_BUSY: 'queueIfBusy'
 	DO_NOT_QUEUE: 'doNotQueue'

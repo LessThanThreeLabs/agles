@@ -18,23 +18,22 @@ class Main.View extends Backbone.View
 
 
 	initialize: () ->
+		@headerView = new Header.View model: @model.headerModel
+
 		window.globalRouterModel.on 'change:view', () =>
 			@_updateContent()
 
 
 	onDispose: () =>
-		window.globalRouterModel.off 'change:view', null, @
-		@currentView.dispose()
+		window.globalRouterModel.off null, null, @
+		@headerView.dispose()
+		@currentView.dispose() if @currentView?
 
 
 	render: () ->
 		@$el.html '<div class="headerContainer"></div><div class="contentContainer"></div>'
-
-		headerView = new Header.View model: @model.headerModel
-		@$el.find('.headerContainer').html headerView.render().el
-
+		@$el.find('.headerContainer').html @headerView.render().el
 		@_updateContent()
-
 		return @
 
 

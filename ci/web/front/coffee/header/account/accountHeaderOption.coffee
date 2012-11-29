@@ -7,14 +7,6 @@ class AccountHeaderOption.Model extends Backbone.Model
 		lastName: 'last'
 		visible: false
 
-	initialize: () =>
-		window.globalAccount.on 'change:firstName', (model, firstName) =>
-			@set 'firstName', firstName
-			@set 'visible', true
-		window.globalAccount.on 'change:lastName', (model, lastName) =>
-			@set 'lastName', lastName
-			@set 'visible', true
-
 
 class AccountHeaderOption.View extends Backbone.View
 	tagName: 'div'
@@ -23,11 +15,22 @@ class AccountHeaderOption.View extends Backbone.View
 	events: 'click': '_clickHandler'
 
 
-	initialize: () ->
-		@model.on 'change:firstName change:lastName', () =>
-			@render()
-		@model.on 'change:visible', () =>
-			@_fixVisibility()
+	initialize: () =>
+		@model.on 'change:firstName', @render
+		@model.on 'change:lastName', @render
+		@model.on 'change:visible', @_fixVisibility
+
+		window.globalAccount.on 'change:firstName', () =>
+			@model.set 'firstName', window.globalAccount.get 'firstName'
+			@model.set 'visible', true
+		window.globalAccount.on 'change:lastName', () =>
+			@model.set 'lastName', window.globalAccount.get 'lastName'
+			@model.set 'visible', true
+
+
+	onDispose: () =>
+		@model.off null, null, @
+		window.globalAccount.off null, null, @
 
 
 	render: () ->
@@ -39,9 +42,9 @@ class AccountHeaderOption.View extends Backbone.View
 
 
 	_fixVisibility: () =>
-		if @model.get('visible') then @$el.css 'display', 'inline-block'
-		else @$el.css 'display', 'none'
+		@$el.css 'display', if @model.get('visible') then 'inline-block' else 'none'
 
 
 	_clickHandler: () =>
-		console.log 'clicked'
+		window.globalRouterModel.set 'view', 'account'
+		

@@ -2,18 +2,22 @@ window.ConsoleCompilationOutput = {}
 
 
 class ConsoleCompilationOutput.Model extends Backbone.Model
-	defaults:
-		consoleTextOutputModels: null
+
+	initialize: () =>
+		@consoleTextOutputModels = new Backbone.Collection()
+		@consoleTextOutputModels.model = ConsoleTextOutput.Model
+		@consoleTextOutputModels.comparator = (consoleTextOutputModel) =>
+			return consoleTextOutputModel.get 'title'
 
 
 	fetchOutput: () =>
-		if not window.globalRouterModel.get('buildId')?
-			@set 'consoleTextOutputModels', []
-			return
+		@consoleTextOutputModels.reset()
+
+		return if not window.globalRouterModel.get('buildId')?
 
 		requestData =
 			method: 'buildOutputIds'
-			args:
+			args: 
 				buildId: window.globalRouterModel.get('buildId')
 		socket.emit 'buildOutputs:read', requestData, (error, buildOutputIds) =>
 			if error?
@@ -25,50 +29,34 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 				for buildOutputId in buildOutputTypeValue
 					consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
 
-			@set 'consoleTextOutputModels', consoleOutputModels
-
-	# 		@_beginPolling()
-
-
-	# _beginPolling: () =>
-	# 	setInterval (() =>
-	# 		requestData =
-	# 			method: 'buildOutputIds'
-	# 			args:
-	# 				buildId: window.globalRouterModel.get('buildId')
-					
-	# 		socket.emit 'buildOutputs:read', requestData, (error, buildOutputIds) =>
-	# 			if error?
-	# 				console.error error
-	# 				return
-
-	# 			consoleOutputModels = []
-	# 			for buildOutputTypeKey, buildOutputTypeValue of buildOutputIds
-	# 				for buildOutputId in buildOutputTypeValue
-	# 					consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
-
-	# 			@set 'consoleTextOutputModels', consoleOutputModels
-	# 		), 3000
+			consoleTextOutputModels.reset consoleOutputModels,
+				error: (model, error) => console.error error
 
 
 class ConsoleCompilationOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleCompilationOutput'
+	html: '&nbsp'
 
 
 	initialize: () =>
+		@model.consoleTextOutputModels.on 'reset', @_addOutput
 		window.globalRouterModel.on 'change:buildId', @model.fetchOutput
-		@model.on 'change:consoleTextOutputModels', @_addOutput
+
+
+	onDispose: () =>
+		@model.consoleTextOutputModels.off null, null, @
+		window.globalRouterModel.off null, null, @
 
 
 	render: () =>
-		@$el.html '&nbsp'
+		@$el.html @html
 		@model.fetchOutput()
 		return @
 
 
 	_addOutput: () =>
-		@$el.empty()
-		for consoleTextOutputModel in @model.get 'consoleTextOutputModels'
+		@$el.html @html
+		for consoleTextOutputModel in @model.consoleTextOutputModels
 			consoleTextOutputView = new ConsoleTextOutput.View model: consoleTextOutputModel
 			@$el.append consoleTextOutputView.render().el

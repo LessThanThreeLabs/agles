@@ -9,18 +9,22 @@ class BuildsSearch.Model extends Backbone.Model
 class BuildsSearch.View extends Backbone.View
 	tagName: 'div'
 	className: 'buildsSearch'
-	template: Handlebars.compile '<input type="search" class="buildsSearchField" placeholder="search..." maxlength=256 autocomplete="on">'
+	html: '<input type="search" class="buildsSearchField" placeholder="search..." maxlength=256 autocomplete="on">'
 	events:
-		'blur .buildsSearchField': '_handleKeyDown'
 		'keyup .buildsSearchField': '_handleKeyDown'
+		'blur .buildsSearchField': '_handleKeyDown'
 
 
 	initialize: () =>
 		@model.on 'change:queryString', @_syncModelToView
 
 
+	onDispose: () =>
+		@model.off null, null, @
+
+
 	render: () =>
-		@$el.html @template()
+		@$el.html @html
 		@_syncModelToView()
 		return @
 

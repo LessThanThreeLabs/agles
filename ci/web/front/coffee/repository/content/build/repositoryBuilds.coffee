@@ -3,7 +3,7 @@ window.RepositoryBuilds = {}
 
 class RepositoryBuilds.Model extends Backbone.Model
 
-	initialize: () ->
+	initialize: () =>
 		@buildsListManagerModel = new BuildsListManager.Model()
 		@buildDetailsModel = new BuildDetails.Model()
 
@@ -11,16 +11,21 @@ class RepositoryBuilds.Model extends Backbone.Model
 class RepositoryBuilds.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryBuilds'
-	template: Handlebars.compile ''
+	html: ''
 
-	initialize: () ->
 
-	render: () ->
-		@$el.html @template()
+	initialize: () =>
+		@buildsListManagerView = new BuildsListManager.View model: @model.buildsListManagerModel
+		@buildDetailsView = new BuildDetails.View model: @model.buildDetailsModel
 
-		buildsListManagerView = new BuildsListManager.View model: @model.buildsListManagerModel
-		@$el.append buildsListManagerView.render().el
 
-		buildDetailsView = new BuildDetails.View model: @model.buildDetailsModel
-		@$el.append buildDetailsView.render().el
+	onDispose: () =>
+		@buildsListManagerView.dispose()
+		@buildDetailsView.dispose()
+
+
+	render: () =>
+		@$el.html @html
+		@$el.append @buildsListManagerView.render().el
+		@$el.append @buildDetailsView.render().el
 		return @

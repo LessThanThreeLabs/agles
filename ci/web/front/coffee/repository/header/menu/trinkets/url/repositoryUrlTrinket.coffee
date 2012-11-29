@@ -5,7 +5,6 @@ class RepositoryUrlTrinket.Model extends Backbone.Model
 	defaults:
 		url: ''
 
-	initialize: () =>
 
 	validate: (attributes) =>
 		if not attributes.url? or attributes.url.length is 0
@@ -22,8 +21,13 @@ class RepositoryUrlTrinket.View extends Backbone.View
 			git clone <span class="repositoryUrl">{{url}}</span>
 		</div>'
 
+
 	initialize: () =>
 		@model.on 'change:url', @render
+
+
+	onDispose: () =>
+		@model.off null, null, @
 
 
 	render: () =>

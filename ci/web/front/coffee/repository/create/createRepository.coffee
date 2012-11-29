@@ -8,13 +8,11 @@ class CreateRepository.Model extends Backbone.Model
 		description: ''
 		defaultPermissions: 'write'
 
-	initialize: () =>
-
 
 class CreateRepository.View extends Backbone.View
 	tagName: 'div'
 	className: 'createRepository'
-	template: Handlebars.compile '<div class="createRepositoryInformation">
+	html: '<div class="createRepositoryInformation">
 			Specify the details of your repository.
 		</div>
 		<div class="prettyForm createRepositoryForm">
@@ -59,12 +57,9 @@ class CreateRepository.View extends Backbone.View
 		'click .defaultPermissionsOption': '_handleDefaultPermissionsSelection'
 		'click .createRepositoryButton': '_handleCreateRepository'
 
-	initialize: () =>
-		@router = new Backbone.Router()
-
 
 	render: () =>
-		@$el.html @template()
+		@$el.html @html
 
 		@$el.find('.repositoryNameField').val @model.get 'name'
 		@$el.find('.repositoryDescriptionField').val @model.get 'description'
@@ -96,7 +91,9 @@ class CreateRepository.View extends Backbone.View
 		# socket.emit 'repos:create', requestData, (errors, repository) =>
 		# 	console.log 'navigate page to repository ' + repository.id
 		repository = id: 17
-		@router.navigate 'repository/' + repository.id, trigger: true
+
+		window.globalRouterModel.set 'view', 'repository'
+		window.globalRouterModel.set 'repositoryId', repository.id
 
 
 	_clearErrors: () =>

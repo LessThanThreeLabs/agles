@@ -5,7 +5,8 @@ class RepositoryAdmin.Model extends Backbone.Model
 	defaults:
 		repositoryId: null
 
-	initialize: () ->
+
+	initialize: () =>
 		menuOptions = [new RepositoryAdminMenuOption('general', 'General'), 
 			new RepositoryAdminMenuOption('members', 'Members')]
 
@@ -26,14 +27,26 @@ class RepositoryAdmin.Model extends Backbone.Model
 class RepositoryAdmin.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdmin'
+	html: ''
 
-	initialize: () ->
 
-	render: () ->
-		repositoryAdminMenuView = new RepositoryAdminMenu.View model: @model.repositoryAdminMenuModel
-		@$el.html repositoryAdminMenuView.render().el
+	initialize: () =>
+		@repositoryAdminMenuView = new RepositoryAdminMenu.View model: @model.repositoryAdminMenuModel
+		@repositoryAdminContentView = new RepositoryAdminContent.View model: @model.repositoryAdminContentModel
 
-		repositoryAdminContentView = new RepositoryAdminContent.View model: @model.repositoryAdminContentModel
-		@$el.append repositoryAdminContentView.render().el
+		window.globalRouterModel.on 'change:repositoryId', () =>
+			@model.set 'repositoryId', window.globalRouterModel.get 'repositoryId'
 
+
+	onDispose: () =>
+		window.globalRouterModel.off null, null, @
+		
+		@repositoryAdminMenuView.dispose()
+		@repositoryAdminContentView.dispose()
+
+
+	render: () =>
+		@$el.html @html
+		@$el.append @repositoryAdminMenuView.render().el
+		@$el.append @repositoryAdminContentView.render().el
 		return @

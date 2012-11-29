@@ -18,6 +18,10 @@ class ConsoleTextOutputLine.View extends Backbone.View
 		@model.on 'change', @render
 
 
+	onDispose: () =>
+		@model.off null, null, @
+
+
 	render: () ->
 		@$el.html @template
 			number: @model.get 'number'

@@ -19,12 +19,10 @@ class RepositoryHeader.Model extends Backbone.Model
 		@on 'change:url', () =>
 			@repositoryHeaderMenuModel.set 'url', @get 'url'
 
-		window.globalRouterModel.on 'change:repositoryId', () =>
-			@clear()
-			@_getRepositoryInformation()
 
+	fetchRepositoryInformation: () =>
+		@clear()
 
-	_getRepositoryInformation: () =>
 		requestData = id: window.globalRouterModel.get 'repositoryId'
 		socket.emit 'repos:read', requestData, (error, data) =>
 			console.error error if error?
@@ -47,19 +45,27 @@ class RepositoryHeader.Model extends Backbone.Model
 class RepositoryHeader.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeader'
-	template: Handlebars.compile '<div class="repositoryHeaderContainer">
+	html: '<div class="repositoryHeaderContainer">
 			<div class="repositoryNameAndDescription"></div>
 			<div class="repositoryUrlAndMenu"></div>
 		</div>'
 
 
-	render: () =>
-		@$el.html @template()
+	initialize: () =>
+		@repositoryHeaderBasicInformationView = new RepositoryHeaderBasicInformation.View model: @model.repositoryHeaderBasicInformationModel
+		@repositoryHeaderMenuView = new RepositoryHeaderMenu.View model: @model.repositoryHeaderMenuModel
 
-		repositoryHeaderBasicInformationView = new RepositoryHeaderBasicInformation.View model: @model.repositoryHeaderBasicInformationModel
-		@$el.find('.repositoryNameAndDescription').append repositoryHeaderBasicInformationView.render().el
-		
-		repositoryHeaderMenuView = new RepositoryHeaderMenu.View model: @model.repositoryHeaderMenuModel
-		@$el.find('.repositoryUrlAndMenu').append repositoryHeaderMenuView.render().el
-		
+		window.globalRouterModel.on 'change:repositoryId', @model.fetchRepositoryInformation
+
+
+	onDispose: () =>
+		window.globalRouterModel.off null, null, @
+		@repositoryHeaderBasicInformationView.dispose()
+		@repositoryHeaderMenuView.dispose()
+
+
+	render: () =>
+		@$el.html @html
+		@$el.find('.repositoryNameAndDescription').append @repositoryHeaderBasicInformationView.render().el
+		@$el.find('.repositoryUrlAndMenu').append @repositoryHeaderMenuView.render().el
 		return @

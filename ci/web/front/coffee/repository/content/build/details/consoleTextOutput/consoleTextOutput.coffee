@@ -2,7 +2,6 @@ window.ConsoleTextOutput = {}
 
 
 class ConsoleTextOutput.Model extends Backbone.Model
-	urlRoot: 'buildOutputs'
 	defaults:
 		id: null
 		title: null
@@ -16,8 +15,6 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 
 	fetchOutput: () =>
-		console.log 'consoleTextOutput -- this should actually be a fetch'
-
 		socket.emit 'buildOutputs:read', id: @get('id'), (error, result) =>
 			if error?
 				console.error error
@@ -27,21 +24,6 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 			if result.console_output?
 				@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
-
-
-		@_beginPolling()
-
-
-	_beginPolling: () =>
-		setInterval (() =>
-			socket.emit 'buildOutputs:read', id: @get('id'), (error, result) =>
-				if error?
-					console.error error
-					return
-
-				return if not result.console_output?
-				@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
-			), 3000
 
 
 	_generateLineModelsFromText: (text) =>
@@ -60,14 +42,20 @@ class ConsoleTextOutput.View extends Backbone.View
 	className: 'consoleTextOutput'
 	template: Handlebars.compile '<div class="title">{{title}}</div><div class="output"></div>'
 
+
 	initialize: () =>
 		@model.on 'change:title', @render
 		@model.consoleTextOutputLineModels.on 'addLine', @_handleAddLine
 		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText
 
 
+	onDispose: () =>
+		@model.off null, null, @
+		@model.consoleTextOutputLineModels.off null, null, @
+
+
 	render: () =>
-		@$el.html @template
+		@$el.html @template 
 			title: @model.get 'title'
 		@model.fetchOutput()
 		return @

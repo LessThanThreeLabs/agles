@@ -9,6 +9,7 @@ class LoginPanel.Model extends Backbone.Model
 		mode: 'initial'
 		visible: false
 
+
 	initialize: () =>
 		@loginBasicInformationPanelModel = new LoginBasicInformationPanel.Model()
 		@loginAdvancedInformationPanelModel = new LoginAdvancedInformationPanel.Model()
@@ -29,7 +30,7 @@ class LoginPanel.Model extends Backbone.Model
 class LoginPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'loginPanel'
-	template: Handlebars.compile '<div class="loginModal modal hide fade">
+	html: '<div class="loginModal modal hide fade">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 				<h3>Login</h3>
@@ -43,7 +44,6 @@ class LoginPanel.View extends Backbone.View
 				<a href="#" class="btn btn-primary okButton">Ok</a>
 			</div>
 		</div>'
-
 	events:
 		'click .createAccountButton': '_handleCreateAccountClick'
 		'click .loginButton': '_handleLoginClick'
@@ -64,16 +64,28 @@ class LoginPanel.View extends Backbone.View
 			@model.set 'visible', false
 
 
+	onDispose: () =>
+		@model.off null, null, @
+
+		@loginBasicInformationPanelView.dispose()
+		@loginAdvancedInformationPanelView.dispose()
+		@loginCreateAccountEmailSentPanelView.dispose()
+
+		console.log 'need to dispose of document events'
+
+
 	render: () =>
 		assert.ok not window.LoginPanel.renderedAlready
 		window.LoginPanel.renderedAlready = true
 
-		@$el.html @template()
+		@$el.html @html
+
 		@$el.find('.formContents').append @loginBasicInformationPanelView.render().el
 		@$el.find('.formContents').append @loginAdvancedInformationPanelView.render().el
 		@$el.find('.formContents').append @loginCreateAccountEmailSentPanelView.render().el
 
 		@_loadInitialView()
+
 		return @
 
 
@@ -176,7 +188,6 @@ class LoginPanel.View extends Backbone.View
 					firstName: userData.firstName
 					lastName: userData.lastName
 				@model.set 'visible', false
-			console.error errors
 
 
 	_updateVisibility: (model, visible) =>
