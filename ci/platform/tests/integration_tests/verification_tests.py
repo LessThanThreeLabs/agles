@@ -1,5 +1,7 @@
 import os
 
+import yaml
+
 from git import Repo
 from nose.tools import *
 from shutil import rmtree
@@ -53,7 +55,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			self.verifier = FakeBuildVerifier(passes=True)
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
-		self._modify_commit_push(work_repo, "hello.py", "print 'Hello World!'",
+		self._modify_commit_push(work_repo, "agles_config.yml",
+			yaml.dump({'test': [{'hello_world': {'script': 'echo Hello World!'}}]}),
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
@@ -64,7 +67,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			self.verifier = FakeBuildVerifier(passes=False)
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
-		self._modify_commit_push(work_repo, "hello.py", "4 = 'x' + 2",
+		self._modify_commit_push(work_repo, "agles_config.yml",
+			yaml.dump({'test': [{'fail': {'script': 'exit 42'}}]}),
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],

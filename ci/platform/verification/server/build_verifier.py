@@ -27,9 +27,7 @@ class BuildVerifier(object):
 		try:
 			self.checkout_refs(repo_uri, refs)
 			verification_config = self.get_verification_configurations()
-			self._get_output_handler(console_appender, ConsoleType.Setup).declare_commands(["chef"])
-			self._get_output_handler(console_appender, ConsoleType.Compile).declare_commands([command.name for command in verification_config.compile_commands])
-			self._get_output_handler(console_appender, ConsoleType.Test).declare_commands([command.name for command in verification_config.test_commands])
+			self._declare_all_commands(console_appender, verification_config)
 			self._setup_vagrant_wrapper(console_appender)
 			self.run_compile_step(verification_config.compile_commands, console_appender)
 			self.run_test_step(verification_config.test_commands, console_appender)
@@ -52,6 +50,12 @@ class BuildVerifier(object):
 
 	def _get_output_handler(self, console_appender, type, subtype=""):
 		return console_appender(type, subtype) if console_appender else None
+
+	def _declare_all_commands(self, console_appender, verification_config):
+		if console_appender:
+			self._get_output_handler(console_appender, ConsoleType.Setup).declare_commands(["chef"])
+			self._get_output_handler(console_appender, ConsoleType.Compile).declare_commands([command.name for command in verification_config.compile_commands])
+			self._get_output_handler(console_appender, ConsoleType.Test).declare_commands([command.name for command in verification_config.test_commands])
 
 	def _setup_vagrant_wrapper(self, console_appender):
 		"""Provisions the contained vagrant wrapper for analysis and test running"""

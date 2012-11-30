@@ -27,7 +27,7 @@ class Vagrant(object):
 		return self.vm_directory
 
 	def status(self):
-		status_output = self._vagrant_call("status").stdout
+		status_output = self._vagrant_call("status").output
 		match = re.search("default\\s+(.*)", status_output, re.MULTILINE)
 		return match.group(1).rstrip() if match else "not created"
 
@@ -79,9 +79,6 @@ class Vagrant(object):
 		self._output = list()
 		output_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
 		output_lines = output_greenlet.wait()
-
-		if output_handler:
-			output_handler.flush()
 
 		output = "\n".join(output_lines)
 		returncode = process.poll()

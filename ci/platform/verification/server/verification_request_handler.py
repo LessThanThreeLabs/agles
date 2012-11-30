@@ -83,7 +83,4 @@ class VerificationRequestHandler(QueueListener):
 
 			def append(self, line_num, line):
 				self.model_server_rpc.append_console_line(self.build_id, line_num, line, self.type, self.subtype)
-
-			def flush(self):
-				self.model_server_rpc.flush_console_output(build_id, self.type, self.subtype)
 		return ConsoleAppender
