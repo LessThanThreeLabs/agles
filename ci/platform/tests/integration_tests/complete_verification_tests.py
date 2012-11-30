@@ -9,7 +9,7 @@ from util.permissions import RepositoryPermissions
 from vagrant.vagrant_wrapper import VagrantWrapper
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
-from model_server.events_broker import EventsBroker
+from model_server.events_broker import EventsBroker, get_event
 from database.engine import ConnectionFactory
 from database import schema
 from verification.master import *
@@ -122,7 +122,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 		with Connection(connection_info) as connection:
 			events_broker = EventsBroker(connection)
-			events_broker.publish(events_broker.get_event("repos", "update"), (commit_id, "master"))
+			events_broker.publish(get_event("repos", "update"), commit_id=commit_id, merge_target="master")
 			with connection.Consumer(merge_queue, callbacks=[self._on_response]) as consumer:
 				consumer.consume()
 				self.response = None
