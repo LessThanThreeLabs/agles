@@ -32,7 +32,7 @@ class ConsoleTextOutput.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:title', @render, @
+		@model.on 'change:title', @_updateTitle, @
 		@model.consoleTextOutputLineModels.on 'addLine', @_handleAddLine, @
 		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText, @
 
@@ -47,6 +47,12 @@ class ConsoleTextOutput.View extends Backbone.View
 			title: @model.get 'title'
 		@model.fetchOutput()
 		return @
+
+
+	_updateTitle: () =>
+		@$el.html @template 
+			title: @model.get 'title'
+		@_initializeOutputText()
 
 
 	_initializeOutputText: () =>
