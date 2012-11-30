@@ -21,20 +21,8 @@ class ConsoleTextOutput.Model extends Backbone.Model
 				return
 
 			@set 'title', result.subtype
-
 			if result.console_output?
-				@consoleTextOutputLineModels.reset @_generateLineModelsFromText result.console_output
-
-
-	_generateLineModelsFromText: (text) =>
-		lines = text.split '\n'
-		return (@_generateLineModel number, line for line, number in lines)
-
-
-	_generateLineModel: (number, line) =>
-		return toReturn =
-			number: number
-			text: line
+				@consoleTextOutputLineModels.reset result.console_output
 
 
 class ConsoleTextOutput.View extends Backbone.View

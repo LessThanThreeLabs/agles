@@ -16,7 +16,7 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 		return if not window.globalRouterModel.get('buildId')?
 
 		requestData =
-			method: 'buildOutputIds'
+			method: 'getBuildConsoleIds'
 			args: 
 				buildId: window.globalRouterModel.get('buildId')
 		socket.emit 'buildOutputs:read', requestData, (error, buildOutputIds) =>

@@ -77,7 +77,7 @@ class SchemaDataGenerator(object):
 				ins_permission = schema.permission.insert().values(user_id=user_id, repo_hash=repo_hash, permissions=permissions)
 				conn.execute(ins_permission)
 
-				for commit in range(random.randint(1, 100)):
+				for commit in range(random.randint(1, 20)):
 					repo_id = random.choice(repos.keys())
 					repo_hash_query = schema.repo.select().where(schema.repo.c.id==repo_id)
 					repo_hash = conn.execute(repo_hash_query).first()[schema.repo.c.hash]
@@ -99,8 +99,15 @@ class SchemaDataGenerator(object):
 
 					for priority, console_type in enumerate(range(2)):
 						ins_console = schema.build_console.insert().values(build_id=build_id, type=console_type,
-							subtype="subtype", subtype_priority=priority, console_output=self.generate_console_output())
-						conn.execute(ins_console)
+							subtype="subtype", subtype_priority=priority)
+						console_id = conn.execute(ins_console).inserted_primary_key[0]
+						self.generate_console_output(conn, console_id)
+
+						ins_console = schema.build_console.insert().values(build_id=build_id, type=console_type,
+							subtype="subtype2", subtype_priority=priority)
+						console_id = conn.execute(ins_console).inserted_primary_key[0]
+						self.generate_console_output(conn, console_id)
+
 
 		self._grantall(self.admin_id, repo_hashes, RepositoryPermissions.RWA)
 		self._grantall(self.user_id, repo_hashes, RepositoryPermissions.R)
@@ -117,11 +124,17 @@ class SchemaDataGenerator(object):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(schema.permission.insert(), insert_values)
 
-	def generate_console_output(self):
-		output = ""
-		for line_num in range(random.randint(20, 1000)):
-			output = output + ''.join(random.choice(string.ascii_letters + string.digits + ' ') for x in range(random.randint(1, 100))) + "\n"
-		return output
+	def generate_console_output(self, sqlconn, console_id):
+		console_output = schema.console_output
+
+		for line_num in range(random.randint(20, 500)):
+			output = ''.join(random.choice(string.ascii_letters + string.digits + ' ') for x in range(random.randint(1, 100)))
+			ins = console_output.insert().values(
+				build_console_id=console_id,
+				line_number=line_num,
+				line=output
+			)
+			sqlconn.execute(ins)
 
 
 def main():

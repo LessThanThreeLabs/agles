@@ -25,25 +25,6 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 		)
 		return query
 
-	def _get_subtype_priority_from_redis(self, type_key):
-		redis_conn = ConnectionFactory.get_redis_connection()
-
-		subtype_to_priority = redis_conn.hgetall(type_key)
-		priority_map = dict([(parse_subtype(k), int(v))
-							 for k, v in subtype_to_priority.items()])
-		return priority_map
-
-	def _get_output_from_redis(self, type_key):
-		subtype_to_output = {}
-		redis_conn = ConnectionFactory.get_redis_connection()
-		subtype_keys = redis_conn.hgetall(type_key)
-		for subtype_key in subtype_keys:
-			subtype = parse_subtype(subtype_key)
-			lines = dict([(int(k), v)
-						  for k, v in redis_conn.hgetall(subtype_key).items()])
-			subtype_to_output[subtype] = lines
-		return subtype_to_output
-
 	def _has_permission(self, user_id, build_id):
 		build = database.schema.build
 		change = database.schema.change
@@ -65,26 +46,10 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 				return RepositoryPermissions.has_permissions(
 					row[permission.c.permissions], RepositoryPermissions.R)
 
-	def get_subtype_priority(self, user_id, build_id, console):
+	def get_build_console_ids(self, user_id, build_id):
 		if not self._has_permission(user_id, build_id):
 			return {}
 
-		type_key = REDIS_TYPE_KEY % (build_id, console)
-
-		redis_conn = ConnectionFactory.get_redis_connection()
-		if redis_conn.exists(type_key):
-			return self._get_subtype_priority_from_redis(type_key)
-
-		build_console = database.schema.build_console
-		query = self._subtypes_query(user_id, build_id, console)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			return dict(
-				[(row[build_console.c.subtype], row[build_console.c.priority])
-					for row in sqlconn.execute(query)]
-			)
-
-	# this is a hack
-	def majortypes(self, user_id, build_id):
 		build_console = database.schema.build_console
 
 		query = build_console.select().where(
@@ -95,34 +60,50 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			for row in sqlconn.execute(query):
 				type = row[build_console.c.type]
-				rowid = row[build_console.c.id]
-				result[type].append(rowid)
-		return dict(result)
+				row_id = row[build_console.c.id]
+				subtype_priority = row[build_console.c.subtype_priority]
+				result[type].append((subtype_priority, row_id))
 
-	def console_output(self, user_id, build_output_id):
+		for k, v in result.iteritems():
+			sorted_v = sorted(v, key=lambda tup: tup[0])
+			result[k] = [row_id for priority, row_id in sorted_v]
+		return result
+
+	def _has_build_console_permission(self, user_id, build_console_id):
+		build = database.schema.build
 		build_console = database.schema.build_console
-		query = build_console.select().where(build_console.c.id==build_output_id)
+		change = database.schema.change
+		commit = database.schema.commit
+		repo = database.schema.repo
+		permission = database.schema.permission
+
+		query = build_console.join(build).join(change).join(commit).join(repo).join(permission).select().where(
+			and_(
+				build_console.c.id==build_console_id,
+				permission.c.user_id==user_id,
+			)
+		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-		return to_dict(row, build_console.columns)
+			if not row:
+				return False
+			else:
+				return RepositoryPermissions.has_permissions(
+					row[permission.c.permissions], RepositoryPermissions.R)
 
-	def get_console_output(self, user_id, build_id, console):
-		if not self._has_permission(user_id, build_id):
+	def get_console_output(self, user_id, build_console_id):
+		if not self._has_build_console_permission(user_id, build_console_id):
 			return {}
 
-		type_key = REDIS_TYPE_KEY % (build_id, console)
-
-		redis_conn = ConnectionFactory.get_redis_connection()
-		if redis_conn.exists(type_key):
-			return self._get_output_from_redis(type_key)
-
+		console_output = database.schema.console_output
 		build_console = database.schema.build_console
-		query = self._subtypes_query(build_id, console)
+
+		output_query = console_output.select().where(console_output.c.build_console_id==build_console_id)
+		metadata_query = build_console.select().where(build_console.c.id==build_console_id)
+
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			subtype_to_output = {}
-			for row in sqlconn.execute(query):
-				lines = row[build_console.c.console_output].splitlines()
-				numbered_lines = dict(enumerate(lines))
-				subtype_to_output[row[build_console.c.subtype]] = numbered_lines
-			return subtype_to_output
+			output = dict([(row[console_output.c.line_number], row[console_output.c.line]) for row in sqlconn.execute(output_query)])
+			console_metadata = to_dict(sqlconn.execute(metadata_query).first(), build_console.columns)
+			console_metadata[console_output.name] = output
+		return console_metadata
