@@ -16,16 +16,18 @@ class AccountHeaderOption.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:firstName', @render
-		@model.on 'change:lastName', @render
-		@model.on 'change:visible', @_fixVisibility
+		@model.on 'change:firstName', @render, @
+		@model.on 'change:lastName', @render, @
+		@model.on 'change:visible', @_fixVisibility, @
 
-		window.globalAccount.on 'change:firstName', () =>
+		window.globalAccount.on 'change:firstName', (() =>
 			@model.set 'firstName', window.globalAccount.get 'firstName'
 			@model.set 'visible', true
-		window.globalAccount.on 'change:lastName', () =>
+			), @
+		window.globalAccount.on 'change:lastName', (() =>
 			@model.set 'lastName', window.globalAccount.get 'lastName'
 			@model.set 'visible', true
+			), @
 
 
 	onDispose: () =>
