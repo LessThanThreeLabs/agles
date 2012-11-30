@@ -2,9 +2,6 @@ window.RepositoryAdmin = {}
 
 
 class RepositoryAdmin.Model extends Backbone.Model
-	defaults:
-		repositoryId: null
-
 
 	initialize: () =>
 		menuOptions = [new RepositoryAdminMenuOption('general', 'General'), 
@@ -16,9 +13,6 @@ class RepositoryAdmin.Model extends Backbone.Model
 
 		@repositoryAdminContentModel = new RepositoryAdminContent.Model()
 		@repositoryAdminContentModel.set 'mode', @repositoryAdminMenuModel.get 'selectedOptionName'
-
-		@on 'change:repositoryId', () =>
-			@repositoryAdminContentModel.set 'repositoryId', @get 'repositoryId'
 
 		@repositoryAdminMenuModel.on 'change:selectedOptionName', ()  =>
 			@repositoryAdminContentModel.set 'mode', @repositoryAdminMenuModel.get 'selectedOptionName'
@@ -34,8 +28,9 @@ class RepositoryAdmin.View extends Backbone.View
 		@repositoryAdminMenuView = new RepositoryAdminMenu.View model: @model.repositoryAdminMenuModel
 		@repositoryAdminContentView = new RepositoryAdminContent.View model: @model.repositoryAdminContentModel
 
-		window.globalRouterModel.on 'change:repositoryId', () =>
+		window.globalRouterModel.on 'change:repositoryId', (() =>
 			@model.set 'repositoryId', window.globalRouterModel.get 'repositoryId'
+			), @
 
 
 	onDispose: () =>

@@ -20,10 +20,11 @@ class LoginHeaderOption.View extends Backbone.View
 	initialize: () ->
 		@loginPanelView = new LoginPanel.View model: @model.loginPanelModel
 
-		@model.on 'change:visible', @_fixVisibility
+		@model.on 'change:visible', @_fixVisibility, @
 
-		window.globalAccount.on 'change:firstName', () =>
+		window.globalAccount.on 'change:firstName', (() =>
 			@model.set 'visible', false
+			), @
 
 
 	onDispose: () =>

@@ -32,7 +32,12 @@ class MemberPermissions.View extends Backbone.View
 		'change .permissionsRadio': '_handlePermissionsChange'
 		'click .removeMemberImage': '_handleRemoveMember'
 
+
 	initialize: () =>
+
+
+	onDispose: () =>
+
 
 	render: () =>
 		@$el.html @template

@@ -3,10 +3,7 @@ window.RepositoryAdminGeneralPanel = {}
 
 class RepositoryAdminGeneralPanel.Model extends Backbone.Model
 	defaults:
-		repositoryId: null
 		description: null
-
-	initialize: () ->
 
 
 class RepositoryAdminGeneralPanel.View extends Backbone.View
@@ -29,6 +26,10 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 		'blur .prettyFormValue': '_handleSubmitChange'
 
 	initialize: () =>
+
+
+	onDispose: () =>
+
 
 	render: () =>
 		@$el.html @template()

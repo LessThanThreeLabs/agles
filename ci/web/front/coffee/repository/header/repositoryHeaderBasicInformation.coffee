@@ -25,8 +25,8 @@ class RepositoryHeaderBasicInformation.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:name', @render
-		@model.on 'change:description', @render
+		@model.on 'change:name', @render, @
+		@model.on 'change:description', @render, @
 
 
 	onDispose: () =>

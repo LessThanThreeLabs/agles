@@ -16,7 +16,7 @@ class BuildsSearch.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:queryString', @_syncModelToView
+		@model.on 'change:queryString', @_syncModelToView, @
 
 
 	onDispose: () =>

@@ -31,10 +31,8 @@ class LoginAdvancedInformationPanel.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:firstName', () =>
-			$('.loginFirstName').val @model.get 'firstName'
-		@model.on 'change:lastName', () =>
-			$('.loginLastName').val @model.get 'lastName'
+		@model.on 'change:firstName', (() => $('.loginFirstName').val @model.get 'firstName'), @
+		@model.on 'change:lastName', (() => $('.loginLastName').val @model.get 'lastName'), @
 
 
 	onDispose: () =>

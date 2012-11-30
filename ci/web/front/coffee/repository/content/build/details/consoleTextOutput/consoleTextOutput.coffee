@@ -32,9 +32,9 @@ class ConsoleTextOutput.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:title', @render
-		@model.consoleTextOutputLineModels.on 'addLine', @_handleAddLine
-		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText
+		@model.on 'change:title', @render, @
+		@model.consoleTextOutputLineModels.on 'addLine', @_handleAddLine, @
+		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText, @
 
 
 	onDispose: () =>
@@ -52,9 +52,13 @@ class ConsoleTextOutput.View extends Backbone.View
 	_initializeOutputText: () =>
 		@$el.find('.output').empty()
 
-		@model.consoleTextOutputLineModels.each (consoleTextOutputLineModel) =>
-			consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
-			@$el.find('.output').append consoleTextOutputLineView.render().el
+		console.log 'consoleTextOutput -- need to render the lines properly'
+		# htmlToAdd = $ 'div'
+		# @model.consoleTextOutputLineModels.each (consoleTextOutputLineModel) =>
+		# 	consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
+		# 	htmlToAdd.append consoleTextOutputLineView.render().el
+
+		# @$el.find('.output').html htmlToAdd.html()
 
 
 	_handleAddLine: (buildOutputLineModel) =>

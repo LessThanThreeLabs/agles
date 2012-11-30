@@ -55,8 +55,8 @@ class LoginPanel.View extends Backbone.View
 		@loginAdvancedInformationPanelView = new LoginAdvancedInformationPanel.View model: @model.loginAdvancedInformationPanelModel
 		@loginCreateAccountEmailSentPanelView = new LoginCreateAccountEmailSentPanel.View model: @model.loginCreateAccountEmailSentPanelModel
 
-		@model.on 'change:mode', @_updateMode
-		@model.on 'change:visible', @_updateVisibility
+		@model.on 'change:mode', @_updateMode, @
+		@model.on 'change:visible', @_updateVisibility, @
 
 		$(document).on 'show', '.loginModal', () =>
 			@model.set 'visible', true

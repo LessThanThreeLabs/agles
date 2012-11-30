@@ -2,8 +2,12 @@ window.RepositoryAdminMenu = {}
 
 
 class RepositoryAdminMenu.Model extends Backbone.Model
+	defaults:
+		options: null
+		selectedOptionName: null
 
-	initialize: () ->
+
+	initialize: () =>
 		assert.ok @get('options').some (option) =>
 			return option.name is @get 'selectedOptionName'
 
@@ -16,12 +20,16 @@ class RepositoryAdminMenu.View extends Backbone.View
 				<div class="menuOption" optionName="{{name}}">{{title}}</div>
 			{{/each}}
 		</div>'
-	events:
-		'click .menuOption': "_handleOptionClick"
+	events: 'click .menuOption': "_handleOptionClick"
+
 
 	initialize: () ->
-		@model.on 'change:options', @render
-		@model.on 'change:selectedOptionName', @_handleSelectedOptionChange
+		@model.on 'change:options', @render, @
+		@model.on 'change:selectedOptionName', @_handleSelectedOptionChange, @
+
+
+	onDispose: () =>
+		@model.off null, null, @
 
 
 	render: () ->

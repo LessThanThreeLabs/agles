@@ -35,8 +35,8 @@ class Build.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'chaneg:status', @render
-		@model.on 'change:selected', @_handleSelected
+		@model.on 'chaneg:status', @render, @
+		@model.on 'change:selected', @_handleSelected, @
 
 
 	onDispose: () =>

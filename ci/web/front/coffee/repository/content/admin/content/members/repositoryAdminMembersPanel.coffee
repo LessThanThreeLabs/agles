@@ -2,10 +2,8 @@ window.RepositoryAdminMembersPanel = {}
 
 
 class RepositoryAdminMembersPanel.Model extends Backbone.Model
-	defaults:
-		repositoryId: null
 
-	initialize: () ->
+	initialize: () =>
 		@inviteMembersPanelModel = new RepositoryAdminInviteMembersPanel.Model()
 		@memberPermissionsPanelModel = new RepositoryAdminMemberPermissionsPanel.Model()
 
@@ -13,7 +11,7 @@ class RepositoryAdminMembersPanel.Model extends Backbone.Model
 class RepositoryAdminMembersPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminMembersPanel'
-	template: Handlebars.compile '<div class="inviteMembers">
+	html: '<div class="inviteMembers">
 			<div class="inviteMembersTitle">Invite Members</div>
 			<div class="inviteMembersContent"></div>
 		</div>
@@ -22,15 +20,19 @@ class RepositoryAdminMembersPanel.View extends Backbone.View
 			<div class="memberPermissionsContent"></div>
 		</div>'
 
+
 	initialize: () =>
+		@inviteMembersPanelView = new RepositoryAdminInviteMembersPanel.View model: @model.inviteMembersPanelModel
+		@memberPermissionsPanelView = new RepositoryAdminMemberPermissionsPanel.View model: @model.memberPermissionsPanelModel
+
+
+	onDispose: () =>
+		@inviteMembersPanelView.dispose()
+		@memberPermissionsPanelView.dispose()
+
 
 	render: () =>
-		@$el.html @template()
-
-		inviteMembersPanelView = new RepositoryAdminInviteMembersPanel.View model: @model.inviteMembersPanelModel
-		@$el.find('.inviteMembersContent').html inviteMembersPanelView.render().el
-
-		memberPermissionsPanelView = new RepositoryAdminMemberPermissionsPanel.View model: @model.memberPermissionsPanelModel
-		@$el.find('.memberPermissionsContent').html memberPermissionsPanelView.render().el
-
+		@$el.html @html
+		@$el.find('.inviteMembersContent').html @inviteMembersPanelView.render().el
+		@$el.find('.memberPermissionsContent').html @memberPermissionsPanelView.render().el
 		return @

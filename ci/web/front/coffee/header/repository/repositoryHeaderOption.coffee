@@ -48,11 +48,10 @@ class RepositoryHeaderOption.View extends Backbone.View
 
 
 	initialize: () ->
-		@model.on 'change:repositories', @_updateDropdownContents
-		@model.on 'change:visible', @_fixVisibility
+		@model.on 'change:repositories', @_updateDropdownContents, @
+		@model.on 'change:visible', @_fixVisibility, @
 
-		window.globalAccount.on 'change:firstName change:lastName', () =>
-			@model.fetchRepositories()
+		window.globalAccount.on 'change:firstName change:lastName', (() => @model.fetchRepositories()), @
 
 
 	onDispose: () =>

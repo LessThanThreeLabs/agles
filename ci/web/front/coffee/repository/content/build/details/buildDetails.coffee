@@ -17,7 +17,7 @@ class BuildDetails.View extends Backbone.View
 
 
 	initialize: () =>
-		window.globalRouterModel.on 'change:buildView', @_updateContent
+		window.globalRouterModel.on 'change:buildView', @_updateContent, @
 
 
 	onDispose: () =>

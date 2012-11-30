@@ -3,18 +3,13 @@ window.RepositoryAdminInviteMembersPanel = {}
 
 class RepositoryAdminInviteMembersPanel.Model extends Backbone.Model
 	defaults:
-		repositoryId: null
 		emails: null
-
-	initialize: () ->
-		@on 'change:emails', () =>
-			console.log @get 'emails'
 
 
 class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminInviteMembersPanel'
-	template: Handlebars.compile '<div class="inviteForm">
+	html: '<div class="inviteForm">
 			<div class="inviteMembersFieldContainer">
 				<input type="text" class="inviteMembersField" placeholder="emails">
 			</div>
@@ -29,10 +24,15 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 		'keyup': '_handleFormEntryChange'
 		'click .inviteButton': '_handleSubmit'
 
+
 	initialize: () =>
 
+
+	onDispose: () =>
+
+
 	render: () =>
-		@$el.html @template()
+		@$el.html @html
 		return @
 
 

@@ -40,12 +40,9 @@ class LoginBasicInformationPanel.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:email', () =>
-			$('.loginEmail').val @model.get 'email'
-		@model.on 'change:password', () =>
-			$('.loginPassword').val @model.get 'password'
-		@model.on 'change:rememberMe', () =>
-			$('.loginRememberMe').prop 'checked', @model.get 'rememberMe'
+		@model.on 'change:email', (() => $('.loginEmail').val @model.get 'email'), @
+		@model.on 'change:password', (() => $('.loginPassword').val @model.get 'password'), @
+		@model.on 'change:rememberMe', (() => $('.loginRememberMe').prop 'checked', @model.get 'rememberMe'), @
 
 
 	dispose: () =>

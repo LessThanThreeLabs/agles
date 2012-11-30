@@ -85,16 +85,15 @@ class BuildsList.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:queryString', () =>
+		@model.on 'change:queryString', (() =>
 			@model.resetBuildsList()
 			@model.fetchInitialBuilds()
+			), @
 
-		@model.buildModels.on 'add', @_handleAddedBuild
-		@model.buildModels.on 'reset', () =>
-			@$el.empty()
+		@model.buildModels.on 'add', @_handleAddedBuild, @
+		@model.buildModels.on 'reset', (() => @$el.empty()), @
 
-		window.globalRouterModel.on 'change:repositoryId', () =>
-			@model.resetBuildsList()
+		window.globalRouterModel.on 'change:repositoryId', (() => @model.resetBuildsList()), @
 
 
 	onDispose: () =>

@@ -19,9 +19,7 @@ class Main.View extends Backbone.View
 
 	initialize: () ->
 		@headerView = new Header.View model: @model.headerModel
-
-		window.globalRouterModel.on 'change:view', () =>
-			@_updateContent()
+		window.globalRouterModel.on 'change:view', @_updateContent, @
 
 
 	onDispose: () =>

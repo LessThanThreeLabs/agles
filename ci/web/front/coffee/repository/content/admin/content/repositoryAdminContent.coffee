@@ -6,7 +6,8 @@ class RepositoryAdminContent.Model extends Backbone.Model
 		repositoryId: null
 		mode: null
 
-	initialize: () ->
+
+	initialize: () =>
 		@generalPanelModel = new RepositoryAdminGeneralPanel.Model()
 		@membersPanelModel = new RepositoryAdminMembersPanel.Model()
 
@@ -14,9 +15,16 @@ class RepositoryAdminContent.Model extends Backbone.Model
 class RepositoryAdminContent.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminContent'
+	currentView: null
+
 
 	initialize: () =>
-		@model.on 'change:mode', @render
+		@model.on 'change:mode', @render, @
+
+
+	onDispose: () =>
+		@model.off null, null, @
+		@currentView.dispose() if @currentView?
 
 
 	render: () =>
@@ -25,13 +33,16 @@ class RepositoryAdminContent.View extends Backbone.View
 
 
 	_renderCurrentView: () =>
+		@currentView.dispose() if @currentView?
+
 		switch @model.get 'mode'
 			when 'general'
-				generalPanelView = new RepositoryAdminGeneralPanel.View model: @model.generalPanelModel
-				@$el.html generalPanelView.render().el
+				@currentView = new RepositoryAdminGeneralPanel.View model: @model.generalPanelModel
+				@$el.html @currentView.render().el
 			when 'members'
-				membersPanelView = new RepositoryAdminMembersPanel.View model: @model.membersPanelModel
-				@$el.html membersPanelView.render().el
+				@currentView = new RepositoryAdminMembersPanel.View model: @model.membersPanelModel
+				@$el.html @currentView.render().el
 			else
+				@currentView = null
 				@$el.html '&nbsp'
 				console.error 'Unaccounted for mode ' + @model.get 'mode' if @model.get('mode')?

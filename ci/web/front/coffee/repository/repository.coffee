@@ -11,7 +11,7 @@ class Repository.Model extends Backbone.Model
 class Repository.View extends Backbone.View
 	tagName: 'div'
 	className: 'repository'
-	template: Handlebars.compile ''
+	html: ''
 
 
 	initialize: () =>
@@ -25,7 +25,7 @@ class Repository.View extends Backbone.View
 
 
 	render: () =>
-		@$el.html @template()
+		@$el.html @html
 		@$el.append @repositoryHeaderView.render().el
 		@$el.append @repositoryContentView.render().el
 		return @

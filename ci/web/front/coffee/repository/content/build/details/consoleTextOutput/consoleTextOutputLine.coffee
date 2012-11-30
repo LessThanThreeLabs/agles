@@ -15,7 +15,7 @@ class ConsoleTextOutputLine.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change', @render
+		@model.on 'change', @render, @
 
 
 	onDispose: () =>

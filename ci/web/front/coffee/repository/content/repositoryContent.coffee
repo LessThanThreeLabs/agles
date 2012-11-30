@@ -15,7 +15,7 @@ class RepositoryContent.View extends Backbone.View
 
 
 	initialize: () =>
-		window.globalRouterModel.on 'change:repositoryView', @_updateContent
+		window.globalRouterModel.on 'change:repositoryView', @_updateContent, @
 
 
 	onDispose: () =>

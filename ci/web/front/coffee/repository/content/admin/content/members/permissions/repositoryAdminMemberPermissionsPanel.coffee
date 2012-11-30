@@ -2,9 +2,6 @@ window.RepositoryAdminMemberPermissionsPanel = {}
 
 
 class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
-	defaults:
-		repositoryId: null
-		# will need users here...
 
 	initialize: () =>
 		@memberPermissionsModels = new Backbone.Collection()
@@ -44,7 +41,7 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminMemberPermissionsPanel'
-	template: Handlebars.compile '<div class="prettyTable permissionsTable">
+	html: '<div class="prettyTable permissionsTable">
 			<div class="prettyTableTitleRow">
 				<div class="prettyTableColumn">Email</div>
 				<div class="prettyTableColumn">First Name</div>
@@ -56,16 +53,21 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 			</div>
 		</div>'
 
+
 	initialize: () =>
-		@model.memberPermissionsModels.on 'add', (memberPermissionsModel, collection, options) =>
+		@model.memberPermissionsModels.on 'add', ((memberPermissionsModel, collection, options) =>
 			memberPermissionView = new MemberPermissions.View model: memberPermissionsModel
 			@_insertMemberAtIndex memberPermissionView.render().el, options.index
-		@model.memberPermissionsModels.on 'reset', () =>
-			@$el.html @template()
+			), @
+		@model.memberPermissionsModels.on 'reset', (() => @$el.html @html), @
+
+
+	onDispose: () =>
+		@model.memberPermissionsModels.off null, null, @
 
 
 	render: () =>
-		@$el.html @template()
+		@$el.html @html
 		@_addCurrentMembers()
 		@model.fetchMembersIfNecassary()
 		return @

@@ -40,13 +40,13 @@ class ConsoleCompilationOutput.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.consoleTextOutputModels.on 'reset', @_addOutput
-		window.globalRouterModel.on 'change:buildId', @model.fetchOutput
+		@model.consoleTextOutputModels.on 'reset', @_addOutput, @
+		window.globalRouterModel.on 'change:buildId', @model.fetchOutput, @
 
 
 	onDispose: () =>
 		@model.consoleTextOutputModels.off null, null, @
-		window.globalRouterModel.off null, null, @
+		window.globalRouterModel.off 'change:buildId', null, @
 
 
 	render: () =>
