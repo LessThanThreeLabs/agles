@@ -49,7 +49,7 @@ class RpcBroker
 			correlationId: messageId
 			mandatory: true
 
-		console.log 'INSTEAD OF FROMID, CAN WE JUST GET THE CLIENT INFORMATION, MAYBE?'
+		console.log 'calling function: ' + route + ' > ' + methodName
 		#console.log 'sent: ' + JSON.stringify msgpack.unpack message
 
 
