@@ -27,6 +27,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 					subtype_priority=1,
 				)
 				sqlconn.execute(ins)
+		self.publish_event(build_id=build_id, type=type, subtypes=subtypes)
 
 		#trans = lambda subtype: REDIS_SUBTYPE_KEY % (build_id, type, subtype)
 		#subtype_keys = map(trans, subtypes)
@@ -58,13 +59,15 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 			if row:
 				if row[build_console.c.console_output]:
 					line = row[build_console.c.console_output] + "\n" + line
-				
+
 				update = build_console.update().where(build_console.c.id==row[build_console.c.id]).values(
 					console_output=line
 				)
 				sqlconn.execute(update)
 			else:
 				raise "fail"
+		self.publish_event(build_id=build_id, type=type, subtype=subtype,
+			line_num=line_num, line=line)
 
 
 		#redis_key = REDIS_SUBTYPE_KEY % (build_id, type, subtype)

@@ -17,6 +17,7 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 			status=BuildStatus.RUNNING, start_time=int(time.time()))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
+		self.publish_event(build_id=build_id, status=BuildStatus.RUNNING)
 
 	def mark_build_finished(self, build_id, status):
 		build = schema.build
@@ -24,3 +25,4 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 			status=status, end_time=int(time.time()))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
+		self.publish_event(build_id=build_id, status=status)

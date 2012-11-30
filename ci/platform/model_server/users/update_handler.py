@@ -12,3 +12,4 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 		ins = ssh_pubkey.insert().values(user_id=user_id, alias=alias, ssh_key=ssh_key)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(ins)
+		self.publish_event(user_id=user_id, alias=alias, ssh_key=ssh_key)

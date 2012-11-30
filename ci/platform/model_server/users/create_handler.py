@@ -35,6 +35,8 @@ class UsersCreateHandler(ModelServerRpcHandler):
 		ins = user.insert().values(**information)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
+		user_id = result.inserted_primary_key[0]
+		self.publish_event(user_id=user_id, information=information)
 		return result.inserted_primary_key[0]
 
 

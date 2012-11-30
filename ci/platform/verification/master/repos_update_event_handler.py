@@ -7,14 +7,14 @@ from settings.verification_server import *
 
 class ReposUpdateEventHandler(EventSubscriber):
 	def __init__(self):
-		super(ReposUpdateEventHandler, self).__init__("repos.update", "verification_master:repos.update")
+		super(ReposUpdateEventHandler, self).__init__("repos", "update", "verification_master:repos.update")
 
 	def bind(self, channel):
 		self.producer = Producer(channel, serializer='msgpack')
 		super(ReposUpdateEventHandler, self).bind(channel)
 
 	def handle_message(self, body, message):
-		commit_id, merge_target = body
+		commit_id, merge_target = body["commit_id"], body["merge_target"]
 		change_id = self._create_change(commit_id, merge_target)
 		for commit_list in self._get_commit_permutations(commit_id):
 			build_id = self._create_build(change_id, commit_list)

@@ -20,6 +20,4 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
 
-		with Connection(connection_info) as connection:
-			events_broker = EventsBroker(connection)
-			events_broker.publish(events_broker.get_event("changes", "update"), ())
+		self.publish_event(change_id=change_id, status=status)

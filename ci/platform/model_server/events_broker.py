@@ -1,5 +1,4 @@
 from kombu.entity import Exchange, Queue
-
 from util import greenlets
 
 
@@ -16,18 +15,19 @@ class EventsBroker(object):
 			subscriber_queue = Queue(exchange=self.events_exchange, routing_key=event, exclusive=True, durable=False)
 		return self.channel.Consumer(queues=subscriber_queue, callbacks=[greenlets.spawn_wrap(callback)])
 
-	def publish(self, event, msg):
+	def publish(self, event, **kwargs):
 		"""Publishes a message to a specific event channel.
 
 		:param event: The event channel to publish msg to.
-		:param msg: The msg we are publishing to the channel.
+		:param kwargs: An implicit dictionary to send in the message.
 		"""
 		producer = self.channel.Producer(serializer="msgpack")
-		producer.publish(msg,
+		producer.publish(kwargs,
 			routing_key=event,
 			exchange=self.events_exchange,
 			delivery_mode=2
 		)
 
-	def get_event(self, noun, verb):
-		return "%s.%s" % (noun, verb)
+
+def get_event(noun, verb):
+	return "%s.%s" % (noun, verb)
