@@ -19,7 +19,7 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 			result = sqlconn.execute(update)
 		if not result.rowcount == 1:
 			raise NoSuchBuildError(build_id)
-		self.publish_event(build_id=build_id, status=BuildStatus.RUNNING)
+		self.publish_event("build", build_id, "build started", status=BuildStatus.RUNNING)
 
 	def mark_build_finished(self, build_id, status):
 		build = schema.build
@@ -29,7 +29,7 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 			result = sqlconn.execute(update)
 		if not result.rowcount == 1:
 			raise NoSuchBuildError(build_id)
-		self.publish_event(build_id=build_id, status=status)
+		self.publish_event("builds", build_id, "build finished", status=status)
 
 
 class NoSuchBuildError(Exception):

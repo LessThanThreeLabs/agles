@@ -7,9 +7,6 @@ from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
-from util.sql import InconsistentDataError
-from model_server.build_outputs import REDIS_SUBTYPE_KEY, REDIS_TYPE_KEY
-
 
 class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
@@ -20,6 +17,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		assert isinstance(ordered_subtypes, collections.Iterable)
 
 		build_console = schema.build_console
+		console_map = {}
 
 		for index, subtype in enumerate(ordered_subtypes):
 			with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -29,8 +27,9 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 					subtype=subtype,
 					subtype_priority=index,
 				)
-				sqlconn.execute(ins)
-		self.publish_event(build_id=build_id, type=type, subtypes=ordered_subtypes)
+				console_id = sqlconn.execute(ins).inserted_primary_key[0]
+				console_map[subtype] = console_id
+		self.publish_event("builds", build_id, "consoles added", type=type, console_map=console_map)
 
 	def append_console_line(self, build_id, line_num, line, type, subtype):
 		"""
@@ -73,5 +72,5 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 						)
 					).values(line=line)
 				)
-			self.publish_event(build_id=build_id, type=type, subtype=subtype,
+			self.publish_event("build_outputs", build_console_id, "line added",
 				line_num=line_num, line=line)

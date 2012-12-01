@@ -27,5 +27,5 @@ class BuildsCreateHandler(ModelServerRpcHandler):
 				ins = build_commits_map.insert().values(build_id=build_id, commit_id=commit)
 				sqlconn.execute(ins)
 
-		self.publish_event(build_id=build_id, change_id=change_id, commit_list=commit_list)
+		self.publish_event("repos", change_id, "build added", build_id=build_id, commit_list=commit_list)
 		return build_id

@@ -23,7 +23,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		repo_id = result.inserted_primary_key[0]
-		self.publish_event(repo_id=repo_id, repo_name=repo_name, repo_hash=repo_hash, default_permissions=default_permissions)
+		self.publish_event("global", None, "repo added",
+			repo_id=repo_id, repo_name=repo_name, repo_hash=repo_hash, default_permissions=default_permissions)
 		return repo_id
 
 	def register_repostore(self, host_name, root_dir):

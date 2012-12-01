@@ -2,7 +2,7 @@
 """ Abstract message handler and two basic extending types
 """
 from util import greenlets
-from model_server.events_broker import EventsBroker, get_event
+from model_server.events_broker import EventsBroker
 
 
 class MessageHandler(object):
@@ -24,12 +24,12 @@ class QueueListener(MessageHandler):
 
 
 class EventSubscriber(MessageHandler):
-	def __init__(self, event_noun, event_verb, queue_name=None):
-		self.event = get_event(event_noun, event_verb)
+	def __init__(self, resource, queue_name=None):
+		self.resource = resource
 		self.queue_name = queue_name
 
 	def bind(self, channel):
 		channel.basic_qos(0, 1, False)
-		consumer = EventsBroker(channel).subscribe(self.event, queue_name=self.queue_name,
+		consumer = EventsBroker(channel).subscribe(self.resource, queue_name=self.queue_name,
 			callback=greenlets.spawn_wrap(self.handle_message))
 		consumer.consume()

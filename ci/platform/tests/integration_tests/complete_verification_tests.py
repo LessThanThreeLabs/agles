@@ -11,14 +11,15 @@ from util.permissions import RepositoryPermissions
 from vagrant.vagrant_wrapper import VagrantWrapper
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
-from model_server.events_broker import EventsBroker, get_event
 from database.engine import ConnectionFactory
 from database import schema
+from model_server.events_broker import EventsBroker
 from verification.master import *
 from verification.server import *
 from verification.server.build_verifier import BuildVerifier
 from settings.rabbit import connection_info
 from settings.verification_server import *
+from shared.constants import BuildStatus
 from repo.store import FileSystemRepositoryStore
 from util.pathgen import to_path
 from settings import store
@@ -95,12 +96,16 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			return repo_key
 
 	def _insert_commit_info(self):
+		commit_id = 0
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=sha512("").hexdigest(), salt="1234567890123456")
 			user_id = conn.execute(ins_user).inserted_primary_key[0]
-			ins_commit = schema.commit.insert().values(repo_hash=self.repo_hash, user_id=user_id,
-				message="commit message", timestamp=int(time.time()))
-			commit_id = conn.execute(ins_commit).inserted_primary_key[0]
+			ins_commit = schema.commit.insert().values(id=commit_id, repo_hash=self.repo_hash,
+				user_id=user_id, message="commit message", timestamp=int(time.time()))
+			conn.execute(ins_commit)
+			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, merge_target="master",
+				number=1, status=BuildStatus.QUEUED)
+			conn.execute(ins_change)
 			return commit_id
 
 	def _on_response(self, body, message):
@@ -116,7 +121,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
 
-		self._insert_repo_info(self.repo_path)
+		repo_id = self._insert_repo_info(self.repo_path)
 		commit_id = self._insert_commit_info()
 
 		commit_sha = self._modify_commit_push(work_repo, "agles_config.yml",
@@ -125,7 +130,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 		with Connection(connection_info) as connection:
 			events_broker = EventsBroker(connection)
-			events_broker.publish(get_event("repos", "update"), commit_id=commit_id, merge_target="master")
+			events_broker.publish("changes", repo_id, "change created",
+				change_id=commit_id, merge_target="master")
 			with connection.Consumer(merge_queue, callbacks=[self._on_response]) as consumer:
 				consumer.consume()
 				self.response = None

@@ -1,5 +1,5 @@
 from bunnyrpc.server import Server
-from events_broker import EventsBroker, get_event
+from events_broker import EventsBroker
 from kombu.connection import Connection
 from settings.rabbit import connection_info
 
@@ -22,11 +22,11 @@ class ModelServerRpcHandler(object):
 	def start(self):
 		self.get_server().run()
 
-	def publish_event(self, **contents):
+	def publish_event(self, resource, id, name, **contents):
 		"""A simple method for publishing a single event with the default
 		rabbit connection info.
 		Not recommended for use with multiple events.
 		"""
 		with Connection(connection_info) as connection:
 			broker = EventsBroker(connection)
-			broker.publish(get_event(self.rpc_noun, self.rpc_verb), **contents)
+			broker.publish(resource, id, name, **contents)
