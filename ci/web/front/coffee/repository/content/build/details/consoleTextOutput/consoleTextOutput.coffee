@@ -20,9 +20,21 @@ class ConsoleTextOutput.Model extends Backbone.Model
 				console.error error
 				return
 
-			@set 'title', result.subtype
-			if result.console_output?
-				@consoleTextOutputLineModels.reset result.console_output
+			@set 'title', result.title
+			@_addLineModels result.consoleOutput
+
+
+	_addLineModels: (consoleOutput) =>
+		lineModels = []
+		for number, text of consoleOutput
+			assert.ok not isNaN parseInt number
+
+			lineModel = new ConsoleTextOutputLine.Model
+				number: parseInt number
+				text: text
+			lineModels.push lineModel
+
+		@consoleTextOutputLineModels.reset lineModels
 
 
 class ConsoleTextOutput.View extends Backbone.View

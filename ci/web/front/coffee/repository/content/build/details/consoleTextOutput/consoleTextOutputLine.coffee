@@ -7,6 +7,16 @@ class ConsoleTextOutputLine.Model extends Backbone.Model
 		text: null
 
 
+	validate: (attributes) =>
+		if typeof attributes.number isnt 'number' or attributes.number < 0
+			return new Error 'Invalid number (make sure it is not a string): ' + attributes.number
+
+		if typeof attributes.text isnt 'string'
+			return new Error 'Invalid text (make sure it is a string): ' + attributes.text
+
+		return
+
+
 class ConsoleTextOutputLine.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleTextOutputLine'
