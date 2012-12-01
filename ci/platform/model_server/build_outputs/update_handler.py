@@ -7,7 +7,7 @@ from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
-from util.querytools import InconsistentDataError
+from util.sql import InconsistentDataError
 from model_server.build_outputs import REDIS_SUBTYPE_KEY, REDIS_TYPE_KEY
 
 

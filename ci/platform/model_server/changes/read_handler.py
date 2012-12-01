@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from util.querytools import to_dict
+from util.sql import to_dict
 from util.permissions import has_repo_permissions
 
 class ChangesReadHandler(ModelServerRpcHandler):

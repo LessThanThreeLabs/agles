@@ -1,5 +1,3 @@
-from sqlalchemy.exc import IntegrityError
-
 def to_dict(row, columns, tablename=None):
 	if not tablename:
 		return dict([(col.name, getattr(row, col.name)) for col in columns]) if row else {}

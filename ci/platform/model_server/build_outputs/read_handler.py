@@ -8,7 +8,7 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from model_server.build_outputs import REDIS_TYPE_KEY, parse_subtype
 from util.permissions import RepositoryPermissions
-from util.querytools import to_dict
+from util.sql import to_dict
 
 class BuildOutputsReadHandler(ModelServerRpcHandler):
 	def __init__(self):
