@@ -21,16 +21,16 @@
 			"/css/src/repository/content/admin/menu/repositoryAdminMenu.css",
 			"/css/src/repository/content/admin/repositoryAdmin.css",
 
-			"/css/src/repository/content/build/build.css",
-			"/css/src/repository/content/build/list/search/buildsSearch.css",
-			"/css/src/repository/content/build/list/buildsList.css",
-			"/css/src/repository/content/build/list/buildsListManager.css",
+			"/css/src/repository/content/change/change.css",
+			"/css/src/repository/content/change/list/search/changesSearch.css",
+			"/css/src/repository/content/change/list/changesList.css",
+			"/css/src/repository/content/change/list/changesListManager.css",
 
-			"/css/src/repository/content/build/details/consoleTextOutput/consoleTextOutputLine.css",
-			"/css/src/repository/content/build/details/consoleTextOutput/consoleTextOutput.css",
-			"/css/src/repository/content/build/details/compilation/consoleCompilationOutput.css",
-			"/css/src/repository/content/build/details/buildDetails.css",
-			"/css/src/repository/content/build/repositoryBuilds.css",
+			"/css/src/repository/content/change/details/consoleTextOutput/consoleTextOutputLine.css",
+			"/css/src/repository/content/change/details/consoleTextOutput/consoleTextOutput.css",
+			"/css/src/repository/content/change/details/compilation/consoleCompilationOutput.css",
+			"/css/src/repository/content/change/details/changeDetails.css",
+			"/css/src/repository/content/change/repositoryChanges.css",
 			
 			"/css/src/repository/content/repositoryContent.css",
 
@@ -89,19 +89,19 @@
 			"/js/src/repository/content/admin/menu/repositoryAdminMenu.js",
 			"/js/src/repository/content/admin/repositoryAdmin.js",
 
-			"/js/src/repository/content/build/build.js",
-			"/js/src/repository/content/build/list/buildsFetcher.js",
-			"/js/src/repository/content/build/list/search/buildsQuery.js",
-			"/js/src/repository/content/build/list/search/buildsSearch.js",
-			"/js/src/repository/content/build/list/buildsList.js",
-			"/js/src/repository/content/build/list/buildsListManager.js",
+			"/js/src/repository/content/change/change.js",
+			"/js/src/repository/content/change/list/changesFetcher.js",
+			"/js/src/repository/content/change/list/search/changesQuery.js",
+			"/js/src/repository/content/change/list/search/changesSearch.js",
+			"/js/src/repository/content/change/list/changesList.js",
+			"/js/src/repository/content/change/list/changesListManager.js",
 
-			"/js/src/repository/content/build/details/consoleTextOutput/consoleTextOutputLine.js",
-			"/js/src/repository/content/build/details/consoleTextOutput/consoleTextOutput.js",
-			"/js/src/repository/content/build/details/compilation/consoleCompilationOutput.js",
-			"/js/src/repository/content/build/details/buildDetails.js",
+			"/js/src/repository/content/change/details/consoleTextOutput/consoleTextOutputLine.js",
+			"/js/src/repository/content/change/details/consoleTextOutput/consoleTextOutput.js",
+			"/js/src/repository/content/change/details/compilation/consoleCompilationOutput.js",
+			"/js/src/repository/content/change/details/changeDetails.js",
 
-			"/js/src/repository/content/build/repositoryBuilds.js",
+			"/js/src/repository/content/change/repositoryChanges.js",
 
 			"/js/src/repository/content/repositoryContent.js",
 
