@@ -67,11 +67,14 @@ class RepositoryHeaderOption.View extends Backbone.View
 
 	_handleRepositorySelection: (event) =>
 		repositoryId = $(event.target).attr 'repositoryId'
+		repositoryId = if isNaN(parseInt(repositoryId)) then null else parseInt(repositoryId)
 		assert.ok repositoryId?
 
-		window.globalRouterModel.set
+		attributesToSet = 
 			view: 'repository'
 			repositoryId: repositoryId
+		window.globalRouterModel.set attributesToSet,
+			error: (model, error) => console.error error
 
 
 	_handleCreateRepository: (event) =>

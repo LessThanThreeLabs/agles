@@ -51,16 +51,19 @@ class GlobalRouterModel extends Backbone.Model
 
 	validate: (attributes) =>
 		if attributes.view? and attributes.view not in @VALID_VIEWS
-			return new Error 'Invalid view'
+			return new Error 'Invalid view: ' + attributes.view
+
+		if attributes.repositoryId? and (typeof attributes.repositoryId isnt 'number' or attributes.repositoryId < 0)
+			return new Error 'Invalid repository id (make sure it is not a string): ' + attributes.repositoryId
 
 		if attributes.repositoryView? and attributes.repositoryView not in @VALID_REPOSITORY_VIEWS
-			return new Error 'Invalid repository view'
+			return new Error 'Invalid repository view: ' + attributes.repositoryView
 
-		if attributes.repositoryId? and attributes.repositoryId < 0
-			return new Error 'Invalid repository id'
+		if attributes.buildId? and (typeof attributes.buildId isnt 'number' or attributes.buildId < 0)
+			return new Error 'Invalid build id (make sure it is not a string): ' + attributes.buildId
 
 		if attributes.buildView? and attributes.buildView not in @VALID_BUILD_VIEWS
-			return new Error "Invalid build view"
+			return new Error 'Invalid build view: ' + attributes.buildView
 
 		return
 

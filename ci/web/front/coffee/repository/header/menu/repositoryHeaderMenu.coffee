@@ -19,7 +19,7 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 
 		@on 'change:selectedMenuOptionName', () =>
 			if @get('selectedMenuOptionName')?
-				window.globalRouterModel.set 'repositoryView', @get('selectedMenuOptionName'),
+				globalRouterModel.set 'repositoryView', @get('selectedMenuOptionName'),
 					error: (model, error) => console.error error
 		@on 'change:url', () =>
 			@repositoryUrlTrinketModel.set 'url', @get 'url'
@@ -78,12 +78,12 @@ class RepositoryHeaderMenu.View extends Backbone.View
 		@model.on 'change:menuOptions', @render, @
 		@model.on 'change:selectedMenuOptionName', @_handleSelectedMenuOption, @
 
-		window.globalRouterModel.on 'change:repositoryId', (() => @model.fetchAllowedMenuOptions()), @
+		globalRouterModel.on 'change:repositoryId', (() => @model.fetchAllowedMenuOptions()), @
 
 
 	onDispose: () =>
 		@model.off null, null, @
-		widnow.globalRouterModel.off null, null, @
+		globalRouterModel.off null, null, @
 
 		@repositoryUrlTrinketView.dispose()
 
