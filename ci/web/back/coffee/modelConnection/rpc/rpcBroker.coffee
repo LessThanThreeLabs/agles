@@ -65,7 +65,7 @@ class RpcBroker
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
 
-			error = if data.error? then new Error data.error else null
+			error = data.error?.message
 			callback error, data.value
 
 
