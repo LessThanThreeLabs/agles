@@ -14,6 +14,7 @@ exports.create = (configurationParams, connection) ->
 
 
 class EventConnection
+
 	constructor: (@configurationParams, @connection) ->
 		assert.ok @configurationParams? and @connection?
 
@@ -49,7 +50,7 @@ class EventConnection
 		@buildEventConnection = ResourceEventConnection.create @connection, 
 			@exchange, 'builds', queueNamePrefix + '_builds', @builds
 		@buildOutputEventConnection = ResourceEventConnection.create @connection, 
-			@exchange, 'buildOutputs', queueNamePrefix + '_buildOutputs', @buildOutputs
+			@exchange, 'build_outputs', queueNamePrefix + '_buildOutputs', @buildOutputs
 		@repositoryEventConnection = ResourceEventConnection.create @connection, 
 			@exchange, 'repositories', queueNamePrefix + '_repositories', @repositories
 
