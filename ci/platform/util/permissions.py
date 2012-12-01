@@ -1,4 +1,23 @@
 """ permissions.py - utility classes for handling permissions"""
+from sqlalchemy import and_
+from database.schema import permission, repo
+from database.engine import ConnectionFactory
+
+
+def has_repo_permissions(user_id, repo_id):
+	query = permission.join(repo).select().where(
+		and_(
+			permission.c.user_id==user_id,
+			repo.c.id==repo_id,
+		)
+	)
+
+	with ConnectionFactory.get_sql_connection() as sqlconn:
+		row = sqlconn.execute(query).first()
+	if not row:
+		return False
+	return RepositoryPermissions.has_permissions(
+		row[permission.c.permissions], RepositoryPermissions.R)
 
 class Permissions(object):
 	pass

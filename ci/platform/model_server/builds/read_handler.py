@@ -4,9 +4,8 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from util.database import to_dict
-from util.permissions import RepositoryPermissions
-
+from util.querytools import to_dict
+from util.permissions import has_repo_permissions
 
 class BuildsReadHandler(ModelServerRpcHandler):
 	def __init__(self):
@@ -26,23 +25,6 @@ class BuildsReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return [row[build_commits_map.c.commit_id] for row in sqlconn.execute(query)]
 
-	def _has_permissions(self, user_id, repo_id):
-		permission = database.schema.permission
-		repo = database.schema.repo
-		query = permission.join(repo).select().where(
-			and_(
-				permission.c.user_id==user_id,
-				repo.c.id==repo_id,
-			)
-		)
-
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row = sqlconn.execute(query).first()
-		if not row:
-			return False
-		return RepositoryPermissions.has_permissions(
-			row[permission.c.permissions], RepositoryPermissions.R)
-
 ##################
 # Front end API
 ##################
@@ -59,7 +41,7 @@ class BuildsReadHandler(ModelServerRpcHandler):
 
 		if row:
 			repo_id = row[repo.c.id]
-			if self._has_permissions(user_id, repo_id):
+			if has_repo_permissions(user_id, repo_id):
 				return to_dict(row, build.columns, tablename=build.name)
 		return {}
 
@@ -72,7 +54,7 @@ class BuildsReadHandler(ModelServerRpcHandler):
 		commit = database.schema.commit
 		repo = database.schema.repo
 
-		if not self._has_permissions(user_id, repo_id):
+		if not has_repo_permissions(user_id, repo_id):
 			return []
 
 		query_string = "%" + query_string + "%"

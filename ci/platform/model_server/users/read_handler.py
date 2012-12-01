@@ -5,7 +5,7 @@ from model_server.rpc_handler import ModelServerRpcHandler
 import database.schema
 
 from database.engine import ConnectionFactory
-from util.database import to_dict
+from util.querytools import to_dict
 
 
 class UsersReadHandler(ModelServerRpcHandler):

@@ -6,7 +6,7 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from shared.constants import VerificationUser
 from sqlalchemy.sql import select
-from util.database import to_dict
+from util.querytools import to_dict
 from util.permissions import RepositoryPermissions
 
 

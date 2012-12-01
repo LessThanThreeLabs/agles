@@ -14,10 +14,10 @@ class BuildOutputsReadHandler extends Handler
 			if error?
 				callback error
 			else
-				callback null, @_sanatizeDefault result
+				callback null, @_santizeDefault result
 
 
-	_sanatizeDefault: (result) =>
+	_sanitizeDefault: (result) =>
 		title: result.subtype
 		consoleOutput: result.console_output
 
