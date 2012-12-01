@@ -28,7 +28,7 @@ class ConsoleTextOutput.Model extends Backbone.Model
 class ConsoleTextOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleTextOutput'
-	template: Handlebars.compile '<div class="title">{{title}}</div><div class="output"></div>'
+	html: '<div class="title"></div><div class="output"></div>'
 
 
 	initialize: () =>
@@ -43,28 +43,25 @@ class ConsoleTextOutput.View extends Backbone.View
 
 
 	render: () =>
-		@$el.html @template 
-			title: @model.get 'title'
+		@$el.html @html 
+		@_updateTitle()
 		@model.fetchOutput()
 		return @
 
 
 	_updateTitle: () =>
-		@$el.html @template 
-			title: @model.get 'title'
-		@_initializeOutputText()
+		@$el.find('.title').html @model.get 'title'
 
 
 	_initializeOutputText: () =>
 		@$el.find('.output').empty()
 
-		console.log 'consoleTextOutput -- need to render the lines properly'
-		# htmlToAdd = $ 'div'
-		# @model.consoleTextOutputLineModels.each (consoleTextOutputLineModel) =>
-		# 	consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
-		# 	htmlToAdd.append consoleTextOutputLineView.render().el
-
-		# @$el.find('.output').html htmlToAdd.html()
+		# we want to load all of the DOM elements at once, for performance reasons
+		htmlToAdd = $ '<div>'
+		@model.consoleTextOutputLineModels.each (consoleTextOutputLineModel) =>
+			consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
+			htmlToAdd.append consoleTextOutputLineView.render().el
+		@$el.find('.output').html htmlToAdd.html()
 
 
 	_handleAddLine: (buildOutputLineModel) =>
