@@ -21,5 +21,5 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		commit_id = result.inserted_primary_key[0]
 
 		self.publish_event(repo_hash=repo_hash, user_id=user_id, commit_id=commit_id,
-			commit_message=commit_message, merge_target=merge_target)
+			commit_message=commit_message, merge_target=merge_target, timestamp=timestamp)
 		return commit_id

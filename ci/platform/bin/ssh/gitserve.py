@@ -7,6 +7,7 @@ replaces certain commands with other actions."""
 import os
 import sys
 
+from model_server import ModelServer
 from util.permissions import RepositoryPermissions
 from util.shell import RestrictedGitShell
 
@@ -25,7 +26,9 @@ def main():
 		rsh = RestrictedGitShell(commands_to_permissions, user_id_commands)
 		rsh.handle_command(command)
 	else:
-		print "You have been successfully authenticated, but shell access is not permitted."
+		with ModelServer.rpc_connect("users", "read") as client:
+			user_info = client.get_user_from_id(user_id)
+		print "You have been successfully authenticated as %s, but shell access is not permitted." % user_info["email"]
 
 
 if __name__ == "__main__":

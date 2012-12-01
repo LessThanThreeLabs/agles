@@ -16,7 +16,9 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 		update = build.update().where(build.c.id==build_id).values(
 			status=BuildStatus.RUNNING, start_time=int(time.time()))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(update)
+			result = sqlconn.execute(update)
+		if not result.rowcount == 1:
+			raise NoSuchBuildError(build_id)
 		self.publish_event(build_id=build_id, status=BuildStatus.RUNNING)
 
 	def mark_build_finished(self, build_id, status):
@@ -24,5 +26,11 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 		update = build.update().where(build.c.id==build_id).values(
 			status=status, end_time=int(time.time()))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(update)
+			result = sqlconn.execute(update)
+		if not result.rowcount == 1:
+			raise NoSuchBuildError(build_id)
 		self.publish_event(build_id=build_id, status=status)
+
+
+class NoSuchBuildError(Exception):
+	pass

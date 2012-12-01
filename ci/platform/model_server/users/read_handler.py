@@ -7,6 +7,7 @@ import database.schema
 from database.engine import ConnectionFactory
 from util.database import to_dict
 
+
 class UsersReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(UsersReadHandler, self).__init__("users", "read")
@@ -33,16 +34,10 @@ class UsersReadHandler(ModelServerRpcHandler):
 		if row:
 			return row[user.c.salt]
 		else:
-			raise NoSuchUserError
+			raise NoSuchUserError(email)
 
 	def get_user_id(self, email, password_hash):
-		user = database.schema.user
-
-		row = self._get_user_row(email, password_hash)
-		if row:
-			return row[user.c.id]
-		else:
-			raise NoSuchUserError
+		return self.get_user(email, password_hash)['id']
 
 	def get_user(self, email, password_hash):
 		user = database.schema.user
@@ -51,7 +46,7 @@ class UsersReadHandler(ModelServerRpcHandler):
 		if row:
 			return to_dict(row, user.columns)
 		else:
-			raise NoSuchUserError
+			raise NoSuchUserError(email, password_hash)
 
 	def get_user_from_id(self, user_id):
 		user = database.schema.user
@@ -62,7 +57,8 @@ class UsersReadHandler(ModelServerRpcHandler):
 		if row:
 			return to_dict(row, user.columns)
 		else:
-			raise NoSuchUserError
+			raise NoSuchUserError(user_id)
+
 
 class NoSuchUserError(Exception):
 	pass

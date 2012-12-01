@@ -14,7 +14,8 @@ class ReposUpdateEventHandler(EventSubscriber):
 		super(ReposUpdateEventHandler, self).bind(channel)
 
 	def handle_message(self, body, message):
-		commit_id, merge_target = body["commit_id"], body["merge_target"]
+		contents = body["contents"]
+		commit_id, merge_target = contents["commit_id"], contents["merge_target"]
 		change_id = self._create_change(commit_id, merge_target)
 		for commit_list in self._get_commit_permutations(commit_id):
 			build_id = self._create_build(change_id, commit_list)

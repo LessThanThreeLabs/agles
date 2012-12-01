@@ -13,3 +13,10 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(ins)
 		self.publish_event(user_id=user_id, alias=alias, ssh_key=ssh_key)
+
+	def delete_ssh_pubkey(self, user_id, alias):
+		ssh_key = schema.ssh_pubkey
+		delete = ssh_pubkey.delete().where(ssh_key.c.alias==alias)
+		with ConnectionFactory.get_sql_connection as sqlconn:
+			sqlconn.execute(delete)
+		self.publish_event(user_id=user_id, alias=alias, ssh_key=None)
