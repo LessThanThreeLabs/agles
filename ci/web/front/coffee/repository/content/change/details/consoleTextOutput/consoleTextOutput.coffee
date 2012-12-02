@@ -45,7 +45,7 @@ class ConsoleTextOutput.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change:title', @_updateTitle, @
-		@model.consoleTextOutputLineModels.on 'addLine', @_handleAddLine, @
+		@model.consoleTextOutputLineModels.on 'add', @_handleAddLine, @
 		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText, @
 
 
@@ -76,12 +76,13 @@ class ConsoleTextOutput.View extends Backbone.View
 		@$el.find('.output').html htmlToAdd.html()
 
 
-	_handleAddLine: (buildOutputLineModel) =>
-		console.log 'need to do something here...'
-		# buildOutputLineView = new BuildOutputLine.View model: buildOutputLineModel
-		# @_insertBuildOutputLineAtIndex buildOutputLineView.render().el, buildOutputLineModel.get 'number'
+	_handleAddLine: (consoleTextOutputLineModel, collection, options) =>
+		consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
+		@_insertBuildOutputLineAtIndex consoleTextOutputLineView.render().el, options.index
 
 
-	# _insertBuildOutputLineAtIndex: (buildOutputLineView, index) =>
-	# 	if index == 0 then $('.buildOutputText').prepend buildOutputLineView
-	# 	else $('.buildOutputText .buildOutputLine:nth-child(' + index + ')').after buildOutputLineView
+	_insertBuildOutputLineAtIndex: (consoleTextOutputLineView, index) =>
+		if index == 0 
+			@$el.find('.output').prepend consoleTextOutputLineView
+		else 
+			@$el.find('.output .consoleTextOutputLine:nth-child(' + index + ')').after consoleTextOutputLineView
