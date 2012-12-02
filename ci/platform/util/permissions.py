@@ -19,8 +19,10 @@ def has_repo_permissions(user_id, repo_id):
 	return RepositoryPermissions.has_permissions(
 		row[permission.c.permissions], RepositoryPermissions.R)
 
+
 class Permissions(object):
 	pass
+
 
 class RepositoryPermissions(Permissions):
 	""" Permissions are currently stored as bitmasks. These methods should be
