@@ -1,17 +1,17 @@
-window.Build = {}
+window.Change = {}
 
 
-class Build.Model extends Backbone.Model
+class Change.Model extends Backbone.Model
 	ALLOWED_STATUS: ['passed', 'running', 'failed', 'queued']
 
-	urlRoot: 'builds'
+	urlRoot: 'changes'
 	defaults:
 		status: 'queued'
 		selected: false
 
 
 	initialize: () =>
-		if window.globalRouterModel.get('buildId') is @get('id')
+		if window.globalRouterModel.get('changeId') is @get('id')
 			@set 'selected', true,
 				error: (model, error) => console.error error
 
@@ -26,9 +26,9 @@ class Build.Model extends Backbone.Model
 		return
 
 
-class Build.View extends Backbone.View
+class Change.View extends Backbone.View
 	tagName: 'div'
-	className: 'build'
+	className: 'change'
 	template: Handlebars.compile '<div class="number">{{number}}</div>
 		<div class="statusText">{{status}}</div>'
 	events: 'click': '_clickHandler'

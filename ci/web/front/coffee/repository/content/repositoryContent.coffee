@@ -4,7 +4,7 @@ window.RepositoryContent = {}
 class RepositoryContent.Model extends Backbone.Model
 
 	initialize: () =>
-		@repositoryBuildsModel = new RepositoryBuilds.Model()
+		@repositoryChangesModel = new RepositoryChanges.Model()
 		@repositoryAdminModel = new RepositoryAdmin.Model()
 
 
@@ -15,11 +15,11 @@ class RepositoryContent.View extends Backbone.View
 
 
 	initialize: () =>
-		window.globalRouterModel.on 'change:repositoryView', @_updateContent, @
+		globalRouterModel.on 'change:repositoryView', @_updateContent, @
 
 
 	onDispose: () =>
-		window.globalRouterModel.off null, null, @
+		globalRouterModel.off null, null, @
 		@currentView.dispose() if @currentView?
 
 
@@ -31,9 +31,9 @@ class RepositoryContent.View extends Backbone.View
 	_updateContent: () =>
 		@currentView.dispose() if @currentView?
 
-		switch window.globalRouterModel.get 'repositoryView'
-			when 'builds'
-				@currentView = new RepositoryBuilds.View model: @model.repositoryBuildsModel
+		switch globalRouterModel.get 'repositoryView'
+			when 'changes'
+				@currentView = new RepositoryChanges.View model: @model.repositoryChangesModel
 				@$el.html @currentView.render().el
 			when 'admin'
 				@currentView = new RepositoryAdmin.View model: @model.repositoryAdminModel

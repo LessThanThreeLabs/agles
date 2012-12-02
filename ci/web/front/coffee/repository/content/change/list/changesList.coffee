@@ -1,67 +1,67 @@
-window.BuildsList = {}
+window.ChangesList = {}
 
 
-class BuildsList.Model extends Backbone.Model
-	NUMBER_OF_BUILDS_TO_REQUEST: 100
-	noMoreBuildsToFetch: false
+class ChangesList.Model extends Backbone.Model
+	NUMBER_OF_CHANGES_TO_REQUEST: 100
+	noMoreChangesToFetch: false
 	defaults:
 		queryString: ''
 
 
 	initialize: () ->
-		@buildsFetcher = new BuildsFetcher()
+		@changesFetcher = new ChangesFetcher()
 
-		@buildModels = new Backbone.Collection()
-		@buildModels.model = Build.Model
-		@buildModels.comparator = (buildModel) =>
-			return -1.0 * buildModel.get 'number'
+		@changeModels = new Backbone.Collection()
+		@changeModels.model = Change.Model
+		@changeModels.comparator = (changeModel) =>
+			return -1.0 * changeModel.get 'number'
 
-		@buildModels.on 'change:selected', @_handleBuildSelection
+		@changeModels.on 'change:selected', @_handleChangeSelection
 
 
-	_handleBuildSelection: (buildModel) =>
-		if buildModel.get 'selected'
-			@_deselectAllOtherBuildModels buildModel
-			window.globalRouterModel.set 
-				'buildId': buildModel.get 'id'
-				'buildView': 'compilation'
+	_handleChangeSelection: (changeModel) =>
+		if changeModel.get 'selected'
+			@_deselectAllOtherChangeModels changeModel
+			globalRouterModel.set 
+				'changeId': changeModel.get 'id'
+				'changeView': 'compilation'
 		else
-			# we use a timeout here to make sure that we don't set the buildId to null
-			# when we're switching between two different build ids
+			# we use a timeout here to make sure that we don't set the changeId to null
+			# when we're switching between two different change ids
 			setTimeout (() =>
-				if window.globalRouterModel.get('buildId') is buildModel.get('id')
-					window.globalRouterModel.set 'buildId', null
+				if globalRouterModel.get('changeId') is changeModel.get('id')
+					globalRouterModel.set 'changeId', null
 				), 0
 
 
-	_deselectAllOtherBuildModels: (buildModelToExclude) =>
-		@buildModels.each (otherBuildModel) =>
-			if otherBuildModel.get('id') isnt buildModelToExclude.get('id')
-				otherBuildModel.set 'selected', false
+	_deselectAllOtherChangeModels: (changeModelToExclude) =>
+		@changeModels.each (otherChangeModel) =>
+			if otherChangeModel.get('id') isnt changeModelToExclude.get('id')
+				otherChangeModel.set 'selected', false
 
 
-	resetBuildsList: () =>
-		@noMoreBuildsToFetch = false
-		@buildModels.reset()
+	resetChangesList: () =>
+		@noMoreChangesToFetch = false
+		@changeModels.reset()
 
 
-	fetchInitialBuilds: () =>
-		queuePolicy =  BuildsFetcher.QueuePolicy.QUEUE_IF_BUSY
-		@_fetchBuilds 0, @NUMBER_OF_BUILDS_TO_REQUEST, queuePolicy
+	fetchInitialChanges: () =>
+		queuePolicy =  ChangesFetcher.QueuePolicy.QUEUE_IF_BUSY
+		@_fetchChanges 0, @NUMBER_OF_CHANGES_TO_REQUEST, queuePolicy
 
 
-	fetchMoreBuildsDoNotQueue: () =>
-		return if @noMoreBuildsToFetch
+	fetchMoreChangesDoNotQueue: () =>
+		return if @noMoreChangesToFetch
 
-		queuePolicy =  BuildsFetcher.QueuePolicy.DO_NOT_QUEUE
-		@_fetchBuilds @buildModels.length, @NUMBER_OF_BUILDS_TO_REQUEST, queuePolicy
+		queuePolicy =  ChangesFetcher.QueuePolicy.DO_NOT_QUEUE
+		@_fetchChanges @changeModels.length, @NUMBER_OF_CHANGES_TO_REQUEST, queuePolicy
 
 
-	_fetchBuilds: (startNumber, numberToRetrieve, queuePolicy) =>
-		assert.ok startNumber >= 0 and numberToRetrieve > 0 and queuePolicy? and not @noMoreBuildsToFetch
+	_fetchChanges: (startNumber, numberToRetrieve, queuePolicy) =>
+		assert.ok startNumber >= 0 and numberToRetrieve > 0 and queuePolicy? and not @noMoreChangesToFetch
 
-		buildsQuery = new BuildsQuery window.globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
-		@buildsFetcher.runQuery buildsQuery, queuePolicy, (error, result) =>
+		changesQuery = new ChangesQuery window.globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
+		@changesFetcher.runQuery changesQuery, queuePolicy, (error, result) =>
 			if error?
 				console.error error
 				return
@@ -69,58 +69,58 @@ class BuildsList.Model extends Backbone.Model
 			# It's possible this is being called for an old query
 			return if result.queryString isnt @get 'queryString'
 
-			# If we didn't receive as many builds as we were 
+			# If we didn't receive as many changes as we were 
 			#   expecting, we must have reached the end.
-			@noMoreBuildsToFetch = result.builds.length < numberToRetrieve
+			@noMoreChangesToFetch = result.changes.length < numberToRetrieve
 
-			@buildModels.add result.builds, 
+			@changeModels.add result.changes, 
 				error: (model, error) => console.error error
 
 
-class BuildsList.View extends Backbone.View
+class ChangesList.View extends Backbone.View
 	tagName: 'div'
-	className: 'buildsList'
+	className: 'changesList'
 	html: '&nbsp'
 	events:	'scroll': '_scrollHandler'
 
 
 	initialize: () =>
 		@model.on 'change:queryString', (() =>
-			@model.resetBuildsList()
-			@model.fetchInitialBuilds()
+			@model.resetChangesList()
+			@model.fetchInitialChanges()
 			), @
 
-		@model.buildModels.on 'add', @_handleAddedBuild, @
-		@model.buildModels.on 'reset', (() => @$el.empty()), @
+		@model.changeModels.on 'add', @_handleAddedChange, @
+		@model.changeModels.on 'reset', @$el.empty, @
 
-		window.globalRouterModel.on 'change:repositoryId', (() => @model.resetBuildsList()), @
+		globalRouterModel.on 'change:repositoryId', @model.resetChangesList, @
 
 
 	onDispose: () =>
 		@model.off null, null, @
-		@model.buildModels.off null, null, @
-		window.globalRouterModel.off null, null, @
+		@model.changeModels.off null, null, @
+		globalRouterModel.off null, null, @
 
 
 	render: () =>
 		@$el.html @html
-		@model.fetchInitialBuilds()
+		@model.fetchInitialChanges()
 		return @
 
 
 	_scrollHandler: () =>
-		heightBeforeFetchingMoreBuilds = 200
-		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreBuilds > @el.scrollHeight
-			@model.fetchMoreBuildsDoNotQueue()
+		heightBeforeFetchingMoreChanges = 200
+		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreChanges > @el.scrollHeight
+			@model.fetchMoreChangesDoNotQueue()
 
 
-	_handleAddedBuild: (buildModel, collection, options) =>
-		buildView = new Build.View model: buildModel
-		@_insertBuildAtIndex buildView.render().el, options.index
+	_handleAddedChange: (changeModel, collection, options) =>
+		changeView = new Change.View model: changeModel
+		@_insertChangeAtIndex changeView.render().el, options.index
 
 
-	_insertBuildAtIndex: (buildView, index) =>
+	_insertChangeAtIndex: (changeView, index) =>
 		if index == 0
-			@$el.prepend buildView
+			@$el.prepend changeView
 		else 
-			@$el.find('.build:nth-child(' + index + ')').after buildView
+			@$el.find('.change:nth-child(' + index + ')').after changeView

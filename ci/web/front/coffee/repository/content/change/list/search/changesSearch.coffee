@@ -1,18 +1,18 @@
-window.BuildsSearch = {}
+window.ChangesSearch = {}
 
 
-class BuildsSearch.Model extends Backbone.Model
+class ChangesSearch.Model extends Backbone.Model
 	defaults:
 		queryString: ''
 
 
-class BuildsSearch.View extends Backbone.View
+class ChangesSearch.View extends Backbone.View
 	tagName: 'div'
-	className: 'buildsSearch'
-	html: '<input type="search" class="buildsSearchField" placeholder="search..." maxlength=256 autocomplete="on">'
+	className: 'changesSearch'
+	html: '<input type="search" class="changesSearchField" placeholder="search..." maxlength=256 autocomplete="on">'
 	events:
-		'keyup .buildsSearchField': '_handleKeyDown'
-		'blur .buildsSearchField': '_handleKeyDown'
+		'keyup .changesSearchField': '_handleKeyDown'
+		'blur .changesSearchField': '_handleKeyDown'
 
 
 	initialize: () =>
@@ -30,8 +30,8 @@ class BuildsSearch.View extends Backbone.View
 
 
 	_syncModelToView: () =>
-		$('.buildsSearchField').val @model.get 'queryString'
+		$('.changesSearchField').val @model.get 'queryString'
 
 
 	_handleKeyDown: (event) =>
-		@model.set 'queryString', $('.buildsSearchField').val()
+		@model.set 'queryString', $('.changesSearchField').val()

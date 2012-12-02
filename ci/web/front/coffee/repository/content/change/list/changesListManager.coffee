@@ -1,39 +1,39 @@
-window.BuildsListManager = {}
+window.ChangesListManager = {}
 
 
-class BuildsListManager.Model extends Backbone.Model
+class ChangesListManager.Model extends Backbone.Model
 
 	initialize: () =>
-		@buildsSearchModel = new BuildsSearch.Model()
-		@buildsSearchModel.on 'change:queryString', () =>
-			@buildsListModel.set 'queryString', @buildsSearchModel.get 'queryString'
+		@changesSearchModel = new ChangesSearch.Model()
+		@changesSearchModel.on 'change:queryString', () =>
+			@changesListModel.set 'queryString', @changesSearchModel.get 'queryString'
 
-		@buildsListModel = new BuildsList.Model()
-		@buildsListModel.on 'change:queryString', () =>
-			@buildsSearchModel.set 'queryString', @buildsListModel.get 'queryString'
+		@changesListModel = new ChangesList.Model()
+		@changesListModel.on 'change:queryString', () =>
+			@changesSearchModel.set 'queryString', @changesListModel.get 'queryString'
 
 
-class BuildsListManager.View extends Backbone.View
+class ChangesListManager.View extends Backbone.View
 	tagName: 'div'
-	className: 'buildsListManager'
-	html: '<div class="buildsListManagerContainer">
-			<div class="buildsSearchContainer"></div>
-			<div class="buildsListContainer"></div>
+	className: 'changesListManager'
+	html: '<div class="changesListManagerContainer">
+			<div class="changesSearchContainer"></div>
+			<div class="changesListContainer"></div>
 		</div>'
 
 
 	initialize: () =>
-		@buildsSearchView = new BuildsSearch.View model: @model.buildsSearchModel
-		@buildsListView = new BuildsList.View model: @model.buildsListModel
+		@changesSearchView = new ChangesSearch.View model: @model.changesSearchModel
+		@changesListView = new ChangesList.View model: @model.changesListModel
 
 
 	onDispose: () =>
-		@buildsSearchView.dispose()
-		@buildsListView.dispose()
+		@changesSearchView.dispose()
+		@changesListView.dispose()
 
 
 	render: () =>
 		@$el.html @html
-		@$el.find('.buildsSearchContainer').html @buildsSearchView.render().el
-		@$el.find('.buildsListContainer').html @buildsListView.render().el
+		@$el.find('.changesSearchContainer').html @changesSearchView.render().el
+		@$el.find('.changesListContainer').html @changesListView.render().el
 		return @

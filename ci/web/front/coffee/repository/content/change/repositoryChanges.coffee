@@ -1,31 +1,31 @@
-window.RepositoryBuilds = {}
+window.RepositoryChanges = {}
 
 
-class RepositoryBuilds.Model extends Backbone.Model
+class RepositoryChanges.Model extends Backbone.Model
 
 	initialize: () =>
-		@buildsListManagerModel = new BuildsListManager.Model()
-		@buildDetailsModel = new BuildDetails.Model()
+		@changesListManagerModel = new ChangesListManager.Model()
+		@changeDetailsModel = new ChangeDetails.Model()
 
 
-class RepositoryBuilds.View extends Backbone.View
+class RepositoryChanges.View extends Backbone.View
 	tagName: 'div'
-	className: 'repositoryBuilds'
+	className: 'repositoryChanges'
 	html: ''
 
 
 	initialize: () =>
-		@buildsListManagerView = new BuildsListManager.View model: @model.buildsListManagerModel
-		@buildDetailsView = new BuildDetails.View model: @model.buildDetailsModel
+		@changesListManagerView = new ChangesListManager.View model: @model.changesListManagerModel
+		@changeDetailsView = new ChangeDetails.View model: @model.changeDetailsModel
 
 
 	onDispose: () =>
-		@buildsListManagerView.dispose()
-		@buildDetailsView.dispose()
+		@changesListManagerView.dispose()
+		@changeDetailsView.dispose()
 
 
 	render: () =>
 		@$el.html @html
-		@$el.append @buildsListManagerView.render().el
-		@$el.append @buildDetailsView.render().el
+		@$el.append @changesListManagerView.render().el
+		@$el.append @changeDetailsView.render().el
 		return @

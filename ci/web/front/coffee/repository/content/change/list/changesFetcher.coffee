@@ -1,4 +1,4 @@
-window.BuildsFetcher = class BuildsFetcher
+window.ChangesFetcher = class ChangesFetcher
 	currentQuery: null
 	currentCallback: null
 
@@ -11,9 +11,9 @@ window.BuildsFetcher = class BuildsFetcher
 		if not @currentQuery?
 			@currentQuery = query
 			@currentCallback = callback
-			@_fetchBuilds()
+			@_fetchChanges()
 			return true
-		else if queuePolicy is BuildsFetcher.QueuePolicy.QUEUE_IF_BUSY
+		else if queuePolicy is ChangesFetcher.QueuePolicy.QUEUE_IF_BUSY
 			@nextQuery = query
 			@nextCallback = callback
 			return true
@@ -21,7 +21,7 @@ window.BuildsFetcher = class BuildsFetcher
 		return false
 
 
-	_fetchBuilds: () =>
+	_fetchChanges: () =>
 		assert.ok @currentQuery? and @currentQuery.repositoryId? and @currentQuery.queryString?
 		assert.ok @currentCallback?
 		
@@ -33,7 +33,7 @@ window.BuildsFetcher = class BuildsFetcher
 		 		start: @currentQuery.startNumber
 		 		numResults: @currentQuery.numberToRetrieve
 
-		socket.emit 'builds:read', requestData, (error, buildsData) =>
+		socket.emit 'changes:read', requestData, (error, changeData) =>
 			if error?
 				callback = @currentCallback
 				@_runNextQuery()
@@ -41,7 +41,7 @@ window.BuildsFetcher = class BuildsFetcher
 			else
 				result = 
 					queryString: @currentQuery.queryString
-					builds: buildsData
+					changes: changeData
 				callback = @currentCallback
 				@_runNextQuery()
 				callback null, result
@@ -53,9 +53,9 @@ window.BuildsFetcher = class BuildsFetcher
 		@nextQuery = null
 		@nextCallback = null
 
-		@_fetchBuilds() if @currentQuery?
+		@_fetchChanges() if @currentQuery?
 
 
-BuildsFetcher.QueuePolicy =
+ChangesFetcher.QueuePolicy =
 	QUEUE_IF_BUSY: 'queueIfBusy'
 	DO_NOT_QUEUE: 'doNotQueue'

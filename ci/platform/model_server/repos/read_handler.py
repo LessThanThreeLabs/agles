@@ -117,8 +117,8 @@ class ReposReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 
 		options = {
-			'default': 'builds',
-			'options': ['source', 'builds', 'settings']
+			'default': 'changes',
+			'options': ['source', 'changes', 'settings']
 		}
 
 		if row and RepositoryPermissions.has_permissions(

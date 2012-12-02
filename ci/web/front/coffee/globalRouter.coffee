@@ -1,7 +1,7 @@
 class GlobalRouterModel extends Backbone.Model
 	VALID_VIEWS: ['welcome', 'account', 'repository', 'createRepository']
-	VALID_REPOSITORY_VIEWS: ['source', 'builds', 'settings', 'admin']
-	VALID_BUILD_VIEWS: ['information', 'compilation', 'test']
+	VALID_REPOSITORY_VIEWS: ['source', 'changes', 'settings', 'admin']
+	VALID_CHANGE_VIEWS: ['information', 'compilation', 'test']
 
 	defaults:
 		view: 'welcome'
@@ -9,8 +9,8 @@ class GlobalRouterModel extends Backbone.Model
 		repositoryId: null
 		repositoryView: null
 
-		buildId: null
-		buildView: null
+		changeId: null
+		changeView: null
 
 
 	initialize: () =>
@@ -39,12 +39,12 @@ class GlobalRouterModel extends Backbone.Model
 		if @get('repositoryView')?
 			url += '/' + @get 'repositoryView'
 
-			if @get('buildId')?
-				assert.ok @get('repositoryView') is 'builds'
-				url += '/' + @get 'buildId'
+			if @get('changeId')?
+				assert.ok @get('repositoryView') is 'changes'
+				url += '/' + @get 'changeId'
 
-				if @get('buildView')?
-					url += '/' + @get 'buildView'
+				if @get('changeView')?
+					url += '/' + @get 'changeView'
 
 		globalRouter.navigate url, trigger: true
 
@@ -59,11 +59,11 @@ class GlobalRouterModel extends Backbone.Model
 		if attributes.repositoryView? and attributes.repositoryView not in @VALID_REPOSITORY_VIEWS
 			return new Error 'Invalid repository view: ' + attributes.repositoryView
 
-		if attributes.buildId? and (typeof attributes.buildId isnt 'number' or attributes.buildId < 0)
-			return new Error 'Invalid build id (make sure it is not a string): ' + attributes.buildId
+		if attributes.changeId? and (typeof attributes.changeId isnt 'number' or attributes.changeId < 0)
+			return new Error 'Invalid change id (make sure it is not a string): ' + attributes.changeId
 
-		if attributes.buildView? and attributes.buildView not in @VALID_BUILD_VIEWS
-			return new Error 'Invalid build view: ' + attributes.buildView
+		if attributes.changeView? and attributes.changeView not in @VALID_CHANGE_VIEWS
+			return new Error 'Invalid change view: ' + attributes.changeView
 
 		return
 
@@ -76,8 +76,8 @@ class GlobalRouter extends Backbone.Router
 
 		'repository/:repositoryId': 'loadRepository'
 		'repository/:repositoryId/:repositoryView': 'loadRepository'
-		'repository/:repositoryId/builds/:buildId': 'loadRepositoryBuild'
-		'repository/:repositoryId/builds/:buildId/:buildView': 'loadRepositoryBuild'
+		'repository/:repositoryId/changes/:changeId': 'loadRepositoryChange'
+		'repository/:repositoryId/changes/:changeId/:changeView': 'loadRepositoryChange'
 
 		'create/repository': 'createRepository'
 
@@ -87,8 +87,8 @@ class GlobalRouter extends Backbone.Router
 			view: 'welcome'
 			repositoryId: null
 			repositoryView: null
-			buildId: null
-			buildView: null
+			changeId: null
+			changeView: null
 		globalRouterModel.set attributesToSet, 
 			error: (model, error) => console.error error
 
@@ -98,8 +98,8 @@ class GlobalRouter extends Backbone.Router
 			view: 'account'
 			repositoryId: null
 			repositoryView: null
-			buildId: null
-			buildView: null
+			changeId: null
+			changeView: null
 		globalRouterModel.set attributesToSet, 
 			error: (model, error) => console.error error
 
@@ -109,19 +109,19 @@ class GlobalRouter extends Backbone.Router
 			view: 'repository'
 			repositoryId: if isNaN(parseInt(repositoryId)) then null else parseInt(repositoryId)
 			repositoryView: repositoryView ? null
-			buildId: null
-			buildView: null
+			changeId: null
+			changeView: null
 		globalRouterModel.set attributesToSet, 
 			error: (model, error) => console.error error
 
 
-	loadRepositoryBuild: (repositoryId, buildId, buildView) =>
+	loadRepositoryChange: (repositoryId, changeId, changeView) =>
 		attributesToSet =
 			view: 'repository'
 			repositoryId: if isNaN(parseInt(repositoryId)) then null else parseInt(repositoryId)
-			repositoryView: 'builds'
-			buildId: if isNaN(parseInt(buildId)) then null else parseInt(buildId)
-			buildView: buildView ? null
+			repositoryView: 'changes'
+			changeId: if isNaN(parseInt(changeId)) then null else parseInt(changeId)
+			changeView: changeView ? null
 		globalRouterModel.set attributesToSet, 
 			error: (model, error) => console.error error
 
@@ -131,8 +131,8 @@ class GlobalRouter extends Backbone.Router
 			view: 'createRepository'
 			repositoryId: null
 			repositoryView: null
-			buildId: null
-			buildView: null
+			changeId: null
+			changeView: null
 		globalRouterModel.set attributesToSet, 
 			error: (model, error) => console.error error
 

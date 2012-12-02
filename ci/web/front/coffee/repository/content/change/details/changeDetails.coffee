@@ -1,27 +1,27 @@
-window.BuildDetails = {}
+window.ChangeDetails = {}
 
 
-class BuildDetails.Model extends Backbone.Model
+class ChangeDetails.Model extends Backbone.Model
 
 	initialize: () =>
 		@consoleCompilationOutputModel = new ConsoleCompilationOutput.Model()
 
 
-class BuildDetails.View extends Backbone.View
+class ChangeDetails.View extends Backbone.View
 	tagName: 'div'
-	className: 'buildDetails'
-	html: '<div class="buildDetailsContentContainer">
-				<div class="buildDetailsContent">&nbsp</div>
+	className: 'changeDetails'
+	html: '<div class="changeDetailsContentContainer">
+				<div class="changeDetailsContent">&nbsp</div>
 			</div>'
 	currentView: null
 
 
 	initialize: () =>
-		window.globalRouterModel.on 'change:buildView', @_updateContent, @
+		globalRouterModel.on 'change:changeView', @_updateContent, @
 
 
 	onDispose: () =>
-		window.globalRouterModel.off null, null, @
+		globalRouterModel.off null, null, @
 		@currentView.dispose() if @currentView?
 
 
@@ -34,20 +34,20 @@ class BuildDetails.View extends Backbone.View
 	_updateContent: () =>
 		@currentView.dispose() if @currentView?
 
-		switch window.globalRouterModel.get 'buildView'
+		switch globalRouterModel.get 'changeView'
 			when 'information'
-				@$el.find('.buildDetailsContent').empty()
-				console.log 'buildDetails -- information view not implemented yet'
+				@$el.find('.changeDetailsContent').empty()
+				console.log 'changeDetails -- information view not implemented yet'
 			when 'compilation'
 				@currentView = new ConsoleCompilationOutput.View model: @model.consoleCompilationOutputModel
-				@$el.find('.buildDetailsContent').html @currentView.render().el
+				@$el.find('.changeDetailsContent').html @currentView.render().el
 			when 'test'
-				@$el.find('.buildDetailsContent').empty()
-				console.log 'buildDetails -- test view not implemented yet'
+				@$el.find('.changeDetailsContent').empty()
+				console.log 'changeDetails -- test view not implemented yet'
 			when null
-				@$el.find('.buildDetailsContent').empty()
-				console.log 'buildDetails -- default view not implemented yet'
+				@$el.find('.changeDetailsContent').empty()
+				console.log 'changeDetails -- default view not implemented yet'
 			else
-				@$el.find('.buildDetailsContent').empty()
-				console.error 'Unaccounted for view ' + window.globalRouterModel.get 'buildView'
+				@$el.find('.changeDetailsContent').empty()
+				console.error 'Unaccounted for view ' + globalRouterModel.get 'changeView'
 	
