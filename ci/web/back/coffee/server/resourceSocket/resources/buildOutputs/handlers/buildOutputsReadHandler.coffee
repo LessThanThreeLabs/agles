@@ -14,7 +14,7 @@ class BuildOutputsReadHandler extends Handler
 			if error?
 				callback error
 			else
-				callback null, @_santizeDefault result
+				callback null, @_sanitizeDefault result
 
 
 	_sanitizeDefault: (result) =>
@@ -23,8 +23,13 @@ class BuildOutputsReadHandler extends Handler
 
 
 	getBuildConsoleIds: (socket, args, callback) =>
-		@modelRpcConnection.buildOutputs.read.get_build_console_ids socket.session.userId, args.buildId, (error, result) =>
+		@modelRpcConnection.changes.read.get_primary_build socket.session.userId, args.changeId, (error, result) =>
 			if error?
 				callback error
-			else
-				callback null, result
+				return
+
+			@modelRpcConnection.buildOutputs.read.get_build_console_ids socket.session.userId, result.id, (error, result) =>
+				if error?
+					callback error
+				else
+					callback null, result

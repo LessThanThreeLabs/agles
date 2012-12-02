@@ -13,12 +13,12 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 	fetchOutput: () =>
 		@consoleTextOutputModels.reset()
 
-		return if not window.globalRouterModel.get('buildId')?
+		return if not globalRouterModel.get('changeId')?
 
 		requestData =
 			method: 'getBuildConsoleIds'
 			args: 
-				buildId: window.globalRouterModel.get('buildId')
+				changeId: window.globalRouterModel.get('changeId')
 		socket.emit 'buildOutputs:read', requestData, (error, buildOutputIds) =>
 			if error?
 				console.error error
@@ -41,12 +41,12 @@ class ConsoleCompilationOutput.View extends Backbone.View
 
 	initialize: () =>
 		@model.consoleTextOutputModels.on 'reset', @_addOutput, @
-		window.globalRouterModel.on 'change:buildId', @model.fetchOutput, @
+		globalRouterModel.on 'change:changeId', @model.fetchOutput, @
 
 
 	onDispose: () =>
 		@model.consoleTextOutputModels.off null, null, @
-		window.globalRouterModel.off 'change:buildId', null, @
+		globalRouterModel.off 'change:changeId', null, @
 
 
 	render: () =>
