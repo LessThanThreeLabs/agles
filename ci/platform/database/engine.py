@@ -2,16 +2,16 @@ from boto.s3.connection import S3Connection
 from redis import StrictRedis
 from sqlalchemy import create_engine
 
-from settings import database
 from settings.aws import access_key_id, secret_access_key
+from settings.database import sql_database_url, redis_connection_params
 
 
 class ConnectionFactory(object):
-	_ENGINE = create_engine(database.sql_database_url)
+	_ENGINE = create_engine(sql_database_url)
 
 	@classmethod
 	def recreate_engine(cls):
-		cls._ENGINE = create_engine(database.sql_database_url)
+		cls._ENGINE = create_engine(sql_database_url)
 
 	@classmethod
 	def get_sql_engine(cls):
@@ -23,7 +23,7 @@ class ConnectionFactory(object):
 
 	@classmethod
 	def get_redis_connection(cls):
-		return StrictRedis(**database.redis_connection_params)
+		return StrictRedis(**redis_connection_params)
 
 	@classmethod
 	def get_s3_bucket(cls, bucket_name):
