@@ -1,6 +1,5 @@
 import os
 import shutil
-import unittest
 
 from os.path import exists
 
@@ -9,10 +8,11 @@ from git import Repo
 from repo.store import FileSystemRepositoryStore, MergeError
 
 from util.pathgen import to_path
-from util.test.mixins import *
+from util.test import BaseIntegrationTest
+from util.test.mixins import ModelServerTestMixin, RepoStoreTestMixin
 
 
-class RepoStoreTests(unittest.TestCase, RepoStoreTestMixin):
+class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMixin):
 	TEST_DIR = '/tmp'
 
 	@classmethod
@@ -33,9 +33,11 @@ class RepoStoreTests(unittest.TestCase, RepoStoreTestMixin):
 		self.repo_path = os.path.join(
 			self.repodir,
 			to_path(self.repo_hash, "repo.git"))
+		self._start_model_server()
 
 	def tearDown(self):
 		self._cleardir(self.repodir)
+		self._stop_model_server()
 
 	def _cleardir(self, dirpath):
 		for filename in os.listdir(dirpath):

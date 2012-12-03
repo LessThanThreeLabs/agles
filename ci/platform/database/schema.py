@@ -115,6 +115,15 @@ ssh_pubkey = Table('ssh_pubkey', metadata,
 	Column('ssh_key', String, nullable=False, unique=True)
 )
 
+#####################
+# Github Integration
+#####################
+
+github_repo_url_map = Table('github_repo_url_map', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False, unique=True),
+	Column('github_url', String, nullable=False)
+)
 
 def reseed_db():
 	engine = ConnectionFactory.get_sql_engine()

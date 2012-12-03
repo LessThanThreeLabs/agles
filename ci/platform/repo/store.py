@@ -176,6 +176,20 @@ class FileSystemRepositoryStore(RepositoryStore):
 			os.makedirs(root_storage_directory_path)
 		self._root_path = root_storage_directory_path
 
+	def _push_github(self, repo, remote_repo, ref):
+		try:
+			repo.git.push(remote_repo, ':'.join([ref, ref]), f=True)
+		except GitCommandError as e:
+			# TODO: should do logging here
+			raise e
+	def _push_github_if_necessary(self, repo, repo_hash, ref):
+		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_corresponding_github_repo_url(repo_hash)
+
+		# remote_repo is None if user doesn't have a pushback url set
+		if remote_repo:
+			self._push_github(repo, remote_repo, ref)
+
 	def merge_changeset(self, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
@@ -201,6 +215,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
+
+		self._push_github_if_necessary(repo, repo_hash, ref_to_merge_into)
 
 	def create_repository(self, repo_hash, repo_name):
 		"""Creates a new server side repository. Raises an exception on failure.

@@ -158,3 +158,17 @@ class ReposReadHandler(ModelServerRpcHandler):
 			return {}
 		else:
 			return to_dict(row, repo.columns, tablename=repo.name)
+
+###############
+# Github Integration
+###############
+
+	def get_corresponding_github_repo_url(self, repo_hash):
+		repo = database.schema.repo
+		github_repo_url_map = database.schema.github_repo_url_map
+
+		query = github_repo_url_map.join(repo).select().where(
+			repo.c.hash==repo_hash)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+			return row[github_repo_url_map.c.github_url] if row else None
