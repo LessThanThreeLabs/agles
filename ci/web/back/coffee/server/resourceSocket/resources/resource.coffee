@@ -26,6 +26,10 @@ module.exports = class Resource
 		callback 'subscribe not written yet' if callback?
 
 
+	unsubscribe: (socket, data, callback) ->
+		callback 'unsubscribe not written yet' if callback?
+
+
 	_call: (handler, socket, data, callback) ->
 		assert.ok data?
 		if data.method? and data.args?

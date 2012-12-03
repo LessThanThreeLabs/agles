@@ -17,3 +17,14 @@ class BuildOutputsResource extends Resource
 
 	read: (socket, data, callback) =>
 		@_call @readHandler, socket, data, callback
+
+
+	subscribe: (socket, data, callback) =>
+		console.log 'need to make sure this user is allowed to receive updates for id ' + data.id
+		eventName = @modelConnection.eventConnection.buildOutputs.registerForEvents socket, data.id
+		callback null, eventName: eventName if callback?
+
+
+	unsubscribe: (socket, data, callback) =>
+		@modelConnection.eventConnection.buildOutputs.unregisterForEvents socket, data.id
+		callback null, 'ok' if callback?
