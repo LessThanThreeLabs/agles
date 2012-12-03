@@ -32,3 +32,10 @@ def hidden_ref(commit_id):
 	:return: The hidden ref that the commit is stored in
 	"""
 	return os.sep.join(['refs/pending', str(commit_id)])
+
+
+def get_repo_hash(abspath):
+	# We start 2 from the back of the list because of ['repo_name', '.git']
+	hash_path_end_index = -1
+	hash_path_start_index = hash_path_end_index - DIR_LEVELS
+	return ''.join(abspath.split('/')[hash_path_start_index:hash_path_end_index])
