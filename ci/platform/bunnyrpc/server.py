@@ -28,6 +28,7 @@ from kombu.entity import Exchange, Queue
 from settings.rabbit import connection_info
 from util import greenlets
 
+
 class Server(object):
 	"""RPC Server that handles rpc calls from clients.
 
@@ -111,7 +112,7 @@ class Server(object):
 		try:
 			proto["value"] = getattr(self.base_instance, method_name)(*args)
 			proto["error"] = None
-		except Exception, e:
+		except Exception:
 			proto["value"] = None
 			exc_type, exc_value, exc_traceback = sys.exc_info()
 			tb = '\t' + '\n\t'.join(traceback.format_exc().splitlines())

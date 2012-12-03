@@ -46,6 +46,5 @@ class ChangesCreateEventHandler(EventSubscriber):
 		self.producer.publish(build_id,
 			exchange=verification_request_queue.exchange,
 			routing_key=verification_request_queue.routing_key,
-			delivery_mode=2,  # make message persistent
 			mandatory=True,
 		)
