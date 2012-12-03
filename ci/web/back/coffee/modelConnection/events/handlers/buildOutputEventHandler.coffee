@@ -18,8 +18,8 @@ class BuildOutputEventHandler extends EventHandler
 
 		setInterval (() =>
 			data =
-				id: 17
-				name: 'sample event'
+				id: id
+				name: @EVENT_PREFIX + id
 				contents:
 					some: 'contents'
 			@processEvent data
@@ -34,5 +34,5 @@ class BuildOutputEventHandler extends EventHandler
 
 
 	processEvent: (data) =>
-		console.log 'emitting...'
+		console.log 'emitting... ' + data.name
 		@sockets.in(@ROOM_PREFIX + data.id).emit data.name, data.contents

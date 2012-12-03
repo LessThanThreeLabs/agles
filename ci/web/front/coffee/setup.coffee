@@ -4,7 +4,7 @@ Backbone.Model.prototype.subscribe = () ->
 	assert.ok @urlRoot? and @id? and @onUpdate?
 	@_numSubscribeRequests++
 
-	socket.emit @urlRoot + ':subscribe', id: @id, (error, result) ->
+	socket.emit @urlRoot + ':subscribe', id: @id, (error, result) =>
 		if error?
 			console.error error
 			return
