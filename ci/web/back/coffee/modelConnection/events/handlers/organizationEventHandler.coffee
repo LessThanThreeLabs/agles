@@ -4,10 +4,10 @@ EventHandler = require './eventHandler'
 
 
 exports.create = (sockets) ->
-	return new OrganizationEventEventHandler sockets
+	return new OrganizationEventHandler sockets
 
 
-class OrganizationEventEventHandler extends EventHandler
+class OrganizationEventHandler extends EventHandler
 
 	registerForEvents: (socket, id) =>
 		console.log 'need to register for organization events'

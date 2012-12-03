@@ -4,10 +4,10 @@ EventHandler = require './eventHandler'
 
 
 exports.create = (sockets) ->
-	return new BuildEventEventHandler sockets
+	return new BuildOutputEventHandler sockets
 
 
-class BuildEventEventHandler extends EventHandler
+class BuildOutputEventHandler extends EventHandler
 
 	registerForEvents: (socket, id) =>
 		console.log 'need to register for build output events'

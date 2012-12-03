@@ -3,6 +3,7 @@ msgpack = require 'msgpack'
 
 
 module.exports = class EventHandler
+	
 	constructor: (@sockets) ->
 		assert.ok @sockets?
 
