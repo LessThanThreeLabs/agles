@@ -15,17 +15,6 @@ class BuildOutputEventHandler extends EventHandler
 	registerForEvents: (socket, id) =>
 		assert.ok socket? and id? and typeof id is 'number'
 		socket.join @ROOM_PREFIX + id
-
-		setInterval (() =>
-			data =
-				id: id
-				name: 'line added'
-				contents:
-					line_number: -1
-					line: 'hello there!!!!'
-			@processEvent data
-			), 10000
-
 		return @EVENT_PREFIX + id
 
 
@@ -35,8 +24,6 @@ class BuildOutputEventHandler extends EventHandler
 
 
 	processEvent: (data) =>
-		console.log 'emitting... ' + data.name
-
 		roomName = @ROOM_PREFIX + data.id
 		eventName = @EVENT_PREFIX + data.id
 		eventType = data.name
@@ -47,5 +34,5 @@ class BuildOutputEventHandler extends EventHandler
 
 
 	_sanitizeContents: (data) =>
-		number: data.line_number
+		number: data.line_num
 		text: data.line

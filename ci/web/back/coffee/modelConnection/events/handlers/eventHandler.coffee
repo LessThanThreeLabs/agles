@@ -10,5 +10,5 @@ module.exports = class EventHandler
 
 	handleEvent: (message, headers, deliveryInfo) =>
 		# pass to child handler
-		data = msgpack.unpack message
+		data = msgpack.unpack message.data
 		@processEvent data
