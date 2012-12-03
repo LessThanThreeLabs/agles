@@ -37,7 +37,7 @@ class ConsoleCompilationOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleCompilationOutput'
 	html: '&nbsp'
-
+	currentViews: []
 
 	initialize: () =>
 		@model.consoleTextOutputModels.on 'reset', @_addOutput, @
@@ -55,9 +55,20 @@ class ConsoleCompilationOutput.View extends Backbone.View
 		return @
 
 
-	_addOutput: () =>
+	_clear: () =>
 		@$el.html @html
+		@_removeOutputs()
+
+
+	_addOutput: () =>
+		@_clear()
 		@model.consoleTextOutputModels.each (consoleTextOutputModel) =>
 			consoleTextOutputView = new ConsoleTextOutput.View model: consoleTextOutputModel
 			@$el.append consoleTextOutputView.render().el
+			@currentViews.push consoleTextOutputView
 			
+
+	_removeOutputs: () =>
+		for view in @currentViews
+			view.dispose()
+		@currentViews = []

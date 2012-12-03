@@ -2,6 +2,7 @@ window.ConsoleTextOutput = {}
 
 
 class ConsoleTextOutput.Model extends Backbone.Model
+	urlRoot: 'buildOutputs'
 	defaults:
 		id: null
 		title: null
@@ -22,6 +23,11 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 			@set 'title', result.title
 			@_addLineModels result.consoleOutput
+
+
+	onUpdate: (data) =>
+		console.log 'received an update:'
+		console.log data
 
 
 	_addLineModels: (consoleOutput) =>
@@ -45,12 +51,14 @@ class ConsoleTextOutput.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change:title', @_updateTitle, @
+		@model.subscribe()
 		@model.consoleTextOutputLineModels.on 'add', @_handleAddLine, @
 		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText, @
 
 
 	onDispose: () =>
 		@model.off null, null, @
+		@model.unsubscribe()
 		@model.consoleTextOutputLineModels.off null, null, @
 
 
