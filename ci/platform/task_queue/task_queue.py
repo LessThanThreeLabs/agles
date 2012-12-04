@@ -1,9 +1,6 @@
-import operator
 import random
 
-import eventlet.queue
-import msgpack
-
+from functools import partial
 from kombu.connection import Connection
 from kombu.entity import Queue
 from settings.rabbit import connection_info
@@ -16,89 +13,45 @@ class TaskQueue(object):
 		if not connection:
 			connection = Connection(connection_info)
 		self.connection = connection
-		self.shared_work_queue = Queue(durable=False, auto_delete=True)(connection)
+		self.shared_work_queue = Queue(durable=False, auto_delete=False)(connection)
 		self.shared_work_queue.queue_declare()
-		self.producer = connection.Producer(serializer='msgpack', on_return=self._handle_return)
-		self.response_queue = Queue(durable=False, auto_delete=True)(connection)
-		self.response_queue.queue_declare()
+		self.producer = self.connection.Producer(serializer='msgpack')
 		self.workers = {}
 
-	def invite_workers(self, num_workers, exchange, routing_key):
-		message = {"type": "invite",
-			"shared_queue": self.shared_work_queue.name,
-			"response_queue": self.response_queue.name}
-		self.invite_queue = eventlet.queue.Queue()
-		exchange(self.producer.channel).declare()
-
-		with self.connection.Consumer([self.response_queue], callbacks=[self.handle_response], auto_declare=False):
-			for worker in range(num_workers):
-				self.producer.publish(message,
-					exchange=exchange,
-					routing_key=routing_key,
-					immediate=True
-				)
-				self.producer.connection.drain_events()
-				self.invite_queue.get()
-		print "Received %s out of %s workers" % (len(self.workers), num_workers)
-		return len(self.workers)
-
-	def delegate_one(self, task):
-		self._publish_task(task,
+	def delegate_task(self, task):
+		self._publish(self._as_task(task),
 			routing_key=self.shared_work_queue.name,
 			mandatory=True)
 
-	def delegate_all(self, task):
-		for worker in self.workers.itervalues():
-			self._publish_task(task,
-				routing_key=worker["queue_name"],
-				mandatory=True)
+	def _as_task(self, task):
+		return {"type": "task", "task": task}
 
-	def _publish_task(self, task, **producer_kwargs):
-		self.producer.publish({"type": "task", "task": task},
+	def _publish(self, message, **producer_kwargs):
+		self.producer.publish(message,
 			**producer_kwargs)
 
-	def close(self):
-		for worker in self.workers.itervalues():
-			self.producer.publish({"type": "free"},
-				routing_key=worker["queue_name"],
-				mandatory=True)
+	def assign_workers(self, num_workers, queue, message=None):
+		queue(self.connection).queue_declare()
+		with self.connection.Consumer([queue], callbacks=[partial(self._new_worker, payload=message)], auto_declare=False):
+			for worker in range(num_workers):
+				self.connection.drain_nowait()
+			print "Received %s out of %s workers" % (len(self.workers), num_workers)
+			if len(self.workers) == 0:
+				self.shared_work_queue.delete()
+		return len(self.workers)
 
-	def handle_response(self, body, message):
-		try:
-			self._switch(body)
-		finally:
-			message.ack()
+	def _new_worker(self, body, message, payload):
+		self._add_worker(body["worker_id"], body["queue_name"], payload)
+		message.ack()
 
-	def _new_worker(self, body):
-		self._add_worker(body["from"], body["queue_name"])
-
-	def _add_worker(self, name, queue):
-		if name and queue:
-			self.workers[name] = {"queue_name": queue, "status": "working"}
-			print "Allocated worker %s" % name
-		self.invite_queue.put(name)
-
-	def _results(self, body):
-		print "Results %s from %s" % (body["results"], body["from"])
-
-	def _worker_done(self, body):
-		self.workers[body["from"]]["status"] = "done"
-		if reduce(operator.and_, [worker["status"] == "done" for worker in self.workers], True):
-			print "ALL WORKERS DONE"
-
-	def _switch(self, body):
-		handlers = {"new_worker": self._new_worker,
-			"results": self._results,
-			"done": self._worker_done}
-		if handlers.get(body["type"]):
-			handlers[body["type"]](body)
-		else:
-			raise InvalidResponseError(body["type"])
-
-	def _handle_return(self, exception, exchange, routing_key, message):
-		body = msgpack.unpackb(message.body)
-		if body["type"] == "invite":
-			self._add_worker(None, None)
+	def _add_worker(self, name, queue, payload):
+		self.workers[name] = {"queue_name": queue, "status": "working"}
+		print "Allocated worker %s" % name
+		with self.connection.Producer(serializer='msgpack') as producer:
+			producer.publish({"type": "assign",
+				"task_queue": self.shared_work_queue.name,
+				"message": payload},
+				routing_key=queue)
 
 
 class InvalidResponseError(Exception):

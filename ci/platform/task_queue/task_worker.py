@@ -1,4 +1,5 @@
 import random
+import socket
 
 from kombu.connection import Connection
 from kombu.entity import Queue
@@ -6,62 +7,68 @@ from settings.rabbit import connection_info
 
 
 class TaskWorker(object):
-	def __init__(self, worker_pool_queue, connection=None):
+	def __init__(self, connection=None):
 		random.seed()
 		self.worker_id = str(random.random())[2:]
 		self.connection = connection if connection else Connection(connection_info)
-		self.worker_pool_queue = worker_pool_queue(self.connection)
-		self.allocated = False
 
-	def wait_for_invitation(self):
-		with self.connection.Consumer([self.worker_pool_queue], callbacks=[self._invited]) as self.consumer:
+	def wait_for_assignment(self, worker_pool_queue):
+		self.own_queue = Queue(auto_delete=True)(self.connection)
+		self.own_queue.queue_declare()
+		self.allocated = False
+		worker_pool_queue(self.connection).declare()
+		with self.connection.Producer(serializer='msgpack', on_return=self._handle_return) as producer:
+			producer.publish({"worker_id": self.worker_id, "queue_name": self.own_queue.name},
+				exchange=worker_pool_queue.exchange,
+				routing_key=worker_pool_queue.routing_key)
+		with self.connection.Consumer([self.own_queue], callbacks=[self._assigned], auto_declare=False) as self.consumer:
 			self.consumer.qos(prefetch_count=1)
 			self.connection.drain_events()
 
-	def handle_message(self, body, message):
-		try:
-			self._switch(body)
-			self.consumer.channel.basic_ack(delivery_tag=message.delivery_tag)
-		except Exception as e:
-			raise e
-
-	def _invited(self, body, message):
-		assert body["type"] == "invite"
+	def _assigned(self, body, message):
+		assert body["type"] == "assign"
 		assert self.allocated == False
 		self.allocated = True
-		self._begin_listening(body["shared_queue"], body["response_queue"], ack=message.delivery_tag)
+		self.do_setup(body["message"])
+		self._begin_listening(body["task_queue"], ack=message.delivery_tag)
 
-	def do_task(self, body):
-		raise NotImplementedError()
+	def do_setup(self, message):
+		pass
 
-	def _freed(self, body):
+	def _begin_listening(self, shared_queue_name, ack):
+		self.consumer.cancel()
+		shared_queue = Queue(shared_queue_name)
+		with self.connection.Consumer([shared_queue], callbacks=[self._handle_task], auto_declare=False) as self.consumer:
+			self.consumer.channel.basic_ack(delivery_tag=ack)
+			try:
+				while True:
+					self.connection.drain_events(timeout=1)
+			except socket.timeout:
+				pass
+		self._freed()
+
+	def _freed(self):
 		self._stop_listening()
 		self.allocated = False
 		print "Worker %s freed" % self.worker_id
 
-	def _begin_listening(self, shared_queue_name, response_queue, ack):
-		self.consumer.cancel()
-		shared_queue = Queue(shared_queue_name, auto_delete=True)
-		own_queue = Queue(auto_delete=True)(self.connection)
-		own_queue.queue_declare()
-		with self.connection.Consumer([shared_queue, own_queue], callbacks=[self.handle_message], auto_declare=False) as self.consumer:
-			with self.connection.Producer(serializer='msgpack') as producer:
-				producer.publish({"type": "new_worker", "from": self.worker_id, "queue_name": own_queue.name},
-					routing_key=response_queue)
-				self.consumer.channel.basic_ack(delivery_tag=ack)
-			while self.allocated:
-				self.connection.drain_events()
-
 	def _stop_listening(self):
 		self.consumer.cancel()
 
-	def _switch(self, body):
-		handlers = {"task": self.do_task,
-			"free": self._freed}
-		if handlers.get(body["type"]):
-			handlers[body["type"]](body)
-		else:
-			raise InvalidResponseError(body["type"])
+	def _handle_task(self, body, message):
+		try:
+			assert body["type"] == "task"
+			self.do_task(body["task"])
+			message.ack()
+		except Exception as e:
+			print e
+			message.requeue()
+
+	def do_task(self, body):
+		raise NotImplementedError()
+
+	def _handle_return(self, exception, exchange, routing_key, message):
+		raise exception
 
 
 class InvalidResponseError(Exception):
@@ -69,12 +76,12 @@ class InvalidResponseError(Exception):
 
 
 class InfiniteWorker(TaskWorker):
-	def __init__(self, worker_pool_queue):
-		super(InfiniteWorker, self).__init__(worker_pool_queue)
+	def __init__(self, worker_pool_queue, connection=None):
+		super(InfiniteWorker, self).__init__(connection)
 		while True:
-			self.wait_for_invitation()
+			self.wait_for_assignment(worker_pool_queue)
 
 
 class InfinitePrinter(InfiniteWorker):
-	def do_task(self, body):
-		print str(body["task"])
+	def do_task(self, task):
+		print str(task)
