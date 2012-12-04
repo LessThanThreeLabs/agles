@@ -32,9 +32,6 @@ class TaskWorker(object):
 		self.do_setup(body["message"])
 		self._begin_listening(body["task_queue"], ack=message.delivery_tag)
 
-	def do_setup(self, message):
-		pass
-
 	def _begin_listening(self, shared_queue_name, ack):
 		self.consumer.cancel()
 		shared_queue = Queue(shared_queue_name)
@@ -49,6 +46,7 @@ class TaskWorker(object):
 
 	def _freed(self):
 		self._stop_listening()
+		self.do_cleanup()
 		self.allocated = False
 		print "Worker %s freed" % self.worker_id
 
@@ -64,11 +62,19 @@ class TaskWorker(object):
 			print e
 			message.requeue()
 
-	def do_task(self, body):
-		raise NotImplementedError()
-
 	def _handle_return(self, exception, exchange, routing_key, message):
 		raise exception
+
+	# To implement when extended
+
+	def do_setup(self, message):
+		pass
+
+	def do_cleanup(self):
+		pass
+
+	def do_task(self, body):
+		raise NotImplementedError()
 
 
 class InvalidResponseError(Exception):

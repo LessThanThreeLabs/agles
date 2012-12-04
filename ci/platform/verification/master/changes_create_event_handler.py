@@ -43,7 +43,7 @@ class ChangesCreateEventHandler(EventSubscriber):
 
 	def _send_verification_request(self, build_id):
 		print "Sending verification request for " + str(build_id)
-		self.producer.publish(build_id,
+		self.producer.publish({"build_id": build_id},
 			exchange=verification_request_queue.exchange,
 			routing_key=verification_request_queue.routing_key,
 			mandatory=True,

@@ -22,7 +22,7 @@ class VerificationRequestHandler(QueueListener):
 
 	def handle_message(self, body, message):
 		"""Respond to a verification event, begin verifying"""
-		build_id = body
+		build_id = body["build_id"]
 		commit_list = self._get_commit_list(build_id)
 		print "Processing verification request: " + str((build_id, commit_list,))
 		self._start_build(build_id)
