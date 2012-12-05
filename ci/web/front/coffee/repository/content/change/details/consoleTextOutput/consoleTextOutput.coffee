@@ -26,10 +26,10 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 
 	onUpdate: (data) =>
-		assert.ok data.type? and data.contents.number? and data.contents.text?
-		console.log 'consoleTextOutput -- adding line... ' + data.type
+		assert.ok data.type?
 
 		if data.type is 'line added'
+			assert.ok data.contents.number? and data.contents.text?
 			lineModel = new ConsoleTextOutputLine.Model data.contents
 			@consoleTextOutputLineModels.add lineModel
 		else

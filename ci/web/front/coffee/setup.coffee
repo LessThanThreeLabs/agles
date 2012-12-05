@@ -10,7 +10,11 @@ Backbone.Model.prototype.subscribe = () ->
 			return
 
 		assert.ok result.eventName? and result.eventName isnt ''
-		socket.on result.eventName, @onUpdate
+		console.log 'socket.on ' + result.eventName
+		socket.on result.eventName, (data) =>
+			console.log data
+			assert.ok data.type?
+			@onUpdate data
 
 
 Backbone.Model.prototype.unsubscribe = () ->

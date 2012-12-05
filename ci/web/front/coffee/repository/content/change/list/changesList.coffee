@@ -4,6 +4,7 @@ window.ChangesList = {}
 class ChangesList.Model extends Backbone.Model
 	NUMBER_OF_CHANGES_TO_REQUEST: 100
 	noMoreChangesToFetch: false
+	urlRoot: 'repository'
 	defaults:
 		queryString: ''
 
@@ -78,6 +79,11 @@ class ChangesList.Model extends Backbone.Model
 
 			@changeModels.add result.changes, 
 				error: (model, error) => console.error error
+
+
+	onUpdate: (data) =>
+		assert.ok data.type?
+		
 
 
 class ChangesList.View extends Backbone.View

@@ -4,6 +4,7 @@ ResourceEventConnection = require './resourceEventConnection'
 
 UserEventHandler = require './handlers/userEventHandler'
 OrganizationEventHandler = require './handlers/organizationEventHandler'
+ChangeEventHandler = require './handlers/changeEventHandler'
 BuildEventHandler = require './handlers/buildEventHandler'
 BuildOutputEventHandler = require './handlers/buildOutputEventHandler'
 RepositoryEventHandler = require './handlers/repositoryEventHandler'
@@ -33,6 +34,7 @@ class EventConnection
 	_createHandlers: (callback) =>
 		@users = UserEventHandler.create @sockets
 		@organizations = OrganizationEventHandler.create @sockets
+		@changes = ChangeEventHandler.create @sockets
 		@builds = BuildEventHandler.create @sockets
 		@buildOutputs = BuildOutputEventHandler.create @sockets
 		@repositories = RepositoryEventHandler.create @sockets
@@ -47,21 +49,24 @@ class EventConnection
 			@exchange, 'users', queueNamePrefix + '_users', @users
 		@organizationEventConnection = ResourceEventConnection.create @connection, 
 			@exchange, 'organizations', queueNamePrefix + '_organizations', @organizations
+		@changeEventConnection = ResourceEventConnection.create @connection,
+			@exchange, 'changes', queueNamePrefix + '_changes', @changes
 		@buildEventConnection = ResourceEventConnection.create @connection, 
 			@exchange, 'builds', queueNamePrefix + '_builds', @builds
 		@buildOutputEventConnection = ResourceEventConnection.create @connection, 
 			@exchange, 'build_outputs', queueNamePrefix + '_buildOutputs', @buildOutputs
 		@repositoryEventConnection = ResourceEventConnection.create @connection, 
-			@exchange, 'repositories', queueNamePrefix + '_repositories', @repositories
+			@exchange, 'repos', queueNamePrefix + '_repositories', @repositories
 
 		await
 			@userEventConnection.connect defer userEventConnectionError
 			@organizationEventConnection.connect defer organizationEventConnectionError
+			@changeEventConnection.connect defer changeEventConnectionError
 			@buildEventConnection.connect defer buildEventConnectionError
 			@buildOutputEventConnection.connect defer buildOutputEventConnectionError
 			@repositoryEventConnection.connect defer repositoryEventConnectionError
 
-		connectionErrors = [userEventConnectionError, organizationEventConnectionError, 
+		connectionErrors = [userEventConnectionError, organizationEventConnectionError, changeEventConnectionError
 			buildEventConnectionError, buildOutputEventConnectionError, repositoryEventConnectionError]
 		errors = (error for error in connectionErrors when error?)
 

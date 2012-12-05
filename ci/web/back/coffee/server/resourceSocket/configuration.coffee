@@ -87,6 +87,7 @@ class ResourceSocketConfigurer
 
 
 	configureConnection: (socket) ->
+		socket.roomCounter = {}
 		socket.session = socket.handshake.session
 		@_setupSessionMaintenance socket
 
