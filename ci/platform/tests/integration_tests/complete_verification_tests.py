@@ -141,7 +141,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 		with Connection(connection_info) as connection:
 			events_broker = EventsBroker(connection)
-			events_broker.publish("changes", repo_id, "change created",
+			events_broker.publish("repos", repo_id, "change added",
 				change_id=commit_id, merge_target="master")
 			with connection.Consumer(merge_queue, callbacks=[self._on_response]) as consumer:
 				consumer.consume()

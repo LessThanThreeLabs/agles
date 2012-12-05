@@ -13,7 +13,7 @@ from verification.shared.build_core import BuildCore
 
 class ChangesCreateEventHandler(EventSubscriber):
 	def __init__(self, uri_translator):
-		super(ChangesCreateEventHandler, self).__init__("changes", "verification_master:repos.update")
+		super(ChangesCreateEventHandler, self).__init__("repos", "verification_master:repos.update")
 		self.uri_translator = uri_translator
 
 	def bind(self, channel):
@@ -22,7 +22,7 @@ class ChangesCreateEventHandler(EventSubscriber):
 
 	def handle_message(self, body, message):
 		try:
-			if body["type"] == "change created":
+			if body["type"] == "change added":
 				self._handle_new_change(body["contents"])
 				message.ack()
 		except Exception as e:
