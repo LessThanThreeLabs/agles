@@ -7,7 +7,6 @@ from model_server import ModelServer
 from settings.verification_server import *
 from task_queue.task_queue import TaskQueue
 from util import pathgen
-from util.uri_translator import RepositoryUriTranslator
 from verification.shared.build_core import BuildCore
 
 
@@ -24,9 +23,9 @@ class ChangesCreateEventHandler(EventSubscriber):
 		try:
 			if body["type"] == "change added":
 				self._handle_new_change(body["contents"])
-				message.ack()
+			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		except Exception as e:
-			message.requeue()
+			message.channel.basic_reject(delivery_tag=message.delivery_tag, requeue=True)
 			raise e  # Should log this
 
 	def _handle_new_change(self, contents):
@@ -38,6 +37,8 @@ class ChangesCreateEventHandler(EventSubscriber):
 		workers = task_queue.get_workers(num_workers, verification_request_queue)
 		if not workers:
 			raise NoWorkersFoundException()
+		with ModelServer.rpc_connect("changes", "update") as model_server_rpc:
+			model_server_rpc.mark_change_started(change_id)
 		self._send_verification_request(change_id, task_queue, workers, commit_list, test_commands)
 
 	def _get_commit_id(self, change_id):
