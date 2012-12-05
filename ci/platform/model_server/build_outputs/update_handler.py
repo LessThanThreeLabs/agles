@@ -1,7 +1,9 @@
 import collections
 
 from sqlalchemy import and_
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import func
 
 from database import schema
 from database.engine import ConnectionFactory
@@ -14,19 +16,34 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildOutputsUpdateHandler, self).__init__("build_outputs", "update")
 
-	def init_subtypes(self, build_id, type, ordered_subtypes):
+	def add_subtypes(self, build_id, type, ordered_subtypes):
 		assert isinstance(ordered_subtypes, collections.Iterable)
 
 		build_console = schema.build_console
-		console_map = {}
 
+		query = select([func.max(build_console.c.subtype_priority)],
+			and_(
+				build_console.c.build_id==build_id,
+				build_console.c.type==type
+			),
+			[build_console]
+		)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			max_priority_result = sqlconn.execute(query).first()
+		if max_priority_result and max_priority_result[0]:
+			starting_priority = max_priority_result[0] + 1
+		else:
+			starting_priority = 0
+
+		console_map = {}
 		for index, subtype in enumerate(ordered_subtypes):
 			with ConnectionFactory.get_sql_connection() as sqlconn:
+				priority = index + starting_priority
 				ins = build_console.insert().values(
 					build_id=build_id,
 					type=type,
 					subtype=subtype,
-					subtype_priority=index,
+					subtype_priority=priority,
 				)
 				console_id = sqlconn.execute(ins).inserted_primary_key[0]
 				console_map[subtype] = console_id

@@ -7,11 +7,10 @@ listener thread should respond to events by running and verifying builds on
 a spawned virtual machine.
 """
 
-from shared.message_driven_server import MessageDrivenServer
 from verification.server.verification_request_handler import VerificationRequestHandler
 
 
-class VerificationServer(MessageDrivenServer):
+class VerificationServer(object):
 	"""Verifies correctness of builds.
 
 	Contains and controls a Vagrant virtual machine, which is used to check out,
@@ -19,7 +18,7 @@ class VerificationServer(MessageDrivenServer):
 	"""
 
 	def __init__(self, verifier):
-		handlers = [
-			VerificationRequestHandler(verifier),
-			]
-		super(VerificationServer, self).__init__(handlers)
+		self.handler = VerificationRequestHandler(verifier)
+
+	def run(self):
+		self.handler.run()

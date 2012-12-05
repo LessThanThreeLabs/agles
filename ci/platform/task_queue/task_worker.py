@@ -16,6 +16,7 @@ class TaskWorker(object):
 		self.own_queue = Queue(auto_delete=True)(self.connection)
 		self.own_queue.queue_declare()
 		self.allocated = False
+		self.results = []
 		worker_pool_queue(self.connection).declare()
 		with self.connection.Producer(serializer='msgpack', on_return=self._handle_return) as producer:
 			producer.publish({"worker_id": self.worker_id, "queue_name": self.own_queue.name},
@@ -29,8 +30,14 @@ class TaskWorker(object):
 		assert body["type"] == "assign"
 		assert self.allocated == False
 		self.allocated = True
-		self.do_setup(body["message"])
-		self._begin_listening(body["task_queue"], ack=message.delivery_tag)
+		try:
+			self.do_setup(body["message"])
+			self._begin_listening(body["task_queue"], ack=message.delivery_tag)
+		except Exception as e:
+			print e
+			self.results.append(e)
+		finally:
+			self._freed()
 
 	def _begin_listening(self, shared_queue_name, ack):
 		self.consumer.cancel()
@@ -42,13 +49,16 @@ class TaskWorker(object):
 					self.connection.drain_events(timeout=1)
 			except socket.timeout:
 				pass
-		self._freed()
 
 	def _freed(self):
-		self._stop_listening()
-		self.do_cleanup()
-		self.allocated = False
-		print "Worker %s freed" % self.worker_id
+		try:
+			self.do_cleanup(self.results)
+			self._stop_listening()
+		except Exception as e:
+			print e
+		finally:
+			self.allocated = False
+			print "Worker %s freed" % self.worker_id
 
 	def _stop_listening(self):
 		self.consumer.cancel()
@@ -56,7 +66,7 @@ class TaskWorker(object):
 	def _handle_task(self, body, message):
 		try:
 			assert body["type"] == "task"
-			self.do_task(body["task"])
+			self.results.append(self.do_task(body["task"]))
 			message.ack()
 		except Exception as e:
 			print e
@@ -70,10 +80,10 @@ class TaskWorker(object):
 	def do_setup(self, message):
 		pass
 
-	def do_cleanup(self):
+	def do_cleanup(self, results):
 		pass
 
-	def do_task(self, body):
+	def do_task(self, task):
 		raise NotImplementedError()
 
 
@@ -84,10 +94,16 @@ class InvalidResponseError(Exception):
 class InfiniteWorker(TaskWorker):
 	def __init__(self, worker_pool_queue, connection=None):
 		super(InfiniteWorker, self).__init__(connection)
+		self.worker_pool_queue = worker_pool_queue
+
+	def run(self):
 		while True:
-			self.wait_for_assignment(worker_pool_queue)
+			self.wait_for_assignment(self.worker_pool_queue)
 
 
 class InfinitePrinter(InfiniteWorker):
+	def do_setup(self, message):
+		print "Setup: %s" % message
+
 	def do_task(self, task):
 		print str(task)

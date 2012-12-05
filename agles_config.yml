@@ -52,7 +52,7 @@ compile:
 test:
   - platform:
       path: ci/platform
-      script: nosetests --tc=fakeverifier:True
+      script: nosetests --tc=fakeVerifier:True
   - web:
       path: ci/web/back
       script: npm test

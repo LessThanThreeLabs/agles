@@ -51,7 +51,7 @@ class VagrantWrapper(object):
 
 	def spawn(self, output_handler=None):
 		if not os.access(self.get_vm_directory(), os.F_OK):
-			os.mkdir(self.get_vm_directory())
+			os.makedirs(self.get_vm_directory())
 		while not self.vagrant.status() == "running":
 			self.teardown()
 			print "Spawning vm at " + self.get_vm_directory()

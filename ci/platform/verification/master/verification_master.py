@@ -5,9 +5,9 @@ from verification_results_handler import VerificationResultsHandler
 
 class VerificationMaster(MessageDrivenServer):
 
-	def __init__(self):
+	def __init__(self, uri_translator=None):
 		handlers = [
 			VerificationResultsHandler(),
-			ChangesCreateEventHandler(),
+			ChangesCreateEventHandler(uri_translator),
 			]
 		super(VerificationMaster, self).__init__(handlers)

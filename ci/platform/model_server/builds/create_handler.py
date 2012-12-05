@@ -9,10 +9,8 @@ class BuildsCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildsCreateHandler, self).__init__("builds", "create")
 
-	def create_build(self, change_id, commit_list):
+	def create_build(self, change_id, commit_list, is_primary=False):
 		build = database.schema.build
-
-		is_primary = len(commit_list) == 1
 
 		ins = build.insert().values(change_id=change_id, is_primary=is_primary,
 			status=BuildStatus.QUEUED)

@@ -15,6 +15,7 @@ class MessageHandler(object):
 
 class QueueListener(MessageHandler):
 	def __init__(self, queue):
+		super(QueueListener, self).__init__()
 		self.queue = queue
 
 	def bind(self, channel):
@@ -25,6 +26,7 @@ class QueueListener(MessageHandler):
 
 class EventSubscriber(MessageHandler):
 	def __init__(self, resource, queue_name=None):
+		super(EventSubscriber, self).__init__()
 		self.resource = resource
 		self.queue_name = queue_name
 

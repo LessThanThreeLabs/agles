@@ -3,7 +3,10 @@ class VagrantCommand(object):
 		raise NotImplementedError("Subclasses should override this!")
 
 
-class NullVagrantCommand(object):
+class NullVagrantCommand(VagrantCommand):
+	def __init__(self, name=None):
+		self.name = name
+
 	def run(self, vagrant_wrapper, output_handler):
 		return 0
 
@@ -14,9 +17,11 @@ class SimpleVagrantCommand(VagrantCommand):
 		self.type = type
 		self.name = name
 
+	def _get_command(self):
+		return "scripts/%s/%s.sh" % (self.type, self.name)
+
 	def run(self, vagrant_wrapper, output_handler):
-		full_command = "scripts/%s/%s.sh" % (self.type, self.name)
-		results = vagrant_wrapper.ssh_call(full_command, output_handler)
+		results = vagrant_wrapper.ssh_call(self._get_command(), output_handler)
 		return results.returncode
 
 

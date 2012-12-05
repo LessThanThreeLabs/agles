@@ -27,36 +27,37 @@ from bunnyrpc.server import Server
 from bunnyrpc.client import Client
 from git import Repo
 from testconfig import config
-from util.test.fake_build_verifier import FakeBuildVerifier, FakeUriTranslator
+from util.test.fake_build_verifier import FakeBuildVerifier
 
-VM_DIRECTORY = '/tmp/verification'
+TEST_ROOT = '/tmp/verification'
+DEFAULT_NUM_VERIFIERS = 2
 
 
 class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	RabbitMixin, RepoStoreTestMixin, RedisTestMixin):
 	@classmethod
 	def setup_class(cls):
-		if config.get("fakeverifier"):
-			cls.verifier = FakeBuildVerifier(passes=True)
-		else:
-			vagrant_wrapper = VagrantWrapper.vm(VM_DIRECTORY, box_name)
-			cls.verifier = BuildVerifier(vagrant_wrapper, FakeUriTranslator())
-		cls.verifier.setup()
-		verification_server = VerificationServer(cls.verifier)
-		cls.vs_process = TestProcess(target=verification_server.run)
-		cls.vs_process.start()
+		cls.verifiers = []
+		cls.vs_processes = []
+		num_verifiers = int(config["numVerifiers"]) if config.get("numVerifiers") else DEFAULT_NUM_VERIFIERS
+		for x in range(num_verifiers):
+			if config.get("fakeVerifier"):
+				verifier = FakeBuildVerifier(passes=True)
+			else:
+				vagrant_wrapper = VagrantWrapper.vm(os.path.join(TEST_ROOT, str(x)), box_name)
+				verifier = BuildVerifier(vagrant_wrapper)
+			verifier.setup()
+			cls.verifiers.append(verifier)
 
 	@classmethod
 	def teardown_class(cls):
-		cls.verifier.teardown()
-		cls.vs_process.terminate()
-		cls.vs_process.join()
-		rmtree(VM_DIRECTORY, ignore_errors=True)
+		[verifier.teardown() for verifier in cls.verifiers]
+		rmtree(TEST_ROOT, ignore_errors=True)
 
 	def setUp(self):
 		super(VerificationRoundTripTest, self).setUp()
 		self._purge_queues()
-		self.repo_dir = os.path.join(VM_DIRECTORY, 'repo')
+		self.repo_dir = os.path.join(TEST_ROOT, 'repo')
 		self.repo_hash = "asdfghjkl"
 		self.repo_machine = "fs0"
 		rmtree(self.repo_dir, ignore_errors=True)
@@ -66,6 +67,12 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			self.repo_dir,
 			to_path(self.repo_hash, "repo.git"))
 		self._start_redis()
+		self.vs_processes = []
+		for verifier in self.verifiers:
+			verification_server = VerificationServer(verifier)
+			vs_process = TestProcess(target=verification_server.run)
+			vs_process.start()
+			self.vs_processes.append(vs_process)
 		repo_store = Server(FileSystemRepositoryStore(self.repo_dir))
 		repo_store.bind(store.rpc_exchange_name, [self.repo_machine])
 		self.repo_store_process = TestProcess(target=repo_store.run)
@@ -80,6 +87,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._stop_model_server()
 		self.vm_process.terminate()
 		self.vm_process.join()
+		[(vs_process.terminate(), vs_process.join()) for vs_process in self.vs_processes]
 		self.repo_store_process.terminate()
 		self.repo_store_process.join()
 		self._stop_redis()
@@ -112,6 +120,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.response = body
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
+	def _test_commands(self):
+		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(3)]
+
 	def test_hello_world_repo_roundtrip(self):
 		with Client(store.rpc_exchange_name, self.repo_machine) as client:
 			client.create_repository(self.repo_hash, "repo.git")
@@ -125,7 +136,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		commit_id = self._insert_commit_info()
 
 		commit_sha = self._modify_commit_push(work_repo, "agles_config.yml",
-			yaml.dump({'test': [{'hello_world': {'script': 'echo Hello World!'}}]}),
+			yaml.dump({'test': self._test_commands()}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection(connection_info) as connection:
@@ -138,6 +149,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 				start_time = time.time()
 				while self.response is None:
 					connection.drain_events()
-					assert time.time() - start_time < 90  # 90s timeout
+					assert time.time() - start_time < 120  # 120s timeout
 		work_repo.git.pull()
 		assert_equals(commit_sha, work_repo.head.commit.hexsha)

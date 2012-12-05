@@ -1,3 +1,5 @@
+import operator
+
 from kombu.messaging import Producer
 
 from shared.constants import BuildStatus
@@ -7,7 +9,6 @@ from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
 from settings.verification_server import *
 from util import pathgen
-from verification.server.verification_result import VerificationResult
 
 
 class VerificationResultsHandler(QueueListener):
@@ -32,11 +33,15 @@ class VerificationResultsHandler(QueueListener):
 		# TODO (bbland): do something more useful than this trivial case
 		with ModelServer.rpc_connect("builds", "read") as client:
 			build = client.get_build_from_id(build_id)
-		if build["is_primary"]:
-			if results == VerificationResult.SUCCESS:
-				self._mark_change_finished(build["change_id"])
-			else:
-				self._mark_change_failed(build["change_id"])
+			builds = client.get_builds_from_change_id(build["change_id"])
+		success = reduce(operator.and_, map(lambda build: build["status"] == BuildStatus.PASSED, builds), True)
+		failure = reduce(operator.or_, map(lambda build: build["status"] == BuildStatus.FAILED, builds), False)
+		if success:
+			self._mark_change_finished(build["change_id"])
+		elif failure:
+			self._mark_change_failed(build["change_id"])
+		else:
+			print "Still waiting for more results"
 
 	def _mark_change_finished(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:

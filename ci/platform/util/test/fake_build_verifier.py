@@ -1,4 +1,5 @@
-from verification.server.verification_result import VerificationResult
+from verification.shared.verification_config import VerificationConfig
+from verification.shared.verification_result import VerificationResult
 
 
 class FakeBuildVerifier(object):
@@ -17,7 +18,21 @@ class FakeBuildVerifier(object):
 		else:
 			callback(VerificationResult.FAILURE)
 
+	def setup_build(self, repo_uri, refs, console_appender=None):
+		return VerificationConfig(None, None)
 
-class FakeUriTranslator(object):
-	def translate(self, repo_uri):
-		return repo_uri
+	def declare_commands(self, console_appender, console_type, commands):
+		pass
+
+	def run_compile_step(self, compile_commands, console_appender=None):
+		pass
+
+	def run_test_command(self, test_command, console_appender=None):
+		if not self.passes:
+			raise Exception()
+
+	def mark_success(self, callback):
+		callback(VerificationResult.SUCCESS)
+
+	def mark_failure(self, callback):
+		callback(VerificationResult.FAILURE)

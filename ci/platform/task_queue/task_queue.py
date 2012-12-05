@@ -1,6 +1,5 @@
 import random
 
-from functools import partial
 from kombu.connection import Connection
 from kombu.entity import Queue
 from settings.rabbit import connection_info
@@ -30,28 +29,34 @@ class TaskQueue(object):
 		self.producer.publish(message,
 			**producer_kwargs)
 
-	def assign_workers(self, num_workers, queue, message=None):
+	def get_workers(self, num_workers, queue):
 		queue(self.connection).queue_declare()
-		with self.connection.Consumer([queue], callbacks=[partial(self._new_worker, payload=message)], auto_declare=False):
+		with self.connection.Consumer([queue], callbacks=[self._new_worker], auto_declare=False):
 			for worker in range(num_workers):
 				self.connection.drain_nowait()
 			print "Received %s out of %s workers" % (len(self.workers), num_workers)
 			if len(self.workers) == 0:
 				self.shared_work_queue.delete()
-		return len(self.workers)
+		return self.workers
 
-	def _new_worker(self, body, message, payload):
-		self._add_worker(body["worker_id"], body["queue_name"], payload)
+	def _new_worker(self, body, message):
+		self._add_worker(body["worker_id"], body["queue_name"])
 		message.ack()
 
-	def _add_worker(self, name, queue, payload):
+	def _add_worker(self, name, queue):
 		self.workers[name] = {"queue_name": queue, "status": "working"}
 		print "Allocated worker %s" % name
+
+	def assign_workers(self, workers, message):
+		for worker in self.workers.itervalues():
+			self.assign_worker(worker, message)
+
+	def assign_worker(self, worker, message):
 		with self.connection.Producer(serializer='msgpack') as producer:
 			producer.publish({"type": "assign",
 				"task_queue": self.shared_work_queue.name,
-				"message": payload},
-				routing_key=queue)
+				"message": message},
+				routing_key=worker["queue_name"])
 
 
 class InvalidResponseError(Exception):

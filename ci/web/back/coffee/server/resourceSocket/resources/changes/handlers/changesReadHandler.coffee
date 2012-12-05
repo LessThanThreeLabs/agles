@@ -38,16 +38,16 @@ class ChangesReadHandler extends Handler
 
 
 	range: (socket, args, callback) =>
-		assert.ok args.repositoryId? 
+		assert.ok args.repositoryId?
 		assert.ok args.start?
-		assert.ok args.numResults? 
+		assert.ok args.numResults?
 		assert.ok args.queryString?
 		userId = socket.session.userId
 		if not userId?
 			callback '404'
 			return
-			
-		@modelRpcConnection.changes.read.query_changes userId, args.repositoryId, 
+
+		@modelRpcConnection.changes.read.query_changes userId, args.repositoryId,
 				args.queryString, args.start, args.numResults, (error, changes) =>
 					if error?
 						callback "Couldn't query for changes"

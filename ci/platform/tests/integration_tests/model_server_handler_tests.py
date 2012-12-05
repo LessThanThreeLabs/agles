@@ -3,7 +3,7 @@ from nose.tools import *
 from database.engine import ConnectionFactory
 from database.schema import *
 from model_server.build_outputs import ConsoleType
-from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler, REDIS_SUBTYPE_KEY, REDIS_TYPE_KEY
+from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler
 from util.permissions import RepositoryPermissions
 from util.test import BaseIntegrationTest
 from util.test.mixins import RedisTestMixin
@@ -25,7 +25,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 				first_name='a',
 				last_name='a',
 				password_hash='a',
-				salt='a'*16
+				salt='a' * 16
 			)
 
 			user_id = sqlconn.execute(ins_user).inserted_primary_key[0]
@@ -85,8 +85,8 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 		build_general = []
 		build_setup = []
 		for i in self.build_ids:
-			update_handler.init_subtypes(i, ConsoleType.Compile, ["compile"])
-			update_handler.init_subtypes(i, ConsoleType.Test, ["unittest"])
+			update_handler.add_subtypes(i, ConsoleType.Compile, ["compile"])
+			update_handler.add_subtypes(i, ConsoleType.Test, ["unittest"])
 
 			line_compile = "build:1, line:%s, console:compile" % i
 			build_general.append(line_compile)
