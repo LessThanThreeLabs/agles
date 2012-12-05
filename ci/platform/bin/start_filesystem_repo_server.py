@@ -8,6 +8,7 @@ from settings import store
 
 DEFAULT_ROOT_DIR = "/repositories"
 
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-e", "--exchange_name", help="The exchange to bind this server to")
