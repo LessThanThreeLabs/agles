@@ -7,7 +7,6 @@ Backbone.Model.prototype.subscribe = () ->
 
 	@_numSubscribeRequests++
 
-	console.log 'subscribing to ' + @subscribeUrl + ':subscribe' + '   id: ' + @subscribeId
 	socket.emit @subscribeUrl + ':subscribe', id: @subscribeId, (error, result) =>
 		if error?
 			console.error error
@@ -28,7 +27,6 @@ Backbone.Model.prototype.unsubscribe = () ->
 
 	@_numSubscribeRequests--
 	if @_numSubscribeRequests is 0
-		console.log 'unsubscribing from ' + @subscribeUrl + ':subscribe' + '   id: ' + @subscribeId
 		socket.emit @subscribeUrl + ':unsubscribe', id: @subscribeId
 
 

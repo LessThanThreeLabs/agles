@@ -6,6 +6,7 @@ class Change.Model extends Backbone.Model
 
 	urlRoot: 'changes'
 	defaults:
+		number: null
 		status: 'queued'
 		selected: false
 

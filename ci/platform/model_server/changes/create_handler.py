@@ -40,7 +40,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			repo_id_query = repo.select().where(repo.c.hash==repo_hash)
 			repo_id = sqlconn.execute(repo_id_query).first()[repo.c.hash]
 		self.publish_event("repos", repo_id, "change added", change_id=change_id, change_number=change_number,
-			commit_id=commit_id, merge_target=merge_target)
+			change_status="queued", commit_id=commit_id, merge_target=merge_target)
 		return {"change_id": change_id, "commit_id": commit_id}
 
 	def _create_commit(self, repo_hash, user_id, commit_message):

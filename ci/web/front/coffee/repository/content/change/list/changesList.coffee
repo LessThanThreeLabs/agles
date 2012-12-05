@@ -79,13 +79,16 @@ class ChangesList.Model extends Backbone.Model
 			#   expecting, we must have reached the end.
 			@noMoreChangesToFetch = result.changes.length < numberToRetrieve
 
-			@changeModels.add result.changes, 
-				error: (model, error) => console.error error
+			@changeModels.add result.changes
 
 
 	onUpdate: (data) =>
-		assert.ok data.type?
-		
+		if data.type is 'change added'
+			changeModel = new Change.Model
+				id: data.contents.id
+				number: data.contents.number
+				status: data.contents.status
+			@changeModels.add changeModel
 
 
 class ChangesList.View extends Backbone.View
