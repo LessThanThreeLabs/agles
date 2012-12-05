@@ -58,7 +58,10 @@ class ChangesList.Model extends Backbone.Model
 
 
 	_fetchChanges: (startNumber, numberToRetrieve, queuePolicy) =>
-		assert.ok startNumber >= 0 and numberToRetrieve > 0 and queuePolicy? and not @noMoreChangesToFetch
+		assert.ok startNumber >= 0
+		assert.ok numberToRetrieve > 0
+		assert.ok queuePolicy?
+		assert.ok not @noMoreChangesToFetch
 
 		changesQuery = new ChangesQuery window.globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
 		@changesFetcher.runQuery changesQuery, queuePolicy, (error, result) =>

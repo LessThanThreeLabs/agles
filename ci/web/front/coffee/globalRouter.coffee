@@ -32,7 +32,8 @@ class GlobalRouterModel extends Backbone.Model
 
 
 	_navigateToRepository: () =>
-		assert.ok @get('view') is 'repository' and @get('repositoryId')?
+		assert.ok @get('view') is 'repository' 
+		assert.ok @get('repositoryId')?
 
 		url = '/repository/' + @get 'repositoryId'
 
