@@ -22,11 +22,11 @@ class ModelServerRpcHandler(object):
 	def start(self):
 		self.get_server().run()
 
-	def publish_event(self, resource, id, name, **contents):
+	def publish_event(self, resource, id, event_type, **contents):
 		"""A simple method for publishing a single event with the default
 		rabbit connection info.
 		Not recommended for use with multiple events.
 		"""
 		with Connection(connection_info) as connection:
 			broker = EventsBroker(connection)
-			broker.publish(resource, id, name, **contents)
+			broker.publish(resource, id, event_type, **contents)

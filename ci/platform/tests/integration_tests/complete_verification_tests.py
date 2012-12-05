@@ -121,7 +121,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
 	def _test_commands(self):
-		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(3)]
+		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(30)]
 
 	def test_hello_world_repo_roundtrip(self):
 		with Client(store.rpc_exchange_name, self.repo_machine) as client:

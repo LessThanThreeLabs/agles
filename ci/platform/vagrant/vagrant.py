@@ -22,6 +22,7 @@ class Vagrant(object):
 		self.vm_directory = vm_directory
 		self.box_name = box_name
 		self.vagrant_env = self._get_vagrant_env()
+		self.ssh_config = None
 
 	def get_vm_directory(self):
 		return self.vm_directory
@@ -45,13 +46,16 @@ class Vagrant(object):
 		return self._vagrant_call("halt", output_handler=output_handler)
 
 	def destroy(self, output_handler=None):
+		self._invalidate_ssh_config()
 		return self._vagrant_call("destroy", "-f", output_handler=output_handler)
 
 	def provision(self, output_handler=None):
 		return self._vagrant_call("provision", output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None):
-		return self._vagrant_call("ssh", "-c", command, output_handler=output_handler)
+		if not self.ssh_config:
+			self._generate_ssh_config()
+		return self._call(["ssh", "default", "-q", "-F", self.ssh_config, command], output_handler=output_handler)
 
 	def vbox_call(self, command, output_handler=None):
 		vbox_id = self._get_vbox_id()
@@ -71,12 +75,15 @@ class Vagrant(object):
 
 	def _vagrant_call(self, *args, **kwargs):
 		command = ["vagrant"] + list(args)
+		return self._call(command, *args, **kwargs)
+
+	def _call(self, command, *args, **kwargs):
 		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=self.vm_directory,
 				env=self.vagrant_env)
 
 		output_handler = kwargs.get("output_handler")
 
-		self._output = list()
+		self._output = []
 		output_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
 		output_lines = output_greenlet.wait()
 
@@ -106,6 +113,14 @@ class Vagrant(object):
 	def _get_vbox_id(self):
 		with open(os.path.join(self.vm_directory, ".vagrant")) as json_file:
 			return json.load(json_file)["active"]["default"]
+
+	def _generate_ssh_config(self):
+		with open(os.path.join(self.vm_directory, ".vagrant_ssh"), "w") as ssh_config_file:
+			ssh_config_file.write(self._vagrant_call("ssh-config").output)
+		self.ssh_config = os.path.join(self.vm_directory, ".vagrant_ssh")
+
+	def _invalidate_ssh_config(self):
+		self.ssh_config = None
 
 
 VagrantResults = collections.namedtuple(
