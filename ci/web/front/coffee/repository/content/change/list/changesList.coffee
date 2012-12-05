@@ -4,12 +4,14 @@ window.ChangesList = {}
 class ChangesList.Model extends Backbone.Model
 	NUMBER_OF_CHANGES_TO_REQUEST: 100
 	noMoreChangesToFetch: false
-	urlRoot: 'repository'
+	subscribeUrl: 'repos'
+	subscribeId: null
 	defaults:
 		queryString: ''
 
 
 	initialize: () ->
+		@subscribeId = globalRouterModel.get 'repositoryId'
 		@changesFetcher = new ChangesFetcher()
 
 		@changeModels = new Backbone.Collection()
@@ -94,6 +96,10 @@ class ChangesList.View extends Backbone.View
 
 
 	initialize: () =>
+		@model.subscribeId = globalRouterModel.get 'repositoryId'
+		@model.subscribe()
+		@model.fetchInitialChanges()
+
 		@model.on 'change:queryString', (() =>
 			@model.resetChangesList()
 			@model.fetchInitialChanges()
@@ -102,18 +108,23 @@ class ChangesList.View extends Backbone.View
 		@model.changeModels.on 'add', @_handleAddedChange, @
 		@model.changeModels.on 'reset', @$el.empty, @
 
-		globalRouterModel.on 'change:repositoryId', @model.resetChangesList, @
+		globalRouterModel.on 'change:repositoryId', (() =>
+			@model.unsubscribe()
+			@model.subscribeId = globalRouterModel.get 'repositoryId'
+			@model.subscribe()
+			@model.resetChangesList()
+			), @
 
 
 	onDispose: () =>
 		@model.off null, null, @
+		@model.unsubscribe()
 		@model.changeModels.off null, null, @
 		globalRouterModel.off null, null, @
 
 
 	render: () =>
 		@$el.html @html
-		@model.fetchInitialChanges()
 		return @
 
 

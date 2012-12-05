@@ -21,5 +21,11 @@ class RepositoriesResource extends Resource
 
 
 	subscribe: (socket, data, callback) =>
-		@_call @subscribeHandler, socket, data, callback
-		
+		console.log 'need to make sure this user is allowed to receive updates for id ' + data.id
+		eventName = @modelConnection.eventConnection.repositories.registerForEvents socket, data.id
+		callback null, eventName: eventName if callback?
+
+
+	unsubscribe: (socket, data, callback) =>
+		@modelConnection.eventConnection.repositories.unregisterForEvents socket, data.id
+		callback null, 'ok' if callback?

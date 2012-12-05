@@ -9,7 +9,11 @@ module.exports = class EventHandler
 
 
 	registerForEvents: (socket, id) =>
-		assert.ok socket? and id? and typeof id is 'number'
+		assert.ok @ROOM_PREFIX
+		assert.ok socket?
+		assert.ok id? 
+		assert.ok typeof id is 'number'
+
 		roomName = @ROOM_PREFIX + id
 		
 		if socket.roomCounter[roomName]?
@@ -17,15 +21,21 @@ module.exports = class EventHandler
 		else
 			socket.roomCounter[roomName] = 1
 
+		console.log 'adding to room: ' + roomName
 		socket.join roomName if socket.roomCounter[roomName] > 0
 		return @EVENT_PREFIX + id
 
 
 	unregisterForEvents: (socket, id) =>
-		assert.ok socket? and id? and typeof id is 'number'
+		assert.ok @ROOM_PREFIX
+		assert.ok socket? 
+		assert.ok id? 
+		assert.ok typeof id is 'number'
+
 		roomName = @ROOM_PREFIX + id
 
 		socket.roomCounter[roomName] = Math.max socket.roomCounter[roomName] - 1, 0
+		console.log 'removing from room: ' + roomName
 		socket.leave roomName if socket.roomCounter[roomName] is 0
 
 

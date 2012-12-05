@@ -8,6 +8,9 @@ exports.create = (sockets) ->
 
 
 class OrganizationEventHandler extends EventHandler
+	ROOM_PREFIX: 'organization-'
+	EVENT_PREFIX: 'organization-'
+
 
 	processEvent: (data) =>
 		console.log 'need to handle organization event...'

@@ -2,13 +2,16 @@ window.ConsoleTextOutput = {}
 
 
 class ConsoleTextOutput.Model extends Backbone.Model
-	urlRoot: 'buildOutputs'
+	subscribeUrl: 'buildOutputs'
+	subscribeId: null
 	defaults:
 		id: null
 		title: null
 
 
 	initialize: () =>
+		@subscribeId = @get 'id'
+
 		@consoleTextOutputLineModels = new Backbone.Collection()
 		@consoleTextOutputLineModels.model = ConsoleTextOutputLine.Model
 		@consoleTextOutputLineModels.comparator = (consoleTextOutputLine) =>
