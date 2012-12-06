@@ -30,10 +30,10 @@ class LoginHandler
 				callback error, @_sanitize user
 
 	_sanitize: (user) =>
+		id: user.id
+		email: user.email
 		firstName: user.first_name
 		lastName: user.last_name
-		email: user.email
-		id: user.id
 
 		# modelRpcConnection.users.read.getPasswordSalt email, (error, result) =>
 		# 	hashedPassword = @passwordHasher.hashPasswordWithSalt password, result.salt

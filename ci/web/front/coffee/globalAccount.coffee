@@ -1,13 +1,18 @@
 class GlobalAccount extends Backbone.Model
 	defaults:
+		email: null
 		firstName: null
 		lastName: null
 
 
 	validate: (attributes) =>
-		if attributes.firstName is null
+		if not attributes.email?
+			return new Error 'Invaild email'
+
+		if not attributes.firstName?
 			return new Error 'Invalid first name'
-		if attributes.lastName is null
+			
+		if not attributes.lastName?
 			return new Error 'Invalid last name'
 
 		return

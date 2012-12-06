@@ -185,6 +185,7 @@ class LoginPanel.View extends Backbone.View
 
 			if not errors?
 				window.globalAccount.set
+					email: userData.email
 					firstName: userData.firstName
 					lastName: userData.lastName
 				@model.set 'visible', false
