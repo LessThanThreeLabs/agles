@@ -49,6 +49,8 @@ class ChangesList.Model extends Backbone.Model
 
 
 	fetchInitialChanges: () =>
+		return if not globalRouterModel.get('repositoryId')?
+
 		queuePolicy =  ChangesFetcher.QueuePolicy.QUEUE_IF_BUSY
 		@_fetchChanges 0, @NUMBER_OF_CHANGES_TO_REQUEST, queuePolicy
 
@@ -66,7 +68,7 @@ class ChangesList.Model extends Backbone.Model
 		assert.ok queuePolicy?
 		assert.ok not @noMoreChangesToFetch
 
-		changesQuery = new ChangesQuery window.globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
+		changesQuery = new ChangesQuery globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
 		@changesFetcher.runQuery changesQuery, queuePolicy, (error, result) =>
 			if error?
 				console.error error
@@ -108,20 +110,20 @@ class ChangesList.View extends Backbone.View
 			), @
 
 		globalRouterModel.on 'change:repositoryId', (() =>
-			@model.unsubscribe()
+			@model.unsubscribe() if @model.subscribeId?
 			@model.subscribeId = globalRouterModel.get 'repositoryId'
-			@model.subscribe()
+			@model.subscribe() if @model.subscribeId?
 			@model.resetChangesList()
 			), @
 
 		@model.subscribeId = globalRouterModel.get 'repositoryId'
-		@model.subscribe()
+		@model.subscribe() if @model.subscribeId?
 		@model.resetChangesList()
 
 
 	onDispose: () =>
 		@model.off null, null, @
-		@model.unsubscribe()
+		@model.unsubscribe() if @model.subscribeId?
 		@model.changeModels.off null, null, @
 		globalRouterModel.off null, null, @
 

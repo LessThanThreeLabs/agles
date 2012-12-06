@@ -15,6 +15,7 @@ Backbone.Model.prototype.subscribe = () ->
 		assert.ok result.eventName? 
 		assert.ok result.eventName isnt ''
 
+		console.log 'need to fix this up so that we wont get old events and actually act on them!!!!'
 		socket.on result.eventName, (data) =>
 			assert.ok data.type?
 			@onUpdate data
