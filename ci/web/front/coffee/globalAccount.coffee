@@ -7,13 +7,13 @@ class GlobalAccount extends Backbone.Model
 
 	validate: (attributes) =>
 		if not attributes.email?
-			return new Error 'Invaild email'
+			return new Error 'Invaild email: ' + attributes.email
 
 		if not attributes.firstName?
-			return new Error 'Invalid first name'
+			return new Error 'Invalid first name: ' + attributes.firstName
 			
 		if not attributes.lastName?
-			return new Error 'Invalid last name'
+			return new Error 'Invalid last name: ' + attributes.lastName
 
 		return
 

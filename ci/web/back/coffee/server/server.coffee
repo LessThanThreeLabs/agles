@@ -90,6 +90,7 @@ class Server
 				response.end 'Invalid link'
 			else
 				@stores.createAccountStore.removeAccount accountKey
+
 				userToCreate =
 					email: account.email
 					salt: account.salt
@@ -99,9 +100,13 @@ class Server
 
 				@modelConnection.rpcConnection.users.create.create_user userToCreate, (error, userId) =>
 					if error?
-						response.end 'User Creation Failed'
+						response.end 'User creation failed'
 					else
 						request.session.userId = userId
+						request.session.email = account.email
+						request.session.firstName = account.firstName
+						request.session.lastName = account.lastName
+
 						response.render 'verifyAccount',
 							firstName: account.firstName
 							lastName: account.lastName

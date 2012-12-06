@@ -40,8 +40,4 @@ class ResourceRouter
 	_bindToResourceFunction: (socket, name, action, resource) ->
 		eventName = name + ':' + action
 		socket.on eventName, (data, callback) ->
-			# if not socket.session.user?
-			# 	callback 'No user associated with resource request'
-			# else
-			socket.session.user = 'fake user'
 			resource[action] socket, data, callback

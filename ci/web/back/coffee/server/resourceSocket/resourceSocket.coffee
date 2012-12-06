@@ -26,6 +26,6 @@ class ResourceSocket
 
 			if socket.session.userId?
 				socket.emit 'accountUpdate',
-					email: 'hello@gmail.com'
-					firstName: 'hello'
-					lastName: 'there!'
+					email: socket.session.email
+					firstName: socket.session.firstName
+					lastName: socket.session.lastName
