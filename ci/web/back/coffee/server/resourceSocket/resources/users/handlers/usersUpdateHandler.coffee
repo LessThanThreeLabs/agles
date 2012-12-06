@@ -40,7 +40,8 @@ class UsersUpdateHandler extends Handler
 
 		@modelRpcConnection.users.update.update_user userId, args, (error, result) =>
 			if error?
-				callback "User failed to update"
+				errors.userUpdate = "Failed to update user"
+				callback errors
 			else
 				callback null, result
 
@@ -75,7 +76,8 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 		@modelRpcConnection.users.update.add_ssh_pubkey userId, data.alias, data.sshKey, (error, result) =>
 			if error?
-				callback "Failed to add Key"
+				errors.sshKeyAdd = "Failed to add key"
+				callback errors
 			else
 				callback null, result
 

@@ -49,7 +49,7 @@ class AccountInformationValidator
 
 
 	isValidSshAlias: (alias) =>
-		return alias? and alias is not ''
+		return alias? and alias isnt ''
 
 
 	getInvalidSshKeyString: () =>
@@ -57,4 +57,4 @@ class AccountInformationValidator
 
 
 	isValidSshKey: (key) =>
-		return key? and key is not ''
+		return key? and key isnt ''

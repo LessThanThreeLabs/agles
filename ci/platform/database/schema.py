@@ -112,7 +112,9 @@ ssh_pubkey = Table('ssh_pubkey', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
 	Column('alias', String, nullable=False),
-	Column('ssh_key', String, nullable=False, unique=True)
+	Column('ssh_key', String, nullable=False),
+
+	UniqueConstraint('user_id', 'alias')
 )
 
 #####################

@@ -61,6 +61,7 @@ class Account.View extends Backbone.View
 				<div class="prettyFormValue">
 					<button type="button" class="accountUpdateUserButton">Update User</button>
 					<span class="prettyFormSaveText userUpdatedText">User successfully updated</span>
+					<div class="prettyFormErrorText userUpdateErrorText"></div>
 				</div>
 			</div>
 			<div class="prettyFormEmptyRow"></div>
@@ -91,6 +92,7 @@ class Account.View extends Backbone.View
 				<div class="prettyFormValue">
 					<button type="button" class="sshKeyAddButton">Add Key</button>
 					<span class="prettyFormSaveText sshKeyAddedText">Key added</span>
+					<div class="prettyFormErrorText sshKeyAddErrorText"></div>
 				</div>
 			</div>
 		</div>'
@@ -115,6 +117,7 @@ class Account.View extends Backbone.View
 
 	_handleUserUpdate: (event) =>
 		console.log 'this belongs in the model...'
+		@_clearMessages()
 		
 		firstName = @model.get 'firstName'
 		lastName = @model.get 'lastName'
@@ -136,11 +139,12 @@ class Account.View extends Backbone.View
 
 
 	_showUserUpdatedMessage: () =>
-		@_clearErrors()
 		@$el.find('.userUpdatedText').css 'visibility', 'visible'
 
 
-	_clearErrors: () =>
+	_clearMessages: () =>
+		@$el.find('.sshKeyAddedText').css 'visibility', 'hidden'
+		@$el.find('.userUpdatedText').css 'visibility', 'hidden'
 		@_displayErrors {}
 
 
@@ -148,14 +152,18 @@ class Account.View extends Backbone.View
 		firstNameError = @$el.find('.accountFirstNameErrorText')
 		lastNameError = @$el.find('.accountLastNameErrorText')
 		emailError = @$el.find('.accountEmailErrorText')
+		userUpdateError = @$el.find('.userUpdateErrorText')
 		sshKeyAliasError = @$el.find('.sshKeyAliasErrorText')
 		sshKeyError = @$el.find('.sshKeyErrorText')
+		sshKeyAddError = @$el.find('.sshKeyAddErrorText')
 
 		@_displayErrorForField firstNameError, errors.firstName
 		@_displayErrorForField lastNameError, errors.lastName
 		@_displayErrorForField emailError, errors.email
+		@_displayErrorForField userUpdateError, errors.userUpdate
 		@_displayErrorForField sshKeyAliasError, errors.alias
 		@_displayErrorForField sshKeyError, errors.sshKey
+		@_displayErrorForField sshKeyAddError, errors.sshKeyAdd
 
 
 	_displayErrorForField: (errorView, errorText) =>
@@ -168,6 +176,7 @@ class Account.View extends Backbone.View
 
 
 	_handleSshKeyAdd: (event) =>
+		@_clearMessages()
 		alias = @model.get 'alias'
 		sshKey = @model.get 'sshKey'
 
@@ -186,5 +195,4 @@ class Account.View extends Backbone.View
 
 
 	_sshKeyAdded: () =>
-		@_clearErrors()
 		@$el.find('.sshKeyAddedText').css 'visibility', 'visible'
