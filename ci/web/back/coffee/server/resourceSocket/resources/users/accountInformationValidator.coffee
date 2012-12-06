@@ -13,28 +13,52 @@ class AccountInformationValidator
 
 
 	isEmailValid: (email) =>
-		if not email? or not email.toLowerCase().match @emailRegex
-			return 'Invaild email address'
-		else
+		if @validEmail email
 			return 'ok'
+		else
+			return 'Invaild email address'
+
+
+	validEmail: (email) =>
+		email? and email.toLowerCase().match @emailRegex
 
 
 	isPasswordValid: (password) =>
-		if not password? or password.length < 8 or not password.match @passwordRegex
-			return 'Password must be at least 8 characters, contain a letter, and contain a number'
-		else
+		if @validPassword password
 			return 'ok'
+		else
+			return 'Password must be at least 8 characters, contain a letter, and contain a number'
+
+
+	validPassword: (password) =>
+		password? and not password.length < 8 and password.match @passwordRegex
 
 
 	isFirstNameValid: (firstName) =>
-		if not firstName? or not firstName.match @firstNameRegex
-			return 'Check name formatting'
-		else
+		if @validFirstName firstName
 			return 'ok'
+		else
+			return 'Check name formatting'
+
+
+	validFirstName: (firstName) =>
+		firstName? and firstName.match @firstNameRegex
 
 
 	isLastNameValid: (lastName) =>
-		if not lastName? or not lastName.match @lastNameRegex
-			return 'Check name formatting'
-		else
+		if @validLastName lastName
 			return 'ok'
+		else
+			return 'Check name formatting'
+
+
+	validLastName: (lastName) =>
+		lastName? and lastName.match @lastNameRegex
+
+
+	validSshAlias: (alias) =>
+		alias? and alias is not ''
+
+
+	validSshKey: (key) =>
+		key? and key is not ''

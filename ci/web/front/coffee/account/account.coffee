@@ -9,9 +9,16 @@ class Account.Model extends Backbone.Model
 		sshKey: null
 		alias: null
 
+
 	initialize: () ->
-		@set 'firstName', window.globalAccount.get 'firstName'
-		@set 'lastName', window.globalAccount.get 'lastName'
+		if socket.session?
+			socket.emit 'users:read', {}, (error, user) =>	
+				if error?
+					console.error "Could not read user"
+				else
+					@set 'firstName', user.firstName 
+					@set 'lastName', user.lastName
+					@set 'email', user.email
 
 
 class Account.View extends Backbone.View

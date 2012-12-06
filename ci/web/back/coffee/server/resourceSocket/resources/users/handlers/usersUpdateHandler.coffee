@@ -3,13 +3,16 @@ assert = require 'assert'
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection, loginHandler) ->
-	return new UsersUpdateHandler modelRpcConnection, loginHandler
+exports.create = (modelRpcConnection, loginHandler, accountInformationValidator) ->
+	return new UsersUpdateHandler modelRpcConnection, loginHandler, accountInformationValidator
 
 
 class UsersUpdateHandler extends Handler
-	constructor: (modelRpcConnection, @loginHandler) ->
-		assert.ok modelRpcConnection? and @loginHandler?
+	constructor: (modelRpcConnection, @loginHandler, @accountInformationValidator) ->
+		assert.ok modelRpcConnection? 
+		assert.ok @loginHandler?
+		assert.ok @accountInformationValidator?
+
 		super modelRpcConnection
 
 
@@ -17,11 +20,11 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 
 		errors = {}
-		if not data.first_name? or data.first_name is ''
+		if not @accountInformationValidator.validFirstName data.first_name
 			errors.firstName = "Invalid First Name"
-		if not data.last_name? or data.last_name is ''
+		if not @accountInformationValidator.validLastName data.last_name 
 			errors.lastName = "Invalid Last Name"
-		if not data.email? or data.email is ''
+		if not @accountInformationValidator.validEmail data.email
 			errors.email = "Invalid Email"
 
 		if Object.keys(errors).length != 0
@@ -53,9 +56,9 @@ class UsersUpdateHandler extends Handler
 
 	addSshKey: (socket, data, callback) =>
 		errors = {}
-		if not data.alias? or data.alias is ''
+		if not @accountInformationValidator.validSshAlias data.alias
 			errors.alias = "Invalid Alias"
-		if not data.sshKey? or data.sshKey is ''
+		if not @accountInformationValidator.validSshKey data.sshKey
 			errors.sshKey = "Invalid Key"
 
 		if Object.keys(errors).length != 0
