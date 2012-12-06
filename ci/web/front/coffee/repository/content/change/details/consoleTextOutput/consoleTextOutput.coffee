@@ -60,9 +60,10 @@ class ConsoleTextOutput.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change:title', @_updateTitle, @
-		@model.subscribe()
 		@model.consoleTextOutputLineModels.on 'add', @_handleAddLine, @
 		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText, @
+		
+		@model.subscribe()
 
 
 	onDispose: () =>

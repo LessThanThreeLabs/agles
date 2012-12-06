@@ -75,14 +75,14 @@ class RepositoryHeaderMenu.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.fetchAllowedMenuOptions()
-
 		@repositoryUrlTrinketView = new RepositoryUrlTrinket.View model: @model.repositoryUrlTrinketModel
 
 		@model.on 'change:menuOptions', @render, @
 		@model.on 'change:selectedMenuOptionName', @_handleSelectedMenuOption, @
 
 		globalRouterModel.on 'change:repositoryId', @model.fetchAllowedMenuOptions, @
+
+		@model.fetchAllowedMenuOptions()
 
 
 	onDispose: () =>

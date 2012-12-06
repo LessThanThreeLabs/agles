@@ -39,6 +39,7 @@ class ConsoleCompilationOutput.View extends Backbone.View
 	html: '&nbsp'
 	currentViews: []
 
+
 	initialize: () =>
 		@model.consoleTextOutputModels.on 'reset', @_addOutput, @
 		globalRouterModel.on 'change:changeId', @model.fetchOutput, @
@@ -47,6 +48,8 @@ class ConsoleCompilationOutput.View extends Backbone.View
 	onDispose: () =>
 		@model.consoleTextOutputModels.off null, null, @
 		globalRouterModel.off 'change:changeId', null, @
+
+		@_removeOutputs()
 
 
 	render: () =>

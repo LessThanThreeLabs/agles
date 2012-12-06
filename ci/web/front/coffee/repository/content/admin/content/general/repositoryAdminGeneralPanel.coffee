@@ -25,6 +25,7 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 		'keyup': '_handleFormEntryChange'
 		'blur .prettyFormValue': '_handleSubmitChange'
 
+
 	initialize: () =>
 
 

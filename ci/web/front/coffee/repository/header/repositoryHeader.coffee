@@ -54,12 +54,12 @@ class RepositoryHeader.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.fetchRepositoryInformation()
-
 		@repositoryHeaderBasicInformationView = new RepositoryHeaderBasicInformation.View model: @model.repositoryHeaderBasicInformationModel
 		@repositoryHeaderMenuView = new RepositoryHeaderMenu.View model: @model.repositoryHeaderMenuModel
 
 		globalRouterModel.on 'change:repositoryId', @model.fetchRepositoryInformation, @
+		
+		@model.fetchRepositoryInformation()
 
 
 	onDispose: () =>

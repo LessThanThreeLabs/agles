@@ -19,6 +19,7 @@ class Main.View extends Backbone.View
 
 	initialize: () ->
 		@headerView = new Header.View model: @model.headerModel
+		
 		window.globalRouterModel.on 'change:view', (() =>
 				# we have a timeout here so that child models/views
 				# won't bind to global events until later, since
