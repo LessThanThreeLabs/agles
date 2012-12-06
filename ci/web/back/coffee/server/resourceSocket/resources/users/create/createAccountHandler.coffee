@@ -11,7 +11,12 @@ exports.create = (configurationParams, createAccountStore, modelRpcConnection, p
 
 class CreateAccountHandler
 	constructor: (@configurationParams, @createAccountStore, @modelRpcConnection, @passwordHasher, @accountInformationValidator, @createAccountEmailer) ->
-		assert.ok @configurationParams? and @createAccountStore? and @modelRpcConnection? and @passwordHasher? and @accountInformationValidator? and @createAccountEmailer?
+		assert.ok @configurationParams? 
+		assert.ok @createAccountStore?
+		assert.ok @modelRpcConnection?
+		assert.ok @passwordHasher?
+		assert.ok @accountInformationValidator?
+		assert.ok @createAccountEmailer?
 
 
 	handleRequest: (socket, data, callback) =>

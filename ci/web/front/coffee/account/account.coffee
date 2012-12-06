@@ -5,7 +5,9 @@ class Account.Model extends Backbone.Model
 	defaults:
 		firstName: null
 		lastName: null
-
+		email: null
+		sshKey: null
+		alias: null
 
 	initialize: () ->
 		@set 'firstName', window.globalAccount.get 'firstName'
@@ -22,7 +24,7 @@ class Account.View extends Backbone.View
 					First Name
 				</div>
 				<div class="prettyFormValue">
-					<input type="text" class="accountFirstNameField" placeholder="first" maxlength=64><span class="prettyFormSaveText accountFirstNameSavedText">Saved</span>
+					<input type="text" class="accountFirstNameField" placeholder="first" maxlength=64>
 					<div class="prettyFormErrorText accountFirstNameErrorText"></div>
 				</div>
 			</div>
@@ -32,24 +34,63 @@ class Account.View extends Backbone.View
 					Last Name
 				</div>
 				<div class="prettyFormValue">
-					<input type="text" class="accountLastNameField" placeholder="last" maxlength=64><span class="prettyFormSaveText accountLastNameSavedText">Saved</span>
+					<input type="text" class="accountLastNameField" placeholder="last" maxlength=64>
 					<div class="prettyFormErrorText accountLastNameErrorText"></div>
+				</div>
+			</div>
+			<div class="prettyFromEmptyRow"></div>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel">
+					Email
+				</div>
+				<div class="prettyFormValue">
+					<input type="text" class="accountEmailField" placeholder="email" maxlength=64>
+					<div class="prettyFormErrorText accountEmailErrorText"></div>
 				</div>
 			</div>
 			<div class="prettyFormEmptyRow"></div>
 			<div class="prettyFormRow">
+				<div class="prettyFormLabel"></div>
+				<div class="prettyFormValue">
+					<input type="button" class="accountUpdateUserButton" value="Update User">
+					<span class="prettyFormSaveText userUpdatedText">User successfully updated</span>
+				</div>
+			</div>
+			<div class="prettyFormEmptyRow"></div>
+			<div class="prettyFormEmptyRow"></div>
+			<div class="prettyFormEmptyRow"></div>
+			<div class="prettyFormRow">
 				<div class="prettyFormLabel">
-					SSH Key
+					Alias
+				</div>
+				<div class="prettyFormValue">	
+					<input type="text" class="sshKeyAliasField" placeholder="alias" maxlength=64>
+					<div class="prettyFormErrorText sshKeyAliasErrorText"></div>
+				</div>
+			</div>
+			<div class="prettyFromEmptyRow"></div>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel">
+					Key
 				</div>
 				<div class="prettyFormValue">
-					<textarea type="text" class="accountSshKeyField" placeholder="ssh key" maxlength=256></textarea><span class="prettyFormSaveText accountSshKeySavedText">Saved</span>
-					<div class="prettyFormErrorText accountSshKeyErrorText"></div>
+					<textarea type="text" class="sshKeyField" placeholder="key" maxlength=256></textarea>
+					<div class="prettyFormErrorText sshKeyErrorText"></div>
+				</div>
+			</div>
+			<div class="prettyFormEmptyRow"></div>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel"></div>
+				<div class="prettyFormValue">
+					<input type="button" class="sshKeyAddButton" value="Add Key">
+					<span class="prettyFormSaveText sshKeyAddedText">Key added</span>
 				</div>
 			</div>
 		</div>'
 	events: 
 		'keyup': '_handleFormEntryChange'
-		'blur .prettyFormValue': '_handleSubmitChange'
+		'click .accountUpdateUserButton': '_handleUserUpdate'
+		'click .sshKeyAddButton': '_handleSshKeyAdd'
 
 
 	render: () ->
@@ -60,28 +101,53 @@ class Account.View extends Backbone.View
 	_handleFormEntryChange: () =>
 		@model.set 'firstName', @$el.find('.accountFirstNameField').val()
 		@model.set 'lastName', @$el.find('.accountLastNameField').val()
+		@model.set 'email', @$el.find('.accountEmailField').val()
+		@model.set 'sshKey', @$el.find('.sshKeyField').val()
+		@model.set 'alias', @$el.find('.sshKeyAliasField').val()
 
 
-	_handleSubmitChange: (event) =>
-		console.log '>> Need to submit account change!'
+	_handleUserUpdate: (event) =>
 		console.log 'this belongs in the model...'
+		
+		###	if sshKey?
+			# TODO (jchu): make this section actually work
+			requestData =
+				method: 'updateSshKey'
+				args: 
+					alias: alias
+					key: key
+			socket.emit 'users:update', requestData, (error, results) =>
+				if errors?
+					@_displayErrors errors
+				else
+					@_showCorrectSavedMessage($(event.target))
 
-		errors = {}
-		@_displayErrors errors
-		@_showCorrectSavedMessage($(event.target)) if not errors? or Object.keys(errors).length is 0
+		else ###
+		
+		firstName = @model.get 'firstName'
+		lastName = @model.get 'lastName'
+		email = @model.get 'email'
+
+		args = 
+			first_name: firstName
+			last_name: lastName
+			email: email
+
+		if args?
+			socket.emit 'users:update', args, (errors, result) =>
+				if errors?
+					@_displayErrors errors
+				else
+					@_showUserUpdatedMessage()
+					window.globalAccount.set
+						firstName: firstName
+						lastName: lastName
+					@model.set 'visible', false
 
 
-	_showCorrectSavedMessage: (field) =>
-		@$el.find('.accountFirstNameSavedText').css 'visibility', 'hidden'
-		@$el.find('.accountLastNameSavedText').css 'visibility', 'hidden'
-		@$el.find('.accountSshKeySavedText').css 'visibility', 'hidden'
-
-		if field.hasClass 'accountFirstNameField'
-			@$el.find('.accountFirstNameSavedText').css 'visibility', 'visible'
-		if field.hasClass 'accountLastNameField'
-			@$el.find('.accountLastNameSavedText').css 'visibility', 'visible'
-		if field.hasClass 'accountSshKeyField'
-			@$el.find('.accountSshKeySavedText').css 'visibility', 'visible'
+	_showUserUpdatedMessage: () =>
+		@$el.find('.userUpdatedText').css 'visibility', 'hidden'
+		@$el.find('.userUpdatedText').css 'visibility', 'visible'
 
 
 	_clearErrors: () =>
@@ -91,12 +157,15 @@ class Account.View extends Backbone.View
 	_displayErrors: (errors = {}) =>
 		firstNameError = @$el.find('.accountFirstNameErrorText')
 		lastNameError = @$el.find('.accountLastNameErrorText')
-		sshKeyError = @$el.find('.accountSshKeyErrorText')
+		emailError = @$el.find('.accountEmailErrorText')
+		sshKeyAliasError = @$el.find('.sshKeyAliasErrorText')
+		sshKeyError = @$el.find('.sshKeyErrorText')
 
 		@_displayErrorForField firstNameError, errors.firstName
 		@_displayErrorForField lastNameError, errors.lastName
+		@_displayErrorForField emailError, errors.email
+		@_displayErrorForField sshKeyAliasError, errors.alias
 		@_displayErrorForField sshKeyError, errors.sshKey
-
 
 	_displayErrorForField: (errorView, errorText) =>
 		if errorText?
@@ -105,3 +174,26 @@ class Account.View extends Backbone.View
 		else
 			errorView.text ''
 			errorView.hide()
+
+
+	_handleSshKeyAdd: (event) =>
+		alias = @model.get 'alias'
+		sshKey = @model.get 'sshKey'
+
+		requestData =
+			method: 'addSshKey'
+			args:
+				alias: alias
+				sshKey: sshKey
+
+		socket.emit 'users:update', requestData, (errors, result) =>
+			if errors?
+				@_displayErrors errors
+			else
+				@_sshKeyAdded()
+				@model.set 'visible', false
+
+
+	_sshKeyAdded: () =>
+		@$el.find('.sshKeyAddedText').css 'visibility', 'hidden'
+		@$el.find('.sshKeyAddedText').css 'visibility', 'visible'
