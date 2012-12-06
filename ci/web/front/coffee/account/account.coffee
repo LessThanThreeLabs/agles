@@ -10,15 +10,14 @@ class Account.Model extends Backbone.Model
 		alias: null
 
 
-	initialize: () ->
-		if socket.session?
-			socket.emit 'users:read', {}, (error, user) =>	
-				if error?
-					console.error "Could not read user"
-				else
-					@set 'firstName', user.firstName 
-					@set 'lastName', user.lastName
-					@set 'email', user.email
+	initialize: () =>
+		@updateAccountInformation()
+
+
+	updateAccountInformation: () =>
+		@set 'email', globalAccount.get 'email'
+		@set 'firstName', globalAccount.get 'firstName'
+		@set 'lastName', globalAccount.get 'lastName'
 
 
 class Account.View extends Backbone.View
@@ -102,9 +101,25 @@ class Account.View extends Backbone.View
 		'click .sshKeyAddButton': '_handleSshKeyAdd'
 
 
-	render: () ->
+	initialize: () =>
+
+
+	onDispose: () =>
+
+
+	render: () =>
 		@$el.html @template()
+		@model.updateAccountInformation()
+		@_syncViewToModel()		
 		return @
+
+
+	_syncViewToModel: () =>
+		@$el.find('.accountFirstNameField').val @model.get 'firstName'
+		@$el.find('.accountLastNameField').val @model.get 'lastName'
+		@$el.find('.accountEmailField').val @model.get 'email'
+		@$el.find('.sshKeyField').val @model.get 'sshKey'
+		@$el.find('.sshKeyAliasField').val @model.get 'alias'
 
 
 	_handleFormEntryChange: () =>
