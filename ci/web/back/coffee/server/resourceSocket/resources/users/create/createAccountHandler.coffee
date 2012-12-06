@@ -32,17 +32,17 @@ class CreateAccountHandler
 	_getErrors: (socket, data, callback) =>
 		errors = {}
 
-		if @accountInformationValidator.isEmailValid(data.email) isnt 'ok'
-			errors.email = @accountInformationValidator.isEmailValid data.email
+		if not @accountInformationValidator.isValidEmail data.email
+			errors.email = @accountInformationValidator.getInvalidEmailString()
 
-		if @accountInformationValidator.isPasswordValid(data.password) isnt 'ok'
-			errors.password = @accountInformationValidator.isPasswordValid data.password
+		if not @accountInformationValidator.isValidPassword data.password
+			errors.password = @accountInformationValidator.getInvalidPasswordString()
 		
-		if @accountInformationValidator.isFirstNameValid(data.firstName) isnt 'ok'
-			errors.firstName = @accountInformationValidator.isFirstNameValid data.firstName
+		if not @accountInformationValidator.isValidFirstName data.firstName
+			errors.firstName = @accountInformationValidator.getInvalidFirstNameString()
 		
-		if @accountInformationValidator.isLastNameValid(data.lastName) isnt 'ok'
-			errors.lastName = @accountInformationValidator.isLastNameValid data.lastName
+		if not @accountInformationValidator.isValidLastName data.lastName
+			errors.lastName = @accountInformationValidator.getInvalidLastNameString()
 		
 		# check if the email is already taken last, since it's the most expensive
 		if Object.keys(errors) is 0 and @_checkIfEmailAlreadyExists data.email

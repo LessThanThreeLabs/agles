@@ -20,18 +20,25 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 
 		errors = {}
-		if not @accountInformationValidator.validFirstName data.first_name
-			errors.firstName = "Invalid First Name"
-		if not @accountInformationValidator.validLastName data.last_name 
-			errors.lastName = "Invalid Last Name"
-		if not @accountInformationValidator.validEmail data.email
-			errors.email = "Invalid Email"
+		if not @accountInformationValidator.isValidFirstName data.firstName
+			errors.firstName = @accountInformationValidator.getInvalidFirstNameString()
+		if not @accountInformationValidator.isValidLastName data.lastName 
+			errors.lastName = @accountInformationValidator.getInvalidLastNameString()
+		if not @accountInformationValidator.isValidEmail data.email
+			errors.email = @accountInformationValidator.getInvalidEmailString()
 
 		if Object.keys(errors).length != 0
 			callback errors
 			return
 
-		@modelRpcConnection.users.update.update_user userId, data, (error, result) =>
+		args = {}
+		args.first_name = data.firstName if data.firstName?
+		args.last_name = data.lastName if data.lastName?
+		args.email = data.email if data.email?
+		args.password_hash = data.passwordHash if data.passwordHash?
+		args.salt = data.salt if data.salt?
+
+		@modelRpcConnection.users.update.update_user userId, args, (error, result) =>
 			if error?
 				callback "User failed to update"
 			else
@@ -56,10 +63,10 @@ class UsersUpdateHandler extends Handler
 
 	addSshKey: (socket, data, callback) =>
 		errors = {}
-		if not @accountInformationValidator.validSshAlias data.alias
-			errors.alias = "Invalid Alias"
-		if not @accountInformationValidator.validSshKey data.sshKey
-			errors.sshKey = "Invalid Key"
+		if not @accountInformationValidator.isValidSshAlias data.alias
+			errors.alias = @accountInformationValidator.getInvalidSshAliasString()
+		if not @accountInformationValidator.isValidSshKey data.sshKey
+			errors.sshKey = @accountInformationValidator.getInvalidSshKeyString()
 
 		if Object.keys(errors).length != 0
 			callback errors

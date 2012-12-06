@@ -116,44 +116,28 @@ class Account.View extends Backbone.View
 	_handleUserUpdate: (event) =>
 		console.log 'this belongs in the model...'
 		
-		###	if sshKey?
-			# TODO (jchu): make this section actually work
-			requestData =
-				method: 'updateSshKey'
-				args: 
-					alias: alias
-					key: key
-			socket.emit 'users:update', requestData, (error, results) =>
-				if errors?
-					@_displayErrors errors
-				else
-					@_showCorrectSavedMessage($(event.target))
-
-		else ###
-		
 		firstName = @model.get 'firstName'
 		lastName = @model.get 'lastName'
 		email = @model.get 'email'
 
 		args = 
-			first_name: firstName
-			last_name: lastName
+			firstName: firstName
+			lastName: lastName
 			email: email
 
-		if args?
-			socket.emit 'users:update', args, (errors, result) =>
-				if errors?
-					@_displayErrors errors
-				else
-					@_showUserUpdatedMessage()
-					window.globalAccount.set
-						firstName: firstName
-						lastName: lastName
-					@model.set 'visible', false
+		socket.emit 'users:update', args, (errors, result) =>
+			if errors?
+				@_displayErrors errors
+			else
+				@_showUserUpdatedMessage()
+				window.globalAccount.set
+					firstName: firstName
+					lastName: lastName
+				@model.set 'visible', false
 
 
 	_showUserUpdatedMessage: () =>
-		@$el.find('.userUpdatedText').css 'visibility', 'hidden'
+		@_clearErrors()
 		@$el.find('.userUpdatedText').css 'visibility', 'visible'
 
 
@@ -173,6 +157,7 @@ class Account.View extends Backbone.View
 		@_displayErrorForField emailError, errors.email
 		@_displayErrorForField sshKeyAliasError, errors.alias
 		@_displayErrorForField sshKeyError, errors.sshKey
+
 
 	_displayErrorForField: (errorView, errorText) =>
 		if errorText?
@@ -202,5 +187,5 @@ class Account.View extends Backbone.View
 
 
 	_sshKeyAdded: () =>
-		@$el.find('.sshKeyAddedText').css 'visibility', 'hidden'
+		@_clearErrors()
 		@$el.find('.sshKeyAddedText').css 'visibility', 'visible'
