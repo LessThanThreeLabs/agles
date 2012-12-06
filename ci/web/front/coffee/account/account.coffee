@@ -64,8 +64,8 @@ class Account.View extends Backbone.View
 				</div>
 			</div>
 			<div class="prettyFormEmptyRow"></div>
-			<div class="prettyFormEmptyRow"></div>
-			<div class="prettyFormEmptyRow"></div>
+
+			
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">
 					Alias
