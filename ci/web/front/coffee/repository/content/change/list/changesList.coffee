@@ -99,10 +99,6 @@ class ChangesList.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.subscribeId = globalRouterModel.get 'repositoryId'
-		@model.subscribe()
-		@model.resetChangesList()
-
 		@model.on 'change:queryString', @model.resetChangesList, @
 
 		@model.changeModels.on 'add', @_handleAddedChange, @
@@ -117,6 +113,10 @@ class ChangesList.View extends Backbone.View
 			@model.subscribe()
 			@model.resetChangesList()
 			), @
+
+		@model.subscribeId = globalRouterModel.get 'repositoryId'
+		@model.subscribe()
+		@model.resetChangesList()
 
 
 	onDispose: () =>

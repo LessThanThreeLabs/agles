@@ -49,7 +49,7 @@ class RpcBroker
 			correlationId: messageId
 			mandatory: true
 
-		console.log 'calling function: ' + route + ' > ' + methodName
+		console.log '-- calling function: ' + route + ' > ' + methodName
 		# console.log 'sent: ' + JSON.stringify msgpack.unpack message
 
 

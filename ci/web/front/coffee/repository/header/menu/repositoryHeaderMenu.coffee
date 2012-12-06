@@ -28,10 +28,12 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 	fetchAllowedMenuOptions: () =>
 		@clear()
 
+		return if not globalRouterModel.get('repositoryId')?
+
 		requestData =
 			method: 'getMenuOptions'
 			args:
-				repositoryId: window.globalRouterModel.get 'repositoryId'
+				repositoryId: globalRouterModel.get 'repositoryId'
 
 		socket.emit 'repos:read', requestData, (error, menuOptions) =>
 			if error?
@@ -73,12 +75,14 @@ class RepositoryHeaderMenu.View extends Backbone.View
 
 
 	initialize: () =>
+		@model.fetchAllowedMenuOptions()
+
 		@repositoryUrlTrinketView = new RepositoryUrlTrinket.View model: @model.repositoryUrlTrinketModel
 
 		@model.on 'change:menuOptions', @render, @
 		@model.on 'change:selectedMenuOptionName', @_handleSelectedMenuOption, @
 
-		globalRouterModel.on 'change:repositoryId', (() => @model.fetchAllowedMenuOptions()), @
+		globalRouterModel.on 'change:repositoryId', @model.fetchAllowedMenuOptions, @
 
 
 	onDispose: () =>

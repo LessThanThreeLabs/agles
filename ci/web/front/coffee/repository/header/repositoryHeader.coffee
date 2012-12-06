@@ -23,7 +23,9 @@ class RepositoryHeader.Model extends Backbone.Model
 	fetchRepositoryInformation: () =>
 		@clear()
 
-		requestData = id: window.globalRouterModel.get 'repositoryId'
+		return if not globalRouterModel.get('repositoryId')?
+
+		requestData = id: globalRouterModel.get 'repositoryId'
 		socket.emit 'repos:read', requestData, (error, data) =>
 			console.error error if error?
 			@set data if data?
@@ -52,14 +54,16 @@ class RepositoryHeader.View extends Backbone.View
 
 
 	initialize: () =>
+		@model.fetchRepositoryInformation()
+
 		@repositoryHeaderBasicInformationView = new RepositoryHeaderBasicInformation.View model: @model.repositoryHeaderBasicInformationModel
 		@repositoryHeaderMenuView = new RepositoryHeaderMenu.View model: @model.repositoryHeaderMenuModel
 
-		window.globalRouterModel.on 'change:repositoryId', @model.fetchRepositoryInformation, @
+		globalRouterModel.on 'change:repositoryId', @model.fetchRepositoryInformation, @
 
 
 	onDispose: () =>
-		window.globalRouterModel.off null, null, @
+		globalRouterModel.off null, null, @
 		@repositoryHeaderBasicInformationView.dispose()
 		@repositoryHeaderMenuView.dispose()
 

@@ -19,7 +19,12 @@ class Main.View extends Backbone.View
 
 	initialize: () ->
 		@headerView = new Header.View model: @model.headerModel
-		window.globalRouterModel.on 'change:view', @_updateContent, @
+		window.globalRouterModel.on 'change:view', (() =>
+				# we have a timeout here so that child models/views
+				# won't bind to global events until later, since
+				# those global events are currently being processed
+				setTimeout (() => @_updateContent()), 0
+			), @
 
 
 	onDispose: () =>
@@ -60,5 +65,3 @@ mainModel = new Main.Model()
 
 mainView = new Main.View model: mainModel
 $('body').prepend mainView.render().el
-
-window.mainView = mainView

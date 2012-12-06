@@ -77,6 +77,7 @@ class Server
 
 	_isAllowedToVisitRoute: (request) =>
 		console.log 'server.coffee -- logic needs to be more comprehensive here...'
+		console.log '  might also want to remove this if we can better handle invalid states in client'
 		return request.url is '/' or request.session.userId?
 
 
