@@ -11,16 +11,20 @@ class RepositoryContent.Model extends Backbone.Model
 class RepositoryContent.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryContent'
-	currentView: null
 
 
 	initialize: () =>
+		@repositoryChangesView = new RepositoryChanges.View model: @model.repositoryChangesModel
+		@repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
+
 		globalRouterModel.on 'change:repositoryView', @_updateContent, @
 
 
 	onDispose: () =>
 		globalRouterModel.off null, null, @
-		@currentView.dispose() if @currentView?
+		
+		@repositoryChangesView.dispose()
+		@repositoryAdminView.dispose()
 
 
 	render: () =>
@@ -29,20 +33,14 @@ class RepositoryContent.View extends Backbone.View
 
 
 	_updateContent: () =>
-		@currentView.dispose() if @currentView?
-
 		switch globalRouterModel.get 'repositoryView'
 			when 'changes'
-				@currentView = new RepositoryChanges.View model: @model.repositoryChangesModel
-				@$el.html @currentView.render().el
+				@$el.html @repositoryChangesView.render().el
 			when 'admin'
-				@currentView = new RepositoryAdmin.View model: @model.repositoryAdminModel
-				@$el.html @currentView.render().el
+				@$el.html @repositoryAdminView.render().el
 			when null
 				# repository view hasn't been selected yet
-				@currentView = null
 				@$el.html '&nbsp'
 			else
-				@currentView = null
 				@$el.html '&nbsp'
 				console.error 'Unaccounted for view ' + window.globalRouterModel.get 'repositoryView'

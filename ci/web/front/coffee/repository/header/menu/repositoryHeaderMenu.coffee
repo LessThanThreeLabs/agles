@@ -38,8 +38,6 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 				console.error error
 				return
 
-			console.log menuOptions
-
 			assert.ok menuOptions.default in menuOptions.options
 
 			allowedOptions = menuOptions.options.map (option) =>

@@ -101,15 +101,15 @@ class ChangesList.View extends Backbone.View
 	initialize: () =>
 		@model.subscribeId = globalRouterModel.get 'repositoryId'
 		@model.subscribe()
-		@model.fetchInitialChanges()
+		@model.resetChangesList()
 
-		@model.on 'change:queryString', (() =>
-			@model.resetChangesList()
-			@model.fetchInitialChanges()
-			), @
+		@model.on 'change:queryString', @model.resetChangesList, @
 
 		@model.changeModels.on 'add', @_handleAddedChange, @
-		@model.changeModels.on 'reset', @$el.empty, @
+		@model.changeModels.on 'reset', (() =>
+			@$el.empty()
+			@model.fetchInitialChanges()
+			), @
 
 		globalRouterModel.on 'change:repositoryId', (() =>
 			@model.unsubscribe()
@@ -125,10 +125,19 @@ class ChangesList.View extends Backbone.View
 		@model.changeModels.off null, null, @
 		globalRouterModel.off null, null, @
 
+		@model.resetChangesList()
+
 
 	render: () =>
 		@$el.html @html
+		@_renderInitialChanges()
 		return @
+
+
+	_renderInitialChanges: () =>
+		@model.changeModels.each (changeModel) =>
+			changeView = new Change.View model: changeModel
+			@$el.append changeView.render().el
 
 
 	_scrollHandler: () =>
