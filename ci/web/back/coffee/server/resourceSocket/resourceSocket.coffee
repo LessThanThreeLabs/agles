@@ -23,3 +23,8 @@ class ResourceSocket
 		@socketio.sockets.on 'connection', (socket) =>
 			@configurer.configureConnection socket
 			@resourceRouter.bindToResources socket
+
+			if socket.session.userId?
+				socket.emit 'accountUpdate',
+					firstName: 'hello'
+					lastName: 'there!'

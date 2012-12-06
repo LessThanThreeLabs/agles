@@ -14,3 +14,7 @@ class GlobalAccount extends Backbone.Model
 
 
 window.globalAccount = new GlobalAccount()
+	
+socket.on 'accountUpdate', (data) ->
+	window.globalAccount.set data,
+		error: (model, error) => console.error error

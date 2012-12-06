@@ -51,12 +51,12 @@ class RepositoryHeaderOption.View extends Backbone.View
 		@model.on 'change:repositories', @_updateDropdownContents, @
 		@model.on 'change:visible', @_fixVisibility, @
 
-		window.globalAccount.on 'change', @model.fetchRepositories, @
+		globalAccount.on 'change', @model.fetchRepositories, @
 
 
 	onDispose: () =>
 		@model.off null, null, @
-		window.globalAccount.off null, null, @
+		globalAccount.off null, null, @
 
 
 	render: () ->
@@ -73,12 +73,12 @@ class RepositoryHeaderOption.View extends Backbone.View
 		attributesToSet = 
 			view: 'repository'
 			repositoryId: repositoryId
-		window.globalRouterModel.set attributesToSet,
+		globalRouterModel.set attributesToSet,
 			error: (model, error) => console.error error
 
 
 	_handleCreateRepository: (event) =>
-		window.globalRouterModel.set
+		globalRouterModel.set
 			view: 'createRepository'
 
 
