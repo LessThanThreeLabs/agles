@@ -59,7 +59,7 @@ class Account.View extends Backbone.View
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel"></div>
 				<div class="prettyFormValue">
-					<input type="button" class="accountUpdateUserButton" value="Update User">
+					<button type="button" class="accountUpdateUserButton">Update User</button>
 					<span class="prettyFormSaveText userUpdatedText">User successfully updated</span>
 				</div>
 			</div>
@@ -89,7 +89,7 @@ class Account.View extends Backbone.View
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel"></div>
 				<div class="prettyFormValue">
-					<input type="button" class="sshKeyAddButton" value="Add Key">
+					<button type="button" class="sshKeyAddButton">Add Key</button>
 					<span class="prettyFormSaveText sshKeyAddedText">Key added</span>
 				</div>
 			</div>
@@ -133,7 +133,6 @@ class Account.View extends Backbone.View
 				window.globalAccount.set
 					firstName: firstName
 					lastName: lastName
-				@model.set 'visible', false
 
 
 	_showUserUpdatedMessage: () =>
