@@ -1,4 +1,6 @@
 Backbone.Model.prototype._numSubscribeRequests = 0
+Backbone.Model.prototype._currentEventName = null
+
 
 Backbone.Model.prototype.subscribe = () ->
 	assert.ok @subscribeUrl?
@@ -15,10 +17,15 @@ Backbone.Model.prototype.subscribe = () ->
 		assert.ok result.eventName? 
 		assert.ok result.eventName isnt ''
 
-		console.log 'need to fix this up so that we wont get old events and actually act on them!!!!'
+		@_currentEventName = result.eventName
 		socket.on result.eventName, (data) =>
 			assert.ok data.type?
-			@onUpdate data
+
+			if result.eventName is @_currentEventName
+				@onUpdate data
+			else
+				console.log 'Unexpected event!'
+				console.leg '  this really isnt a surprise... but I wanted to see if it would ever happen'
 
 
 Backbone.Model.prototype.unsubscribe = () ->
