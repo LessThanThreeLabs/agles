@@ -65,11 +65,19 @@ class Server
 
 
 	_handleIndexRequest: (request, response) =>
-		@spdyCache.pushFiles request, response
-		response.render 'index', 
-			csrfToken: request.session.csrfToken
-			cssFiles: @cssFilesString
-			jsFiles: @jsFilesString
+		if @_isAllowedToVisitRoute request
+			@spdyCache.pushFiles request, response
+			response.render 'index', 
+				csrfToken: request.session.csrfToken
+				cssFiles: @cssFilesString
+				jsFiles: @jsFilesString
+		else
+			response.send 'Some nice 404 page here'
+
+
+	_isAllowedToVisitRoute: (request) =>
+		console.log 'server.coffee -- logic needs to be more comprehensive here...'
+		return request.url is '/' or request.session.userId?
 
 
 	_handleVerifyAccountRequest: (request, response) =>

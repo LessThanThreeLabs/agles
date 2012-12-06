@@ -16,18 +16,18 @@ class LoginHandler
 
 		@modelRpcConnection.users.read.get_salt data.email, (error, salt) =>
 			if error?
-				callback "Login Failed"
+				callback 'Login failed'
 				return
 
 			hashedPassword = @passwordHasher.hashPasswordWithSalt data.password, salt
 			@modelRpcConnection.users.read.get_user data.email, hashedPassword, (error, user) =>
 				if error?
-					callback "Login Failed"
+					callback 'Login failed'
 					return
 
 				socket.session.userId = user.id
 				socket.session.save()
-				callback error, @_sanitize(user)
+				callback error, @_sanitize user
 
 	_sanitize: (user) =>
 		firstName: user.first_name
