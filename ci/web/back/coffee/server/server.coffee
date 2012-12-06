@@ -41,8 +41,8 @@ class Server
 		expressServer.get '/account', @_handleIndexRequest
 		expressServer.get '/repository/:repositoryId', @_handleIndexRequest
 		expressServer.get '/repository/:repositoryId/:repositoryView', @_handleIndexRequest
-		expressServer.get '/repository/:repositoryId/builds/:buildId', @_handleIndexRequest
-		expressServer.get '/repository/:repositoryId/builds/:buildId/:buildView', @_handleIndexRequest
+		expressServer.get '/repository/:repositoryId/changes/:changeId', @_handleIndexRequest
+		expressServer.get '/repository/:repositoryId/changes/:changeId/:changeView', @_handleIndexRequest
 		expressServer.get '/create/repository', @_handleIndexRequest
 
 		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
