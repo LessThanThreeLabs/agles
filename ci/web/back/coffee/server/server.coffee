@@ -67,13 +67,27 @@ class Server
 	_handleIndexRequest: (request, response) =>
 		if @_isAllowedToVisitRoute request
 			@spdyCache.pushFiles request, response
-			response.render 'index', 
+
+			templateValues =
 				csrfToken: request.session.csrfToken
 				cssFiles: @cssFilesString
 				jsFiles: @jsFilesString
-				userEmail: request.session.email
-				userFirstName: request.session.firstName
-				userLastName: request.session.lastName
+				userEmail: null
+				userFirstName: null
+				userLastName: null
+
+			if request.session.userId?
+				@modelConnection.rpcConnection.users.read.get_user_from_id request.session.userId, (error, user) =>
+					if error?
+						console.error "UserId: #{request.session.userId} doesn't exist."
+					else
+						templateValues.userEmail = user.email
+						templateValues.userFirstName = user.first_name
+						templateValues.userLastName = user.last_name
+
+					response.render 'index', templateValues
+			else
+				response.render 'index', templateValues
 		else
 			response.send 'Some nice 404 page here'
 
@@ -106,9 +120,6 @@ class Server
 						response.end 'User creation failed'
 					else
 						request.session.userId = userId
-						request.session.email = account.email
-						request.session.firstName = account.firstName
-						request.session.lastName = account.lastName
 
 						response.render 'verifyAccount',
 							firstName: account.firstName

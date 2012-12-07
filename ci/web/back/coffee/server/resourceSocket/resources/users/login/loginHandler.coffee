@@ -26,9 +26,6 @@ class LoginHandler
 					return
 
 				socket.session.userId = user.id
-				socket.session.email = user.email
-				socket.session.firstName = user.first_name
-				socket.session.lastName = user.last_name
 				socket.session.save()
 
 				callback error, @_sanitize user
