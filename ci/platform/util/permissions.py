@@ -40,3 +40,7 @@ class RepositoryPermissions(Permissions):
 	@classmethod
 	def valid_permissions(cls):
 		return [cls.NONE, cls.R, cls.RW, cls.RWA]
+
+
+class InvalidPermissionsError(Exception):
+	pass

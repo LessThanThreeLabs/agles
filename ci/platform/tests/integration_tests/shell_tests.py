@@ -2,7 +2,7 @@ from nose.tools import *
 
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
-from util.permissions import RepositoryPermissions
+from util.permissions import RepositoryPermissions, InvalidPermissionsError
 from util.shell import *
 from database.engine import ConnectionFactory
 from database import schema
@@ -65,4 +65,4 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._setup_db_entries(REPO_URI)
 
 		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
-		assert_raises(InvalidPermissionError, rsh.new_sshargs, 'git-upload-pack', REPO_URI, "2")
+		assert_raises(InvalidPermissionsError, rsh.new_sshargs, 'git-upload-pack', REPO_URI, "2")

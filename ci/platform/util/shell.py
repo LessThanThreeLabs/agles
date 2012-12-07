@@ -3,7 +3,7 @@ import re
 
 from model_server import ModelServer
 from util import pathgen
-from util.permissions import RepositoryPermissions
+from util.permissions import RepositoryPermissions, InvalidPermissionsError
 
 REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"
 
@@ -35,7 +35,7 @@ class RestrictedGitShell(object):
 		with ModelServer.rpc_connect("repos", "read") as client:
 			permissions = client.get_permissions(int(user_id), repo_hash)
 		if not RepositoryPermissions.has_permissions(permissions, self.commands_to_permissions[command]):
-			raise InvalidPermissionError("User %s does not have the necessary permissions to run %s on repository %s" % (user_id, command, repo_hash))
+			raise InvalidPermissionsError("User %s does not have the necessary permissions to run %s on repository %s" % (user_id, command, repo_hash))
 
 	def _validate(self, repo_path):
 		if not repo_path.endswith(".git"):
@@ -75,8 +75,4 @@ class InvalidCommandError(Exception):
 
 
 class MalformedCommandError(Exception):
-	pass
-
-
-class InvalidPermissionError(Exception):
 	pass
