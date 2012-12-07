@@ -44,9 +44,9 @@ class VerificationResultsHandler(QueueListener):
 			print "Still waiting for more results"
 
 	def _mark_change_finished(self, change_id):
+		self.send_merge_request(change_id)
 		with ModelServer.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.PASSED)
-		self.send_merge_request(change_id)
 
 	def _mark_change_failed(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
@@ -76,12 +76,3 @@ class VerificationResultsHandler(QueueListener):
 			self._mark_change_merge_failure(change_id)
 			# merge_status = False
 			raise e  # Should alert the user somehow
-		"""
-		with ModelServer.rpc_connect("repos", "update") as client:
-					client.mark_merge(merge_status)
-		"""
-		self.producer.publish((repo_hash, commit_id, merge_target,),
-			exchange=merge_queue.exchange,
-			routing_key=merge_queue.routing_key,  # TODO (bbland): replace with something useful
-			delivery_mode=2,  # make message persistent
-		)

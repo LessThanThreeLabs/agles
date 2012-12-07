@@ -1,4 +1,5 @@
 import os
+import socket
 import time
 
 import yaml
@@ -117,7 +118,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			return commit_id
 
 	def _on_response(self, body, message):
-		self.response = body
+		if body["type"] == "change finished":
+			self.change_status = body["contents"]["status"]
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
 	def _test_commands(self):
@@ -143,15 +145,16 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			events_broker = EventsBroker(connection)
 			events_broker.publish("repos", repo_id, "change added",
 				change_id=commit_id, merge_target="master")
-			with connection.Consumer(merge_queue, callbacks=[self._on_response]) as consumer:
-				consumer.consume()
-				self.response = None
+			with events_broker.subscribe("changes", callback=self._on_response) as consumer:
+				self.change_status = None
 				start_time = time.time()
-				while self.response is None:
+				consumer.consume()
+				while self.change_status is None:
 					try:
 						connection.drain_events(timeout=1)
 					except socket.timeout:
 						pass
 					assert time.time() - start_time < 120  # 120s timeout
+		assert_equals(BuildStatus.PASSED, self.change_status)
 		work_repo.git.pull()
 		assert_equals(commit_sha, work_repo.head.commit.hexsha)
