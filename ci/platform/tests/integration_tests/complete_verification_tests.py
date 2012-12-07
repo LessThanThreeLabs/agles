@@ -148,7 +148,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 				self.response = None
 				start_time = time.time()
 				while self.response is None:
-					connection.drain_events()
+					try:
+						connection.drain_events(timeout=1)
+					except socket.timeout:
+						pass
 					assert time.time() - start_time < 120  # 120s timeout
 		work_repo.git.pull()
 		assert_equals(commit_sha, work_repo.head.commit.hexsha)
