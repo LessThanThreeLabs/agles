@@ -6,7 +6,7 @@ from sqlalchemy import and_
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from util.permissions import RepositoryPermissions
+from util.permissions import RepositoryPermissions, InvalidPermissionsError
 from util.sql import to_dict
 
 class BuildOutputsReadHandler(ModelServerRpcHandler):
@@ -47,7 +47,7 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 
 	def get_build_console_ids(self, user_id, build_id):
 		if not self._has_permission(user_id, build_id):
-			return {}
+			raise InvalidPermissionsError("user_id: %d, build_id: %d" % (user_id, build_id))
 
 		build_console = database.schema.build_console
 
@@ -93,7 +93,8 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 
 	def get_console_output(self, user_id, build_console_id):
 		if not self._has_build_console_permission(user_id, build_console_id):
-			return {}
+			raise InvalidPermissionsError("user_id: %d, build_console_id: %d" %
+										  (user_id, build_console_id))
 
 		console_output = database.schema.console_output
 		build_console = database.schema.build_console

@@ -7,7 +7,7 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from shared.constants import VerificationUser
 from sqlalchemy.sql import select
 from util.sql import to_dict
-from util.permissions import RepositoryPermissions
+from util.permissions import RepositoryPermissions, InvalidPermissionsError
 
 
 class ReposReadHandler(ModelServerRpcHandler):
@@ -155,7 +155,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 
 		if not row or not RepositoryPermissions.has_permissions(
 				row[permission.c.permissions], RepositoryPermissions.R):
-			return {}
+			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 		else:
 			return to_dict(row, repo.columns, tablename=repo.name)
 

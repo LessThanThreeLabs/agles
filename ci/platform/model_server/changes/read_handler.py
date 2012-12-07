@@ -5,7 +5,7 @@ from sqlalchemy import and_, or_
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from util.sql import to_dict
-from util.permissions import has_repo_permissions
+from util.permissions import has_repo_permissions, InvalidPermissionsError
 
 class ChangesReadHandler(ModelServerRpcHandler):
 	def __init__(self):
@@ -39,6 +39,9 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			repo_id = row[repo.c.id]
 			if has_repo_permissions(user_id, repo_id):
 				return to_dict(row, change.columns, tablename=change.name)
+			else:
+				raise InvalidPermissionsError("user_id: %d, repo_id: %d"
+											  % (user_id, repo_id))
 		return {}
 
 	def get_primary_build(self, user_id, change_id):
@@ -60,6 +63,9 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			repo_id = row[repo.c.id]
 			if has_repo_permissions(user_id, repo_id):
 				return to_dict(row, build.columns, tablename=build.name)
+			else:
+				raise InvalidPermissionsError("user_id: %d, repo_id: %d"
+											  % (user_id, repo_id))
 		return {}
 
 	# TODO (jchu): This query is SLOW AS BALLS
