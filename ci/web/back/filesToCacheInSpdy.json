@@ -12,13 +12,14 @@
 
 			"/css/src/account/account.css",
 
+			"/css/src/visualElements/simpleMenu.css",
+
 			"/css/src/repository/content/admin/content/members/permissions/memberPermissions.css",
 			"/css/src/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.css",
 			"/css/src/repository/content/admin/content/members/repositoryAdminInviteMembersPanel.css",
 			"/css/src/repository/content/admin/content/members/repositoryAdminMembersPanel.css",
 			"/css/src/repository/content/admin/content/general/repositoryAdminGeneralPanel.css",
 			"/css/src/repository/content/admin/content/repositoryAdminContent.css",
-			"/css/src/repository/content/admin/menu/repositoryAdminMenu.css",
 			"/css/src/repository/content/admin/repositoryAdmin.css",
 
 			"/css/src/repository/content/change/change.css",
@@ -79,14 +80,15 @@
 
 			"/js/src/account/account.js",
 
+			"/js/src/visualElements/simpleMenuOption.js",
+			"/js/src/visualElements/simpleMenu.js",			
+
 			"/js/src/repository/content/admin/content/members/permissions/memberPermissions.js",
 			"/js/src/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.js",
 			"/js/src/repository/content/admin/content/members/repositoryAdminInviteMembersPanel.js",
 			"/js/src/repository/content/admin/content/members/repositoryAdminMembersPanel.js",
 			"/js/src/repository/content/admin/content/general/repositoryAdminGeneralPanel.js",
 			"/js/src/repository/content/admin/content/repositoryAdminContent.js",
-			"/js/src/repository/content/admin/menu/repositoryAdminMenuOption.js",
-			"/js/src/repository/content/admin/menu/repositoryAdminMenu.js",
 			"/js/src/repository/content/admin/repositoryAdmin.js",
 
 			"/js/src/repository/content/change/change.js",

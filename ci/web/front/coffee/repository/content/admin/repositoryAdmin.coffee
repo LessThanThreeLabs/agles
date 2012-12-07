@@ -4,18 +4,18 @@ window.RepositoryAdmin = {}
 class RepositoryAdmin.Model extends Backbone.Model
 
 	initialize: () =>
-		menuOptions = [new RepositoryAdminMenuOption('general', 'General'), 
-			new RepositoryAdminMenuOption('members', 'Members')]
+		menuOptions = [new SimpleMenuOption('general', 'General'), 
+			new SimpleMenuOption('members', 'Members')]
 
-		@repositoryAdminMenuModel = new RepositoryAdminMenu.Model
+		@simpleMenuModel = new SimpleMenu.Model
 			options: menuOptions
 			selectedOptionName: menuOptions[0].name
 
 		@repositoryAdminContentModel = new RepositoryAdminContent.Model()
-		@repositoryAdminContentModel.set 'mode', @repositoryAdminMenuModel.get 'selectedOptionName'
 
-		@repositoryAdminMenuModel.on 'change:selectedOptionName', ()  =>
-			@repositoryAdminContentModel.set 'mode', @repositoryAdminMenuModel.get 'selectedOptionName'
+		@simpleMenuModel.on 'change:selectedOptionName', ()  =>
+			@repositoryAdminContentModel.set 'mode', @simpleMenuModel.get 'selectedOptionName'
+		@repositoryAdminContentModel.set 'mode', @simpleMenuModel.get 'selectedOptionName'
 
 
 class RepositoryAdmin.View extends Backbone.View
@@ -25,23 +25,17 @@ class RepositoryAdmin.View extends Backbone.View
 
 
 	initialize: () =>
-		@repositoryAdminMenuView = new RepositoryAdminMenu.View model: @model.repositoryAdminMenuModel
+		@simpleMenuView = new SimpleMenu.View model: @model.simpleMenuModel
 		@repositoryAdminContentView = new RepositoryAdminContent.View model: @model.repositoryAdminContentModel
-
-		window.globalRouterModel.on 'change:repositoryId', (() =>
-			@model.set 'repositoryId', window.globalRouterModel.get 'repositoryId'
-			), @
 
 
 	onDispose: () =>
-		window.globalRouterModel.off null, null, @
-		
-		@repositoryAdminMenuView.dispose()
+		@simpleMenuView.dispose()
 		@repositoryAdminContentView.dispose()
 
 
 	render: () =>
 		@$el.html @html
-		@$el.append @repositoryAdminMenuView.render().el
+		@$el.append @simpleMenuView.render().el
 		@$el.append @repositoryAdminContentView.render().el
 		return @
