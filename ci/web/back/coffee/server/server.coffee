@@ -72,9 +72,6 @@ class Server
 				csrfToken: request.session.csrfToken
 				cssFiles: @cssFilesString
 				jsFiles: @jsFilesString
-				userEmail: null
-				userFirstName: null
-				userLastName: null
 
 			if request.session.userId?
 				@modelConnection.rpcConnection.users.read.get_user_from_id request.session.userId, (error, user) =>
