@@ -40,8 +40,7 @@ class GlobalRouterModel extends Backbone.Model
 		if @get('repositoryView')?
 			url += '/' + @get 'repositoryView'
 
-			if @get('changeId')?
-				assert.ok @get('repositoryView') is 'changes'
+			if @get('repositoryView') is 'changes' and @get('changeId')?
 				url += '/' + @get 'changeId'
 
 				if @get('changeView')?
