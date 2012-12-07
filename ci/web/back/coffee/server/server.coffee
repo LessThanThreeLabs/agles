@@ -71,6 +71,9 @@ class Server
 				csrfToken: request.session.csrfToken
 				cssFiles: @cssFilesString
 				jsFiles: @jsFilesString
+				userEmail: request.session.email
+				userFirstName: request.session.firstName
+				userLastName: request.session.lastName
 		else
 			response.send 'Some nice 404 page here'
 

@@ -8,6 +8,12 @@ class AccountHeaderOption.Model extends Backbone.Model
 		visible: false
 
 
+	updateInformation: () =>
+		@set 'firstName', globalAccount.get 'firstName'
+		@set 'lastName', globalAccount.get 'lastName'
+		@set 'visible', globalAccount.get('email')?
+
+
 class AccountHeaderOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'accountHeaderOption headerMenuOption'
@@ -16,23 +22,15 @@ class AccountHeaderOption.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change:firstName', @render, @
-		@model.on 'change:lastName', @render, @
-		@model.on 'change:visible', @_fixVisibility, @
+		@model.on 'change', @render, @
+		globalAccount.on 'change', @model.updateInformation, @
 
-		window.globalAccount.on 'change:firstName', (() =>
-			@model.set 'firstName', window.globalAccount.get 'firstName'
-			@model.set 'visible', true
-			), @
-		window.globalAccount.on 'change:lastName', (() =>
-			@model.set 'lastName', window.globalAccount.get 'lastName'
-			@model.set 'visible', true
-			), @
+		@model.updateInformation()
 
 
 	onDispose: () =>
 		@model.off null, null, @
-		window.globalAccount.off null, null, @
+		globalAccount.off null, null, @
 
 
 	render: () =>

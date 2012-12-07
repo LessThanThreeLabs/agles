@@ -23,9 +23,3 @@ class ResourceSocket
 		@socketio.sockets.on 'connection', (socket) =>
 			@configurer.configureConnection socket
 			@resourceRouter.bindToResources socket
-
-			if socket.session.userId?
-				socket.emit 'accountUpdate',
-					email: socket.session.email
-					firstName: socket.session.firstName
-					lastName: socket.session.lastName

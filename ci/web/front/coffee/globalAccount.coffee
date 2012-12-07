@@ -6,20 +6,21 @@ class GlobalAccount extends Backbone.Model
 
 
 	validate: (attributes) =>
-		if not attributes.email?
+		if not attributes.email? or attributes.email is ''
 			return new Error 'Invaild email: ' + attributes.email
 
-		if not attributes.firstName?
+		if not attributes.firstName? or attributes.firstName is ''
 			return new Error 'Invalid first name: ' + attributes.firstName
 			
-		if not attributes.lastName?
+		if not attributes.lastName? or attributes.lastName is ''
 			return new Error 'Invalid last name: ' + attributes.lastName
 
 		return
 
 
 window.globalAccount = new GlobalAccount()
-	
-socket.on 'accountUpdate', (data) ->
-	window.globalAccount.set data,
-		error: (model, error) => console.error error
+
+window.globalAccount.set
+	email: window.accountEmail
+	firstName: window.accountFirstName
+	lastName: window.accountLastName

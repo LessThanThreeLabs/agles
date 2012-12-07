@@ -10,6 +10,10 @@ class LoginHeaderOption.Model extends Backbone.Model
 		@loginPanelModel = new LoginPanel.Model()
 
 
+	updateInformation: () =>
+		@set 'visible', not globalAccount.get('email')?
+
+
 class LoginHeaderOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'loginHeaderOption headerMenuOption'
@@ -21,10 +25,9 @@ class LoginHeaderOption.View extends Backbone.View
 		@loginPanelView = new LoginPanel.View model: @model.loginPanelModel
 
 		@model.on 'change:visible', @_fixVisibility, @
+		globalAccount.on 'change', @model.updateInformation, @
 
-		window.globalAccount.on 'change:firstName', (() =>
-			@model.set 'visible', false
-			), @
+		@model.updateInformation()
 
 
 	onDispose: () =>
@@ -48,4 +51,4 @@ class LoginHeaderOption.View extends Backbone.View
 
 
 	_fixVisibility: () =>
-		@$el.toggle @model.get 'visible'
+		@$el.css 'display', if @model.get('visible') then 'inline-block' else 'none'
