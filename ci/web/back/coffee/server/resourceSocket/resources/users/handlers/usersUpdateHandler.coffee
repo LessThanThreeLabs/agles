@@ -24,8 +24,8 @@ class UsersUpdateHandler extends Handler
 			errors.firstName = @accountInformationValidator.getInvalidFirstNameString()
 		if not @accountInformationValidator.isValidLastName data.lastName 
 			errors.lastName = @accountInformationValidator.getInvalidLastNameString()
-		if not @accountInformationValidator.isValidEmail data.email
-			errors.email = @accountInformationValidator.getInvalidEmailString()
+		# if not @accountInformationValidator.isValidEmail data.email
+			# errors.email = @accountInformationValidator.getInvalidEmailString()
 
 		if Object.keys(errors).length != 0
 			callback errors
@@ -34,7 +34,7 @@ class UsersUpdateHandler extends Handler
 		args = {}
 		args.first_name = data.firstName if data.firstName?
 		args.last_name = data.lastName if data.lastName?
-		args.email = data.email if data.email?
+		# args.email = data.email if data.email?
 		args.password_hash = data.passwordHash if data.passwordHash?
 		args.salt = data.salt if data.salt?
 

@@ -5,7 +5,7 @@ class Account.Model extends Backbone.Model
 	defaults:
 		firstName: null
 		lastName: null
-		email: null
+		# email: null
 		sshKey: null
 		alias: null
 
@@ -15,7 +15,7 @@ class Account.Model extends Backbone.Model
 
 
 	updateAccountInformation: () =>
-		@set 'email', globalAccount.get 'email'
+		# @set 'email', globalAccount.get 'email'
 		@set 'firstName', globalAccount.get 'firstName'
 		@set 'lastName', globalAccount.get 'lastName'
 
@@ -44,6 +44,9 @@ class Account.View extends Backbone.View
 					<div class="prettyFormErrorText accountLastNameErrorText"></div>
 				</div>
 			</div>
+
+
+			<!--
 			<div class="prettyFromEmptyRow"></div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">
@@ -54,6 +57,9 @@ class Account.View extends Backbone.View
 					<div class="prettyFormErrorText accountEmailErrorText"></div>
 				</div>
 			</div>
+			-->
+
+				
 			<div class="prettyFormEmptyRow"></div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel"></div>
@@ -117,7 +123,7 @@ class Account.View extends Backbone.View
 	_syncViewToModel: () =>
 		@$el.find('.accountFirstNameField').val @model.get 'firstName'
 		@$el.find('.accountLastNameField').val @model.get 'lastName'
-		@$el.find('.accountEmailField').val @model.get 'email'
+		# @$el.find('.accountEmailField').val @model.get 'email'
 		@$el.find('.sshKeyField').val @model.get 'sshKey'
 		@$el.find('.sshKeyAliasField').val @model.get 'alias'
 
@@ -125,7 +131,7 @@ class Account.View extends Backbone.View
 	_handleFormEntryChange: () =>
 		@model.set 'firstName', @$el.find('.accountFirstNameField').val()
 		@model.set 'lastName', @$el.find('.accountLastNameField').val()
-		@model.set 'email', @$el.find('.accountEmailField').val()
+		# @model.set 'email', @$el.find('.accountEmailField').val()
 		@model.set 'sshKey', @$el.find('.sshKeyField').val()
 		@model.set 'alias', @$el.find('.sshKeyAliasField').val()
 
@@ -136,12 +142,12 @@ class Account.View extends Backbone.View
 		
 		firstName = @model.get 'firstName'
 		lastName = @model.get 'lastName'
-		email = @model.get 'email'
+		# email = @model.get 'email'
 
 		args = 
 			firstName: firstName
 			lastName: lastName
-			email: email
+			# email: email
 
 		socket.emit 'users:update', args, (errors, result) =>
 			if errors?
@@ -166,7 +172,7 @@ class Account.View extends Backbone.View
 	_displayErrors: (errors = {}) =>
 		firstNameError = @$el.find('.accountFirstNameErrorText')
 		lastNameError = @$el.find('.accountLastNameErrorText')
-		emailError = @$el.find('.accountEmailErrorText')
+		# emailError = @$el.find('.accountEmailErrorText')
 		userUpdateError = @$el.find('.userUpdateErrorText')
 		sshKeyAliasError = @$el.find('.sshKeyAliasErrorText')
 		sshKeyError = @$el.find('.sshKeyErrorText')
@@ -174,7 +180,7 @@ class Account.View extends Backbone.View
 
 		@_displayErrorForField firstNameError, errors.firstName
 		@_displayErrorForField lastNameError, errors.lastName
-		@_displayErrorForField emailError, errors.email
+		# @_displayErrorForField emailError, errors.email
 		@_displayErrorForField userUpdateError, errors.userUpdate
 		@_displayErrorForField sshKeyAliasError, errors.alias
 		@_displayErrorForField sshKeyError, errors.sshKey
