@@ -53,6 +53,8 @@ class RepositoryHeaderOption.View extends Backbone.View
 
 		globalAccount.on 'change', @model.fetchRepositories, @
 
+		@model.fetchRepositories() if globalAccount.get 'email'
+
 
 	onDispose: () =>
 		@model.off null, null, @
