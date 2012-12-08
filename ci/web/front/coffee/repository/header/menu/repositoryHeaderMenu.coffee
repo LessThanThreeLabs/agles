@@ -104,11 +104,10 @@ class RepositoryHeaderMenu.View extends Backbone.View
 	_handleClick: (event) =>
 		optionName = $(event.target).attr 'optionName'
 		assert.ok optionName?
-		@model.set 'selectedMenuOptionName', optionName
+		globalRouterModel.set 'repositoryView', optionName
 
 
 	_handleSelectedMenuOption: () =>
 		@$el.find('.repositoryMenuOption').removeClass 'selected'
-
 		optionName = globalRouterModel.get 'repositoryView'
 		@$el.find(".repositoryMenuOption[optionName='#{optionName}']").addClass 'selected'
