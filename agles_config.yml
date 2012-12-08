@@ -53,6 +53,7 @@ test:
   - platform:
       path: ci/platform
       script: nosetests --tc=fakeVerifier:True
+      timeout: 45
   - web:
       path: ci/web/back
       script: npm test

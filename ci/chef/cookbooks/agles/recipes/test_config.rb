@@ -6,9 +6,11 @@ def create_testscript(name, path, validated_commands)
 		owner node[:agles][:user]
 		mode "0755"
 		variables(
+			:name => name,
 			:user => node[:agles][:user],
 			:path => path,
-			:validated_commands => validated_commands
+			:validated_commands => validated_commands,
+			:timeout => timeout
 		)
 	end
 end
@@ -18,14 +20,15 @@ def handle_tests(tests)
 		name = test.keys.first
 		config = test.values.first
 		path = config["path"]
+		timeout = (config["timeout"] or 120)
 		commands = config["script"]
 		if not commands.is_a? Array
 			commands = [commands]
 		end
 		commands.each do |command|
-			command.gsub("\n", "\\n")
+			command.gsub("\n", "\\n").gsub("\"", "\\\"")
 		end
-		create_testscript(name, path, commands)
+		create_testscript(name, path, commands, timeout)
 	end
 end
 

@@ -1,7 +1,13 @@
 #!/bin/bash --login
 source /home/<%= @user %>/scripts/setup.sh
 cd /home/<%= @user %>/source/<%= @path %>
+timeout <%= @timeout %> bash -c "
 <% for @command in @validated_commands %>
-/home/<%= @user %>/scripts/validator.sh "<%= @command %>" &&\
+/home/<%= @user %>/scripts/validator.sh <%= @command %> &&
 <% end %>
-true
+true"
+r=$?
+if [ $r -eq 124 ]
+	then echo "<%= @name %> timed out after <%= @timeout %> seconds"
+fi
+exit $r
