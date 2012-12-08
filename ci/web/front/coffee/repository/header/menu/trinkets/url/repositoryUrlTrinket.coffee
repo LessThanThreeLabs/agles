@@ -16,9 +16,9 @@ class RepositoryUrlTrinket.Model extends Backbone.Model
 			args:
 				repositoryId: globalRouterModel.get 'repositoryId'
 
-		socket.emit 'repos:read', requestData, (errors, url) =>
-			if errors?
-				console.error "Could not read git url"
+		socket.emit 'repos:read', requestData, (error, url) =>
+			if error?
+				console.error error
 			else
 				@set 'url', url
 

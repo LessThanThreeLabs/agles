@@ -9,7 +9,6 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		'admin': new RepositoryHeaderMenuOption 'admin', 'Admin', '/img/icons/admin.svg'
 	defaults:
 		menuOptions: []
-		selectedMenuOptionName: null
 		url: ''
 
 
@@ -17,10 +16,6 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		@repositoryUrlTrinketModel = new RepositoryUrlTrinket.Model()
 		@router = new Backbone.Router()
 
-		@on 'change:selectedMenuOptionName', () =>
-			if @get('selectedMenuOptionName')?
-				globalRouterModel.set 'repositoryView', @get('selectedMenuOptionName'),
-					error: (model, error) => console.error error
 		@on 'change:url', () =>
 			@repositoryUrlTrinketModel.set 'url', @get 'url'
 
@@ -34,7 +29,7 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 			method: 'getMenuOptions'
 			args:
 				repositoryId: globalRouterModel.get 'repositoryId'
-
+		
 		socket.emit 'repos:read', requestData, (error, menuOptions) =>
 			if error?
 				console.error error
@@ -49,8 +44,8 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 			@set 'menuOptions', allowedOptions,
 				error: (model, error) => console.error error
 
-			if not @get('selectedMenuOptionName')?
-				@set 'selectedMenuOptionName', menuOptions.default,
+			if not globalRouterModel.get('repositoryView')? 
+				globalRouterModel.set 'repositoryView', menuOptions.default,
 					error: (model, error) => console.error error
 
 
@@ -78,9 +73,9 @@ class RepositoryHeaderMenu.View extends Backbone.View
 		@repositoryUrlTrinketView = new RepositoryUrlTrinket.View model: @model.repositoryUrlTrinketModel
 
 		@model.on 'change:menuOptions', @render, @
-		@model.on 'change:selectedMenuOptionName', @_handleSelectedMenuOption, @
 
 		globalRouterModel.on 'change:repositoryId', @model.fetchAllowedMenuOptions, @
+		globalRouterModel.on 'change:repositoryView', @_handleSelectedMenuOption, @
 
 		@model.fetchAllowedMenuOptions()
 
@@ -115,5 +110,5 @@ class RepositoryHeaderMenu.View extends Backbone.View
 	_handleSelectedMenuOption: () =>
 		@$el.find('.repositoryMenuOption').removeClass 'selected'
 
-		optionName = @model.get 'selectedMenuOptionName'
+		optionName = globalRouterModel.get 'repositoryView'
 		@$el.find(".repositoryMenuOption[optionName='#{optionName}']").addClass 'selected'

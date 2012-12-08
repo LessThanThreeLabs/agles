@@ -13,12 +13,12 @@ class RepositoriesReadHandler extends Handler
 		userId = socket.session.userId
 		
 		if not userId?
-			callback "404"
+			callback '404'
 			return
 
 		@modelRpcConnection.repos.read.get_repo_from_id userId, data.id, (error, repo) =>
 			if error?
-				callback "Could not read repo"
+				callback 'Could not read repo'
 			else
 				callback null, repo
 
@@ -28,7 +28,7 @@ class RepositoriesReadHandler extends Handler
 
 		userId = socket.session.userId
 		if not userId?
-			callback "No user id"
+			callback 'No user id'
 		else
 			@modelRpcConnection.repos.read.get_clone_url userId, args.repositoryId, (error, url) =>
 				if error?
