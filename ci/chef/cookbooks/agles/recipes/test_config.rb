@@ -1,6 +1,6 @@
 include_recipe "agles"
 
-def create_testscript(name, path, validated_commands)
+def create_testscript(name, path, validated_commands, timeout)
 	template "/home/#{node[:agles][:user]}/scripts/test/#{name}.sh" do
 		source "shell_command.erb"
 		owner node[:agles][:user]
