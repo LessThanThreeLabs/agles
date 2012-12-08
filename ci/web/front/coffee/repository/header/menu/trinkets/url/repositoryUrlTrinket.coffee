@@ -6,6 +6,23 @@ class RepositoryUrlTrinket.Model extends Backbone.Model
 		url: ''
 
 
+	fetchRepositoryCloneUrl: () =>
+		@clear()
+
+		return if not globalRouterModel.get('repositoryId')?
+
+		requestData =
+			method: 'getCloneUrl'
+			args:
+				repositoryId: globalRouterModel.get 'repositoryId'
+
+		socket.emit 'repos:read', requestData, (errors, url) =>
+			if errors?
+				console.error "Could not read git url"
+			else
+				@set 'url', url
+
+
 	validate: (attributes) =>
 		if not attributes.url? or attributes.url.length is 0
 			return new Error 'Invalid repository url'
@@ -23,6 +40,8 @@ class RepositoryUrlTrinket.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change:url', @render, @
+		globalRouterModel.on 'change:repositoryId', @model.fetchRepositoryCloneUrl, @
+		@model.fetchRepositoryCloneUrl()
 
 
 	onDispose: () =>

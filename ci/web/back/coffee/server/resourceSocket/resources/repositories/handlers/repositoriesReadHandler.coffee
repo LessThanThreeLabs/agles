@@ -23,6 +23,20 @@ class RepositoriesReadHandler extends Handler
 				callback null, repo
 
 
+	getCloneUrl: (socket, args, callback) =>
+		assert.ok args.repositoryId?
+
+		userId = socket.session.userId
+		if not userId?
+			callback "No user id"
+		else
+			@modelRpcConnection.repos.read.get_clone_url userId, args.repositoryId, (error, url) =>
+				if error?
+					callback error
+				else
+					callback null, url
+
+
 	writableRepositories: (socket, args, callback) =>
 		userId = socket.session.userId
 		if not userId?

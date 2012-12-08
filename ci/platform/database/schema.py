@@ -24,9 +24,7 @@ media = Table('media', metadata,
 uri_repo_map = Table('uri_repo_map', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('uri', String, nullable=False, unique=True),
-	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
-
-	UniqueConstraint('uri', 'repo_id')
+	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False, unique=True),
 )
 
 repo = Table('repo', metadata,

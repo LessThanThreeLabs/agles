@@ -139,7 +139,8 @@ class ReposReadHandler(ModelServerRpcHandler):
 		return map(lambda row: to_dict(row, repo.columns, tablename=repo.name),
 			visible_rows)
 
-	def get_repo_from_id(self, user_id, repo_id):
+	# TODO: Once repo hash is removed, clean all this up
+	def _get_repo_joined_permission_row(self, user_id, repo_id):
 		repo = database.schema.repo
 		permission = database.schema.permission
 
@@ -151,17 +152,36 @@ class ReposReadHandler(ModelServerRpcHandler):
 		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row = sqlconn.execute(query).first()
+			return sqlconn.execute(query).first()
 
+	def get_repo_from_id(self, user_id, repo_id):
+		repo = database.schema.repo
+		permission = database.schema.permission
+
+		row = self._get_repo_joined_permission_row(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(
 				row[permission.c.permissions], RepositoryPermissions.R):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
-		else:
-			return to_dict(row, repo.columns, tablename=repo.name)
+		return to_dict(row, repo.columns, tablename=repo.name)
 
-###############
-# Github Integration
-###############
+	def get_clone_url(self, user_id, repo_id):
+		permission = database.schema.permission
+		uri_repo_map = database.schema.uri_repo_map
+
+		row = self._get_repo_joined_permission_row(user_id, repo_id)
+		if not row or not RepositoryPermissions.has_permissions(
+				row[permission.c.permissions], RepositoryPermissions.R):
+			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+
+		uri_query = uri_repo_map.select().where(uri_repo_map.c.repo_id==repo_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(uri_query).first()
+			assert row is not None
+			return row[uri_repo_map.c.uri]
+
+######################
+# Github Integration #
+######################
 
 	def get_corresponding_github_repo_url(self, repo_hash):
 		repo = database.schema.repo
