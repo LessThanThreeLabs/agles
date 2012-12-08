@@ -46,7 +46,7 @@ class RepositoryUrlTrinket.View extends Backbone.View
 
 	onDispose: () =>
 		@model.off null, null, @
-
+		globalRouterModel.off null, null, @
 
 	render: () =>
 		@$el.html @template url: @model.get 'url'
