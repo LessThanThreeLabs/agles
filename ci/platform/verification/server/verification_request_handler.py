@@ -71,14 +71,14 @@ class VerificationRequestHandler(InfiniteWorker):
 		called with a return value after verification.
 		Sends a message denoting the return value and acks"""
 		def default_verify_callback(results, cleanup_function=lambda: None):
+			status = BuildStatus.PASSED if results == VerificationResult.SUCCESS else BuildStatus.FAILED
+			builds_update_rpc.mark_build_finished(build_id, status)
 			with Connection(connection_info).Producer(serializer='msgpack') as producer:
 				producer.publish((build_id, results),
 					exchange=verification_results_queue.exchange,
 					routing_key=verification_results_queue.routing_key,
 					mandatory=True,
 				)
-			status = BuildStatus.PASSED if results == VerificationResult.SUCCESS else BuildStatus.FAILED
-			builds_update_rpc.mark_build_finished(build_id, status)
 			cleanup_function()
 		return default_verify_callback
 
