@@ -110,7 +110,7 @@ class SchemaDataGenerator(object):
 
 
 		self._grantall(self.admin_id, repo_hashes, RepositoryPermissions.RWA)
-		self._grantall(self.user_id, repo_hashes, RepositoryPermissions.R)
+		self._grantall(self.user_id, repo_hashes[:1], RepositoryPermissions.R)
 
 	def _grantall(self, user_id, repo_hashes, permissions):
 		insert_values = []
