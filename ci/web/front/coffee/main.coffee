@@ -9,6 +9,7 @@ class Main.Model extends Backbone.Model
 		@accountModel = new Account.Model()
 		@repositoryModel = new Repository.Model()
 		@createRepositoryModel = new CreateRepository.Model()
+		@invalidRepositoryStateModel = new InvalidRepositoryState.Model()
 
 
 class Main.View extends Backbone.View
@@ -56,6 +57,9 @@ class Main.View extends Backbone.View
 				@$el.find('.contentContainer').html @currentView.render().el
 			when 'createRepository'
 				@currentView = new CreateRepository.View model: @model.createRepositoryModel
+				@$el.find('.contentContainer').html @currentView.render().el
+			when 'invalidRepositoryState'
+				@currentView = new InvalidRepositoryState.View model: @model.invalidRepositoryStateModel
 				@$el.find('.contentContainer').html @currentView.render().el
 			else	
 				@currentView = null

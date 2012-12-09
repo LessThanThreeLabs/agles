@@ -40,6 +40,7 @@
 			"/css/src/repository/header/repositoryHeaderBasicInformation.css",
 			"/css/src/repository/header/repositoryHeader.css",
 
+			"/css/src/repository/invalid/invalidRepositoryState.css",
 			"/css/src/repository/create/createRepository.css",
 			"/css/src/repository/repository.css",
 
@@ -113,6 +114,7 @@
 			"/js/src/repository/header/repositoryHeaderBasicInformation.js",
 			"/js/src/repository/header/repositoryHeader.js",
 
+			"/js/src/repository/invalid/invalidRepositoryState.js",
 			"/js/src/repository/create/createRepository.js",
 			"/js/src/repository/repository.js",
 

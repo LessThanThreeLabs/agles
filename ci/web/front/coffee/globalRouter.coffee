@@ -1,5 +1,5 @@
 class GlobalRouterModel extends Backbone.Model
-	VALID_VIEWS: ['welcome', 'account', 'repository', 'createRepository']
+	VALID_VIEWS: ['welcome', 'account', 'repository', 'createRepository', 'invalidRepositoryState']
 	VALID_REPOSITORY_VIEWS: ['source', 'changes', 'settings', 'admin']
 	VALID_CHANGE_VIEWS: ['information', 'compilation', 'test']
 
@@ -27,6 +27,8 @@ class GlobalRouterModel extends Backbone.Model
 				@_navigateToRepository()
 			when 'createRepository'
 				globalRouter.navigate '/create/repository', trigger: true
+			when 'invalidRepositoryState'
+				globalRouter.navigate '/repository/invalid', trigger: true
 			else
 				console.error 'Unaccounted for view ' + @get 'view'
 
@@ -74,12 +76,14 @@ class GlobalRouter extends Backbone.Router
 
 		'account': 'loadAccount'
 
+		'repository/invalid': 'loadInvalidRepositoryState'
+
 		'repository/:repositoryId': 'loadRepository'
 		'repository/:repositoryId/:repositoryView': 'loadRepository'
 		'repository/:repositoryId/changes/:changeId': 'loadRepositoryChange'
 		'repository/:repositoryId/changes/:changeId/:changeView': 'loadRepositoryChange'
 
-		'create/repository': 'createRepository'
+		'create/repository': 'loadCreateRepository'
 
 
 	loadIndex: () =>
@@ -126,9 +130,20 @@ class GlobalRouter extends Backbone.Router
 			error: (model, error) => console.error error
 
 
-	createRepository: () =>
+	loadCreateRepository: () =>
 		attributesToSet =
 			view: 'createRepository'
+			repositoryId: null
+			repositoryView: null
+			changeId: null
+			changeView: null
+		globalRouterModel.set attributesToSet, 
+			error: (model, error) => console.error error
+
+
+	loadInvalidRepositoryState: () =>
+		attributesToSet =
+			view: 'invalidRepositoryState'
 			repositoryId: null
 			repositoryView: null
 			changeId: null
