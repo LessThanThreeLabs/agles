@@ -18,6 +18,7 @@ class RepositoryUrlTrinket.Model extends Backbone.Model
 
 		socket.emit 'repos:read', requestData, (error, url) =>
 			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
 			else
 				@set 'url', url

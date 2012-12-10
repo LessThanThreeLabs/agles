@@ -32,21 +32,25 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		
 		socket.emit 'repos:read', requestData, (error, menuOptions) =>
 			if error?
-				console.error error
-				return
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
+				console.error
+			else
+				@_processAllowedMenuOptions menuOptions
 
-			assert.ok menuOptions.default in menuOptions.options
 
-			allowedOptions = menuOptions.options.map (option) =>
-				assert.ok @MENU_OPTIONS[option]?
-				return @MENU_OPTIONS[option]
+	_processAllowedMenuOptions: (menuOptions) =>
+		assert.ok menuOptions.default in menuOptions.options
 
-			@set 'menuOptions', allowedOptions,
+		allowedOptions = menuOptions.options.map (option) =>
+			assert.ok @MENU_OPTIONS[option]?
+			return @MENU_OPTIONS[option]
+
+		@set 'menuOptions', allowedOptions,
+			error: (model, error) => console.error error
+
+		if not globalRouterModel.get('repositoryView')? 
+			globalRouterModel.set 'repositoryView', menuOptions.default,
 				error: (model, error) => console.error error
-
-			if not globalRouterModel.get('repositoryView')? 
-				globalRouterModel.set 'repositoryView', menuOptions.default,
-					error: (model, error) => console.error error
 
 
 	validate: (attributes) =>

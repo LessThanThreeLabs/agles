@@ -21,16 +21,20 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 				changeId: window.globalRouterModel.get('changeId')
 		socket.emit 'buildOutputs:read', requestData, (error, buildOutputIds) =>
 			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
-				return
+			else
+				@_processBuildOutputIds buildOutputIds
+			
 
-			consoleOutputModels = []
-			for buildOutputTypeKey, buildOutputTypeValue of buildOutputIds
-				for buildOutputId in buildOutputTypeValue
-					consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
+	_processBuildOutputIds: (buildOutputIds) =>
+		consoleOutputModels = []
+		for buildOutputTypeKey, buildOutputTypeValue of buildOutputIds
+			for buildOutputId in buildOutputTypeValue
+				consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
 
-			@consoleTextOutputModels.reset consoleOutputModels,
-				error: (model, error) => console.error error
+		@consoleTextOutputModels.reset consoleOutputModels,
+			error: (model, error) => console.error error
 
 
 class ConsoleCompilationOutput.View extends Backbone.View

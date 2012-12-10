@@ -27,8 +27,11 @@ class RepositoryHeader.Model extends Backbone.Model
 
 		requestData = id: globalRouterModel.get 'repositoryId'
 		socket.emit 'repos:read', requestData, (error, data) =>
-			console.error error if error?
-			@set data if data?
+			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
+				console.error error
+			else
+				@set data
 
 
 	validate: (attributes) =>

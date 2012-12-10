@@ -21,11 +21,11 @@ class ConsoleTextOutput.Model extends Backbone.Model
 	fetchOutput: () =>
 		socket.emit 'buildOutputs:read', id: @get('id'), (error, result) =>
 			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
-				return
-
-			@set 'title', result.title
-			@_addLineModels result.consoleOutput
+			else
+				@set 'title', result.title
+				@_addLineModels result.consoleOutput
 
 
 	onUpdate: (data) =>

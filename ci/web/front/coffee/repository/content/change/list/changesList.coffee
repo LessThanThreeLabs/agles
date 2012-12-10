@@ -71,6 +71,7 @@ class ChangesList.Model extends Backbone.Model
 		changesQuery = new ChangesQuery globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
 		@changesFetcher.runQuery changesQuery, queuePolicy, (error, result) =>
 			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
 				return
 
