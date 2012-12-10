@@ -7,6 +7,7 @@ class ConsoleTextOutput.Model extends Backbone.Model
 	defaults:
 		id: null
 		title: null
+		expanded: false
 
 
 	initialize: () =>
@@ -52,14 +53,23 @@ class ConsoleTextOutput.Model extends Backbone.Model
 		@consoleTextOutputLineModels.reset lineModels
 
 
+	toggleExpanded: () =>
+		@set 'expanded', not @get 'expanded'
+
+
 class ConsoleTextOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleTextOutput'
-	html: '<div class="title"></div><div class="output"></div>'
+	html: '<div class="title"></div>
+		<div class="outputSlidingWindow">
+			<div class="output"></div>
+		</div>'
+	events: 'click': '_handleClick'
 
 
 	initialize: () =>
 		@model.on 'change:title', @_updateTitle, @
+		@model.on 'change:expanded', @_updateExpandedState, @
 		@model.consoleTextOutputLineModels.on 'add', @_handleAddLine, @
 		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText, @
 		
@@ -79,8 +89,21 @@ class ConsoleTextOutput.View extends Backbone.View
 		return @
 
 
+	_handleClick: (event) =>
+		@model.toggleExpanded()
+
+
 	_updateTitle: () =>
 		@$el.find('.title').html @model.get 'title'
+
+
+	_updateExpandedState: () =>
+		if @model.get 'expanded'
+			@$('.outputSlidingWindow').height @$('.output').height()
+			# setTimeout (() => @$('.outputSlidingWindow').height 'auto'), 1000
+		else
+			@$('.outputSlidingWindow').height 0
+
 
 
 	_initializeOutputText: () =>
