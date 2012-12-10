@@ -12,7 +12,7 @@ class RepositoriesReadHandler extends Handler
 	default: (socket, data, callback) =>
 		assert.ok data.id?
 		userId = socket.session.userId
-		
+
 		if not userId?
 			callback 403
 			return
@@ -72,7 +72,40 @@ class RepositoriesReadHandler extends Handler
 				callback null, menuOptions
 
 
+	getMembersWithPermissions: (socket, args, callback) =>
+		assert.ok socket.session.userId?
+		assert.ok args.repositoryId?
+
+		userId = socket.session.userId
+		@modelRpcConnection.repos.read.get_members_with_permissions userId, args.repositoryId,
+			(error, users) =>
+				if error?
+					callback error
+				else
+					callback null, @_filterPermitted((@_sanitizeUser user for user in users))
+
+
 	_sanitize: (repository) =>
 		id: repository.id
 		name: repository.name
 		defaultPermissions: repository.defaultPermissions
+
+
+	_sanitizeUser: (user) =>
+		id: user.id
+		firstName: user.first_name
+		lastName: user.last_name
+		email: user.email
+		permissions: @_toPermissionString user.permissions
+
+
+	_toPermissionString: (permissions) =>
+		switch permissions
+			when 1 then "r"
+			when 3 then "r/w"
+			when 7 then "r/w/a"
+			else ""
+
+
+	_filterPermitted: (users) =>
+		(user for user in users when user.permissions.length)

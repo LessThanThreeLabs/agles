@@ -39,4 +39,4 @@ module.exports = class Resource
 				callback 'Class #{handler} has no method #{data.method}'
 		else
 			handler.default socket, data, callback
-			
+

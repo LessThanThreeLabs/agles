@@ -10,32 +10,21 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 			return memberPermissionsModel.get 'email'
 
 
-	fetchMembersIfNecassary: () =>
-		return if @memberPermissionsModels.length isnt 0
+	fetchMembersIfNecessary: () =>
+		return if not globalRouterModel.get('repositoryId')?
 
-		console.log '>> need to fetch members'
+		requestData =
+			method: 'getMembersWithPermissions'
+			args:
+				repositoryId: globalRouterModel.get 'repositoryId'
 
-		member1 =
-			email: 'cc.fake@email.com'
-			firstName: 'fake'
-			lastName: 'email'
-			permissions: 'r'
-		member2 =
-			email: 'aa.fake@email2.com'
-			firstName: 'faker'
-			lastName: 'email'
-			permissions: 'r/w'
-		member3 =
-			email: 'bb.fake@email2.com'
-			firstName: 'faker'
-			lastName: 'email'
-			permissions: 'r/w'
-
-		@memberPermissionsModels.add [member1, member2]
-
-		setTimeout (() =>
-				@memberPermissionsModels.add [member3]			
-			), 1000
+		socket.emit 'repos:read', requestData, (errors, users) =>
+			if errors?
+				console.log errors
+				console.error "Could not read member permissions"
+			else
+				@memberPermissionsModels.reset()
+				@memberPermissionsModels.add users
 
 
 class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
@@ -60,6 +49,10 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 			@_insertMemberAtIndex memberPermissionView.render().el, options.index
 			), @
 		@model.memberPermissionsModels.on 'reset', (() => @$el.html @html), @
+		@model.memberPermissionsModels.on 'remove', @render, @
+		@model.memberPermissionsModels.on 'removeMember', ((memberPermissionsModel) =>
+			console.log "hello"
+			@model.memberPermissionsModels.remove memberPermissionsModel), @
 
 
 	onDispose: () =>
@@ -69,7 +62,7 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 	render: () =>
 		@$el.html @html
 		@_addCurrentMembers()
-		@model.fetchMembersIfNecassary()
+		@model.fetchMembersIfNecessary()
 		return @
 
 

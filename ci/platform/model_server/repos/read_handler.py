@@ -179,6 +179,22 @@ class ReposReadHandler(ModelServerRpcHandler):
 			assert row is not None
 			return row[uri_repo_map.c.uri]
 
+	def get_members_with_permissions(self, user_id, repo_id):
+		repo = database.schema.repo
+		user = database.schema.user
+		permission = database.schema.permission
+
+		row = self._get_repo_joined_permission_row(user_id, repo_id)
+		if not row or not RepositoryPermissions.has_permissions(
+				row[permission.c.permissions], RepositoryPermissions.RWA):
+			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+		repo_hash = row[repo.c.hash]
+
+		query = user.join(permission).select().apply_labels().where(permission.c.repo_hash==repo_hash)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			return [dict(to_dict(row, user.columns, tablename=user.name).items() + [(permission.c.permissions.name, row[permission.c.permissions])])
+				for row in sqlconn.execute(query)]
+
 ######################
 # Github Integration #
 ######################

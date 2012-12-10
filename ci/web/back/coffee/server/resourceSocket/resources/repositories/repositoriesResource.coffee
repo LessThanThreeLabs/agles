@@ -3,19 +3,25 @@ assert = require 'assert'
 Resource = require '../resource'
 
 RepositoriesReadHandler = require './handlers/repositoriesReadHandler'
+RepositoriesUpdateHandler = require './handlers/RepositoriesUpdateHandler'
 
 exports.create = (configurationParams, stores, modelConnection) ->
 	readHandler = RepositoriesReadHandler.create modelConnection.rpcConnection
-	return new RepositoriesResource configurationParams, stores, modelConnection, readHandler
+	updateHandler = RepositoriesUpdateHandler.create modelConnection.rpcConnection
+	return new RepositoriesResource configurationParams, stores, modelConnection, readHandler, updateHandler
 
 
 class RepositoriesResource extends Resource
-	constructor: (configurationParams, stores, modelConnection, @readHandler) ->
+	constructor: (configurationParams, stores, modelConnection, @readHandler, @updateHandler) ->
 		super configurationParams, stores, modelConnection
 
 
 	read: (socket, data, callback) =>
 		@_call @readHandler, socket, data, callback
+
+
+	update: (socket, data, callback) =>
+		@_call @updateHandler, socket, data, callback
 
 
 	subscribe: (socket, data, callback) =>

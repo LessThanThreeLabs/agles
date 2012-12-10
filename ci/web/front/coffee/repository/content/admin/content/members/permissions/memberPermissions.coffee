@@ -53,9 +53,37 @@ class MemberPermissions.View extends Backbone.View
 
 
 	_handlePermissionsChange: (event) =>
+		email = @model.get 'email'
 		permissions = $(event.target).val()
-		console.log '>> need to change member permissions to: ' + permissions
+
+		requestData =
+			method: 'changeMemberPermissions'
+			args:
+				repositoryId: globalRouterModel.get 'repositoryId'
+				email: email
+				permissions: permissions
+
+		socket.emit 'repos:update', requestData, (errors, result) =>
+			if errors?
+				console.log errors
+				console.error "Could not change member permissions"
+				@_selectCorrectPermissionsRadio()
+			else
+				@model.set 'permissions', permissions
 
 
 	_handleRemoveMember: () =>
-		console.log '>> need to remove member'
+		email = @model.get 'email'
+
+		requestData =
+			method: 'removeMember'
+			args:
+				repositoryId: globalRouterModel.get 'repositoryId'
+				email: email
+
+		socket.emit 'repos:update', requestData, (errors, result) =>
+			if errors?
+				console.log errors
+				console.error "Could not remove member"
+			else
+				@trigger 'removeMember'
