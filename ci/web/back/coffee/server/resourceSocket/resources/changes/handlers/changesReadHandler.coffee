@@ -26,22 +26,6 @@ class ChangesReadHandler extends Handler
 				callback null, @_sanitizeChange changeData
 
 
-	getPrimaryBuild: (socket, args, callback) =>
-		assert.ok args.id?
-		userId = socket.session.userId
-
-		if not userId?
-			callback 403
-			return
-
-		@modelRpcConnection.changes.read.get_primary_build userId, args.id, (error, build) =>
-			if error?
-				if error.type is 'InvalidPermissionsError' then callback 403
-				else callback 'unable to get primary build'
-			else
-				callback null, @_sanitizeBuild build
-
-
 	range: (socket, args, callback) =>
 		assert.ok args.repositoryId?
 		assert.ok args.start?
