@@ -3,7 +3,7 @@ assert = require 'assert'
 Resource = require '../resource'
 
 RepositoriesReadHandler = require './handlers/repositoriesReadHandler'
-RepositoriesUpdateHandler = require './handlers/RepositoriesUpdateHandler'
+RepositoriesUpdateHandler = require './handlers/repositoriesUpdateHandler'
 
 exports.create = (configurationParams, stores, modelConnection) ->
 	readHandler = RepositoriesReadHandler.create modelConnection.rpcConnection
