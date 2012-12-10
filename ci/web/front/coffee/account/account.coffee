@@ -87,7 +87,7 @@ class Account.View extends Backbone.View
 					Key
 				</div>
 				<div class="prettyFormValue">
-					<textarea type="text" class="sshKeyField" placeholder="key" maxlength=256></textarea>
+					<textarea type="text" class="sshKeyField" placeholder="key" maxlength=415></textarea>
 					<div class="prettyFormErrorText sshKeyErrorText"></div>
 				</div>
 			</div>
