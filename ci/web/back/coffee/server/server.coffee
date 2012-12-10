@@ -65,34 +65,25 @@ class Server
 
 
 	_handleIndexRequest: (request, response) =>
-		if @_isAllowedToVisitRoute request
-			@spdyCache.pushFiles request, response
+		@spdyCache.pushFiles request, response
 
-			templateValues =
-				csrfToken: request.session.csrfToken
-				cssFiles: @cssFilesString
-				jsFiles: @jsFilesString
+		templateValues =
+			csrfToken: request.session.csrfToken
+			cssFiles: @cssFilesString
+			jsFiles: @jsFilesString
 
-			if request.session.userId?
-				@modelConnection.rpcConnection.users.read.get_user_from_id request.session.userId, (error, user) =>
-					if error?
-						console.error "UserId: #{request.session.userId} doesn't exist."
-					else
-						templateValues.userEmail = user.email
-						templateValues.userFirstName = user.first_name
-						templateValues.userLastName = user.last_name
+		if request.session.userId?
+			@modelConnection.rpcConnection.users.read.get_user_from_id request.session.userId, (error, user) =>
+				if error?
+					console.error "UserId #{request.session.userId} doesn't exist: " + error
+				else
+					templateValues.userEmail = user.email
+					templateValues.userFirstName = user.first_name
+					templateValues.userLastName = user.last_name
 
-					response.render 'index', templateValues
-			else
 				response.render 'index', templateValues
 		else
-			response.send 'Some nice 404 page here'
-
-
-	_isAllowedToVisitRoute: (request) =>
-		console.log 'server.coffee -- logic needs to be more comprehensive here...'
-		console.log '  might also want to remove this if we can better handle invalid states in client'
-		return request.url is '/' or request.session.userId?
+			response.render 'index', templateValues
 
 
 	_handleVerifyAccountRequest: (request, response) =>

@@ -57,9 +57,12 @@ class RepositoriesReadHandler extends Handler
 
 
 	getMenuOptions: (socket, args, callback) =>
-		assert.ok socket.session.userId?
 		assert.ok args.repositoryId?
 		userId = socket.session.userId
+
+		if not userId?
+			callback 403
+			return
 
 		@modelRpcConnection.repos.read.get_visible_repo_menuoptions userId, args.repositoryId, (error, menuOptions) =>
 			if error?
