@@ -77,7 +77,8 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 
 		if not has_repo_permissions(user_id, repo_id):
-			return []
+			raise InvalidPermissionsError("user_id: %d, repo_id %d"
+										  % (user_id, repo_id))
 
 		query_string = "%" + query_string + "%"
 
