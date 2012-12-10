@@ -8,6 +8,7 @@ exports.create = (modelRpcConnection, createAccountHandler) ->
 
 
 class UsersCreateHandler extends Handler
+
 	constructor: (modelRpcConnection, @createAccountHandler) ->
 		assert.ok modelRpcConnection? and @createAccountHandler?
 		super modelRpcConnection
@@ -30,4 +31,4 @@ class UsersCreateHandler extends Handler
 		if data.email? and data.password? and data.rememberMe? and data.firstName? and data.lastName?
 			@createAccountHandler.handleRequest socket, data, callback
 		else
-			callback 'Parsing error'
+			callback 'parsing error'

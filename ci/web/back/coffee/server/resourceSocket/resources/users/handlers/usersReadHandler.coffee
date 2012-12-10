@@ -8,6 +8,7 @@ exports.create = (modelRpcConnection) ->
 
 
 class UsersReadHandler extends Handler
+	
 	constructor: (modelRpcConnection) ->
 		assert.ok modelRpcConnection?
 		super modelRpcConnection
@@ -17,7 +18,8 @@ class UsersReadHandler extends Handler
 		userId = socket.session.userId
 		@modelRpcConnection.users.read.get_user_from_id userId, (error, user) =>
 			if error?
-				callback error
+				if error.type is 'InvalidPermissionsError' then callback 403
+				else callback 'unable to get user data'
 			else
 				callback @_sanitize user
 

@@ -8,17 +8,20 @@ exports.create = (modelRpcConnection) ->
 
 
 class ChangesReadHandler extends Handler
+
 	default: (socket, data, callback) =>
 		assert.ok socket.session.userId?
 		assert.ok data.id?
 		userId = socket.session.userId
+
 		if not userId?
-			callback '404'
+			callback 403
 			return
 
 		@modelRpcConnection.changes.read.get_visible_change_from_id userId, data.id, (error, changeData) =>
 			if error?
-				callback "Cannot locate change"
+				if error.type is 'InvalidPermissionsError' then callback 403
+				else callback 'unable to read change'
 			else
 				callback null, @_sanitizeChange changeData
 
@@ -26,13 +29,15 @@ class ChangesReadHandler extends Handler
 	getPrimaryBuild: (socket, args, callback) =>
 		assert.ok args.id?
 		userId = socket.session.userId
+
 		if not userId?
-			callback '404'
+			callback 403
 			return
 
 		@modelRpcConnection.changes.read.get_primary_build userId, args.id, (error, build) =>
 			if error?
-				callback "build not found"
+				if error.type is 'InvalidPermissionsError' then callback 403
+				else callback 'unable to get primary build'
 			else
 				callback null, @_sanitizeBuild build
 
@@ -43,14 +48,16 @@ class ChangesReadHandler extends Handler
 		assert.ok args.numResults?
 		assert.ok args.queryString?
 		userId = socket.session.userId
+
 		if not userId?
-			callback '404'
+			callback 403
 			return
 
 		@modelRpcConnection.changes.read.query_changes userId, args.repositoryId,
 				args.queryString, args.start, args.numResults, (error, changes) =>
 					if error?
-						callback "Couldn't query for changes"
+						if error.type is 'InvalidPermissionsError' then callback 403
+						else callback 'unable to get changes'
 					else
 						sanitizedChanges = (@_sanitizeChange change, args.repositoryId for change in changes)
 						callback null, sanitizedChanges

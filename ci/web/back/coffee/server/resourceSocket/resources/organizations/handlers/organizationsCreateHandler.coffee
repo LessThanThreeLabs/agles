@@ -8,5 +8,6 @@ exports.create = (modelRpcConnection) ->
 
 
 class OrganizationsCreateHandler extends Handler
+	
 	default: (socket, data, callback) =>
 		

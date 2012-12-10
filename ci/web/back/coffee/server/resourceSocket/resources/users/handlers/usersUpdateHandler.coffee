@@ -59,7 +59,7 @@ class UsersUpdateHandler extends Handler
 		if data.email? and data.password? and data.rememberMe?
 			@loginHandler.handleRequest socket, data, callback
 		else
-			callback 'Malformed request.'
+			callback 'parsing error'
 
 
 	addSshKey: (socket, data, callback) =>
@@ -76,7 +76,7 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 		@modelRpcConnection.users.update.add_ssh_pubkey userId, data.alias, data.sshKey, (error, result) =>
 			if error?
-				errors.sshKeyAdd = "Failed to add key"
+				errors.sshKeyAdd = 'failed to add key'
 				callback errors
 			else
 				callback null, result
@@ -88,6 +88,7 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 		@modelRpcConnection.users.update.delete_ssh_pubkey userId, data.alias, (error, result) =>
 			if error?
-				callback "Failed to remove SSH key"
+				if error.type is 'InvalidPermissionsError' then callback 403
+				else callback 'unable to remove ssh key'
 			else
 				callback null, result
