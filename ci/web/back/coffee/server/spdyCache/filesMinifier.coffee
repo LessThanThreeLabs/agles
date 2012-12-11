@@ -14,22 +14,41 @@ class FilesMinifier
 
 	replaceWithMinifiedFiles: (files) =>
 		console.log 'Minifying files...'
-		@_minifyJs files
-		@_minifyCss files
+		@_replaceJs files
+		@_replaceCss files
 
 
-	_minifyJs: (files) =>
+	_replaceJs: (files) =>
 		jsFiles = @_flattenFiles files, 'js'
-		minifiedJs = uglify.minify jsFiles, fromString: true
+		minifiedJs = @_getMinifiedJs jsFiles
 
 		files['js'] = []
 		files['js'].push
 			name: '/js/minified.js'
-			plain: minifiedJs.code
+			plain: minifiedJs
 			contentType: 'application/javascript'
 
 
-	_minifyCss: (files) =>
+	_getMinifiedJs: (jsFiles) =>
+		topLevelAst = null
+		for jsFile in jsFiles
+			topLevelAst = uglify.parse jsFile.plain,
+				filename: jsFile.name
+				toplevel: topLevelAst
+
+		topLevelAst.figure_out_scope()
+
+		compressor = uglify.Compressor()
+		compressedAst = topLevelAst.transform compressor
+
+		compressedAst.figure_out_scope()
+		compressedAst.compute_char_frequency()
+		compressedAst.mangle_names()
+
+		return compressedAst.print_to_string()
+
+
+	_replaceCss: (files) =>
 		cssFiles = @_flattenFiles files, 'css'
 		console.log 'need to minify css'
 
@@ -38,6 +57,6 @@ class FilesMinifier
 		toReturn = []
 
 		for file in files[fileType]
-			toReturn.push file.plain
+			toReturn.push file
 
 		return toReturn
