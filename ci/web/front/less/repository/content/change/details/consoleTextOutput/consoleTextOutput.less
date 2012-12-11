@@ -1,6 +1,6 @@
 div.consoleTextOutput {
 
-	.title {
+	.titleContainer {
 		@titleBoxShadowColor: #EAEAEA;
 		box-shadow: 0px 0px 5px 5px @titleBoxShadowColor inset;
 		-moz-box-shadow: 0px 0px 5px 5px @titleBoxShadowColor inset;
@@ -10,10 +10,10 @@ div.consoleTextOutput {
 		cursor: hand;
 		cursor: pointer;
 
+		position: relative;
 		padding-left: 10px;
 		padding-top: 8px;
 		height: 30px;
-		font-size: 1.5em;
 
 		&.expanded {
 			background-color: rgba(160, 0, 0, 0.05);
@@ -21,6 +21,22 @@ div.consoleTextOutput {
 
 		&:hover {
 			background-color: rgba(160, 0, 0, 0.05);
+
+			.expandCollapse {
+				visibility: visible;
+			}
+		}
+
+		.title {
+			font-size: 1.5em;
+		}
+
+		.expandCollapse {
+			position: absolute;
+			visibility: hidden;
+			top: 12px;
+			right: 10px;
+			color: #AAAAAA;
 		}
 	}
 

@@ -60,11 +60,14 @@ class ConsoleTextOutput.Model extends Backbone.Model
 class ConsoleTextOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleTextOutput'
-	html: '<div class="title"></div>
+	html: '<div class="titleContainer">
+			<div class="title"></div>
+			<div class="expandCollapse"></div>
+		</div>
 		<div class="outputSlidingWindow">
 			<div class="output"></div>
 		</div>'
-	events: 'click .title': '_handleTitleClick'
+	events: 'click .titleContainer': '_handleTitleClick'
 
 
 	initialize: () =>
@@ -85,7 +88,8 @@ class ConsoleTextOutput.View extends Backbone.View
 	render: () =>
 		@$el.html @html 
 		@_updateTitle()
-		@model.fetchOutput()
+		@_updateExpandedState()
+		@model.fetchOutput()  # shouldn't this be moved?
 		return @
 
 
@@ -94,16 +98,25 @@ class ConsoleTextOutput.View extends Backbone.View
 
 
 	_updateTitle: () =>
-		@$el.find('.title').html @model.get 'title'
+		@$('.title').html @model.get 'title'
 
 
 	_updateExpandedState: () =>
 		if @model.get 'expanded'
-			@$('.title').addClass 'expanded'
+			@$('.titleContainer').addClass 'expanded'
 			@$('.outputSlidingWindow').height ($(window).height() * .67)
 		else
-			@$('.title').removeClass 'expanded'
+			@$('.titleContainer').removeClass 'expanded'
 			@$('.outputSlidingWindow').height 0
+
+		@_updateExpandCollapseText()
+
+
+	_updateExpandCollapseText: () =>
+		if @model.get 'expanded'
+			@$('.expandCollapse').html 'click to collapse'
+		else
+			@$('.expandCollapse').html 'click to expand'
 
 
 	_initializeOutputText: () =>
@@ -114,7 +127,7 @@ class ConsoleTextOutput.View extends Backbone.View
 		@model.consoleTextOutputLineModels.each (consoleTextOutputLineModel) =>
 			consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
 			htmlToAdd.append consoleTextOutputLineView.render().el
-		@$el.find('.output').html htmlToAdd.html()
+		@$('.output').html htmlToAdd.html()
 
 
 	_handleAddLine: (consoleTextOutputLineModel, collection, options) =>
@@ -124,6 +137,6 @@ class ConsoleTextOutput.View extends Backbone.View
 
 	_insertBuildOutputLineAtIndex: (consoleTextOutputLineView, index) =>
 		if index == 0 
-			@$el.find('.output').prepend consoleTextOutputLineView
+			@$('.output').prepend consoleTextOutputLineView
 		else 
-			@$el.find('.output .consoleTextOutputLine:nth-child(' + index + ')').after consoleTextOutputLineView
+			@$('.output .consoleTextOutputLine:nth-child(' + index + ')').after consoleTextOutputLineView
