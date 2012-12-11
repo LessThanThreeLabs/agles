@@ -26,8 +26,7 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
 				console.error errors
 			else
-				@memberPermissionsModels.reset()
-				@memberPermissionsModels.add users
+				@memberPermissionsModels.reset users
 
 
 class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
