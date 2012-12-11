@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: agles
+# Cookbook Name:: koality
 # Recipe:: setup_config
 #
 # Copyright 2012, Less Than Three Labs
@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-include_recipe 'agles'
+include_recipe 'koality'
 
 require 'yaml'
 
@@ -27,7 +27,7 @@ end
 
 def pip(package_name, package_version)
 	python_pip package_name do
-		virtualenv node[:agles][:languages][:python][:virtualenv]
+		virtualenv node[:koality][:languages][:python][:virtualenv]
 		version package_version if package_version
 		action :install
 	end
@@ -35,7 +35,7 @@ end
 
 def gem(package_name, package_version)
 	rvm_gem package_name do
-		ruby_string node[:agles][:languages][:ruby][:ruby_string]
+		ruby_string node[:koality][:languages][:ruby][:ruby_string]
 		version package_version if package_version
 		action :install
 	end
@@ -44,8 +44,8 @@ end
 def npm(package_name, package_version)
 	if package_name == "directory"
 		execute "npm install" do
-			cwd "#{node[:agles][:source_path][:internal]}/#{package_version}"
-			environment({"HOME" => "/home/#{node[:agles][:user]}"})
+			cwd "#{node[:koality][:source_path][:internal]}/#{package_version}"
+			environment({"HOME" => "/home/#{node[:koality][:user]}"})
 		end
 	else
 		package_string = package_version ? "#{package_name}@#{package_version}" : package_name
@@ -116,17 +116,17 @@ def execute_script(script_info)
 	name = script_info["script"]
 	rvm_shell name do
 		code name
-		if node[:agles][:languages][:ruby][:ruby_string]
-			ruby_string node[:agles][:languages][:ruby][:ruby_string]
+		if node[:koality][:languages][:ruby][:ruby_string]
+			ruby_string node[:koality][:languages][:ruby][:ruby_string]
 		end
 		if script_info["background"]
 			code "#{name} &"
 		end
 		if not script_info["directory"].nil?
-			cwd "#{node[:agles][:source_path][:internal]}/#{script_info["directory"]}"
+			cwd "#{node[:koality][:source_path][:internal]}/#{script_info["directory"]}"
 		end
 		timeout script_info["timeout"].nil? ? 600 : script_info["timeout"]
-		environment({"HOME" => "/home/#{node[:agles][:user]}"})
+		environment({"HOME" => "/home/#{node[:koality][:user]}"})
 		action :run
 	end
 end
@@ -149,7 +149,7 @@ def handle_config(config)
 	handle_setup(config["setup"]) if config.has_key? "setup"
 end
 
-config_path = "#{node[:agles][:source_path][:internal]}/#{node[:agles][:config_path]}"
+config_path = "#{node[:koality][:source_path][:internal]}/#{node[:koality][:config_path]}"
 if File.exist? config_path
 	config = YAML::load(File.read(config_path))
 	handle_config config

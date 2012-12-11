@@ -55,7 +55,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			self.verifier = FakeBuildVerifier(passes=True)
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
-		self._modify_commit_push(work_repo, "agles_config.yml",
+		self._modify_commit_push(work_repo, "koality.yml",
 			yaml.dump({'test': [{'hello_world': {'script': 'echo Hello World!'}}]}),
 			refspec="HEAD:refs/pending/1")
 
@@ -67,7 +67,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			self.verifier = FakeBuildVerifier(passes=False)
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
-		self._modify_commit_push(work_repo, "agles_config.yml",
+		self._modify_commit_push(work_repo, "koality.yml",
 			yaml.dump({'test': [{'fail': {'script': 'exit 42'}}]}),
 			refspec="HEAD:refs/pending/1")
 

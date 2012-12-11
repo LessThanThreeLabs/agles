@@ -36,7 +36,7 @@ class BuildCore(object):
 	def _get_verification_configuration(self):
 		"""Reads in the yaml config file contained in the checked
 		out user repository which this server is verifying"""
-		config_path = os.path.join(self.source_dir, "agles_config.yml")
+		config_path = os.path.join(self.source_dir, "koality.yml")
 		if os.access(config_path, os.F_OK):
 			with open(config_path) as config_file:
 				config = yaml.load(config_file.read())

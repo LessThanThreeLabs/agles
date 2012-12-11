@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: agles
+# Cookbook Name:: koality
 # Recipe:: verification_master
 #
 # Copyright 2012, Less Than Three Labs
@@ -13,6 +13,6 @@ execute "Stop verification master" do
 end
 
 execute "Start verification master" do
-	command "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_master.py >> /tmp/verification/master.log 2>&1 &"
-	user node[:agles][:user]
+	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py >> /tmp/verification/master.log 2>&1 &"
+	user node[:koality][:user]
 end

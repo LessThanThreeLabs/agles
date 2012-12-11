@@ -137,7 +137,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		repo_id = self._insert_repo_info(self.repo_path)
 		commit_id = self._insert_commit_info()
 
-		commit_sha = self._modify_commit_push(work_repo, "agles_config.yml",
+		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
 			yaml.dump({'test': self._test_commands()}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 

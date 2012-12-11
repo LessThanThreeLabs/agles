@@ -1,10 +1,10 @@
 name "model_server"
-description "Agles model server"
+description "Koality model server"
 run_list(
-	"recipe[agles::model_server]"
+	"recipe[koality::model_server]"
 )
 override_attributes(
-	:agles => {
+	:koality => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles",
 		}

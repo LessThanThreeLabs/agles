@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: agles
+# Cookbook Name:: koality
 # Recipe:: verification_server
 #
 # Copyright 2012, Less Than Three Labs
@@ -12,7 +12,7 @@ execute "Stop verification servers" do
 	returns [0, 1]
 end
 
-node[:agles][:verification][:server_count].to_i.times do |server_num|
+node[:koality][:verification][:server_count].to_i.times do |server_num|
 	vagrant_path = "/tmp/verification/#{server_num}"
 	rvm_shell "Start verification server #{server_num}}" do
 		code <<-EOH
@@ -25,8 +25,8 @@ node[:agles][:verification][:server_count].to_i.times do |server_num|
 		done
 		vagrant ssh -c "sleep 2"
 		vagrant sandbox on
-		#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{vagrant_path} -f >> #{vagrant_path}/server.log 2>&1 &
+		#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{vagrant_path} -f >> #{vagrant_path}/server.log 2>&1 &
 		EOH
-		user node[:agles][:user]
+		user node[:koality][:user]
 	end
 end

@@ -1,4 +1,4 @@
-include_recipe "agles"
+include_recipe "koality"
 
 dependencies = {
 		:system_packages => ['gcc', 'g++', 'apache2-utils', 'libevent-dev'],
@@ -32,11 +32,11 @@ dependencies[:python][:versions].each do |version|
 	package "python#{version}-dev" do
 		options("--force-yes")
 	end
-	virtualenv_name = "/home/#{node[:agles][:user]}/virtualenvs/#{version}"
+	virtualenv_name = "/home/#{node[:koality][:user]}/virtualenvs/#{version}"
 	python_virtualenv virtualenv_name do
 		interpreter "python#{version}"
-		owner node[:agles][:user]
-		group node[:agles][:user]
+		owner node[:koality][:user]
+		group node[:koality][:user]
 		action :create
 	end
 	dependencies[:python][:packages].each do |pip_package|

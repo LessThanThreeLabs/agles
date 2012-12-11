@@ -4,6 +4,6 @@ execute "Stop filesystem repo server" do
 end
 
 execute "Start filesystem repo server" do
-	command "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_filesystem_repo_server.py -r #{node[:agles][:repositories_path]}&"
+	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_filesystem_repo_server.py -r #{node[:koality][:repositories_path]}&"
 	user "git"
 end

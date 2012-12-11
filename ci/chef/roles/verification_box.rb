@@ -1,5 +1,5 @@
 name "verification_box"
-description "Agles verification virtual box"
+description "Koality verification virtual box"
 run_list(
 	"recipe[python]",
 	"recipe[postgresql::server]",
@@ -8,12 +8,12 @@ run_list(
 	"recipe[mysql::client]",
 	"recipe[mysql::ruby]",
 	"recipe[database]",
-	"recipe[agles::rabbitmq]",
-	"recipe[agles::copy_source]",
+	"recipe[koality::rabbitmq]",
+	"recipe[koality::copy_source]",
 	"recipe[redisio::install]",
 	"recipe[rvm::system]",
-	"recipe[agles::dependencies]",
-	"recipe[agles::verification_box]"
+	"recipe[koality::dependencies]",
+	"recipe[koality::verification_box]"
 )
 
 default_attributes(

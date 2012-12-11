@@ -47,7 +47,7 @@ setup:
       user: true
   - databases:
       postgres:
-      - name: agles
+      - name: koality
         username: lt3
 languages:
   python:

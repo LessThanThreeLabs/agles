@@ -1,11 +1,11 @@
 name "verification_server"
-description "Agles verification server"
+description "Koality verification server"
 run_list(
 	"recipe[rvm]",
-	"recipe[agles::verification_server]"
+	"recipe[koality::verification_server]"
 )
 override_attributes(
-	:agles => {
+	:koality => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles",
 		},

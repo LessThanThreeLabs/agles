@@ -1,5 +1,5 @@
 name "development_machine"
-description "Agles development virtual machine"
+description "Koality development virtual machine"
 run_list(
 	"recipe[git]",
 	"recipe[python]",
@@ -7,11 +7,11 @@ run_list(
 	"recipe[postgresql::client]",
 	"recipe[database]",
 	"recipe[rabbitmq]",
-	"recipe[agles::setup_config]"
+	"recipe[koality::setup_config]"
 )
 default_attributes()
 override_attributes(
-	:agles => {
+	:koality => {
 		:source_path => {
 			:external => "/vagrant"
 		},

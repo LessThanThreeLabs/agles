@@ -1,9 +1,9 @@
 name "verification_box_run"
-description "Stripped down agles verification virtual box run"
+description "Stripped down koality verification virtual box run"
 run_list(
-	"recipe[agles::copy_source]",
-	"recipe[agles::language_config]",
-	"recipe[agles::compile_config]",
-	"recipe[agles::test_config]",
-	"recipe[agles::setup_config]"
+	"recipe[koality::copy_source]",
+	"recipe[koality::language_config]",
+	"recipe[koality::compile_config]",
+	"recipe[koality::test_config]",
+	"recipe[koality::setup_config]"
 )

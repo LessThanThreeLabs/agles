@@ -1,10 +1,10 @@
 name "verification_master"
-description "Agles verification master"
+description "Koality verification master"
 run_list(
-	"recipe[agles::verification_master]"
+	"recipe[koality::verification_master]"
 )
 override_attributes(
-	:agles => {
+	:koality => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles",
 		}

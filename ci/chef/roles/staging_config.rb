@@ -1,5 +1,5 @@
 name "staging_config"
-description "Agles staging configuration"
+description "Koality staging configuration"
 
 run_list(
 	"recipe[git]",
@@ -7,14 +7,14 @@ run_list(
 	"recipe[postgresql::server]",
 	"recipe[postgresql::client]",
 	"recipe[database]",
-	"recipe[agles::rabbitmq]",
+	"recipe[koality::rabbitmq]",
 	"recipe[redisio::install]",
 	"recipe[rvm::system]",
-	"recipe[agles::dependencies]",
-	"recipe[agles::setup_config]"
+	"recipe[koality::dependencies]",
+	"recipe[koality::setup_config]"
 )
 default_attributes(
-	:agles => {
+	:koality => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles"
 		},

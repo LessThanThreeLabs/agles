@@ -14,11 +14,11 @@ Vagrant::Config.run do |config|
     "--memory", 1024,
     "--cpus", 2]
 
-  # Get Agles root directory
-  agles_root = ENV["AGLES_ROOT"]
+  # Get Koality root directory
+  koality_root = ENV["KOALITY_ROOT"]
 
   # Get provisioner role
-  provisioner_role = (ENV["AGLES_ROLE"] or "verification_box")
+  provisioner_role = (ENV["KOALITY_ROLE"] or "verification_box")
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
@@ -75,9 +75,9 @@ Vagrant::Config.run do |config|
   # some recipes and/or roles.
   #
 	config.vm.provision :chef_solo do |chef|
-		chef_path = agles_root.nil? ?
+		chef_path = koality_root.nil? ?
 				"~/chef-repo" :
-				agles_root + "/ci/chef"
+				koality_root + "/ci/chef"
 		chef.cookbooks_path = chef_path + "/cookbooks"
 		chef.roles_path = chef_path + "/roles"
 		# chef.data_bags_path = "/var/chef/cookbooks/verification/data_bags"

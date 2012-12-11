@@ -26,9 +26,9 @@ class VagrantWrapper(object):
 		return self.vagrant.destroy(output_handler=output_handler)
 
 	def provision(self, role=None, output_handler=None):
-		self.vagrant.vagrant_env["AGLES_ROLE"] = role
+		self.vagrant.vagrant_env["KOALITY_ROLE"] = role
 		results = self.vagrant.provision(output_handler=output_handler)
-		del self.vagrant.vagrant_env["AGLES_ROLE"]
+		del self.vagrant.vagrant_env["KOALITY_ROLE"]
 		return results
 
 	def ssh_call(self, command, output_handler=None):

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: agles
+# Cookbook Name:: koality
 # Recipe:: default
 #
 # Copyright 2012, Less Than Three Labs
@@ -17,7 +17,7 @@ when "ubuntu"
 end
 
 if node[:vagrant]
-	node[:agles][:user] = "vagrant"
-	node[:agles][:source_path][:internal] = "/home/vagrant/source"
+	node[:koality][:user] = "vagrant"
+	node[:koality][:source_path][:internal] = "/home/vagrant/source"
 	include_recipe "rvm::vagrant"
 end

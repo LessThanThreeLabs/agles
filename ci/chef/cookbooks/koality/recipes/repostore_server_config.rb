@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: agles
+# Cookbook Name:: koality
 # Recipe:: verification_server
 #
 # Copyright 2012, Less Than Three Labs
@@ -39,19 +39,19 @@ if not File.exists? '/usr/local/bin/ssh'
 			# Check for AuthorizedKeysScript settings and add it if it doesn't exist
 			grep "AuthorizedKeysScript" sshd_config
 			if [ $? -ne 0 ]
-				then chmod +x #{node[:agles][:source_path][:authorized_keys_script]}
+				then chmod +x #{node[:koality][:source_path][:authorized_keys_script]}
 				mv sshd_config sshd_config.bu
 				sed '/AuthorizedKeysFile/d' sshd_config.bu > sshd_config
 
 				# Setting the authorized_keys file to something that can't exist so it uses the script
-				echo "AuthorizedKeysScript #{node[:agles][:source_path][:authorized_keys_script]}" >> sshd_config
+				echo "AuthorizedKeysScript #{node[:koality][:source_path][:authorized_keys_script]}" >> sshd_config
 				echo "AuthorizedKeysFile /dev/null/authorized_keys" >> sshd_config
 			fi
 		EOH
 	end
 
 	execute "install_agles" do
-		cwd node[:agles][:source_path][:platform]
+		cwd node[:koality][:source_path][:platform]
 		user "root"
 		command "python setup.py install"
 	end

@@ -1,4 +1,4 @@
-include_recipe "agles"
+include_recipe "koality"
 include_recipe "rabbitmq"
 
 unless File.exists? "/usr/local/bin/rabbitmqadmin"
@@ -12,7 +12,7 @@ unless File.exists? "/usr/local/bin/rabbitmqadmin"
 		code <<-EOH
 		wget --http-user=guest --http-password=guest localhost:55672/cli/rabbitmqadmin
 		chmod +x rabbitmqadmin
-		chown #{node[:agles][:user]} rabbitmqadmin
+		chown #{node[:koality][:user]} rabbitmqadmin
 		mv rabbitmqadmin /usr/local/bin/rabbitmqadmin
 		EOH
 	end

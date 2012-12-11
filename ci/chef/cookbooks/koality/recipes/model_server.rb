@@ -4,6 +4,6 @@ execute "Stop model server" do
 end
 
 execute "Start model server" do
-	command "#{node[:agles][:source_path][:internal]}/ci/platform/bin/start_model_server.py &"
-	user node[:agles][:user]
+	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_model_server.py &"
+	user node[:koality][:user]
 end
