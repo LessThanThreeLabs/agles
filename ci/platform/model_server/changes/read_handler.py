@@ -7,6 +7,7 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from util.sql import to_dict
 from util.permissions import has_repo_permissions, InvalidPermissionsError
 
+
 class ChangesReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ChangesReadHandler, self).__init__("changes", "read")
@@ -22,10 +23,17 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				row[change.c.number], row[change.c.status],
 				row[change.c.start_time], row[change.c.end_time])
 
+	def get_builds_from_change_id(self, change_id):
+		build = database.schema.build
+
+		query = build.select().where(build.c.change_id==change_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			return [to_dict(row, build.columns) for row in sqlconn.execute(query)]
+
 ##########################
 # Front end API
 ##########################
-		
+
 	def get_visible_change_from_id(self, user_id, change_id):
 		change = database.schema.change
 		commit = database.schema.commit
@@ -44,17 +52,14 @@ class ChangesReadHandler(ModelServerRpcHandler):
 											  % (user_id, repo_id))
 		return {}
 
-	def get_primary_build(self, user_id, change_id):
+	def get_visible_builds_from_change_id(self, user_id, change_id):
 		build = database.schema.build
 		change = database.schema.change
 		commit = database.schema.commit
 		repo = database.schema.repo
 
 		query = build.join(change).join(commit).join(repo).select().apply_labels().where(
-			and_(
-				change.c.id==change_id,
-				build.c.is_primary==True,
-			)
+			change.c.id==change_id
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
@@ -62,7 +67,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		if row:
 			repo_id = row[repo.c.id]
 			if has_repo_permissions(user_id, repo_id):
-				return to_dict(row, build.columns, tablename=build.name)
+				return self.get_builds_from_change_id(change_id)
 			else:
 				raise InvalidPermissionsError("user_id: %d, repo_id: %d"
 											  % (user_id, repo_id))

@@ -33,6 +33,7 @@ class VerificationResultsHandler(QueueListener):
 		# TODO (bbland): do something more useful than this trivial case
 		with ModelServer.rpc_connect("builds", "read") as client:
 			build = client.get_build_from_id(build_id)
+		with ModelServer.rpc_connect("changes", "read") as client:
 			builds = client.get_builds_from_change_id(build["change_id"])
 		success = reduce(operator.and_, map(lambda build: build["status"] == BuildStatus.PASSED, builds), True)
 		failure = reduce(operator.or_, map(lambda build: build["status"] == BuildStatus.FAILED, builds), False)

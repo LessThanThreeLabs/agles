@@ -20,13 +20,6 @@ class BuildsReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 		return to_dict(row, build.columns)
 
-	def get_builds_from_change_id(self, change_id):
-		build = database.schema.build
-
-		query = build.select().where(build.c.change_id==change_id)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			return [to_dict(row, build.columns) for row in sqlconn.execute(query)]
-
 	def get_commit_list(self, build_id):
 		build_commits_map = database.schema.build_commits_map
 		query = build_commits_map.select().where(build_commits_map.c.build_id==build_id)

@@ -24,15 +24,16 @@ class BuildOutputsReadHandler extends Handler
 
 
 	getBuildConsoleIds: (socket, args, callback) =>
-		@modelRpcConnection.changes.read.get_primary_build socket.session.userId, args.changeId, (error, result) =>
+		@modelRpcConnection.changes.read.get_visible_builds_from_change_id socket.session.userId, args.changeId, (error, builds) =>
 			if error?
 				if error.type is 'InvalidPermissionsError' then callback 403
 				else callback 'unable to read build console ids'
 				return
 
-			@modelRpcConnection.buildOutputs.read.get_build_console_ids socket.session.userId, result.id, (error, result) =>
-				if error?
-					if error.type is 'InvalidPermissionsError' then callback 403
-					else callback 'unable to read build console ids'
-				else
-					callback null, result
+			for build in builds:
+				@modelRpcConnection.buildOutputs.read.get_build_console_ids socket.session.userId, build.id, (error, result) =>
+					if error?
+						if error.type is 'InvalidPermissionsError' then callback 403
+						else callback 'unable to read build console ids'
+					else
+						callback null, result
