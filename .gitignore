@@ -1,13 +1,16 @@
 # use glob syntax
 syntax: glob
 
-/build/
+build/
+dist/
+*.egg-info
 
 *~
 *.DS_Store
 *.ignore
 *.log
 *.orig
+*.out
 *.pdf
 *.ps
 *.pyc
