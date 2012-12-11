@@ -84,16 +84,17 @@ class CreateRepository.View extends Backbone.View
 			description: @model.get 'description'
 			defaultPermissions: @model.get 'defaultPermissions'
 		
-		socket.emit 'repos:create', requestData, (errors, repositoryId) =>
+		socket.emit 'repos:create', requestData, (error, repositoryId) =>
 			console.log 'navigate page to repository ' + repositoryId
-			if errors?
+			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error "Failed to create repository"
 				#TODO do something
 			else
 				attributesToSet = 
 		            view: 'repository'
         		    repositoryId: repositoryId
-        		globalRouterModel.set attributesToSet,error: (model, error) => console.error error
+        		globalRouterModel.set attributesToSet, error: (model, error) => console.error error
 
 
 	_clearErrors: () =>
