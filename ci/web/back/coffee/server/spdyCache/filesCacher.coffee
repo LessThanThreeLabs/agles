@@ -28,7 +28,7 @@ class FilesCacher
 			else
 				@_files = files
 
-				if true
+				if false
 					@filesMinifier.replaceWithMinifiedFiles @_files
 
 				@filesCompressor.addCompressedFiles @_files, callback
