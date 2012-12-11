@@ -15,6 +15,8 @@ startEverything = () ->
 	httpPort = commandLineParser.getHttpPort() ? configurationParams.server.http.defaultPort
 	httpsPort = commandLineParser.getHttpsPort() ? configurationParams.server.https.defaultPort
 
+	environment.setEnvironmentMode configurationParams.mode
+
 	modelConnection = ModelConnection.create configurationParams.modelConnection
 	modelConnection.connect (error) ->
 		throw error if error?

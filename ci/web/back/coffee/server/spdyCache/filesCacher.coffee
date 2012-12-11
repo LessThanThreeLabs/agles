@@ -28,7 +28,7 @@ class FilesCacher
 			else
 				@_files = files
 
-				if false
+				if process.env.NODE_ENV is 'production'
 					@filesMinifier.replaceWithMinifiedFiles @_files
 
 				@filesCompressor.addCompressedFiles @_files, callback
