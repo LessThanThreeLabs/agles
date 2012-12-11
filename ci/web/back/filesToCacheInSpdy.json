@@ -66,9 +66,7 @@
 			"/js/libs/tippedSkin.js",
 			"/js/libs/handlebars.js",
 			"/js/libs/underscore.js",
-			"/js/libs/backbone/backbone.js",
-			"/js/libs/backbone/iosync.js",
-			"/js/libs/backbone/iobind.productionModeShouldUseMinified.js",
+			"/js/libs/backbone.js",
 
 			"/js/src/setup.js",
 
