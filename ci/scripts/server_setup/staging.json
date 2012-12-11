@@ -1,0 +1,7 @@
+{ "run_list": [
+	"role[model_server]",
+	"role[repostore]",
+	"role[verification_master]",
+	"role[verification_server]"
+	]
+}
