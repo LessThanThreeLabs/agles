@@ -38,5 +38,6 @@ class BuildOutputsReadHandler extends Handler
 						else callback 'unable to read build console ids'
 						return
 					else
-						results.push(result)
+						results.push result
+
 			callback null, results
