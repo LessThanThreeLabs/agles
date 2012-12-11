@@ -2,8 +2,6 @@
 import argparse
 import os
 
-from multiprocessing import Process
-
 from settings.verification_server import box_name
 from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer

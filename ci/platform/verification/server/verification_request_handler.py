@@ -1,8 +1,9 @@
 import operator
+import os
 
 from kombu.connection import Connection
 
-from shared.constants import BuildStatus
+from shared.constants import BuildStatus, VerificationUser
 from model_server import ModelServer
 from model_server.build_outputs import ConsoleType
 from settings.rabbit import connection_info
@@ -20,6 +21,18 @@ class VerificationRequestHandler(InfiniteWorker):
 	def __init__(self, verifier):
 		super(VerificationRequestHandler, self).__init__(verification_request_queue)
 		self.verifier = verifier
+		self._register_pubkey()
+
+	def _register_pubkey(self):
+		try:
+			with ModelServer.rpc_connect("users", "update") as users_update_rpc:
+				users_update_rpc.add_ssh_pubkey(VerificationUser.id, self.worker_id, self._get_ssh_pubkey())
+		except:
+			pass
+
+	def _get_ssh_pubkey(self):
+		with open(os.path.join(os.path.join(os.environ["HOME"], ".ssh"), "id_rsa.pub")) as pubkey_file:
+			return pubkey_file.read()
 
 	def do_setup(self, message):
 		# Check out commit, run all setup and compile stuff
