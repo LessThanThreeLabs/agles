@@ -2,11 +2,11 @@ window.CreateRepository = {}
 
 
 class CreateRepository.Model extends Backbone.Model
-	ALLOWED_PERMISSIONS: ['read', 'write', 'admin']
+	ALLOWED_PERMISSIONS: ['r', 'r/w', 'r/w/a']
 	defaults:
 		name: ''
 		description: ''
-		defaultPermissions: 'write'
+		defaultPermissions: 'r/w'
 
 
 class CreateRepository.View extends Backbone.View
@@ -42,9 +42,9 @@ class CreateRepository.View extends Backbone.View
 				</div>
 				<div class="prettyFormValue">
 					<div class="btn-group" data-toggle="buttons-radio">
-						<button class="btn defaultPermissionsOption readPermissionsOption" type="read">Read</button>
-						<button class="btn defaultPermissionsOption writePermissionsOption" type="write">Write</button>
-						<button class="btn defaultPermissionsOption adminPermissionsOption" type="admin">Admin</button>
+						<button class="btn defaultPermissionsOption readPermissionsOption" type="r">Read</button>
+						<button class="btn defaultPermissionsOption writePermissionsOption" type="r/w">Write</button>
+						<button class="btn defaultPermissionsOption adminPermissionsOption" type="r/w/a">Admin</button>
 					</div>
 				</div>
 			</div>
@@ -63,7 +63,7 @@ class CreateRepository.View extends Backbone.View
 
 		@$el.find('.repositoryNameField').val @model.get 'name'
 		@$el.find('.repositoryDescriptionField').val @model.get 'description'
-		@$el.find('.defaultPermissionsOption[type=' + @model.get('defaultPermissions') + ']').addClass 'active'
+		@$el.find('.defaultPermissionsOption[type="' + @model.get('defaultPermissions') + '"]').addClass 'active'
 
 		return @
 
@@ -84,18 +84,16 @@ class CreateRepository.View extends Backbone.View
 			description: @model.get 'description'
 			defaultPermissions: @model.get 'defaultPermissions'
 		
-		console.log 'need to make request with:'
-		console.log requestData
-		console.log 'checking of these fields needs to be done on the webserver...'
-
 		socket.emit 'repos:create', requestData, (errors, repositoryId) =>
 			console.log 'navigate page to repository ' + repositoryId
 			if errors?
 				console.error "Failed to create repository"
 				#TODO do something
 			else
-				window.globalRouterModel.set 'view', 'repository'
-				window.globalRouterModel.set 'repositoryId', repositoryId
+				attributesToSet = 
+		            view: 'repository'
+        		    repositoryId: repositoryId
+        		globalRouterModel.set attributesToSet,error: (model, error) => console.error error
 
 
 	_clearErrors: () =>

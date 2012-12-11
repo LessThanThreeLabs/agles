@@ -1,13 +1,13 @@
 assert = require 'assert'
 
-Handler = require '../../handler'
+RepositoriesHandler = require './repositoriesHandler'
 
 
 exports.create = (modelRpcConnection) ->
 	return new RepositoriesUpdateHandler modelRpcConnection
 
 
-class RepositoriesUpdateHandler extends Handler
+class RepositoriesUpdateHandler extends RepositoriesHandler
 	changeMemberPermissions: (socket, args, callback) =>
 		assert.ok socket.session.userId?
 		assert.ok args.repositoryId?
@@ -48,11 +48,3 @@ class RepositoriesUpdateHandler extends Handler
 					else callback 'unable to remove members'
 				else
 					callback null, result
-
-
-	_fromPermissionString: (permissions) =>
-		switch permissions
-			when "r" then 1
-			when "r/w" then 3
-			when "r/w/a" then 7
-			else 0
