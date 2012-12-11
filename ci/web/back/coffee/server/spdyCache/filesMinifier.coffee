@@ -38,14 +38,16 @@ class FilesMinifier
 
 		topLevelAst.figure_out_scope()
 
-		compressor = uglify.Compressor()
+		compressor = uglify.Compressor warnings: false
 		compressedAst = topLevelAst.transform compressor
 
 		compressedAst.figure_out_scope()
 		compressedAst.compute_char_frequency()
 		compressedAst.mangle_names()
 
-		return compressedAst.print_to_string()
+		return compressedAst.print_to_string
+			 comments: (node, commentToken) =>
+			 	return commentToken.type is 'comment2'
 
 
 	_replaceCss: (files) =>
