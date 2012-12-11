@@ -12,6 +12,7 @@ class FilesLoader
 
 
 	load: (callback) =>
+		console.log 'Loading files...'
 		@_determineFilesToCache callback
 
 
