@@ -64,7 +64,7 @@ class ConsoleTextOutput.View extends Backbone.View
 		<div class="outputSlidingWindow">
 			<div class="output"></div>
 		</div>'
-	events: 'click': '_handleClick'
+	events: 'click .title': '_handleTitleClick'
 
 
 	initialize: () =>
@@ -89,7 +89,7 @@ class ConsoleTextOutput.View extends Backbone.View
 		return @
 
 
-	_handleClick: (event) =>
+	_handleTitleClick: (event) =>
 		@model.toggleExpanded()
 
 

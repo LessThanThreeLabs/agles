@@ -1,11 +1,18 @@
 div.consoleTextOutput {
-	padding-bottom: 20px;
-
-	&:last-child {
-		padding-bottom: 0px;
-	}
 
 	.title {
+		@titleBoxShadowColor: #EAEAEA;
+		box-shadow: 0px 0px 5px 5px @titleBoxShadowColor inset;
+		-moz-box-shadow: 0px 0px 5px 5px @titleBoxShadowColor inset;
+		-webkit-box-shadow: 0px 0px 5px 5px @titleBoxShadowColor inset;
+		box-shadow: 0px 0px 5px 5px @titleBoxShadowColor inset;
+
+		cursor: hand;
+		cursor: pointer;
+
+		padding-left: 10px;
+		padding-top: 8px;
+		height: 30px;
 		font-size: 1.5em;
 	}
 
