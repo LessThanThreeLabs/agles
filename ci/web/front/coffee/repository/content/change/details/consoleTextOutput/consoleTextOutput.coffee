@@ -77,6 +77,7 @@ class ConsoleTextOutput.View extends Backbone.View
 		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText, @
 		
 		@model.subscribe()
+		@model.fetchOutput()
 
 
 	onDispose: () =>
@@ -89,7 +90,6 @@ class ConsoleTextOutput.View extends Backbone.View
 		@$el.html @html 
 		@_updateTitle()
 		@_updateExpandedState()
-		@model.fetchOutput()  # shouldn't this be moved?
 		return @
 
 
