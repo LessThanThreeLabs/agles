@@ -30,10 +30,13 @@ class BuildOutputsReadHandler extends Handler
 				else callback 'unable to read build console ids'
 				return
 
+			results = []
 			for build in builds
 				@modelRpcConnection.buildOutputs.read.get_build_console_ids socket.session.userId, build.id, (error, result) =>
 					if error?
 						if error.type is 'InvalidPermissionsError' then callback 403
 						else callback 'unable to read build console ids'
+						return
 					else
-						callback null, result
+						results.push(result)
+			callback null, results
