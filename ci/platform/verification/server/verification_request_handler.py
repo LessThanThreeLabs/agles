@@ -1,16 +1,16 @@
 import operator
-import os
 
 from kombu.connection import Connection
 
-from shared.constants import BuildStatus, VerificationUser
 from model_server import ModelServer
 from model_server.build_outputs import ConsoleType
 from settings.rabbit import connection_info
 from settings.verification_server import *
+from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
 from task_queue.task_worker import InfiniteWorker
 from vagrant.vagrant_command import SimpleVagrantTestCommand
+from verification.shared.pubkey_registrar import PubkeyRegistrar
 from verification.shared.verification_result import VerificationResult
 
 
@@ -24,15 +24,7 @@ class VerificationRequestHandler(InfiniteWorker):
 		self._register_pubkey()
 
 	def _register_pubkey(self):
-		try:
-			with ModelServer.rpc_connect("users", "update") as users_update_rpc:
-				users_update_rpc.add_ssh_pubkey(VerificationUser.id, self.worker_id, self._get_ssh_pubkey())
-		except:
-			pass
-
-	def _get_ssh_pubkey(self):
-		with open(os.path.join(os.path.join(os.environ["HOME"], ".ssh"), "id_rsa.pub")) as pubkey_file:
-			return pubkey_file.read()
+		PubkeyRegistrar().register_pubkey(VerificationUser.id, self.worker_id)
 
 	def do_setup(self, message):
 		# Check out commit, run all setup and compile stuff

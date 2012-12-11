@@ -1,3 +1,4 @@
+import random
 import time
 
 from kombu.messaging import Producer
@@ -8,12 +9,17 @@ from settings.verification_server import *
 from task_queue.task_queue import TaskQueue
 from util import pathgen
 from verification.shared.build_core import BuildCore
+from verification.shared.pubkey_registrar import PubkeyRegistrar
 
 
 class ChangesCreateEventHandler(EventSubscriber):
 	def __init__(self, uri_translator):
 		super(ChangesCreateEventHandler, self).__init__("repos", "verification_master:repos.update")
 		self.uri_translator = uri_translator
+		self._register_pubkey()
+
+	def _register_pubkey(self):
+		PubkeyRegistrar().register_pubkey(VerificationUser.id, str(random.random())[2:])
 
 	def bind(self, channel):
 		self.producer = Producer(channel, serializer='msgpack')
