@@ -19,7 +19,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		row = self._get_repo_joined_permission_row(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(
-				row[permission.c.permissions], RepositoryPermissions.R):
+				row[permission.c.permissions], RepositoryPermissions.RWA):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 		repo_hash = row[repo.c.hash]
 
@@ -30,6 +30,9 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 
 		target_user_id = user_row[user.c.id]
+		if target_user_id == user_id:
+			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+
 		del_query = permission.delete().where(and_(
 			permission.c.user_id==target_user_id,
 			permission.c.repo_hash==repo_hash)
@@ -47,7 +50,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		row = self._get_repo_joined_permission_row(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(
-				row[permission.c.permissions], RepositoryPermissions.R):
+				row[permission.c.permissions], RepositoryPermissions.RWA):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 		repo_hash = row[repo.c.hash]
 
@@ -58,6 +61,9 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 
 		target_user_id = user_row[user.c.id]
+		if target_user_id == user_id:
+			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+
 		del_query = permission.delete().where(and_(
 			permission.c.user_id==target_user_id,
 			permission.c.repo_hash==repo_hash)

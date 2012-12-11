@@ -17,6 +17,42 @@ class MemberPermissions.Model extends Backbone.Model
 		return
 
 
+	_changePermissions: (permissions, callback) =>
+		email = @get 'email'
+
+		requestData =
+			method: 'changeMemberPermissions'
+			args:
+				repositoryId: globalRouterModel.get 'repositoryId'
+				email: email
+				permissions: permissions
+
+		socket.emit 'repos:update', requestData, (errors, result) =>
+			if errors?
+				callback "Could not change member permissions", null
+				#@view._selectCorrectPermissionsRadio()
+			else
+				@set 'permissions', permissions
+				callback null, null
+
+
+	_removeMember: () =>
+		email = @get 'email'
+
+		requestData =
+			method: 'removeMember'
+			args:
+				repositoryId: globalRouterModel.get 'repositoryId'
+				email: email
+
+		socket.emit 'repos:update', requestData, (errors, result) =>
+			if errors?
+				console.error "Could not remove member"
+			else
+				@trigger 'removeMember', @
+
+
+
 class MemberPermissions.View extends Backbone.View
 	tagName: 'div'
 	className: 'memberPermissions prettyTableRow'
@@ -53,37 +89,11 @@ class MemberPermissions.View extends Backbone.View
 
 
 	_handlePermissionsChange: (event) =>
-		email = @model.get 'email'
 		permissions = $(event.target).val()
-
-		requestData =
-			method: 'changeMemberPermissions'
-			args:
-				repositoryId: globalRouterModel.get 'repositoryId'
-				email: email
-				permissions: permissions
-
-		socket.emit 'repos:update', requestData, (errors, result) =>
+		@model._changePermissions permissions, (errors, result) =>
 			if errors?
-				console.log errors
-				console.error "Could not change member permissions"
 				@_selectCorrectPermissionsRadio()
-			else
-				@model.set 'permissions', permissions
-
+				console.error errors
 
 	_handleRemoveMember: () =>
-		email = @model.get 'email'
-
-		requestData =
-			method: 'removeMember'
-			args:
-				repositoryId: globalRouterModel.get 'repositoryId'
-				email: email
-
-		socket.emit 'repos:update', requestData, (errors, result) =>
-			if errors?
-				console.log errors
-				console.error "Could not remove member"
-			else
-				@trigger 'removeMember'
+		@model._removeMember()

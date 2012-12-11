@@ -8,9 +8,12 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 		@memberPermissionsModels.model = MemberPermissions.Model
 		@memberPermissionsModels.comparator = (memberPermissionsModel) =>
 			return memberPermissionsModel.get 'email'
+		@memberPermissionsModels.on 'removeMember', (memberPermissionsModel) =>
+			@memberPermissionsModels.remove memberPermissionsModel
 
 
-	fetchMembersIfNecessary: () =>
+	fetchMembers: () =>
+		@memberPermissionsModels.reset()
 		return if not globalRouterModel.get('repositoryId')?
 
 		requestData =
@@ -44,25 +47,22 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.memberPermissionsModels.on 'add', ((memberPermissionsModel, collection, options) =>
-			memberPermissionView = new MemberPermissions.View model: memberPermissionsModel
-			@_insertMemberAtIndex memberPermissionView.render().el, options.index
-			), @
-		@model.memberPermissionsModels.on 'reset', (() => @$el.html @html), @
+		@model.memberPermissionsModels.on 'add', @_handleAdd, @
+		@model.memberPermissionsModels.on 'reset', @render, @
 		@model.memberPermissionsModels.on 'remove', @render, @
-		@model.memberPermissionsModels.on 'removeMember', ((memberPermissionsModel) =>
-			console.log "hello"
-			@model.memberPermissionsModels.remove memberPermissionsModel), @
+		globalRouterModel.on 'change:repositoryId', @model.fetchMembers, @
+
+		@model.fetchMembers()
 
 
 	onDispose: () =>
 		@model.memberPermissionsModels.off null, null, @
+		globalRouterModel.off null, null, @
 
 
 	render: () =>
 		@$el.html @html
 		@_addCurrentMembers()
-		@model.fetchMembersIfNecessary()
 		return @
 
 
@@ -72,6 +72,11 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 			@$el.find('.permissionsTable').append memberPermissionView.render().el
 
 
+	_handleAdd: (memberPermissionsModel, collection, options) =>
+		memberPermissionView = new MemberPermissions.View model: memberPermissionsModel
+		@_insertMemberAtIndex memberPermissionView.render().el, options.index
+
+
 	_insertMemberAtIndex: (memberPermissionView, index) =>
 		memberPermissionRowsOffset = 2
 
@@ -79,3 +84,4 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 			@$el.find('.permissionsTable').append memberPermissionView
 		else
 			@$el.find('.permissionsTable .memberPermissions:nth-child('+ (index+1) + ')').after memberPermissionView
+

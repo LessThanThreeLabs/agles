@@ -77,10 +77,16 @@ class RepositoriesReadHandler extends Handler
 		assert.ok args.repositoryId?
 
 		userId = socket.session.userId
+
+		if not userId?
+			callback 403
+			return
+
 		@modelRpcConnection.repos.read.get_members_with_permissions userId, args.repositoryId,
 			(error, users) =>
 				if error?
-					callback error
+					if error.type is 'InvalidPermissionsError' then callback 403
+					else callback 'unable to get repository members'
 				else
 					callback null, @_filterPermitted((@_sanitizeUser user for user in users))
 
