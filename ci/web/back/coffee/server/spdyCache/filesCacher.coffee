@@ -3,18 +3,20 @@ zlib = require 'zlib'
 assert = require 'assert'
 
 FilesLoader = require './filesLoader'
+FilesMinifier = require './filesMinifier'
 
 
 exports.create = (configurationParams) ->
 	filesLoader = FilesLoader.create configurationParams
-	return new FilesCacher configurationParams, filesLoader
+	filesMinifier = FilesMinifier.create configurationParams
+	return new FilesCacher configurationParams, filesLoader, filesMinifier
 
 
 class FilesCacher
-	files: null
+	_files: null
 
-	constructor: (@configurationParams, @filesLoader) ->
-		assert.ok @configurationParams? and @filesLoader?
+	constructor: (@configurationParams, @filesLoader, @filesMinifier) ->
+		assert.ok @configurationParams? and @filesLoader? and @filesMinifier?
 
 
 	loadFiles: (callback) =>
@@ -22,19 +24,45 @@ class FilesCacher
 			if error?
 				callback error
 			else
-				@files = files
-				@_addCompressedFiles callback
+				@_files = files
+
+				@_switchToMinifiedVersions (error) =>
+					if error?
+						callback error
+						return
+
+					@_addCompressedFiles (error) =>
+						if error?
+							callback error
+							return
+
+					callback()
+
+
+	_switchToMinifiedVersions: (callback) =>
+		@filesMinifier.minifyJs @_files, (error, minifiedJs) =>
+			if error?
+				callback error
+				return
+
+			@_files['js'] = []
+			@_files['js'].push
+				name: '/js/minified.js'
+				plain: minifiedJs
+				contentType: 'application/javascript'
+
+			callback()
 
 
 	_addCompressedFiles: (callback) =>
 		gzipErrors = {}
 
 		await
-			for fileType of @files
+			for fileType of @_files
 				gzipErrors[fileType] = []
-				for file, index in @files[fileType]
+				for file, index in @_files[fileType]
 					continue if not @_shouldGzip file.contentType
-					zlib.gzip file.plain, defer gzipErrors[fileType][index], @files[fileType][index].gzip
+					zlib.gzip file.plain, defer gzipErrors[fileType][index], @_files[fileType][index].gzip
 
 		if @_containsAnyErrors gzipErrors
 			callback 'Unable to gzip all the files'
@@ -62,10 +90,14 @@ class FilesCacher
 
 
 	getFileTypes: () =>
-		assert.ok @files?
-		return Object.keys @files
+		assert.ok @_files?
+		return Object.keys @_files
 
 
 	getFiles: (fileType) =>
-		assert.ok @files?
-		return @files[fileType]
+		assert.ok @_files?
+		return @_files[fileType]
+
+
+	getMinifiedJavascript: () =>
+		return @minifiedJavascript

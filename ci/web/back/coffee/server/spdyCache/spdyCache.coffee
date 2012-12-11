@@ -25,7 +25,7 @@ class SpdyCache
 
 		useGzip = @_canUseGzip request.headers
 		for fileType in @filesCacher.getFileTypes()
-			@_pushFilesOfType request, response, fileType, useGzip	
+			@_pushFilesOfType request, response, fileType, useGzip
 
 
 	_canUseGzip: (headers) =>

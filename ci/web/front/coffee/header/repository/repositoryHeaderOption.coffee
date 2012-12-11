@@ -61,7 +61,7 @@ class RepositoryHeaderOption.View extends Backbone.View
 		globalAccount.off null, null, @
 
 
-	render: () ->
+	render: () =>
 		@$el.html @html
 		@_updateDropdownContents()
 		return @

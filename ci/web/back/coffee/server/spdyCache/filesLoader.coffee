@@ -24,12 +24,12 @@ class FilesLoader
 				@_loadFiles filesToLoad, callback
 
 
-	_loadFiles: (filesToCache, callback) =>
+	_loadFiles: (filesToLoad, callback) =>
 		loadedFiles = {}
 		loadedFileErrors = {}
 
 		await
-			for fileType, contentTypes of filesToCache
+			for fileType, contentTypes of filesToLoad
 				@_loadFilesForContentTypes contentTypes, defer loadedFileErrors[fileType], loadedFiles[fileType] 
 
 		anyErrors = false
