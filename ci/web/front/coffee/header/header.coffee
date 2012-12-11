@@ -22,7 +22,7 @@ class Header.View extends Backbone.View
 
 
 	render: () ->
-		@$el.html '<div class="headerContent"><span class="title">Blimp</span></div>'
+		@$el.html '<div class="headerContent"><span class="title">Koality</span></div>'
 		@$el.append @headerMenuView.render().el
 		return @
 
