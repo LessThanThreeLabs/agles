@@ -110,7 +110,7 @@ ssh_pubkey = Table('ssh_pubkey', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
 	Column('alias', String, nullable=False),
-	Column('ssh_key', String, nullable=False),
+	Column('ssh_key', String, nullable=False, unique=True),
 
 	UniqueConstraint('user_id', 'alias')
 )
@@ -125,12 +125,26 @@ github_repo_url_map = Table('github_repo_url_map', metadata,
 	Column('github_url', String, nullable=False)
 )
 
+
+def _insert_defaults():
+	_insert_admin_user()
+
+
+def _insert_admin_user():
+	ins = user.insert().values(id=1, email="lt3@getkoality.com", first_name="Admin", last_name="Admin",
+		password_hash="b87e08ca180fafd3239a067683e5c564cd68717b184d04adb3eaed208be8619d2526553dff3b9515d35a03a94ed367445490f9b63ea63f9bfe25b752eb6364cb",
+		salt="aaaaaaaaaaaaaaaa")
+	with ConnectionFactory.get_sql_connection() as sqlconn:
+		sqlconn.execute(ins)
+
+
 def reseed_db():
 	engine = ConnectionFactory.get_sql_engine()
 	with contextlib.closing(engine.connect()):
 		for table in reversed(metadata.sorted_tables):
 			table.drop(engine, checkfirst=True)
 	metadata.create_all(engine)
+	_insert_defaults()
 
 
 def main():
