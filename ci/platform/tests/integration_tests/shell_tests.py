@@ -37,10 +37,11 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		with ConnectionFactory.get_sql_connection() as conn:
 			conn.execute(ins)
 
+#TODO: FIX THIS HAX WITH CREATE REPO
 	def _setup_db_entries(self, REPO_URI):
 		repostore_id = self._create_repo_store()
 		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
-			repo_id = rpc_conn.create_repo("repo.git", repostore_id, RepositoryPermissions.RW)
+			repo_id = rpc_conn._create_repo_in_db("repo.git", "repo.git", "afjfaio", RepositoryPermissions.RW)
 		self._map_uri(REPO_URI, repo_id)
 
 	def test_new_sshargs(self):
@@ -50,7 +51,6 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
 		sshargs = rsh.new_sshargs('git-receive-pack', REPO_URI, "1")
 
-		print sshargs
 		assert_equals(len(sshargs), 6)
 		assert_equals('ssh', sshargs[0])
 		assert_equals('ssh', sshargs[1])

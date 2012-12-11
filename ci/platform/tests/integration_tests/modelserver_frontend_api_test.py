@@ -107,6 +107,8 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 #	REPOS
 #####################
 
+# TODO: FIX ALL OF THIS BELOW. THIS IS ALL HAX
+
 	def _create_repo(self):
 		repostore = database.schema.repostore
 		permission = database.schema.permission
@@ -119,7 +121,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			self.repostore_id = result.inserted_primary_key[0]
 
 		with ModelServer.rpc_connect("repos", "create") as conn:
-			self.repo_id = conn.create_repo(self.REPO_NAME, self.repostore_id, RepositoryPermissions.RW)
+			self.repo_id = conn._create_repo_in_db(self.REPO_NAME, self.REPO_NAME, "http://machine0", RepositoryPermissions.RW)
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			query = repo.select().where(repo.c.id==self.repo_id)
