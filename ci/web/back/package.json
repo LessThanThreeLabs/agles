@@ -17,7 +17,8 @@
     "msgpack": "git://github.com/pgriess/node-msgpack.git",
     "zombie": "git://github.com/assaf/zombie.git",
     "nodemailer": "git://github.com/andris9/Nodemailer.git",
-    "uglify-js": "git://github.com/mishoo/UglifyJS2.git"
+    "uglify-js": "git://github.com/mishoo/UglifyJS2.git",
+    "clean-css": "git://github.com/GoalSmashers/clean-css.git"
   },
 
   "engines": {

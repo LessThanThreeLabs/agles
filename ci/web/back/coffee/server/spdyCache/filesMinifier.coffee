@@ -1,6 +1,7 @@
 fs = require 'fs'
 assert = require 'assert'
-uglify = require 'uglify-js'
+uglifyJs = require 'uglify-js'
+cleanCss = require 'clean-css'
 
 
 exports.create = (configurationParams) ->
@@ -13,32 +14,34 @@ class FilesMinifier
 
 
 	replaceWithMinifiedFiles: (files) =>
-		console.log 'Minifying files...'
+		console.log 'Minifying js files...'
 		@_replaceJs files
+
+		console.log 'Minifying css files...'
 		@_replaceCss files
 
 
 	_replaceJs: (files) =>
-		jsFiles = @_flattenFiles files, 'js'
-		minifiedJs = @_getMinifiedJs jsFiles
+		minifiedJsCode = @_getMinifiedJs files.js
 
-		files['js'] = []
-		files['js'].push
+		minifiedJsFile =
 			name: '/js/minified.js'
-			plain: minifiedJs
+			plain: minifiedJsCode
 			contentType: 'application/javascript'
+
+		files.js = [minifiedJsFile]
 
 
 	_getMinifiedJs: (jsFiles) =>
 		topLevelAst = null
 		for jsFile in jsFiles
-			topLevelAst = uglify.parse jsFile.plain,
+			topLevelAst = uglifyJs.parse jsFile.plain,
 				filename: jsFile.name
 				toplevel: topLevelAst
 
 		topLevelAst.figure_out_scope()
 
-		compressor = uglify.Compressor warnings: false
+		compressor = uglifyJs.Compressor warnings: false
 		compressedAst = topLevelAst.transform compressor
 
 		compressedAst.figure_out_scope()
@@ -51,14 +54,20 @@ class FilesMinifier
 
 
 	_replaceCss: (files) =>
-		cssFiles = @_flattenFiles files, 'css'
-		console.log 'need to minify css'
+		minifiedCssCode = @_getMinifiedCss files.css
+
+		minifiedCssFile =
+			name: '/css/minified.css'
+			plain: minifiedCssCode
+			contentType: 'text/css'
+
+		files.css = [minifiedCssFile]
 
 
-	_flattenFiles: (files, fileType) =>
-		toReturn = []
+	_getMinifiedCss: (cssFiles) =>
+		minifiedCssToCombine = []
+		for cssFile in cssFiles
+			minifiedCss = cleanCss.process cssFile.plain, removeEmpty: true
+			minifiedCssToCombine.push minifiedCss
 
-		for file in files[fileType]
-			toReturn.push file
-
-		return toReturn
+		return minifiedCssToCombine.join ' '

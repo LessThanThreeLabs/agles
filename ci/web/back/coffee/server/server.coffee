@@ -61,7 +61,7 @@ class Server
 			@_createCssString()
 			@_createJsString()
 
-			console.log 'Server running!'
+			console.log '>> Server running!'
 
 
 	_handleIndexRequest: (request, response) =>
