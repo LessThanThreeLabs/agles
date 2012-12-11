@@ -99,10 +99,11 @@ class ConsoleTextOutput.View extends Backbone.View
 
 	_updateExpandedState: () =>
 		if @model.get 'expanded'
+			@$('.title').addClass 'expanded'
 			@$('.outputSlidingWindow').height ($(window).height() * .67)
 		else
+			@$('.title').removeClass 'expanded'
 			@$('.outputSlidingWindow').height 0
-
 
 
 	_initializeOutputText: () =>
