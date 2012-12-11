@@ -23,8 +23,8 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 
 		socket.emit 'repos:read', requestData, (errors, users) =>
 			if errors?
-				console.log errors
-				console.error "Could not read member permissions"
+				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
+				console.error errors
 			else
 				@memberPermissionsModels.reset()
 				@memberPermissionsModels.add users

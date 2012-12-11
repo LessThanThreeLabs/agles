@@ -29,8 +29,8 @@ class MemberPermissions.Model extends Backbone.Model
 
 		socket.emit 'repos:update', requestData, (errors, result) =>
 			if errors?
-				callback "Could not change member permissions", null
-				#@view._selectCorrectPermissionsRadio()
+				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
+				console.error errors
 			else
 				@set 'permissions', permissions
 				callback null, null
@@ -47,7 +47,8 @@ class MemberPermissions.Model extends Backbone.Model
 
 		socket.emit 'repos:update', requestData, (errors, result) =>
 			if errors?
-				console.error "Could not remove member"
+				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
+				console.error errors
 			else
 				@trigger 'removeMember', @
 
@@ -90,10 +91,7 @@ class MemberPermissions.View extends Backbone.View
 
 	_handlePermissionsChange: (event) =>
 		permissions = $(event.target).val()
-		@model._changePermissions permissions, (errors, result) =>
-			if errors?
-				@_selectCorrectPermissionsRadio()
-				console.error errors
+		@model._changePermissions permissions
 
 	_handleRemoveMember: () =>
 		@model._removeMember()
