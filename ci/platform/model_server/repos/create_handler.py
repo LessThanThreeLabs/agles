@@ -14,20 +14,35 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
-	def create_repo(self, repo_name, repostore_id, default_permissions):
-		# This is a stub that only does things that are needed for testing atm.
-		# It needs to be completed
-		repo = database.schema.repo
+	def create_repo(self, repo_name, default_permissions):
+		#TODO: REMOVE REPO HASH!!!!!!!!!!
 		repo_hash = os.urandom(16).encode('hex')
-		ins = repo.insert().values(name=repo_name, hash=repo_hash, repostore_id=repostore_id, default_permissions=default_permissions)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			result = sqlconn.execute(ins)
-		repo_id = result.inserted_primary_key[0]
+		store_name = self._create_repo_on_filesystem(repo_hash, repo_name)
+		repo_id = self._create_repo_in_db(repo_hash, repo_name, store_name, default_permissions)
 		self.publish_event("global", None, "repo added",
 			repo_id=repo_id, repo_name=repo_name, repo_hash=repo_hash, default_permissions=default_permissions)
 		return repo_id
 
+	def _create_repo_on_filesystem(self, repo_hash, repo_name):
+		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		store_name = manager.get_least_loaded_store()
+		manager.create_repository(store_name, repo_hash, repo_name)
+		return store_name
+
+	def _create_repo_in_db(self, repo_hash, repo_name, store_name, default_permissions):
+		repo = database.schema.repo
+		repostore = database.schema.repostore
+		query = repostore.select().where(repostore.c.uri==store_name)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
+
+			ins = repo.insert().values(name=repo_name, hash=repo_hash, repostore_id=repostore_id, default_permissions=default_permissions)
+			result = sqlconn.execute(ins)
+		repo_id = result.inserted_primary_key[0]
+		return repo_id
+
 	def register_repostore(self, host_name, root_dir):
+		#TODO: We don't need a store name. Just use id. This is a large refactor
 		store_name = uuid.uuid1().hex
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 		manager.register_remote_store(store_name)

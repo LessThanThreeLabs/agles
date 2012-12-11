@@ -88,12 +88,14 @@ class CreateRepository.View extends Backbone.View
 		console.log requestData
 		console.log 'checking of these fields needs to be done on the webserver...'
 
-		# socket.emit 'repos:create', requestData, (errors, repository) =>
-		# 	console.log 'navigate page to repository ' + repository.id
-		repository = id: 17
-
-		window.globalRouterModel.set 'view', 'repository'
-		window.globalRouterModel.set 'repositoryId', repository.id
+		socket.emit 'repos:create', requestData, (errors, repositoryId) =>
+			console.log 'navigate page to repository ' + repositoryId
+			if errors?
+				console.error "Failed to create repository"
+				#TODO do something
+			else
+				window.globalRouterModel.set 'view', 'repository'
+				window.globalRouterModel.set 'repositoryId', repositoryId
 
 
 	_clearErrors: () =>
