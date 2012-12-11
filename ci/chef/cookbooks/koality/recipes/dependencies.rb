@@ -58,7 +58,7 @@ dependencies[:ruby][:versions].each do |version|
 end
 
 dependencies[:nodejs][:versions].each do |version|
-	agles_nodejs version
+	koality_nodejs version
 end
 
 # Setup postgresql local connection trusting
