@@ -103,7 +103,6 @@ class Vagrant(object):
 			self._output.append(line)
 			if line_handler:
 				line_handler.append(len(self._output), line)
-			eventlet.greenthread.sleep()  # Allows for fairer scheduling between stdin and stdout
 		return lines
 
 	def _get_vagrant_env(self):

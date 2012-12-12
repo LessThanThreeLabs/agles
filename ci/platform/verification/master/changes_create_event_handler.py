@@ -3,6 +3,7 @@ import time
 
 from kombu.messaging import Producer
 
+from shared.constants import VerificationUser
 from shared.handler import EventSubscriber
 from model_server import ModelServer
 from settings.verification_server import *

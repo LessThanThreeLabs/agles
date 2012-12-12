@@ -48,6 +48,8 @@ class VerificationRequestHandler(InfiniteWorker):
 			if success:
 				self.verifier.mark_success(callback)
 			else:
+				for result in results:
+					print result
 				self.verifier.mark_failure(callback)
 
 	def do_task(self, task):
@@ -106,4 +108,8 @@ class VerificationRequestHandler(InfiniteWorker):
 
 			def append(self, line_num, line):
 				self.build_outputs_update_rpc.append_console_line(self.build_id, line_num, line, self.type, self.subtype)
+
+			def set_return_code(self, return_code):
+				self.build_outputs_update_rpc.set_return_code(self.build_id, return_code, self.type, self.subtype)
+
 		return ConsoleAppender

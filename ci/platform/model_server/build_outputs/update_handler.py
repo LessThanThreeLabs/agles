@@ -18,6 +18,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
 	def add_subtypes(self, build_id, type, ordered_subtypes):
 		assert isinstance(ordered_subtypes, collections.Iterable)
+		assert type in ['setup', 'compile', 'test']
 
 		build_console = schema.build_console
 
@@ -92,3 +93,27 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 				)
 			self.publish_event("build_outputs", build_console_id, "line added",
 				line_num=line_num, line=line)
+
+	def set_return_code(self, build_id, return_code, type, subtype):
+		build_console = schema.build_console
+
+		query = build_console.select().where(
+			and_(
+				build_console.c.build_id==build_id,
+				build_console.c.type==type,
+				build_console.c.subtype==subtype,
+			)
+		)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+			assert row is not None
+
+			build_console_id = row[build_console.c.id]
+			sqlconn.execute(
+				build_console.update().where(
+					build_console.c.id==build_console_id
+				).values(return_code=return_code)
+			)
+
+		self.publish_event("build_outputs", build_console_id, "return code added",
+			return_code=return_code)

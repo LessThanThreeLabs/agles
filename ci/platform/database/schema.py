@@ -8,9 +8,8 @@ from database.engine import ConnectionFactory
 metadata = MetaData()
 
 # We reserve the first 999 users as special users
-user_id_seq = Sequence('user_id_seq', start=1000)
 user = Table('user', metadata,
-	Column('id', Integer, user_id_seq, primary_key=True),
+	Column('id', Integer, Sequence('user_id_seq', start=1000), primary_key=True),
 	Column('email', String, nullable=False, unique=True),
 	Column('first_name', String, nullable=False),
 	Column('last_name', String, nullable=False),
@@ -86,6 +85,7 @@ build_console = Table('build_console', metadata,
 	Column('type', String, nullable=False),
 	Column('subtype', String, nullable=False),
 	Column('subtype_priority', Integer, nullable=False),
+	Column('return_code', Integer, nullable=True),
 
 	UniqueConstraint('build_id', 'type', 'subtype')
 )

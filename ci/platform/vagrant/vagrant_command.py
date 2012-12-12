@@ -22,6 +22,8 @@ class SimpleVagrantCommand(VagrantCommand):
 
 	def run(self, vagrant_wrapper, output_handler):
 		results = vagrant_wrapper.ssh_call(self._get_command(), output_handler)
+		if output_handler:
+			output_handler.set_return_code(results.returncode)
 		return results.returncode
 
 
