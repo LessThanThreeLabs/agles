@@ -68,7 +68,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			query = user.select().where(user.c.id==user_id)
 			email = sqlconn.execute(query).first()[user.c.email]
 			uri = self._transpose_to_uri(email, repo_name)
-			ins = uri_repo_map.insert(uri=uri, repo_id=repo_id)
+			ins = uri_repo_map.insert().values(uri=uri, repo_id=repo_id)
 			sqlconn.execute(ins)
 
 	def _transpose_to_uri(self, email, repo_name):
