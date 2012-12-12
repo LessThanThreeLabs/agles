@@ -18,7 +18,7 @@ default_attributes(
 		:source_path => {
 			:internal => "/home/lt3/code/agles"
 		},
-		:config_path => "general/staging.yml"
+		:config_path => "ci/general/staging.yml"
 	},
 	:rvm => {
 		:default_ruby => "ruby-1.9.3-p286"
