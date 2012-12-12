@@ -31,7 +31,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		target_user_id = user_row[user.c.id]
 		if target_user_id == user_id:
-			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+			raise InvalidActionError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 
 		del_query = permission.delete().where(and_(
 			permission.c.user_id==target_user_id,
@@ -62,7 +62,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		target_user_id = user_row[user.c.id]
 		if target_user_id == user_id:
-			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+			raise InvalidActionError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 
 		del_query = permission.delete().where(and_(
 			permission.c.user_id==target_user_id,
@@ -100,3 +100,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(ins)
+
+
+class InvalidActionError(Exception):
+	pass

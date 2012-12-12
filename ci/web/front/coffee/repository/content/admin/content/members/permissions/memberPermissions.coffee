@@ -30,7 +30,7 @@ class MemberPermissions.Model extends Backbone.Model
 		socket.emit 'repos:update', requestData, (errors, result) =>
 			if errors?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
-				console.error errors
+				callback errors
 			else
 				@set 'permissions', permissions
 				callback null, null
@@ -91,7 +91,8 @@ class MemberPermissions.View extends Backbone.View
 
 	_handlePermissionsChange: (event) =>
 		permissions = $(event.target).val()
-		@model._changePermissions permissions
+		@model._changePermissions permissions, (error, result) =>
+			@_selectCorrectPermissionsRadio() if errors?
 
 	_handleRemoveMember: () =>
 		@model._removeMember()
