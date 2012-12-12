@@ -25,7 +25,7 @@ def handle_tests(tests)
 		if not commands.is_a? Array
 			commands = [commands]
 		end
-		commands.each do |command|
+		commands.map do |command|
 			command.gsub("\n", "\\n").gsub("\"", "\\\"")
 		end
 		create_testscript(name, path, commands, timeout)
