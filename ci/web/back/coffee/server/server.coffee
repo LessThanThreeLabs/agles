@@ -10,6 +10,8 @@ Configurer = require './configuration'
 ResourceSocket = require './resourceSocket/resourceSocket'
 SpdyCache = require './spdyCache/spdyCache'
 
+WelcomeHandler = require './handlers/welcomeHandler'
+
 
 exports.create = (configurationParams, modelConnection, port) ->
 	stores =
@@ -18,34 +20,39 @@ exports.create = (configurationParams, modelConnection, port) ->
 	
 	configurer = Configurer.create configurationParams, stores.sessionStore
 	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection
-	spdyCache = SpdyCache.create configurationParams
+	# spdyCache = SpdyCache.create configurationParams
+	spdyCache = 'hello'
 
 	httpsOptions =
 		key: fs.readFileSync configurationParams.security.key
 		cert: fs.readFileSync configurationParams.security.certificate
 		ca: fs.readFileSync configurationParams.security.certrequest
 
-	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, spdyCache, stores
+	welcomeHandler = WelcomeHandler.create configurationParams, stores, modelConnection
+
+	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, spdyCache, stores, welcomeHandler
 
 
 class Server
-	constructor: (@configurer, @httpsOptions, @port, @modelConnection, @resourceSocket, @spdyCache, @stores) ->
-		assert.ok @configurer? and @httpsOptions? and @port? and @modelConnection? and @resourceSocket? and @spdyCache? and @stores?
+	constructor: (@configurer, @httpsOptions, @port, @modelConnection, @resourceSocket, @spdyCache, @stores, @welcomeHandler) ->
+		assert.ok @configurer? and @httpsOptions? and @port? and @modelConnection? and 
+			@resourceSocket? and @spdyCache? and @stores? and @welcomeHandler?
 
 
 	start: () ->
 		expressServer = express()
 		@configurer.configure expressServer
 
-		expressServer.get '/', @_handleIndexRequest
-		expressServer.get '/account', @_handleIndexRequest
-		expressServer.get '/repository/:repositoryId', @_handleIndexRequest
-		expressServer.get '/repository/:repositoryId/:repositoryView', @_handleIndexRequest
-		expressServer.get '/repository/:repositoryId/changes/:changeId', @_handleIndexRequest
-		expressServer.get '/repository/:repositoryId/changes/:changeId/:changeView', @_handleIndexRequest
-		expressServer.get '/create/repository', @_handleIndexRequest
+		expressServer.get '/', @welcomeHandler.handleRequest
+		# expressServer.get '/', @_handleIndexRequest
+		# expressServer.get '/account', @_handleIndexRequest
+		# expressServer.get '/repository/:repositoryId', @_handleIndexRequest
+		# expressServer.get '/repository/:repositoryId/:repositoryView', @_handleIndexRequest
+		# expressServer.get '/repository/:repositoryId/changes/:changeId', @_handleIndexRequest
+		# expressServer.get '/repository/:repositoryId/changes/:changeId/:changeView', @_handleIndexRequest
+		# expressServer.get '/create/repository', @_handleIndexRequest
 
-		expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
+		# expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
 
 		# should server static content from here too
 		# (in memory)
@@ -53,15 +60,15 @@ class Server
 		server = spdy.createServer @httpsOptions, expressServer
 		server.listen @port
 
-		@resourceSocket.start server
+		# @resourceSocket.start server
 
-		@spdyCache.load (error) =>
-			throw error if error?
+		# @spdyCache.load (error) =>
+		# 	throw error if error?
 
-			@_createCssString()
-			@_createJsString()
+		# 	@_createCssString()
+		# 	@_createJsString()
 
-			console.log '>> Server running!'
+		# 	console.log '>> Server running!'
 
 
 	_handleIndexRequest: (request, response) =>

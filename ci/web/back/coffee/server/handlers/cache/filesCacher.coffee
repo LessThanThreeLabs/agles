@@ -1,5 +1,3 @@
-fs = require 'fs'
-zlib = require 'zlib'
 assert = require 'assert'
 
 FilesLoader = require './filesLoader'
@@ -7,8 +5,8 @@ FilesMinifier = require './filesMinifier'
 FilesCompressor = require './filesCompressor'
 
 
-exports.create = (configurationParams) ->
-	filesLoader = FilesLoader.create configurationParams
+exports.create = (configurationParams, filesToLoadUri) ->
+	filesLoader = FilesLoader.create configurationParams, filesToLoadUri
 	filesMinifier = FilesMinifier.create configurationParams
 	filesCompressor = FilesCompressor.create configurationParams
 	return new FilesCacher configurationParams, filesLoader, filesMinifier, filesCompressor
@@ -34,11 +32,6 @@ class FilesCacher
 				@filesCompressor.addCompressedFiles @_files, callback
 
 
-	getFileTypes: () =>
+	getFiles: () =>
 		assert.ok @_files?
-		return Object.keys @_files
-
-
-	getFiles: (fileType) =>
-		assert.ok @_files?
-		return @_files[fileType]
+		return @_files

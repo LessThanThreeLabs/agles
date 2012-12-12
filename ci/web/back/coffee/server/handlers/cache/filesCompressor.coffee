@@ -12,21 +12,21 @@ class FilesCompressor
 
 
 	addCompressedFiles: (files, callback) =>
-		console.log 'Compressing files...'
-		
-		gzipErrors = {}
-
 		await
 			for fileType of files
-				gzipErrors[fileType] = []
-				for file, index in files[fileType]
+				for fileName, file of files[fileType]
 					continue if not @_shouldGzip file.contentType
-					zlib.gzip file.plain, defer gzipErrors[fileType][index], files[fileType][index].gzip
+					zlib.gzip file.plain, defer file.gzipError, file.gzip
 
-		if @_containsAnyErrors gzipErrors
-			callback 'Unable to gzip all the files'
+		combinedErrors = ''
+		for fileType of files
+			for fileName, file of files[fileType]
+				combinedErrors += file.gzipError + ' ' if file.gzipError?
+
+		if combinedErrors isnt ''
+			callback combinedErrors
 		else
-			callback()
+			callback null, files
 
 
 	_shouldGzip: (contentType) =>
@@ -37,12 +37,3 @@ class FilesCompressor
 				return false
 			else
 				throw new Error 'Unaccounted for content type'
-
-
-	_containsAnyErrors: (gzipErrors) =>
-		for fileType in Object.keys gzipErrors
-			anyErrors = gzipErrors[fileType].some (fileError) =>
-				return fileError?
-			return true if anyErrors
-
-		return false

@@ -14,10 +14,7 @@ class FilesMinifier
 
 
 	replaceWithMinifiedFiles: (files) =>
-		console.log 'Minifying js files...'
 		@_replaceJs files
-
-		console.log 'Minifying css files...'
 		@_replaceCss files
 
 

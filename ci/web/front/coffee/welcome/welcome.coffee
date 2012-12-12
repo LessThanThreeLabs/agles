@@ -21,3 +21,4 @@ class Welcome.View extends Backbone.View
 	render: () =>
 		@$el.html @html
 		return @
+
