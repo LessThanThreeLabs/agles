@@ -49,7 +49,7 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 class ConsoleCompilationOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleCompilationOutput'
-	html: '&nbsp'
+	html: ''
 	currentViews: []
 
 
