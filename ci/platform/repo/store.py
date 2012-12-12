@@ -182,6 +182,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		except GitCommandError as e:
 			# TODO: should do logging here
 			raise e
+
 	def _push_github_if_necessary(self, repo, repo_hash, ref):
 		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_corresponding_github_repo_url(repo_hash)
