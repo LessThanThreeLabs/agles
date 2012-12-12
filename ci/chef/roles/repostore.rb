@@ -1,6 +1,7 @@
 name "repostore"
 description "Koality sets up sshd for a repostore"
 run_list(
+	"recipe[koality::gituser]",
 	"recipe[koality::repostore_server_config]",
 	"recipe[koality::filesystem_repo_server]"
 )

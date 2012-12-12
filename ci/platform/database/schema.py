@@ -128,7 +128,8 @@ github_repo_url_map = Table('github_repo_url_map', metadata,
 )
 
 
-def _insert_defaults():
+def _create_and_initialize(engine):
+	metadata.create_all(engine)
 	_insert_admin_user()
 
 
@@ -145,14 +146,13 @@ def reseed_db():
 	with contextlib.closing(engine.connect()):
 		for table in reversed(metadata.sorted_tables):
 			table.drop(engine, checkfirst=True)
-	metadata.create_all(engine)
-	_insert_defaults()
+	_create_and_initialize(engine)
 
 
 def main():
 	print "Creating database schema..."
 	engine = ConnectionFactory.get_sql_engine()
-	metadata.create_all(engine)
+	_create_and_initialize(engine)
 
 if __name__ == "__main__":
 	main()
