@@ -1,5 +1,13 @@
 include_recipe "koality"
 
+directory "/home/#{node[:koality][:user]}/scripts" do
+	owner node[:koality][:user]
+end
+
+directory "/home/#{node[:koality][:user]}/scripts/language" do
+	owner node[:koality][:user]
+end
+
 def language_configure(language, command)
 	file "/home/#{node[:koality][:user]}/scripts/language/#{language}.sh" do
 		owner node[:koality][:user]
