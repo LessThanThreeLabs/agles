@@ -27,7 +27,7 @@ end
 
 def pip(package_name, package_version)
 	python_pip package_name do
-		virtualenv node[:koality][:languages][:python][:virtualenv]
+		virtualenv node[:koality][:languages][:python][:virtualenv] if node[:koality][:languages][:python][:virtualenv]
 		version package_version if package_version
 		action :install
 	end
