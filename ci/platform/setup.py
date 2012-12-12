@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-	name="agles",
+	name="koality",
 	version="0.1",
-	description="Production code for agles",
+	description="Production code for koality",
 	packages=find_packages(exclude=[
 		"bin",
 		"aws_t",

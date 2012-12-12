@@ -23,6 +23,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			store_name = self._create_repo_on_filesystem(repo_hash, repo_name)
 			repo_id = self._create_repo_in_db(repo_hash, repo_name, store_name, default_permissions)
 			self._grant_permissions(user_id, repo_hash, RepositoryPermissions.RWA)
+			self._initialize_repo_uri(user_id, repo_id, repo_name)
 			self.publish_event("global", None, "repo added",
 				repo_id=repo_id, repo_name=repo_name, repo_hash=repo_hash, default_permissions=default_permissions)
 			return repo_id
@@ -58,6 +59,21 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(ins)
+
+	def _initialize_repo_uri(self, user_id, repo_id, repo_name):
+		user = database.schema.user
+		uri_repo_map = database.schema.uri_repo_map
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			query = user.select().where(user.c.id==user_id)
+			email = sqlconn.execute(query).first()[user.c.email]
+			uri = self._transpose_to_uri(email, repo_name)
+			ins = uri_repo_map.insert(uri=uri, repo_id=repo_id)
+			sqlconn.execute(ins)
+
+	def _transpose_to_uri(self, email, repo_name):
+		sanitized_email = email.replace("@", "AT").replace(".", "DOT")
+		return "/%s/%s" % (sanitized_email, repo_name)
 
 	def register_repostore(self, host_name, root_dir):
 		#TODO: We don't need a store name. Just use id. This is a large refactor
