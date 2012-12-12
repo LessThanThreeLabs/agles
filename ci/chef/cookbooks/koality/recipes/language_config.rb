@@ -16,18 +16,18 @@ def language_configure(language, command)
 end
 
 def virtualenv_configure(new_virtualenv)
-	node[:koality][:languages][:python][:virtualenv] = "/home/#{node[:koality][:user]}/virtualenvs/#{new_virtualenv}"
+	node.set[:koality][:languages][:python][:virtualenv] = "/home/#{node[:koality][:user]}/virtualenvs/#{new_virtualenv}"
 	language_configure("python", "source virtualenvs/#{new_virtualenv}/bin/activate")
 end
 
 def rvm_configure(new_ruby)
-	node[:koality][:languages][:ruby][:ruby_string] = new_ruby
+	node.set[:koality][:languages][:ruby][:ruby_string] = new_ruby
 	language_configure("ruby", "rvm use #{new_ruby}")
 end
 
 def nvm_configure(new_node)
 	new_node = "v#{new_node}" if not new_node.start_with? "v"
-	node[:koality][:languages][:node][:node_version] = new_node
+	node.set[:koality][:languages][:node][:node_version] = new_node
 	link "/usr/local/bin/node" do
 		to "/home/#{node[:koality][:user]}/#{new_node}/bin/node"
 	end
@@ -39,7 +39,7 @@ end
 
 def setup_language(language, version)
 	language = language.to_sym
-	node[:koality][:languages][language] = {:version => version}
+	node.set[:koality][:languages][language] = {:version => version}
 	case language
 	when :python
 		virtualenv_configure version

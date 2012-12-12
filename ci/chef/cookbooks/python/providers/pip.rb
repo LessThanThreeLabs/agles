@@ -157,7 +157,7 @@ end
 # TODO remove when provider is moved into Chef core
 # this allows PythonPip to work with Chef::Resource::Package
 def pip_cmd(nr)
-  if (nr.respond_to?("virtualenv") && nr.virtualenv)
+  if (nr.respond_to?("virtualenv") && nr.virtualenv && !nr.virtualenv.empty?)
     ::File.join(nr.virtualenv,'/bin/pip')
   elsif "#{node['python']['install_method']}".eql?("source")
     ::File.join("#{node['python']['prefix_dir']}","/bin/pip")
