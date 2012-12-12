@@ -97,7 +97,7 @@ class SchemaDataGenerator(object):
 					ins_map = schema.build_commits_map.insert().values(build_id=build_id, commit_id=commit_id)
 					conn.execute(ins_map)
 
-					for priority, console_type in enumerate(range(2)):
+					for priority, console_type in enumerate(['compile', 'test']):
 						ins_console = schema.build_console.insert().values(build_id=build_id, type=console_type,
 							subtype="subtype", subtype_priority=priority)
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
