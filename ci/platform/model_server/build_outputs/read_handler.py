@@ -106,4 +106,4 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 			output = dict([(row[console_output.c.line_number], row[console_output.c.line]) for row in sqlconn.execute(output_query)])
 			console_metadata = to_dict(sqlconn.execute(metadata_query).first(), build_console.columns)
 			console_metadata[console_output.name] = output
-		return console_metadata
+			return console_metadata
