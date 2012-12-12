@@ -42,7 +42,7 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 	def _runserver(self, base_instance, exchange,
 				   queue_names, event, ttl=30000):
 		server = Server(base_instance)
-		server.bind(exchange, queue_names, message_ttl=ttl)
+		server.bind(exchange, queue_names, message_ttl=ttl, auto_delete=True)
 		event.set()
 		server.run()
 

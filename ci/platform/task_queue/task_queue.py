@@ -12,7 +12,7 @@ class TaskQueue(object):
 		if not connection:
 			connection = Connection(connection_info)
 		self.connection = connection
-		self.shared_work_queue = Queue(durable=False, auto_delete=False)(connection)
+		self.shared_work_queue = Queue(durable=False, auto_delete=True)(connection)
 		self.shared_work_queue.queue_declare()
 		self.producer = self.connection.Producer(serializer='msgpack')
 		self.workers = {}
@@ -32,8 +32,10 @@ class TaskQueue(object):
 	def get_workers(self, num_workers, queue):
 		queue(self.connection).queue_declare()
 		with self.connection.Consumer([queue], callbacks=[self._new_worker], auto_declare=False):
-			for worker in range(num_workers):
+			self.worker_attempt = 0
+			while self.worker_attempt < num_workers:
 				self.connection.drain_nowait()
+				self.worker_attempt = self.worker_attempt + 1
 			print "Received %s out of %s workers" % (len(self.workers), num_workers)
 			if len(self.workers) == 0:
 				self.shared_work_queue.delete()
@@ -41,6 +43,12 @@ class TaskQueue(object):
 
 	def _new_worker(self, body, message):
 		self._add_worker(body["worker_id"], body["queue_name"])
+		try:
+			Queue(body["queue_name"])(self.connection).queue_declare(passive=True)
+		except self.connection.transport.channel_errors:
+			self.worker_attempt = self.worker_attempt - 1  # Queue doesn't exist, worker is dead
+		else:
+			pass  # All good
 		message.ack()
 
 	def _add_worker(self, name, queue):

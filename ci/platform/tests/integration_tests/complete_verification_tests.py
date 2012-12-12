@@ -75,7 +75,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			vs_process.start()
 			self.vs_processes.append(vs_process)
 		repo_store = Server(FileSystemRepositoryStore(self.repo_dir))
-		repo_store.bind(store.rpc_exchange_name, [self.repo_machine])
+		repo_store.bind(store.rpc_exchange_name, [self.repo_machine], auto_delete=True)
 		self.repo_store_process = TestProcess(target=repo_store.run)
 		self.repo_store_process.start()
 		verification_master = VerificationMaster()

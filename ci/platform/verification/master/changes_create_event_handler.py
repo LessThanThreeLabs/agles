@@ -41,7 +41,7 @@ class ChangesCreateEventHandler(EventSubscriber):
 		test_commands = self._get_test_commands(commit_list)
 		num_workers = max(1, min(4, len(test_commands)))  # between 1 and 4 workers
 		task_queue = TaskQueue()
-		workers = task_queue.get_workers(num_workers, verification_request_queue)
+		workers = task_queue.get_workers(num_workers, verification_worker_queue)
 		if not workers:
 			raise NoWorkersFoundException()
 		with ModelServer.rpc_connect("changes", "update") as model_server_rpc:

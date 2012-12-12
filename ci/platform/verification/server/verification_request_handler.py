@@ -19,7 +19,7 @@ class VerificationRequestHandler(InfiniteWorker):
 	and triggers a Verify on the commit list.
 	"""
 	def __init__(self, verifier):
-		super(VerificationRequestHandler, self).__init__(verification_request_queue)
+		super(VerificationRequestHandler, self).__init__(verification_worker_queue)
 		self.verifier = verifier
 		self._register_pubkey()
 

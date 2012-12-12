@@ -37,7 +37,7 @@ def main():
 		config["store_name"], args.exchange_name, root_dir)
 
 	fs_repo_server = Server(FileSystemRepositoryStore(root_dir))
-	fs_repo_server.bind(args.exchange_name, [config["store_name"]])
+	fs_repo_server.bind(args.exchange_name, [config["store_name"], auto_delete=True])
 	fs_repo_server.run()
 
 

@@ -13,7 +13,7 @@ class TaskWorker(object):
 		self.connection = connection if connection else Connection(connection_info)
 
 	def wait_for_assignment(self, worker_pool_queue):
-		self.own_queue = Queue(auto_delete=True)(self.connection)
+		self.own_queue = Queue(auto_delete=True, durable=False)(self.connection)
 		self.own_queue.queue_declare()
 		self.allocated = False
 		self.results = []
