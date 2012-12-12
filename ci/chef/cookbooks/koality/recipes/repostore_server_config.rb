@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: koality
-# Recipe:: verification_server
+# Recipe:: repostore_server_config
 #
 # Copyright 2012, Less Than Three Labs
 #
@@ -80,5 +80,21 @@ if not File.exists? '/usr/local/bin/ssh'
 
 	link "/usr/bin/git-upload-pack" do
 		to "/usr/bin/dul-upload-pack"
+	end
+
+	bash "Move standard ssh daemon" do
+		user "root"
+		code <<-EOH
+			/usr/sbin/sshd -p 2222
+			service ssh stop
+			echo MAKE SURE THE SSH DAEMON HAS STARTED SUCCESSFULLY BEFORE LOGGING OUT
+		EOH
+	end
+
+	bash "Start modified ssh daemon" do
+		user "root"
+		code <<-EOH
+			/usr/local/sbin/sshd -f /usr/local/etc/sshd_config
+		EOH
 	end
 end
