@@ -16,7 +16,7 @@ class FilesLoader
 			if error?
 				callback error
 			else
-				files = @_createFiles filesToLoad
+				files = @_createFiles JSON.parse filesToLoad
 				@_loadFileContent files, callback
 
 
@@ -38,12 +38,14 @@ class FilesLoader
 	_loadFileContent: (files, callback) =>
 		await
 			for fileType of files
-				for fileName, file of fileType
+				for fileName, file of files[fileType]
 					fs.readFile file.location, 'binary', defer file.error, file.plain
 
 		combinedErrors = ''
 		for fileType of files
 			for fileName, file of files[fileType]
+				if file.error?
+					console.error file.error
 				combinedErrors += file.error + ' ' if file.error?
 
 		if combinedErrors isnt ''

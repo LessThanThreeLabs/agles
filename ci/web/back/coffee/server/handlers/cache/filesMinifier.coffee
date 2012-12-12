@@ -22,16 +22,16 @@ class FilesMinifier
 		minifiedJsCode = @_getMinifiedJs files.js
 
 		minifiedJsFile =
-			name: '/js/minified.js'
 			plain: minifiedJsCode
 			contentType: 'application/javascript'
 
-		files.js = [minifiedJsFile]
+		files.js = {}
+		files.js['/js/minified.js'] = minifiedJsFile
 
 
 	_getMinifiedJs: (jsFiles) =>
 		topLevelAst = null
-		for jsFile in jsFiles
+		for jsFileName, jsFile of jsFiles
 			topLevelAst = uglifyJs.parse jsFile.plain,
 				filename: jsFile.name
 				toplevel: topLevelAst
@@ -54,16 +54,16 @@ class FilesMinifier
 		minifiedCssCode = @_getMinifiedCss files.css
 
 		minifiedCssFile =
-			name: '/css/minified.css'
 			plain: minifiedCssCode
 			contentType: 'text/css'
 
-		files.css = [minifiedCssFile]
+		files.css = {}
+		files.css['/css/minified.css'] = minifiedCssFile
 
 
 	_getMinifiedCss: (cssFiles) =>
 		minifiedCssToCombine = []
-		for cssFile in cssFiles
+		for cssFileName, cssFile of cssFiles
 			minifiedCss = cleanCss.process cssFile.plain, removeEmpty: true
 			minifiedCssToCombine.push minifiedCss
 

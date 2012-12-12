@@ -29,6 +29,9 @@ exports.create = (configurationParams, modelConnection, port) ->
 		ca: fs.readFileSync configurationParams.security.certrequest
 
 	welcomeHandler = WelcomeHandler.create configurationParams, stores, modelConnection
+	welcomeHandler.initialize (error) =>
+		consore.error error if error?
+		console.log 'welcomeHandler ready!'
 
 	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, spdyCache, stores, welcomeHandler
 
