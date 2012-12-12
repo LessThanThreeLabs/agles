@@ -16,7 +16,7 @@ setup:
     - pip:
       - amqp
       - pika: 0.9.5
-      - kombu
+      - kombu: 2.4.7
       - librabbitmq
       - sqlalchemy
       - pyyaml
@@ -29,7 +29,6 @@ setup:
       - greenlet
       - eventlet
       - gitpython
-      - virtualenvwrapper
       - psycopg2
       - argparse
       - nose-testconfig
@@ -50,6 +49,6 @@ setup:
       - name: koality
         username: lt3
 languages:
-  python: 2.7
+  # python: 2.7 # This would put pip packages in a virtualenv
   ruby: 1.9.3
   nodejs: v0.8.9
