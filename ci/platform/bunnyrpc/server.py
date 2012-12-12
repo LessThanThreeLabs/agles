@@ -112,6 +112,9 @@ class Server(object):
 		try:
 			proto["value"] = getattr(self.base_instance, method_name)(*args)
 			proto["error"] = None
+		except AssertionError as e:
+			#TODO: We should log this
+			raise e
 		except Exception:
 			proto["value"] = None
 			exc_type, exc_value, exc_traceback = sys.exc_info()
