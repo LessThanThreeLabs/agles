@@ -11,6 +11,7 @@ run_list(
 	"recipe[redisio::install]",
 	"recipe[rvm::system]",
 	"recipe[koality::dependencies]",
+	"recipe[koality::language_config]",
 	"recipe[koality::setup_config]"
 )
 default_attributes(
