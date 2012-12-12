@@ -43,7 +43,7 @@ class RepositoriesReadHandler extends Handler
 				if error.type is 'InvalidPermissionsError' then callback 403
 				else callback 'unable to get clone url'
 			else
-				cloneUrl = @configurationParams.domain + ":" + url
+				cloneUrl = "git@" + @configurationParams.domain + ":" + url
 				callback null, cloneUrl
 
 
