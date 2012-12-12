@@ -22,8 +22,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			repo_hash = os.urandom(16).encode('hex')
 			store_name = self._create_repo_on_filesystem(repo_hash, repo_name)
 			repo_id = self._create_repo_in_db(repo_hash, repo_name, store_name, default_permissions)
-			self._grant_permissions(user_id, repo_hash, RepositoryPermissions.RWA)
 			self._initialize_repo_uri(user_id, repo_id, repo_name)
+			self._grant_permissions(user_id, repo_hash, RepositoryPermissions.RWA)
 			self.publish_event("global", None, "repo added",
 				repo_id=repo_id, repo_name=repo_name, repo_hash=repo_hash, default_permissions=default_permissions)
 			return repo_id
@@ -73,7 +73,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 	def _transpose_to_uri(self, email, repo_name):
 		sanitized_email = email.replace("@", "AT").replace(".", "DOT")
-		return "/%s/%s" % (sanitized_email, repo_name)
+		return "%s/%s" % (sanitized_email, repo_name)
 
 	def register_repostore(self, host_name, root_dir):
 		#TODO: We don't need a store name. Just use id. This is a large refactor

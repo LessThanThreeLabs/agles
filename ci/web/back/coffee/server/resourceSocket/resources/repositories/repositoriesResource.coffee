@@ -8,7 +8,7 @@ RepositoriesUpdateHandler = require './handlers/repositoriesUpdateHandler'
 
 exports.create = (configurationParams, stores, modelConnection) ->
 	createHandler = RepositoriesCreateHandler.create modelConnection.rpcConnection
-	readHandler = RepositoriesReadHandler.create modelConnection.rpcConnection
+	readHandler = RepositoriesReadHandler.create configurationParams, modelConnection.rpcConnection
 	updateHandler = RepositoriesUpdateHandler.create modelConnection.rpcConnection
 	return new RepositoriesResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler
 

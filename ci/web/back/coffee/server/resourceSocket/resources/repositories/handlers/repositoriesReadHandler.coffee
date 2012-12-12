@@ -3,11 +3,16 @@ assert = require 'assert'
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection) ->
-	return new RepositoriesReadHandler modelRpcConnection
+exports.create = (configurationParams, modelRpcConnection) ->
+	return new RepositoriesReadHandler configurationParams, modelRpcConnection
 
 
 class RepositoriesReadHandler extends Handler
+
+	constructor: (@configurationParams, modelRpcConnection) ->
+		assert.ok @configurationParams?
+		super modelRpcConnection
+
 
 	default: (socket, data, callback) =>
 		assert.ok data.id?
@@ -38,7 +43,8 @@ class RepositoriesReadHandler extends Handler
 				if error.type is 'InvalidPermissionsError' then callback 403
 				else callback 'unable to get clone url'
 			else
-				callback null, url
+				cloneUrl = @configurationParams.domain + ":" + url
+				callback null, cloneUrl
 
 
 	writableRepositories: (socket, args, callback) =>
