@@ -1,5 +1,4 @@
 import os
-import uuid
 
 from sqlalchemy import and_
 
@@ -75,11 +74,10 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		sanitized_email = email.replace("@", "AT").replace(".", "DOT")
 		return "%s/%s" % (sanitized_email, repo_name)
 
-	def register_repostore(self, host_name, root_dir):
+	def register_repostore(self, host_name, store_name, root_dir, num_repos):
 		#TODO: We don't need a store name. Just use id. This is a large refactor
-		store_name = uuid.uuid1().hex
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
-		manager.register_remote_store(store_name)
+		manager.register_remote_store(store_name, num_repos)
 
 		repostore = database.schema.repostore
 		query = repostore.select().where(
@@ -102,4 +100,3 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			statement = repostore.insert().values(uri=store_name, host_name=host_name, repositories_path=root_dir)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(statement)
-		return store_name

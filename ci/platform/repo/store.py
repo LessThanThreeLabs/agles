@@ -22,10 +22,11 @@ from util import pathgen
 
 class RemoteRepositoryManager(object):
 
-	def register_remote_store(self, store_name):
+	def register_remote_store(self, store_name, num_repos):
 		"""Registers a remote store as a managed store of this manager
 
 		:param store_name: The identifier of the remote store the repository is on
+		:param num_repos: The number of repos to initialize it with
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -80,11 +81,8 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		super(DistributedLoadBalancingRemoteRepositoryManager, self).__init__()
 		self._redisdb = redis_connection
 
-	def register_remote_store(self, store_name):
-		if not self._redisdb.zscore(self.SERVER_REPO_COUNT_NAME, store_name):
-			self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{store_name: 0})
-		else:
-			raise StoreAlreadyRegisteredError("Store %s already registered." % store_name)
+	def register_remote_store(self, store_name, num_repos):
+		self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{store_name: num_repos})
 
 	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
@@ -134,11 +132,7 @@ class RepositoryStore(object):
 	CONFIG_FILE = ".repostore_config.yml"
 
 	@classmethod
-	def create_config(cls, root_dir):
-		host_name = socket.gethostbyname(socket.getfqdn())  # ridiculous hack
-		with model_server.ModelServer.rpc_connect("repos", "create") as conn:
-			store_name = conn.register_repostore(host_name, root_dir)
-
+	def create_config(cls, root_dir, store_name):
 		config = {"store_name": store_name}
 		config_path = os.path.join(root_dir, cls.CONFIG_FILE)
 		if not os.path.exists(root_dir):
@@ -153,6 +147,13 @@ class RepositoryStore(object):
 		with open(config_path) as config_file:
 			config = yaml.load(config_file.read())
 		return config
+
+	@classmethod
+	def initialize_store(cls, root_dir, store_name, num_repos):
+		host_name = socket.gethostbyname(socket.getfqdn())  # ridiculous hack
+		with model_server.ModelServer.rpc_connect("repos", "create") as conn:
+			conn.register_repostore(host_name, store_name, root_dir, num_repos)
+
 
 	def merge_changeset(self, repo_hash, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
@@ -273,11 +274,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo_path = os.path.join(self._root_path,
 								 pathgen.to_path(repo_hash, repo_name))
 		return os.path.realpath(repo_path)
-
-
-class StoreAlreadyRegisteredError(Exception):
-	def __init__(self, msg=''):
-		super(StoreAlreadyRegisteredError, self).__init__(msg)
 
 
 class RepositoryOperationException(Exception):
