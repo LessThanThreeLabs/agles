@@ -14,7 +14,7 @@ class BuildVerifier(VagrantBuildCore):
 			verification_config = self.setup_build(repo_uri, refs, console_appender)
 			self.run_compile_step(verification_config.compile_commands, console_appender)
 			self.run_test_step(verification_config.test_commands, console_appender)
-		except Exception, e:
+		except Exception:
 			self.mark_failure(callback)
 		else:
 			self.mark_success(callback)

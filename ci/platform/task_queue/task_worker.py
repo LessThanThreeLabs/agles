@@ -42,13 +42,16 @@ class TaskWorker(object):
 	def _begin_listening(self, shared_queue_name, ack):
 		self.consumer.cancel()
 		shared_queue = Queue(shared_queue_name)
-		with self.connection.Consumer([shared_queue], callbacks=[self._handle_task], auto_declare=False) as self.consumer:
-			self.consumer.channel.basic_ack(delivery_tag=ack)
-			try:
-				while True:
-					self.connection.drain_events(timeout=1)
-			except socket.timeout:
-				pass
+		try:
+			with self.connection.Consumer([shared_queue], callbacks=[self._handle_task], auto_declare=False) as self.consumer:
+				self.consumer.channel.basic_ack(delivery_tag=ack)
+				try:
+					while True:
+						self.connection.drain_events(timeout=1)
+				except socket.timeout:
+					pass
+		except self.connection.transport.channel_errors:
+			pass  # Looks like there's no work to be done anymore (queue nonexistent)
 
 	def _freed(self):
 		try:

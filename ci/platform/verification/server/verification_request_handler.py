@@ -44,12 +44,10 @@ class VerificationRequestHandler(InfiniteWorker):
 		with ModelServer.rpc_connect("builds", "update") as builds_update_rpc:
 			callback = self._make_verify_callback(self.build_id, builds_update_rpc)
 			# check that no results are exceptions
-			success = not reduce(operator.or_, map(lambda results: isinstance(results, Exception), results), False)
+			success = not any([isinstance(result, Exception) for result in results])
 			if success:
 				self.verifier.mark_success(callback)
 			else:
-				for result in results:
-					print result
 				self.verifier.mark_failure(callback)
 
 	def do_task(self, task):
