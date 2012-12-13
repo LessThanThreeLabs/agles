@@ -31,7 +31,7 @@ class TaskQueue(object):
 
 	def get_workers(self, num_workers, queue):
 		queue(self.connection).queue_declare()
-		with self.connection.Consumer([queue], callbacks=[self._new_worker], auto_declare=False):
+		with self.connection.Consumer([queue], callbacks=[self._new_worker], auto_declare=False) as consumer:
 			self.worker_attempt = 0
 			while self.worker_attempt < num_workers:
 				self.connection.drain_nowait()
@@ -39,6 +39,7 @@ class TaskQueue(object):
 			print "Received %s out of %s workers" % (len(self.workers), num_workers)
 			if len(self.workers) == 0:
 				self.shared_work_queue.delete()
+		consumer.recover(requeue=True)
 		return self.workers
 
 	def _new_worker(self, body, message):
