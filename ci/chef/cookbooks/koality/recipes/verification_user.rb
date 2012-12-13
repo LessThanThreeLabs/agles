@@ -10,3 +10,5 @@ end
 directory "/verification" do
 	owner "verification"
 end
+
+gem_package "vagrant"
