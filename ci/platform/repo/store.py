@@ -150,10 +150,17 @@ class RepositoryStore(object):
 
 	@classmethod
 	def initialize_store(cls, root_dir, store_name, num_repos):
-		host_name = socket.gethostbyname(socket.getfqdn())  # ridiculous hack
+		host_name = cls._get_host_name()
 		with model_server.ModelServer.rpc_connect("repos", "create") as conn:
 			conn.register_repostore(host_name, store_name, root_dir, num_repos)
 
+	@classmethod
+	def _get_host_name(cls):  # relies on Google DNS to capture own outbound ip
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		sock.connect(("8.8.8.8", 80))
+		host_name = sock.getsockname()[0]
+		sock.close()
+		return host_name
 
 	def merge_changeset(self, repo_hash, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
