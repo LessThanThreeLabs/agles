@@ -73,7 +73,6 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 			@model.unsubscribe() if @model.subscribeId?
 			@model.subscribeId = globalRouterModel.get 'repositoryId'
 			@model.subscribe() if @model.subscribeId?
-			console.log 'resubscribed'
 			@model.fetchMembers), @
 
 		@model.subscribe() if @model.subscribeId?
