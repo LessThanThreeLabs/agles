@@ -46,5 +46,5 @@ class AccountHeaderMenuOption.View extends Backbone.View
 
 
 	_clickHandler: () =>
-		console.log 'need to handle account click!'
+		window.location.href = '/account'
 		
