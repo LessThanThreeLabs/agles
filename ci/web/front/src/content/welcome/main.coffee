@@ -5,7 +5,7 @@ class Main.Model extends Backbone.Model
 
 	initialize: () =>
 		@headerModel = new Header.Model()
-		# @welcomeModel = new Welcome.Model()
+		@welcomeModel = new Welcome.Model()
 
 
 class Main.View extends Backbone.View
@@ -16,15 +16,18 @@ class Main.View extends Backbone.View
 
 	initialize: () ->
 		@headerView = new Header.View model: @model.headerModel
+		@welcomeView = new Welcome.View model: @model.welcomeModel
 		
 
 	onDispose: () =>
 		@headerView.dispose()
+		@welcomeView.dispose()
 
 
 	render: () ->
 		@$el.html @html
 		@$('.headerContainer').html @headerView.render().el
+		@$('.contentContainer').html @welcomeView.render().el
 		return @
 
 

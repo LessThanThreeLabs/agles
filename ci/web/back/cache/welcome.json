@@ -7,6 +7,7 @@
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/welcome/welcome.css",
 			"/css/src/main.css"
 		]
 	},
@@ -27,6 +28,7 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/welcome/welcome.js",
 			"/js/src/content/welcome/main.js"
 		]
 	},

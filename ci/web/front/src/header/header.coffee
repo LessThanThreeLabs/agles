@@ -29,5 +29,4 @@ class Header.View extends Backbone.View
 
 
 	_handleTitleClick: () =>
-		console.log 'need to go to welcome screen'
-		# window.globalRouterModel.set 'view', 'welcome'
+		window.location.href = '/'
