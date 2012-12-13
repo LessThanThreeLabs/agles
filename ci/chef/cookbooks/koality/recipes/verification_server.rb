@@ -15,7 +15,7 @@ end
 
 node[:koality][:verification][:server_count].to_i.times do |server_num|
 	vagrant_path = "/verification/server/#{server_num}"
-	rvm_shell "Start verification server #{server_num}}" do
+	bash "Start verification server #{server_num}}" do
 		user "verification"
 		code <<-EOH
 			mkdir -p #{vagrant_path}

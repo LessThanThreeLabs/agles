@@ -1,7 +1,6 @@
 name "verification_server"
 description "Koality verification server"
 run_list(
-	"recipe[rvm]",
 	"recipe[koality::verification_server]"
 )
 override_attributes(

@@ -1,3 +1,5 @@
+include_recipe "rvm"
+
 chef_gem "ruby-shadow"
 
 user "verification" do
@@ -11,4 +13,4 @@ directory "/verification" do
 	owner "verification"
 end
 
-gem_package "vagrant"
+rvm_gem "vagrant"
