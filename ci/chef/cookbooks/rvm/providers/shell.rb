@@ -77,10 +77,10 @@ def script_wrapper(exec_action)
 
     if new_resource.user
       user        new_resource.user
-      if user_rvm && new_resource.environment
+      if new_resource.environment
         environment({ 'USER' => new_resource.user, 'HOME' => user_home }.merge(
           new_resource.environment))
-      elsif user_rvm
+      else
         environment({ 'USER' => new_resource.user, 'HOME' => user_home })
       end
     end
