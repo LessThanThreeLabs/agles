@@ -29,7 +29,9 @@ class PrettyDropdown.View extends Backbone.View
 	template: Handlebars.compile '{{#each options}}
 				<div class="prettyDropdownOption" optionName="{{name}}">{{title}}</div>
 			{{/each}}'
-	events: 'click .prettyDropdownOption': '_clickHandler'
+	events:
+		'hover .prettyDropdownOption': "_handleHover"
+		'click .prettyDropdownOption': '_handleClick'
 
 
 	initialize: () =>
@@ -82,7 +84,14 @@ class PrettyDropdown.View extends Backbone.View
 			else
 				console.error 'Unaccounted for dropdown alignment'
 
+	_handleHover: (event) =>
+		hoveredOptionName = $(event.target).attr 'optionName'
+		@trigger 'hover', hoveredOptionName
+		event.stopPropagation()
 
-	_clickHandler: (event) =>
-		console.log 'need to handle repository click!'
+
+	_handleClick: (event) =>
+		selectedOptionName = $(event.target).attr 'optionName'
+		@trigger 'selected', selectedOptionName
+		@model.set 'visible', false
 		event.stopPropagation()
