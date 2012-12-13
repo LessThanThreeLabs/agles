@@ -21,12 +21,13 @@ node[:koality][:verification][:server_count].to_i.times do |server_num|
 			mkdir -p #{vagrant_path}
 			cd #{vagrant_path}
 			vagrant init precise64_verification
-			while [ "`vagrant status | grep default | sed -e 's/default\\s\\+\\(.*\\)/\\1/'`" != 'running' ]
-				do vagrant destroy -f
-				vagrant up --no-provision
-			done
-			vagrant sandbox on
-			#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{vagrant_path} -f >> #{vagrant_path}/server.log 2>&1 &
+			if [ "`vagrant status | grep default | sed -e 's/default\\s\\+\\(.*\\)/\\1/'`" == 'running' ]
+				then #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{vagrant_path} -f >> #{vagrant_path}/server.log 2>&1 &
+			else
+				vagrant destroy -f
+				#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{vagrant_path} >> #{vagrant_path}/server.log 2>&1 &
+				sleep 60  # deal with it
+			fi
 			EOH
 	end
 end
