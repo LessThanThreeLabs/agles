@@ -7,6 +7,10 @@ class RepositoryHeaderMenuOption.Model extends Backbone.Model
 		visible: true
 
 
+	initialize: () =>
+		@dropdownModel = new PrettyDropdown.Model alignment: 'right'
+
+
 	fetchRepositories: () =>
 		requestData = 
 			method: 'writableRepositories'
@@ -49,6 +53,8 @@ class RepositoryHeaderMenuOption.View extends Backbone.View
 
 
 	initialize: () ->
+		@dropdownView = new PrettyDropdown.View model: @model.dropdownModel
+
 		# @model.on 'change:repositories', @_updateDropdownContents, @
 		@model.on 'change:visible', @_fixVisibility, @
 
@@ -64,6 +70,7 @@ class RepositoryHeaderMenuOption.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		@$el.append @dropdownView.render().el
 		# @_updateDropdownContents()
 		return @
 

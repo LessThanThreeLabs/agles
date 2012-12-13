@@ -4,6 +4,8 @@
 			"/css/src/fonts.css",
 			"/css/src/setup.css",
 
+			"/css/src/visualElements/prettyDropdown/prettyDropdown.css",
+
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
@@ -24,6 +26,9 @@
 			"/js/src/setup.js",
 			"/js/src/socket.js",
 			"/js/src/globalAccount.js",
+
+			"/js/src/visualElements/prettyDropdown/prettyDropdownOption.js",
+			"/js/src/visualElements/prettyDropdown/prettyDropdown.js",			
 
 			"/js/src/header/menuOptions/repository/repositoryHeaderMenuOption.js",
 			"/js/src/header/menuOptions/account/accountHeaderMenuOption.js",
