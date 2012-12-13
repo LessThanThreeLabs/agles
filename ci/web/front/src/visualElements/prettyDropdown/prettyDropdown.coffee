@@ -29,11 +29,12 @@ class PrettyDropdown.View extends Backbone.View
 	template: Handlebars.compile '{{#each options}}
 				<div class="prettyDropdownOption" optionName="{{name}}">{{title}}</div>
 			{{/each}}'
-	events: 'click': '_clickHandler'
+	events: 'click .prettyDropdownOption': '_clickHandler'
 
 
 	initialize: () =>
-		@model.on 'change', @render, @
+		@model.on 'change:options change:alignment', @render, @
+		@model.on 'change:visible', @_fixVisibility, @
 
 
 	onDispose: () =>
@@ -48,7 +49,26 @@ class PrettyDropdown.View extends Backbone.View
 
 
 	_fixVisibility: () =>
+		@_fixGlobalClickListener()
 		@$el.toggle @model.get 'visible'
+
+
+	_fixGlobalClickListener: () =>
+		if @model.get 'visible' then @_addGlobalClickListener()
+		else @_removeGlobalClickListener()
+
+
+	_addGlobalClickListener: () =>
+		setTimeout (() => $('html').bind 'click', @_handleGlobalClick), 0
+
+
+	_removeGlobalClickListener: () =>
+		$('html').unbind 'click', @_handleGlobalClick
+
+
+	_handleGlobalClick: (event) =>
+		@_removeGlobalClickListener()
+		@model.set 'visible', false
 
 
 	_fixAlignment: () =>
@@ -65,4 +85,4 @@ class PrettyDropdown.View extends Backbone.View
 
 	_clickHandler: (event) =>
 		console.log 'need to handle repository click!'
-		
+		event.stopPropagation()
