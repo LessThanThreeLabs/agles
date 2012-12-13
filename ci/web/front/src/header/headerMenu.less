@@ -8,25 +8,28 @@ div.headerMenu {
 	width: 300px;
 
 	.headerMenuOption {
-		cursor: hand;
-		cursor: pointer;
-
-		@backgroundColorTransitionTime: 0.5s;
-		transition: background-color @backgroundColorTransitionTime ease-out;
-		-moz-transition: background-color @backgroundColorTransitionTime ease-out;
-		-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
-		-o-transition: background-color @backgroundColorTransitionTime ease-out;
-
 		@height: 35px;
 		display: inline-block;
 		position: relative;
 		height: @height;
 		line-height: @height;
-		padding-left: 15px;
-		padding-right: 15px;
 
-		&:hover {
-			background-color: rgba(255, 255, 255, 0.4);
+		.headerMenuOptionTitle {
+			cursor: hand;
+			cursor: pointer;
+
+			@backgroundColorTransitionTime: 0.5s;
+			transition: background-color @backgroundColorTransitionTime ease-out;
+			-moz-transition: background-color @backgroundColorTransitionTime ease-out;
+			-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+			-o-transition: background-color @backgroundColorTransitionTime ease-out;
+
+			padding-left: 15px;
+			padding-right: 15px;
+			
+			&:hover {
+				background-color: rgba(255, 255, 255, 0.4);
+			}
 		}
 	}
 }

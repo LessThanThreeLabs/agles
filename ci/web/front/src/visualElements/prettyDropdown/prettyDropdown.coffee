@@ -4,8 +4,12 @@ window.PrettyDropdown = {}
 class PrettyDropdown.Model extends Backbone.Model
 	defaults:
 		options: []
-		visible: true
+		visible: false
 		alignment: 'left'
+
+
+	toggleVisibility: () =>
+		@set 'visible', not @get 'visible'
 
 
 	validate: (attributes) =>

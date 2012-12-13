@@ -17,7 +17,7 @@ class AccountHeaderMenuOption.Model extends Backbone.Model
 class AccountHeaderMenuOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'accountHeaderMenuOption headerMenuOption'
-	template: Handlebars.compile '{{firstName}} {{lastName}}'
+	template: Handlebars.compile '<div class="headerMenuOptionTitle">{{firstName}} {{lastName}}</div>'
 	events: 'click': '_clickHandler'
 
 

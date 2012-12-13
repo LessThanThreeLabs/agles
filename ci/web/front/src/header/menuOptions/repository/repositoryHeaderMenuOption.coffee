@@ -41,7 +41,7 @@ class RepositoryHeaderMenuOption.Model extends Backbone.Model
 class RepositoryHeaderMenuOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeaderMenuOption headerMenuOption'
-	html: 'Repositories'
+	html: '<div class="headerMenuOptionTitle">Repositories</div>'
 	# html: '<div class="dropdown">
 	# 		<span class="dropdown-toggle" data-toggle="dropdown" href="#">Repositories</span>
 	# 		<ul class="dropdown-menu dropdownContents pull-right" role="menu"></ul>
@@ -56,6 +56,7 @@ class RepositoryHeaderMenuOption.View extends Backbone.View
 	# events:
 	# 	'click .repository': '_handleRepositorySelection'
 	# 	'click .createRepository': '_handleCreateRepository'
+	events: 'click .headerMenuOptionTitle': '_handleClick'
 
 
 	initialize: () ->
@@ -79,6 +80,10 @@ class RepositoryHeaderMenuOption.View extends Backbone.View
 		@$el.append @dropdownView.render().el
 		# @_updateDropdownContents()
 		return @
+
+
+	_handleClick: (event) =>
+		@model.dropdownModel.toggleVisibility()
 
 
 	# _handleRepositorySelection: (event) =>
