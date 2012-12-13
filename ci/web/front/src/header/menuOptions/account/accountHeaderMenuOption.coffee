@@ -1,10 +1,10 @@
-window.AccountHeaderOption = {}
+window.AccountHeaderMenuOption = {}
 
 
-class AccountHeaderOption.Model extends Backbone.Model
+class AccountHeaderMenuOption.Model extends Backbone.Model
 	defaults:
-		firstName: 'first'
-		lastName: 'last'
+		firstName: null
+		lastName: null
 		visible: false
 
 
@@ -14,9 +14,9 @@ class AccountHeaderOption.Model extends Backbone.Model
 		@set 'visible', globalAccount.get('email')?
 
 
-class AccountHeaderOption.View extends Backbone.View
+class AccountHeaderMenuOption.View extends Backbone.View
 	tagName: 'div'
-	className: 'accountHeaderOption headerMenuOption'
+	className: 'accountHeaderMenuOption headerMenuOption'
 	template: Handlebars.compile '{{firstName}} {{lastName}}'
 	events: 'click': '_clickHandler'
 
@@ -46,5 +46,5 @@ class AccountHeaderOption.View extends Backbone.View
 
 
 	_clickHandler: () =>
-		window.globalRouterModel.set 'view', 'account'
+		console.log 'need to handle account click!'
 		

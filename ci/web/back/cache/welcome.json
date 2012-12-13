@@ -25,6 +25,8 @@
 			"/js/src/socket.js",
 			"/js/src/globalAccount.js",
 
+			"/js/src/header/menuOptions/repository/repositoryHeaderMenuOption.js",
+			"/js/src/header/menuOptions/account/accountHeaderMenuOption.js",
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 

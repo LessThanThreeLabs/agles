@@ -1,7 +1,7 @@
-window.RepositoryHeaderOption = {}
+window.RepositoryHeaderMenuOption = {}
 
 
-class RepositoryHeaderOption.Model extends Backbone.Model
+class RepositoryHeaderMenuOption.Model extends Backbone.Model
 	defaults:
 		repositories: null
 		visible: true
@@ -28,7 +28,7 @@ class RepositoryHeaderOption.Model extends Backbone.Model
 		return
 
 
-class RepositoryHeaderOption.View extends Backbone.View
+class RepositoryHeaderMenuOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeaderOption headerMenuOption'
 	html: '<div class="dropdown">

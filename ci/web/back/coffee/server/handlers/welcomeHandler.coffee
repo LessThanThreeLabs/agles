@@ -31,6 +31,9 @@ class WelcomeHandler extends RequestHandler
 			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString
+			email: 'awesome@email.com'
+			firstName: 'jordan'
+			lastName: 'potter'
 
 		# if request.session.userId?
 		# 	@modelConnection.rpcConnection.users.read.get_user_from_id request.session.userId, (error, user) =>
