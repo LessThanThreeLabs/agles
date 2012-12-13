@@ -19,5 +19,5 @@ end
 
 execute "Start verification master" do
 	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py >> /verification/master/master.log 2>&1 &"
-	user node[:koality][:user]
+	user "verification"
 end
