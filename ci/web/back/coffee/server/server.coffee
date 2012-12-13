@@ -63,7 +63,7 @@ class Server
 		server = spdy.createServer @httpsOptions, expressServer
 		server.listen @port
 
-		# @resourceSocket.start server
+		@resourceSocket.start server
 
 		# @spdyCache.load (error) =>
 		# 	throw error if error?

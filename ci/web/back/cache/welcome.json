@@ -2,15 +2,10 @@
 	"css": {
 		"text/css": [
 			"/css/src/fonts.css",
+			"/css/src/setup.css",
 
-			"/css/src/header/login/loginCreateAccountEmailSentPanel.css",
-			"/css/src/header/login/loginBasicInformationPanel.css",
-			"/css/src/header/login/loginPanel.css",
-			"/css/src/header/login/loginHeaderOption.css",
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
-
-			"/css/src/welcome/welcome.css",
 
 			"/css/src/main.css"
 		]
@@ -26,29 +21,18 @@
 			"/js/libs/backbone.js",
 
 			"/js/src/setup.js",
-
 			"/js/src/socket.js",
 			"/js/src/globalAccount.js",
 
-			"/js/src/header/repository/repositoryHeaderOption.js",
-			"/js/src/header/account/accountHeaderOption.js",
-			"/js/src/header/login/loginCreateAccountEmailSentPanel.js",
-			"/js/src/header/login/loginAdvancedInformationPanel.js",
-			"/js/src/header/login/loginBasicInformationPanel.js",
-			"/js/src/header/login/loginPanel.js",
-			"/js/src/header/login/loginHeaderOption.js",
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
-			"/js/src/welcome/welcome.js",
-
-			"/js/src/welcome/main.js"
+			"/js/src/content/welcome/main.js"
 		]
 	},
 
 	"img": {
 		"image/png": [
-			"/img/background.png",
 			"/img/awesomeFace.png"
 		]
 	},
