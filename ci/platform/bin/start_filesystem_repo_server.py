@@ -9,12 +9,14 @@ from settings import store
 
 DEFAULT_ROOT_DIR = "/repositories"
 
+
 def count_repositories(root_dir):
 	count = 0
 	for root, dirs, files in os.walk(root_dir):
 		if root.endswith('.git') and not root.endswith('/.git'):
 			count += 1
 	return count
+
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -37,7 +39,7 @@ def main():
 		config["store_name"], args.exchange_name, root_dir)
 
 	fs_repo_server = Server(FileSystemRepositoryStore(root_dir))
-	fs_repo_server.bind(args.exchange_name, [config["store_name"], auto_delete=True])
+	fs_repo_server.bind(args.exchange_name, [config["store_name"]], auto_delete=True)
 	fs_repo_server.run()
 
 
