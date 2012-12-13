@@ -17,7 +17,7 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 
 		requestData =
 			method: 'getBuildConsoleIds'
-			args: 
+			args:
 				changeId: window.globalRouterModel.get('changeId')
 		socket.emit 'buildOutputs:read', requestData, (error, results) =>
 			if error?
@@ -25,7 +25,7 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 				console.error error
 			else
 				@_processBuildOutputIds results
-			
+
 
 	_processBuildOutputIds: (buildOutputs) =>
 		consoleOutputModels = []
@@ -39,7 +39,7 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 	_getConsoleOutputModelsForType: (buildOutputs, type) =>
 		consoleOutputModels = []
 
-		for buildOutput in buildOutputs
+		for buildOutput in buildOutputs when buildOutput[type]?
 			for buildOutputId in buildOutput[type]
 				consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
 
@@ -82,7 +82,7 @@ class ConsoleCompilationOutput.View extends Backbone.View
 			consoleTextOutputView = new ConsoleTextOutput.View model: consoleTextOutputModel
 			@$el.append consoleTextOutputView.render().el
 			@currentViews.push consoleTextOutputView
-			
+
 
 	_removeOutputs: () =>
 		for view in @currentViews
