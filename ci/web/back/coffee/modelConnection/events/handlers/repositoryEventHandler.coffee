@@ -13,9 +13,6 @@ class RepositoryEventHandler extends EventHandler
 
 
 	processEvent: (data) =>
-		console.log 'here'
-		console.log data
-
 		roomName = @ROOM_PREFIX + data.id
 		eventName = @EVENT_PREFIX + data.id
 
