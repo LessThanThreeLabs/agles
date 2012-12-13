@@ -31,15 +31,15 @@ class TaskQueue(object):
 
 	def get_workers(self, num_workers, queue):
 		queue(self.connection).queue_declare()
-		with self.connection.Consumer([queue], callbacks=[self._new_worker], auto_declare=False) as consumer:
-			self.worker_attempt = 0
-			while self.worker_attempt < num_workers:
-				self.connection.drain_nowait()
-				self.worker_attempt = self.worker_attempt + 1
-			print "Received %s out of %s workers" % (len(self.workers), num_workers)
-			if len(self.workers) == 0:
-				self.shared_work_queue.delete()
-		consumer.recover(requeue=True)
+		with self.connection.channel() as channel:
+			with channel.Consumer([queue], callbacks=[self._new_worker], auto_declare=False):
+				self.worker_attempt = 0
+				while self.worker_attempt < num_workers:
+					self.connection.drain_nowait()
+					self.worker_attempt = self.worker_attempt + 1
+				print "Received %s out of %s workers" % (len(self.workers), num_workers)
+				if len(self.workers) == 0:
+					self.shared_work_queue.delete()
 		return self.workers
 
 	def _new_worker(self, body, message):
