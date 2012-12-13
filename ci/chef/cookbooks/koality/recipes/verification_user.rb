@@ -14,3 +14,5 @@ directory "/verification" do
 end
 
 rvm_gem "vagrant"
+
+rvm_shell "vagrant gem install sahara"
