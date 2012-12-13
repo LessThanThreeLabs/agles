@@ -1,17 +1,28 @@
 div.prettyDropdown {
 	position: absolute;
 	top: 100%;
-
 	display: block;
-	width: 300px;
-	height: 400px;
-	background-color: green;
+	background-color: rgba(160, 0, 0, 0.5);
 
 	&.leftAligned {
 		left: 0px;
+		text-align: left;
 	}
 
 	&.rightAligned {
 		right: 0px;
+		text-align: right;
+	}
+
+	.prettyDropdownOption {
+		@height: 30px;
+		padding: 0px 20px 0px 20px;
+		height: @height;
+		line-height: @height;
+		white-space: nowrap;
+
+		&:hover {
+			background-color: rgba(255, 255, 255, 0.4);
+		}
 	}
 }

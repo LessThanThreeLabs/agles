@@ -23,7 +23,7 @@ class PrettyDropdown.View extends Backbone.View
 	tagName: 'div'
 	className: 'prettyDropdown'
 	template: Handlebars.compile '{{#each options}}
-				<div class="dropdownOption" optionName="{{name}}">{{title}}</div>
+				<div class="prettyDropdownOption" optionName="{{name}}">{{title}}</div>
 			{{/each}}'
 	events: 'click': '_clickHandler'
 

@@ -8,7 +8,13 @@ class RepositoryHeaderMenuOption.Model extends Backbone.Model
 
 
 	initialize: () =>
-		@dropdownModel = new PrettyDropdown.Model alignment: 'right'
+		options = [
+			new PrettyDropdownOption('hello', 'Repository #1AAAAAAAA'),
+			new PrettyDropdownOption('there', 'Repository #2')
+			]
+		@dropdownModel = new PrettyDropdown.Model 
+			options: options
+			alignment: 'right'
 
 
 	fetchRepositories: () =>
