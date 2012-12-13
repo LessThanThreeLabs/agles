@@ -5,7 +5,7 @@ class HeaderMenu.Model extends Backbone.Model
 
 	initialize: () =>
 		@accountHeaderMenuOptionModel = new AccountHeaderMenuOption.Model()
-		# @loginHeaderOptionModel = new LoginHeaderOption.Model()
+		@loginHeaderMenuOptionModel = new LoginHeaderMenuOption.Model()
 		@repositoryHeaderMenuOptionModel = new RepositoryHeaderMenuOption.Model()
 
 
@@ -17,13 +17,13 @@ class HeaderMenu.View extends Backbone.View
 
 	initialize: () =>
 		@accountHeaderMenuOptionView = new AccountHeaderMenuOption.View model: @model.accountHeaderMenuOptionModel
-		# @loginHeaderOptionView = new LoginHeaderOption.View model: @model.loginHeaderOptionModel
+		@loginHeaderMenuOptionView = new LoginHeaderMenuOption.View model: @model.loginHeaderMenuOptionModel
 		@repositoryHeaderMenuOptionView = new RepositoryHeaderMenuOption.View model: @model.repositoryHeaderMenuOptionModel
 
 
 	onDispose: () =>
 		@accountHeaderMenuOptionView.dispose()
-		# @loginHeaderOptionView.dispose()
+		@loginHeaderMenuOptionView.dispose()
 		@repositoryHeaderMenuOptionView.dispose()
 		
 
@@ -31,7 +31,7 @@ class HeaderMenu.View extends Backbone.View
 		@$el.html @html
 
 		@$el.append @accountHeaderMenuOptionView.render().el
-		# @$el.append @loginHeaderOptionView.render().el
+		@$el.append @loginHeaderMenuOptionView.render().el
 		@$el.append @repositoryHeaderMenuOptionView.render().el
 		
 		return @

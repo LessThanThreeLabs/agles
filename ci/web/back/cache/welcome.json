@@ -31,6 +31,7 @@
 			"/js/src/visualElements/prettyDropdown/prettyDropdown.js",			
 
 			"/js/src/header/menuOptions/repository/repositoryHeaderMenuOption.js",
+			"/js/src/header/menuOptions/login/loginHeaderMenuOption.js",
 			"/js/src/header/menuOptions/account/accountHeaderMenuOption.js",
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
