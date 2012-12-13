@@ -1,4 +1,4 @@
-import eventlet; eventlet.monkey_patch(os=False)
+import eventlet; eventlet.monkey_patch(os=False, psycopg=False)
 
 
 def spawn_wrap(func):
