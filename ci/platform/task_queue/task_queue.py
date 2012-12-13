@@ -43,13 +43,12 @@ class TaskQueue(object):
 		return self.workers
 
 	def _new_worker(self, body, message):
-		self._add_worker(body["worker_id"], body["queue_name"])
 		try:
 			Queue(body["queue_name"])(self.connection).queue_declare(passive=True)
 		except self.connection.transport.channel_errors:
 			self.worker_attempt = self.worker_attempt - 1  # Queue doesn't exist, worker is dead
 		else:
-			pass  # All good
+			self._add_worker(body["worker_id"], body["queue_name"])
 		message.ack()
 
 	def _add_worker(self, name, queue):
