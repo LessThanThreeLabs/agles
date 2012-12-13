@@ -8,6 +8,34 @@ exports.create = (modelRpcConnection) ->
 
 
 class RepositoriesUpdateHandler extends RepositoriesHandler
+	inviteMembers: (socket, args, callback) =>
+		assert.ok socket.session.userId?
+		assert.ok args.repositoryId?
+		assert.ok args.emails?
+
+		userId = socket.session.userId
+
+		if not userId?
+			callback 403
+			return
+
+		errors = []
+		results = []
+
+		await
+			for email, index in args.emails
+				console.log email
+				@modelRpcConnection.repos.update.add_member userId, email, args.repositoryId, defer errors[index], results[index]
+
+		for error, index in errors
+			if error?
+				if error.type is 'InvalidPermissionsError' then callback 403
+				else errors[index] = args.emails[index]
+
+		errors = errors.filter (error) => error?
+
+		callback errors, results
+
 	changeMemberPermissions: (socket, args, callback) =>
 		assert.ok socket.session.userId?
 		assert.ok args.repositoryId?

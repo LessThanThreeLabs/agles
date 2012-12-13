@@ -12,6 +12,28 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposUpdateHandler, self).__init__("repos", "update")
 
+	def add_member(self, user_id, email, repo_id):
+		repo = database.schema.repo
+		user = database.schema.user
+		permission = database.schema.permission
+
+		row = self._get_repo_joined_permission_row(user_id, repo_id)
+		if not row or not RepositoryPermissions.has_permissions(
+				row[permission.c.permissions], RepositoryPermissions.RWA):
+			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+		repo_hash = row[repo.c.hash]
+		repo_permissions = row[repo.c.default_permissions]
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			invited_user = sqlconn.execute(user.select().where(user.c.email==email)).first()
+			if not invited_user:
+				raise NoSuchUserError("email: %s" % email)
+			invited_user_id = invited_user[user.c.id]
+			sqlconn.execute(permission.insert().values(user_id=invited_user_id, repo_hash=repo_hash, permissions=repo_permissions))
+
+		self.publish_event("repos", repo_id, "member added", email=email, first_name=invited_user[user.c.first_name],
+			last_name=invited_user[user.c.last_name], permissions=repo_permissions)
+
 	def change_member_permissions(self, user_id, email, repo_id, permissions):
 		repo = database.schema.repo
 		user = database.schema.user
@@ -43,6 +65,8 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 			sqlconn.execute(del_query)
 			sqlconn.execute(ins)
 
+		self.publish_event("repos", repo_id, "member permissions changed", email=email, permissions=permissions)
+
 	def remove_member(self, user_id, email, repo_id):
 		repo = database.schema.repo
 		user = database.schema.user
@@ -72,6 +96,8 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(del_query)
 
+		self.publish_event("repos", repo_id, "member removed", email=email)
+
 	# TODO: Once repo hash is removed, clean all this up
 	def _get_repo_joined_permission_row(self, user_id, repo_id):
 		repo = database.schema.repo
@@ -100,6 +126,10 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(ins)
+
+
+class NoSuchUserError(Exception):
+	pass
 
 
 class InvalidActionError(Exception):

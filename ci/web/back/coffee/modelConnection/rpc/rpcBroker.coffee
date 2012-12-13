@@ -17,7 +17,7 @@ class RpcBroker
 		# our servers will OOM and I'll punch a small duckling.
 		# Seriously.
 		@messageIdsToCallbacks = {}
-			
+
 
 	connect: (callback) ->
 		await

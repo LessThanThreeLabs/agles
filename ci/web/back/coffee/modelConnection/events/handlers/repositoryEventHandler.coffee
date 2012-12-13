@@ -21,9 +21,13 @@ class RepositoryEventHandler extends EventHandler
 
 		switch data.type
 			when 'change added'
-				@sockets.in(roomName).emit eventName, 
+				@sockets.in(roomName).emit eventName,
 					type: data.type
 					contents: @_sanitizeChangeAddedContents data.contents
+			when 'member added', 'member removed', 'member permissions changed'
+				@sockets.in(roomName).emit eventName,
+					type: data.type
+					contents: @_sanitizeUser data.contents
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 
@@ -32,4 +36,19 @@ class RepositoryEventHandler extends EventHandler
 		id: data.change_id
 		number: data.change_number
 		status: data.change_status
-		
+
+
+	_sanitizeUser: (user) =>
+		id: user.id
+		firstName: user.first_name
+		lastName: user.last_name
+		email: user.email
+		permissions: @_toPermissionString user.permissions
+
+
+	_toPermissionString: (permissions) =>
+		switch permissions
+			when 1 then "r"
+			when 3 then "r/w"
+			when 7 then "r/w/a"
+			else ""

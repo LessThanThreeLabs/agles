@@ -2,14 +2,16 @@ window.RepositoryAdminMemberPermissionsPanel = {}
 
 
 class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
+	subscribeUrl: 'repos'
+	subscribeId: null
 
 	initialize: () =>
+		@subscribeId = globalRouterModel.get 'repositoryId'
+
 		@memberPermissionsModels = new Backbone.Collection()
 		@memberPermissionsModels.model = MemberPermissions.Model
 		@memberPermissionsModels.comparator = (memberPermissionsModel) =>
 			return memberPermissionsModel.get 'email'
-		@memberPermissionsModels.on 'removeMember', (memberPermissionsModel) =>
-			@memberPermissionsModels.remove memberPermissionsModel
 
 
 	fetchMembers: () =>
@@ -27,6 +29,25 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 				console.error errors
 			else
 				@memberPermissionsModels.reset users
+
+
+	onUpdate: (data) =>
+		console.log data
+		assert.ok data.type?
+
+		if data.type is 'member added'
+			assert.ok data.contents.email? and data.contents.firstName? and
+				data.contents.lastName? and data.contents.permissions?
+			memberPermissionsModel = new MemberPermissions.Model data.contents
+			@memberPermissionsModels.add memberPermissionsModel
+		else if data.type is 'member removed'
+			assert.ok data.contents.email?
+			@memberPermissionsModels.remove @memberPermissionsModels.where {email: data.contents.email}
+		else if data.type is 'member permissions changed'
+			assert.ok data.contents.email? and data.contents.permissions?
+			@memberPermissionsModels.where({email: data.contents.email})[0].set 'permissions', data.contents.permissions
+		else
+			console.log 'Unaccounted for update type: ' + data.type
 
 
 class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
@@ -49,12 +70,19 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 		@model.memberPermissionsModels.on 'add', @_handleAdd, @
 		@model.memberPermissionsModels.on 'reset', @render, @
 		@model.memberPermissionsModels.on 'remove', @render, @
-		globalRouterModel.on 'change:repositoryId', @model.fetchMembers, @
+		globalRouterModel.on 'change:repositoryId', (() =>
+			@model.unsubscribe() if @model.subscribeId?
+			@model.subscribeId = globalRouterModel.get 'repositoryId'
+			@model.subscribe() if @model.subscribeId?
+			console.log 'resubscribed'
+			@model.fetchMembers), @
 
+		@model.subscribe() if @model.subscribeId?
 		@model.fetchMembers()
 
 
 	onDispose: () =>
+		@model.unsubscribe() if @model.subscribeId?
 		@model.memberPermissionsModels.off null, null, @
 		globalRouterModel.off null, null, @
 

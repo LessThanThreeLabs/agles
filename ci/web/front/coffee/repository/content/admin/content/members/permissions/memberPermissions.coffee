@@ -49,9 +49,6 @@ class MemberPermissions.Model extends Backbone.Model
 			if errors?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
 				console.error errors
-			else
-				@trigger 'removeMember', @
-
 
 
 class MemberPermissions.View extends Backbone.View
@@ -71,6 +68,7 @@ class MemberPermissions.View extends Backbone.View
 
 
 	initialize: () =>
+		@model.on 'change:permissions', @_selectCorrectPermissionsRadio, @
 
 
 	onDispose: () =>
