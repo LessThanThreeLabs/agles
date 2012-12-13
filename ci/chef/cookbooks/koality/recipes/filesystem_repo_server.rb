@@ -1,3 +1,5 @@
+include_recipe "koality::git_user"
+
 execute "Stop filesystem repo server" do
 	command "killall -9 start_filesystem_repo_server.py"
 	returns [0, 1]

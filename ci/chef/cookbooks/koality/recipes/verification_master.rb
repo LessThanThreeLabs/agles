@@ -6,6 +6,7 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+include_recipe "koality::verification_user"
 
 execute "Stop verification master" do
 	command "killall -9 start_verification_master.py"
@@ -13,6 +14,6 @@ execute "Stop verification master" do
 end
 
 execute "Start verification master" do
-	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py >> /tmp/verification/master.log 2>&1 &"
+	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py >> /verification/master/master.log 2>&1 &"
 	user node[:koality][:user]
 end
