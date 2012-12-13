@@ -29,7 +29,9 @@ class RepositoriesUpdateHandler extends RepositoriesHandler
 
 		for error, index in errors
 			if error?
-				if error.type is 'InvalidPermissionsError' then callback 403
+				if error.type is 'InvalidPermissionsError'
+					callback 403
+					return
 				else errors[index] = args.emails[index]
 
 		errors = errors.filter (error) => error?

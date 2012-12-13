@@ -72,6 +72,7 @@ class MemberPermissions.View extends Backbone.View
 
 
 	onDispose: () =>
+		@model.off null, null, @
 
 
 	render: () =>

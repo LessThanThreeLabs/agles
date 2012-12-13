@@ -6,6 +6,16 @@ class RepositoryAdminInviteMembersPanel.Model extends Backbone.Model
 		emails: null
 
 
+	_inviteMembers: (emails, callback) =>
+		requestData =
+			method: 'inviteMembers'
+			args:
+				repositoryId: globalRouterModel.get 'repositoryId'
+				emails: emails
+
+		socket.emit 'repos:update', requestData, callback
+
+
 class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminInviteMembersPanel'
@@ -52,18 +62,12 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 	_handleSubmit: (event) =>
 		@_clearForm()
 		emails = @model.get 'emails'
-		requestData =
-			method: 'inviteMembers'
-			args:
-				repositoryId: globalRouterModel.get 'repositoryId'
-				emails: emails
-
-		socket.emit 'repos:update', requestData, (errors, result) =>
+		@model._inviteMembers emails, ((errors, result) =>
 			if errors?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
 				@_displayErrors errors
 			showSentMessage = not errors? or Object.keys(errors).length < emails.length
-			@$el.find('.repositoryInviteMembersSentText').toggle showSentMessage
+			@$el.find('.repositoryInviteMembersSentText').toggle showSentMessage)
 
 
 	_clearErrors: () =>

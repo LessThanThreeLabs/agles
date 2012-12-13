@@ -32,7 +32,6 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 
 
 	onUpdate: (data) =>
-		console.log data
 		assert.ok data.type?
 
 		if data.type is 'member added'
@@ -47,7 +46,7 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 			assert.ok data.contents.email? and data.contents.permissions?
 			@memberPermissionsModels.where({email: data.contents.email})[0].set 'permissions', data.contents.permissions
 		else
-			console.log 'Unaccounted for update type: ' + data.type
+			console.error 'Unaccounted for update type: ' + data.type
 
 
 class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
