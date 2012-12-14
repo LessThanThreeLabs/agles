@@ -21,15 +21,11 @@ class PrettyModal.View extends Backbone.View
 	tagName: 'div'
 	className: 'prettyModal'
 	html: '<div class="prettyModalBackdrop"></div>
-		<div class="prettyModalContent">hello</div>'
-
+		<div class="prettyModalContent"></div>'
+	innerHtml = ''
 
 	initialize: () =>
 		@model.on 'change:visible', @_fixVisibility, @
-
-		setTimeout (() =>
-			@model.set 'visible', true
-			), 2000
 
 
 	onDispose: () =>
@@ -38,8 +34,18 @@ class PrettyModal.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		@_addInnerHtml()
 		@_fixVisibility()
 		return @
+
+
+	setInnerHtml: (innerHtml) =>
+		@innerHtml = innerHtml
+		@render()
+
+
+	_addInnerHtml: () =>
+		@$('.prettyModalContent').html @innerHtml
 
 
 	_fixVisibility: () =>
@@ -55,6 +61,7 @@ class PrettyModal.View extends Backbone.View
 
 	_handleBackdropClick: (event) =>
 		@model.set 'visible', false
+		event.stopPropagation()
 
 
 	_handleKeyPress: (event) =>

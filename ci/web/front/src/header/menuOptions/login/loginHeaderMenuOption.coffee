@@ -19,11 +19,12 @@ class LoginHeaderMenuOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'loginHeaderMenuOption headerMenuOption'
 	html: '<div class="headerMenuOptionTitle">Login</div>'
-	# events: 'click': '_clickHandler'
+	events: 'click': '_clickHandler'
 
 
 	initialize: () =>
 		@modalView = new PrettyModal.View model: @model.modalModel
+		@modalView.setInnerHtml 'hello there!'
 
 		@model.on 'change', @render, @
 		globalAccount.on 'change', @model.updateInformation, @
@@ -39,9 +40,7 @@ class LoginHeaderMenuOption.View extends Backbone.View
 	render: () =>
 		@$el.html @html
 		@$el.append @modalView.render().el
-
 		@_fixVisibility()
-
 		return @
 
 
@@ -50,5 +49,5 @@ class LoginHeaderMenuOption.View extends Backbone.View
 
 
 	_clickHandler: () =>
-		console.log 'need to handle login click'
+		@model.modalModel.set 'visible', true
 		
