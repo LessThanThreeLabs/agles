@@ -50,12 +50,6 @@ if not File.exists? '/usr/local/bin/ssh'
 		EOH
 	end
 
-	execute "install_agles" do
-		cwd node[:koality][:source_path][:platform]
-		user "root"
-		command "python setup.py install"
-	end
-
 	git "/tmp/dulwich-lt3" do
 		repository "git://github.com/LessThanThreeLabs/dulwich.git"
 		reference "master"
@@ -81,20 +75,39 @@ if not File.exists? '/usr/local/bin/ssh'
 	link "/usr/bin/git-upload-pack" do
 		to "/usr/bin/dul-upload-pack"
 	end
+end
+	
+bash "setup_ssh_pushing_to_github" do
+	user "root"
+	cwd "/usr/local/etc/"
+	code <<-EOH
+		grep "github.com" ssh_config
+		if [ $? -ne 0 ]
+			then echo "\nHost *github.com" >> ssh_config
+			echo "\tStrictHostKeyChecking no" >> ssh_config
+			echo "\tUserKnownHostsFile /dev/null" >> ssh_config
+		fi
+	EOH
+end
 
-	bash "Move standard ssh daemon" do
-		user "root"
-		code <<-EOH
-			/usr/sbin/sshd -p 2222
-			service ssh stop
-			echo MAKE SURE THE SSH DAEMON HAS STARTED SUCCESSFULLY BEFORE LOGGING OUT
-		EOH
-	end
+execute "install_agles" do
+	cwd node[:koality][:source_path][:platform]
+	user "root"
+	command "python setup.py install"
+end
 
-	bash "Start modified ssh daemon" do
-		user "root"
-		code <<-EOH
-			/usr/local/sbin/sshd -f /usr/local/etc/sshd_config
-		EOH
-	end
+bash "Move standard ssh daemon" do
+	user "root"
+	code <<-EOH
+		/usr/sbin/sshd -p 2222
+		service ssh stop
+		echo MAKE SURE THE SSH DAEMON HAS STARTED SUCCESSFULLY BEFORE LOGGING OUT
+	EOH
+end
+
+bash "Start modified ssh daemon" do
+	user "root"
+	code <<-EOH
+		/usr/local/sbin/sshd -f /usr/local/etc/sshd_config
+	EOH
 end
