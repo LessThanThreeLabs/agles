@@ -1,0 +1,49 @@
+div.prettyModal {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 99999;
+
+	.prettyModalBackdrop {
+		@opacityTransitionTime: 1.0s;
+		transition: opacity @opacityTransitionTime ease-in;
+		-moz-transition: opacity @opacityTransitionTime ease-in;
+		-webkit-transition: opacity @opacityTransitionTime ease-in;
+		-o-transition: opacity @opacityTransitionTime ease-in;
+
+		width: 100%;
+		height: 100%;		
+		background-color: rgba(0, 0, 0, 0.6);
+		opacity: 0.0;
+		pointer-events: none;
+	}
+
+	.prettyModalContent {
+		@width: 400px;
+		position: absolute;
+		top: 20%;
+		left: 50%;
+		margin-left: -1.0 * @width / 2;
+
+		display: none;
+		width: @width;
+		height: 300px;
+		border-radius: 15px;
+		background-color: #EAEAEA;
+		border-color: 2px solid green;
+	}
+
+	&.visible {
+
+		.prettyModalBackdrop {
+			opacity: 1.0;
+			pointer-events: auto;
+		}
+
+		.prettyModalContent {
+			display: block;
+		}
+	}
+}

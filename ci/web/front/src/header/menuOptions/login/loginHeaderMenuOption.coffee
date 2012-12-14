@@ -6,18 +6,25 @@ class LoginHeaderMenuOption.Model extends Backbone.Model
 		visible: false
 
 
+	initialize: () =>
+		@modalModel = new PrettyModal.Model()
+
+
 	updateInformation: () =>
-		@set 'visible', not globalAccount.get('email')?
+		# @set 'visible', not globalAccount.get('email')?
+		@set 'visible', globalAccount.get('email')?
 
 
 class LoginHeaderMenuOption.View extends Backbone.View
 	tagName: 'div'
 	className: 'loginHeaderMenuOption headerMenuOption'
 	html: '<div class="headerMenuOptionTitle">Login</div>'
-	events: 'click': '_clickHandler'
+	# events: 'click': '_clickHandler'
 
 
 	initialize: () =>
+		@modalView = new PrettyModal.View model: @model.modalModel
+
 		@model.on 'change', @render, @
 		globalAccount.on 'change', @model.updateInformation, @
 
@@ -31,7 +38,10 @@ class LoginHeaderMenuOption.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		@$el.append @modalView.render().el
+
 		@_fixVisibility()
+
 		return @
 
 
