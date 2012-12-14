@@ -59,7 +59,7 @@ class VagrantWrapper(object):
 				raise VagrantException(self.vagrant, "Failed to initialize vagrant")
 			if self.up(False, output_handler).returncode != 0:
 				raise VagrantException(self.vagrant, "Failed to start vagrant vm")
-		if self.vbox_call("/usr/bin/sudo dhclient").returncode != 0:
+		if self.vbox_call("/usr/bin/sudo dhclient eth0").returncode != 0:
 			raise VagrantException(self.vagrant, "Failed to verify DHCP server on vm")
 		if self.sandbox_on(output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Failed to initialize sandbox on vm")
@@ -76,7 +76,7 @@ class VagrantWrapper(object):
 	def safe_rollback(self, output_handler=None):
 		if self.sandbox_rollback(output_handler).returncode != 0:
 			raise VagrantException(self.vagrant, "Failed to roll back vm")
-		if self.vbox_call("/usr/bin/sudo dhclient").returncode != 0:
+		if self.vbox_call("/usr/bin/sudo dhclient eth0").returncode != 0:
 			raise VagrantException(self.vagrant, "Failed to verify DHCP server on vm")
 
 
