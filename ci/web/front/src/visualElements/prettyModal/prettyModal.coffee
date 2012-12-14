@@ -45,11 +45,19 @@ class PrettyModal.View extends Backbone.View
 	_fixVisibility: () =>
 		if @model.get 'visible'
 			@$el.addClass 'visible'
+			$('html').bind 'keydown', @_handleKeyPress
 			@$('.prettyModalBackdrop').bind 'click', @_handleBackdropClick
 		else
+			$('html').unbind 'keydown', @_handleKeyPress
 			@$('.prettyModalBackdrop').unbind 'click', @_handleBackdropClick
 			@$el.removeClass 'visible'
 
 
 	_handleBackdropClick: (event) =>
 		@model.set 'visible', false
+
+
+	_handleKeyPress: (event) =>
+		# listen for escape key
+		if event.keyCode is 27
+			@model.set 'visible', false
