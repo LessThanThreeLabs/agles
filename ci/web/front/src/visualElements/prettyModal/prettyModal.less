@@ -5,6 +5,7 @@ div.prettyModal {
 	bottom: 0;
 	left: 0;
 	z-index: 9997;
+	text-align: center;
 
 	.prettyModalBackdrop {
 		@initialFadeInOpacity: 0.0;
@@ -13,17 +14,14 @@ div.prettyModal {
 			from { opacity: @initialFadeInOpacity; }
 			to { opacity: @finalFadeInOpacity; }
 		}
-
 		@-moz-keyframes fadeIn {
 			from { opacity: @initialFadeInOpacity; }
 			to { opacity: @finalFadeInOpacity; }
 		}
-
 		@-webkit-keyframes fadeIn {
 			from { opacity: @initialFadeInOpacity; }
 			to { opacity: @finalFadeInOpacity; }
 		}
-
 		@-o-keyframes fadeIn {
 			from { opacity: @initialFadeInOpacity; }
 			to { opacity: @finalFadeInOpacity; }
@@ -42,36 +40,31 @@ div.prettyModal {
 
 	.prettyModalContent {
 		@initialSlideInLocation: -400px;
-		@finalSlideInLocation: 20%;
+		@finalSlideInLocation: 200px;
 		@keyframes slideIn { 
-			from { margin-top: @initialSlideInLocation; }
-			to { margin-top: @finalSlideInLocation; }
+			from { top: @initialSlideInLocation; }
+			to { top: @finalSlideInLocation; }
 		}
-
 		@-moz-keyframes slideIn {
-			from { margin-top: @initialSlideInLocation; }
-			to { margin-top: @finalSlideInLocation; }
+			from { top: @initialSlideInLocation; }
+			to { top: @finalSlideInLocation; }
 		}
-
 		@-webkit-keyframes slideIn {
-			from { margin-top: @initialSlideInLocation; }
-			to { margin-top: @finalSlideInLocation; }
+			from { top: @initialSlideInLocation; }
+			to { top: @finalSlideInLocation; }
 		}
-
 		@-o-keyframes slideIn {
-			from { margin-top: @initialSlideInLocation; }
-			to { margin-top: @finalSlideInLocation; }
+			from { top: @initialSlideInLocation; }
+			to { top: @finalSlideInLocation; }
 		}
 
 		display: none;
 		position: relative;
-		z-index: 9999;
-		margin-left: auto;
-		margin-right: auto;
-		margin-top: 20%;
+		top: 200px;
 		padding: 20px;
-		width: 400px;
+		min-width: 400px;
 		min-height: 100px;
+		z-index: 9999;
 		text-align: left;
 		border-radius: 15px;
 		background-color: #EAEAEA;
@@ -101,7 +94,7 @@ div.prettyModal {
 			-webkit-animation: slideIn @slideInTransitionTime ease-out;
 			-o-animation: slideIn @slideInTransitionTime ease-out;
 
-			display: block;
+			display: inline-block;
 		}
 	}
 }
