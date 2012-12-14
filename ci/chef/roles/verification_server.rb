@@ -3,7 +3,7 @@ description "Koality verification server"
 run_list(
 	"recipe[koality::verification_server]"
 )
-override_attributes(
+default_attributes(
 	:koality => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles",

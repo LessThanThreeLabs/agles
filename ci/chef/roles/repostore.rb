@@ -4,7 +4,7 @@ run_list(
 	"recipe[koality::repostore_server_config]",
 	"recipe[koality::filesystem_repo_server]"
 )
-override_attributes(
+default_attributes(
 	:koality => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles",

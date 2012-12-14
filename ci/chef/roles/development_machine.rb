@@ -9,8 +9,7 @@ run_list(
 	"recipe[rabbitmq]",
 	"recipe[koality::setup_config]"
 )
-default_attributes()
-override_attributes(
+default_attributes(
 	:koality => {
 		:source_path => {
 			:external => "/vagrant"

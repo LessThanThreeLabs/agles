@@ -25,4 +25,3 @@ default_attributes(
 		:default_ruby => "ruby-1.9.3-p286"
 	}
 )
-override_attributes()
