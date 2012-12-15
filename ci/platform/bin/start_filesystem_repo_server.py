@@ -28,18 +28,18 @@ def main():
 	root_dir = os.path.realpath(args.root_dir)
 	try:
 		config = RepositoryStore.parse_config(root_dir)
+		num_repos = count_repositories(root_dir)
+		RepositoryStore.update_store(config["id"], root_dir, num_repos)
 	except IOError:
-		store_name = uuid.uuid1().hex
-		config = RepositoryStore.create_config(root_dir, store_name)
+		repostore_id = RepositoryStore.initialize_store(root_dir)
+		config = RepositoryStore.create_config(repostore_id, root_dir)
 
-	num_repos = count_repositories(root_dir)
-	RepositoryStore.initialize_store(root_dir, config["store_name"], num_repos)
 
 	print "Starting FileSystem Repository Server '%s' on exchange '%s' with root directory '%s' ..." % (
-		config["store_name"], args.exchange_name, root_dir)
+		config["id"], args.exchange_name, root_dir)
 
 	fs_repo_server = Server(FileSystemRepositoryStore(root_dir))
-	fs_repo_server.bind(args.exchange_name, [config["store_name"]], auto_delete=True)
+	fs_repo_server.bind(args.exchange_name, [str(config["id"])], auto_delete=True)
 	fs_repo_server.run()
 
 

@@ -48,7 +48,7 @@ class RestrictedGitShell(object):
 		requested_repo_uri = self._get_requested_repo_uri(repo_path)
 
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			machine_uri, route, repos_path, repo_hash, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			repostore_id, route, repos_path, repo_hash, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_hash, repo_name))
 
 		self.verify_user_permissions(command, user_id, repo_hash)

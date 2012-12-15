@@ -22,18 +22,18 @@ from util import pathgen
 
 class RemoteRepositoryManager(object):
 
-	def register_remote_store(self, store_name, num_repos):
+	def register_remote_store(self, repostore_id, num_repos):
 		"""Registers a remote store as a managed store of this manager
 
-		:param store_name: The identifier of the remote store the repository is on
+		:param repostore_id: The identifier of the remote store the repository is on
 		:param num_repos: The number of repos to initialize it with
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repostore_id, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
 		"""Merges a changeset on the remote repository with a ref.
 
-		:param store_name: The identifier of the local store(machine) the
+		:param repostore_id: The identifier of the local store(machine) the
 						   repository is on.
 		:param repo_hash: The unique identifier for the repository being created.
 		:param repo_name: The name of the repository.
@@ -43,28 +43,28 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, store_name, repo_hash, repo_name):
+	def create_repository(self, repostore_id, repo_hash, repo_name):
 		"""Creates a repository on the given local store.
 
-		:param store_name: The identifier of the local store(machine) to create the repository on.
+		:param repostore_id: The identifier of the local store(machine) to create the repository on.
 		:param repo_hash: The unique identifier for the repository being created.
 		:param repo_name: The name of the new repository.
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def delete_repository(self, store_name, repo_hash, repo_name):
+	def delete_repository(self, repostore_id, repo_hash, repo_name):
 		"""Deletes a repository on the given local store.
 
-		:param store_name: The identifier of the local store(machine) to create the repository on.
+		:param repostore_id: The identifier of the local store(machine) to create the repository on.
 		:param repo_hash: The unique identifier for the repository being created.
 		:param repo_name: The name of the new repository.
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def rename_repository(self, store_name, repo_hash, old_repo_name, new_repo_name):
+	def rename_repository(self, repostore_id, repo_hash, old_repo_name, new_repo_name):
 		"""Renames a repository on the given local store.
 
-		:param store_name: The identifier of the local store(machine) to create the repository on.
+		:param repostore_id: The identifier of the local store(machine) to create the repository on.
 		:param repo_hash: The unique identifier for the repository being created.
 		:param old_repo_name: The name of the old repository.
 		:param new_repo_name: The name of the new repository.
@@ -81,38 +81,39 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		super(DistributedLoadBalancingRemoteRepositoryManager, self).__init__()
 		self._redisdb = redis_connection
 
-	def register_remote_store(self, store_name, num_repos):
-		self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{store_name: num_repos})
+	def register_remote_store(self, repostore_id, num_repos=0):
 
-	def merge_changeset(self, store_name, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+		self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{str(repostore_id): num_repos})
+
+	def merge_changeset(self, repostore_id, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
 
-		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
+		with Client(rpc_exchange_name, str(repostore_id), globals=globals()) as client:
 			client.merge_changeset(repo_hash, repo_name, ref_to_merge, ref_to_merge_into)
 
-	def create_repository(self, store_name, repo_hash, repo_name):
+	def create_repository(self, repostore_id, repo_hash, repo_name):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
 
-		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
+		with Client(rpc_exchange_name, str(repostore_id), globals=globals()) as client:
 			client.create_repository(repo_hash, repo_name)
-		self._update_store_repo_count(store_name)
+		self._update_store_repo_count(repostore_id)
 
-	def delete_repository(self, store_name, repo_hash, repo_name):
+	def delete_repository(self, repostore_id, repo_hash, repo_name):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
 
-		with Client(rpc_exchange_name, store_name) as client:
+		with Client(rpc_exchange_name, str(repostore_id)) as client:
 			client.delete_repository(repo_hash, repo_name)
-		self._update_store_repo_count(store_name, -1)
+		self._update_store_repo_count(repostore_id, -1)
 
-	def rename_repository(self, store_name, repo_hash, old_repo_name, new_repo_name):
+	def rename_repository(self, repostore_id, repo_hash, old_repo_name, new_repo_name):
 		assert old_repo_name.endswith(".git")
 		assert new_repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
 
-		with Client(rpc_exchange_name, store_name, globals=globals()) as client:
+		with Client(rpc_exchange_name, str(repostore_id), globals=globals()) as client:
 			client.rename_repository(repo_hash, old_repo_name, new_repo_name)
 
 	def get_least_loaded_store(self):
@@ -123,8 +124,8 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		assert len(results) == 1
 		return results[0]
 
-	def _update_store_repo_count(self, store_name, amount=1):
-		self._redisdb.zincrby(self.SERVER_REPO_COUNT_NAME, store_name, amount)
+	def _update_store_repo_count(self, repostore_id, amount=1):
+		self._redisdb.zincrby(self.SERVER_REPO_COUNT_NAME, str(repostore_id), amount)
 
 
 class RepositoryStore(object):
@@ -132,8 +133,8 @@ class RepositoryStore(object):
 	CONFIG_FILE = ".repostore_config.yml"
 
 	@classmethod
-	def create_config(cls, root_dir, store_name):
-		config = {"store_name": store_name}
+	def create_config(cls, repostore_id, root_dir):
+		config = {"id": repostore_id}
 		config_path = os.path.join(root_dir, cls.CONFIG_FILE)
 		if not os.path.exists(root_dir):
 			os.makedirs(root_dir)
@@ -149,10 +150,16 @@ class RepositoryStore(object):
 		return config
 
 	@classmethod
-	def initialize_store(cls, root_dir, store_name, num_repos):
+	def initialize_store(cls, root_dir):
 		host_name = cls._get_host_name()
 		with model_server.ModelServer.rpc_connect("repos", "create") as conn:
-			conn.register_repostore(host_name, store_name, root_dir, num_repos)
+			return conn.register_repostore(host_name, root_dir)
+
+	@classmethod
+	def update_store(cls, repostore_id, root_dir, num_repos):
+		host_name = cls._get_host_name()
+		with model_server.ModelServer.rpc_connect("repos", "update") as conn:
+			conn.update_repostore(repostore_id, host_name, root_dir, num_repos)
 
 	@classmethod
 	def _get_host_name(cls):  # relies on Google DNS to capture own outbound ip

@@ -1,6 +1,7 @@
 from sqlalchemy import and_
 
 import database.schema
+import repo.store
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
@@ -112,6 +113,18 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return sqlconn.execute(query).first()
+
+	def update_repostore(self, repostore_id, host_name, root_dir, num_repos):
+		repostore = database.schema.repostore
+		query = repostore.select().where(repostore.c.id==repostore_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+			assert row is not None
+			assert row[repostore.c.host_name] == host_name
+			assert row[repostore.c.repositories_path] == root_dir
+
+		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager.register_remote_store(repostore_id, num_repos=num_repos)
 
 #####################
 # Github Integration

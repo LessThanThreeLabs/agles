@@ -31,7 +31,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 			user_id = sqlconn.execute(ins_user).inserted_primary_key[0]
 
 			ins_repostore = repostore.insert().values(
-				uri='a', host_name='a', repositories_path='a')
+				host_name='a', repositories_path='a')
 
 			repostore_id = sqlconn.execute(ins_repostore).inserted_primary_key[0]
 

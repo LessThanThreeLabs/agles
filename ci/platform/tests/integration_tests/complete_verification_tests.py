@@ -21,7 +21,7 @@ from verification.server.build_verifier import BuildVerifier
 from settings.rabbit import connection_info
 from settings.verification_server import *
 from shared.constants import BuildStatus
-from repo.store import FileSystemRepositoryStore
+from repo.store import FileSystemRepositoryStore, RepositoryStore
 from util.pathgen import to_path
 from settings import store
 from bunnyrpc.server import Server
@@ -60,7 +60,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._purge_queues()
 		self.repo_dir = os.path.join(TEST_ROOT, 'repo')
 		self.repo_hash = "asdfghjkl"
-		self.repo_machine = "fs0"
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.makedirs(self.repo_dir)
 		self._start_model_server()
@@ -74,8 +73,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			vs_process = TestProcess(target=verification_server.run)
 			vs_process.start()
 			self.vs_processes.append(vs_process)
+
 		repo_store = Server(FileSystemRepositoryStore(self.repo_dir))
-		repo_store.bind(store.rpc_exchange_name, [self.repo_machine], auto_delete=True)
+		self.repostore_id = 1
+		repo_store.bind(store.rpc_exchange_name, [str(self.repostore_id)], auto_delete=True)
+
 		self.repo_store_process = TestProcess(target=repo_store.run)
 		self.repo_store_process.start()
 		verification_master = VerificationMaster()
@@ -96,7 +98,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	def _insert_repo_info(self, repo_uri):
 		with ConnectionFactory.get_sql_connection() as conn:
-			ins_machine = schema.repostore.insert().values(uri=self.repo_machine, host_name="localhost", repositories_path=self.repo_dir)
+			ins_machine = schema.repostore.insert().values(host_name="localhost", repositories_path=self.repo_dir)
 			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
 			ins_repo = schema.repo.insert().values(name="repo.git", hash=self.repo_hash, repostore_id=repostore_key, default_permissions=RepositoryPermissions.RW)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
@@ -126,7 +128,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(30)]
 
 	def test_hello_world_repo_roundtrip(self):
-		with Client(store.rpc_exchange_name, self.repo_machine) as client:
+		with Client(store.rpc_exchange_name, str(self.repostore_id)) as client:
 			client.create_repository(self.repo_hash, "repo.git")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)

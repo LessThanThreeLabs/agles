@@ -101,7 +101,6 @@ console_output = Table('console_output', metadata,
 
 repostore = Table('repostore', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('uri', String, nullable=False, unique=True),
 	Column('host_name', String, nullable=False),
 	Column('repositories_path', String, nullable=False),
 

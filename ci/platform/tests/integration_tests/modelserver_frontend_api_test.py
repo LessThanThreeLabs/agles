@@ -114,14 +114,14 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		permission = database.schema.permission
 		repo = database.schema.repo
 
-		repostore_ins = repostore.insert().values(uri="http://machine0", host_name="localhost", repositories_path="/tmp")
+		repostore_ins = repostore.insert().values(host_name="localhost", repositories_path="/tmp")
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			result = conn.execute(repostore_ins)
 			self.repostore_id = result.inserted_primary_key[0]
 
 		with ModelServer.rpc_connect("repos", "create") as conn:
-			self.repo_id = conn._create_repo_in_db(self.REPO_NAME, self.REPO_NAME, "http://machine0", RepositoryPermissions.RW)
+			self.repo_id = conn._create_repo_in_db(self.REPO_NAME, self.REPO_NAME, self.repostore_id, RepositoryPermissions.RW)
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			query = repo.select().where(repo.c.id==self.repo_id)

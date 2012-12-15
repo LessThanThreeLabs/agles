@@ -44,13 +44,13 @@ class ReposReadHandler(ModelServerRpcHandler):
 		uri_repo_map = database.schema.uri_repo_map
 		repo = database.schema.repo
 		repostore = database.schema.repostore
-		query = select([repostore.c.uri, repostore.c.host_name, repostore.c.repositories_path, repo.c.hash, repo.c.name], from_obj=[
-            uri_repo_map.select().where(uri_repo_map.c.uri==requested_repo_uri).alias().join(repo).join(repostore)])
+		query = select([repostore.c.id, repostore.c.host_name, repostore.c.repositories_path, repo.c.hash, repo.c.name], from_obj=[
+			uri_repo_map.select().where(uri_repo_map.c.uri==requested_repo_uri).alias().join(repo).join(repostore)])
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row_result = sqlconn.execute(query).first()
 		if not row_result:
 			return None
-		return row_result[repostore.c.uri], row_result[repostore.c.host_name], row_result[repostore.c.repositories_path], row_result[repo.c.hash], row_result[repo.c.name]
+		return row_result[repostore.c.id], row_result[repostore.c.host_name], row_result[repostore.c.repositories_path], row_result[repo.c.hash], row_result[repo.c.name]
 
 	def get_user_id_from_public_key(self, key):
 		ssh_pubkey = database.schema.ssh_pubkey

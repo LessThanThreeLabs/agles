@@ -27,7 +27,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._purge_queues()
 
 	def _create_repo_store(self):
-		ins = schema.repostore.insert().values(uri="afjfaio", host_name="localhost", repositories_path="/tmp")
+		ins = schema.repostore.insert().values(host_name="localhost", repositories_path="/tmp")
 		with ConnectionFactory.get_sql_connection() as conn:
 			result = conn.execute(ins)
 			return result.inserted_primary_key[0]
@@ -41,7 +41,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	def _setup_db_entries(self, REPO_URI):
 		repostore_id = self._create_repo_store()
 		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
-			repo_id = rpc_conn._create_repo_in_db("repo.git", "repo.git", "afjfaio", RepositoryPermissions.RW)
+			repo_id = rpc_conn._create_repo_in_db("repo.git", "repo.git", repostore_id, RepositoryPermissions.RW)
 		self._map_uri(REPO_URI, repo_id)
 
 	def test_new_sshargs(self):
