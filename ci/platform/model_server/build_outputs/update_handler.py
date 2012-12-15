@@ -20,6 +20,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		assert type in ['setup', 'compile', 'test']
 
 		build_console = schema.build_console
+		build = schema.build
 
 		query = select([func.max(build_console.c.subtype_priority)],
 			and_(
@@ -28,8 +29,15 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 			),
 			[build_console]
 		)
+
+		build_query = build.select().where(build.c.id==build_id)
+
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			max_priority_result = sqlconn.execute(query).first()
+			build_row = sqlconn.execute(build_query).first()
+			assert build_row is not None
+			repo_id = build_row[build.c.repo_id]
+
 		if max_priority_result and max_priority_result[0]:
 			starting_priority = max_priority_result[0] + 1
 		else:
@@ -41,6 +49,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 				priority = index + starting_priority
 				ins = build_console.insert().values(
 					build_id=build_id,
+					repo_id=repo_id,
 					type=type,
 					subtype=subtype,
 					subtype_priority=priority,

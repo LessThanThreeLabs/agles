@@ -83,12 +83,12 @@ class SchemaDataGenerator(object):
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
 						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())))
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
-					ins_change = schema.change.insert().values(commit_id=commit_id, merge_target="target_%d" % commit,
+					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target_%d" % commit,
 						number=repos[repo_id], status=random.choice(VALID_STATUSES),
 						start_time=int(time.time()) + random.randint(-10000, 10000),
 						end_time=int(time.time()) + random.randint(10000, 12000))
 					change_id = conn.execute(ins_change).inserted_primary_key[0]
-					ins_build = schema.build.insert().values(change_id=change_id, is_primary=True, status=random.choice(VALID_STATUSES),
+					ins_build = schema.build.insert().values(change_id=change_id, repo_id=repo_id, is_primary=True, status=random.choice(VALID_STATUSES),
 						start_time=int(time.time()) + random.randint(-10000, 10000),
 						end_time=int(time.time()) + random.randint(10000, 12000))
 					build_id = conn.execute(ins_build).inserted_primary_key[0]
@@ -96,12 +96,12 @@ class SchemaDataGenerator(object):
 					conn.execute(ins_map)
 
 					for priority, console_type in enumerate(['compile', 'test']):
-						ins_console = schema.build_console.insert().values(build_id=build_id, type=console_type,
+						ins_console = schema.build_console.insert().values(build_id=build_id, repo_id=repo_id, type=console_type,
 							subtype="subtype", subtype_priority=priority)
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)
 
-						ins_console = schema.build_console.insert().values(build_id=build_id, type=console_type,
+						ins_console = schema.build_console.insert().values(build_id=build_id, repo_id=repo_id, type=console_type,
 							subtype="subtype2", subtype_priority=priority)
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)

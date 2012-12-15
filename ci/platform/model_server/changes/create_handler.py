@@ -33,7 +33,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			if max_change_number_result and max_change_number_result[0]:
 				prev_change_number = max_change_number_result[0]
 			change_number = prev_change_number + 1
-			ins = change.insert().values(commit_id=commit_id, merge_target=merge_target,
+			ins = change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target=merge_target,
 				number=change_number, status=BuildStatus.QUEUED)
 			result = sqlconn.execute(ins)
 			change_id = result.inserted_primary_key[0]

@@ -55,6 +55,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 
 			ins_change = change.insert().values(
 				commit_id=commit_id,
+				repo_id=repo_id,
 				merge_target='a',
 				number=1,
 				status='a',
@@ -66,6 +67,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 
 			ins_build = build.insert().values(
 				change_id=change_id,
+				repo_id=repo_id,
 				is_primary=True,
 				status='a',
 				start_time=1,

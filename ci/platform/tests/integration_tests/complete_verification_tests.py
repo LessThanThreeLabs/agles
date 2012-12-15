@@ -112,7 +112,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id,
 				user_id=user_id, message="commit message", timestamp=int(time.time()))
 			conn.execute(ins_commit)
-			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, merge_target="master",
+			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master",
 				number=1, status=BuildStatus.QUEUED)
 			conn.execute(ins_change)
 			return commit_id

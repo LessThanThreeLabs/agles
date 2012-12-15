@@ -5,7 +5,6 @@ import database.schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from shared.constants import VerificationUser
-from sqlalchemy.sql import select
 from util.sql import to_dict
 from util.permissions import RepositoryPermissions, InvalidPermissionsError
 

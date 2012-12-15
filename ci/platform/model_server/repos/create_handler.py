@@ -1,7 +1,3 @@
-import os
-
-from sqlalchemy import and_
-
 import database.schema
 import repo.store
 
@@ -27,7 +23,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			self._grant_permissions(user_id, repo_id, RepositoryPermissions.RWA)
 			# make filesystem changes
 			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name)
-			
+
 			self.publish_event("global", None, "repo added",
 				repo_id=repo_id, repo_name=repo_name, default_permissions=default_permissions)
 			return repo_id
