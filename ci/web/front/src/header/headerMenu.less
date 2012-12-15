@@ -8,11 +8,9 @@ div.headerMenu {
 	width: 500px;  // I DON'T LIKE THIS... WHY DO WE NEED A WIDTH HERE?
 
 	.headerMenuOption {
-		@height: 35px;
 		display: inline-block;
 		position: relative;
-		height: @height;
-		line-height: @height;
+		height: 100%;
 
 		.headerMenuOptionTitle {
 			cursor: hand;
@@ -24,9 +22,11 @@ div.headerMenu {
 			-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
 			-o-transition: background-color @backgroundColorTransitionTime ease-out;
 
+			padding-top: 8px;
 			padding-left: 15px;
 			padding-right: 15px;
-			
+			height: 100%;
+
 			&:hover {
 				background-color: rgba(255, 255, 255, 0.4);
 			}

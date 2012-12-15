@@ -7,6 +7,7 @@ class LoginHeaderMenuOption.Model extends Backbone.Model
 
 
 	initialize: () =>
+		@loginPanelModel = new LoginPanel.Model()
 		@modalModel = new PrettyModal.Model()
 
 
@@ -23,8 +24,9 @@ class LoginHeaderMenuOption.View extends Backbone.View
 
 
 	initialize: () =>
+		@loginPanelView = new LoginPanel.View model: @model.loginPanelModel
 		@modalView = new PrettyModal.View model: @model.modalModel
-		@modalView.setInnerHtml 'hello there!'
+		@modalView.setInnerHtml @loginPanelView.render().el
 
 		@model.on 'change', @render, @
 		globalAccount.on 'change', @model.updateInformation, @
