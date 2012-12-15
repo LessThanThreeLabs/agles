@@ -45,16 +45,15 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
 		sshargs = rsh.new_sshargs('git-receive-pack', REPO_URI, "1")
 
-		assert_equals(len(sshargs), 8)
+		assert_equals(len(sshargs), 7)
 		assert_equals('ssh', sshargs[0])
 		assert_equals('ssh', sshargs[1])
 		assert_equals('-p', sshargs[2])
 		assert_equals('2222', sshargs[3])
-		assert_equals('-o', sshargs[4])
-		assert_equals('StrictHostKeyChecking=false', sshargs[5])
-		assert_equals('git@localhost', sshargs[6])
-		assert_is_not_none(re.match("git-receive-pack '.+/.+/.+/repo.git' 1", sshargs[7]),
-			msg='Created ssh command: "%s" is not well formed.' % sshargs[7])
+		assert_equals('-oStrictHostKeyChecking=no', sshargs[4])
+		assert_equals('git@localhost', sshargs[5])
+		assert_is_not_none(re.match("git-receive-pack '.+/.+/.+/repo.git' 1", sshargs[6]),
+			msg='Created ssh command: "%s" is not well formed.' % sshargs[6])
 
 	def test_invalid_permissions(self):
 		REPO_URI = "schacon/repo.git"

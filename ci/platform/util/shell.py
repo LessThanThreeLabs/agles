@@ -21,7 +21,7 @@ class RestrictedGitShell(object):
 		path = "'%s'" % path
 		command_parts = [command, path, user_id] if command in self.user_id_commands else [command, path]
 		full_command = ' '.join(command_parts)
-		return "ssh", "ssh", "-p", "2222", "-o", "StrictHostKeyChecking=false", uri, full_command
+		return "ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command
 
 	def _replace_paths(self, orig_args_str, new_path):
 		return re.sub(REPO_PATH_PATTERN, new_path, orig_args_str)

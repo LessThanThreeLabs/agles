@@ -75,15 +75,12 @@ class Vagrant(object):
 
 	def _vagrant_call(self, *args, **kwargs):
 		command = ["vagrant"] + list(args)
-		return self._call(command, *args, **kwargs)
+		return self._call(command, **kwargs)
 
-	def _call(self, command, *args, **kwargs):
+	def _call(self, command, output_handler=None, **kwargs):
 		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=self.vm_directory,
 				env=self.vagrant_env)
 
-		output_handler = kwargs.get("output_handler")
-
-		self._output = []
 		output_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
 		output_lines = output_greenlet.wait()
 
@@ -100,9 +97,8 @@ class Vagrant(object):
 				break
 			line = line.rstrip()
 			lines.append(line)
-			self._output.append(line)
 			if line_handler:
-				line_handler.append(len(self._output), line)
+				line_handler.append(len(lines), line)
 		return lines
 
 	def _get_vagrant_env(self):

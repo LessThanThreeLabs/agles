@@ -154,3 +154,5 @@ if File.exist? config_path
 	config = YAML::load(File.read(config_path))
 	handle_config config
 end
+
+bash "chown -R #{node[:koality][:user]}:#{node[:koality][:user]} /home/#{node[:koality][:user]}"
