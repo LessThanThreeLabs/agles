@@ -27,12 +27,10 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 
 	def _has_permission(self, user_id, build_id):
 		build = database.schema.build
-		change = database.schema.change
-		commit = database.schema.commit
 		repo = database.schema.repo
 		permission = database.schema.permission
 
-		query = build.join(change).join(commit).join(repo).join(permission).select().where(
+		query = build.join(repo).join(permission).select().where(
 			and_(
 				build.c.id==build_id,
 				permission.c.user_id==user_id,
@@ -70,14 +68,11 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 		return result
 
 	def _has_build_console_permission(self, user_id, build_console_id):
-		build = database.schema.build
 		build_console = database.schema.build_console
-		change = database.schema.change
-		commit = database.schema.commit
 		repo = database.schema.repo
 		permission = database.schema.permission
 
-		query = build_console.join(build).join(change).join(commit).join(repo).join(permission).select().where(
+		query = build_console.join(repo).join(permission).select().where(
 			and_(
 				build_console.c.id==build_console_id,
 				permission.c.user_id==user_id,
@@ -95,7 +90,7 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 	def get_console_output(self, user_id, build_console_id):
 		if not self._has_build_console_permission(user_id, build_console_id):
 			raise InvalidPermissionsError("user_id: %d, build_console_id: %d" %
-										  (user_id, build_console_id))
+											(user_id, build_console_id))
 
 		console_output = database.schema.console_output
 		build_console = database.schema.build_console

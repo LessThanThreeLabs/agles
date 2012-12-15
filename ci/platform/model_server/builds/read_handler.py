@@ -32,11 +32,9 @@ class BuildsReadHandler(ModelServerRpcHandler):
 
 	def get_visible_build_from_id(self, user_id, build_id):
 		build = database.schema.build
-		change = database.schema.change
-		commit = database.schema.commit
 		repo = database.schema.repo
 
-		query = build.join(change).join(commit).join(repo).select().apply_labels().where(build.c.id==build_id)
+		query = build.join(repo).select().apply_labels().where(build.c.id==build_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
