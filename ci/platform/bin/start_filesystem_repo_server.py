@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import argparse
 import os
-import uuid
 
 from bunnyrpc.server import Server
 from repo.store import RepositoryStore, FileSystemRepositoryStore
@@ -39,7 +38,7 @@ def main():
 		config["id"], args.exchange_name, root_dir)
 
 	fs_repo_server = Server(FileSystemRepositoryStore(root_dir))
-	fs_repo_server.bind(args.exchange_name, [str(config["id"])], auto_delete=True)
+	fs_repo_server.bind(args.exchange_name, [RepositoryStore.queue_name(config["id"])], auto_delete=True)
 	fs_repo_server.run()
 
 

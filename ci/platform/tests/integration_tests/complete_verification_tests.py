@@ -76,7 +76,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 		repo_store = Server(FileSystemRepositoryStore(self.repo_dir))
 		self.repostore_id = 1
-		repo_store.bind(store.rpc_exchange_name, [str(self.repostore_id)], auto_delete=True)
+		repo_store.bind(store.rpc_exchange_name, [RepositoryStore.queue_name(self.repostore_id)], auto_delete=True)
 
 		self.repo_store_process = TestProcess(target=repo_store.run)
 		self.repo_store_process.start()
@@ -126,7 +126,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(30)]
 
 	def test_hello_world_repo_roundtrip(self):
-		with Client(store.rpc_exchange_name, str(self.repostore_id)) as client:
+		with Client(store.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
 			client.create_repository(self.repo_hash, "repo.git")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)

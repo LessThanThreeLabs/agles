@@ -34,11 +34,11 @@ class RemoteRepositoryManager(object):
 		"""Merges a changeset on the remote repository with a ref.
 
 		:param repostore_id: The identifier of the local store(machine) the
-						   repository is on.
+							repository is on.
 		:param repo_hash: The unique identifier for the repository being created.
 		:param repo_name: The name of the repository.
 		:param ref_to_merge: The sha ref of the changeset on the remote
-							 repository we want to merge.
+							repository we want to merge.
 		:param ref_to_merge_into: The ref we want to merge into.
 		"""
 		raise NotImplementedError("Subclasses should override this!")
@@ -89,14 +89,14 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
 
-		with Client(rpc_exchange_name, str(repostore_id), globals=globals()) as client:
+		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.merge_changeset(repo_hash, repo_name, ref_to_merge, ref_to_merge_into)
 
 	def create_repository(self, repostore_id, repo_hash, repo_name):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
 
-		with Client(rpc_exchange_name, str(repostore_id), globals=globals()) as client:
+		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.create_repository(repo_hash, repo_name)
 		self._update_store_repo_count(repostore_id)
 
@@ -104,7 +104,7 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
 
-		with Client(rpc_exchange_name, str(repostore_id)) as client:
+		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id)) as client:
 			client.delete_repository(repo_hash, repo_name)
 		self._update_store_repo_count(repostore_id, -1)
 
@@ -113,7 +113,7 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		assert new_repo_name.endswith(".git")
 		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
 
-		with Client(rpc_exchange_name, str(repostore_id), globals=globals()) as client:
+		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.rename_repository(repo_hash, old_repo_name, new_repo_name)
 
 	def get_least_loaded_store(self):
@@ -131,6 +131,10 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 class RepositoryStore(object):
 	"""Base class for RepositoryStore"""
 	CONFIG_FILE = ".repostore_config.yml"
+
+	@classmethod
+	def queue_name(cls, repostore_id):
+		return "repostore:%d" % repostore_id
 
 	@classmethod
 	def create_config(cls, repostore_id, root_dir):
