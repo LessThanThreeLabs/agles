@@ -17,7 +17,6 @@ class ReposReadHandler(ModelServerRpcHandler):
 	def get_repo_uri(self, commit_id):
 		commit = database.schema.commit
 		repo = database.schema.repo
-		uri_repo_map = database.schema.uri_repo_map
 
 		repo_id_query = commit.select().where(
 			commit.c.id==commit_id)
@@ -27,11 +26,10 @@ class ReposReadHandler(ModelServerRpcHandler):
 			return None
 		repo_hash = row[commit.c.repo_hash]
 
-		query = repo.join(
-            uri_repo_map).select().where(repo.c.hash==repo_hash)
+		query = repo.select().where(repo.c.hash==repo_hash)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-		return row[uri_repo_map.c.uri] if row else None
+		return row[repo.c.uri] if row else None
 
 	def get_repo_name(self, repo_hash):
 		repo = database.schema.repo
@@ -41,11 +39,10 @@ class ReposReadHandler(ModelServerRpcHandler):
 		return row[repo.c.name] if row else None
 
 	def get_repo_attributes(self, requested_repo_uri):
-		uri_repo_map = database.schema.uri_repo_map
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		query = select([repostore.c.id, repostore.c.host_name, repostore.c.repositories_path, repo.c.hash, repo.c.name], from_obj=[
-			uri_repo_map.select().where(uri_repo_map.c.uri==requested_repo_uri).alias().join(repo).join(repostore)])
+			repo.select().where(repo.c.uri==requested_repo_uri).alias().join(repostore)])
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row_result = sqlconn.execute(query).first()
 		if not row_result:
@@ -166,18 +163,14 @@ class ReposReadHandler(ModelServerRpcHandler):
 
 	def get_clone_url(self, user_id, repo_id):
 		permission = database.schema.permission
-		uri_repo_map = database.schema.uri_repo_map
+		repo = database.schema.repo
 
 		row = self._get_repo_joined_permission_row(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(
 				row[permission.c.permissions], RepositoryPermissions.R):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 
-		uri_query = uri_repo_map.select().where(uri_repo_map.c.repo_id==repo_id)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row = sqlconn.execute(uri_query).first()
-			assert row is not None
-			return row[uri_repo_map.c.uri]
+		return row[repo.c.uri]
 
 	def get_members_with_permissions(self, user_id, repo_id):
 		repo = database.schema.repo

@@ -100,10 +100,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_machine = schema.repostore.insert().values(host_name="localhost", repositories_path=self.repo_dir)
 			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
-			ins_repo = schema.repo.insert().values(name="repo.git", hash=self.repo_hash, repostore_id=repostore_key, default_permissions=RepositoryPermissions.RW)
+			ins_repo = schema.repo.insert().values(name="repo.git", hash=self.repo_hash, repostore_id=repostore_key, uri=repo_uri, default_permissions=RepositoryPermissions.RW)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
-			ins_map = schema.uri_repo_map.insert().values(uri=repo_uri, repo_id=repo_key)
-			conn.execute(ins_map)
 			return repo_key
 
 	def _insert_commit_info(self):

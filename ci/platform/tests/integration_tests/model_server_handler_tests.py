@@ -38,6 +38,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 			ins_repo = repo.insert().values(
 				name='a',
 				hash='a',
+				uri='a',
 				repostore_id=repostore_id,
 				default_permissions=RepositoryPermissions.RWA
 			)

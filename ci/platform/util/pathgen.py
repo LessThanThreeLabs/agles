@@ -1,9 +1,16 @@
-# repositories.py - a util class for interacting with repositories
-
 import os
 
 DEFAULT_CHARS_PER_LEVEL = 2
 DIR_LEVELS = 3
+
+
+def path_sanitize_email(email):
+	return email.replace("@", "AT").replace(".", "DOT")
+
+
+def to_clone_path(email, repo_name):
+	sanitized_email = path_sanitize_email(email)
+	return "%s/%s" % (sanitized_email, repo_name)
 
 
 def to_path(hash, name, dir_levels=DIR_LEVELS):

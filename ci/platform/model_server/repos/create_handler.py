@@ -8,6 +8,7 @@ import repo.store
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from util.permissions import RepositoryPermissions
+from util.pathgen import to_clone_path
 
 
 class ReposCreateHandler(ModelServerRpcHandler):
@@ -19,9 +20,9 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			repo_name += ".git"
 			#TODO: REMOVE REPO HASH!!!!!!!!!!
 			repo_hash = os.urandom(16).encode('hex')
-			repostore_id = self._create_repo_on_filesystem(repo_hash, repo_name)
-			repo_id = self._create_repo_in_db(repo_hash, repo_name, repostore_id, default_permissions)
-			self._initialize_repo_uri(user_id, repo_id, repo_name)
+			repostore_id = self._create_repo_on_filesystem(user_id, repo_hash, repo_name)
+			uri = self._transpose_to_uri(repo_name)
+			repo_id = self._create_repo_in_db(repo_hash, repo_name, uri, repostore_id, default_permissions)
 			self._grant_permissions(user_id, repo_hash, RepositoryPermissions.RWA)
 			self.publish_event("global", None, "repo added",
 				repo_id=repo_id, repo_name=repo_name, repo_hash=repo_hash, default_permissions=default_permissions)
@@ -37,14 +38,13 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		manager.create_repository(repostore_id, repo_hash, repo_name)
 		return repostore_id
 
-	def _create_repo_in_db(self, repo_hash, repo_name, repostore_id, default_permissions):
+	def _create_repo_in_db(self, repo_hash, repo_name, uri, repostore_id, default_permissions):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id==repostore_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
-
-			ins = repo.insert().values(name=repo_name, hash=repo_hash, repostore_id=repostore_id, default_permissions=default_permissions)
+			ins = repo.insert().values(name=repo_name, hash=repo_hash, uri=uri, repostore_id=repostore_id, default_permissions=default_permissions)
 			result = sqlconn.execute(ins)
 		repo_id = result.inserted_primary_key[0]
 		return repo_id
@@ -59,20 +59,13 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(ins)
 
-	def _initialize_repo_uri(self, user_id, repo_id, repo_name):
+	def _transpose_to_uri(self, repo_name):
 		user = database.schema.user
-		uri_repo_map = database.schema.uri_repo_map
-
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			query = user.select().where(user.c.id==user_id)
 			email = sqlconn.execute(query).first()[user.c.email]
-			uri = self._transpose_to_uri(email, repo_name)
-			ins = uri_repo_map.insert().values(uri=uri, repo_id=repo_id)
-			sqlconn.execute(ins)
 
-	def _transpose_to_uri(self, email, repo_name):
-		sanitized_email = email.replace("@", "AT").replace(".", "DOT")
-		return "%s/%s" % (sanitized_email, repo_name)
+		return to_clone_path(email, repo_name)
 
 	def register_repostore(self, host_name, root_dir):
 		repostore = database.schema.repostore

@@ -55,15 +55,13 @@ class SchemaDataGenerator(object):
 			repos = dict()
 			repo_hashes = []
 			for repostore in range(random.randint(1, 3)):
-				ins_repostore = schema.repostore.insert().values(uri="repostore_%d" % repostore, repositories_path=REPOSITORIES_PATH, host_name=hashlib.sha1(str(repostore)).hexdigest())
+				ins_repostore = schema.repostore.insert().values(repositories_path=REPOSITORIES_PATH, host_name=hashlib.sha1(str(repostore)).hexdigest())
 				repostore_id = conn.execute(ins_repostore).inserted_primary_key[0]
 
 				for repo in range(random.randint(1, NUM_REPOS)):
 					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, hash="hash_%d,%d" % (repostore, repo),
-						repostore_id=repostore_id, default_permissions=RepositoryPermissions.RW)
+						uri="uri_%d_%d" % (repostore, repo), repostore_id=repostore_id, default_permissions=RepositoryPermissions.RW)
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
-					ins_map = schema.uri_repo_map.insert().values(uri="uri_%d_%d" % (repostore, repo), repo_id=repo_id)
-					conn.execute(ins_map)
 					repos[repo_id] = 0
 					repo_hashes.append("hash_%d,%d" % (repostore, repo))
 

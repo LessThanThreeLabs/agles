@@ -43,16 +43,18 @@ from hashlib import sha512
 from nose.tools import *
 
 from database.engine import ConnectionFactory
+from model_server import ModelServer
 from util.permissions import RepositoryPermissions
+from util.pathgen import to_clone_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
-from model_server import ModelServer
 
 
 class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
 	EMAIL = "jchu@lt3.com"
 	REPO_NAME = "r"
+	REPO_URI = to_clone_path(EMAIL, REPO_NAME)
 
 	def setUp(self):
 		super(ModelServerFrontEndApiTest, self).setUp()
@@ -77,7 +79,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				"email": self.EMAIL,
 				"first_name": "asdf",
 				"last_name": "bdsf",
-				"salt": "a"*16,
+				"salt": "a" * 16,
 				"password_hash": self.password_hash
 			}
 			self.user_id = conn.create_user(self.user_info)
@@ -86,12 +88,10 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		for key in expected.iterkeys():
 			assert_equals(expected[key], actual[key])
 
-
 	def test_get_user_id(self):
 		with ModelServer.rpc_connect("users", "read") as conn:
 			user_id = conn.get_user_id(self.EMAIL, self.password_hash)
 		assert_equals(self.user_id, user_id)
-
 
 	def test_get_user(self):
 		with ModelServer.rpc_connect("users", "read") as conn:
@@ -121,7 +121,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			self.repostore_id = result.inserted_primary_key[0]
 
 		with ModelServer.rpc_connect("repos", "create") as conn:
-			self.repo_id = conn._create_repo_in_db(self.REPO_NAME, self.REPO_NAME, self.repostore_id, RepositoryPermissions.RW)
+			self.repo_id = conn._create_repo_in_db(self.REPO_NAME, self.REPO_NAME, self.REPO_URI, self.repostore_id, RepositoryPermissions.RW)
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			query = repo.select().where(repo.c.id==self.repo_id)

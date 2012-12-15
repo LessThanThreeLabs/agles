@@ -22,16 +22,11 @@ media = Table('media', metadata,
 	Column('hash', String(32), nullable=False)
 )
 
-uri_repo_map = Table('uri_repo_map', metadata,
-	Column('id', Integer, primary_key=True),
-	Column('uri', String, nullable=False, unique=True),
-	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False, unique=True),
-)
-
 repo = Table('repo', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('name', String, nullable=False),
 	Column('hash', String, nullable=False, index=True, unique=True),
+	Column('uri', String, nullable=False, unique=True),  # this is the clone uri
 	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
 	Column('default_permissions', SmallInteger, nullable=False)  # This is a bitmask
 )
