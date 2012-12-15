@@ -59,13 +59,13 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		super(VerificationRoundTripTest, self).setUp()
 		self._purge_queues()
 		self.repo_dir = os.path.join(TEST_ROOT, 'repo')
-		self.repo_hash = "asdfghjkl"
+		self.repo_id = 1
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.makedirs(self.repo_dir)
 		self._start_model_server()
 		self.repo_path = os.path.join(
 			self.repo_dir,
-			to_path(self.repo_hash, "repo.git"))
+			to_path(self.repo_id, "repo.git"))
 		self._start_redis()
 		self.vs_processes = []
 		for verifier in self.verifiers:
@@ -100,7 +100,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_machine = schema.repostore.insert().values(host_name="localhost", repositories_path=self.repo_dir)
 			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
-			ins_repo = schema.repo.insert().values(name="repo.git", hash=self.repo_hash, repostore_id=repostore_key, uri=repo_uri, default_permissions=RepositoryPermissions.RW)
+			ins_repo = schema.repo.insert().values(id=self.repo_id, name="repo.git", repostore_id=repostore_key, uri=repo_uri, default_permissions=RepositoryPermissions.RW)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			return repo_key
 
@@ -109,7 +109,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=sha512("").hexdigest(), salt="1234567890123456")
 			user_id = conn.execute(ins_user).inserted_primary_key[0]
-			ins_commit = schema.commit.insert().values(id=commit_id, repo_hash=self.repo_hash,
+			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id,
 				user_id=user_id, message="commit message", timestamp=int(time.time()))
 			conn.execute(ins_commit)
 			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, merge_target="master",
@@ -127,7 +127,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	def test_hello_world_repo_roundtrip(self):
 		with Client(store.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
-			client.create_repository(self.repo_hash, "repo.git")
+			client.create_repository(self.repo_id, "repo.git")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")

@@ -31,11 +31,11 @@ class RestrictedGitShell(object):
 		assert match is not None
 		return match.group()
 
-	def verify_user_permissions(self, command, user_id, repo_hash):
+	def verify_user_permissions(self, command, user_id, repo_id):
 		with ModelServer.rpc_connect("repos", "read") as client:
-			permissions = client.get_permissions(int(user_id), repo_hash)
+			permissions = client.get_permissions(int(user_id), repo_id)
 		if not RepositoryPermissions.has_permissions(permissions, self.commands_to_permissions[command]):
-			raise InvalidPermissionsError("User %s does not have the necessary permissions to run %s on repository %s" % (user_id, command, repo_hash))
+			raise InvalidPermissionsError("User %s does not have the necessary permissions to run %s on repository %d" % (user_id, command, repo_id))
 
 	def _validate(self, repo_path):
 		if not repo_path.endswith(".git"):
@@ -48,10 +48,10 @@ class RestrictedGitShell(object):
 		requested_repo_uri = self._get_requested_repo_uri(repo_path)
 
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, route, repos_path, repo_hash, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
-		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_hash, repo_name))
+			repostore_id, route, repos_path, repo_id, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 
-		self.verify_user_permissions(command, user_id, repo_hash)
+		self.verify_user_permissions(command, user_id, repo_id)
 
 		return self._create_ssh_exec_args(route, command, remote_filesystem_path, user_id)
 

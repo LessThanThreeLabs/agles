@@ -37,7 +37,6 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 
 			ins_repo = repo.insert().values(
 				name='a',
-				hash='a',
 				uri='a',
 				repostore_id=repostore_id,
 				default_permissions=RepositoryPermissions.RWA
@@ -46,7 +45,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
 			repo_id = sqlconn.execute(ins_repo).inserted_primary_key[0]
 
 			ins_commit = commit.insert().values(
-				repo_hash='a',
+				repo_id=repo_id,
 				user_id=user_id,
 				message='a',
 				timestamp=1,

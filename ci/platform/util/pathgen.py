@@ -13,23 +13,24 @@ def to_clone_path(email, repo_name):
 	return "%s/%s" % (sanitized_email, repo_name)
 
 
-def to_path(hash, name, dir_levels=DIR_LEVELS):
-	return os.path.join(directory_treeify(hash, dir_levels), name)
+def to_path(pathseed, name, dir_levels=DIR_LEVELS):
+	return os.path.join(directory_treeify(pathseed, dir_levels), name)
 
 
-def directory_treeify(hash, dir_levels=DIR_LEVELS):
-	"""Takes a hash and separates it into directories (e.g. a23fe89 => a/2/3fe89)
+def directory_treeify(pathseed, dir_levels=DIR_LEVELS):
+	"""Takes a pathseed and separates it into directories (e.g. 1 => 00/00/01)
 
-	:param hash: The hash we are treeifying.
-	:param dir_levels: The number of directory levels to create from repo_hash.
-	:return: A string representing repo_hash with file separators up to dir_levels levels.
+	:param pathseed: The thing we take and treeify.
+	:param dir_levels: The number of directory levels to create from pathseed.
+	:return: A string representing pathseed with file separators up to dir_levels levels.
 	"""
 	assert dir_levels > 0
-	assert len(hash) > (dir_levels - 1) * DEFAULT_CHARS_PER_LEVEL
+	required_len = dir_levels * DEFAULT_CHARS_PER_LEVEL
+	padded_id = str(pathseed).zfill(required_len)
 
 	pivot = dir_levels * DEFAULT_CHARS_PER_LEVEL
-	chunked_hash = map(''.join, zip(*[iter(hash[:pivot])] * DEFAULT_CHARS_PER_LEVEL))
-	return os.path.join(*chunked_hash) + hash[pivot:]
+	chunked_hash = map(''.join, zip(*[iter(padded_id[:pivot])] * DEFAULT_CHARS_PER_LEVEL))
+	return os.path.join(*chunked_hash) + padded_id[pivot:]
 
 
 def hidden_ref(commit_id):
@@ -41,8 +42,9 @@ def hidden_ref(commit_id):
 	return os.sep.join(['refs/pending', str(commit_id)])
 
 
-def get_repo_hash(abspath):
+def get_repo_id(abspath):
 	# We start 2 from the back of the list because of ['repo_name', '.git']
-	hash_path_end_index = -1
-	hash_path_start_index = hash_path_end_index - DIR_LEVELS
-	return ''.join(abspath.split('/')[hash_path_start_index:hash_path_end_index])
+	repo_id_path_end_index = -1
+	repo_id_path_start_index = repo_id_path_end_index - DIR_LEVELS
+	repo_id_string = ''.join(abspath.split('/')[repo_id_path_start_index:repo_id_path_end_index])
+	return int(repo_id_string)

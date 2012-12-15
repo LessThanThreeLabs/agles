@@ -25,7 +25,6 @@ media = Table('media', metadata,
 repo = Table('repo', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('name', String, nullable=False),
-	Column('hash', String, nullable=False, index=True, unique=True),
 	Column('uri', String, nullable=False, unique=True),  # this is the clone uri
 	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
 	Column('default_permissions', SmallInteger, nullable=False)  # This is a bitmask
@@ -35,15 +34,15 @@ repo = Table('repo', metadata,
 permission = Table('permission', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
-	Column('repo_hash', String, ForeignKey('repo.hash'), nullable=False, index=True),
+	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False, index=True),
 	Column('permissions', SmallInteger, nullable=False),  # This is a bitmask
 
-	UniqueConstraint('user_id', 'repo_hash')
+	UniqueConstraint('user_id', 'repo_id')
 )
 
 commit = Table('commit', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('repo_hash', String, ForeignKey('repo.hash'), nullable=False),
+	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
 	Column('message', String, nullable=False),
 	Column('timestamp', Integer, nullable=False)

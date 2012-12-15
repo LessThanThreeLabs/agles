@@ -8,7 +8,6 @@ from sqlalchemy.sql import func
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from model_server.build_outputs import REDIS_SUBTYPE_KEY, REDIS_TYPE_KEY
 
 
 class BuildOutputsUpdateHandler(ModelServerRpcHandler):

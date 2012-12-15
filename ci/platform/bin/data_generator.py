@@ -53,34 +53,34 @@ class SchemaDataGenerator(object):
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			repos = dict()
-			repo_hashes = []
+			repo_ids = []
 			for repostore in range(random.randint(1, 3)):
 				ins_repostore = schema.repostore.insert().values(repositories_path=REPOSITORIES_PATH, host_name=hashlib.sha1(str(repostore)).hexdigest())
 				repostore_id = conn.execute(ins_repostore).inserted_primary_key[0]
 
 				for repo in range(random.randint(1, NUM_REPOS)):
-					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, hash="hash_%d,%d" % (repostore, repo),
-						uri="uri_%d_%d" % (repostore, repo), repostore_id=repostore_id, default_permissions=RepositoryPermissions.RW)
+					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, uri="uri_%d_%d" % (repostore, repo), 
+						repostore_id=repostore_id, default_permissions=RepositoryPermissions.RW)
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
 					repos[repo_id] = 0
-					repo_hashes.append("hash_%d,%d" % (repostore, repo))
+					repo_ids.append(repo_id)
 
 			for user in range(random.randint(1, 10)):
 				ins_user = schema.user.insert().values(first_name="firstname_%d" % user, last_name="lastname_%d" % user, email="%d@b.com" % user,
 					password_hash=hashlib.sha512(str(user)).hexdigest(), salt='a'*16)
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
-				repo_hash = random.choice(repo_hashes)
+				repo_id= random.choice(repo_ids)
 				permissions = random.choice(RepositoryPermissions.valid_permissions())
-				ins_permission = schema.permission.insert().values(user_id=user_id, repo_hash=repo_hash, permissions=permissions)
+				ins_permission = schema.permission.insert().values(user_id=user_id, repo_id=repo_id, permissions=permissions)
 				conn.execute(ins_permission)
 
 				for commit in range(random.randint(1, 20)):
 					repo_id = random.choice(repos.keys())
-					repo_hash_query = schema.repo.select().where(schema.repo.c.id==repo_id)
-					repo_hash = conn.execute(repo_hash_query).first()[schema.repo.c.hash]
+					repo_id_query = schema.repo.select().where(schema.repo.c.id==repo_id)
+					repo_id = conn.execute(repo_id_query).first()[schema.repo.c.id]
 					repos[repo_id] += 1
-					ins_commit = schema.commit.insert().values(repo_hash=repo_hash, user_id=user_id,
+					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
 						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())))
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, merge_target="target_%d" % commit,
@@ -107,15 +107,15 @@ class SchemaDataGenerator(object):
 						self.generate_console_output(conn, console_id)
 
 
-		self._grantall(self.admin_id, repo_hashes, RepositoryPermissions.RWA)
-		self._grantall(self.user_id, repo_hashes[:1], RepositoryPermissions.R)
+		self._grantall(self.admin_id, repo_ids, RepositoryPermissions.RWA)
+		self._grantall(self.user_id, repo_ids[:1], RepositoryPermissions.R)
 
-	def _grantall(self, user_id, repo_hashes, permissions):
+	def _grantall(self, user_id, repo_ids, permissions):
 		insert_values = []
-		for repo_hash in repo_hashes:
+		for repo_id in repo_ids:
 			insert_values.append({
 				'user_id': user_id,
-				'repo_hash': repo_hash,
+				'repo_id': repo_id,
 				'permissions': permissions
 			})
 

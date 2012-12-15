@@ -18,11 +18,10 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		user = database.schema.user
 		permission = database.schema.permission
 
-		row = self._get_repo_joined_permission_row(user_id, repo_id)
+		row = self._get_repo_permissions(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(
 				row[permission.c.permissions], RepositoryPermissions.RWA):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
-		repo_hash = row[repo.c.hash]
 		repo_permissions = row[repo.c.default_permissions]
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -30,21 +29,21 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 			if not invited_user:
 				raise NoSuchUserError("email: %s" % email)
 			invited_user_id = invited_user[user.c.id]
-			sqlconn.execute(permission.insert().values(user_id=invited_user_id, repo_hash=repo_hash, permissions=repo_permissions))
+			sqlconn.execute(permission.insert().values(user_id=invited_user_id, repo_id=repo_id, permissions=repo_permissions))
 
 		self.publish_event("repos", repo_id, "member added", email=email, first_name=invited_user[user.c.first_name],
 			last_name=invited_user[user.c.last_name], permissions=repo_permissions)
 
+	# TODO: Should this delete/add or update/insert?
 	def change_member_permissions(self, user_id, email, repo_id, permissions):
 		repo = database.schema.repo
 		user = database.schema.user
 		permission = database.schema.permission
 
-		row = self._get_repo_joined_permission_row(user_id, repo_id)
+		row = self._get_repo_permissions(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(
 				row[permission.c.permissions], RepositoryPermissions.RWA):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
-		repo_hash = row[repo.c.hash]
 
 		user_query = user.select().where(user.c.email==email)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -58,9 +57,9 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		del_query = permission.delete().where(and_(
 			permission.c.user_id==target_user_id,
-			permission.c.repo_hash==repo_hash)
+			permission.c.repo_id==repo_id)
 		)
-		ins = permission.insert().values(user_id=target_user_id, repo_hash=repo_hash, permissions=permissions)
+		ins = permission.insert().values(user_id=target_user_id, repo_id=repo_id, permissions=permissions)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(del_query)
@@ -73,11 +72,10 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		user = database.schema.user
 		permission = database.schema.permission
 
-		row = self._get_repo_joined_permission_row(user_id, repo_id)
+		row = self._get_repo_permissions(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(
 				row[permission.c.permissions], RepositoryPermissions.RWA):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
-		repo_hash = row[repo.c.hash]
 
 		user_query = user.select().where(user.c.email==email)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -89,9 +87,11 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		if target_user_id == user_id:
 			raise InvalidActionError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 
-		del_query = permission.delete().where(and_(
-			permission.c.user_id==target_user_id,
-			permission.c.repo_hash==repo_hash)
+		del_query = permission.delete().where(
+			and_(
+				permission.c.user_id==target_user_id,
+				permission.c.repo_id==repo_id
+			)
 		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -99,14 +99,13 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 		self.publish_event("repos", repo_id, "member removed", email=email)
 
-	# TODO: Once repo hash is removed, clean all this up
-	def _get_repo_joined_permission_row(self, user_id, repo_id):
+	def _get_repo_permissions(self, user_id, repo_id):
 		repo = database.schema.repo
 		permission = database.schema.permission
 
-		query = repo.join(permission).select().apply_labels().where(
+		query = permission.select().where(
 			and_(
-				repo.c.id==repo_id,
+				permission.c.repo_id==repo_id,
 				permission.c.user_id==user_id
 			)
 		)

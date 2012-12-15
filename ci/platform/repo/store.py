@@ -30,12 +30,12 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def merge_changeset(self, repostore_id, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		"""Merges a changeset on the remote repository with a ref.
 
 		:param repostore_id: The identifier of the local store(machine) the
 							repository is on.
-		:param repo_hash: The unique identifier for the repository being created.
+		:param repo_id: The unique identifier for the repository being created.
 		:param repo_name: The name of the repository.
 		:param ref_to_merge: The sha ref of the changeset on the remote
 							repository we want to merge.
@@ -43,29 +43,29 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repostore_id, repo_hash, repo_name):
+	def create_repository(self, repostore_id, repo_id, repo_name):
 		"""Creates a repository on the given local store.
 
 		:param repostore_id: The identifier of the local store(machine) to create the repository on.
-		:param repo_hash: The unique identifier for the repository being created.
+		:param repo_id: The unique identifier for the repository being created.
 		:param repo_name: The name of the new repository.
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def delete_repository(self, repostore_id, repo_hash, repo_name):
+	def delete_repository(self, repostore_id, repo_id, repo_name):
 		"""Deletes a repository on the given local store.
 
 		:param repostore_id: The identifier of the local store(machine) to create the repository on.
-		:param repo_hash: The unique identifier for the repository being created.
+		:param repo_id: The unique identifier for the repository being created.
 		:param repo_name: The name of the new repository.
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def rename_repository(self, repostore_id, repo_hash, old_repo_name, new_repo_name):
+	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
 		"""Renames a repository on the given local store.
 
 		:param repostore_id: The identifier of the local store(machine) to create the repository on.
-		:param repo_hash: The unique identifier for the repository being created.
+		:param repo_id: The unique identifier for the repository being created.
 		:param old_repo_name: The name of the old repository.
 		:param new_repo_name: The name of the new repository.
 		"""
@@ -85,36 +85,36 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 
 		self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{str(repostore_id): num_repos})
 
-	def merge_changeset(self, repostore_id, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
-		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
+		assert isinstance(repo_id, int)
 
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.merge_changeset(repo_hash, repo_name, ref_to_merge, ref_to_merge_into)
+			client.merge_changeset(repo_id, repo_name, ref_to_merge, ref_to_merge_into)
 
-	def create_repository(self, repostore_id, repo_hash, repo_name):
+	def create_repository(self, repostore_id, repo_id, repo_name):
 		assert repo_name.endswith(".git")
-		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
+		assert isinstance(repo_id, int)
 
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.create_repository(repo_hash, repo_name)
+			client.create_repository(repo_id, repo_name)
 		self._update_store_repo_count(repostore_id)
 
-	def delete_repository(self, repostore_id, repo_hash, repo_name):
+	def delete_repository(self, repostore_id, repo_id, repo_name):
 		assert repo_name.endswith(".git")
-		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
+		assert isinstance(repo_id, int)
 
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id)) as client:
-			client.delete_repository(repo_hash, repo_name)
+			client.delete_repository(repo_id, repo_name)
 		self._update_store_repo_count(repostore_id, -1)
 
-	def rename_repository(self, repostore_id, repo_hash, old_repo_name, new_repo_name):
+	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
 		assert old_repo_name.endswith(".git")
 		assert new_repo_name.endswith(".git")
-		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
+		assert isinstance(repo_id, int)
 
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.rename_repository(repo_hash, old_repo_name, new_repo_name)
+			client.rename_repository(repo_id, old_repo_name, new_repo_name)
 
 	def get_least_loaded_store(self):
 		"""Identifies the local store that is being least utilized. For this particular class
@@ -173,16 +173,16 @@ class RepositoryStore(object):
 		sock.close()
 		return host_name
 
-	def merge_changeset(self, repo_hash, repo_name, sha_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repo_hash, repo_name):
+	def create_repository(self, repo_id, repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def delete_repository(self, repo_hash, repo_name):
+	def delete_repository(self, repo_id, repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def rename_repository(self, repo_hash, old_repo_name, new_repo_name):
+	def rename_repository(self, repo_id, old_repo_name, new_repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
 
@@ -202,19 +202,19 @@ class FileSystemRepositoryStore(RepositoryStore):
 			# TODO: should do logging here
 			raise e
 
-	def _push_github_if_necessary(self, repo, repo_hash, ref):
+	def _push_github_if_necessary(self, repo, repo_id, ref):
 		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
-			remote_repo = conn.get_corresponding_github_repo_url(repo_hash)
+			remote_repo = conn.get_corresponding_github_repo_url(repo_id)
 
 		# remote_repo is None if user doesn't have a pushback url set
 		if remote_repo:
 			self._push_github(repo, remote_repo, ref)
 
-	def merge_changeset(self, repo_hash, repo_name, ref_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
-		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
+		assert isinstance(repo_id, int)
 
-		repo_path = self._resolve_path(repo_hash, repo_name)
+		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
 		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
 		try:
@@ -228,7 +228,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
-		except GitCommandError, e:
+		except GitCommandError as e:
 			stacktrace = sys.exc_info()[2]
 			error_msg = "repo: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
 				repo, ref_to_merge, ref_to_merge_into)
@@ -236,61 +236,61 @@ class FileSystemRepositoryStore(RepositoryStore):
 		finally:
 			repo_slave.git.reset(hard=True)
 
-		self._push_github_if_necessary(repo, repo_hash, ref_to_merge_into)
+		self._push_github_if_necessary(repo, repo_id, ref_to_merge_into)
 
-	def create_repository(self, repo_hash, repo_name):
+	def create_repository(self, repo_id, repo_name):
 		"""Creates a new server side repository. Raises an exception on failure.
 		We create bare repositories because they are server side.
 
-		:param repo_hash: A unique hash assigned to each repository that determines which directory
-						  the repository is stored under.
+		:param repo_id: A unique id assigned to each repository that is used to determine
+						which directory the repository is stored under.
 		:param repo_name: The name of the new repository.
 		"""
 		assert repo_name.endswith(".git")
-		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
+		assert isinstance(repo_id, int)
 
-		repo_path = self._resolve_path(repo_hash, repo_name)
+		repo_path = self._resolve_path(repo_id, repo_name)
 		if not os.path.exists(repo_path):
 			os.makedirs(repo_path)
 		else:
-			raise RepositoryAlreadyExistsException(repo_hash, repo_path)
+			raise RepositoryAlreadyExistsException(repo_id, repo_path)
 		Repo.init(repo_path, bare=True)
 
-	def delete_repository(self, repo_hash, repo_name):
+	def delete_repository(self, repo_id, repo_name):
 		"""Deletes a server side repository. This cannot be undone. Raises an exception on failure.
 
-		:param repo_hash: A unique hash assigned to each repository that determines which directory
-						  the repository is stored under.
+		:param repo_id: A unique id assigned to each repository that is used to determine
+						which directory the repository is stored under.
 		:param repo_name: The name of the repository to be deleted.
 		"""
 		assert repo_name.endswith(".git")
-		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
+		assert isinstance(repo_id, int)
 
-		repo_path = self._resolve_path(repo_hash, repo_name)
+		repo_path = self._resolve_path(repo_id, repo_name)
 		shutil.rmtree(repo_path)
 
-	def rename_repository(self, repo_hash, old_name, new_name):
+	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.
 
-		:param repo_hash: A unique hash assigned to each repository that determines which directory
-						  the repository is stored under.
+		:param repo_id: A unique id assigned to each repository that is used to 
+						determine which directory the repository is stored under.
 		:param old_name: The old repository name.
 		:param new_name: The new repository name.
 		"""
 		assert old_name.endswith(".git")
 		assert new_name.endswith(".git")
-		assert isinstance(repo_hash, str) or isinstance(repo_hash, unicode)
+		assert isinstance(repo_id, int)
 
-		old_repo_path = self._resolve_path(repo_hash, old_name)
-		new_repo_path = self._resolve_path(repo_hash, new_name)
+		old_repo_path = self._resolve_path(repo_id, old_name)
+		new_repo_path = self._resolve_path(repo_id, new_name)
 		if not os.path.exists(new_repo_path):
 			shutil.move(old_repo_path, new_repo_path)
 		else:
-			raise RepositoryAlreadyExistsException(repo_hash, new_repo_path)
+			raise RepositoryAlreadyExistsException(repo_id, new_repo_path)
 
-	def _resolve_path(self, repo_hash, repo_name):
+	def _resolve_path(self, repo_id, repo_name):
 		repo_path = os.path.join(self._root_path,
-								 pathgen.to_path(repo_hash, repo_name))
+								 pathgen.to_path(repo_id, repo_name))
 		return os.path.realpath(repo_path)
 
 
@@ -311,7 +311,7 @@ class MergeError(RepositoryOperationException):
 class RepositoryAlreadyExistsException(RepositoryOperationException):
 	"""Indicates an exception occurred due to a repository already existing."""
 
-	def __init__(self, msg='', repo_hash=None, existing_repo_path=None):
+	def __init__(self, msg='', repo_id=None, existing_repo_path=None):
 		if not msg:
-			msg = 'Repository with hash %s already exists at path %s' % (repo_hash, existing_repo_path)
+			msg = 'Repository with id %d already exists at path %s' % (repo_id, existing_repo_path)
 		super(RepositoryAlreadyExistsException, self).__init__(msg)

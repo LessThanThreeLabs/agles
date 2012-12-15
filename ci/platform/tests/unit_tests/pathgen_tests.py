@@ -3,6 +3,7 @@ import unittest
 from nose.tools import *
 from util.pathgen import directory_treeify, to_path
 
+
 class ShellTest(unittest.TestCase):
 	def setUp(self):
 		pass
@@ -19,9 +20,6 @@ class ShellTest(unittest.TestCase):
 		oddlen_hash = '123456789'
 		assert_equals('12/34/56789', directory_treeify(oddlen_hash))
 		assert_equals('12/34/56/789', directory_treeify(oddlen_hash, dir_levels=4))
-
-		undersized_hash = '123'
-		assert_raises(AssertionError, directory_treeify, undersized_hash)
 
 	def test_to_path(self):
 		evenlen_hash = '1234567890'
