@@ -18,4 +18,35 @@ body {
 		font-size: 1.0em;
 		border-radius: 5px;
 	}
+
+	button {
+		display: inline-block;
+
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #FFFFFF), color-stop(1, #F6F6F6));
+		background: -moz-linear-gradient(center top, #FFFFFF 5%, #F6F6F6 100% );
+		background-color: #FFFFFF;
+
+		box-shadow:inset 0px 1px 0px 1px #FFFFFF;
+		-moz-box-shadow: 0px 1px 0px 1px #FFFFFF inset;
+		-webkit-box-shadow: 0px 1px 0px 1px #FFFFFF inset;
+
+		border: 1px solid #DCDCDC;
+		border-radius: 6px;
+		color: #666666;
+		font-weight: bold;
+		padding: 6px 24px;
+		text-decoration: none;
+		text-shadow: 1px 1px 0px #FFFFFF;
+
+		&:hover {
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #F6F6F6), color-stop(1, #FFFFFF));
+			background: -moz-linear-gradient(center top, #F6F6F6 5%, #FFFFFF 100%);
+			background-color: #F6F6F6;
+		}
+
+		&:active {
+			position: relative;
+			top: 1px;
+		}
+	}
 }
