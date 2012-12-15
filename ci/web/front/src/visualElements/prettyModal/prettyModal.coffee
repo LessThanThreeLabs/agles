@@ -29,6 +29,7 @@ class PrettyModal.View extends Backbone.View
 
 
 	onDispose: () =>
+		$('html').unbind 'keydown', @_handleKeyPress
 		@model.off null, null, @
 
 
