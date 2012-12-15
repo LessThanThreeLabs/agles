@@ -63,12 +63,13 @@ div.prettyModal {
 		position: relative;
 		top: 200px;
 		padding: 20px;
-		min-width: 400px;
+		min-width: 300px;
 		min-height: 100px;
 		z-index: 9999;
 		text-align: left;
 		border-radius: 15px;
-		background-color: #EAEAEA;
+		background: -moz-linear-gradient(#FFFFFF, #DADADA);
+		background: -webkit-linear-gradient(#FFFFFF, #DADADA);
 		border-color: 2px solid green;
 
 		box-shadow: 0 0 6px 6px #808080;
@@ -80,7 +81,7 @@ div.prettyModal {
 		display: block;
 
 		.prettyModalBackdrop {
-			@fadeInTransitionTime: 0.75s;
+			@fadeInTransitionTime: 0.6s;
 			animation: fadeIn @fadeInTransitionTime ease-in;
 			-moz-animation: fadeIn @fadeInTransitionTime ease-in;
 			-webkit-animation: fadeIn @fadeInTransitionTime ease-in;
@@ -88,7 +89,7 @@ div.prettyModal {
 		}
 
 		.prettyModalContent {
-			@slideInTransitionTime: 0.6s;
+			@slideInTransitionTime: 0.5s;
 			animation: slideIn @slideInTransitionTime ease-out;
 			-moz-animation: slideIn @slideInTransitionTime ease-out;
 			-webkit-animation: slideIn @slideInTransitionTime ease-out;

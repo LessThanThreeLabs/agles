@@ -8,6 +8,8 @@
 			"/css/src/visualElements/prettyModal/prettyModal.css",
 			"/css/src/visualElements/prettyDropdown/prettyDropdown.css",
 
+			"/css/src/header/menuOptions/login/loginPanel.css",
+
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
