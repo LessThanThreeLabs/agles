@@ -62,7 +62,10 @@ class OpenstackVm(VirtualMachine):
 
 	@classmethod
 	def from_id(cls, vm_directory, vm_id, vm_username=VM_USERNAME):
-		return OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
+		try:
+			return OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
+		except:
+			return None
 
 	def _write_vm_info(self):
 		config = yaml.dump({'server_id': self.server.id, 'username': self.vm_username})
@@ -72,7 +75,7 @@ class OpenstackVm(VirtualMachine):
 			vm_info_file.write(config)
 
 	def wait_until_ready(self):
-		while not (self.server.accessIPv4 and self.server.progress == 100):
+		while not (self.server.accessIPv4 and self.server.status == 'ACTIVE'):
 			eventlet.sleep((100 - self.server.progress) / 10.0)  # 0-10 seconds depending on progress
 			self.server = self.nova_client.servers.get(self.server.id)
 
