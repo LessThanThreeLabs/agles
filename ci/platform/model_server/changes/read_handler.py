@@ -73,7 +73,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 	# TODO (jchu): This query is SLOW AS BALLS
 	def query_changes(self, user_id, repo_id, query_string,
-					  start_index_inclusive, num_results):
+						start_index_inclusive, num_results):
 		user = database.schema.user
 		change = database.schema.change
 		commit = database.schema.commit

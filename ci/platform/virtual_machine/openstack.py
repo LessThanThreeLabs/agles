@@ -1,5 +1,5 @@
 import os
-import random
+import uuid
 
 import eventlet
 import novaclient.client
@@ -20,6 +20,7 @@ class OpenstackClient(object):
 class OpenstackVm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
+	VM_IMAGE_NEWEST_PREFIX = "precise64_box_"
 
 	def __init__(self, vm_directory, server, vm_username=VM_USERNAME):
 		super(OpenstackVm, self).__init__(vm_directory)
@@ -35,7 +36,7 @@ class OpenstackVm(VirtualMachine):
 	@classmethod
 	def construct(cls, vm_directory, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
 		if not name:
-			name = "verification_box_%s" % str(random.random())[2:]
+			name = "verification_box_%s" % str(uuid.uuid1())
 		if not image:
 			image = cls._get_newest_image()
 		if not flavor:
@@ -76,7 +77,7 @@ class OpenstackVm(VirtualMachine):
 			self.server = self.nova_client.servers.get(self.server.id)
 
 	def provision(self, role, output_handler=None):
-		return self.ssh_call("chef-solo -o role[%s]" % role, output_handler)
+		return self.ssh_call("sudo chef-solo -o role[%s]" % role, output_handler)
 
 	def ssh_call(self, command, output_handler=None):
 		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)
@@ -110,8 +111,7 @@ class OpenstackVm(VirtualMachine):
 	def remote_checkout(self, git_url, refs):
 		self.ssh_call("mkdir ~/.ssh; ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
 		pubkey = self.ssh_call("cat .ssh/id_rsa.pub").output
-		random.seed()
-		alias = str(random.random())[2:] + "_box"
+		alias = str(uuid.uuid1()) + "_box"
 		PubkeyRegistrar.register_pubkey(VerificationUser.id, alias, pubkey)
 		command = "git clone %s source" % git_url
 		command = command + "&& git fetch origin %s" % refs[0]
@@ -126,6 +126,6 @@ class OpenstackVm(VirtualMachine):
 	@classmethod
 	def _get_newest_image(cls):
 		images = OpenstackClient.get_client().images.list()
-		images = [image for image in images if image.name.startswith("precise64_box_") and image.status == 'ACTIVE']
-		images.sort(key=lambda image: int(image.name[len("precise64_box_"):]), reverse=True)
+		images = [image for image in images if image.name.startswith(cls.VM_IMAGE_NEWEST_PREFIX) and image.status == 'ACTIVE']
+		images.sort(key=lambda image: int(image.name[len(cls.VM_IMAGE_NEWEST_PREFIX):]), reverse=True)
 		return images[0]
