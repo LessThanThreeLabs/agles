@@ -41,7 +41,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		query = repostore.select().where(repostore.c.id==repostore_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
-			ins = repo.insert().values(name=repo_name, uri=uri, repostore_id=repostore_id, default_permissions=default_permissions)
+			ins = repo.insert().values(name=repo_name, uri=uri, owner=user_id, repostore_id=repostore_id, default_permissions=default_permissions)
 			result = sqlconn.execute(ins)
 		repo_id = result.inserted_primary_key[0]
 		return repo_id

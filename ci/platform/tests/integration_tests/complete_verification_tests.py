@@ -83,6 +83,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		verification_master = VerificationMaster()
 		self.vm_process = TestProcess(target=verification_master.run)
 		self.vm_process.start()
+		with ConnectionFactory.get_sql_connection() as conn:
+			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=sha512("").hexdigest(), salt="1234567890123456")
+			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 	def tearDown(self):
 		super(VerificationRoundTripTest, self).setUp()
@@ -100,17 +103,15 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_machine = schema.repostore.insert().values(host_name="localhost", repositories_path=self.repo_dir)
 			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
-			ins_repo = schema.repo.insert().values(id=self.repo_id, name="repo.git", repostore_id=repostore_key, uri=repo_uri, default_permissions=RepositoryPermissions.RW)
+			ins_repo = schema.repo.insert().values(id=self.repo_id, name="repo.git", owner=self.user_id, repostore_id=repostore_key, uri=repo_uri, default_permissions=RepositoryPermissions.RW)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			return repo_key
 
 	def _insert_commit_info(self):
 		commit_id = 0
 		with ConnectionFactory.get_sql_connection() as conn:
-			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=sha512("").hexdigest(), salt="1234567890123456")
-			user_id = conn.execute(ins_user).inserted_primary_key[0]
 			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id,
-				user_id=user_id, message="commit message", timestamp=int(time.time()))
+				user_id=self.user_id, message="commit message", timestamp=int(time.time()))
 			conn.execute(ins_commit)
 			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master",
 				number=1, status=BuildStatus.QUEUED)

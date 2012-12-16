@@ -59,8 +59,8 @@ class SchemaDataGenerator(object):
 				repostore_id = conn.execute(ins_repostore).inserted_primary_key[0]
 
 				for repo in range(random.randint(1, NUM_REPOS)):
-					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, uri="uri_%d_%d" % (repostore, repo), 
-						repostore_id=repostore_id, default_permissions=RepositoryPermissions.RW)
+					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, uri="uri_%d_%d" % (repostore, repo),
+						owner=self.admin_id, repostore_id=repostore_id, default_permissions=RepositoryPermissions.RW)
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
 					repos[repo_id] = 0
 					repo_ids.append(repo_id)
