@@ -41,6 +41,7 @@ class PrettyModal.View extends Backbone.View
 
 
 	setInnerHtml: (innerHtml) =>
+		console.log 'setting inner html'
 		@innerHtml = innerHtml
 		@render()
 

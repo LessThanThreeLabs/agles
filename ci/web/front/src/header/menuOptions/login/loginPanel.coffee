@@ -64,8 +64,7 @@ class LoginPanel.View extends Backbone.View
 
 
 	_handleFormEntryChange: (event) =>
-		console.log 'handling chang...'
 		@model.set
 			email: @$('.loginEmail').val()
 			password: @$('.loginPassword').val()
-			rememberMe: @$('.rememberMe').prop 'checked'
+			rememberMe: @$('.loginRememberMe').prop 'checked'
