@@ -29,11 +29,13 @@ class OpenstackVm(VirtualMachine):
 		self._write_vm_info()
 
 	@classmethod
-	def from_directory_or_construct(cls, vm_directory, name, image=None, flavor=None, vm_username=VM_USERNAME):
+	def from_directory_or_construct(cls, vm_directory, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
 		return cls.from_directory(vm_directory) or cls.construct(vm_directory, name, image, flavor, vm_username)
 
 	@classmethod
-	def construct(cls, vm_directory, name, image=None, flavor=None, vm_username=VM_USERNAME):
+	def construct(cls, vm_directory, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
+		if not name:
+			name = "verification_box_%s" % str(random.random())[2:]
 		if not image:
 			image = cls._get_newest_image()
 		if not flavor:
