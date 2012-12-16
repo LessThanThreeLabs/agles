@@ -119,6 +119,6 @@ class OpenstackVm(VirtualMachine):
 	@classmethod
 	def _get_newest_image(cls):
 		images = OpenstackClient.get_client().images.list()
-		images = [image for image in images if image.name.startswith("precise64_box_")]
+		images = [image for image in images if image.name.startswith("precise64_box_") and image.status == 'ACTIVE']
 		images.sort(key=lambda image: int(image.name[len("precise64_box_"):]), reverse=True)
 		return images[0]
