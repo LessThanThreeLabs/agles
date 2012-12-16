@@ -54,6 +54,7 @@ class LoginPanel.View extends Backbone.View
 	events:
 		'keyup': '_handleFormEntryChange'
 		'change .loginRememberMe': '_handleFormEntryChange'
+		'click .loginButton': '_performLoginRequest'
 
 
 	initialize: () =>
@@ -64,11 +65,24 @@ class LoginPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		@_giveEmailFieldFocus()
 		return @
 
 
+	_giveEmailFieldFocus: () =>
+		setTimeout (() => @$('.loginEmail').focus()), 0
+
+
 	_handleFormEntryChange: (event) =>
-		@model.set
-			email: @$('.loginEmail').val()
-			password: @$('.loginPassword').val()
-			rememberMe: @$('.loginRememberMe').prop 'checked'
+		if event.keyCode is 13
+			@_performLoginRequest()
+		else
+			@model.set
+				email: @$('.loginEmail').val()
+				password: @$('.loginPassword').val()
+				rememberMe: @$('.loginRememberMe').prop 'checked'
+
+
+	_performLoginRequest: () =>
+		console.log '>> need to perform login!'
+
