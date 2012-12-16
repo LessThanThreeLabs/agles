@@ -6,6 +6,7 @@ sudo python setup.py clean
 sudo python setup.py install
 cd ~/code/agles/submodules/dulwich
 git pull
+sudo python setup.py clean
 sudo python setup.py install
 cd ~/code/agles/ci/web/back
 ./compile.sh

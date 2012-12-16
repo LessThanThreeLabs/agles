@@ -76,7 +76,7 @@ if not File.exists? '/usr/local/bin/ssh'
 		to "/usr/bin/dul-upload-pack"
 	end
 end
-	
+
 bash "setup_ssh_pushing_to_github" do
 	user "root"
 	cwd "/usr/local/etc/"
@@ -99,8 +99,8 @@ end
 bash "Move standard ssh daemon" do
 	user "root"
 	code <<-EOH
-		/usr/sbin/sshd -p 2222
 		service ssh stop
+		/usr/sbin/sshd -p 2222
 		echo MAKE SURE THE SSH DAEMON HAS STARTED SUCCESSFULLY BEFORE LOGGING OUT
 	EOH
 end

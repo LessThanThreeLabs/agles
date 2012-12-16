@@ -33,6 +33,7 @@ setup:
       - argparse
       - nose-testconfig
       - boto
+      - rackspace-novaclient
     - gem:
       - vagrant
     - npm:
