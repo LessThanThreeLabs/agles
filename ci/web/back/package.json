@@ -4,6 +4,7 @@
 
   "dependencies" : {
     "iced-coffee-script": "x.x.x",
+    "ws": "0.4.x",
     "nodetime": "git://github.com/nodetime/nodetime.git",
     "commander": "git://github.com/visionmedia/commander.js.git",
     "express":  "git://github.com/visionmedia/express.git",

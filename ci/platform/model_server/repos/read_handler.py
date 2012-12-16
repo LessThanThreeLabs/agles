@@ -82,11 +82,9 @@ class ReposReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 		return row[permission.c.permissions] if row else RepositoryPermissions.NONE
 
-
 	#################
 	# Front end API #
 	#################
-
 
 	def _get_visible_repos(self, user_id):
 		repo = database.schema.repo
