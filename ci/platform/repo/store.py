@@ -122,7 +122,7 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 
 		results = self._redisdb.zrange(self.SERVER_REPO_COUNT_NAME, 0, 0, score_cast_func=int)
 		assert len(results) == 1
-		return results[0]
+		return int(results[0])  # We use repostore id's so these should all be ints
 
 	def _update_store_repo_count(self, repostore_id, amount=1):
 		self._redisdb.zincrby(self.SERVER_REPO_COUNT_NAME, str(repostore_id), amount)

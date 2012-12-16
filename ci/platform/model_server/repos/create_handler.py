@@ -27,7 +27,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			self.publish_event("global", None, "repo added",
 				repo_id=repo_id, repo_name=repo_name, default_permissions=default_permissions)
 			return repo_id
-		except Exception, e:
+		except Exception as e:
 			# do logging here to say we need to fix inconsistencies between
 			# the db and fs
 			raise e
