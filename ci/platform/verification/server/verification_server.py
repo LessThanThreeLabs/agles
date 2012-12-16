@@ -13,7 +13,7 @@ from verification.server.verification_request_handler import VerificationRequest
 class VerificationServer(object):
 	"""Verifies correctness of builds.
 
-	Contains and controls a Vagrant virtual machine, which is used to check out,
+	Contains and controls a virtual machine, which is used to check out,
 	lint, and run tests against commits.
 	"""
 

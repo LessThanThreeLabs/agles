@@ -1,15 +1,14 @@
 import os
-
-from subprocess import Popen, PIPE, STDOUT
+import random
 
 import eventlet
 import novaclient.client
 import yaml
 
-from eventlet.green import select
 from settings.openstack import credentials
-from util import greenlets
+from shared.constants import VerificationUser
 from verification.shared.pubkey_registrar import PubkeyRegistrar
+from virtual_machine import VirtualMachine
 
 
 class OpenstackClient(object):
@@ -18,23 +17,25 @@ class OpenstackClient(object):
 		return novaclient.client.Client(*credentials[0], **credentials[1])
 
 
-class OpenstackVm(object):
+class OpenstackVm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
 
 	def __init__(self, vm_directory, server, vm_username=VM_USERNAME):
-		self.vm_directory = vm_directory
+		super(OpenstackVm, self).__init__(vm_directory)
 		self.server = server
 		self.nova_client = OpenstackClient.get_client()
 		self.vm_username = vm_username
 		self._write_vm_info()
 
 	@classmethod
-	def from_directory_or_construct(cls, vm_directory, name, image, flavor=None, vm_username=VM_USERNAME):
+	def from_directory_or_construct(cls, vm_directory, name, image=None, flavor=None, vm_username=VM_USERNAME):
 		return cls.from_directory(vm_directory) or cls.construct(vm_directory, name, image, flavor, vm_username)
 
 	@classmethod
-	def construct(cls, vm_directory, name, image, flavor=None, vm_username=VM_USERNAME):
+	def construct(cls, vm_directory, name, image=None, flavor=None, vm_username=VM_USERNAME):
+		if not image:
+			image = cls._get_newest_image()
 		if not flavor:
 			flavor = OpenstackClient.get_client().flavors.find(ram=1024)
 		server = OpenstackClient.get_client().servers.create(name, image, flavor, files=cls._default_files(vm_username))
@@ -62,12 +63,14 @@ class OpenstackVm(object):
 
 	def _write_vm_info(self):
 		config = yaml.dump({'server_id': self.server.id, 'username': self.vm_username})
+		if not os.access(self.vm_directory, os.F_OK):
+			os.makedirs(self.vm_directory)
 		with open(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE), "w") as vm_info_file:
 			vm_info_file.write(config)
 
 	def wait_until_ready(self):
 		while not (self.server.accessIPv4 and self.server.progress == 100):
-			eventlet.sleep(0.1)
+			eventlet.sleep((100 - self.server.progress) / 10.0)  # 0-10 seconds depending on progress
 			self.server = self.nova_client.servers.get(self.server.id)
 
 	def provision(self, role, output_handler=None):
@@ -75,7 +78,7 @@ class OpenstackVm(object):
 
 	def ssh_call(self, command, output_handler=None):
 		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)
-		return self._call(["ssh", login, "-q", "-oStrictHostKeyChecking=no", command], output_handler=output_handler)
+		return self.call(["ssh", login, "-q", "-oStrictHostKeyChecking=no", command], output_handler=output_handler)
 
 	def reboot(self, force=False):
 		reboot_type = 'REBOOT_HARD' if force else 'REBOOT_SOFT'
@@ -87,34 +90,33 @@ class OpenstackVm(object):
 
 	def save_snapshot(self, image_name):
 		image_id = self.server.create_image(image_name)
-		return self.nova_client.image.get(image_id)
+		return self.nova_client.images.get(image_id)
 
-	def rebuild(self, image):
+	def rebuild(self, image=None):
+		if not image:
+			image = self._get_newest_image()
 		self.server.rebuild(image)
 		self.wait_until_ready()
 
-	def remote_clone(self, git_url):
-		return self.ssh_call("git clone %s source" % git_url)
+	def remote_checkout(self, git_url, refs):
+		self.ssh_call("mkdir ~/.ssh; ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
+		pubkey = self.ssh_call("cat .ssh/id_rsa.pub").output
+		random.seed()
+		alias = str(random.random())[2:] + "_box"
+		PubkeyRegistrar.register_pubkey(VerificationUser.id, alias, pubkey)
+		command = "git clone %s source" % git_url
+		command = command + "&& git fetch origin %s" % refs[0]
+		command = command + "&& git checkout FETCH_HEAD"
+		for ref in refs[1:]:
+			command = command + "&& git fetch origin %s" % ref
+			command = command + "&& git merge FETCH_HEAD"
+		results = self.ssh_call(command)
+		PubkeyRegistrar.unregister_pubkey(VerificationUser.id, alias)
+		return results
 
-	def _call(self, command, output_handler=None, **kwargs):
-		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=self.vm_directory)
-
-		output_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
-		output_lines = output_greenlet.wait()
-
-		output = "\n".join(output_lines)
-		returncode = process.poll()
-		return (returncode, output)
-
-	def _handle_stream(self, stream, line_handler):
-		lines = list()
-		while True:
-			select.select([stream], [], [])
-			line = stream.readline()
-			if line == "":
-				break
-			line = line.rstrip()
-			lines.append(line)
-			if line_handler:
-				line_handler.append(len(lines), line)
-		return lines
+	@classmethod
+	def _get_newest_image(cls):
+		images = OpenstackClient.get_client().images.list()
+		images = [image for image in images if image.name.startswith("precise64_box_")]
+		images.sort(key=lambda image: int(image.name[len("precise64_box_"):]), reverse=True)
+		return images[0]

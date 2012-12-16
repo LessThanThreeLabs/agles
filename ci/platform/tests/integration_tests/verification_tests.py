@@ -11,7 +11,7 @@ from settings.verification_server import box_name
 from util.test import BaseIntegrationTest
 from util.test.fake_build_verifier import FakeBuildVerifier
 from util.test.mixins import *
-from vagrant.vagrant_wrapper import VagrantWrapper
+from virtual_machine.vagrant import Vagrant
 from verification.server.build_verifier import BuildVerifier
 from verification.shared.verification_result import VerificationResult
 
@@ -25,8 +25,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		if config.get("fakeVerifier"):
 			cls.verifier = FakeBuildVerifier(passes=True)
 		else:
-			vagrant_wrapper = VagrantWrapper.vm(VM_DIRECTORY, box_name)
-			cls.verifier = BuildVerifier(vagrant_wrapper)
+			vagrant = Vagrant(VM_DIRECTORY, box_name)
+			cls.verifier = BuildVerifier.for_virtual_machine(vagrant)
 		cls.verifier.setup()
 
 	@classmethod

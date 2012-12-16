@@ -9,7 +9,7 @@ from settings.verification_server import *
 from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
 from task_queue.task_worker import InfiniteWorker
-from vagrant.vagrant_command import SimpleVagrantTestCommand
+from virtual_machine.remote_command import SimpleRemoteTestCommand
 from verification.shared.pubkey_registrar import PubkeyRegistrar
 from verification.shared.verification_result import VerificationResult
 
@@ -52,7 +52,7 @@ class VerificationRequestHandler(InfiniteWorker):
 
 	def do_task(self, task):
 		try:
-			test_command = SimpleVagrantTestCommand(task["test_command"])
+			test_command = SimpleRemoteTestCommand(task["test_command"])
 			with ModelServer.rpc_connect("build_outputs", "update") as build_outputs_update_rpc:
 				console_appender = self._make_console_appender(build_outputs_update_rpc, self.build_id)
 				self.verifier.declare_commands(console_appender, ConsoleType.Test, [test_command])

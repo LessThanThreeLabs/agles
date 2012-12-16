@@ -17,7 +17,8 @@ when "ubuntu"
 end
 
 if node[:vagrant]
-	node[:koality][:user] = "vagrant"
-	node[:koality][:source_path][:internal] = "/home/vagrant/source"
+	node.set[:koality][:user] = "vagrant"
+	node.set[:koality][:source_path][:external] = "/vagrant/source"
+	node.set[:koality][:source_path][:internal] = "/home/vagrant/source"
 	include_recipe "rvm::vagrant"
 end

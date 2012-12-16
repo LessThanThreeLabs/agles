@@ -7,8 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
-default[:koality][:source_path][:external] = "/vagrant/source"
-default[:koality][:source_path][:internal] = "/home/vagrant/source"
+default[:koality][:source_path][:external] = ""
+default[:koality][:source_path][:internal] = "/home/lt3/source"
 default[:koality][:config_path] = "koality.yml"
 default[:koality][:user] = "lt3"
 default[:koality][:languages] = {

@@ -9,7 +9,7 @@ from kombu.connection import Connection
 from shutil import rmtree
 from nose.tools import *
 from util.permissions import RepositoryPermissions
-from vagrant.vagrant_wrapper import VagrantWrapper
+from virtual_machine.vagrant import Vagrant
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
 from database.engine import ConnectionFactory
@@ -45,8 +45,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			if config.get("fakeVerifier"):
 				verifier = FakeBuildVerifier(passes=True)
 			else:
-				vagrant_wrapper = VagrantWrapper.vm(os.path.join(TEST_ROOT, str(x)), box_name)
-				verifier = BuildVerifier(vagrant_wrapper)
+				vagrant = Vagrant(os.path.join(TEST_ROOT, str(x)), box_name)
+				verifier = BuildVerifier.for_virtual_machine(vagrant)
 			verifier.setup()
 			cls.verifiers.append(verifier)
 
