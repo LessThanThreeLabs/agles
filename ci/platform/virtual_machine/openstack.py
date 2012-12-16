@@ -97,7 +97,14 @@ class OpenstackVm(VirtualMachine):
 	def rebuild(self, image=None):
 		if not image:
 			image = self._get_newest_image()
-		self.server.rebuild(image)
+		try:
+			self.server.rebuild(image)
+		except:
+			name = self.server.name
+			flavor = self.server.flavor['id']
+			self.delete()
+			self.server = self.nova_client.servers.create(name, image, flavor, files=self._default_files(self.vm_username))
+			self._write_vm_info()
 		self.wait_until_ready()
 
 	def remote_checkout(self, git_url, refs):
