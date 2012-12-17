@@ -5,6 +5,7 @@ end
 
 directory "/tmp/model_server" do
 	owner node[:koality][:user]
+	group node[:koality][:user]
 end
 
 execute "Start model server" do

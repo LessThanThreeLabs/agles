@@ -7,6 +7,7 @@ end
 
 directory "/tmp/repo_server" do
 	owner "git"
+	group "git"
 end
 
 execute "Start filesystem repo server" do

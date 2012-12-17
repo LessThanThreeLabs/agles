@@ -1,5 +1,3 @@
-import operator
-
 from kombu.connection import Connection
 
 from model_server import ModelServer

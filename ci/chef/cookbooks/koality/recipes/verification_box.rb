@@ -12,6 +12,15 @@ postgresql_database_user node[:koality][:user] do
 	action :create
 end
 
+directory "/home/#{node[:koality][:user]}/.ssh" do
+	owner node[:koality][:user]
+end
+
+execute "ssh-keygen -t rsa -N \"\" -f /home/#{node[:koality][:user]}/.ssh/id_rsa" do
+	user node[:koality][:user]
+	not_if {File.exists?("/home/#{node[:koality][:user]}/.ssh/id_rsa")}
+end
+
 directory "/home/#{node[:koality][:user]}/scripts" do
 	owner node[:koality][:user]
 end
