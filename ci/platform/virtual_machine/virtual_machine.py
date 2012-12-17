@@ -50,7 +50,7 @@ class VirtualMachine(object):
 			for ref in refs[1:]:
 				command = command + "&& git fetch origin %s" % ref
 				command = command + "&& git merge FETCH_HEAD"
-			results = self.ssh_call(command)
+			results = self.ssh_call(command, output_handler)
 		finally:
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 		return results
