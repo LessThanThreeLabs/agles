@@ -10,6 +10,7 @@ ResourceSocket = require './resourceSocket/resourceSocket'
 SpdyCache = require './spdyCache/spdyCache'
 
 WelcomeHandler = require './handlers/welcomeHandler'
+AccountHandler = require './handlers/accountHandler'
 CreateAccountHandler = require './handlers/createAccountHandler'
 VerifyAccountHandler = require './handlers/verifyAccountHandler'
 RecoverPasswordHandler = require './handlers/recoverPasswordHandler'
@@ -30,6 +31,7 @@ exports.create = (configurationParams, modelConnection, port) ->
 
 	handlers =
 		welcomeHandler: WelcomeHandler.create configurationParams, stores, modelConnection
+		accountHandler: AccountHandler.create configurationParams, stores, modelConnection
 		createAccountHandler: CreateAccountHandler.create configurationParams, stores, modelConnection
 		verifyAccountHandler: VerifyAccountHandler.create configurationParams, stores, modelConnection
 		recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection
@@ -46,11 +48,12 @@ class Server
 	initialize: (callback) =>
 		await
 			@handlers.welcomeHandler.initialize defer welcomeHandlerError
+			@handlers.accountHandler.initialize defer accountHandlerError
 			@handlers.createAccountHandler.initialize defer createAccountHandlerError
 			@handlers.verifyAccountHandler.initialize defer verifyAccountHandlerError
 			@handlers.recoverPasswordHandler.initialize defer recoverPasswordHandlerError
 
-		errors = (error for error in [welcomeHandlerError, createAccountHandlerError, 
+		errors = (error for error in [welcomeHandlerError, accountHandlerError, createAccountHandlerError, 
 			verifyAccountHandlerError, recoverPasswordHandlerError] when error?)
 		if errors.length > 0
 			callback errors.join ' '
@@ -63,6 +66,7 @@ class Server
 		@configurer.configure expressServer
 
 		expressServer.get '/', @handlers.welcomeHandler.handleRequest
+		expressServer.get '/account', @handlers.accountHandler.handleRequest
 		expressServer.get '/createAccount', @handlers.createAccountHandler.handleRequest
 		expressServer.get '/verifyAccount', @handlers.verifyAccountHandler.handleRequest
 		expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
