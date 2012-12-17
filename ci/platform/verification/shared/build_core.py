@@ -1,5 +1,6 @@
 import os
 import shutil
+import subprocess
 
 import yaml
 
@@ -24,7 +25,13 @@ class BuildCore(object):
 	def _checkout_refs(self, repo_uri, refs):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
-		checkout_url = self.uri_translator.translate(repo_uri) if self.uri_translator else repo_uri
+		if self.uri_translator:
+			checkout_url = self.uri_translator.translate(repo_uri)
+			host_url = checkout_url[:checkout_url.find(":")]
+			# Add repostore to authorized keys for the following git command
+			subprocess.call(["ssh", host_url, "-q", "-oStrictHostKeyChecking=no"])
+		else:
+			checkout_url = repo_uri
 		Git().clone(checkout_url, self.source_dir)
 		repo = Repo(self.source_dir)
 		ref = refs[0]
