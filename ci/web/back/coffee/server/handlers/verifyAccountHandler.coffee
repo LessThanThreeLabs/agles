@@ -1,4 +1,5 @@
 fs = require 'fs'
+url = require 'url'
 assert = require 'assert'
 
 RequestHandler = require './requestHandler'
@@ -16,27 +17,34 @@ class VerifyAccountHandler extends RequestHandler
 
 
 	handleRequest: (request, response) =>
-		# parsedUrl = url.parse request.url, true
-		# accountKey = parsedUrl.query.account
-		
-		# @stores.createAccountStore.getAccount accountKey, (error, account) =>
-		# 	if error?
-		# 		response.end 'Invalid link'
-		# 	else
-		# 		@stores.createAccountStore.removeAccount accountKey
+		parsedUrl = url.parse request.url, true
+		accountKey = parsedUrl.query.account
 
-		# 		userToCreate =
-		# 			email: account.email
-		# 			salt: account.salt
-		# 			password_hash: account.passwordHash
-		# 			first_name: account.firstName
-		# 			last_name: account.lastName
+		if not accountKey?
+			response.end 'Invalid link'
+			return
 
-		# 		@modelConnection.rpcConnection.users.create.create_user userToCreate, (error, userId) =>
-		# 			if error?
-		# 				response.end 'User creation failed'
-		# 			else
-		# 				request.session.userId = userId
+		@stores.createAccountStore.getAccount accountKey, (error, account) =>
+			if error?
+				response.end 'Invalid link'
+			else
+				@stores.createAccountStore.removeAccount accountKey
+				@_createUser request, response, account
 
-						@pushFiles request, response
-						response.render 'index', @getTemplateValues request
+
+	_createUser: (request, response, account) =>
+		userToCreate =
+			email: account.email
+			salt: account.salt
+			password_hash: account.passwordHash
+			first_name: account.firstName
+			last_name: account.lastName
+
+		@modelConnection.rpcConnection.users.create.create_user userToCreate, (error, userId) =>
+			if error?
+				response.end 'User creation failed'
+			else
+				request.session.userId = userId
+
+				@pushFiles request, response
+				response.render 'index', @getTemplateValues request

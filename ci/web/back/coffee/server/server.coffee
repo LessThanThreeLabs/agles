@@ -1,6 +1,5 @@
 fs = require 'fs'
 assert = require 'assert'
-url = require 'url'
 spdy = require 'spdy'
 express = require 'express'
 
