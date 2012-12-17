@@ -18,6 +18,8 @@ directory "/verification/master" do
 end
 
 execute "Start verification master" do
+	cwd "/verification/master"
+	environment({"HOME" => "/home/verification"})
 	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py >> /verification/master/master.log 2>&1 &"
 	user "verification"
 end
