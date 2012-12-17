@@ -11,6 +11,7 @@ ResourceSocket = require './resourceSocket/resourceSocket'
 SpdyCache = require './spdyCache/spdyCache'
 
 WelcomeHandler = require './handlers/welcomeHandler'
+CreateAccountHandler = require './handlers/createAccountHandler'
 
 
 exports.create = (configurationParams, modelConnection, port) ->
@@ -33,13 +34,18 @@ exports.create = (configurationParams, modelConnection, port) ->
 		consore.error error if error?
 		console.log 'welcomeHandler ready!'
 
-	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, spdyCache, stores, welcomeHandler
+	createAccountHandler = CreateAccountHandler.create configurationParams, stores, modelConnection
+	createAccountHandler.initialize (error) =>
+		console.error if error?
+		console.log 'createAccountHandler ready!'
+
+	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, spdyCache, stores, welcomeHandler, createAccountHandler
 
 
 class Server
-	constructor: (@configurer, @httpsOptions, @port, @modelConnection, @resourceSocket, @spdyCache, @stores, @welcomeHandler) ->
+	constructor: (@configurer, @httpsOptions, @port, @modelConnection, @resourceSocket, @spdyCache, @stores, @welcomeHandler, @createAccountHandler) ->
 		assert.ok @configurer? and @httpsOptions? and @port? and @modelConnection? and 
-			@resourceSocket? and @spdyCache? and @stores? and @welcomeHandler?
+			@resourceSocket? and @spdyCache? and @stores? and @welcomeHandler? and @createAccountHandler?
 
 
 	start: () ->
@@ -47,6 +53,7 @@ class Server
 		@configurer.configure expressServer
 
 		expressServer.get '/', @welcomeHandler.handleRequest
+		expressServer.get '/createAccount', @createAccountHandler.handleRequest
 		# expressServer.get '/', @_handleIndexRequest
 		# expressServer.get '/account', @_handleIndexRequest
 		# expressServer.get '/repository/:repositoryId', @_handleIndexRequest
