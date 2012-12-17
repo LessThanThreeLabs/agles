@@ -1,8 +1,6 @@
-import contextlib
-
 from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Sequence, MetaData, ForeignKey, UniqueConstraint
-from sqlalchemy import event, DDL
-
+from sqlalchemy import event, text, DDL
+from sqlalchemy.exc import SQLAlchemyError
 from database.engine import ConnectionFactory
 
 
@@ -21,7 +19,7 @@ user = Table('user', metadata,
 event.listen(
 	user,
 	"after_create",
-	DDL("ALTER TABLE %(table)s ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regclass);")
+	DDL("alter table %(table)s alter column id set default nextval('user_id_seq'::regclass);")
 )
 
 media = Table('media', metadata,
@@ -147,10 +145,39 @@ def _insert_admin_user():
 
 def reseed_db():
 	engine = ConnectionFactory.get_sql_engine()
-	with contextlib.closing(engine.connect()):
-		for table in reversed(metadata.sorted_tables):
-			table.drop(engine, checkfirst=True)
+	_drop_all_tables_and_sequences(engine)
 	_create_and_initialize(engine)
+
+
+def _get_table_list_from_db(engine):
+	"""return a list of table names from the current
+	databases public schema"""
+	sql = "select table_name from information_schema.tables where table_schema='public'"
+	execute = engine.execute
+	return [name for (name, ) in execute(text(sql))]
+
+
+def _get_seq_list_from_db(engine):
+	"""return a list of the sequence names from the current
+	databases public schema"""
+	sql = "select sequence_name from information_schema.sequences where sequence_schema='public'"
+	execute = engine.execute
+	return [name for (name, ) in execute(text(sql))]
+
+
+def _drop_all_tables_and_sequences(engine):
+	execute = engine.execute
+	for table in _get_table_list_from_db(engine):
+		try:
+			execute(text('DROP TABLE "%s" CASCADE' % table))
+		except SQLAlchemyError as e:
+			print e
+
+	for seq in _get_seq_list_from_db(engine):
+		try:
+			execute(text('DROP SEQUENCE "%s" CASCADE' % seq))
+		except SQLAlchemyError as e:
+			print e
 
 
 def main():
