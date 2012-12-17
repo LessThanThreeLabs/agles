@@ -64,7 +64,7 @@ def main():
 	print 'Destroying vagrant box', box_name
 	call(['vagrant', 'destroy', '-f'])
 
-	verification_box_name = box_name + '_verification'
+	verification_box_name = argv[2] if len(argv) == 3 else box_name + '_verification'
 	if have_box_installed(verification_box_name):
 		print "Removing existing verification box:", verification_box_name
 		call(['vagrant', 'box', 'remove', verification_box_name])
