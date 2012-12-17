@@ -60,6 +60,7 @@ class VirtualMachineBuildCore(BuildCore):
 	def __init__(self, virtual_machine, uri_translator=None):
 		super(VirtualMachineBuildCore, self).__init__(uri_translator)
 		self.virtual_machine = virtual_machine
+		self.source_dir = os.path.join(virtual_machine.vm_directory, "source")
 
 	def setup(self):
 		raise NotImplementedError()
@@ -141,7 +142,6 @@ class VirtualMachineBuildCore(BuildCore):
 class VagrantBuildCore(VirtualMachineBuildCore):
 	def __init__(self, vagrant, uri_translator=None):
 		super(VagrantBuildCore, self).__init__(vagrant, uri_translator)
-		self.source_dir = os.path.join(vagrant.vm_directory, "source")
 
 	def setup(self):
 		self.virtual_machine.spawn()
