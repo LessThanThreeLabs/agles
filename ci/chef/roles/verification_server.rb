@@ -9,7 +9,10 @@ default_attributes(
 			:internal => "/home/lt3/code/agles",
 		},
 		:verification => {
-			:server_count => 3
+			:server_count => {
+				:local => 2,
+				:cloud => 20
+			}
 		}
 	}
 )
