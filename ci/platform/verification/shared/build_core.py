@@ -7,7 +7,7 @@ import yaml
 from git import Git, Repo
 
 from model_server.build_outputs import ConsoleType
-from virtual_machine.remote_command import SimpleRemoteProvisionCommand
+from virtual_machine.remote_command import SimpleRemoteCheckoutCommand, SimpleRemoteProvisionCommand
 from verification_config import VerificationConfig
 from verification_result import VerificationResult
 
@@ -19,7 +19,7 @@ class BuildCore(object):
 
 	def setup_build(self, repo_uri, refs, console_appender=None):
 		self._checkout_refs(repo_uri, refs)
-		verification_config = self._get_verification_configuration()
+		verification_config = self._get_verification_configuration_from_file()
 		return verification_config
 
 	def _checkout_refs(self, repo_uri, refs):
@@ -41,7 +41,7 @@ class BuildCore(object):
 			repo.git.fetch("origin", ref)
 			repo.git.merge("FETCH_HEAD")
 
-	def _get_verification_configuration(self):
+	def _get_verification_configuration_from_file(self):
 		"""Reads in the yaml config file contained in the checked
 		out user repository which this server is verifying"""
 		config_path = os.path.join(self.source_dir, "koality.yml")
@@ -50,8 +50,10 @@ class BuildCore(object):
 				config = yaml.load(config_file.read())
 		else:
 			config = dict()
-		verification_config = VerificationConfig(config.get("compile"), config.get("test"))
-		return verification_config
+		return self._get_verification_configuration(config)
+
+	def _get_verification_configuration(self, config_dict):
+		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"))
 
 
 class VirtualMachineBuildCore(BuildCore):
@@ -82,11 +84,13 @@ class VirtualMachineBuildCore(BuildCore):
 		if output_handler:
 			output_handler.declare_commands(command_names)
 
-	def setup_virtual_machine(self, console_appender):
+	def setup_virtual_machine(self, console_appender, setup_commands=[]):
 		"""Provisions the contained virtual machine for analysis and test running"""
-		setup_command = SimpleRemoteProvisionCommand("verification_box_run")
-		self.declare_commands(console_appender, ConsoleType.Setup, [setup_command])
-		self.run_setup_command(setup_command, console_appender)
+		chef_command = SimpleRemoteProvisionCommand("verification_box_run")
+		setup_commands = setup_commands + [chef_command]
+		self.declare_commands(console_appender, ConsoleType.Setup, setup_commands)
+		for setup_command in setup_commands:
+			self.run_setup_command(setup_command, console_appender)
 
 	def run_setup_command(self, setup_command, console_appender):
 		if setup_command.run(self.virtual_machine,
@@ -169,9 +173,8 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 
 	def setup_virtual_machine(self, repo_uri, refs, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
-		if self.virtual_machine.remote_checkout(checkout_url, refs).returncode:
-			raise VerificationException("Setup: git checkout")
-		super(OpenstackBuildCore, self).setup_virtual_machine(console_appender)
+		checkout_command = SimpleRemoteCheckoutCommand(checkout_url, refs)
+		super(OpenstackBuildCore, self).setup_virtual_machine(console_appender, [checkout_command])
 
 
 class VerificationException(Exception):
