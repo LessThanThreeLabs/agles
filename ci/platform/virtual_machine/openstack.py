@@ -109,12 +109,14 @@ class OpenstackVm(VirtualMachine):
 		self.wait_until_ready()
 
 	def remote_checkout(self, git_url, refs):
+		host_url = git_url[:git_url.find(":")]
 		self.ssh_call("mkdir ~/.ssh; ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
 		pubkey = self.ssh_call("cat .ssh/id_rsa.pub").output
 		alias = str(uuid.uuid1()) + "_box"
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
-		command = "ssh %s -q -oStrictHostKeyChecking=no" % git_url  # first, bypass the yes/no prompt
+		command = "ssh %s -q -oStrictHostKeyChecking=no" % host_url  # first, bypass the yes/no prompt
 		command = command + "&& git clone %s source" % git_url
+		command = command + "&& cd source"
 		command = command + "&& git fetch origin %s" % refs[0]
 		command = command + "&& git checkout FETCH_HEAD"
 		for ref in refs[1:]:
