@@ -1,0 +1,28 @@
+div.simpleMenu {
+	font-size: 12px;
+	text-align: right;
+	border-right: 1px solid #DDDDDD;
+
+	.menuOptions {
+		margin-top: 50px;
+
+		.menuOption {
+			font-size: 1.2em;
+			padding: 10px 10px 10px 0px;
+
+			@backgroundColorTransitionTime: 0.25s;
+			transition: background-color @backgroundColorTransitionTime ease-out;
+			-moz-transition: background-color @backgroundColorTransitionTime ease-out;
+			-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+			-o-transition: background-color @backgroundColorTransitionTime ease-out;
+
+			&.selected {
+				background-color: rgba(200, 200, 200, 0.3);
+			}
+
+			&:hover {
+				background-color: rgba(200, 200, 200, 0.3);
+			}
+		}
+	}
+}
