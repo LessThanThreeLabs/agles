@@ -2,7 +2,7 @@ window.LoginHeaderMenuOption = {}
 
 
 class LoginHeaderMenuOption.Model extends Backbone.Model
-	VALID_STATES = ['login', 'create']
+	VALID_STATES: ['login', 'create']
 	defaults:
 		visible: false
 		state: 'login'
@@ -22,7 +22,7 @@ class LoginHeaderMenuOption.Model extends Backbone.Model
 		if typeof attributes.visible isnt 'boolean'
 			return new Error 'Invalid visibility: ' + attributes.visible
 
-		if attributes.state not in VALID_STATES
+		if attributes.state not in @VALID_STATES
 			return new Error 'Invalid state: ' + attributes.state
 
 		return
@@ -33,10 +33,10 @@ class LoginHeaderMenuOption.View extends Backbone.View
 	className: 'loginHeaderMenuOption headerMenuOption'
 	html: '<div class="headerMenuOptionTitle">Login</div>'
 	events: 'click': '_clickHandler'
+	currentView: null
 
 
 	initialize: () =>
-		@loginPanelView = new LoginPanel.View model: @model.loginPanelModel
 		@modalView = new PrettyModal.View model: @model.modalModel
 
 		@model.on 'change', @render, @
@@ -50,6 +50,8 @@ class LoginHeaderMenuOption.View extends Backbone.View
 		@model.off null, null, @
 		globalAccount.off null, null, @
 
+		currentView.dispose() if currentView?
+
 
 	render: () =>
 		@$el.html @html
@@ -59,9 +61,12 @@ class LoginHeaderMenuOption.View extends Backbone.View
 
 
 	_renderCurrentState: () =>
+		currentView.dispose() if currentView?
+
 		switch @model.get 'state'
 			when 'login'
-				@modalView.setInnerHtml @loginPanelView.render().el
+				currentView = new LoginPanel.View model: @model.loginPanelModel
+				@modalView.setInnerHtml currentView.render().el
 			when 'create'
 				console.log 'need to make the create account page...'
 			else
