@@ -1,6 +1,7 @@
 import contextlib
 
 from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Sequence, MetaData, ForeignKey, UniqueConstraint
+from sqlalchemy import event, DDL
 
 from database.engine import ConnectionFactory
 
@@ -15,6 +16,12 @@ user = Table('user', metadata,
 	Column('last_name', String, nullable=False),
 	Column('password_hash', String, nullable=False),
 	Column('salt', String(16), nullable=False)
+)
+
+event.listen(
+	user,
+	"after_create",
+	DDL("ALTER TABLE %(table)s ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regclass);")
 )
 
 media = Table('media', metadata,
