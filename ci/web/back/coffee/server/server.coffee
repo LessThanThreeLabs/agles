@@ -12,6 +12,7 @@ SpdyCache = require './spdyCache/spdyCache'
 
 WelcomeHandler = require './handlers/welcomeHandler'
 CreateAccountHandler = require './handlers/createAccountHandler'
+VerifyAccountHandler = require './handlers/verifyAccountHandler'
 RecoverPasswordHandler = require './handlers/recoverPasswordHandler'
 
 
@@ -31,6 +32,7 @@ exports.create = (configurationParams, modelConnection, port) ->
 	handlers =
 		welcomeHandler: WelcomeHandler.create configurationParams, stores, modelConnection
 		createAccountHandler: CreateAccountHandler.create configurationParams, stores, modelConnection
+		verifyAccountHandler: VerifyAccountHandler.create configurationParams, stores, modelConnection
 		recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection
 
 	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, stores, handlers
@@ -46,9 +48,11 @@ class Server
 		await
 			@handlers.welcomeHandler.initialize defer welcomeHandlerError
 			@handlers.createAccountHandler.initialize defer createAccountHandlerError
+			@handlers.verifyAccountHandler.initialize defer verifyAccountHandlerError
 			@handlers.recoverPasswordHandler.initialize defer recoverPasswordHandlerError
 
-		errors = (error for error in [welcomeHandlerError, createAccountHandlerError, recoverPasswordHandlerError] when error?)
+		errors = (error for error in [welcomeHandlerError, createAccountHandlerError, 
+			verifyAccountHandlerError, recoverPasswordHandlerError] when error?)
 		if errors.length > 0
 			callback errors.join ' '
 		else
@@ -61,6 +65,7 @@ class Server
 
 		expressServer.get '/', @handlers.welcomeHandler.handleRequest
 		expressServer.get '/createAccount', @handlers.createAccountHandler.handleRequest
+		expressServer.get '/verifyAccount', @handlers.verifyAccountHandler.handleRequest
 		expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
 		
 		# should server static content from here too
@@ -70,46 +75,3 @@ class Server
 		server.listen @port
 
 		@resourceSocket.start server
-
-
-	_handleVerifyAccountRequest: (request, response) =>
-		parsedUrl = url.parse request.url, true
-		accountKey = parsedUrl.query.account
-		
-		@stores.createAccountStore.getAccount accountKey, (error, account) =>
-			if error?
-				response.end 'Invalid link'
-			else
-				@stores.createAccountStore.removeAccount accountKey
-
-				userToCreate =
-					email: account.email
-					salt: account.salt
-					password_hash: account.passwordHash
-					first_name: account.firstName
-					last_name: account.lastName
-
-				@modelConnection.rpcConnection.users.create.create_user userToCreate, (error, userId) =>
-					if error?
-						response.end 'User creation failed'
-					else
-						request.session.userId = userId
-
-						response.render 'verifyAccount',
-							firstName: account.firstName
-							lastName: account.lastName
-
-
-	_createCssString: () =>
-		cssFileNames = @spdyCache.getFileNames 'css'
-		formatedCssFiles = cssFileNames.map (cssFileName) =>
-			return "<link rel='stylesheet' type='text/css' href='#{cssFileName}' />"
-		@cssFilesString = formatedCssFiles.join '\n'
-
-
-	_createJsString: () =>
-		jsFileNames = @spdyCache.getFileNames 'js'
-		formattedJsFiles = jsFileNames.map (jsFileName) =>
-			return "<script src='#{jsFileName}'></script>"
-		@jsFilesString = formattedJsFiles.join '\n'
-		
