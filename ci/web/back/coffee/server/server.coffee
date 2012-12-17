@@ -12,6 +12,7 @@ SpdyCache = require './spdyCache/spdyCache'
 
 WelcomeHandler = require './handlers/welcomeHandler'
 CreateAccountHandler = require './handlers/createAccountHandler'
+RecoverPasswordHandler = require './handlers/recoverPasswordHandler'
 
 
 exports.create = (configurationParams, modelConnection, port) ->
@@ -21,49 +22,47 @@ exports.create = (configurationParams, modelConnection, port) ->
 	
 	configurer = Configurer.create configurationParams, stores.sessionStore
 	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection
-	# spdyCache = SpdyCache.create configurationParams
-	spdyCache = 'hello'
 
 	httpsOptions =
 		key: fs.readFileSync configurationParams.security.key
 		cert: fs.readFileSync configurationParams.security.certificate
 		ca: fs.readFileSync configurationParams.security.certrequest
 
-	welcomeHandler = WelcomeHandler.create configurationParams, stores, modelConnection
-	welcomeHandler.initialize (error) =>
-		consore.error error if error?
-		console.log 'welcomeHandler ready!'
+	handlers =
+		welcomeHandler: WelcomeHandler.create configurationParams, stores, modelConnection
+		createAccountHandler: CreateAccountHandler.create configurationParams, stores, modelConnection
+		recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection
 
-	createAccountHandler = CreateAccountHandler.create configurationParams, stores, modelConnection
-	createAccountHandler.initialize (error) =>
-		console.error if error?
-		console.log 'createAccountHandler ready!'
-
-	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, spdyCache, stores, welcomeHandler, createAccountHandler
+	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, stores, handlers
 
 
 class Server
-	constructor: (@configurer, @httpsOptions, @port, @modelConnection, @resourceSocket, @spdyCache, @stores, @welcomeHandler, @createAccountHandler) ->
+	constructor: (@configurer, @httpsOptions, @port, @modelConnection, @resourceSocket, @stores, @handlers) ->
 		assert.ok @configurer? and @httpsOptions? and @port? and @modelConnection? and 
-			@resourceSocket? and @spdyCache? and @stores? and @welcomeHandler? and @createAccountHandler?
+			@resourceSocket? and @stores? and @handlers?
+
+
+	initialize: (callback) =>
+		await
+			@handlers.welcomeHandler.initialize defer welcomeHandlerError
+			@handlers.createAccountHandler.initialize defer createAccountHandlerError
+			@handlers.recoverPasswordHandler.initialize defer recoverPasswordHandlerError
+
+		errors = (error for error in [welcomeHandlerError, createAccountHandlerError, recoverPasswordHandlerError] when error?)
+		if errors.length > 0
+			callback errors.join ' '
+		else
+			callback()
 
 
 	start: () ->
 		expressServer = express()
 		@configurer.configure expressServer
 
-		expressServer.get '/', @welcomeHandler.handleRequest
-		expressServer.get '/createAccount', @createAccountHandler.handleRequest
-		# expressServer.get '/', @_handleIndexRequest
-		# expressServer.get '/account', @_handleIndexRequest
-		# expressServer.get '/repository/:repositoryId', @_handleIndexRequest
-		# expressServer.get '/repository/:repositoryId/:repositoryView', @_handleIndexRequest
-		# expressServer.get '/repository/:repositoryId/changes/:changeId', @_handleIndexRequest
-		# expressServer.get '/repository/:repositoryId/changes/:changeId/:changeView', @_handleIndexRequest
-		# expressServer.get '/create/repository', @_handleIndexRequest
-
-		# expressServer.get '/verifyAccount', @_handleVerifyAccountRequest
-
+		expressServer.get '/', @handlers.welcomeHandler.handleRequest
+		expressServer.get '/createAccount', @handlers.createAccountHandler.handleRequest
+		expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
+		
 		# should server static content from here too
 		# (in memory)
 
@@ -71,36 +70,6 @@ class Server
 		server.listen @port
 
 		@resourceSocket.start server
-
-		# @spdyCache.load (error) =>
-		# 	throw error if error?
-
-		# 	@_createCssString()
-		# 	@_createJsString()
-
-		# 	console.log '>> Server running!'
-
-
-	_handleIndexRequest: (request, response) =>
-		@spdyCache.pushFiles request, response
-
-		templateValues =
-			csrfToken: request.session.csrfToken
-			cssFiles: @cssFilesString
-			jsFiles: @jsFilesString
-
-		if request.session.userId?
-			@modelConnection.rpcConnection.users.read.get_user_from_id request.session.userId, (error, user) =>
-				if error?
-					console.error "UserId #{request.session.userId} doesn't exist: " + error
-				else
-					templateValues.userEmail = user.email
-					templateValues.userFirstName = user.first_name
-					templateValues.userLastName = user.last_name
-
-				response.render 'index', templateValues
-		else
-			response.render 'index', templateValues
 
 
 	_handleVerifyAccountRequest: (request, response) =>

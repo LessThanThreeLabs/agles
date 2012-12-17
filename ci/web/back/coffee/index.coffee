@@ -41,7 +41,11 @@ createServers = (serverConfigurationParams, httpPort, httpsPort, modelConnection
 	redirectServer.start()
 
 	server = Server.create serverConfigurationParams, modelConnection, httpsPort
-	server.start()
+	server.initialize (error) =>
+		if error?
+			console.error error
+		else
+			server.start()
 
 
 startEverything()
