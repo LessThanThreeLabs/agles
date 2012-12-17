@@ -6,6 +6,15 @@ module.exports = class Resource
 		assert.ok @configurationParams? and @stores? and @modelConnection? and @filesCacher?
 
 
+	initialize: (callback) =>
+		@filesCacher.loadFiles (error) =>
+			if error
+				callback error
+			else
+				@loadResourceStrings()
+				callback()
+
+
 	handleRequest: (request, response) =>
 		response.send 'response handler not written yet'
 
@@ -27,6 +36,29 @@ module.exports = class Resource
 		formattedJsFiles = jsFileNames.map (jsFileName) =>
 			return "<script src='#{jsFileName}'></script>"
 		@jsFilesString = formattedJsFiles.join '\n'
+
+
+	getTemplateValues: (request) =>
+		templateValues =
+			csrfToken: request.session.csrfToken
+			cssFiles: @cssFilesString
+			jsFiles: @jsFilesString
+			email: 'awesome@email.com'
+			firstName: 'jordan'
+			lastName: 'potter'
+
+		# if request.session.userId?
+		# 	@modelConnection.rpcConnection.users.read.get_user_from_id request.session.userId, (error, user) =>
+		# 		if error?
+		# 			console.error "UserId #{request.session.userId} doesn't exist: " + error
+		# 		else
+		# 			templateValues.userEmail = user.email
+		# 			templateValues.userFirstName = user.first_name
+		# 			templateValues.userLastName = user.last_name
+
+		# 		response.render 'index', templateValues
+		# else
+		return templateValues
 
 
 	pushFiles: (request, response) =>
