@@ -115,7 +115,7 @@ class OpenstackVm(VirtualMachine):
 		self.ssh_call("mkdir ~/.ssh; ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
 		pubkey = self.ssh_call("cat .ssh/id_rsa.pub").output
 		alias = str(uuid.uuid1()) + "_box"
-		PubkeyRegistrar.register_pubkey(VerificationUser.id, alias, pubkey)
+		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
 		command = "git clone %s source" % git_url
 		command = command + "&& git fetch origin %s" % refs[0]
 		command = command + "&& git checkout FETCH_HEAD"
@@ -123,7 +123,7 @@ class OpenstackVm(VirtualMachine):
 			command = command + "&& git fetch origin %s" % ref
 			command = command + "&& git merge FETCH_HEAD"
 		results = self.ssh_call(command)
-		PubkeyRegistrar.unregister_pubkey(VerificationUser.id, alias)
+		PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 		return results
 
 	@classmethod
