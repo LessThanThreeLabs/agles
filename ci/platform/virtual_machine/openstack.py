@@ -113,7 +113,8 @@ class OpenstackVm(VirtualMachine):
 		pubkey = self.ssh_call("cat .ssh/id_rsa.pub").output
 		alias = str(uuid.uuid1()) + "_box"
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
-		command = "git clone %s source" % git_url
+		command = "ssh %s -q -oStrictHostKeyChecking=no" % git_url  # first, bypass the yes/no prompt
+		command = command + "&& git clone %s source" % git_url
 		command = command + "&& git fetch origin %s" % refs[0]
 		command = command + "&& git checkout FETCH_HEAD"
 		for ref in refs[1:]:
