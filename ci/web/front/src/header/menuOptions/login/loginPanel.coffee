@@ -24,7 +24,8 @@ class LoginPanel.Model extends Backbone.Model
 class LoginPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'loginPanel'
-	html: '<div class="prettyForm">
+	html: '<div class="errorText">Invalid username/password combination</div>
+		<div class="prettyForm">
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">Email</div>
 				<div class="prettyFormValue">
@@ -85,4 +86,9 @@ class LoginPanel.View extends Backbone.View
 
 	_performLoginRequest: () =>
 		console.log '>> need to perform login!'
+		@_changeErrorTextVisibility true
+
+
+	_changeErrorTextVisibility: (visible) =>
+		@$('.errorText').css 'display', if visible then 'block' else 'none'
 
