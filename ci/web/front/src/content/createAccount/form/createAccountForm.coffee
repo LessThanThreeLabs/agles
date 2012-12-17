@@ -41,30 +41,35 @@ class CreateAccountForm.View extends Backbone.View
 				<div class="prettyFormLabel">Email</div>
 				<div class="prettyFormValue">
 					<input type="email" class="createAccountEmail" placeholder="email" maxlength=256 autocomplete="on">
+					<div class="prettyFormErrorText" type="email"></div>
 				</div>
 			</div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">Password</div>
 				<div class="prettyFormValue">
 					<input type="password" class="createAccountPassword" placeholder="password" maxlength=256>
+					<div class="prettyFormErrorText" type="password"></div>
 				</div>
 			</div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">Confirm password</div>
 				<div class="prettyFormValue">
 					<input type="password" class="createAccountConfirmPassword" placeholder="password, again" maxlength=256>
+					<div class="prettyFormErrorText" type="confirmPassword"></div>
 				</div>
 			</div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">First name</div>
 				<div class="prettyFormValue">
 					<input type="text" class="createAccountFirstName" placeholder="first" maxlength=256>
+					<div class="prettyFormErrorText" type="firstName"></div>
 				</div>
 			</div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">Last name</div>
 				<div class="prettyFormValue">
 					<input type="text" class="createAccountLastName" placeholder="last" maxlength=256>
+					<div class="prettyFormErrorText" type="lastName"></div>
 				</div>
 			</div>
 			<div class="prettyFormRow">
@@ -109,3 +114,17 @@ class CreateAccountForm.View extends Backbone.View
 
 	_performCreateAccountRequest: () =>
 		console.log '>> need to perform create account request'
+
+
+	_clearErrors: () =>
+		@$('.prettyFormErrorText').removeClass 'visible'
+
+
+	_showErrors: (errors) =>
+		@_clearErrors()
+
+		for errorType, errorText of errors
+			errorField = @$('.prettyFormErrorText[type="' + errorType + '"]')
+			errorField.addClass 'visible'
+			errorField.html errorText
+
