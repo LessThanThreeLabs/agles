@@ -124,7 +124,7 @@ class CreateAccountForm.View extends Backbone.View
 		@_clearErrors()
 
 		for errorType, errorText of errors
-			errorField = @$('.prettyFormErrorText[type="' + errorType + '"]')
+			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
 			errorField.addClass 'visible'
 			errorField.html errorText
 
