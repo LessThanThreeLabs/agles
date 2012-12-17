@@ -3,7 +3,7 @@
 
 Repository management is done using gitpython.
 """
-
+import logging
 import os
 import re
 import shutil
@@ -189,6 +189,8 @@ class RepositoryStore(object):
 class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
+	logger = logging.getLogger("FileSystemRepositoryStore")
+
 	def __init__(self, root_storage_directory_path):
 		super(FileSystemRepositoryStore, self).__init__()
 		if not os.path.exists(root_storage_directory_path):
@@ -198,9 +200,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def _push_github(self, repo, remote_repo, ref):
 		try:
 			repo.git.push(remote_repo, ':'.join([ref, ref]), f=True)
-		except GitCommandError as e:
-			# TODO: should do logging here
-			raise e
+		except GitCommandError:
+			error_msg = "failed to push repo to github: [repo: %s, remote_repo: %s, ref: %s]" % (repo, remote_repo, ref)
+			self.logger.exception(error_msg)
 
 	def _push_github_if_necessary(self, repo, repo_id, ref):
 		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
@@ -228,10 +230,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
-		except GitCommandError as e:
+		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
 			error_msg = "repo: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
 				repo, ref_to_merge, ref_to_merge_into)
+			self.logger.info(error_msg)
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
@@ -272,7 +275,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.
 
-		:param repo_id: A unique id assigned to each repository that is used to 
+		:param repo_id: A unique id assigned to each repository that is used to
 						determine which directory the repository is stored under.
 		:param old_name: The old repository name.
 		:param new_name: The new repository name.
@@ -290,7 +293,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def _resolve_path(self, repo_id, repo_name):
 		repo_path = os.path.join(self._root_path,
-								 pathgen.to_path(repo_id, repo_name))
+									pathgen.to_path(repo_id, repo_name))
 		return os.path.realpath(repo_path)
 
 

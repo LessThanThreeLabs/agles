@@ -2,6 +2,8 @@
 import argparse
 import os
 
+import settings.log
+
 from settings.verification_server import box_name
 from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer
@@ -13,6 +15,8 @@ DEFAULT_VM_DIRECTORY = "/tmp/verification"
 
 
 def main():
+	settings.log.configure()
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-v", "--vm_dir",
 		help="The root directory for the virtual machine")

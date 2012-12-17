@@ -4,17 +4,17 @@ BunnyRPC is an rpc framework written on top of rabbitmq.
 
 Protocol Definition:
 	client->server rpc call:
-	 	An rpc call is of the format:
+		An rpc call is of the format:
 			{"method": "method", "args": [arg0, arg1, arg2, ...]}
 
 	server->client response:
-	 	The server's response is of the format:
+		The server's response is of the format:
 			{
 			"error": {
-					 "type": "type",
-					 "message": "msg",
-					 "traceback": "traceback"
-					 } or None,
+					"type": "type",
+					"message": "msg",
+					"traceback": "traceback"
+					} or None,
 			"value": value
 			}
 """
@@ -59,7 +59,7 @@ class Server(object):
 		routed to <queue_names>.
 
 		:param exchange_name: The name of the exchange to bind this server to.
-							  This is the exchange we'll be receiving rpc calls from.
+								This is the exchange we'll be receiving rpc calls from.
 		:param queue_names: A list of queues we bind to. These queues are the
 							the ones we pull our rpc calls from.
 		"""
@@ -109,9 +109,6 @@ class Server(object):
 		try:
 			proto["value"] = getattr(self.base_instance, method_name)(*args)
 			proto["error"] = None
-		except AssertionError as e:
-			#TODO: We should log this
-			raise e
 		except Exception:
 			proto["value"] = None
 			exc_type, exc_value, exc_traceback = sys.exc_info()

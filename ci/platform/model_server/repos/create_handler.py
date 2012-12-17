@@ -1,3 +1,5 @@
+import logging
+
 import database.schema
 import repo.store
 
@@ -8,6 +10,8 @@ from util.pathgen import to_clone_path
 
 
 class ReposCreateHandler(ModelServerRpcHandler):
+	logger = logging.getLogger("ReposCreateHandler")
+
 	def __init__(self):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
@@ -28,9 +32,9 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				repo_id=repo_id, repo_name=repo_name, default_permissions=default_permissions)
 			return repo_id
 		except Exception as e:
-			# do logging here to say we need to fix inconsistencies between
-			# the db and fs
-			raise e
+			error_msg = "failed to create repo: [user_id: %d, repo_name: %s, default_permissions: %d]" % (user_id, repo_name, default_permissions)
+			self.logger.exception(error_msg)
+			raise RepositoryCreateError(e)
 
 	def _create_repo_on_filesystem(self, manager, repostore_id, repo_id, repo_name):
 		manager.create_repository(repostore_id, repo_id, repo_name)
@@ -74,3 +78,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 		manager.register_remote_store(repostore_id)
 		return repostore_id
+
+
+class RepositoryCreateError(Exception):
+	pass

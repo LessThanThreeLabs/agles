@@ -2,6 +2,8 @@
 import argparse
 import os
 
+import settings.log
+
 from bunnyrpc.server import Server
 from repo.store import RepositoryStore, FileSystemRepositoryStore
 from settings import store
@@ -18,6 +20,7 @@ def count_repositories(root_dir):
 
 
 def main():
+	settings.log.configure()
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-e", "--exchange_name", help="The exchange to bind this server to")
 	parser.add_argument("-r", "--root_dir", help="The root directory to add repositories to")
@@ -32,7 +35,6 @@ def main():
 	except IOError:
 		repostore_id = RepositoryStore.initialize_store(root_dir)
 		config = RepositoryStore.create_config(repostore_id, root_dir)
-
 
 	print "Starting FileSystem Repository Server '%s' on exchange '%s' with root directory '%s' ..." % (
 		config["id"], args.exchange_name, root_dir)

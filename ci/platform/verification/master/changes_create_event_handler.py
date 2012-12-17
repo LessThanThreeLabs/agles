@@ -1,3 +1,4 @@
+import logging
 import random
 import time
 
@@ -14,6 +15,8 @@ from verification.shared.pubkey_registrar import PubkeyRegistrar
 
 
 class ChangesCreateEventHandler(EventSubscriber):
+	logger = logging.getLogger("ChangesCreateEventHandler")
+
 	def __init__(self, uri_translator):
 		super(ChangesCreateEventHandler, self).__init__("repos", "verification_master:repos.update")
 		self.uri_translator = uri_translator
@@ -31,9 +34,10 @@ class ChangesCreateEventHandler(EventSubscriber):
 			if body["type"] == "change added":
 				self._handle_new_change(body["contents"])
 			message.channel.basic_ack(delivery_tag=message.delivery_tag)
-		except Exception as e:
+		except:
+			msg = "basic_reject for message [body: %s, message: %s]" % (body, message)
+			self.logger.exception(msg)
 			message.channel.basic_reject(delivery_tag=message.delivery_tag, requeue=True)
-			raise e  # Should log this
 
 	def _handle_new_change(self, contents):
 		change_id = contents["change_id"]

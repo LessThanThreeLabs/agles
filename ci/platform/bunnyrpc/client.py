@@ -153,8 +153,8 @@ class Client(ClientBase):
 		if proto["error"]:
 			assert isinstance(proto["error"], dict)
 			exc_tuple = (proto["error"]["type"],
-						 proto["error"]["message"],
-						 proto["error"]["traceback"])
+						proto["error"]["message"],
+						proto["error"]["traceback"])
 			eval_str = "%s(r''' %s\n RemoteTraceback (most recent call last):%s ''')" % exc_tuple
 			try:
 				raise eval(eval_str, self.caller_globals_dict)
