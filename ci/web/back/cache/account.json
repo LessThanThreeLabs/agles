@@ -14,6 +14,7 @@
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/account/content/panels/sshKeys/accountSshKeysPanel.css",
 			"/css/src/content/account/content/panels/password/accountPasswordPanel.css",
 			"/css/src/content/account/content/panels/general/accountGeneralPanel.css",
 			"/css/src/content/account/content/accountContent.css",

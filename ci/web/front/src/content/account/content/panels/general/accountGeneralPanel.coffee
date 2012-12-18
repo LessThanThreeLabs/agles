@@ -14,7 +14,7 @@ class AccountGeneralPanel.Model extends Backbone.Model
 		if typeof attributes.lastName isnt 'string'
 			return new Error 'Invalid last name: ' + attributes.lastName
 
-		return	
+		return
 
 
 class AccountGeneralPanel.View extends Backbone.View
