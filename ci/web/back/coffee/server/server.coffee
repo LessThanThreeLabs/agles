@@ -70,11 +70,11 @@ class Server
 
 		expressServer.get '/', @handlers.welcomeHandler.handleRequest
 		expressServer.get '/account', @handlers.accountHandler.handleRequest
+		expressServer.get '/account/create', @handlers.createAccountHandler.handleRequest
 		expressServer.get '/account/:view', @handlers.accountHandler.handleRequest
-		expressServer.get '/createAccount', @handlers.createAccountHandler.handleRequest
 		expressServer.get '/verifyAccount', @handlers.verifyAccountHandler.handleRequest
 		expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
-		expressServer.get '/createRepository', @handlers.createRepositoryHandler.handleRequest
+		expressServer.get '/repository/create', @handlers.createRepositoryHandler.handleRequest
 		
 		# should server static content from here too
 		# (in memory)
