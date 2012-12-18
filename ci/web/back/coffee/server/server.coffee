@@ -15,6 +15,7 @@ CreateAccountHandler = require './handlers/createAccountHandler'
 VerifyAccountHandler = require './handlers/verifyAccountHandler'
 RecoverPasswordHandler = require './handlers/recoverPasswordHandler'
 CreateRepositoryHandler = require './handlers/createRepositoryHandler'
+RepositoryHandler = require './handlers/repositoryHandler'
 
 
 exports.create = (configurationParams, modelConnection, port) ->
@@ -37,6 +38,7 @@ exports.create = (configurationParams, modelConnection, port) ->
 		verifyAccountHandler: VerifyAccountHandler.create configurationParams, stores, modelConnection
 		recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection
 		createRepositoryHandler: CreateRepositoryHandler.create configurationParams, stores, modelConnection
+		repositoryHandler: RepositoryHandler.create configurationParams, stores, modelConnection
 
 	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, stores, handlers
 
@@ -48,6 +50,8 @@ class Server
 
 
 	initialize: (callback) =>
+		# if this seciton is causing problems, be sure to increase
+		# the maximum number of files you can have open
 		await
 			@handlers.welcomeHandler.initialize defer welcomeHandlerError
 			@handlers.accountHandler.initialize defer accountHandlerError
@@ -55,9 +59,11 @@ class Server
 			@handlers.verifyAccountHandler.initialize defer verifyAccountHandlerError
 			@handlers.recoverPasswordHandler.initialize defer recoverPasswordHandlerError
 			@handlers.createRepositoryHandler.initialize defer createRepositoryHandlerError
+			@handlers.repositoryHandler.initialize defer repositoryHandlerError
 
-		errors = (error for error in [welcomeHandlerError, accountHandlerError, createAccountHandlerError, 
-			verifyAccountHandlerError, recoverPasswordHandlerError, createRepositoryHandlerError] when error?)
+		errors = (error for error in [welcomeHandlerError, accountHandlerError, 
+			createAccountHandlerError, verifyAccountHandlerError, recoverPasswordHandlerError, 
+			createRepositoryHandlerError, repositoryHandlerError] when error?)
 		if errors.length > 0
 			callback errors.join ' '
 		else
@@ -75,6 +81,7 @@ class Server
 		expressServer.get '/verifyAccount', @handlers.verifyAccountHandler.handleRequest
 		expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
 		expressServer.get '/repository/create', @handlers.createRepositoryHandler.handleRequest
+		expressServer.get '/repository/:id', @handlers.repositoryHandler.handleRequest
 		
 		# should server static content from here too
 		# (in memory)
