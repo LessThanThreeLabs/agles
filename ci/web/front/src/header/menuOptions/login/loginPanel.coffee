@@ -50,7 +50,7 @@ class LoginPanel.View extends Backbone.View
 		</div>
 		<div class="memberOptions">
 			<div class="memberOptionsTitle">Not a member?</div>
-			<a href="createAccount" class="createAccountOption">Create an account</a> | <a href="recoverPassword" class="recoverPasswordOption">Recover password</a>
+			<a href="/createAccount" class="createAccountOption">Create an account</a> | <a href="/recoverPassword" class="recoverPasswordOption">Recover password</a>
 		</div>'
 	events:
 		'keyup': '_handleFormEntryChange'

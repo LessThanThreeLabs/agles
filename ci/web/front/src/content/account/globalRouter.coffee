@@ -1,8 +1,8 @@
 class GlobalRouterModel extends Backbone.Model
-	VALID_VIEWS: ['global', 'sshKeys']
+	VALID_VIEWS: ['general', 'sshKeys']
 
 	defaults:
-		view: 'global'
+		view: 'general'
 
 
 	initialize: () =>
@@ -11,10 +11,10 @@ class GlobalRouterModel extends Backbone.Model
 
 	_navigate: () =>
 		switch @get 'view'
-			when 'global'
-				globalRouter.navigate '/global', trigger: true
+			when 'general'
+				globalRouter.navigate '/account/general', trigger: true
 			when 'sshKeys'
-				globalRouter.navigate '/sshKeys', trigger: true
+				globalRouter.navigate '/account/sshKeys', trigger: true
 			else
 				console.error 'Unaccounted for view ' + @get 'view'
 
@@ -28,11 +28,11 @@ class GlobalRouterModel extends Backbone.Model
 
 class GlobalRouter extends Backbone.Router
 	routes:
-		':view': 'loadIndex'
+		'account/:view': 'loadAccountView'
 
 
-	loadIndex: (view) =>
-		globalRouterModel.set view: view,
+	loadAccountView: (view) =>
+		globalRouterModel.set view: view ? null,
 			error: (model, error) => console.error error
 
 
@@ -41,6 +41,4 @@ globalRouter = new GlobalRouter()
 
 window.globalRouterModel = globalRouterModel
 
-Backbone.history.start
-	root: '/account/'
-	pushState: true
+Backbone.history.start pushState: true
