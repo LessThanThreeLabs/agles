@@ -6,7 +6,6 @@ import novaclient.client
 import yaml
 
 from settings.openstack import credentials
-from shared.constants import VerificationUser
 from verification.shared.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
 

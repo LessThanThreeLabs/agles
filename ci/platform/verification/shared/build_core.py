@@ -29,7 +29,7 @@ class BuildCore(object):
 			checkout_url = self.uri_translator.translate(repo_uri)
 			host_url = checkout_url[:checkout_url.find(":")]
 			# Add repostore to authorized keys for the following git command
-			subprocess.call(["ssh", host_url, "-q", "-oStrictHostKeyChecking=no"])
+			subprocess.call(["ssh", host_url, "true", "-q", "-oStrictHostKeyChecking=no"])
 		else:
 			checkout_url = repo_uri
 		Git().clone(checkout_url, self.source_dir)

@@ -14,7 +14,8 @@ from util.shell import RestrictedGitShell, InvalidCommandError
 commands_to_permissions = {
 	"git-receive-pack": RepositoryPermissions.RW,
 	"git-upload-pack": RepositoryPermissions.R,
-	"git-upload-archive": RepositoryPermissions.R
+	"git-upload-archive": RepositoryPermissions.R,
+	"true": RepositoryPermissions.NONE
 }
 
 user_id_commands = ["git-receive-pack"]
