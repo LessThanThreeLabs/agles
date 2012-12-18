@@ -14,6 +14,7 @@ class Account.Model extends Backbone.Model
 		@accountContentModel = new AccountContent.Model()
 
 		@prettyMenuModel.on 'change:selectedOptionName', () =>
+			@accountContentModel.set 'view', @prettyMenuModel.get 'selectedOptionName'
 			globalRouterModel.set 'view', @prettyMenuModel.get('selectedOptionName'),
 				error: (model, error) => console.error error
 

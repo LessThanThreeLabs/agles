@@ -45,6 +45,8 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/account/content/panels/sshKeys/accountSshKeysPanel.js",
+			"/js/src/content/account/content/panels/general/accountGeneralPanel.js",
 			"/js/src/content/account/content/accountContent.js",
 			"/js/src/content/account/account.js",
 			
