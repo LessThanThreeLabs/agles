@@ -8,13 +8,6 @@ class AccountPasswordPanel.Model extends Backbone.Model
 		confirmPassword: ''
 
 
-	initialize: () =>
-		@on 'change', () =>
-			console.log @get 'oldPassword'
-			console.log @get 'newPassword'
-			console.log @get 'confirmPassword'
-
-
 	validate: (attributes) =>
 		if typeof attributes.oldPassword isnt 'string'
 			return new Error 'Invalid old password: ' + attributes.oldPassword
@@ -31,31 +24,33 @@ class AccountPasswordPanel.Model extends Backbone.Model
 class AccountPasswordPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'accountPasswordPanel'
-	html: '<div class="prettyForm">
-			<div class="prettyFormRow">
-				<div class="prettyFormLabel">Old password</div>
-				<div class="prettyFormValue">
-					<input type="password" class="accountOldPassword" placeholder="old password" maxlength=256>
-					<div class="prettyFormErrorText" type="oldPassword"></div>
+	html: '<div class="accountPasswordPanelContent">
+			<div class="prettyForm">
+				<div class="prettyFormRow">
+					<div class="prettyFormLabel">Old password</div>
+					<div class="prettyFormValue">
+						<input type="password" class="accountOldPassword" placeholder="old password" maxlength=256>
+						<div class="prettyFormErrorText" type="oldPassword"></div>
+					</div>
+				</div>
+				<div class="prettyFormRow">
+					<div class="prettyFormLabel">New password</div>
+					<div class="prettyFormValue">
+						<input type="password" class="accountNewPassword" placeholder="new password" maxlength=256>
+						<div class="prettyFormErrorText" type="newPassword"></div>
+					</div>
+				</div>
+				<div class="prettyFormRow">
+					<div class="prettyFormLabel">Confirm password</div>
+					<div class="prettyFormValue">
+						<input type="password" class="accountConfirmPassword" placeholder="new password, again" maxlength=256>
+						<div class="prettyFormErrorText" type="confirmPassword"></div>
+					</div>
 				</div>
 			</div>
-			<div class="prettyFormRow">
-				<div class="prettyFormLabel">New password</div>
-				<div class="prettyFormValue">
-					<input type="password" class="accountNewPassword" placeholder="new password" maxlength=256>
-					<div class="prettyFormErrorText" type="newPassword"></div>
-				</div>
+			<div class="saveAccountPasswordButtonContainer">
+				<button class="saveAccountPasswordButton">Save</button>
 			</div>
-			<div class="prettyFormRow">
-				<div class="prettyFormLabel">Confirm password</div>
-				<div class="prettyFormValue">
-					<input type="password" class="accountConfirmPassword" placeholder="new password, again" maxlength=256>
-					<div class="prettyFormErrorText" type="confirmPassword"></div>
-				</div>
-			</div>
-		</div>
-		<div class="saveAccountPasswordButtonContainer">
-			<button class="saveAccountPasswordButton">Save</button>
 		</div>'
 	events:
 		'keyup': '_handleFormEntryChange'
