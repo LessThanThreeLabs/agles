@@ -46,6 +46,7 @@
 			"/js/src/header/header.js",
 
 			"/js/src/content/account/account.js",
+			"/js/src/content/account/globalRouter.js",
 			"/js/src/content/account/main.js"
 		]
 	},
