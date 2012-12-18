@@ -9,13 +9,13 @@ class RepositoryHeaderMenuOption.Model extends Backbone.Model
 
 
 	initialize: () =>
-		options = [
+		dropdownOptions = [
 			new PrettyDropdownOption(1, 'Repository #1AAAAAAAA'),
 			new PrettyDropdownOption(2, 'Repository #2'),
 			@CREATE_REPOSITORY_DROPDOWN_OPTION
 			]
 		@dropdownModel = new PrettyDropdown.Model 
-			options: options
+			options: dropdownOptions
 			alignment: 'right'
 
 
@@ -70,6 +70,7 @@ class RepositoryHeaderMenuOption.View extends Backbone.View
 	render: () =>
 		@$el.html @html
 		@$el.append @dropdownView.render().el
+		@_fixVisibility()
 		return @
 
 

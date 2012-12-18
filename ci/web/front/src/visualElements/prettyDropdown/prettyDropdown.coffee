@@ -30,7 +30,7 @@ class PrettyDropdown.View extends Backbone.View
 				<div class="prettyDropdownOption" optionName="{{name}}">{{title}}</div>
 			{{/each}}'
 	events:
-		'hover .prettyDropdownOption': "_handleHover"
+		'hover .prettyDropdownOption': '_handleHover'
 		'click .prettyDropdownOption': '_handleClick'
 
 
