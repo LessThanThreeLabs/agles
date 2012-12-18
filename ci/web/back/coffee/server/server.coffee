@@ -14,6 +14,7 @@ AccountHandler = require './handlers/accountHandler'
 CreateAccountHandler = require './handlers/createAccountHandler'
 VerifyAccountHandler = require './handlers/verifyAccountHandler'
 RecoverPasswordHandler = require './handlers/recoverPasswordHandler'
+CreateRepositoryHandler = require './handlers/createRepositoryHandler'
 
 
 exports.create = (configurationParams, modelConnection, port) ->
@@ -35,6 +36,7 @@ exports.create = (configurationParams, modelConnection, port) ->
 		createAccountHandler: CreateAccountHandler.create configurationParams, stores, modelConnection
 		verifyAccountHandler: VerifyAccountHandler.create configurationParams, stores, modelConnection
 		recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection
+		createRepositoryHandler: CreateRepositoryHandler.create configurationParams, stores, modelConnection
 
 	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, stores, handlers
 
@@ -52,9 +54,10 @@ class Server
 			@handlers.createAccountHandler.initialize defer createAccountHandlerError
 			@handlers.verifyAccountHandler.initialize defer verifyAccountHandlerError
 			@handlers.recoverPasswordHandler.initialize defer recoverPasswordHandlerError
+			@handlers.createRepositoryHandler.initialize defer createRepositoryHandlerError
 
 		errors = (error for error in [welcomeHandlerError, accountHandlerError, createAccountHandlerError, 
-			verifyAccountHandlerError, recoverPasswordHandlerError] when error?)
+			verifyAccountHandlerError, recoverPasswordHandlerError, createRepositoryHandlerError] when error?)
 		if errors.length > 0
 			callback errors.join ' '
 		else
@@ -71,6 +74,7 @@ class Server
 		expressServer.get '/createAccount', @handlers.createAccountHandler.handleRequest
 		expressServer.get '/verifyAccount', @handlers.verifyAccountHandler.handleRequest
 		expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
+		expressServer.get '/createRepository', @handlers.createRepositoryHandler.handleRequest
 		
 		# should server static content from here too
 		# (in memory)
