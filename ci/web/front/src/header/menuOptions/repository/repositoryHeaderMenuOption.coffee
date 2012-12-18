@@ -2,6 +2,7 @@ window.RepositoryHeaderMenuOption = {}
 
 
 class RepositoryHeaderMenuOption.Model extends Backbone.Model
+	CREATE_REPOSITORY_DROPDOWN_OPTION: new PrettyDropdownOption 'createRepository', 'Create Repository'
 	defaults:
 		repositories: null
 		visible: true
@@ -10,7 +11,8 @@ class RepositoryHeaderMenuOption.Model extends Backbone.Model
 	initialize: () =>
 		options = [
 			new PrettyDropdownOption(1, 'Repository #1AAAAAAAA'),
-			new PrettyDropdownOption(2, 'Repository #2')
+			new PrettyDropdownOption(2, 'Repository #2'),
+			@CREATE_REPOSITORY_DROPDOWN_OPTION
 			]
 		@dropdownModel = new PrettyDropdown.Model 
 			options: options
@@ -49,9 +51,7 @@ class RepositoryHeaderMenuOption.View extends Backbone.View
 
 	initialize: () ->
 		@dropdownView = new PrettyDropdown.View model: @model.dropdownModel
-		@dropdownView.on 'selected', ((repositoryId) =>
-			window.location.href = '/repository/' + repositoryId
-			), @
+		@dropdownView.on 'selected', @_handleRepositorySelection, @
 
 		@model.on 'change:visible', @_fixVisibility, @
 		globalAccount.on 'change', @model.fetchRepositories, @
@@ -71,6 +71,13 @@ class RepositoryHeaderMenuOption.View extends Backbone.View
 		@$el.html @html
 		@$el.append @dropdownView.render().el
 		return @
+
+
+	_handleRepositorySelection: (repositoryName) =>
+		if repositoryName is @model.CREATE_REPOSITORY_DROPDOWN_OPTION.name
+			window.location.href = '/repository/create'
+		else
+			window.location.href = '/repository/' + repositoryName
 
 
 	_handleClick: (event) =>
