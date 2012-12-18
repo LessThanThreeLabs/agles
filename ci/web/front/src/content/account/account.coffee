@@ -11,6 +11,8 @@ class Account.Model extends Backbone.Model
 			options: menuOptions
 			selectedOptionName: menuOptions[0].name
 
+		@accountContentModel = new AccountContent.Model()
+
 		@prettyMenuModel.on 'change:selectedOptionName', () =>
 			globalRouterModel.set 'view', @prettyMenuModel.get('selectedOptionName'),
 				error: (model, error) => console.error error
@@ -19,11 +21,15 @@ class Account.Model extends Backbone.Model
 class Account.View extends Backbone.View
 	tagName: 'div'
 	className: 'account'
-	html: 'hello'
+	html: '<div class="accountContainer">
+			<div class="accountMenuContainer"></div>
+			<div class="accountContentContainer"></div>
+		</div>'
 
 
 	initialize: () =>
 		@prettyMenuView = new PrettyMenu.View model: @model.prettyMenuModel
+		@accountContentView = new AccountContent.View model: @model.accountContentModel
 
 		globalRouterModel.on 'change:view', (() =>
 			@model.prettyMenuModel.set 'selectedOptionName', globalRouterModel.get 'view'
@@ -37,5 +43,6 @@ class Account.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
-		@$el.append @prettyMenuView.render().el
+		@$('.accountMenuContainer').html @prettyMenuView.render().el
+		@$('.accountContentContainer').html @accountContentView.render().el
 		return @
