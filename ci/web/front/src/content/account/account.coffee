@@ -5,6 +5,7 @@ class Account.Model extends Backbone.Model
 	
 	initialize: () =>
 		menuOptions = [new PrettyMenuOption('general', 'General'),
+			new PrettyMenuOption('password', 'Password'),
 			new PrettyMenuOption('sshKeys', 'SSH Keys')]
 
 		@prettyMenuModel = new PrettyMenu.Model

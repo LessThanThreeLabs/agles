@@ -48,7 +48,9 @@ class RecoverPasswordForm.View extends Backbone.View
 		if event.keyCode is 13
 			@_performRecoverPasswordRequest()
 		else
-			@model.set 'email', @$('.recoverPasswordEmail').val()
+			attributesToSet = email: @$('.recoverPasswordEmail').val()
+			@model.set attributesToSet, 
+				error: (model, error) => console.error error
 
 
 	_performRecoverPasswordRequest: () =>

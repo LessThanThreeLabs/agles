@@ -8,6 +8,7 @@ class AccountContent.Model extends Backbone.Model
 
 	initialize: () =>
 		@accountGeneralPanelModel = new AccountGeneralPanel.Model()
+		@accountPasswordPanelModel = new AccountPasswordPanel.Model()
 		@accountSshKeysPanelModel = new AccountSshKeysPanel.Model()
 
 
@@ -37,6 +38,9 @@ class AccountContent.View extends Backbone.View
 		switch @model.get 'view'
 			when 'general'
 				@currentView = new AccountGeneralPanel.View model: @model.accountGeneralPanelModel
+				@$el.html @currentView.render().el
+			when 'password'
+				@currentView = new AccountPasswordPanel.View model: @model.accountPasswordPanelModel
 				@$el.html @currentView.render().el
 			when 'sshKeys'
 				@currentView = new AccountSshKeysPanel.View model: @model.accountSshKeysPanelModel

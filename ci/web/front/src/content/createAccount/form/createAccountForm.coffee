@@ -103,13 +103,15 @@ class CreateAccountForm.View extends Backbone.View
 		if event.keyCode is 13
 			@_performCreateAccountRequest()
 		else
-			@model.set
+			attributesToSet = 
 				email: @$('.createAccountEmail').val()
 				password: @$('.createAccountPassword').val()
 				confirmPassword: @$('.createAccountConfirmPassword').val()
 				firstName: @$('.createAccountFirstName').val()
 				lastName: @$('.createAccountLastName').val()
 				rememberMe: @$('.createAccountRememberMe').prop 'checked'
+			@model.set attributesToSet, 
+				error: (model, error) => console.error error
 
 
 	_performCreateAccountRequest: () =>
