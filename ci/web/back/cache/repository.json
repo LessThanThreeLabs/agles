@@ -43,6 +43,8 @@
 			"/js/src/header/header.js",
 
 			"/js/src/content/repository/repository.js",
+
+			"/js/src/content/repository/globalRouter.js",
 			"/js/src/content/repository/main.js"
 		]
 	},

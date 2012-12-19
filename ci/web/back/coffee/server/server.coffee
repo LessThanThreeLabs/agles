@@ -81,7 +81,10 @@ class Server
 		expressServer.get '/verifyAccount', @handlers.verifyAccountHandler.handleRequest
 		expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
 		expressServer.get '/repository/create', @handlers.createRepositoryHandler.handleRequest
-		expressServer.get '/repository/:id', @handlers.repositoryHandler.handleRequest
+		expressServer.get '/repository/:repositoryId', @handlers.repositoryHandler.handleRequest
+		expressServer.get '/repository/:repositoryId/:repositoryView', @handlers.repositoryHandler.handleRequest
+		expressServer.get '/repository/:repositoryId/:repositoryView/:changeId', @handlers.repositoryHandler.handleRequest
+		expressServer.get '/repository/:repositoryId/:repositoryView/:changeId/:changeView', @handlers.repositoryHandler.handleRequest
 		
 		# should server static content from here too
 		# (in memory)
