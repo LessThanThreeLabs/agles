@@ -48,10 +48,8 @@ class RepositoryHeader.Model extends Backbone.Model
 class RepositoryHeader.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeader'
-	html: '<div class="repositoryHeaderContainer">
-			<div class="repositoryHeaderBasicInformationContainer"></div>
-			<div class="repositoryHeaderMenuContainer"></div>
-		</div>'
+	html: '<div class="repositoryHeaderBasicInformationContainer"></div>
+		<div class="repositoryHeaderMenuContainer"></div>'
 
 
 	initialize: () =>

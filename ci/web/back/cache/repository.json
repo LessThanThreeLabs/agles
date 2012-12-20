@@ -49,6 +49,8 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/repository/content/repositoryContent.js",
+
 			"/js/src/content/repository/header/basicInformation/repositoryHeaderBasicInformation.js",
 			"/js/src/content/repository/header/menu/trinkets/url/repositoryUrlTrinket.js",
 			"/js/src/content/repository/header/menu/repositoryHeaderMenuOption.js",
