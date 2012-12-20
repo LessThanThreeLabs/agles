@@ -5,7 +5,7 @@ class RepositoryContent.Model extends Backbone.Model
 
 	initialize: () =>
 		@repositoryChangesModel = new RepositoryChanges.Model()
-		# @repositoryAdminModel = new RepositoryAdmin.Model()
+		@repositoryAdminModel = new RepositoryAdmin.Model()
 
 
 class RepositoryContent.View extends Backbone.View
@@ -16,7 +16,7 @@ class RepositoryContent.View extends Backbone.View
 
 	initialize: () =>
 		@repositoryChangesView = new RepositoryChanges.View model: @model.repositoryChangesModel
-		# @repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
+		@repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
 
 		globalRouterModel.on 'change:repositoryView', @_updateContent, @
 

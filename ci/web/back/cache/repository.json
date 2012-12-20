@@ -6,14 +6,18 @@
 			"/css/src/fonts.css",
 			"/css/src/setup.css",
 
-			"/css/src/visualElements/prettyForm/prettyForm.css",
-			"/css/src/visualElements/prettyModal/prettyModal.css",
 			"/css/src/visualElements/prettyDropdown/prettyDropdown.css",
+			"/css/src/visualElements/prettyForm/prettyForm.css",
+			"/css/src/visualElements/prettyMenu/prettyMenu.css",
+			"/css/src/visualElements/prettyModal/prettyModal.css",
 
 			"/css/src/header/menuOptions/login/loginPanel.css",
 
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
+
+			"/css/src/content/repository/content/admin/content/repositoryAdminContent.css",
+			"/css/src/content/repository/content/admin/repositoryAdmin.css",
 
 			"/css/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutputLine.css",
 			"/css/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutput.css",
@@ -49,9 +53,11 @@
 			"/js/src/socket.js",
 			"/js/src/globalAccount.js",
 
-			"/js/src/visualElements/prettyModal/prettyModal.js",
 			"/js/src/visualElements/prettyDropdown/prettyDropdownOption.js",
 			"/js/src/visualElements/prettyDropdown/prettyDropdown.js",			
+			"/js/src/visualElements/prettyMenu/prettyMenuOption.js",
+			"/js/src/visualElements/prettyMenu/prettyMenu.js",
+			"/js/src/visualElements/prettyModal/prettyModal.js",		
 
 			"/js/src/header/menuOptions/repository/headerMenuRepositoryOption.js",
 			"/js/src/header/menuOptions/login/loginPanel.js",
@@ -59,6 +65,9 @@
 			"/js/src/header/menuOptions/account/headerMenuAccountOption.js",
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
+
+			"/js/src/content/repository/content/admin/content/repositoryAdminContent.js",
+			"/js/src/content/repository/content/admin/repositoryAdmin.js",
 
 			"/js/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutputLine.js",
 			"/js/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutput.js",

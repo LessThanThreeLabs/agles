@@ -18,6 +18,7 @@ class Account.Model extends Backbone.Model
 			@accountContentModel.set 'view', @prettyMenuModel.get 'selectedOptionName'
 			globalRouterModel.set 'view', @prettyMenuModel.get('selectedOptionName'),
 				error: (model, error) => console.error error
+		@accountContentModel.set 'view', @prettyMenuModel.get 'selectedOptionName'
 
 
 class Account.View extends Backbone.View
@@ -41,6 +42,9 @@ class Account.View extends Backbone.View
 
 	onDispose: () =>
 		globalRouterModel.off null, null, @
+
+		@prettyMenuView.dispose()
+		@accountContentView.dispose()
 
 
 	render: () =>
