@@ -93,7 +93,7 @@ class RepositoryHeaderMenu.View extends Backbone.View
 		@$el.html @template options: @model.get 'menuOptions'
 		@$('.repositoryMenuTrinkets').append @repositoryUrlTrinketView.render().el
 		@_handleSelectedMenuOption()
-		Tipped.create '.repositoryMenuOption', skin: 'default'
+		Tipped.create @$('.repositoryMenuOption'), skin: 'default'
 		return @
 
 
