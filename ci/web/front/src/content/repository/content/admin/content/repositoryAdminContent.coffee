@@ -8,7 +8,7 @@ class RepositoryAdminContent.Model extends Backbone.Model
 
 	initialize: () =>
 		@generalPanelModel = new RepositoryAdminGeneralPanel.Model()
-		# @membersPanelModel = new RepositoryAdminMembersPanel.Model()
+		@membersPanelModel = new RepositoryAdminMembersPanel.Model()
 
 
 class RepositoryAdminContent.View extends Backbone.View
@@ -38,9 +38,9 @@ class RepositoryAdminContent.View extends Backbone.View
 			when 'general'
 				@currentView = new RepositoryAdminGeneralPanel.View model: @model.generalPanelModel
 				@$el.html @currentView.render().el
-			# when 'members'
-			# 	@currentView = new RepositoryAdminMembersPanel.View model: @model.membersPanelModel
-			# 	@$el.html @currentView.render().el
+			when 'members'
+				@currentView = new RepositoryAdminMembersPanel.View model: @model.membersPanelModel
+				@$el.html @currentView.render().el
 			else
 				@currentView = null
 				@$el.html '&nbsp'
