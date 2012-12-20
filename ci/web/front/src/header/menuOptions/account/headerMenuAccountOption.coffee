@@ -18,9 +18,12 @@ class HeaderMenuAccountOption.Model extends Backbone.Model
 
 
 	updateInformation: () =>
-		@set 'firstName', globalAccount.get 'firstName'
-		@set 'lastName', globalAccount.get 'lastName'
-		@set 'visible', globalAccount.get('email')?
+		attributesToSet = 
+			firstName: globalAccount.get 'firstName'
+			lastName: globalAccount.get 'lastName'
+			visible: globalAccount.get 'loggedIn'
+		@set attributesToSet, 
+			error: (model, error) => console.error error
 
 
 class HeaderMenuAccountOption.View extends Backbone.View

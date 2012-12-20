@@ -45,6 +45,9 @@ class VerifyAccountHandler extends RequestHandler
 				response.end 'User creation failed'
 			else
 				request.session.userId = userId
+				request.session.email = account.email
+				request.session.firstName = account.firstName
+				request.session.lastName = account.lastName
 
 				@pushFiles request, response
 				response.render 'index', @getTemplateValues request

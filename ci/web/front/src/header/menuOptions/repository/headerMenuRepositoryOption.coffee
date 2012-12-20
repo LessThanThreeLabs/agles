@@ -20,7 +20,7 @@ class HeaderMenuRepositoryOption.Model extends Backbone.Model
 
 
 	fetchRepositories: () =>
-		return if not globalAccount.get('email')?
+		return if not globalAccount.get 'loggedIn'
 
 		requestData = 
 			method: 'writableRepositories'
@@ -54,7 +54,7 @@ class HeaderMenuRepositoryOption.View extends Backbone.View
 		@dropdownView.on 'selected', @_handleRepositorySelection, @
 
 		@model.on 'change:visible', @_fixVisibility, @
-		globalAccount.on 'change', @model.fetchRepositories, @
+		globalAccount.on 'change:loggedIn', @model.fetchRepositories, @
 
 		@model.fetchRepositories()
 

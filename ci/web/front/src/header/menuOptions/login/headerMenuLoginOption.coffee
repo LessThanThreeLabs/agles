@@ -13,8 +13,9 @@ class HeaderMenuLoginOption.Model extends Backbone.Model
 
 
 	updateInformation: () =>
-		attributesToSet = visible: globalAccount.get('email')?
-		@set attributesToSet, error: (model, error) => console.error error
+		attributesToSet = visible: not globalAccount.get 'loggedIn'
+		@set attributesToSet, 
+			error: (model, error) => console.error error
 
 
 	validate: (attributes) =>

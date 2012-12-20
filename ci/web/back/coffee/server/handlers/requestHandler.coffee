@@ -43,21 +43,10 @@ module.exports = class Resource
 			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString
-			email: 'awesome@email.com'
-			firstName: 'jordan'
-			lastName: 'potter'
+			email: request.session.email
+			firstName: request.session.firstName
+			lastName: request.session.lastName
 
-		# if request.session.userId?
-		# 	@modelConnection.rpcConnection.users.read.get_user_from_id request.session.userId, (error, user) =>
-		# 		if error?
-		# 			console.error "UserId #{request.session.userId} doesn't exist: " + error
-		# 		else
-		# 			templateValues.userEmail = user.email
-		# 			templateValues.userFirstName = user.first_name
-		# 			templateValues.userLastName = user.last_name
-
-		# 		response.render 'index', templateValues
-		# else
 		return templateValues
 
 
