@@ -4,19 +4,26 @@ window.HeaderMenuRepositoryOption = {}
 class HeaderMenuRepositoryOption.Model extends Backbone.Model
 	CREATE_REPOSITORY_DROPDOWN_OPTION: new PrettyDropdownOption 'createRepository', 'Create Repository'
 	defaults:
-		repositories: null
+		repositories: []
 		visible: true
 
 
 	initialize: () =>
-		dropdownOptions = [
-			new PrettyDropdownOption(1, 'Repository #1AAAAAAAA'),
-			new PrettyDropdownOption(2, 'Repository #2'),
-			@CREATE_REPOSITORY_DROPDOWN_OPTION
-			]
-		@dropdownModel = new PrettyDropdown.Model 
-			options: dropdownOptions
-			alignment: 'right'
+		@dropdownModel = new PrettyDropdown.Model alignment: 'right'
+
+		@on 'change:repositories', @_setDropdownOptions
+		@_setDropdownOptions()
+
+
+	_setDropdownOptions: () =>
+		dropdownOptions = []
+		for repository in @get 'repositories'
+			dropdownOptions.push new PrettyDropdownOption repository.id, repository.name
+		dropdownOptions.push @CREATE_REPOSITORY_DROPDOWN_OPTION
+
+		attributesToSet = options: dropdownOptions
+		@dropdownModel.set attributesToSet,
+			error: (model, error) => console.error error
 
 
 	fetchRepositories: () =>

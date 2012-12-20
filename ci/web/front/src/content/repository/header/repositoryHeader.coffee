@@ -12,12 +12,16 @@ class RepositoryHeader.Model extends Backbone.Model
 		@repositoryHeaderBasicInformationModel = new RepositoryHeaderBasicInformation.Model()
 		@repositoryHeaderMenuModel = new RepositoryHeaderMenu.Model()
 
-		@on 'change:name', () =>
-			@repositoryHeaderBasicInformationModel.set 'name', @get 'name'
-		@on 'change:description', () =>
-			@repositoryHeaderBasicInformationModel.set 'description', @get 'description'
+		@on 'change:name change:description', () =>
+			attributesToSet = 
+				name: @get 'name'
+				description: @get 'description'
+			@repositoryHeaderBasicInformationModel.set attributesToSet,
+				error: (model, error) => console.error error
 		@on 'change:url', () =>
-			@repositoryHeaderMenuModel.repositoryUrlTrinketModel.set 'url', @get 'url'
+			attributesToSet = url: @get 'url'
+			@repositoryHeaderMenuModel.repositoryUrlTrinketModel.set attributesToSet,
+				error: (model, error) => console.error error
 
 
 	fetchRepositoryInformation: () =>
@@ -29,7 +33,8 @@ class RepositoryHeader.Model extends Backbone.Model
 				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
 			else
-				@set data
+				@set data,
+					error: (model, error) => console.error error
 
 
 	validate: (attributes) =>

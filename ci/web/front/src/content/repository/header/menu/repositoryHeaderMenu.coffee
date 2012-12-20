@@ -52,8 +52,6 @@ class RepositoryHeaderMenu.Model extends Backbone.Model
 		if not attributes.menuOptions?
 			return new Error 'Must specify menu options'
 
-		console.log attributes.menuOptions
-
 		for option in attributes.menuOptions
 			if not @POSSIBLE_MENU_OPTIONS[option.name]?
 				return new Error 'Invalid option: ' + option

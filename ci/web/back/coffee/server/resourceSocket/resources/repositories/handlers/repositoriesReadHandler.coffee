@@ -27,7 +27,7 @@ class RepositoriesReadHandler extends Handler
 				if error.type is 'InvalidPermissionsError' then callback 403
 				else callback 'unable to read repositories'
 			else
-				callback null, repo
+				callback null, @_sanitize repo
 
 
 	getCloneUrl: (socket, args, callback) =>
@@ -100,7 +100,9 @@ class RepositoriesReadHandler extends Handler
 	_sanitize: (repository) =>
 		id: repository.id
 		name: repository.name
+		description: 'repositoryReadHandler -- need a real description here'
 		defaultPermissions: repository.defaultPermissions
+		url: 'repositoryReadHandler -- need a real url here'
 
 
 	_sanitizeUser: (user) =>
