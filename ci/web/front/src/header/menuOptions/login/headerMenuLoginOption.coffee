@@ -39,6 +39,9 @@ class HeaderMenuLoginOption.View extends Backbone.View
 		@model.on 'change:visible', @_fixVisibility, @
 		globalAccount.on 'change', @model.updateInformation, @
 
+		@loginPanelView.on 'loggedIn', () =>
+			@model.modalModel.set 'visible', false
+
 		@model.updateInformation()
 
 
