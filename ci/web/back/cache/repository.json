@@ -15,6 +15,12 @@
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/repository/content/changes/list/changesList.css",
+			"/css/src/content/repository/content/changes/list/changesListSearch.css",
+			"/css/src/content/repository/content/changes/list/changesListManager.css",
+			"/css/src/content/repository/content/changes/change.css",
+			"/css/src/content/repository/content/changes/repositoryChanges.css",
+
 			"/css/src/content/repository/header/basicInformation/repositoryHeaderBasicInformation.css",
 			"/css/src/content/repository/header/menu/trinkets/url/repositoryUrlTrinket.css",
 			"/css/src/content/repository/header/menu/repositoryHeaderMenu.css",
@@ -51,6 +57,13 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/repository/content/changes/list/changesQuery.js",
+			"/js/src/content/repository/content/changes/list/changesFetcher.js",
+			"/js/src/content/repository/content/changes/list/changesList.js",
+			"/js/src/content/repository/content/changes/list/changesListSearch.js",
+			"/js/src/content/repository/content/changes/list/changesListManager.js",
+			"/js/src/content/repository/content/changes/change.js",
+			"/js/src/content/repository/content/changes/repositoryChanges.js",
 			"/js/src/content/repository/content/repositoryContent.js",
 
 			"/js/src/content/repository/header/basicInformation/repositoryHeaderBasicInformation.js",
