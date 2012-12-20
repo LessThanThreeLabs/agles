@@ -100,7 +100,8 @@ class RepositoryHeaderMenu.View extends Backbone.View
 	_handleClick: (event) =>
 		optionName = $(event.target).attr 'optionName'
 		assert.ok optionName?
-		globalRouterModel.set 'repositoryView', optionName
+		globalRouterModel.set 'repositoryView', optionName,
+			error: (model, error) => console.error error
 
 
 	_handleSelectedMenuOption: () =>

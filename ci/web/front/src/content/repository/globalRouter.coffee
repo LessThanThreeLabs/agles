@@ -9,7 +9,17 @@ class GlobalRouterModel extends Backbone.Model
 
 
 	initialize: () =>
+		@on 'change:repositoryView', @_cleanUpState
 		@on 'change:repositoryView change:changeId change:changeView', @_navigate
+
+
+	_cleanUpState: () =>
+		if @get('repositoryView') isnt 'changes'
+			attributesToSet =
+				changeId: null
+				changeView: null
+			@set attributesToSet,
+				error: (model, error) => console.error error
 
 
 	_navigate: () =>
@@ -38,9 +48,6 @@ class GlobalRouterModel extends Backbone.Model
 
 		if attributes.changeId? and (typeof attributes.changeId isnt 'number' or attributes.changeId < 0)
 			return new Error 'Invalid change id (make sure it is not a string): ' + attributes.changeId
-
-		if attributes.changeId? and attributes.repositoryView isnt 'changes'
-			return new Error 'Invalid repository view when change id specified: ' + attributes.repositoryView
 
 		if attributes.changeView? and typeof attributes.changeView isnt 'string'
 			return new Error 'Invalid change view: ' + attributes.changeView
