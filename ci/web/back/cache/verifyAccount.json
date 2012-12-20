@@ -35,10 +35,10 @@
 			"/js/src/visualElements/prettyDropdown/prettyDropdownOption.js",
 			"/js/src/visualElements/prettyDropdown/prettyDropdown.js",			
 
-			"/js/src/header/menuOptions/repository/repositoryHeaderMenuOption.js",
+			"/js/src/header/menuOptions/repository/headerMenuRepositoryOption.js",
 			"/js/src/header/menuOptions/login/loginPanel.js",
-			"/js/src/header/menuOptions/login/loginHeaderMenuOption.js",
-			"/js/src/header/menuOptions/account/accountHeaderMenuOption.js",
+			"/js/src/header/menuOptions/login/headerMenuLoginOption.js",
+			"/js/src/header/menuOptions/account/headerMenuAccountOption.js",
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 

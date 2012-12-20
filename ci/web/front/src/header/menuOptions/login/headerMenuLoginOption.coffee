@@ -1,7 +1,7 @@
-window.LoginHeaderMenuOption = {}
+window.HeaderMenuLoginOption = {}
 
 
-class LoginHeaderMenuOption.Model extends Backbone.Model
+class HeaderMenuLoginOption.Model extends Backbone.Model
 	VALID_STATES: ['login', 'create']
 	defaults:
 		visible: false
@@ -28,9 +28,9 @@ class LoginHeaderMenuOption.Model extends Backbone.Model
 		return
 
 
-class LoginHeaderMenuOption.View extends Backbone.View
+class HeaderMenuLoginOption.View extends Backbone.View
 	tagName: 'div'
-	className: 'loginHeaderMenuOption headerMenuOption'
+	className: 'headerMenuLoginOption headerMenuOption'
 	html: '<div class="headerMenuOptionTitle">Login</div>'
 	events: 'click': '_clickHandler'
 	currentView: null

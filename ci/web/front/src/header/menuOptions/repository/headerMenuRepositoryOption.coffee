@@ -1,7 +1,7 @@
-window.RepositoryHeaderMenuOption = {}
+window.HeaderMenuRepositoryOption = {}
 
 
-class RepositoryHeaderMenuOption.Model extends Backbone.Model
+class HeaderMenuRepositoryOption.Model extends Backbone.Model
 	CREATE_REPOSITORY_DROPDOWN_OPTION: new PrettyDropdownOption 'createRepository', 'Create Repository'
 	defaults:
 		repositories: null
@@ -42,9 +42,9 @@ class RepositoryHeaderMenuOption.Model extends Backbone.Model
 		return
 
 
-class RepositoryHeaderMenuOption.View extends Backbone.View
+class HeaderMenuRepositoryOption.View extends Backbone.View
 	tagName: 'div'
-	className: 'repositoryHeaderMenuOption headerMenuOption'
+	className: 'headerMenuRepositoryOption headerMenuOption'
 	html: '<div class="headerMenuOptionTitle">Repositories</div>'
 	events: 'click .headerMenuOptionTitle': '_handleClick'
 

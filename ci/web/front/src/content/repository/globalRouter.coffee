@@ -31,7 +31,7 @@ class GlobalRouterModel extends Backbone.Model
 
 
 	validate: (attributes) =>
-		if attributes.repositoryId? and (typeof attributes.repositoryId isnt 'number' or attributes.repositoryId < 0)
+		if typeof attributes.repositoryId isnt 'number' or attributes.repositoryId < 0
 			return new Error 'Invalid repository id (make sure it is not a string): ' + attributes.repositoryId
 
 		if attributes.repositoryView? and attributes.repositoryView not in @VALID_REPOSITORY_VIEWS

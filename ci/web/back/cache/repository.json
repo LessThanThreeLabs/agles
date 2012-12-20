@@ -13,7 +13,12 @@
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/repository/header/basicInformation/repositoryHeaderBasicInformation.css",
+			"/css/src/content/repository/header/menu/trinkets/url/repositoryUrlTrinket.css",
+			"/css/src/content/repository/header/menu/repositoryHeaderMenu.css",
+			"/css/src/content/repository/header/repositoryHeader.css",
 			"/css/src/content/repository/repository.css",
+
 			"/css/src/main.css"
 		]
 	},
@@ -23,6 +28,8 @@
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
 			"/js/libs/jquery.js",
+			"/js/libs/tipped.js",
+			"/js/libs/tippedSkin.js",
 			"/js/libs/handlebars.js",
 			"/js/libs/underscore.js",
 			"/js/libs/backbone.js",
@@ -35,13 +42,18 @@
 			"/js/src/visualElements/prettyDropdown/prettyDropdownOption.js",
 			"/js/src/visualElements/prettyDropdown/prettyDropdown.js",			
 
-			"/js/src/header/menuOptions/repository/repositoryHeaderMenuOption.js",
+			"/js/src/header/menuOptions/repository/headerMenuRepositoryOption.js",
 			"/js/src/header/menuOptions/login/loginPanel.js",
-			"/js/src/header/menuOptions/login/loginHeaderMenuOption.js",
-			"/js/src/header/menuOptions/account/accountHeaderMenuOption.js",
+			"/js/src/header/menuOptions/login/headerMenuLoginOption.js",
+			"/js/src/header/menuOptions/account/headerMenuAccountOption.js",
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/repository/header/basicInformation/repositoryHeaderBasicInformation.js",
+			"/js/src/content/repository/header/menu/trinkets/url/repositoryUrlTrinket.js",
+			"/js/src/content/repository/header/menu/repositoryHeaderMenuOption.js",
+			"/js/src/content/repository/header/menu/repositoryHeaderMenu.js",
+			"/js/src/content/repository/header/repositoryHeader.js",
 			"/js/src/content/repository/repository.js",
 
 			"/js/src/content/repository/globalRouter.js",

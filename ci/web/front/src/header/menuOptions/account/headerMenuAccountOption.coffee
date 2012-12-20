@@ -1,7 +1,7 @@
-window.AccountHeaderMenuOption = {}
+window.HeaderMenuAccountOption = {}
 
 
-class AccountHeaderMenuOption.Model extends Backbone.Model
+class HeaderMenuAccountOption.Model extends Backbone.Model
 	PROFILE_DROPDOWN_OPTION: new PrettyDropdownOption('profile', 'Profile')
 	LOGOUT_DROPDOWN_OPTION: new PrettyDropdownOption('logout', 'Logout')
 	defaults:
@@ -23,9 +23,9 @@ class AccountHeaderMenuOption.Model extends Backbone.Model
 		@set 'visible', globalAccount.get('email')?
 
 
-class AccountHeaderMenuOption.View extends Backbone.View
+class HeaderMenuAccountOption.View extends Backbone.View
 	tagName: 'div'
-	className: 'accountHeaderMenuOption headerMenuOption'
+	className: 'headerMenuAccountOption headerMenuOption'
 	html: '<div class="headerMenuOptionTitle">
 			<span class="accountHeaderFirstName"></span>
 			<span class="accountHeaderLastName"></span>

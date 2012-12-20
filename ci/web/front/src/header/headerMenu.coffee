@@ -4,9 +4,9 @@ window.HeaderMenu = {}
 class HeaderMenu.Model extends Backbone.Model
 
 	initialize: () =>
-		@accountHeaderMenuOptionModel = new AccountHeaderMenuOption.Model()
-		@loginHeaderMenuOptionModel = new LoginHeaderMenuOption.Model()
-		@repositoryHeaderMenuOptionModel = new RepositoryHeaderMenuOption.Model()
+		@headerMenuAccountOptionModel = new HeaderMenuAccountOption.Model()
+		@headerMenuLoginOptionModel = new HeaderMenuLoginOption.Model()
+		@headerMenuRepositoryOptionModel = new HeaderMenuRepositoryOption.Model()
 
 
 class HeaderMenu.View extends Backbone.View
@@ -16,22 +16,22 @@ class HeaderMenu.View extends Backbone.View
 
 
 	initialize: () =>
-		@accountHeaderMenuOptionView = new AccountHeaderMenuOption.View model: @model.accountHeaderMenuOptionModel
-		@loginHeaderMenuOptionView = new LoginHeaderMenuOption.View model: @model.loginHeaderMenuOptionModel
-		@repositoryHeaderMenuOptionView = new RepositoryHeaderMenuOption.View model: @model.repositoryHeaderMenuOptionModel
+		@headerMenuAccountOptionView = new HeaderMenuAccountOption.View model: @model.headerMenuAccountOptionModel
+		@headerMenuLoginOptionView = new HeaderMenuLoginOption.View model: @model.headerMenuLoginOptionModel
+		@headerMenuRepositoryOptionView = new HeaderMenuRepositoryOption.View model: @model.headerMenuRepositoryOptionModel
 
 
 	onDispose: () =>
-		@accountHeaderMenuOptionView.dispose()
-		@loginHeaderMenuOptionView.dispose()
-		@repositoryHeaderMenuOptionView.dispose()
+		@headerMenuAccountOptionView.dispose()
+		@headerMenuLoginOptionView.dispose()
+		@headerMenuRepositoryOptionView.dispose()
 		
 
 	render: () =>
 		@$el.html @html
 
-		@$el.append @accountHeaderMenuOptionView.render().el
-		@$el.append @loginHeaderMenuOptionView.render().el
-		@$el.append @repositoryHeaderMenuOptionView.render().el
+		@$el.append @headerMenuAccountOptionView.render().el
+		@$el.append @headerMenuLoginOptionView.render().el
+		@$el.append @headerMenuRepositoryOptionView.render().el
 		
 		return @
