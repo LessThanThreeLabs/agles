@@ -93,3 +93,5 @@ class Server
 		server.listen @port
 
 		@resourceSocket.start server
+
+		console.log 'SERVER STARTED'

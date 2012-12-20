@@ -20,6 +20,7 @@ class FilesCacher
 
 
 	loadFiles: (callback) =>
+		console.log 'loading files'
 		@filesLoader.load (error, files) =>
 			if error?
 				callback error
@@ -27,8 +28,10 @@ class FilesCacher
 				@_files = files
 
 				if process.env.NODE_ENV is 'production'
+					console.log 'minifying files'
 					@filesMinifier.replaceWithMinifiedFiles @_files
 
+				console.log 'compressing files'
 				@filesCompressor.addCompressedFiles @_files, callback
 
 
