@@ -83,8 +83,7 @@ class ChangesList.Model extends Backbone.Model
 		# expecting, we must have reached the end
 		@noMoreChangesToFetch = result.changes.length < numberResultsExpecting
 
-		@changeModels.add result.changes,
-			error: (a, b, c) => console.error 'blah'
+		@changeModels.add result.changes
 
 
 	onUpdate: (data) =>
@@ -102,7 +101,9 @@ class ChangesList.View extends Backbone.View
 	className: 'changesList'
 	html: '<div class="changesListContainer">
 			<div class="changesListSearchContainer"></div>
-			<div class="changesListPanel"></div>
+			<div class="changesListPanel">
+				<div class="changesListPanelContainer"></div>
+			</div>
 		</div>'
 	events:	'scroll': '_scrollHandler'
 
@@ -136,7 +137,7 @@ class ChangesList.View extends Backbone.View
 	_renderInitialChanges: () =>
 		@model.changeModels.each (changeModel) =>
 			changeView = new Change.View model: changeModel
-			@$('.changesListPanel').append changeView.render().el
+			@$('.changesListPanelContainer').append changeView.render().el
 
 
 	_scrollHandler: () =>
@@ -151,11 +152,11 @@ class ChangesList.View extends Backbone.View
 
 	_insertChangeAtIndex: (changeView, index) =>
 		if index == 0
-			@$('.changesListPanel').prepend changeView
+			@$('.changesListPanelContainer').prepend changeView
 		else 
 			@$('.change:nth-child(' + index + ')').after changeView
 
 
 	_handleChangesReset: () =>
-		@$('.changesListPanel').empty()
+		@$('.changesListPanelContainer').empty()
 		@model.fetchInitialChanges()

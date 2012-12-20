@@ -9,10 +9,11 @@ class ChangesListSearch.Model extends Backbone.Model
 class ChangesListSearch.View extends Backbone.View
 	tagName: 'div'
 	className: 'changesListSearch'
-	html: '<input type="search" class="changesSearchField" placeholder="search..." maxlength=256 autocomplete="on">'
+	html: '<input type="search" class="changesListSearchField" placeholder="search..." maxlength=256 autocomplete="on">'
 	events:
-		'keyup .changesSearchField': '_handleKeyDown'
-		'blur .changesSearchField': '_handleKeyDown'
+		'keyup .changesListSearchField': '_handleKeyDown'
+		'blur .changesListSearchField': '_handleKeyDown'
+		'click .changesListSearchField': '_handleKeyDown'
 
 
 	initialize: () =>
@@ -30,8 +31,8 @@ class ChangesListSearch.View extends Backbone.View
 
 
 	_syncModelToView: () =>
-		@$('.changesSearchField').val @model.get 'queryString'
+		@$('.changesListSearchField').val @model.get 'queryString'
 
 
 	_handleKeyDown: (event) =>
-		@model.set 'queryString', @$('.changesSearchField').val()
+		@model.set 'queryString', @$('.changesListSearchField').val()
