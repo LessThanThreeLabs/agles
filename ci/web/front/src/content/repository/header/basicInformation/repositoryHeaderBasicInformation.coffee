@@ -20,7 +20,7 @@ class RepositoryHeaderBasicInformation.Model extends Backbone.Model
 class RepositoryHeaderBasicInformation.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryHeaderBasicInformation'
-	template: Handlebars.compile '<div class="repositoryName">> {{name}}</div><br>
+	template: Handlebars.compile '<div class="repositoryName">> {{name}}</div>
 			<div class="repositoryDescription">{{description}}</div>'
 
 
