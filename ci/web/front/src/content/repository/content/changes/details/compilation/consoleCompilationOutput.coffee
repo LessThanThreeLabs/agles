@@ -37,6 +37,8 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 
 
 	_getConsoleOutputModelsForType: (buildOutputs, type) =>
+		console.log 'WHY DO WE HAVE THIS FUNCTION?....'
+
 		consoleOutputModels = []
 
 		for buildOutput in buildOutputs

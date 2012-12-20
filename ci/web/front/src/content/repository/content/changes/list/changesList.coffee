@@ -71,16 +71,20 @@ class ChangesList.Model extends Backbone.Model
 			if error?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
-				return
+			else
+				@_processChanges numberToRetrieve, result
 
-			# it's possible this is being called for an old query
-			return if result.queryString isnt @get 'queryString'
 
-			# if we didn't receive as many changes as we were 
-			# expecting, we must have reached the end
-			@noMoreChangesToFetch = result.changes.length < numberToRetrieve
+	_processChanges: (numberResultsExpecting, result) =>
+		# it's possible this is being called for an old query
+		return if result.queryString isnt @changesListSearchModel.get 'queryString'
 
-			@changeModels.add result.changes
+		# if we didn't receive as many changes as we were 
+		# expecting, we must have reached the end
+		@noMoreChangesToFetch = result.changes.length < numberResultsExpecting
+
+		@changeModels.add result.changes,
+			error: (a, b, c) => console.error 'blah'
 
 
 	onUpdate: (data) =>
@@ -147,9 +151,9 @@ class ChangesList.View extends Backbone.View
 
 	_insertChangeAtIndex: (changeView, index) =>
 		if index == 0
-			@$el.prepend changeView
+			@$('.changesListPanel').prepend changeView
 		else 
-			@$el.find('.change:nth-child(' + index + ')').after changeView
+			@$('.change:nth-child(' + index + ')').after changeView
 
 
 	_handleChangesReset: () =>
