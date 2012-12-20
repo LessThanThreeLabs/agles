@@ -6,13 +6,16 @@ class ChangesList.Model extends Backbone.Model
 	noMoreChangesToFetch: false
 	subscribeUrl: 'repos'
 	subscribeId: null
-	defaults:
-		queryString: ''
 
 
 	initialize: () ->
 		@subscribeId = globalRouterModel.get 'repositoryId'
+
 		@changesFetcher = new ChangesFetcher()
+		@changesListSearchModel = new ChangesListSearch.Model()
+		@changesListSearchModel.on 'change:queryString', () =>
+			@noMoreChangesToFetch = false
+			@changeModels.reset()
 
 		@changeModels = new Backbone.Collection()
 		@changeModels.model = Change.Model
@@ -27,7 +30,7 @@ class ChangesList.Model extends Backbone.Model
 			@_deselectAllOtherChangeModels changeModel
 			globalRouterModel.set 
 				'changeId': changeModel.get 'id'
-				'changeView': 'compilation'
+				'changeView': 'home'
 		else
 			# we use a timeout here to make sure that we don't set the changeId to null
 			# when we're switching between two different change ids
@@ -41,11 +44,6 @@ class ChangesList.Model extends Backbone.Model
 		@changeModels.each (otherChangeModel) =>
 			if otherChangeModel.get('id') isnt changeModelToExclude.get('id')
 				otherChangeModel.set 'selected', false
-
-
-	resetChangesList: () =>
-		@noMoreChangesToFetch = false
-		@changeModels.reset()
 
 
 	fetchInitialChanges: () =>
@@ -66,18 +64,20 @@ class ChangesList.Model extends Backbone.Model
 		assert.ok queuePolicy?
 		assert.ok not @noMoreChangesToFetch
 
-		changesQuery = new ChangesQuery globalRouterModel.get('repositoryId'), @get('queryString'), startNumber, numberToRetrieve
+		changesQuery = new ChangesQuery globalRouterModel.get('repositoryId'),
+			@changesListSearchModel.get('queryString'), startNumber, numberToRetrieve
+
 		@changesFetcher.runQuery changesQuery, queuePolicy, (error, result) =>
 			if error?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
 				return
 
-			# It's possible this is being called for an old query
+			# it's possible this is being called for an old query
 			return if result.queryString isnt @get 'queryString'
 
-			# If we didn't receive as many changes as we were 
-			#   expecting, we must have reached the end.
+			# if we didn't receive as many changes as we were 
+			# expecting, we must have reached the end
 			@noMoreChangesToFetch = result.changes.length < numberToRetrieve
 
 			@changeModels.add result.changes
@@ -93,37 +93,38 @@ class ChangesList.Model extends Backbone.Model
 
 
 class ChangesList.View extends Backbone.View
+	HEIGHT_BEFORE_FETCHING_MORE_CHANGES: 200
 	tagName: 'div'
 	className: 'changesList'
-	html: '&nbsp'
+	html: '<div class="changesListContainer">
+			<div class="changesListSearchContainer"></div>
+			<div class="changesListPanel"></div>
+		</div>'
 	events:	'scroll': '_scrollHandler'
 
 
 	initialize: () =>
-		@model.on 'change:queryString', @model.resetChangesList, @
+		@changesListSearchView = new ChangesListSearch.View model: @model.changesListSearchModel
 
 		@model.changeModels.on 'add', @_handleAddedChange, @
-		@model.changeModels.on 'reset', (() =>
-			@$el.empty()
-			@model.fetchInitialChanges()
-			), @
+		@model.changeModels.on 'reset', @_handleChangesReset, @
 
 		@model.subscribeId = globalRouterModel.get 'repositoryId'
 		@model.subscribe()
-		@model.resetChangesList()
+		@model.fetchInitialChanges()
 
 
 	onDispose: () =>
-		@model.off null, null, @
+		@changesListSearchView.dispose()
+
 		@model.unsubscribe() if @model.subscribeId?
 		@model.changeModels.off null, null, @
 		globalRouterModel.off null, null, @
 
-		@model.resetChangesList()
-
 
 	render: () =>
 		@$el.html @html
+		@$('.changesListSearchContainer').html @changesListSearchView.render().el
 		@_renderInitialChanges()
 		return @
 
@@ -131,12 +132,11 @@ class ChangesList.View extends Backbone.View
 	_renderInitialChanges: () =>
 		@model.changeModels.each (changeModel) =>
 			changeView = new Change.View model: changeModel
-			@$el.append changeView.render().el
+			@$('.changesListPanel').append changeView.render().el
 
 
 	_scrollHandler: () =>
-		heightBeforeFetchingMoreChanges = 200
-		if @el.scrollTop + @el.clientHeight + heightBeforeFetchingMoreChanges > @el.scrollHeight
+		if @el.scrollTop + @el.clientHeight + @HEIGHT_BEFORE_FETCHING_MORE_CHANGES > @el.scrollHeight
 			@model.fetchMoreChangesDoNotQueue()
 
 
@@ -150,3 +150,8 @@ class ChangesList.View extends Backbone.View
 			@$el.prepend changeView
 		else 
 			@$el.find('.change:nth-child(' + index + ')').after changeView
+
+
+	_handleChangesReset: () =>
+		@$('.changesListPanel').empty()
+		@model.fetchInitialChanges()

@@ -4,8 +4,8 @@ window.RepositoryChanges = {}
 class RepositoryChanges.Model extends Backbone.Model
 
 	initialize: () =>
-		@changesListManagerModel = new ChangesListManager.Model()
-		# @changeDetailsModel = new ChangeDetails.Model()
+		@changesListModel = new ChangesList.Model()
+		@changeDetailsModel = new ChangeDetails.Model()
 
 
 class RepositoryChanges.View extends Backbone.View
@@ -15,17 +15,17 @@ class RepositoryChanges.View extends Backbone.View
 
 
 	initialize: () =>
-		@changesListManagerView = new ChangesListManager.View model: @model.changesListManagerModel
-		# @changeDetailsView = new ChangeDetails.View model: @model.changeDetailsModel
+		@changesListView = new ChangesList.View model: @model.changesListModel
+		@changeDetailsView = new ChangeDetails.View model: @model.changeDetailsModel
 
 
 	onDispose: () =>
-		@changesListManagerView.dispose()
+		@changesListView.dispose()
 		@changeDetailsView.dispose()
 
 
 	render: () =>
 		@$el.html @html
-		@$el.append @changesListManagerView.render().el
-		# @$el.append @changeDetailsView.render().el
+		@$el.append @changesListView.render().el
+		@$el.append @changeDetailsView.render().el
 		return @

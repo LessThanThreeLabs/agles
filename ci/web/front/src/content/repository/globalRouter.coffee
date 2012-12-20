@@ -1,6 +1,5 @@
 class GlobalRouterModel extends Backbone.Model
 	VALID_REPOSITORY_VIEWS: ['source', 'changes', 'settings', 'admin']
-	VALID_CHANGE_VIEWS: ['information', 'compilation', 'test']
 
 	defaults:
 		repositoryId: null
@@ -43,7 +42,7 @@ class GlobalRouterModel extends Backbone.Model
 		if attributes.changeId? and attributes.repositoryView isnt 'changes'
 			return new Error 'Invalid repository view when change id specified: ' + attributes.repositoryView
 
-		if attributes.changeView? and attributes.changeView not in @VALID_CHANGE_VIEWS
+		if attributes.changeView? and typeof attributes.changeView isnt 'string'
 			return new Error 'Invalid change view: ' + attributes.changeView
 
 		return
