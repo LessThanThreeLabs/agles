@@ -83,3 +83,16 @@ class AccountPasswordPanel.View extends Backbone.View
 
 	_performSaveAccountPasswordRequest: () =>
 		console.log '>> need to save account password'
+
+
+	_clearErrors: () =>
+		@$('.prettyFormErrorText').removeClass 'visible'
+
+
+	_showErrors: (errors) =>
+		@_clearErrors()
+
+		for errorType, errorText of errors
+			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
+			errorField.addClass 'visible'
+			errorField.html errorText

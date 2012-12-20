@@ -16,6 +16,7 @@
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/repository/content/admin/content/general/repositoryAdminGeneralPanel.css",
 			"/css/src/content/repository/content/admin/content/repositoryAdminContent.css",
 			"/css/src/content/repository/content/admin/repositoryAdmin.css",
 
@@ -66,6 +67,7 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/repository/content/admin/content/general/repositoryAdminGeneralPanel.js",
 			"/js/src/content/repository/content/admin/content/repositoryAdminContent.js",
 			"/js/src/content/repository/content/admin/repositoryAdmin.js",
 

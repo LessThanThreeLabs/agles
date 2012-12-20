@@ -70,3 +70,16 @@ class AccountGeneralPanel.View extends Backbone.View
 
 	_performSaveAccountRequest: () =>
 		console.log '>> need to save account info'
+
+
+	_clearErrors: () =>
+		@$('.prettyFormErrorText').removeClass 'visible'
+
+
+	_showErrors: (errors) =>
+		@_clearErrors()
+
+		for errorType, errorText of errors
+			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
+			errorField.addClass 'visible'
+			errorField.html errorText

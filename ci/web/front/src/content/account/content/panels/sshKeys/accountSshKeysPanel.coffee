@@ -70,3 +70,16 @@ class AccountSshKeysPanel.View extends Backbone.View
 
 	_performSaveAccountSshKeyRequest: () =>
 		console.log '>> need to save ssh key'
+
+
+	_clearErrors: () =>
+		@$('.prettyFormErrorText').removeClass 'visible'
+
+
+	_showErrors: (errors) =>
+		@_clearErrors()
+
+		for errorType, errorText of errors
+			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
+			errorField.addClass 'visible'
+			errorField.html errorText
