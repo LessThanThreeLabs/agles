@@ -85,8 +85,24 @@ class LoginPanel.View extends Backbone.View
 
 
 	_performLoginRequest: () =>
-		console.log '>> need to perform login!'
-		@_changeErrorTextVisibility true
+		requestData = 
+			method: 'login'
+			args:
+				email: @model.get 'email'
+				password: @model.get 'password'
+				rememberMe: @model.get 'rememberMe'
+
+		socket.emit 'users:update', requestData, (error, userData) =>
+			if error?
+				@_changeErrorTextVisibility true
+				console.error error
+			else
+				# window.location.reload()
+				globalAccount.set
+					email: userData.email
+					firstName: userData.firstName
+					lastName: userData.lastName
+				@trigger 'loggedIn'
 
 
 	_changeErrorTextVisibility: (visible) =>
