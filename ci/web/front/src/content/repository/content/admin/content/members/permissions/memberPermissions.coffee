@@ -3,7 +3,6 @@ window.MemberPermissions = {}
 
 class MemberPermissions.Model extends Backbone.Model
 	ALLOWED_PERMISSIONS: ['r', 'r/w', 'r/w/a']
-
 	defaults:
 		email: null
 		firstName: null
@@ -11,47 +10,54 @@ class MemberPermissions.Model extends Backbone.Model
 		permissions: null
 
 
+	initialize: () =>
+		@on 'change:permissions', @_submitPermissions
+
+
 	validate: (attributes) =>
+		if typeof attributes.email isnt 'string' or attributes.email is ''
+			return new Error 'Invalid email: ' + attributes.email
+
+		if typeof attributes.firstName isnt 'string' or attributes.firstName is ''
+			return new Error 'Invalid first name: ' + attributes.firstName
+
+		if typeof attributes.lastName isnt 'string' or attributes.lastName is ''
+			return new Error 'Invalid last name: ' + attributes.lastName
+
 		if attributes.permissions not in @ALLOWED_PERMISSIONS
 			return new Error 'Invalid member permissions'
+
 		return
 
 
-	_changePermissions: (permissions, callback) =>
-		email = @get 'email'
-
+	_submitPermissions: () =>
+		console.log 'should pass a user id instead of an email address...'
+		console.log 'is this firing when it shouldnt?....'
+		
 		requestData =
 			method: 'changeMemberPermissions'
 			args:
 				repositoryId: globalRouterModel.get 'repositoryId'
-				email: email
-				permissions: permissions
+				email: @get 'email'
+				permissions: @get 'permissions'
 
 		socket.emit 'repos:update', requestData, (errors, result) =>
 			if errors?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
 				console.error errors
-			else
-				@set 'permissions', permissions
-				callback null, null
 
 
-	_removeMember: () =>
-		email = @get 'email'
-
+	removeMember: () =>
 		requestData =
 			method: 'removeMember'
 			args:
 				repositoryId: globalRouterModel.get 'repositoryId'
-				email: email
+				email: @get 'email'
 
 		socket.emit 'repos:update', requestData, (errors, result) =>
 			if errors?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
 				console.error errors
-			else
-				@trigger 'removeMember', @
-
 
 
 class MemberPermissions.View extends Backbone.View
@@ -86,12 +92,15 @@ class MemberPermissions.View extends Backbone.View
 
 
 	_selectCorrectPermissionsRadio: () =>
-		@$el.find('input:radio[value="' + @model.get('permissions') + '"]').prop 'checked', true
+		permissions = @model.get('permissions')
+		@$("input:radio[value='#{permissions}']").prop 'checked', true
 
 
 	_handlePermissionsChange: (event) =>
 		permissions = $(event.target).val()
-		@model._changePermissions permissions
+		@model.set 'permissions', permissions,
+			error: (model, error) => console.error error
+
 
 	_handleRemoveMember: () =>
-		@model._removeMember()
+		@model.removeMember()

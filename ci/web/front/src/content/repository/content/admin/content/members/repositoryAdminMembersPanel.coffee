@@ -5,7 +5,7 @@ class RepositoryAdminMembersPanel.Model extends Backbone.Model
 
 	initialize: () =>
 		@inviteMembersPanelModel = new RepositoryAdminInviteMembersPanel.Model()
-		# @memberPermissionsPanelModel = new RepositoryAdminMemberPermissionsPanel.Model()
+		@memberPermissionsPanelModel = new RepositoryAdminMemberPermissionsPanel.Model()
 
 
 class RepositoryAdminMembersPanel.View extends Backbone.View
@@ -23,16 +23,16 @@ class RepositoryAdminMembersPanel.View extends Backbone.View
 
 	initialize: () =>
 		@inviteMembersPanelView = new RepositoryAdminInviteMembersPanel.View model: @model.inviteMembersPanelModel
-		# @memberPermissionsPanelView = new RepositoryAdminMemberPermissionsPanel.View model: @model.memberPermissionsPanelModel
+		@memberPermissionsPanelView = new RepositoryAdminMemberPermissionsPanel.View model: @model.memberPermissionsPanelModel
 
 
 	onDispose: () =>
 		@inviteMembersPanelView.dispose()
-		# @memberPermissionsPanelView.dispose()
+		@memberPermissionsPanelView.dispose()
 
 
 	render: () =>
 		@$el.html @html
 		@$('.inviteMembersContent').html @inviteMembersPanelView.render().el
-		# @$el.find('.memberPermissionsContent').html @memberPermissionsPanelView.render().el
+		@$('.memberPermissionsContent').html @memberPermissionsPanelView.render().el
 		return @

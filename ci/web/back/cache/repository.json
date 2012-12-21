@@ -10,12 +10,15 @@
 			"/css/src/visualElements/prettyForm/prettyForm.css",
 			"/css/src/visualElements/prettyMenu/prettyMenu.css",
 			"/css/src/visualElements/prettyModal/prettyModal.css",
+			"/css/src/visualElements/prettyTable/prettyTable.css",
 
 			"/css/src/header/menuOptions/login/loginPanel.css",
 
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/repository/content/admin/content/members/permissions/memberPermissions.css",
+			"/css/src/content/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.css",
 			"/css/src/content/repository/content/admin/content/members/invite/repositoryAdminInviteMembersPanel.css",
 			"/css/src/content/repository/content/admin/content/members/repositoryAdminMembersPanel.css",
 			"/css/src/content/repository/content/admin/content/general/repositoryAdminGeneralPanel.css",
@@ -69,6 +72,8 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/repository/content/admin/content/members/permissions/memberPermissions.js",
+			"/js/src/content/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.js",
 			"/js/src/content/repository/content/admin/content/members/invite/repositoryAdminInviteMembersPanel.js",
 			"/js/src/content/repository/content/admin/content/members/repositoryAdminMembersPanel.js",
 			"/js/src/content/repository/content/admin/content/general/repositoryAdminGeneralPanel.js",

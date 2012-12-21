@@ -2,19 +2,20 @@ window.RepositoryAdminMemberPermissionsPanel = {}
 
 
 class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
+	subscribeUrl: 'repos'
+	subscribeId: null
 
 	initialize: () =>
+		@subscribeId = globalRouterModel.get 'repositoryId'
+
 		@memberPermissionsModels = new Backbone.Collection()
 		@memberPermissionsModels.model = MemberPermissions.Model
 		@memberPermissionsModels.comparator = (memberPermissionsModel) =>
 			return memberPermissionsModel.get 'email'
-		@memberPermissionsModels.on 'removeMember', (memberPermissionsModel) =>
-			@memberPermissionsModels.remove memberPermissionsModel
 
 
 	fetchMembers: () =>
 		@memberPermissionsModels.reset()
-		return if not globalRouterModel.get('repositoryId')?
 
 		requestData =
 			method: 'getMembersWithPermissions'
@@ -26,7 +27,27 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
 				console.error errors
 			else
-				@memberPermissionsModels.reset users
+				@memberPermissionsModels.reset users,
+					error: (model, error) => console.error error
+
+
+	onUpdate: (data) =>
+		assert.ok data.type?
+
+		switch data.type
+			when 'member added'
+				assert.ok data.contents.email? and data.contents.firstName? and
+					data.contents.lastName? and data.contents.permissions?
+				memberPermissionsModel = new MemberPermissions.Model data.contents
+				@memberPermissionsModels.add memberPermissionsModel
+			when 'member removed'
+				assert.ok data.contents.email?
+				@memberPermissionsModels.remove @memberPermissionsModels.where email: data.contents.email
+			when 'member permissions changed'
+				assert.ok data.contents.email? and data.contents.permissions?
+				@memberPermissionsModels.where(email: data.contents.email)[0].set 'permissions', data.contents.permissions
+			else
+				console.error 'Unaccounted for update type: ' + data.type
 
 
 class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
@@ -48,15 +69,17 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 	initialize: () =>
 		@model.memberPermissionsModels.on 'add', @_handleAdd, @
 		@model.memberPermissionsModels.on 'reset', @render, @
-		@model.memberPermissionsModels.on 'remove', @render, @
-		globalRouterModel.on 'change:repositoryId', @model.fetchMembers, @
 
+		# TODO: make this smarter... (like handleAdd)
+		@model.memberPermissionsModels.on 'remove', @render, @
+
+		@model.subscribe()
 		@model.fetchMembers()
 
 
 	onDispose: () =>
+		@model.unsubscribe()
 		@model.memberPermissionsModels.off null, null, @
-		globalRouterModel.off null, null, @
 
 
 	render: () =>
@@ -68,7 +91,7 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 	_addCurrentMembers: () =>
 		@model.memberPermissionsModels.each (memberPermissionsModel) =>
 			memberPermissionView = new MemberPermissions.View model: memberPermissionsModel
-			@$el.find('.permissionsTable').append memberPermissionView.render().el
+			@$'.permissionsTable').append memberPermissionView.render().el
 
 
 	_handleAdd: (memberPermissionsModel, collection, options) =>
