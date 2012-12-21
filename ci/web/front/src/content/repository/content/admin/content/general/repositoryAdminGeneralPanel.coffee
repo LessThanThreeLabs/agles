@@ -43,6 +43,7 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		setTimeout (() => @$('.repositoryDescriptionField').focus()), 0
 		return @
 
 

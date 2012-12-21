@@ -17,7 +17,7 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 		<div class="repositoryInviteMembersErrorText"></div>'
 	events: 
 		'keyup': '_handleFormEntryChange'
-		'click .inviteButton': '_handleSubmit'
+		'click .inviteButton': '_handleInviteUsers'
 
 
 	initialize: () =>
@@ -28,14 +28,19 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		setTimeout (() => @$('.inviteMembersField').focus()), 0
 		return @
 
 
 	_handleFormEntryChange: () =>
-		@model.set 'emails', @$el.find('.inviteMembersField').val()
+		if event.keyCode is 13
+			@_handleInviteUsers()
+		else
+			@model.set 'emails', @$('.inviteMembersField').val(),
+				error: (model, error) => console.error error
 
 
-	_handleSubmit: (event) =>
+	_handleInviteUsers: (event) =>
 		console.log '>> Need to invite members to repository!'
 
 
