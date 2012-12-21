@@ -36,8 +36,9 @@ class HeaderMenuLoginOption.View extends Backbone.View
 	initialize: () =>
 		@loginPanelView = new LoginPanel.View model: @model.loginPanelModel
 		@modalView = new PrettyModal.View model: @model.modalModel
-
+		
 		@model.on 'change:visible', @_fixVisibility, @
+		@model.modalModel.on 'change:visible', @_handleModalVisibilityChange, @
 		globalAccount.on 'change', @model.updateInformation, @
 
 		@loginPanelView.on 'loggedIn', () =>
@@ -48,6 +49,7 @@ class HeaderMenuLoginOption.View extends Backbone.View
 
 	onDispose: () =>
 		@model.off null, null, @
+		@model.modalModel.off null, null, @
 		globalAccount.off null, null, @
 
 		@loginPanelView.dispose()
@@ -60,6 +62,11 @@ class HeaderMenuLoginOption.View extends Backbone.View
 		@modalView.setInnerHtml @loginPanelView.render().el
 		@_fixVisibility()
 		return @
+
+
+	_handleModalVisibilityChange: () =>
+		if @model.modalModel.get 'visible'
+			@loginPanelView.correctFocus()
 
 
 	_fixVisibility: () =>

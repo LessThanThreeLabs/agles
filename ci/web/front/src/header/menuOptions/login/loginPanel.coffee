@@ -66,11 +66,11 @@ class LoginPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
-		@_giveEmailFieldFocus()
+		@correctFocus()
 		return @
 
 
-	_giveEmailFieldFocus: () =>
+	correctFocus: () =>
 		setTimeout (() => @$('.loginEmail').focus()), 0
 
 
