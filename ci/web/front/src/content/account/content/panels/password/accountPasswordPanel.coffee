@@ -66,6 +66,7 @@ class AccountPasswordPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		setTimeout (() => @$('.accountOldPassword').focus()), 0
 		return @
 
 

@@ -54,6 +54,7 @@ class AccountGeneralPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		setTimeout (() => @$('.accountFirstName').focus()), 0
 		return @
 
 

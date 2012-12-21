@@ -54,6 +54,7 @@ class AccountSshKeysPanel.View extends Backbone.View
 
 	render: () =>
 		@$el.html @html
+		setTimeout (() => @$('.accountSshKeyAlias').focus()), 0
 		return @
 
 
