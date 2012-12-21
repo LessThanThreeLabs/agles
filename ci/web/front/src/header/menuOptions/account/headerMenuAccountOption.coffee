@@ -90,4 +90,11 @@ class HeaderMenuAccountOption.View extends Backbone.View
 
 	_performLogoutRequest: () =>
 		console.log '>> need to make logout request'
-		window.location.href = '/'
+		requestData =
+			method: 'logout'
+			args: {}
+		socket.emit 'users:update', requestData, (error, userData) =>
+			if error?
+				console.error error
+			else
+				window.location.href = '/'

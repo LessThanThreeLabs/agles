@@ -62,6 +62,15 @@ class UsersUpdateHandler extends Handler
 			callback 'parsing error'
 
 
+	logout: (socket, data, callback) =>
+		delete socket.session.userId
+		delete socket.session.email
+		delete socket.session.firstName
+		delete socket.session.lastName
+		socket.session.save()
+		callback null, null
+
+
 	addSshKey: (socket, data, callback) =>
 		errors = {}
 		if not @accountInformationValidator.isValidSshAlias data.alias
