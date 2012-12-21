@@ -30,22 +30,6 @@ class RepositoriesReadHandler extends Handler
 				callback null, @_sanitize repo
 
 
-	getCloneUrl: (socket, args, callback) =>
-		assert.ok args.repositoryId?
-		userId = socket.session.userId
-
-		if not userId?
-			callback 403
-			return
-
-		@modelRpcConnection.repos.read.get_clone_url userId, args.repositoryId, (error, url) =>
-			if error?
-				if error.type is 'InvalidPermissionsError' then callback 403
-				else callback 'unable to get clone url'
-			else
-				cloneUrl = "git@" + @configurationParams.domain + ":" + url
-				callback null, cloneUrl
-
 
 	writableRepositories: (socket, args, callback) =>
 		userId = socket.session.userId
@@ -102,7 +86,7 @@ class RepositoriesReadHandler extends Handler
 		name: repository.name
 		description: 'repositoryReadHandler -- need a real description here'
 		defaultPermissions: repository.defaultPermissions
-		url: 'repositoryReadHandler -- need a real url here'
+		url: "git@" + @configurationParams.domain + ":" + repository.uri
 
 
 	_sanitizeUser: (user) =>

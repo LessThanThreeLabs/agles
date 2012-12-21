@@ -146,9 +146,6 @@ class ReposReadHandler(ModelServerRpcHandler):
 		assert row is not None
 		return to_dict(row, repo.columns)
 
-	def get_clone_url(self, user_id, repo_id):
-		repo = self.get_repo_from_id(user_id, repo_id)
-		return repo["uri"]
 
 	def get_members_with_permissions(self, user_id, repo_id):
 		user = database.schema.user
