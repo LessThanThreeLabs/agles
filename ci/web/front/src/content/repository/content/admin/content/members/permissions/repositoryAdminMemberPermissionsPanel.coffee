@@ -91,7 +91,7 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 	_addCurrentMembers: () =>
 		@model.memberPermissionsModels.each (memberPermissionsModel) =>
 			memberPermissionView = new MemberPermissions.View model: memberPermissionsModel
-			@$'.permissionsTable').append memberPermissionView.render().el
+			@$('.permissionsTable').append memberPermissionView.render().el
 
 
 	_handleAdd: (memberPermissionsModel, collection, options) =>
