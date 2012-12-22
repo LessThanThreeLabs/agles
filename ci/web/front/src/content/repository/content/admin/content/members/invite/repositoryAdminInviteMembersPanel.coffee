@@ -29,7 +29,7 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 		</div>
 		<div class="repositoryInviteMembersSentText">Emails sent</div>
 		<div class="repositoryInviteMembersErrorText"></div>'
-	events: 
+	events:
 		'keyup': '_handleFormEntryChange'
 		'click .inviteButton': '_handleInviteUsers'
 
@@ -56,7 +56,7 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 
 	_handleInviteUsers: (event) =>
 		@_clearForm()
-		@model.inviteMembers (error, result) =>
+		@model.inviteMembers (errors, result) =>
 			if errors?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
 				@_showErrorMessage true, error
