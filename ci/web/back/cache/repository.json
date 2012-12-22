@@ -107,6 +107,15 @@
 	"img": {
 		"image/png": [
 			"/img/awesomeFace.png"
+		],
+
+		"image/svg+xml": [
+			"/img/icons/link.svg",
+			"/img/icons/sourceCode.svg",
+			"/img/icons/changes.svg",
+			"/img/icons/settings.svg",
+			"/img/icons/admin.svg",
+			"/img/icons/removeMember.svg"
 		]
 	},
 
