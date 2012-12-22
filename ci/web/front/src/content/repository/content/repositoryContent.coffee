@@ -11,21 +11,17 @@ class RepositoryContent.Model extends Backbone.Model
 class RepositoryContent.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryContent'
-	html: 'hello'
+	html: ''
+	currentView: null
 
 
 	initialize: () =>
-		@repositoryChangesView = new RepositoryChanges.View model: @model.repositoryChangesModel
-		@repositoryAdminView = new RepositoryAdmin.View model: @model.repositoryAdminModel
-
 		globalRouterModel.on 'change:repositoryView', @_updateContent, @
 
 
 	onDispose: () =>
 		globalRouterModel.off null, null, @
-		
-		@repositoryChangesView.dispose()
-		@repositoryAdminView.dispose()
+		@currentView.dispose() if @currentView?
 
 
 	render: () =>
@@ -34,11 +30,15 @@ class RepositoryContent.View extends Backbone.View
 
 
 	_updateContent: () =>
+		@currentView.dispose() if @currentView?
+
 		switch globalRouterModel.get 'repositoryView'
 			when 'changes'
-				@$el.html @repositoryChangesView.render().el
+				@currentView = new RepositoryChanges.View model: @model.repositoryChangesModel
+				@$el.html @currentView.render().el
 			when 'admin'
-				@$el.html @repositoryAdminView.render().el
+				@currentView = new RepositoryAdmin.View model: @model.repositoryAdminModel
+				@$el.html @currentView.render().el
 			when null
 				# repository view hasn't been selected yet
 				@$el.html '&nbsp'

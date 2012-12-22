@@ -13,9 +13,7 @@ class ChangesList.Model extends Backbone.Model
 
 		@changesFetcher = new ChangesFetcher()
 		@changesListSearchModel = new ChangesListSearch.Model()
-		@changesListSearchModel.on 'change:queryString', () =>
-			@noMoreChangesToFetch = false
-			@changeModels.reset()
+		@changesListSearchModel.on 'change:queryString', @reset
 
 		@changeModels = new Backbone.Collection()
 		@changeModels.model = Change.Model
@@ -23,6 +21,11 @@ class ChangesList.Model extends Backbone.Model
 			return -1.0 * changeModel.get 'number'
 
 		@changeModels.on 'change:selected', @_handleChangeSelection
+
+
+	reset: () =>
+		@noMoreChangesToFetch = false
+		@changeModels.reset()
 
 
 	_handleChangeSelection: (changeModel) =>
@@ -120,11 +123,12 @@ class ChangesList.View extends Backbone.View
 
 
 	onDispose: () =>
-		@changesListSearchView.dispose()
-
 		@model.unsubscribe() if @model.subscribeId?
 		@model.changeModels.off null, null, @
 		globalRouterModel.off null, null, @
+
+		@model.reset()
+		@changesListSearchView.dispose()
 
 
 	render: () =>
