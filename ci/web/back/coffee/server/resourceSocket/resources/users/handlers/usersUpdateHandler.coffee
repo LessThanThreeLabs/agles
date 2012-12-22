@@ -65,7 +65,6 @@ class UsersUpdateHandler extends Handler
 
 
 	logout: (socket, data, callback) =>
-		console.log 'here!!'
 		delete socket.session.userId
 		delete socket.session.email
 		delete socket.session.firstName
