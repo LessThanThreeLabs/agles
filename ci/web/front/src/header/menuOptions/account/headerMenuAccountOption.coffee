@@ -96,4 +96,7 @@ class HeaderMenuAccountOption.View extends Backbone.View
 			if error?
 				console.error error
 			else
-				window.location.href = '/'
+				if window.location.pathname is '/'
+					window.location.reload true
+				else
+					window.location.href = '/'
