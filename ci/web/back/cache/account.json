@@ -60,16 +60,9 @@
 		]
 	},
 
-	"img": {
-		"image/png": [
-			"/img/awesomeFace.png"
-		]
-	},
-
 	"font": {
 		"application/x-font-woff": [
 			"/font/lobster/lobster.woff",
-			"/font/sourceCodePro/sourceCodePro.woff",
 			"/font/ubuntu/ubuntu.woff"
 		]
 	}

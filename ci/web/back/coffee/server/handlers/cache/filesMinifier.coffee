@@ -20,8 +20,8 @@ class FilesMinifier
 				callback error
 			else
 				@randomPrefix = buffer.toString 'hex'
-				@_replaceJs files
-				@_replaceCss files
+				@_replaceJs files if files.js?
+				@_replaceCss files if files.css?
 				callback()
 
 
