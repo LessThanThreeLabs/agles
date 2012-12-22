@@ -16,5 +16,8 @@ class CreateAccountHandler extends RequestHandler
 
 
 	handleRequest: (request, response) =>
-		@pushFiles request, response
-		response.render 'index', @getTemplateValues request
+		if request.session.userId?
+			response.redirect 302, '/'
+		else
+			@pushFiles request, response
+			response.render 'index', @getTemplateValues request
