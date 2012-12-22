@@ -26,13 +26,24 @@ class FilesCacher
 				callback error
 			else
 				@_files = files
+				@_minifyFiles callback
 
-				if process.env.NODE_ENV is 'production'
-					console.log 'minifying files'
-					@filesMinifier.replaceWithMinifiedFiles @_files
 
-				console.log 'compressing files'
-				@filesCompressor.addCompressedFiles @_files, callback
+	_minifyFiles: (callback) =>
+		if process.env.NODE_ENV is 'production'
+			console.log 'minifying files'
+			@filesMinifier.replaceWithMinifiedFiles @_files, (error) =>
+				if error?
+					callback error
+				else
+					@_compressFiles callback
+		else
+			@_compressFiles callback
+
+
+	_compressFiles: (callback) =>
+		console.log 'compressing files'
+		@filesCompressor.addCompressedFiles @_files, callback
 
 
 	getFiles: () =>

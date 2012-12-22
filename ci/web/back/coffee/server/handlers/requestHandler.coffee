@@ -19,20 +19,25 @@ module.exports = class Resource
 		response.send 'response handler not written yet'
 
 
+	getFiles: () =>
+		assert.ok @filesCacher.getFiles()
+		return @filesCacher.getFiles()
+
+
 	loadResourceStrings: () =>
 		@_createCssString()
 		@_createJsString()
 
 
 	_createCssString: () =>
-		cssFileNames = Object.keys @filesCacher.getFiles().css
+		cssFileNames = Object.keys @getFiles().css
 		formatedCssFiles = cssFileNames.map (cssFileName) =>
 			return "<link rel='stylesheet' type='text/css' href='#{cssFileName}' />"
 		@cssFilesString = formatedCssFiles.join '\n'
 
 
 	_createJsString: () =>
-		jsFileNames = Object.keys @filesCacher.getFiles().js
+		jsFileNames = Object.keys @getFiles().js
 		formattedJsFiles = jsFileNames.map (jsFileName) =>
 			return "<script src='#{jsFileName}'></script>"
 		@jsFilesString = formattedJsFiles.join '\n'
@@ -57,7 +62,7 @@ module.exports = class Resource
 
 		useGzip = @_canUseGzip request.headers
 
-		for fileType, files of @filesCacher.getFiles()
+		for fileType, files of @getFiles()
 			for fileName, file of files
 				@_pushFile request, response, fileName, file, useGzip
 

@@ -1,5 +1,6 @@
 fs = require 'fs'
 assert = require 'assert'
+crypto = require 'crypto'
 uglifyJs = require 'uglify-js'
 cleanCss = require 'clean-css'
 
@@ -13,9 +14,15 @@ class FilesMinifier
 		assert.ok @configurationParams?
 
 
-	replaceWithMinifiedFiles: (files) =>
-		@_replaceJs files
-		@_replaceCss files
+	replaceWithMinifiedFiles: (files, callback) =>
+		crypto.randomBytes 8, (error, buffer) =>
+			if error?
+				callback error
+			else
+				@randomPrefix = buffer.toString 'hex'
+				@_replaceJs files
+				@_replaceCss files
+				callback()
 
 
 	_replaceJs: (files) =>
@@ -26,7 +33,7 @@ class FilesMinifier
 			contentType: 'application/javascript'
 
 		files.js = {}
-		files.js['/js/minified.js'] = minifiedJsFile
+		files.js["/js/#{@randomPrefix}_minified.js"] = minifiedJsFile
 
 
 	_getMinifiedJs: (jsFiles) =>
@@ -58,7 +65,7 @@ class FilesMinifier
 			contentType: 'text/css'
 
 		files.css = {}
-		files.css['/css/minified.css'] = minifiedCssFile
+		files.css["/css/#{@randomPrefix}_minified.css"] = minifiedCssFile
 
 
 	_getMinifiedCss: (cssFiles) =>
