@@ -1,5 +1,5 @@
 {
-	"mode": "production",
+	"mode": "development",
 
 	"profiler": {
 		"applicationName": "Less Than Three",

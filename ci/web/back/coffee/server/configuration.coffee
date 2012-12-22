@@ -16,8 +16,6 @@ class ServerConfigurer
 	configure: (server) ->
 		server.configure () =>
 			# ORDER HERE IS VERY IMPORTANT!!!!
-			server.use express.compress()
-			@_configureStaticServer server
 			server.use express.cookieParser()
 			# server.use express.bodyParser()  # need this?
 			server.use express.query()  # need this?
@@ -35,15 +33,6 @@ class ServerConfigurer
 		server.set 'view engine', 'hbs'
 		server.set 'views', @configurationParams.staticFiles.rootDirectory
 		server.locals.layout = false
-
-
-	_configureStaticServer: (server) ->
-		server.use express.favicon @configurationParams.staticFiles.rootDirectory + '/favicon.ico'
-
-		for staticDirectory in @configurationParams.staticFiles.staticDirectories
-			server.use staticDirectory,
-				express.static @configurationParams.staticFiles.rootDirectory + staticDirectory, maxAge: 0
-				# TODO: determine correct maxage!!!!
 
 
 	_configureSessionLogic: (server) ->
