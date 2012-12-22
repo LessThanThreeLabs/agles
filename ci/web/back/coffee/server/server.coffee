@@ -7,7 +7,6 @@ SessionStore = require './sessionStore'
 CreateAccountStore = require './createAccountStore'
 Configurer = require './configuration'
 ResourceSocket = require './resourceSocket/resourceSocket'
-SpdyCache = require './spdyCache/spdyCache'
 
 WelcomeHandler = require './handlers/welcomeHandler'
 AccountHandler = require './handlers/accountHandler'
