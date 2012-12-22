@@ -68,7 +68,7 @@ class UsersUpdateHandler extends Handler
 		delete socket.session.firstName
 		delete socket.session.lastName
 		socket.session.save()
-		callback null, null
+		callback null
 
 
 	addSshKey: (socket, data, callback) =>
