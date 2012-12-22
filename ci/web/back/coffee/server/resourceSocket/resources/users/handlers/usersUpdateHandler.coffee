@@ -43,6 +43,8 @@ class UsersUpdateHandler extends Handler
 				errors.userUpdate = "Failed to update user"
 				callback errors
 			else
+				socket.session.firstName = data.firstName
+				socket.session.lastName = data.lastName
 				callback null, result
 
 
