@@ -42,7 +42,6 @@ class ServerConfigurer
 	    	cookie:
 	    		path: '/',
 	    		httpOnly: true,
-	    		# secure: true,
+	    		secure: true,
 	    		maxAge: 14400000
 	    	store: @sessionStore
-	    console.log 'need to make our cookies secure'
