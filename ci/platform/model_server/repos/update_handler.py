@@ -22,9 +22,12 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		if not row or not RepositoryPermissions.has_permissions(
 				row[permission.c.permissions], RepositoryPermissions.RWA):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
-		repo_permissions = row[repo.c.default_permissions]
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(repo.select().where(repo.c.id==repo_id)).first()
+			if not row:
+				raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+			repo_permissions = row[repo.c.default_permissions]
 			invited_user = sqlconn.execute(user.select().where(user.c.email==email)).first()
 			if not invited_user:
 				raise NoSuchUserError("email: %s" % email)
@@ -36,7 +39,6 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 	# TODO: Should this delete/add or update/insert?
 	def change_member_permissions(self, user_id, email, repo_id, permissions):
-		repo = database.schema.repo
 		user = database.schema.user
 		permission = database.schema.permission
 
@@ -68,7 +70,6 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		self.publish_event("repos", repo_id, "member permissions changed", email=email, permissions=permissions)
 
 	def remove_member(self, user_id, email, repo_id):
-		repo = database.schema.repo
 		user = database.schema.user
 		permission = database.schema.permission
 
@@ -100,7 +101,6 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		self.publish_event("repos", repo_id, "member removed", email=email)
 
 	def _get_repo_permissions(self, user_id, repo_id):
-		repo = database.schema.repo
 		permission = database.schema.permission
 
 		query = permission.select().where(
