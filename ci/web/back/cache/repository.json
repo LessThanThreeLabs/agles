@@ -17,6 +17,7 @@
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/repository/content/admin/content/github/repositoryAdminGithubPanel.css",
 			"/css/src/content/repository/content/admin/content/members/permissions/memberPermissions.css",
 			"/css/src/content/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.css",
 			"/css/src/content/repository/content/admin/content/members/invite/repositoryAdminInviteMembersPanel.css",
@@ -72,6 +73,7 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/repository/content/admin/content/github/repositoryAdminGithubPanel.js",
 			"/js/src/content/repository/content/admin/content/members/permissions/memberPermissions.js",
 			"/js/src/content/repository/content/admin/content/members/permissions/repositoryAdminMemberPermissionsPanel.js",
 			"/js/src/content/repository/content/admin/content/members/invite/repositoryAdminInviteMembersPanel.js",

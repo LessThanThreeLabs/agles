@@ -5,7 +5,8 @@ class RepositoryAdmin.Model extends Backbone.Model
 
 	initialize: () =>
 		menuOptions = [new PrettyMenuOption('general', 'General'), 
-			new PrettyMenuOption('members', 'Members')]
+			new PrettyMenuOption('members', 'Members'),
+			new PrettyMenuOption('github', 'Github')]
 
 		@prettyMenuModel = new PrettyMenu.Model
 			options: menuOptions
