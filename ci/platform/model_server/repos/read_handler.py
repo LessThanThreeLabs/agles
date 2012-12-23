@@ -112,7 +112,8 @@ class ReposReadHandler(ModelServerRpcHandler):
 
 		options = {
 			'default': 'changes',
-			'options': ['source', 'changes', 'settings']
+			#'options': ['source', 'changes', 'settings']
+			'options': ['changes']
 		}
 
 		if row and RepositoryPermissions.has_permissions(
