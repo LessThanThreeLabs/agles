@@ -20,19 +20,19 @@ class AccountGeneralPanel.Model extends Backbone.Model
 class AccountGeneralPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'accountGeneralPanel'
-	html: '<div class="accountGeneralPanelContent">
+	template: Handlebars.compile '<div class="accountGeneralPanelContent">
 			<div class="prettyForm">
 				<div class="prettyFormRow">
 					<div class="prettyFormLabel">First name</div>
 					<div class="prettyFormValue">
-						<input type="text" class="accountFirstName" placeholder="first" maxlength=256>
+						<input type="text" class="accountFirstName" placeholder="{{firstName}}" maxlength=256>
 						<div class="prettyFormErrorText" type="firstName"></div>
 					</div>
 				</div>
 				<div class="prettyFormRow">
 					<div class="prettyFormLabel">Last name</div>
 					<div class="prettyFormValue">
-						<input type="text" class="accountLastName" placeholder="last" maxlength=256>
+						<input type="text" class="accountLastName" placeholder="{{lastName}}" maxlength=256>
 						<div class="prettyFormErrorText" type="lastName"></div>
 					</div>
 				</div>
@@ -53,7 +53,9 @@ class AccountGeneralPanel.View extends Backbone.View
 
 
 	render: () =>
-		@$el.html @html
+		@$el.html @template
+			firstName: globalAccount.get 'firstName'
+			lastName: globalAccount.get 'lastName'
 		setTimeout (() => @$('.accountFirstName').focus()), 0
 		return @
 
@@ -71,6 +73,7 @@ class AccountGeneralPanel.View extends Backbone.View
 
 	_performSaveAccountRequest: () =>
 		console.log '>> need to save account info'
+		console.log 'if successful, need to also update the globalAcount'
 
 
 	_clearErrors: () =>
