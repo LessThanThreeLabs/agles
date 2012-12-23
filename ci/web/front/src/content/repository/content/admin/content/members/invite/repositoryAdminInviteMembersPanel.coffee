@@ -56,10 +56,10 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 
 	_handleInviteUsers: (event) =>
 		@_clearForm()
-		@model.inviteMembers (errors, result) =>
-			if errors?
-				globalRouterModel.set 'view', 'invalidRepositoryState' if errors is 403
-				@_showErrorMessage true, error
+		@model.inviteMembers (error, result) =>
+			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
+				@_showErrorMessage true, _toErrorMessage error
 			else
 				@_showSuccessMessage true
 
@@ -72,6 +72,11 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 
 	_showSuccessMessage: (showSuccess) =>
 		@$('.repositoryInviteMembersSentText').toggle showSuccess
+
+
+	_toErrorMessage: (emails) =>
+		if emails
+			'Unable to invite: ' + emails.join(', ')
 
 
 	_showErrorMessage: (showError, message) =>
