@@ -8,12 +8,14 @@
 			"/css/src/visualElements/prettyForm/prettyForm.css",
 			"/css/src/visualElements/prettyMenu/prettyMenu.css",
 			"/css/src/visualElements/prettyModal/prettyModal.css",
+			"/css/src/visualElements/prettyTable/prettyTable.css",
 
 			"/css/src/header/menuOptions/login/loginPanel.css",
 
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/account/content/panels/sshKeys/row/accountSshKeyRow.css",
 			"/css/src/content/account/content/panels/sshKeys/accountSshKeysPanel.css",
 			"/css/src/content/account/content/panels/password/accountPasswordPanel.css",
 			"/css/src/content/account/content/panels/general/accountGeneralPanel.css",
@@ -49,6 +51,7 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/account/content/panels/sshKeys/row/accountSshKeyRow.js",
 			"/js/src/content/account/content/panels/sshKeys/accountSshKeysPanel.js",
 			"/js/src/content/account/content/panels/password/accountPasswordPanel.js",
 			"/js/src/content/account/content/panels/general/accountGeneralPanel.js",

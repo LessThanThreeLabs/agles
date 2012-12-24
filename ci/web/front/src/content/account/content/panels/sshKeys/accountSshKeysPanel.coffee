@@ -2,85 +2,87 @@ window.AccountSshKeysPanel = {}
 
 
 class AccountSshKeysPanel.Model extends Backbone.Model
-	defaults:
-		alias: ''
-		key: ''
+
+	initialize: () =>
+		@sshKeyRowModels = new Backbone.Collection()
+		@sshKeyRowModels.model = AccountSshKeysRow.Model
+		@sshKeyRowModels.comparator = (sshKeyRowModel) =>
+			return sshKeyRowModel.get 'alias'
 
 
-	validate: (attributes) =>
-		if typeof attributes.alias isnt 'string'
-			return new Error 'Invalid alias: ' + attributes.alias
+	fetchKeys: () =>
+		@sshKeyRowModels.reset()
 
-		if typeof attributes.key isnt 'string'
-			return new Error 'Invalid key: ' + attributes.key
+		console.log 'need to retrieve ssh keys....'
+		blah1 =
+			alias: 'hello'
+			dateAdded: 'some date here'
+		blah2 =
+			alias: 'hello again'
+			dateAdded: 'some other date here'
+		blah3 =
+			alias: 'hello again again'
+			dateAdded: 'some other date here yar'
+		blah4 =
+			alias: 'hello again again again again'
+			dateAdded: 'some other date here hooray'
 
-		return
+		setTimeout (() =>
+			@sshKeyRowModels.reset [blah1, blah2, blah3, blah4],
+				error: (model, error) => console.error error
+			), 500
 
 
 class AccountSshKeysPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'accountSshKeysPanel'
 	html: '<div class="accountSshKeysPanelContent">
-			<div class="prettyForm">
-				<div class="prettyFormRow">
-					<div class="prettyFormLabel">Alias</div>
-					<div class="prettyFormValue">
-						<input type="text" class="accountSshKeyAlias" placeholder="alias" maxlength=256>
-						<div class="prettyFormErrorText" type="alias"></div>
-					</div>
+			<div class="prettyTable sshKeysTable">
+				<div class="prettyTableTitleRow">
+					<div class="prettyTableColumn aliasColumn">Alias</div>
+					<div class="prettyTableColumn createdDateColumn">Created</div>
+					<div class="prettyTableColumn removeKeyColumn">Remove</div>
 				</div>
-				<div class="prettyFormRow">
-					<div class="prettyFormLabel">Key</div>
-					<div class="prettyFormValue">
-						<textarea type="text" class="accountSshKey" placeholder="key" maxlength=500></textarea>
-						<div class="prettyFormErrorText" type="key"></div>
-					</div>
-				</div>
-			</div>
-			<div class="saveAccountSshKeyButtonContainer">
-				<button class="saveAccountSshKeyButton">Save</button>
 			</div>
 		</div>'
-	events:
-		'keyup': '_handleFormEntryChange'
-		'click .saveAccountSshKeyButton': '_performSaveAccountSshKeyRequest'
 
 
 	initialize: () =>
+		@model.sshKeyRowModels.on 'add', @_handleAdd, @
+		@model.sshKeyRowModels.on 'reset', @render, @
+
+		# TODO: make this smarter... (like handleAdd)
+		@model.sshKeyRowModels.on 'remove', @render, @
+
+		@model.fetchKeys()
+
+		console.log 'here...'
 
 
 	onDispose: () =>
+		@model.sshKeyRowModels.off null, null, @
 
 
 	render: () =>
 		@$el.html @html
-		setTimeout (() => @$('.accountSshKeyAlias').focus()), 0
+		@_addCurrentKeys()
 		return @
 
 
-	_handleFormEntryChange: (event) =>
-		if event.keyCode is 13
-			@_performSaveAccountSshKeyRequest()
+	_addCurrentKeys: () =>
+		@model.sshKeyRowModels.each (sshKeyRowModel) =>
+			sshKeyRowView = new AccountSshKeysRow.View model: sshKeyRowModel
+			@$('.sshKeysTable').append sshKeyRowView.render().el
+
+
+	_handleAdd: (sshKeyRowModel, collection, options) =>
+		sshKeyRowView = new AccountSshKeysRow.View model: sshKeyRowModel
+		@_insertSshKeyAtIndex sshKeyRowView.render().el, options.index
+
+
+	_insertMemberAtIndex: (sshKeyRowView, index) =>
+		if index is 0
+			@$el.find('.sshKeysTable').append sshKeyRowView
 		else
-			attributesToSet =
-				alias: @$('.accountSshKeyAlias').val()
-				key: @$('.accountSshKey').val()
-			@model.set attributesToSet, 
-				error: (model, error) => console.error error
+			@$el.find('.sshKeysTable .accountSshKeysRow:nth-child('+ (index+1) + ')').after sshKeyRowView
 
-
-	_performSaveAccountSshKeyRequest: () =>
-		console.log '>> need to save ssh key'
-
-
-	_clearErrors: () =>
-		@$('.prettyFormErrorText').removeClass 'visible'
-
-
-	_showErrors: (errors) =>
-		@_clearErrors()
-
-		for errorType, errorText of errors
-			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
-			errorField.addClass 'visible'
-			errorField.html errorText

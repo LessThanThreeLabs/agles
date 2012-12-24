@@ -101,6 +101,7 @@ class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View
 
 	_insertMemberAtIndex: (memberPermissionView, index) =>
 		memberPermissionRowsOffset = 2
+		console.log 'do not think this variable is ever used...'
 
 		if index is 0
 			@$el.find('.permissionsTable').append memberPermissionView
