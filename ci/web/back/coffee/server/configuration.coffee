@@ -2,6 +2,7 @@ fs = require 'fs'
 assert = require 'assert'
 express = require 'express'
 csrf = require './csrf'
+gzip = require './gzip'
 
 
 exports.create = (configurationParams, sessionStore) ->
@@ -21,6 +22,7 @@ class ServerConfigurer
 			server.use express.query()  # need this?
 			@_configureSessionLogic server
 			server.use csrf()
+			server.use gzip()
 			@_configureViewEngine server
 
 		server.configure 'development', () ->

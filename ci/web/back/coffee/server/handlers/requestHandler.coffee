@@ -60,11 +60,9 @@ module.exports = class Resource
 			console.log 'spdy not supported!'
 			return
 
-		useGzip = @_canUseGzip request.headers
-
 		for fileType, files of @getFiles()
 			for fileName, file of files
-				@_pushFile request, response, fileName, file, useGzip
+				@_pushFile request, response, fileName, file, request.gzipAllowed
 
 
 	_pushFile: (request, response, fileName, file, useGzip) =>
@@ -81,12 +79,3 @@ module.exports = class Resource
 				assert.ok data?
 				stream.end data, 'binary'
 				
-
-	_canUseGzip: (headers) =>
-		return false if not headers['accept-encoding']?
-		return true if headers['accept-encoding'].trim() is '*'
-
-		encodings = headers['accept-encoding'].split ','
-		return encodings.some (encoding) =>
-			return encoding is 'gzip'
-			

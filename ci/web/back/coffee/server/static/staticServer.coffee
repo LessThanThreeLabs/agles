@@ -46,7 +46,7 @@ class StaticServer
 
 
 	_sendFile: (request, response, file) =>
-		if @_canUseGzip(request.headers) and file.gzip?
+		if request.gzipAllowed and file.gzip?
 			response.writeHead 200,
 				'content-type': file.contentType
 				'content-encoding': 'gzip'
@@ -55,13 +55,3 @@ class StaticServer
 			response.writeHead 200,
 				'content-type': file.contentType
 			response.end file.plain, 'binary'
-
-
-	_canUseGzip: (headers) =>
-		console.log 'staticServer -- this needs to be turned into express middleware'
-		return false if not headers['accept-encoding']?
-		return true if headers['accept-encoding'].trim() is '*'
-
-		encodings = headers['accept-encoding'].split ','
-		return encodings.some (encoding) =>
-			return encoding is 'gzip'

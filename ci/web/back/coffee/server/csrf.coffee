@@ -1,6 +1,3 @@
-assert = require 'assert'
-
-
 module.exports = () ->
 	return (request, response, next) ->
 		request.session?.csrfToken ?= generateCsrfToken()
