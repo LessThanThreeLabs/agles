@@ -32,7 +32,7 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 		</div>'
 	events:
 		'keyup': '_handleFormEntryChange'
-		'click .saveDescriptionButton': '_performSaveForwardUrlRequest'
+		'click .saveForwardUrlButton': '_performSaveForwardUrlRequest'
 
 
 	initialize: () =>
@@ -48,8 +48,11 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 
 
 	_handleFormEntryChange: () =>
-		@model.set 'forwardUrl', @$('.repositoryForwardUrlField').val(),
-			error: (model, error) => console.error error
+		if event.keyCode is 13
+			@_performSaveForwardUrlRequest()
+		else
+			@model.set 'forwardUrl', @$('.repositoryForwardUrlField').val(),
+				error: (model, error) => console.error error
 
 
 	_performSaveForwardUrlRequest: (event) =>
