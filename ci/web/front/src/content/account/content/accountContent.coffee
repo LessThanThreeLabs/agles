@@ -15,37 +15,39 @@ class AccountContent.Model extends Backbone.Model
 class AccountContent.View extends Backbone.View
 	tagName: 'div'
 	className: 'accountContent'
-	currentView: null
-
+	_currentView: null
+	_rendered: false
 
 	initialize: () =>
-		@model.on 'change:view', @render, @
+		@model.on 'change:view', @_renderCurrentView, @
 
 
 	onDispose: () =>
 		@model.off null, null, @
-		@currentView.dispose() if @currentView?
+		@_currentView.dispose() if @_currentView?
 
 
 	render: () =>
+		@_rendered = true
 		@_renderCurrentView()
 		return @
 
 
 	_renderCurrentView: () =>
-		@currentView.dispose() if @currentView?
+		@_currentView.dispose() if @_currentView?
+		return if not @_rendered
 
 		switch @model.get 'view'
 			when 'general'
-				@currentView = new AccountGeneralPanel.View model: @model.accountGeneralPanelModel
-				@$el.html @currentView.render().el
+				@_currentView = new AccountGeneralPanel.View model: @model.accountGeneralPanelModel
+				@$el.html @_currentView.render().el
 			when 'password'
-				@currentView = new AccountPasswordPanel.View model: @model.accountPasswordPanelModel
-				@$el.html @currentView.render().el
+				@_currentView = new AccountPasswordPanel.View model: @model.accountPasswordPanelModel
+				@$el.html @_currentView.render().el
 			when 'sshKeys'
-				@currentView = new AccountSshKeysPanel.View model: @model.accountSshKeysPanelModel
-				@$el.html @currentView.render().el
+				@_currentView = new AccountSshKeysPanel.View model: @model.accountSshKeysPanelModel
+				@$el.html @_currentView.render().el
 			else
-				@currentView = null
+				@_currentView = null
 				@$el.html '&nbsp'
 				console.error 'Unaccounted for view ' + @model.get 'view'

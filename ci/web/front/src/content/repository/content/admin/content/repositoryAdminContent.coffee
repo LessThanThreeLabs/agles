@@ -15,37 +15,40 @@ class RepositoryAdminContent.Model extends Backbone.Model
 class RepositoryAdminContent.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryAdminContent'
-	currentView: null
+	_currentView: null
+	_rendered: false
 
 
 	initialize: () =>
-		@model.on 'change:view', @render, @
+		@model.on 'change:view', @_renderCurrentView, @
 
 
 	onDispose: () =>
 		@model.off null, null, @
-		@currentView.dispose() if @currentView?
+		@_currentView.dispose() if @_currentView?
 
 
 	render: () =>
+		@_rendered = true
 		@_renderCurrentView()
 		return @
 
 
 	_renderCurrentView: () =>
-		@currentView.dispose() if @currentView?
+		@_currentView.dispose() if @_currentView?
+		return if not @_rendered
 
 		switch @model.get 'view'
 			when 'general'
-				@currentView = new RepositoryAdminGeneralPanel.View model: @model.generalPanelModel
-				@$el.html @currentView.render().el
+				@_currentView = new RepositoryAdminGeneralPanel.View model: @model.generalPanelModel
+				@$el.html @_currentView.render().el
 			when 'members'
-				@currentView = new RepositoryAdminMembersPanel.View model: @model.membersPanelModel
-				@$el.html @currentView.render().el
+				@_currentView = new RepositoryAdminMembersPanel.View model: @model.membersPanelModel
+				@$el.html @_currentView.render().el
 			when 'github'
-				@currentView = new RepositoryAdminGithubPanel.View model: @model.githubPanelModel
-				@$el.html @currentView.render().el
+				@_currentView = new RepositoryAdminGithubPanel.View model: @model.githubPanelModel
+				@$el.html @_currentView.render().el
 			else
-				@currentView = null
+				@_currentView = null
 				@$el.html '&nbsp'
 				console.error 'Unaccounted for mode ' + @model.get 'view' if @model.get('view')?
