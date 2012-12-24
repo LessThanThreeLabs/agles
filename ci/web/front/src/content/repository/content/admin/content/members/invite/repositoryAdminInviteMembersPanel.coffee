@@ -75,7 +75,7 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 
 
 	_toErrorMessage: (emails) =>
-		if emails
+		if emails?
 			'Unable to invite: ' + emails.join(', ')
 
 
