@@ -25,8 +25,8 @@ class AccountSshKeysRow.View extends Backbone.View
 	tagName: 'div'
 	className: 'accountSshKeysRow prettyTableRow'
 	template: Handlebars.compile '
-		<div class="prettyTableColumn">{{alias}}</div>
-		<div class="prettyTableColumn">{{dateAdded}}</div>
+		<div class="prettyTableColumn aliasColumn">{{alias}}</div>
+		<div class="prettyTableColumn createdDateColumn">{{dateAdded}}</div>
 		<div class="prettyTableColumn removeKeyColumn"><img src="/img/icons/removeMember.svg" class="removeKeyImage"></div>'
 	events:
 		'click .removeKeyImage': '_handleRemoveKey'

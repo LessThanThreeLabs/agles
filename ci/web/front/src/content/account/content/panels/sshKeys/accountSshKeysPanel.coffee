@@ -4,85 +4,56 @@ window.AccountSshKeysPanel = {}
 class AccountSshKeysPanel.Model extends Backbone.Model
 
 	initialize: () =>
-		@sshKeyRowModels = new Backbone.Collection()
-		@sshKeyRowModels.model = AccountSshKeysRow.Model
-		@sshKeyRowModels.comparator = (sshKeyRowModel) =>
-			return sshKeyRowModel.get 'alias'
-
-
-	fetchKeys: () =>
-		@sshKeyRowModels.reset()
-
-		console.log 'need to retrieve ssh keys....'
-		blah1 =
-			alias: 'hello'
-			dateAdded: 'some date here'
-		blah2 =
-			alias: 'hello again'
-			dateAdded: 'some other date here'
-		blah3 =
-			alias: 'hello again again'
-			dateAdded: 'some other date here yar'
-		blah4 =
-			alias: 'hello again again again again'
-			dateAdded: 'some other date here hooray'
-
-		setTimeout (() =>
-			@sshKeyRowModels.reset [blah1, blah2, blah3, blah4],
-				error: (model, error) => console.error error
-			), 500
+		@currentSshKeysPanelModel = new AccountCurrentSshKeysPanel.Model()
+		@addSshKeyPanelModel = new AccountAddSshKeyPanel.Model()
+		@modalModel = new PrettyModal.Model()
 
 
 class AccountSshKeysPanel.View extends Backbone.View
 	tagName: 'div'
 	className: 'accountSshKeysPanel'
-	html: '<div class="accountSshKeysPanelContent">
-			<div class="prettyTable sshKeysTable">
-				<div class="prettyTableTitleRow">
-					<div class="prettyTableColumn aliasColumn">Alias</div>
-					<div class="prettyTableColumn createdDateColumn">Created</div>
-					<div class="prettyTableColumn removeKeyColumn">Remove</div>
-				</div>
-			</div>
+	html: '<div class="currentKeysContainer">
+			<div class="currentKeysTitle">Current Keys</div>
+			<div class="currentKeysContent"></div>
+		</div>
+		<div class="addSshKeyContainer">
+			<button class="addSshKeyButton">Add Key</button>
 		</div>'
+	events: 'click .addSshKeyButton': '_handleAddSshKey'
 
 
 	initialize: () =>
-		@model.sshKeyRowModels.on 'add', @_handleAdd, @
-		@model.sshKeyRowModels.on 'reset', @render, @
+		@currentSshKeysPanelView = new AccountCurrentSshKeysPanel.View model: @model.currentSshKeysPanelModel
+		@addSshKeyPanelView = new AccountAddSshKeyPanel.View model: @model.addSshKeyPanelModel
+		@modalView = new PrettyModal.View model: @model.modalModel
 
-		# TODO: make this smarter... (like handleAdd)
-		@model.sshKeyRowModels.on 'remove', @render, @
+		@model.modalModel.on 'change:visible', @_handleModalVisibilityChange, @
 
-		@model.fetchKeys()
-
-		console.log 'here...'
+		@addSshKeyPanelView.on 'addedKey', () =>
+			@model.modalModel.set 'visible', false
 
 
 	onDispose: () =>
-		@model.sshKeyRowModels.off null, null, @
+		@currentSshKeysPanelView.dispose()
+		@addSshKeyPanelView.dispose()
+		@modalView.dispose()
 
 
 	render: () =>
 		@$el.html @html
-		@_addCurrentKeys()
+		@$('.currentKeysContent').html @currentSshKeysPanelView.render().el
+		@$el.append @modalView.render().el
+		@modalView.setInnerHtml @addSshKeyPanelView.render().el
 		return @
 
 
-	_addCurrentKeys: () =>
-		@model.sshKeyRowModels.each (sshKeyRowModel) =>
-			sshKeyRowView = new AccountSshKeysRow.View model: sshKeyRowModel
-			@$('.sshKeysTable').append sshKeyRowView.render().el
+	_handleAddSshKey: () =>
+		@model.modalModel.set 'visible', true,
+			error: (model, error) => console.error error
 
 
-	_handleAdd: (sshKeyRowModel, collection, options) =>
-		sshKeyRowView = new AccountSshKeysRow.View model: sshKeyRowModel
-		@_insertSshKeyAtIndex sshKeyRowView.render().el, options.index
-
-
-	_insertMemberAtIndex: (sshKeyRowView, index) =>
-		if index is 0
-			@$el.find('.sshKeysTable').append sshKeyRowView
+	_handleModalVisibilityChange: () =>
+		if @model.modalModel.get 'visible'
+			@addSshKeyPanelView.correctFocus()
 		else
-			@$el.find('.sshKeysTable .accountSshKeysRow:nth-child('+ (index+1) + ')').after sshKeyRowView
-
+			@model.addSshKeyPanelModel.reset()

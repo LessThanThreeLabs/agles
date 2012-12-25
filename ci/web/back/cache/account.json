@@ -15,7 +15,8 @@
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
-			"/css/src/content/account/content/panels/sshKeys/row/accountSshKeyRow.css",
+			"/css/src/content/account/content/panels/sshKeys/currentKeys/row/accountSshKeyRow.css",
+			"/css/src/content/account/content/panels/sshKeys/currentKeys/accountCurrentSshKeysPanel.css",
 			"/css/src/content/account/content/panels/sshKeys/accountSshKeysPanel.css",
 			"/css/src/content/account/content/panels/password/accountPasswordPanel.css",
 			"/css/src/content/account/content/panels/general/accountGeneralPanel.css",
@@ -51,7 +52,9 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
-			"/js/src/content/account/content/panels/sshKeys/row/accountSshKeyRow.js",
+			"/js/src/content/account/content/panels/sshKeys/currentKeys/row/accountSshKeyRow.js",
+			"/js/src/content/account/content/panels/sshKeys/currentKeys/accountCurrentSshKeysPanel.js",
+			"/js/src/content/account/content/panels/sshKeys/add/accountAddSshKeyPanel.js",
 			"/js/src/content/account/content/panels/sshKeys/accountSshKeysPanel.js",
 			"/js/src/content/account/content/panels/password/accountPasswordPanel.js",
 			"/js/src/content/account/content/panels/general/accountGeneralPanel.js",
