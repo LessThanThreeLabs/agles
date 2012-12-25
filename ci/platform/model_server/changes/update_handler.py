@@ -19,7 +19,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 	def mark_change_finished(self, change_id, status):
 		self._update_change_status(change_id, status,
 			"change finished", end_time=int(time.time()))
-		if status == 'failed':
+		if status == BuildStatus.FAILED:
 			self._notify_failure(change_id)
 
 	def _update_change_status(self, change_id, status, event_name, **kwargs):
@@ -43,9 +43,10 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		first_name = row[user.c.first_name]
 		last_name = row[user.c.last_name]
 		repo_id = row[change.c.repo_id]
+		change_number = row[change.c.number]
 		change_link = "https://getkoality.com/repository/%d/changes/%d/home" % (repo_id, change_id)
 
-		subject = "There was an issue with your change (#%d)" % change_id
+		subject = "There was an issue with your change (#%d)" % change_number
 		text = """%s %s,
 
 		There was an issue with the change you submitted so it was not merged.
