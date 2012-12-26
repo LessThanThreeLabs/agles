@@ -68,7 +68,9 @@ module.exports = class Resource
 	_pushFile: (request, response, fileName, file, useGzip) =>
 		useGzip = false if not file.gzip?
 
-		headers = 'content-type': file.contentType
+		headers = 
+			'content-type': file.contentType
+			'content-length': if useGzip then file.gzip.length else file.plain.length
 		headers['content-encoding'] = 'gzip' if useGzip
 
 		response.push fileName, headers, (error, stream) =>

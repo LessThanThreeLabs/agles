@@ -14,8 +14,6 @@ class StaticServer
 
 	addFiles: (filesToAdd) =>
 		for fileType, files of filesToAdd
-			# @_files[fileType] = {} if not @_files[fileType]?
-
 			for fileName, file of files
 				existingFile = @_files[fileName]
 				if existingFile?
@@ -49,9 +47,11 @@ class StaticServer
 		if request.gzipAllowed and file.gzip?
 			response.writeHead 200,
 				'content-type': file.contentType
+				'content-length': file.gzip.length
 				'content-encoding': 'gzip'
 			response.end file.gzip, 'binary'
 		else
 			response.writeHead 200,
 				'content-type': file.contentType
+				'content-length': file.plain.length
 			response.end file.plain, 'binary'
