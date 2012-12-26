@@ -65,11 +65,7 @@ class UsersUpdateHandler extends Handler
 
 
 	logout: (socket, data, callback) =>
-		delete socket.session.userId
-		delete socket.session.email
-		delete socket.session.firstName
-		delete socket.session.lastName
-		socket.session.save()
+		socket.session.destroy()
 		callback null
 
 
