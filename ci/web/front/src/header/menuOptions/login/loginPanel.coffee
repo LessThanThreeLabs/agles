@@ -97,12 +97,21 @@ class LoginPanel.View extends Backbone.View
 				@_changeErrorTextVisibility true
 				console.error error
 			else
-				# window.location.reload()
-				globalAccount.set
-					email: userData.email
-					firstName: userData.firstName
-					lastName: userData.lastName
-				@trigger 'loggedIn'
+				if @model.get 'rememberMe'
+					$.post '/fixCookieExpiration', (data) =>
+						assert data isnt '403'
+						@_handleSuccessfulLogin userData
+				else
+					@_handleSuccessfulLogin userData
+
+
+	_handleSuccessfulLogin: (userData) =>
+		globalAccount.set
+			email: userData.email
+			firstName: userData.firstName
+			lastName: userData.lastName
+
+		@trigger 'loggedIn'
 
 
 	_changeErrorTextVisibility: (visible) =>
