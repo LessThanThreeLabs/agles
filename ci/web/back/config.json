@@ -19,12 +19,7 @@
 		},
 
 		"staticFiles": {
-			"rootDirectory": "front",
-			"staticDirectories": ["/js", "/css", "/img", "/font"],
-
-			"spdy": {
-				"filesToCacheFile": "filesToCacheInSpdy.json"
-			}
+			"rootDirectory": "front"
 		},
 
 		"session": {
@@ -37,7 +32,9 @@
 			"redisStore": {
 				"url": "127.0.0.1",
 				"port": 6379
-			}
+			},
+
+			"rememberMeDuration": 2592000000
 		},
 
 		"socket": {
