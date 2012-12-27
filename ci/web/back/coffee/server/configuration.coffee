@@ -42,8 +42,7 @@ class ServerConfigurer
 	    	secret: @configurationParams.session.secret
 	    	key: @configurationParams.session.cookie.name
 	    	cookie:
-	    		path: '/',
-	    		httpOnly: true,
-	    		secure: true,
-	    		maxAge: 14400000
+	    		path: '/'
+	    		httpOnly: true
+	    		secure: true
 	    	store: @sessionStore

@@ -8,7 +8,7 @@
     "commander": "1.1.1",
     "connect-redis": "1.4.5",
     "cookie": "0.0.5",
-    "express":  "3.0.4",
+    "express":  "3.0.5",
     "iced-coffee-script": "1.4.0a",
     "hbs": "2.0.1",
     "msgpack": "0.1.7",

@@ -2,10 +2,11 @@ fs = require 'fs'
 assert = require 'assert'
 spdy = require 'spdy'
 express = require 'express'
+csrf = require './csrf'
+gzip = require './gzip'
 
 SessionStore = require './sessionStore'
 CreateAccountStore = require './createAccountStore'
-Configurer = require './configuration'
 ResourceSocket = require './resourceSocket/resourceSocket'
 StaticServer = require './static/staticServer'
 
@@ -23,7 +24,6 @@ exports.create = (configurationParams, modelConnection, port) ->
 		sessionStore: SessionStore.create configurationParams
 		createAccountStore: CreateAccountStore.create configurationParams
 	
-	configurer = Configurer.create configurationParams, stores.sessionStore
 	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection
 	staticServer = StaticServer.create configurationParams
 
@@ -41,12 +41,12 @@ exports.create = (configurationParams, modelConnection, port) ->
 		createRepositoryHandler: CreateRepositoryHandler.create configurationParams, stores, modelConnection
 		repositoryHandler: RepositoryHandler.create configurationParams, stores, modelConnection
 
-	return new Server configurer, httpsOptions, port, modelConnection, resourceSocket, stores, handlers, staticServer
+	return new Server configurationParams, httpsOptions, port, modelConnection, resourceSocket, stores, handlers, staticServer
 
 
 class Server
-	constructor: (@configurer, @httpsOptions, @port, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer) ->
-		assert.ok @configurer? and @httpsOptions? and @port? and @modelConnection? and 
+	constructor: (@configurationParams, @httpsOptions, @port, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer) ->
+		assert.ok @configurationParams? and @httpsOptions? and @port? and @modelConnection? and 
 			@resourceSocket? and @stores? and @handlers? and @staticServer?
 
 
@@ -88,9 +88,9 @@ class Server
 		callback()
 
 
-	start: () ->
+	start: () =>
 		expressServer = express()
-		@configurer.configure expressServer
+		@_configureServer expressServer
 
 		expressServer.get '/', @handlers.welcomeHandler.handleRequest
 		expressServer.get '/account', @handlers.accountHandler.handleRequest
@@ -105,9 +105,41 @@ class Server
 		expressServer.get '/repository/:repositoryId/:repositoryView/:changeId/:changeView', @handlers.repositoryHandler.handleRequest
 		expressServer.get '*', @staticServer.handleRequest		
 
+		expressServer.post '/fixCookieExpiration', @_handleFixCookieExpiration
+
 		server = spdy.createServer @httpsOptions, expressServer
 		server.listen @port
 
 		@resourceSocket.start server
 
 		console.log 'SERVER STARTED'
+
+
+	_configureServer: (expressServer) =>
+		# ORDER IS IMPORTANT HERE!!!!
+		expressServer.use express.cookieParser()
+		expressServer.use express.query()
+		expressServer.use express.session
+	    	secret: @configurationParams.session.secret
+	    	key: @configurationParams.session.cookie.name
+	    	cookie:
+	    		path: '/'
+	    		httpOnly: true
+	    		secure: true
+	    	store: @stores.sessionStore
+		expressServer.use csrf()
+		expressServer.use gzip()
+
+		expressServer.set 'view engine', 'hbs'
+		expressServer.set 'views', @configurationParams.staticFiles.rootDirectory
+		expressServer.locals.layout = false
+
+
+	_handleFixCookieExpiration: (request, response) =>
+		if not request.session.userId?
+			response.end '403'
+		else
+			request.session.cookie.maxAge = @configurationParams.session.rememberMeDuration
+			request.session.cookieExpirationIncreased ?= 0 
+			request.session.cookieExpirationIncreased++
+			response.end 'ok'
