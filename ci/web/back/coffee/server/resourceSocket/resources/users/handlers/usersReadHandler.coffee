@@ -24,6 +24,24 @@ class UsersReadHandler extends Handler
 				callback @_sanitize user
 
 
+	getSshKeys: (socket, data, callback) =>
+		userId = socket.session.userId
+		@modelRpcConnection.users.read.get_ssh_keys userId, (error, keys) =>
+			if error?
+				console.error error
+				callback error
+			else
+				sanitizedKeys = (@_sanitizeSshKey key for key in keys)
+				callback null, sanitizedKeys
+
+
+	_sanitizeSshKey: (key) =>
+		userId: key.user_id
+		alias: key.alias
+		sshKey: key.ssh_key
+		dateAdded: "blah"
+
+
 	_sanitize: (user) =>
 		id: user.id
 		firstName: user.first_name

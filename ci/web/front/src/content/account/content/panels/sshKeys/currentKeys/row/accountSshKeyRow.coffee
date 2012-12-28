@@ -18,7 +18,16 @@ class AccountSshKeysRow.Model extends Backbone.Model
 
 
 	removeKey: () =>
-		console.log '>> need to remove key...'
+		requestData =
+			method: 'removeSshKey'
+			args:
+				alias: @get 'alias'
+
+		socket.emit 'users:update', requestData, (error, userData) =>
+			if error?
+				console.error "need to handle error key removal"
+			else
+				console.error "need to handle successful key removal"
 
 
 class AccountSshKeysRow.View extends Backbone.View

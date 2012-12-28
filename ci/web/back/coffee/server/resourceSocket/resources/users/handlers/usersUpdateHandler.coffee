@@ -93,7 +93,7 @@ class UsersUpdateHandler extends Handler
 		assert.ok data.alias?
 
 		userId = socket.session.userId
-		@modelRpcConnection.users.update.delete_ssh_pubkey userId, data.alias, (error, result) =>
+		@modelRpcConnection.users.update.remove_ssh_pubkey userId, data.alias, (error, result) =>
 			if error?
 				if error.type is 'InvalidPermissionsError' then callback 403
 				else callback 'unable to remove ssh key'

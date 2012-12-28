@@ -54,10 +54,11 @@ class RpcBroker
 
 
 	_handleResponse: (message, headers, deliveryInformation) =>
-		# console.log 'received: ' + JSON.stringify msgpack.unpack message.data
-
 		messageId = deliveryInformation.correlationId
 		data = msgpack.unpack message.data
+
+		if data.error?
+			console.log 'received: ' + JSON.stringify msgpack.unpack message.data
 
 		if not @messageIdsToCallbacks[messageId]?
 			console.error 'Received unexpected rpc message ' + JSON.stringify data

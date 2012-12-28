@@ -18,7 +18,7 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 	def remove_ssh_pubkey(self, user_id, alias):
 		ssh_pubkey = schema.ssh_pubkey
 		delete = ssh_pubkey.delete().where(ssh_pubkey.c.alias==alias)
-		with ConnectionFactory.get_sql_connection as sqlconn:
+		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(delete)
 		self.publish_event("users", user_id, "ssh pubkey removed", alias=alias, ssh_key=None)
 

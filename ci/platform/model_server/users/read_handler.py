@@ -59,6 +59,13 @@ class UsersReadHandler(ModelServerRpcHandler):
 		else:
 			raise NoSuchUserError(user_id)
 
+	def get_ssh_keys(self, user_id):
+		ssh_pubkey = database.schema.ssh_pubkey
+
+		query = ssh_pubkey.select().where(ssh_pubkey.c.user_id==user_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			keys = [to_dict(row, ssh_pubkey.columns) for row in sqlconn.execute(query)]
+		return keys
 
 class NoSuchUserError(Exception):
 	pass

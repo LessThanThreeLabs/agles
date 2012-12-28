@@ -13,24 +13,15 @@ class AccountCurrentSshKeysPanel.Model extends Backbone.Model
 	fetchKeys: () =>
 		@sshKeyRowModels.reset()
 
-		console.log 'need to retrieve ssh keys....'
-		blah1 =
-			alias: 'hello'
-			dateAdded: 'some date here'
-		blah2 =
-			alias: 'hello again'
-			dateAdded: 'some other date here'
-		blah3 =
-			alias: 'hello again again'
-			dateAdded: 'some other date here yar'
-		blah4 =
-			alias: 'hello again again again again'
-			dateAdded: 'some other date here hooray'
+		requestData =
+			method: 'getSshKeys'
+			args: {}
 
-		setTimeout (() =>
-			@sshKeyRowModels.reset [blah1, blah2, blah3, blah4],
-				error: (model, error) => console.error error
-			), 500
+		socket.emit 'users:read', requestData, (error, sshKeys) =>
+			if error?
+				console.error error
+			else
+				@sshKeyRowModels.reset sshKeys, error: (model, error) => console.error error
 
 
 class AccountCurrentSshKeysPanel.View extends Backbone.View
@@ -81,4 +72,3 @@ class AccountCurrentSshKeysPanel.View extends Backbone.View
 			@$el.find('.sshKeysTable').append sshKeyRowView
 		else
 			@$el.find('.sshKeysTable .accountSshKeysRow:nth-child('+ (index+1) + ')').after sshKeyRowView
-

@@ -80,8 +80,17 @@ class AccountAddSshKeyPanel.View extends Backbone.View
 
 
 	_performAddKeyRequest: () =>
-		console.log '>> need to handle add key request'
-		@trigger 'addedKey'
+		requestData = 
+			method: 'addSshKey'
+			args:
+				alias: @model.get 'alias'
+				sshKey: @model.get 'key'
+
+		socket.emit 'users:update', requestData, (error, result) =>
+			if error?
+				console.log ">> need to show an error"
+			else
+				@trigger 'addedKey'
 
 
 	_clearErrors: () =>
