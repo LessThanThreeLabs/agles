@@ -1,0 +1,61 @@
+@informationBackgroundColor: #DDDDDD;
+@successBackgroundColor: #00AA00;
+@warningBackgroundColor: #AAAA00;
+@errorBackgroundColor: #AA0000;
+
+
+@fadeInOpacity: 0.8;
+@keyframes fadeIn { 
+	from { opacity: 0.0; }
+	to { opacity: @fadeInOpacity; }
+}
+
+@-moz-keyframes fadeIn {
+	from { opacity: 0.0; }
+	to { opacity: @fadeInOpacity; }
+}
+
+@-webkit-keyframes fadeIn {
+	from { opacity: 0.0; }
+	to { opacity: @fadeInOpacity; }
+}
+
+@-o-keyframes fadeIn {
+	from { opacity: 0.0; }
+	to { opacity: @fadeInOpacity; }
+}
+
+
+div.prettyNotification {
+	margin-bottom: 8px;
+	width: 200px;
+	height: 50px;
+	text-align: center;
+	opacity: @fadeInOpacity;
+
+	@fadeInTransitionTime: 1.5s;
+	animation: fadeIn @fadeInTransitionTime ease-out;
+	-moz-animation: fadeIn @fadeInTransitionTime ease-out;
+	-webkit-animation: fadeIn @fadeInTransitionTime ease-out;
+	-o-animation: fadeIn @fadeInTransitionTime ease-out;
+
+	.prettyNotificationContainer {
+		width: 100%;
+		height: 100%;
+		border-radius: 5px;
+
+		.notificationText {
+			font-size: 1.5em;
+			color: #444444;
+		}
+
+		&.information { background-color: @informationBackgroundColor; }
+		&.success { background-color: @successBackgroundColor; }
+		&.warning { background-color: @warningBackgroundColor; }
+		&.error { background-color: @errorBackgroundColor; }
+	}
+
+	&:hover  {
+		opacity: 1.0;
+	}
+}
