@@ -1,7 +1,7 @@
-@informationBackgroundColor: #DDDDDD;
-@successBackgroundColor: #00AA00;
-@warningBackgroundColor: #AAAA00;
-@errorBackgroundColor: #AA0000;
+@informationBackgroundColor: #F0F0F0;
+@successBackgroundColor: #36D536;
+@warningBackgroundColor: #E7F01B;
+@errorBackgroundColor: #E02424;
 
 
 @fadeInOpacity: 0.8;
@@ -26,6 +26,27 @@
 }
 
 
+@keyframes fadeOut { 
+	from { opacity: @fadeInOpacity }
+	to { opacity: 0.0; }
+}
+
+@-moz-keyframes fadeOut { 
+	from { opacity: @fadeInOpacity }
+	to { opacity: 0.0; }
+}
+
+@-webkit-keyframes fadeOut { 
+	from { opacity: @fadeInOpacity }
+	to { opacity: 0.0; }
+}
+
+@-o-keyframes fadeOut { 
+	from { opacity: @fadeInOpacity }
+	to { opacity: 0.0; }
+}
+
+
 div.prettyNotification {
 	margin-bottom: 8px;
 	width: 200px;
@@ -33,7 +54,7 @@ div.prettyNotification {
 	text-align: center;
 	opacity: @fadeInOpacity;
 
-	@fadeInTransitionTime: 1.5s;
+	@fadeInTransitionTime: 1.2s;
 	animation: fadeIn @fadeInTransitionTime ease-out;
 	-moz-animation: fadeIn @fadeInTransitionTime ease-out;
 	-webkit-animation: fadeIn @fadeInTransitionTime ease-out;
@@ -44,9 +65,13 @@ div.prettyNotification {
 		height: 100%;
 		border-radius: 5px;
 
+		box-shadow: 2px 2px 2px #808080;
+		-moz-box-shadow: 2px 2px 2px #808080;
+		-webkit-box-shadow: 2px 2px 2px #808080;
+
 		.notificationText {
 			font-size: 1.5em;
-			color: #444444;
+			color: #101010;
 		}
 
 		&.information { background-color: @informationBackgroundColor; }
@@ -57,5 +82,15 @@ div.prettyNotification {
 
 	&:hover  {
 		opacity: 1.0;
+	}
+
+	&.fadeOut {
+		opacity: 0.0;
+
+		@fadeOutTransitionTime: 0.8s;
+		animation: fadeOut @fadeOutTransitionTime ease-in;
+		-moz-animation: fadeOut @fadeOutTransitionTime ease-in;
+		-webkit-animation: fadeOut @fadeOutTransitionTime ease-in;
+		-o-animation: fadeOut @fadeOutTransitionTime ease-in;
 	}
 }

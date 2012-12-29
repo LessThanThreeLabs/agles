@@ -5,16 +5,19 @@ class PrettyNotification.Model extends Backbone.Model
 	ALLOWED_TYPES: ['information', 'success', 'warning', 'error']
 	defaults:
 		type: 'information'
-		sticky: false
 		text: ''
+		duration: 5000
 
 
 	validate: (attributes) =>
 		if attributes.type not in @ALLOWED_TYPES
 			return new Error 'Invalid type: ' + attributes.type
 
-		if typeof attributes.sticky isnt 'boolean'
-			return new Error 'Invalid sticky value: ' + attributes.sticky
+		if typeof attributes.text isnt 'string'
+			return new Error 'Invalid text value: ' + attributes.text
+
+		if typeof attributes.duration isnt 'number' or attributes.duration < 0
+			return new Error 'Invalid duration: ' + attributes.duration
 
 		return
 
@@ -26,6 +29,7 @@ class PrettyNotification.View extends Backbone.View
 			<div class="notificationText">hello</div>
 		</div>'
 	events: 'click': '_handleClick'
+	_destroyed: false
 
 
 	initialize: () =>
@@ -42,11 +46,18 @@ class PrettyNotification.View extends Backbone.View
 		@_fixType()
 		@_fixTextField()
 
-		# setTimeout (() =>
-		# 	@dispose()
-		# 	), 4000
+		if @model.get('duration') > 0
+			setTimeout (() => @_destroy()), @model.get 'duration'
 
 		return @
+
+
+	_destroy: () =>
+		return if @_destroyed
+		@_destroyed = true
+
+		@$el.addClass 'fadeOut'
+		setTimeout (() => @dispose()), 800
 
 
 	_fixType: () =>
@@ -59,4 +70,4 @@ class PrettyNotification.View extends Backbone.View
 
 
 	_handleClick: (event) =>
-		console.log 'clicked!!'
+		@_destroy()
