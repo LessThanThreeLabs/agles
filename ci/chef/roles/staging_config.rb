@@ -9,12 +9,13 @@ run_list(
 	"recipe[database]",
 	"recipe[koality::rabbitmq]",
 	"recipe[redisio::install]",
-	"recipe[supervisor]"
+	"recipe[supervisor]",
 	"recipe[rvm::system]",
 	"recipe[koality::dependencies]",
 	"recipe[koality::language_config]",
 	"recipe[koality::setup_config]"
 )
+
 default_attributes(
 	:koality => {
 		:source_path => {
@@ -26,3 +27,4 @@ default_attributes(
 		:default_ruby => "ruby-1.9.3-p286"
 	}
 )
+

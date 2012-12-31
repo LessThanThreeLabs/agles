@@ -1,6 +1,6 @@
-execute "Stop model server" do
-	command "killall -9 start_model_server.py"
-	returns [0, 1]
+supervisor_service "model_server" do
+	action [:stop]
+	directory "/tmp/model_server"
 end
 
 directory "/tmp/model_server" do
@@ -8,8 +8,10 @@ directory "/tmp/model_server" do
 	group node[:koality][:user]
 end
 
-execute "Start model server" do
-	cwd "/tmp/model_server"
-	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_model_server.py &"
+supervisor_service "model_server" do
+	action [:enable, :start]
+	directory "/tmp/model_server"
+	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_model_server.py"
 	user node[:koality][:user]
+	priority 1
 end
