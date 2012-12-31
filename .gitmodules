@@ -1,3 +1,6 @@
 [submodule "submodules/dulwich"]
 	path = submodules/dulwich
 	url = git@github.com:LessThanThreeLabs/dulwich.git
+[submodule "submodules/jgit"]
+	path = submodules/jgit
+	url = git@github.com:LessThanThreeLabs/jgit.git
