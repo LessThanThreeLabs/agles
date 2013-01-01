@@ -1,3 +1,5 @@
+package "haproxy"
+
 supervisor_service "redisSessionStore" do
 	action [:stop]
 end
