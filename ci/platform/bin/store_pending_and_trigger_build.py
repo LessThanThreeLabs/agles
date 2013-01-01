@@ -12,6 +12,7 @@ def main():
 	message = sys.argv[3]
 	merge_target = sys.argv[4]
 	pending_change_ref = store_pending_ref_and_trigger_build(user_id, repo_id, message, merge_target)
+	print pending_change_ref
 
 
 def store_pending_ref_and_trigger_build(user_id, repo_id, message, merge_target):
