@@ -9,6 +9,7 @@ run_list(
 	"recipe[database]",
 	"recipe[koality::rabbitmq]",
 	"recipe[redisio::install]",
+	"recipe[haproxy]",
 	"recipe[supervisor]",
 	"recipe[rvm::system]",
 	"recipe[koality::dependencies]",
