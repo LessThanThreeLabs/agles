@@ -1,6 +1,7 @@
 name "webserver"
 description "Koality webserver"
 run_list(
+	"recipe[haproxy]",
 	"recipe[koality::webserver]"
 )
 default_attributes(
