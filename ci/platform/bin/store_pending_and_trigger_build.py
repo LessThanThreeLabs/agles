@@ -6,7 +6,7 @@ from util import pathgen
 
 
 def main():
-	user_id = sys.argv[1]
+	user_id = int(sys.argv[1])
 	repo_dir = sys.argv[2]
 	repo_id = pathgen.get_repo_id(repo_dir)
 	message = sys.argv[3]
