@@ -62,9 +62,9 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 				repositoryId: globalRouterModel.get 'repositoryId'
 				forwardUrl: @model.get 'forwardUrl'
 
-		socket.emit 'repos:update', requestData, (error, callback) =>
-			if error?
-				globalNotificationManager.addNotification PrettyNotification.Types.Error, 'an error occured while attempting to update forward url'
+		socket.emit 'repos:update', requestData, (errors, callback) =>
+			if errors?
+				@_showErrors errors
 			else
 				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'successfully updated forward url'
 

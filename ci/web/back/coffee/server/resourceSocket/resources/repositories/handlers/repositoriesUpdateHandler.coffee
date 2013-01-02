@@ -111,6 +111,6 @@ class RepositoriesUpdateHandler extends RepositoriesHandler
 
 		@modelRpcConnection.repos.update.set_forward_url userId, args.repositoryId, args.forwardUrl, (error, result) =>
 			if error?
-				callback error
+				callback 'Unable to update forward url'
 			else
 				callback null, result
