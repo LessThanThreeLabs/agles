@@ -2,6 +2,7 @@
 setup:
   - packages:
     - system:
+      - python-software-properties
       - zlib1g
       - vim
       - gcc
