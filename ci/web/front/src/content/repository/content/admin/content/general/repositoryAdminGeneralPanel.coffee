@@ -63,10 +63,9 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 
 		socket.emit 'repos:update', requestData, (errors, result) =>
 			if errors?
-				console.log 'need to handle error'
-				console.error errors
+				@_showErrors errors
 			else
-				console.log 'need to handle success!'
+				globalNotificationManager.addNotification 'success', 'successfully changed repository information'
 
 
 	_clearErrors: () =>
