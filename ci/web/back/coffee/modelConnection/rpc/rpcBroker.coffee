@@ -80,5 +80,5 @@ class RpcBroker
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
 
-			error = new Error 'Rpc request timed out'
+			error = 'Timed out'
 			callback error, null
