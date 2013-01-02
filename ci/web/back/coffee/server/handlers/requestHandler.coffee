@@ -45,6 +45,7 @@ module.exports = class Resource
 
 	getTemplateValues: (request) =>
 		templateValues =
+			userId: request.session.userId
 			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString

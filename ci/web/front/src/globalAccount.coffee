@@ -35,9 +35,8 @@ class GlobalAccount extends Backbone.Model
 window.globalAccount = new GlobalAccount()
 
 if window.accountInformation?
-	console.error 'NEED TO BE USING THE CORRECT USER ID HERE!!'
 	attributesToSet =
-		userId: 1000
+		userId: if isNaN(parseInt(window.accountInformation.userId)) then null else parseInt(window.accountInformation.userId)
 		email: window.accountInformation.email
 		firstName: window.accountInformation.firstName
 		lastName: window.accountInformation.lastName
