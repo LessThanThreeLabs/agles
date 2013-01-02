@@ -62,7 +62,11 @@ class OpenstackVm(VirtualMachine):
 	@classmethod
 	def from_id(cls, vm_directory, vm_id, vm_username=VM_USERNAME):
 		try:
-			return OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
+			vm = OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
+			if vm.server.status == 'ERROR':
+				vm.delete()
+				return None
+			return vm
 		except:
 			return None
 

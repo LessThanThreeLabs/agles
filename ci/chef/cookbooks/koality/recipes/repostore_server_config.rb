@@ -82,7 +82,7 @@ if not File.exists? '/usr/local/bin/ssh'
 			action :sync
 		end
 
-		bash "install_dulwich_remove_gitbinaries" do
+		bash "install_jgit_remove_gitbinaries" do
 			cwd "/tmp/jgit-lt3"
 			code <<-EOH
 				mvn install
