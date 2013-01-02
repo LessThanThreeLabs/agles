@@ -10,8 +10,8 @@ default_attributes(
 		},
 		:verification => {
 			:server_count => {
-				:local => 2,
-				:cloud => 20
+				:local => 3,
+				:cloud => 2
 			}
 		}
 	}
