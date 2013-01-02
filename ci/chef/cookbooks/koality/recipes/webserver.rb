@@ -1,5 +1,14 @@
 package "haproxy"
 
+bash "compile_webserver" do
+	cwd "#{node[:koality][:source_path][:internal]}/ci/web/back"
+	code <<-EOH
+		./compile.sh
+		cd front
+		timeout 3 ./continuousCompile.sh
+	EOH
+end
+
 supervisor_service "redisSessionStore" do
 	action [:stop]
 end
