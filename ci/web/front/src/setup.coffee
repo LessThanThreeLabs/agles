@@ -24,8 +24,7 @@ Backbone.Model.prototype.subscribe = () ->
 			if result.eventName is @_currentEventName
 				@onUpdate data
 			else
-				console.log 'Unexpected event!'
-				console.leg '  this really isnt a surprise... but I wanted to see if it would ever happen'
+				console.error 'Unexpected event!'
 
 
 Backbone.Model.prototype.unsubscribe = () ->

@@ -88,9 +88,12 @@ class AccountAddSshKeyPanel.View extends Backbone.View
 
 		socket.emit 'users:update', requestData, (error, result) =>
 			if error?
-				console.log ">> need to show an error"
+				console.log 'need to show this error correctly:'
+				console.log error
+				# @_showErrors error
 			else
 				@trigger 'addedKey'
+				globalNotificationManager.addNotification 'success', 'SSH key added'
 
 
 	_clearErrors: () =>

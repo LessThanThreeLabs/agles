@@ -2,8 +2,13 @@ window.AccountCurrentSshKeysPanel = {}
 
 
 class AccountCurrentSshKeysPanel.Model extends Backbone.Model
+	subscribeUrl: 'users'
+	subscribeId: null
+
 
 	initialize: () =>
+		@subscribeId = globalAccount.get 'userId'
+
 		@sshKeyRowModels = new Backbone.Collection()
 		@sshKeyRowModels.model = AccountSshKeysRow.Model
 		@sshKeyRowModels.comparator = (sshKeyRowModel) =>
@@ -22,6 +27,17 @@ class AccountCurrentSshKeysPanel.Model extends Backbone.Model
 				console.error error
 			else
 				@sshKeyRowModels.reset sshKeys, error: (model, error) => console.error error
+
+
+	onUpdate: (data) =>
+		if data.type is 'ssh pubkey added'
+			sshKeyRowModel = new AccountSshKeysRow.Model
+				id: data.contents.id
+				alias: data.contents.alias
+				dateAdded: data.contents.dateAdded
+			@sshKeyRowModels.add sshKeyRowModel
+		else if data.type is 'ssh pubkey removed'
+			console.log 'need to handle remove event...'
 
 
 class AccountCurrentSshKeysPanel.View extends Backbone.View
@@ -43,10 +59,12 @@ class AccountCurrentSshKeysPanel.View extends Backbone.View
 		# TODO: make this smarter... (like handleAdd)
 		@model.sshKeyRowModels.on 'remove', @render, @
 
+		@model.subscribe()
 		@model.fetchKeys()
 
 
 	onDispose: () =>
+		@model.unsubscribe()
 		@model.sshKeyRowModels.off null, null, @
 
 

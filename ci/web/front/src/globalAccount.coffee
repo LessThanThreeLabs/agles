@@ -1,5 +1,6 @@
 class GlobalAccount extends Backbone.Model
 	defaults:
+		userId: null
 		email: null
 		firstName: null
 		lastName: null
@@ -13,6 +14,9 @@ class GlobalAccount extends Backbone.Model
 
 
 	validate: (attributes) =>
+		if typeof attributes.userId isnt 'number' or attributes.userId < 0
+			return new Error 'Invalid user id (make sure it is not a string): ' + attributes.userId
+
 		if typeof attributes.email isnt 'string'
 			return new Error 'Invaild email: ' + attributes.email
 
@@ -31,7 +35,8 @@ class GlobalAccount extends Backbone.Model
 window.globalAccount = new GlobalAccount()
 
 if window.accountInformation?
-	attributesToSet = 
+	attributesToSet =
+		userId: 1000
 		email: window.accountInformation.email
 		firstName: window.accountInformation.firstName
 		lastName: window.accountInformation.lastName

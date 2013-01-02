@@ -10,8 +10,6 @@ class GlobalNotificationManager extends Backbone.View
 
 
 	addNotification: (type, text, duration=5000) =>
-		console.log 'need to add notificaiton'
-
 		prettyNotificationModel = new PrettyNotification.Model
 			type: type
 			text: text
@@ -21,7 +19,6 @@ class GlobalNotificationManager extends Backbone.View
 		@$el.append prettyNotificationView.render().el
 
 
-console.log 'here!'
 window.globalNotificationManager = new GlobalNotificationManager()
 $('body').prepend window.globalNotificationManager.render().el
 
