@@ -8,6 +8,26 @@ exports.create = (modelRpcConnection) ->
 
 
 class RepositoriesUpdateHandler extends RepositoriesHandler
+	updateDescription: (socket, args, callback) =>
+		assert.ok args.repositoryId?
+		assert.ok args.description?
+
+		userId = socket.session.userId
+
+		if not userId?
+			callback 403
+			return
+
+		errors = {}
+
+		@modelRpcConnection.repos.update.update_description userId, args.repositoryId, args.description, (error, result) =>
+			if error?
+				errors.description = "Update of repository description failed"
+				callback errors
+			else
+				callback null, result
+
+
 	inviteMembers: (socket, args, callback) =>
 		assert.ok socket.session.userId?
 		assert.ok args.repositoryId?
@@ -38,6 +58,7 @@ class RepositoriesUpdateHandler extends RepositoriesHandler
 		errors = if errors.length > 0 then errors else null
 
 		callback errors, results
+
 
 	changeMemberPermissions: (socket, args, callback) =>
 		assert.ok socket.session.userId?

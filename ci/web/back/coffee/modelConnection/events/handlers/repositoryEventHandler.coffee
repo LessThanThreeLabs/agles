@@ -25,6 +25,10 @@ class RepositoryEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					type: data.type
 					contents: @_sanitizeUser data.contents
+			when 'description updated'
+				@sockets.in(roomName).emit eventName,
+					type: data.type
+					contents = data.contents
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 

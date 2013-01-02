@@ -53,7 +53,20 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 
 
 	_performSaveDescriptionRequest: (event) =>
-		console.log '>> Need to submit repository description change!'
+		requestData =
+			method: 'updateDescription'
+			args:
+				repositoryId: globalRouterModel.get 'repositoryId'
+				description: @model.get 'description'
+
+		console.log requestData
+
+		socket.emit 'repos:update', requestData, (errors, result) =>
+			if errors?
+				console.log 'need to handle error'
+				console.error errors
+			else
+				console.log 'need to handle success!'
 
 
 	_clearErrors: () =>
