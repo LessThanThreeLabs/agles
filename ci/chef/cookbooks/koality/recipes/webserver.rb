@@ -6,6 +6,7 @@ bash "compile_webserver" do
 		./compile.sh
 		cd front
 		timeout 3 ./continuousCompile.sh
+		exit 0
 	EOH
 end
 
