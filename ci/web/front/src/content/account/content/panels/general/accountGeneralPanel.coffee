@@ -78,8 +78,7 @@ class AccountGeneralPanel.View extends Backbone.View
 
 		socket.emit 'users:update', userUpdateData, (errors, userData) =>
 			if errors?
-				console.error errors
-				#TODO handle errors here
+				@_showErrors errors
 			else
 				globalAccount.set
 					firstName: userUpdateData.firstName
