@@ -14,7 +14,7 @@ class GlobalAccount extends Backbone.Model
 
 
 	validate: (attributes) =>
-		if typeof attributes.userId isnt 'number' or attributes.userId < 0
+		if attributes.userId? and (typeof attributes.userId isnt 'number' or attributes.userId < 0)
 			return new Error 'Invalid user id (make sure it is not a string): ' + attributes.userId
 
 		if typeof attributes.email isnt 'string'

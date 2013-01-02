@@ -107,6 +107,7 @@ class LoginPanel.View extends Backbone.View
 
 	_handleSuccessfulLogin: (userData) =>
 		globalAccount.set
+			userId: userData.userId
 			email: userData.email
 			firstName: userData.firstName
 			lastName: userData.lastName

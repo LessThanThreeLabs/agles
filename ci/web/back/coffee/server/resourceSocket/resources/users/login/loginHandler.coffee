@@ -32,7 +32,7 @@ class LoginHandler
 
 
 	_sanitize: (user) =>
-		id: user.id
+		userId: user.id
 		email: user.email
 		firstName: user.first_name
 		lastName: user.last_name
