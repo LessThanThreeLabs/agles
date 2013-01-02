@@ -50,31 +50,66 @@ if not File.exists? '/usr/local/bin/ssh'
 		EOH
 	end
 
-	git "/tmp/dulwich-lt3" do
-		repository "git://github.com/LessThanThreeLabs/dulwich.git"
-		reference "master"
-		action :sync
+	if false  # dulwich
+		git "/tmp/dulwich-lt3" do
+			repository "git://github.com/LessThanThreeLabs/dulwich.git"
+			reference "master"
+			action :sync
+		end
+
+		bash "install_dulwich_remove_gitbinaries" do
+			cwd "/tmp/dulwich-lt3"
+			code <<-EOH
+				python setup.py install
+				cp bin/* /usr/bin
+				mkdir -p /usr/bin/gitbin
+				mv /usr/bin/git-* /usr/bin/gitbin
+				exit 0
+			EOH
+		end
+
+		link "/usr/bin/git-receive-pack" do
+			to "/usr/bin/dul-receive-pack"
+		end
+
+		link "/usr/bin/git-upload-pack" do
+			to "/usr/bin/dul-upload-pack"
+		end
+	else  # jgit
+		git "/tmp/jgit-lt3" do
+			repository "git://github.com/LessThanThreeLabs/jgit.git"
+			reference "master"
+			action :sync
+		end
+
+		bash "install_dulwich_remove_gitbinaries" do
+			cwd "/tmp/jgit-lt3"
+			code <<-EOH
+				mvn install
+				cp org.eclipse.jgit.pgm/target/jgit /usr/bin/
+				mkdir -p /usr/bin/gitbin
+				mv /usr/bin/git-* /usr/bin/gitbin
+				exit 0
+			EOH
+		end
+
+		file "/usr/bin/git-receive-pack" do
+			mode '0755'
+			content <<-EOH
+				#!/bin/bash
+				jgit receive-pack $*
+			EOH
+		end
+
+		file "/usr/bin/git-upload-pack" do
+			mode '0755'
+			content <<-EOH
+				#!/bin/bash
+				jgit upload-pack $*
+			EOH
+		end
 	end
 
-	bash "install_dulwich_remove_gitbinaries" do
-		user "root"
-		cwd "/tmp/dulwich-lt3"
-		code <<-EOH
-			python setup.py install
-			cp bin/* /usr/bin
-			mkdir -p /usr/bin/gitbin
-			mv /usr/bin/git-* /usr/bin/gitbin
-			exit 0
-		EOH
-	end
-
-	link "/usr/bin/git-receive-pack" do
-		to "/usr/bin/dul-receive-pack"
-	end
-
-	link "/usr/bin/git-upload-pack" do
-		to "/usr/bin/dul-upload-pack"
-	end
 end
 
 bash "setup_ssh_pushing_to_github" do

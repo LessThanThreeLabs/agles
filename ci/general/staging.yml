@@ -13,6 +13,12 @@ setup:
       - libpq-dev
       - lessc
       - haproxy
+      - mvn
+    - scripts:
+      - script:|
+          sudo add-apt-repository ppa:flexiondotorg/java
+          sudo apt-get update
+          sudo apt-get install sun-java6-jdk sun-java6-plugin
     - pip:
       - amqp
       - pika: 0.9.5
