@@ -83,7 +83,20 @@ class AccountPasswordPanel.View extends Backbone.View
 
 
 	_performSaveAccountPasswordRequest: () =>
-		console.log '>> need to save account password'
+		requestData =
+			method: 'updatePassword'
+			args:
+				oldPassword: @model.get 'oldPassword'
+				newPassword: @model.get 'newPassword'
+				confirmPassword: @model.get 'confirmPassword'
+
+		socket.emit 'users:update', requestData, (errors, user) =>
+			if errors?
+				#TODO: handle error
+				console.error errors
+			else
+				console.log 'successfully changed password'
+				#TODO: Handle success
 
 
 	_clearErrors: () =>

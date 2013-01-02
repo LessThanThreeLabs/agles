@@ -3,14 +3,15 @@ assert = require 'assert'
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection, loginHandler, accountInformationValidator) ->
-	return new UsersUpdateHandler modelRpcConnection, loginHandler, accountInformationValidator
+exports.create = (modelRpcConnection, loginHandler, passwordHasher, accountInformationValidator) ->
+	return new UsersUpdateHandler modelRpcConnection, loginHandler, passwordHasher, accountInformationValidator
 
 
 class UsersUpdateHandler extends Handler
-	constructor: (modelRpcConnection, @loginHandler, @accountInformationValidator) ->
+	constructor: (modelRpcConnection, @loginHandler, @passwordHasher, @accountInformationValidator) ->
 		assert.ok modelRpcConnection? 
 		assert.ok @loginHandler?
+		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
 
 		super modelRpcConnection
@@ -46,6 +47,43 @@ class UsersUpdateHandler extends Handler
 				socket.session.firstName = data.firstName
 				socket.session.lastName = data.lastName
 				callback null, result
+
+
+	updatePassword: (socket, data, callback) =>
+		assert.ok data.oldPassword?
+		assert.ok data.newPassword?
+		assert.ok data.confirmPassword?
+		userId = socket.session.userId
+
+		errors = 
+			userUpdate: "Failed to update password"
+
+		if data.newPassword != data.confirmPassword
+			errors.confirmPassword = "New password and confirmed password do not match"
+			callback errors
+			return
+		else if not @accountInformationValidator.isValidPassword data.newPassword
+			errors.newPassword = @accountInformationValidator.getInvalidPasswordString()
+			callback errors
+			return
+			
+		@modelRpcConnection.users.read.get_user_from_id userId, (error, userData) =>
+			if error?
+				callback errors
+			else
+				oldPasswordHash = @passwordHasher.hashPasswordWithSalt data.oldPassword, userData.salt
+				if userData.password_hash != oldPasswordHash
+					errors.oldPassword = "Old password is not correct"
+					callback errors
+					return
+
+				newPasswordHash = @passwordHasher.hashPasswordWithSalt data.newPassword, userData.salt
+				@modelRpcConnection.users.update.update_user userId, {password_hash: newPasswordHash}, (error, result) =>
+					if error?
+						callback errors
+					else
+						#TODO: handle success
+						callback null, result
 
 
 	# -- GIVEN --
