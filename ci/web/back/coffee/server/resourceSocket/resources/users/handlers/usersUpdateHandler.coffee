@@ -55,11 +55,10 @@ class UsersUpdateHandler extends Handler
 		assert.ok data.confirmPassword?
 		userId = socket.session.userId
 
-		errors = 
-			userUpdate: "Failed to update password"
+		errors = {}
 
 		if data.newPassword != data.confirmPassword
-			errors.confirmPassword = "New password and confirmed password do not match"
+			errors.confirmPassword = 'New password and confirmed password do not match'
 			callback errors
 			return
 		else if not @accountInformationValidator.isValidPassword data.newPassword
@@ -69,20 +68,19 @@ class UsersUpdateHandler extends Handler
 			
 		@modelRpcConnection.users.read.get_user_from_id userId, (error, userData) =>
 			if error?
-				callback errors
+				callback 'Unexpected error'
 			else
 				oldPasswordHash = @passwordHasher.hashPasswordWithSalt data.oldPassword, userData.salt
 				if userData.password_hash != oldPasswordHash
-					errors.oldPassword = "Old password is not correct"
+					errors.oldPassword = 'Old password is not correct'
 					callback errors
 					return
 
 				newPasswordHash = @passwordHasher.hashPasswordWithSalt data.newPassword, userData.salt
 				@modelRpcConnection.users.update.update_user userId, {password_hash: newPasswordHash}, (error, result) =>
 					if error?
-						callback errors
+						callback 'Unexpected error'
 					else
-						#TODO: handle success
 						callback null, result
 
 

@@ -92,11 +92,9 @@ class AccountPasswordPanel.View extends Backbone.View
 
 		socket.emit 'users:update', requestData, (errors, user) =>
 			if errors?
-				#TODO: handle error
-				console.error errors
+				@_showErrors errors
 			else
-				console.log 'successfully changed password'
-				#TODO: Handle success
+				globalNotificationManager.addNotification 'success', 'successfully changed password'
 
 
 	_clearErrors: () =>
@@ -105,6 +103,10 @@ class AccountPasswordPanel.View extends Backbone.View
 
 	_showErrors: (errors) =>
 		@_clearErrors()
+
+		if typeof errors is 'string'
+			globalNotificationManager.addNotification 'error', errors
+			return
 
 		for errorType, errorText of errors
 			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
