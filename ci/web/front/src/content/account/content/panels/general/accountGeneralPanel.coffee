@@ -73,8 +73,8 @@ class AccountGeneralPanel.View extends Backbone.View
 
 	_performSaveAccountRequest: () =>
 		userUpdateData = 
-			firstName: @model.get 'firstName'
-			lastName: @model.get 'lastName'
+			firstName: if @model.get('firstName') is '' then globalAccount.get('firstName') else @model.get 'firstName'
+			lastName: if @model.get('lastName') is '' then globalAccount.get('lastName') else @model.get 'lastName'
 
 		socket.emit 'users:update', userUpdateData, (errors, userData) =>
 			if errors?
