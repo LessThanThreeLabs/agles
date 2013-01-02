@@ -32,12 +32,12 @@ class AccountCurrentSshKeysPanel.Model extends Backbone.Model
 	onUpdate: (data) =>
 		if data.type is 'ssh pubkey added'
 			sshKeyRowModel = new AccountSshKeysRow.Model
-				id: data.contents.id
 				alias: data.contents.alias
 				dateAdded: data.contents.dateAdded
 			@sshKeyRowModels.add sshKeyRowModel
 		else if data.type is 'ssh pubkey removed'
-			console.log 'need to handle remove event...'
+			assert.ok data.contents.alias
+			@sshKeyRowModels.remove @sshKeyRowModels.where alias: data.contents.alias
 
 
 class AccountCurrentSshKeysPanel.View extends Backbone.View

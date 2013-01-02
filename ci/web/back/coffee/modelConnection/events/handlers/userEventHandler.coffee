@@ -27,6 +27,5 @@ class UserEventHandler extends EventHandler
 				throw new Error 'Unexpected event type: ' + data.type
 
 	_sanitizeSshKey: (data) =>
-		id: data.id
 		alias: data.alias
 		dateAdded: 'need a real timestamp here...'
