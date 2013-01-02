@@ -16,6 +16,15 @@ class PrettyNotification.Model extends Backbone.Model
 		duration: 5000
 
 
+	initialize: () =>
+		matchingType = false
+		for typeName, typeValue of PrettyNotification.Types
+			matchingType = true if typeValue is @get 'type'
+
+		if not matchingType
+			throw new Error 'Invalid type: ' + @get 'type'
+
+
 	validate: (attributes) =>
 		matchingType = false
 		for typeName, typeValue of PrettyNotification.Types
