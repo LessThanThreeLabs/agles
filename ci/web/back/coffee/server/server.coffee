@@ -5,10 +5,11 @@ express = require 'express'
 csrf = require './csrf'
 gzip = require './gzip'
 
-SessionStore = require './sessionStore'
-CreateAccountStore = require './createAccountStore'
 ResourceSocket = require './resourceSocket/resourceSocket'
 StaticServer = require './static/staticServer'
+
+SessionStore = require './stores/sessionStore'
+CreateAccountStore = require './stores/createAccountStore'
 
 WelcomeHandler = require './handlers/welcomeHandler'
 AccountHandler = require './handlers/accountHandler'
