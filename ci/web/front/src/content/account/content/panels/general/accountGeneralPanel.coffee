@@ -83,6 +83,7 @@ class AccountGeneralPanel.View extends Backbone.View
 				globalAccount.set
 					firstName: userUpdateData.firstName
 					lastName: userUpdateData.lastName
+				globalNotificationManager.addNotification 'success', 'successfully changed user information'
 
 
 	_clearErrors: () =>
