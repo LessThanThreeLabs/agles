@@ -72,8 +72,18 @@ class AccountGeneralPanel.View extends Backbone.View
 
 
 	_performSaveAccountRequest: () =>
-		console.log '>> need to save account info'
-		console.log 'if successful, need to also update the globalAcount'
+		userUpdateData = 
+			firstName: @model.get 'firstName'
+			lastName: @model.get 'lastName'
+
+		socket.emit 'users:update', userUpdateData, (errors, userData) =>
+			if errors?
+				console.error 'failed'
+				#TODO handle errors here
+			else
+				globalAccount.set
+					firstName: userUpdateData.firstName
+					lastName: userUpdateData.lastName
 
 
 	_clearErrors: () =>
