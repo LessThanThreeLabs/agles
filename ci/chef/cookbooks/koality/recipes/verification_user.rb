@@ -11,6 +11,7 @@ end
 
 directory "/verification" do
 	owner "verification"
+	mode "0777"
 end
 
 link "/home/verification/chef-repo" do

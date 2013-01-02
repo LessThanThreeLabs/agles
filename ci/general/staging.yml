@@ -36,6 +36,7 @@ setup:
       - nose-testconfig
       - boto
       - rackspace-novaclient
+      - requests
     - gem:
       - vagrant
     - npm:
