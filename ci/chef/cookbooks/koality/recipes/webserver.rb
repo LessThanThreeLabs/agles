@@ -2,6 +2,7 @@ package "haproxy"
 
 bash "compile_webserver" do
 	cwd "#{node[:koality][:source_path][:internal]}/ci/web/back"
+	user node[:koality][:user]
 	code <<-EOH
 		./compile.sh
 		cd front
@@ -28,7 +29,7 @@ end
 
 supervisor_service "redisSessionStore" do
 	action [:enable, :start]
-	command "redis-server conf/redis/sessionStoreRedis.conf"                                                                                                                                                                                                                     
+	command "redis-server conf/redis/sessionStoreRedis.conf"
 	directory "#{node[:koality][:source_path][:internal]}/ci/web/back"
 	user node[:koality][:user]
 	priority 0
@@ -36,7 +37,7 @@ end
 
 supervisor_service "redisCreateAccount" do
 	action [:enable, :start]
-	command "redis-server conf/redis/createAccountRedis.conf"                                                                                                                                                                                                                     
+	command "redis-server conf/redis/createAccountRedis.conf"
 	directory "#{node[:koality][:source_path][:internal]}/ci/web/back"
 	user node[:koality][:user]
 	priority 0
