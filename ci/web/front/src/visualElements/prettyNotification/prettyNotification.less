@@ -1,4 +1,4 @@
-@informationBackgroundColor: #F0F0F0;
+@informationBackgroundColor: #AAD7EC;
 @successBackgroundColor: #36D536;
 @warningBackgroundColor: #E7F01B;
 @errorBackgroundColor: #E02424;
@@ -50,7 +50,8 @@
 div.prettyNotification {
 	margin-bottom: 8px;
 	width: 200px;
-	height: 50px;
+	min-height: 50px;
+	max-height: 200px;
 	text-align: center;
 	opacity: @fadeInOpacity;
 
@@ -70,7 +71,8 @@ div.prettyNotification {
 		-webkit-box-shadow: 2px 2px 2px #808080;
 
 		.notificationText {
-			font-size: 1.5em;
+			padding: 10px 20px 10px 20px;
+			font-size: 1.2em;
 			color: #101010;
 		}
 

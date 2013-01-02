@@ -25,7 +25,4 @@ console.log 'here!'
 window.globalNotificationManager = new GlobalNotificationManager()
 $('body').prepend window.globalNotificationManager.render().el
 
-setTimeout (() => globalNotificationManager.addNotification('information', 'hello 1', 0)), 500
-setTimeout (() => globalNotificationManager.addNotification('success', 'hello 2', 0)), 1000
-setTimeout (() => globalNotificationManager.addNotification('warning', 'hello 3', 0)), 1500
-setTimeout (() => globalNotificationManager.addNotification('error', 'hello 4', 0)), 2000
+setTimeout (() => globalNotificationManager.addNotification('information', 'Check this out.  I can display notifications.  So cool!', 5000)), 500
