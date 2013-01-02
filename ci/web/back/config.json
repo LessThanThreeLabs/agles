@@ -31,7 +31,7 @@
 
 			"redisStore": {
 				"url": "127.0.0.1",
-				"port": 6379
+				"port": 6390
 			},
 
 			"rememberMeDuration": 2592000000
@@ -60,7 +60,7 @@
 
 			"redisStore": {
 				"url": "127.0.0.1",
-				"port": 6380	
+				"port": 6391
 			}
 		}
 	},
