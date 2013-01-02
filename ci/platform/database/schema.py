@@ -124,10 +124,10 @@ ssh_pubkey = Table('ssh_pubkey', metadata,
 # Github Integration
 #####################
 
-github_repo_url_map = Table('github_repo_url_map', metadata,
+repo_forward_url_map = Table('repo_forward_url_map', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False, unique=True),
-	Column('github_url', String, nullable=False)
+	Column('forward_url', String, nullable=False)
 )
 
 

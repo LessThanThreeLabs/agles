@@ -165,12 +165,12 @@ class ReposReadHandler(ModelServerRpcHandler):
 # Github Integration #
 ######################
 
-	def get_corresponding_github_repo_url(self, repo_id):
+	def get_repo_forward_url(self, repo_id):
 		repo = database.schema.repo
-		github_repo_url_map = database.schema.github_repo_url_map
+		repo_forward_url_map = database.schema.repo_forward_url_map
 
-		query = github_repo_url_map.join(repo).select().where(
+		query = repo_forward_url_map.join(repo).select().where(
 			repo.c.id==repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-			return row[github_repo_url_map.c.github_url] if row else None
+			return row[repo_forward_url_map.c.github_url] if row else None

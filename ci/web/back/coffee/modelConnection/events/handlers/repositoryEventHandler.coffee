@@ -29,6 +29,10 @@ class RepositoryEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					type: data.type
 					contents = data.contents
+			when 'forward url updated'
+				@sockets.in(roomName).emit eventName,
+					type: data.type
+					contents = @_sanitizeForwardUrlContents data.contents
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 
@@ -38,6 +42,10 @@ class RepositoryEventHandler extends EventHandler
 		number: data.change_number
 		status: data.change_status
 
+
+	_sanitizeForwardUrlContents: (data) =>
+		id: data.id
+		forwardUrl: data.forward_url
 
 	_sanitizeUser: (user) =>
 		id: user.id

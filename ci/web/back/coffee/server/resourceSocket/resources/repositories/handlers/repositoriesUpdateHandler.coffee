@@ -29,7 +29,6 @@ class RepositoriesUpdateHandler extends RepositoriesHandler
 
 
 	inviteMembers: (socket, args, callback) =>
-		assert.ok socket.session.userId?
 		assert.ok args.repositoryId?
 		assert.ok args.emails?
 
@@ -61,7 +60,6 @@ class RepositoriesUpdateHandler extends RepositoriesHandler
 
 
 	changeMemberPermissions: (socket, args, callback) =>
-		assert.ok socket.session.userId?
 		assert.ok args.repositoryId?
 		assert.ok args.email?
 		assert.ok args.permissions?
@@ -83,7 +81,6 @@ class RepositoriesUpdateHandler extends RepositoriesHandler
 
 
 	removeMember: (socket, args, callback) =>
-		assert.ok socket.session.userId?
 		assert.ok args.repositoryId?
 		assert.ok args.email?
 
@@ -100,3 +97,20 @@ class RepositoriesUpdateHandler extends RepositoriesHandler
 					else callback 'unable to remove members'
 				else
 					callback null, result
+
+
+	updateForwardUrl: (socket, args, callback) =>
+		assert.ok args.repositoryId?
+		assert.ok args.forwardUrl?
+
+		userId = socket.session.userId
+
+		if not userId?
+			callback 403
+			return
+
+		@modelRpcConnection.repos.update.set_forward_url userId, args.repositoryId, args.forwardUrl, (error, result) =>
+			if error?
+				callback error
+			else
+				callback null, result

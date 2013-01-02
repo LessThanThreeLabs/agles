@@ -1,4 +1,5 @@
 from sqlalchemy import and_
+from sqlalchemy.exc import IntegrityError
 
 import database.schema
 import repo.store
@@ -144,15 +145,22 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 # Github Integration
 #####################
 
-	def set_corresponding_github_repo_url(self, repo_id, github_repo_url):
-		github_repo_url_map = schema.github_repo_url_map
-		ins = github_repo_url_map.insert().values(
+	def set_forward_url(self, user_id, repo_id, forward_url):
+
+		repo_forward_url_map = database.schema.repo_forward_url_map
+
+		ins = repo_forward_url_map.insert().values(
 			repo_id=repo_id,
-			github_url=github_repo_url
+			forward_url=forward_url
 		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(ins)
+			try:
+				sqlconn.execute(ins)
+			except IntegrityError:
+				update = repo_forward_url_map.update().where(repo_forward_url_map.c.repo_id==repo_id).values(forward_url=forward_url)
+				sqlconn.execute(update)
+		self.publish_event("repos", repo_id, "forward url updated", forward_url=forward_url)
 
 
 class NoSuchUserError(Exception):

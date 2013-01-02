@@ -59,8 +59,6 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 				repositoryId: globalRouterModel.get 'repositoryId'
 				description: @model.get 'description'
 
-		console.log requestData
-
 		socket.emit 'repos:update', requestData, (errors, result) =>
 			if errors?
 				@_showErrors errors
