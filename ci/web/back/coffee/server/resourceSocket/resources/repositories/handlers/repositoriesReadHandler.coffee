@@ -30,7 +30,6 @@ class RepositoriesReadHandler extends Handler
 				callback null, @_sanitize repo
 
 
-
 	writableRepositories: (socket, args, callback) =>
 		userId = socket.session.userId
 
@@ -82,11 +81,15 @@ class RepositoriesReadHandler extends Handler
 
 
 	_sanitize: (repository) =>
-		id: repository.id
-		name: repository.name
-		description: 'repositoryReadHandler -- need a real description here'
-		defaultPermissions: repository.defaultPermissions
-		url: "git@" + @configurationParams.domain + ":" + repository.uri
+		console.log repository
+
+		returnval =
+			id: repository.id
+			name: repository.name
+			description: repository.description
+			defaultPermissions: repository.defaultPermissions
+			url: "git@" + @configurationParams.domain + ":" + repository.uri
+		return returnval
 
 
 	_sanitizeUser: (user) =>
