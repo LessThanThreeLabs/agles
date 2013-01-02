@@ -65,7 +65,7 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 			if errors?
 				@_showErrors errors
 			else
-				globalNotificationManager.addNotification 'success', 'successfully changed repository information'
+				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'successfully changed repository information'
 
 
 	_clearErrors: () =>
@@ -76,7 +76,7 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 		@_clearErrors()
 
 		if typeof errors is 'string'
-			globalNotificationManager.addNotification 'error', errors
+			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, errors
 			return
 
 		for errorType, errorText of errors

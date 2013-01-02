@@ -94,7 +94,7 @@ class AccountPasswordPanel.View extends Backbone.View
 			if errors?
 				@_showErrors errors
 			else
-				globalNotificationManager.addNotification 'success', 'successfully changed password'
+				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'successfully changed password'
 
 
 	_clearErrors: () =>
@@ -105,7 +105,7 @@ class AccountPasswordPanel.View extends Backbone.View
 		@_clearErrors()
 
 		if typeof errors is 'string'
-			globalNotificationManager.addNotification 'error', errors
+			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, errors
 			return
 
 		for errorType, errorText of errors

@@ -1,6 +1,13 @@
 window.PrettyNotification = {}
 
 
+window.PrettyNotification.Types = 
+	INFORMATION: 'information'
+	SUCCESS: 'success'
+	WARNING: 'warning'
+	ERROR: 'error'
+
+
 class PrettyNotification.Model extends Backbone.Model
 	ALLOWED_TYPES: ['information', 'success', 'warning', 'error']
 	defaults:
@@ -10,7 +17,11 @@ class PrettyNotification.Model extends Backbone.Model
 
 
 	validate: (attributes) =>
-		if attributes.type not in @ALLOWED_TYPES
+		matchingType = false
+		for typeName, typeValue of PrettyNotification.Types
+			matchingType = true if attributes.type is typeValue
+
+		if not matchingType
 			return new Error 'Invalid type: ' + attributes.type
 
 		if typeof attributes.text isnt 'string'

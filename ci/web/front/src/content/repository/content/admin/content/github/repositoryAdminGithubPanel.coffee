@@ -57,6 +57,7 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 
 	_performSaveForwardUrlRequest: (event) =>
 		console.log '>> Need to submit repository forward url change!'
+		globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'EONTAUH AOETNUH NTAOHUTNEAH UTNSAH'
 
 
 	_clearErrors: () =>
@@ -67,7 +68,7 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 		@_clearErrors()
 
 		if typeof errors is 'string'
-			globalNotificationManager.addNotification 'error', errors
+			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, errors
 			return
 
 		for errorType, errorText of errors

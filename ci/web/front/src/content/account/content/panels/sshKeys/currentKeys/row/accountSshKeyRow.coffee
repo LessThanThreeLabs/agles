@@ -25,7 +25,7 @@ class AccountSshKeysRow.Model extends Backbone.Model
 
 		socket.emit 'users:update', requestData, (error, userData) =>
 			if error?
-				globalNotificationManager.addNotification 'warning', 'unable to remove ssh key'
+				globalNotificationManager.addNotification PrettyNotification.Types.WARNING, 'unable to remove ssh key'
 
 
 class AccountSshKeysRow.View extends Backbone.View

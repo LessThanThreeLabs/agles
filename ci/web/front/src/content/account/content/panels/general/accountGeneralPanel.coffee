@@ -83,7 +83,7 @@ class AccountGeneralPanel.View extends Backbone.View
 				globalAccount.set
 					firstName: userUpdateData.firstName
 					lastName: userUpdateData.lastName
-				globalNotificationManager.addNotification 'success', 'successfully changed user information'
+				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'successfully changed user information'
 
 
 	_clearErrors: () =>
@@ -94,7 +94,7 @@ class AccountGeneralPanel.View extends Backbone.View
 		@_clearErrors()
 
 		if typeof errors is 'string'
-			globalNotificationManager.addNotification 'error', errors
+			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, errors
 			return
 
 		for errorType, errorText of errors

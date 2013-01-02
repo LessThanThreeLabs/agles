@@ -86,14 +86,12 @@ class AccountAddSshKeyPanel.View extends Backbone.View
 				alias: @model.get 'alias'
 				sshKey: @model.get 'key'
 
-		socket.emit 'users:update', requestData, (error, result) =>
+		socket.emit 'users:update', requestData, (errors, result) =>
 			if error?
-				console.log 'need to show this error correctly:'
-				console.log error
-				# @_showErrors error
+				@_showErrors errors
 			else
 				@trigger 'addedKey'
-				globalNotificationManager.addNotification 'success', 'SSH key added'
+				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'SSH key added'
 
 
 	_clearErrors: () =>
@@ -102,6 +100,10 @@ class AccountAddSshKeyPanel.View extends Backbone.View
 
 	_showErrors: (errors) =>
 		@_clearErrors()
+
+		if typeof errors is 'string'
+			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, errors
+			return
 
 		for errorType, errorText of errors
 			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
