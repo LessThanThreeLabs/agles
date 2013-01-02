@@ -15,7 +15,8 @@ class CreateAccountStore
 
 
 	initialize: () ->
-		@redisConnection = redis.createClient @configurationParams.port, @configurationParams.url, return_buffers: true
+		@redisConnection = redis.createClient @configurationParams.createAccount.redisStore.port, 
+			@configurationParams.createAccount.redisStore.url, return_buffers: true
 
 
 	addAccount: (key, account) ->
