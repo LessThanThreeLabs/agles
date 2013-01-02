@@ -20,7 +20,7 @@ class RepositoriesCreateHandler extends RepositoriesHandler
 			callback 403
 			return
 
-		@modelRpcConnection.repos.create.create_repo userId, data.name, 
+		@modelRpcConnection.repos.create.create_repo userId, data.name, data.description,
 			@_fromPermissionString(data.defaultPermissions), (error, repositoryId) =>
 				if error?
 					callback error
