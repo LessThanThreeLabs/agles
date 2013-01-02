@@ -22,6 +22,7 @@ end
 def system(package_name, package_version)
 	package package_name do
 		version package_version if package_version
+		options("--force-yes")
 	end
 end
 

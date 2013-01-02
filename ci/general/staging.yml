@@ -49,7 +49,10 @@ setup:
     - script: |
         add-apt-repository ppa:flexiondotorg/java
         apt-get update
-        apt-get install sun-java6-jdk sun-java6-plugin
+  - packages:
+    - system:
+      - sun-java6-jdk
+      - sun-java6-plugin
   - databases:
       postgres:
       - name: koality
