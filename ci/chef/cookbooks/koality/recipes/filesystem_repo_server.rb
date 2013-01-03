@@ -1,9 +1,10 @@
 include_recipe "koality::setuppy_install"
 include_recipe "koality::git_user"
 
-execute "Stop filesystem repo server" do
-	command "killall -9 start_filesystem_repo_server.py"
-	returns [0, 1]
+
+supervisor_service "filesystem_repo_server" do
+	action [:stop]
+	directory "/tmp/repo_server"
 end
 
 directory "/tmp/repo_server" do
@@ -11,8 +12,12 @@ directory "/tmp/repo_server" do
 	group "git"
 end
 
-execute "Start filesystem repo server" do
-	cwd "/tmp/repo_server"
-	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_filesystem_repo_server.py -r #{node[:koality][:repositories_path]}&"
+supervisor_service "filesystem_repo_server" do
+	action [:enable, :start]
+	directory "/tmp/repo_server"
+	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_filesystem_repo_server.py -r #{node[:koality][:repositories_path]}"
+	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/filesystem_repo_server_stdout.log"
+	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/filesystem_repo_server_stderr.log"
 	user "git"
+	priority 0
 end
