@@ -16,11 +16,17 @@ class BuildOutputEventHandler extends EventHandler
 		roomName = @ROOM_PREFIX + data.id
 		eventName = @EVENT_PREFIX + data.id
 		
-		@sockets.in(roomName).emit eventName, 
-			type: data.type
-			contents: @_sanitizeContents data.contents
+		switch data.type
+			when 'line added'
+				@sockets.in(roomName).emit eventName,
+					type: data.type
+					contents: @_sanitizeLineAdded data.contents
+			when 'return code added'
+				# do nothing
+			else
+				throw new Error 'Unexpected event type: ' + data.type
 
 
-	_sanitizeContents: (data) =>
+	_sanitizeLineAdded: (data) =>
 		number: data.line_num
 		text: data.line
