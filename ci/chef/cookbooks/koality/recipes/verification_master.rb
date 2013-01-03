@@ -6,6 +6,7 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+include_recipe "koality::setuppy_install"
 include_recipe "koality::verification_user"
 
 execute "Stop verification master" do

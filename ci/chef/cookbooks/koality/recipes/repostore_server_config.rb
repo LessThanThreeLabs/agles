@@ -6,6 +6,7 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+include_recipe "koality::setuppy_install"
 
 if not File.exists? '/usr/local/bin/ssh'
 	git "/tmp/openssh-for-git" do

@@ -1,3 +1,4 @@
+include_recipe "koality::setuppy_install"
 include_recipe "koality::git_user"
 
 execute "Stop filesystem repo server" do
