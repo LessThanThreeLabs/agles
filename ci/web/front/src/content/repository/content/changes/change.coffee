@@ -40,11 +40,10 @@ class Change.Model extends Backbone.Model
 
 	onUpdate: (data) =>
 		switch data.type
-			when 'change started'
-				@set 'status', data.contents.status,
-					error: (model, error) => console.error error
-			when 'change ended'
-				@set 'status', data.contents.status,
+			when 'change started', 'change finished'
+				attributesToSet =
+					status: data.contents.status
+				@set attributesToSet,
 					error: (model, error) => console.error error
 			else
 				console.error 'Unaccounted for update type: ' + data.type
@@ -59,7 +58,7 @@ class Change.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'chaneg:status', @render, @
+		@model.on 'change:status', @render, @
 		@model.on 'change:selected', @_handleSelected, @
 
 		@model.subscribe()
@@ -75,7 +74,7 @@ class Change.View extends Backbone.View
 			number: @model.get 'number'
 			status: @model.get 'status'
 			
-		@$el.addClass @model.get 'status'
+		@$el.removeClass().addClass('change').addClass @model.get 'status'
 
 		@_handleSelected()
 

@@ -17,7 +17,7 @@ class ChangeEventHandler extends EventHandler
 		eventName = @EVENT_PREFIX + data.id
 
 		switch data.type
-			when 'change started', 'change ended'
+			when 'change started', 'change finished'
 				console.log 'need to handle change started/ended...'
 				@sockets.in(roomName).emit eventName,
 					type: data.type
