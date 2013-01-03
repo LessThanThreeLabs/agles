@@ -25,6 +25,8 @@ class ChangeEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					type: data.type
 					contents: data.contents
+			when 'build added'
+				# do nothing
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 
