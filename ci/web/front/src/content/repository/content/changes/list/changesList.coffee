@@ -109,6 +109,7 @@ class ChangesList.View extends Backbone.View
 			</div>
 		</div>'
 	events:	'scroll': '_scrollHandler'
+	changeViews: []
 
 
 	initialize: () =>
@@ -141,7 +142,14 @@ class ChangesList.View extends Backbone.View
 	_renderInitialChanges: () =>
 		@model.changeModels.each (changeModel) =>
 			changeView = new Change.View model: changeModel
+			@changeViews.push changeView
 			@$('.changesListPanelContainer').append changeView.render().el
+
+
+	_disposeAllChanges: () =>
+		for changeView in @changeViews
+			changeView.dispose()
+		@changeViews = []
 
 
 	_scrollHandler: () =>
@@ -151,6 +159,7 @@ class ChangesList.View extends Backbone.View
 
 	_handleAddedChange: (changeModel, collection, options) =>
 		changeView = new Change.View model: changeModel
+		@changeViews.push changeView
 		@_insertChangeAtIndex changeView.render().el, options.index
 
 
@@ -162,5 +171,6 @@ class ChangesList.View extends Backbone.View
 
 
 	_handleChangesReset: () =>
+		@_disposeAllChanges()
 		@$('.changesListPanelContainer').empty()
 		@model.fetchInitialChanges()
