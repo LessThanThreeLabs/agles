@@ -81,15 +81,11 @@ class RepositoriesReadHandler extends Handler
 
 
 	_sanitize: (repository) =>
-		console.log repository
-
-		returnval =
-			id: repository.id
-			name: repository.name
-			description: repository.description
-			defaultPermissions: repository.defaultPermissions
-			url: "git@" + @configurationParams.domain + ":" + repository.uri
-		return returnval
+		id: repository.id
+		name: repository.name
+		description: repository.description
+		defaultPermissions: repository.defaultPermissions
+		url: "git@" + @configurationParams.domain + ":" + repository.uri
 
 
 	_sanitizeUser: (user) =>
