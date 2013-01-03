@@ -32,8 +32,6 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 
 
 	onUpdate: (data) =>
-		assert.ok data.type?
-
 		switch data.type
 			when 'member added'
 				assert.ok data.contents.email? and data.contents.firstName? and

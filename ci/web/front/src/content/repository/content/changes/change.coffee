@@ -39,8 +39,15 @@ class Change.Model extends Backbone.Model
 
 
 	onUpdate: (data) =>
-		console.log 'received change event:'
-		console.log data
+		switch data.type
+			when 'change started'
+				@set 'status', data.contents.status,
+					error: (model, error) => console.error error
+			when 'change ended'
+				@set 'status', data.contents.status,
+					error: (model, error) => console.error error
+			else
+				console.error 'Unaccounted for update type: ' + data.type
 
 
 class Change.View extends Backbone.View
