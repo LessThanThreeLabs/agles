@@ -87,7 +87,7 @@ class OpenstackVm(VirtualMachine):
 
 	def ssh_call(self, command, output_handler=None):
 		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)
-		return self.call(["ssh", login, "-q", "-oStrictHostKeyChecking=no", command], output_handler=output_handler)
+		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], output_handler=output_handler)
 
 	def reboot(self, force=False):
 		reboot_type = 'REBOOT_HARD' if force else 'REBOOT_SOFT'
