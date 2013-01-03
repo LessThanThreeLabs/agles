@@ -1,3 +1,5 @@
-execute "python setup.py install" do
-	command "python #{node[:koality][:source_path][:internal]}/ci/platform/setup.py install"
+execute "install_koality" do
+		cwd node[:koality][:source_path][:platform]
+		user "root"
+		command "python setup.py install"
 end
