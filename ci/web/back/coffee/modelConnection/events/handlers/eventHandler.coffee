@@ -43,3 +43,6 @@ module.exports = class EventHandler
 		# pass to child handler
 		data = msgpack.unpack message.data
 		@processEvent data
+
+		console.log 'received event:'
+		console.log data

@@ -21,10 +21,14 @@ Backbone.Model.prototype.subscribe = () ->
 		socket.on result.eventName, (data) =>
 			assert.ok data.type?
 
+			console.log 'received event for room ' + result.eventName + ':'
+			console.log data
+
 			if result.eventName is @_currentEventName
 				@onUpdate data
 			else
 				console.error 'Unexpected event!'
+				console.log '...maybe the room name changed in between subscribe() calls?'
 
 
 Backbone.Model.prototype.unsubscribe = () ->
