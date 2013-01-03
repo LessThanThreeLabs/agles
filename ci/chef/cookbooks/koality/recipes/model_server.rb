@@ -1,3 +1,5 @@
+include_recipe "koality::setuppy_install"
+
 supervisor_service "model_server" do
 	action [:stop]
 	directory "/tmp/model_server"
