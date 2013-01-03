@@ -173,4 +173,4 @@ class ReposReadHandler(ModelServerRpcHandler):
 			repo.c.id==repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-			return row[repo_forward_url_map.c.github_url] if row else None
+			return row[repo_forward_url_map.c.forward_url] if row else None
