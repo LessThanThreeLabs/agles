@@ -37,6 +37,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 			build_row = sqlconn.execute(build_query).first()
 			assert build_row is not None
 			repo_id = build_row[build.c.repo_id]
+			change_id = build_row[build.c.change_id]  # TODO: This is a hack for the front end
 
 		if max_priority_result and max_priority_result[0]:
 			starting_priority = max_priority_result[0] + 1
@@ -56,7 +57,8 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 				)
 				console_id = sqlconn.execute(ins).inserted_primary_key[0]
 				console_map[subtype] = console_id
-		self.publish_event("builds", build_id, "consoles added", type=type, console_map=console_map)
+		# TODO: This is firing to changes as a hack for the front end. Needs to go back to builds in the future
+		self.publish_event("changes", change_id, "consoles added", type=type, console_map=console_map)
 
 	def append_console_line(self, build_id, line_num, line, type, subtype):
 		"""
