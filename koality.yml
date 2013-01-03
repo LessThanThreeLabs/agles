@@ -45,17 +45,17 @@ setup:
       - name: koality
         username: lt3
 compile:
-  - platform:
+  - compile_platform:
       path: ci/platform
       script: python setup.py install
-  - web:
+  - compile_web:
       path: ci/web/back
       script: ./compile.sh
 test:
-  - platform:
+  - test_platform:
       path: ci/platform
       script: nosetests -sv --tc=fakeVerifier:True
       timeout: 45
-  - web:
+  - test_web:
       path: ci/web/back
       script: npm test
