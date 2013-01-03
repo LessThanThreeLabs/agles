@@ -20,7 +20,6 @@ class CreateAccountHandler
 
 
 	handleRequest: (socket, data, callback) =>
-
 		errors = @_getErrors socket, data
 
 		if Object.keys(errors).length isnt 0

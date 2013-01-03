@@ -115,16 +115,17 @@ class CreateAccountForm.View extends Backbone.View
 
 
 	_performCreateAccountRequest: () =>
+		if @model.get('password') isnt @model.get('confirmPassword')
+			errors = confirmPassword: 'Passwords do not match'
+			@_showErrors errors
+			return
+
 		requestData =
 			email: @model.get 'email'
 			password: @model.get 'password'
 			firstName: @model.get 'firstName'
 			lastName: @model.get 'lastName'
 			rememberMe: @model.get 'rememberMe'
-
-		if requestData.password != @model.get 'confirmPassword'
-			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, 'Passwords do not match'
-			return
 
 		socket.emit 'users:create', requestData, (errors, result) =>
 			if errors?

@@ -49,5 +49,10 @@ class VerifyAccountHandler extends RequestHandler
 				request.session.firstName = account.firstName
 				request.session.lastName = account.lastName
 
+				if account.rememberMe
+					request.session.cookie.maxAge = @configurationParams.session.rememberMeDuration
+					request.session.cookieExpirationIncreased ?= 0 
+					request.session.cookieExpirationIncreased++
+
 				@pushFiles request, response
 				response.render 'index', @getTemplateValues request
