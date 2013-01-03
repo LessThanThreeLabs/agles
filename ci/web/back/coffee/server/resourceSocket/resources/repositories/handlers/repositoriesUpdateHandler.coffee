@@ -53,6 +53,7 @@ class RepositoriesUpdateHandler extends RepositoriesHandler
 					return
 				else errors[index] = args.emails[index]
 
+		results = results.filter (result) => result?
 		errors = errors.filter (error) => error?
 		errors = if errors.length > 0 then errors else null
 
