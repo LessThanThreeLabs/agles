@@ -65,13 +65,18 @@ class CreateRepositoryForm.View extends Backbone.View
 
 
 	_performCreateRepositoryRequest: () =>
-		console.log '>> need to perform create account request'
+		requestData =
+			name: @model.get 'name'
+			description: @model.get 'description'
+			defaultPermissions: 'r/w'
 
-			# if errors?
-			# 	@_showErrors errors
-			# else
-			# 	globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'YAY LOOK AT ME I CREATED A REPOSITORY!'
-			# 	globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, '...should actually change to repository page'
+		socket.emit 'repos:create', requestData, (errors, result) =>
+			if errors?
+				console.error 'fail'
+				@_showErrors errors
+			else
+				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'YAY LOOK AT ME I CREATED A REPOSITORY!'
+				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, '...should actually change to repository page'
 
 
 	_clearErrors: () =>
