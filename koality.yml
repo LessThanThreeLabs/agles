@@ -59,5 +59,3 @@ test:
   - test_web:
       path: ci/web/back
       script: npm test
-  - test_bad:
-      script: exit 1
