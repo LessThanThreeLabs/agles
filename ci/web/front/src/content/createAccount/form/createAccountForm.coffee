@@ -122,15 +122,12 @@ class CreateAccountForm.View extends Backbone.View
 			lastName: @model.get 'lastName'
 			rememberMe: @model.get 'rememberMe'
 
-		socket.emit 'users:create', requestData, (error, result) =>
-			if error?
-				console.error error
+		socket.emit 'users:create', requestData, (errors, result) =>
+			if errors?
+				@_showErrors errors
 			else
-				console.log 'success'
-
-		if false
-			globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'YAY LOOK AT ME I SENT AN EMAIL!'
-			globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, '...should actually change to a sent-email-page'
+				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'YAY LOOK AT ME I SENT AN EMAIL!'
+				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, '...should actually change to a sent-email-page'
 
 
 	_clearErrors: () =>
@@ -139,6 +136,10 @@ class CreateAccountForm.View extends Backbone.View
 
 	_showErrors: (errors) =>
 		@_clearErrors()
+
+		if typeof errors is 'string'
+			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, errors
+			return
 
 		for errorType, errorText of errors
 			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
