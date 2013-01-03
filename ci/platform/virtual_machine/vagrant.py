@@ -74,7 +74,7 @@ class Vagrant(VirtualMachine):
 			print "Spawning vm at " + self.vm_directory
 			if self.init(output_handler).returncode != 0:
 				raise VagrantException(self, "Failed to initialize vagrant")
-			if self.up(False, output_handler).returncode != 0:
+			if self.up(True, output_handler).returncode != 0:
 				raise VagrantException(self, "Failed to start vagrant vm")
 		if self.vbox_call("/usr/bin/sudo dhclient eth0").returncode != 0:
 			raise VagrantException(self, "Failed to verify DHCP server on vm")
