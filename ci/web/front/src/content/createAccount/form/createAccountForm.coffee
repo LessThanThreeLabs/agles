@@ -115,7 +115,18 @@ class CreateAccountForm.View extends Backbone.View
 
 
 	_performCreateAccountRequest: () =>
-		console.log '>> need to perform create account request'
+		requestData =
+			email: @model.get 'email'
+			password: @model.get 'password'
+			firstName: @model.get 'firstName'
+			lastName: @model.get 'lastName'
+			rememberMe: @model.get 'rememberMe'
+
+		socket.emit 'users:create', requestData, (error, result) =>
+			if error?
+				console.error error
+			else
+				console.log 'success'
 
 
 	_clearErrors: () =>
