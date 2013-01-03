@@ -7,6 +7,9 @@ default_attributes(
 	:koality => {
 		:source_path => {
 			:internal => "/home/lt3/code/agles",
+		},
+		:supervisor => {
+			:logdir => "/home/lt3/code/agles/ci/production/supervisor/log",
 		}
 	}
 )
