@@ -134,12 +134,6 @@ bash "setup_ssh_pushing_to_github" do
 	EOH
 end
 
-execute "install_agles" do
-	cwd node[:koality][:source_path][:platform]
-	user "root"
-	command "python setup.py install"
-end
-
 bash "Move standard ssh daemon" do
 	user "root"
 	code <<-EOH
