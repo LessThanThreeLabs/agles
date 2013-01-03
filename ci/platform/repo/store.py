@@ -202,7 +202,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo.git.push(remote_repo, ':'.join([ref, ref]), force=True)
 		except GitCommandError:
 			error_msg = "failed to push repo to github: [repo: %s, remote_repo: %s, ref: %s]" % (repo, remote_repo, ref)
-			self.logger.exception(error_msg)
+			self.logger.error(error_msg)
 
 	def _push_forward_url_if_necessary(self, repo, repo_id, ref):
 		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
