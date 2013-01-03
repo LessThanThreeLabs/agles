@@ -130,8 +130,7 @@ class CreateAccountForm.View extends Backbone.View
 			if errors?
 				@_showErrors errors
 			else
-				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'YAY LOOK AT ME I SENT AN EMAIL!'
-				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, '...should actually change to a sent-email-page'
+				@trigger 'accountCreated'
 
 
 	_clearErrors: () =>

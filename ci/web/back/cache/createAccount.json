@@ -16,6 +16,7 @@
 			"/css/src/header/headerMenu.css",
 			"/css/src/header/header.css",
 
+			"/css/src/content/createAccount/success/createAccountSuccess.css",
 			"/css/src/content/createAccount/form/createAccountForm.css",
 			"/css/src/content/createAccount/createAccount.css",
 			"/css/src/main.css"
@@ -49,6 +50,7 @@
 			"/js/src/header/headerMenu.js",
 			"/js/src/header/header.js",
 
+			"/js/src/content/createAccount/success/createAccountSuccess.js",
 			"/js/src/content/createAccount/form/createAccountForm.js",
 			"/js/src/content/createAccount/createAccount.js",
 			"/js/src/content/createAccount/main.js"
