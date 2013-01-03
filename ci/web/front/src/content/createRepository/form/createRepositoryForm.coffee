@@ -67,6 +67,12 @@ class CreateRepositoryForm.View extends Backbone.View
 	_performCreateRepositoryRequest: () =>
 		console.log '>> need to perform create account request'
 
+			# if errors?
+			# 	@_showErrors errors
+			# else
+			# 	globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'YAY LOOK AT ME I CREATED A REPOSITORY!'
+			# 	globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, '...should actually change to repository page'
+
 
 	_clearErrors: () =>
 		@$('.prettyFormErrorText').removeClass 'visible'
@@ -74,6 +80,10 @@ class CreateRepositoryForm.View extends Backbone.View
 
 	_showErrors: (errors) =>
 		@_clearErrors()
+
+		if typeof errors is 'string'
+			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, errors
+			return
 
 		for errorType, errorText of errors
 			errorField = @$(".prettyFormErrorText[type='#{errorType}']")
