@@ -39,7 +39,7 @@ class AccountAddSshKeyPanel.View extends Backbone.View
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel">Key</div>
 				<div class="prettyFormValue">
-					<textarea type="text" class="sshKey" placeholder="key" maxlength=256></textarea>
+					<textarea type="text" class="sshKey" placeholder="key"></textarea>
 					<div class="prettyFormErrorText" type="key"></div>
 				</div>
 			</div>
@@ -72,7 +72,7 @@ class AccountAddSshKeyPanel.View extends Backbone.View
 
 
 	_handleFormEntryChange: (event) =>
-		attributesToSet = 
+		attributesToSet =
 			alias: @$('.sshKeyAlias').val()
 			key: @$('.sshKey').val()
 		@model.set attributesToSet,
@@ -80,7 +80,7 @@ class AccountAddSshKeyPanel.View extends Backbone.View
 
 
 	_performAddKeyRequest: () =>
-		requestData = 
+		requestData =
 			method: 'addSshKey'
 			args:
 				alias: @model.get 'alias'
