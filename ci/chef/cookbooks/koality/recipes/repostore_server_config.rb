@@ -108,6 +108,14 @@ if not File.exists? '/usr/local/bin/ssh'
 				jgit upload-pack $*
 			EOH
 		end
+
+		link "/usr/bin/store-pending-and-trigger-build" do
+			to "#{node[:koality][:source_path][:platform]}/bin/store_pending_and_trigger_build.py"
+		end
+
+		link "/usr/bin/verify-repository-permissions" do
+			to "#{node[:koality][:source_path][:platform]}/bin/verify_repository_permissions.py"
+		end
 	end
 
 end
