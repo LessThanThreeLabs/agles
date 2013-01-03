@@ -59,7 +59,7 @@ class RepositoryAdminInviteMembersPanel.View extends Backbone.View
 		@model.inviteMembers (error, result) =>
 			if error?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
-				@_showErrorMessage true, _toErrorMessage error
+				@_showErrorMessage true, @_toErrorMessage error
 			else
 				@_showSuccessMessage true
 
