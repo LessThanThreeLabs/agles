@@ -3,6 +3,8 @@ window.Change = {}
 
 class Change.Model extends Backbone.Model
 	ALLOWED_STATUS: ['passed', 'running', 'failed', 'queued']
+	subscribeUrl: 'changes'
+	subscribeId: null
 
 	urlRoot: 'changes'
 	defaults:
@@ -12,6 +14,8 @@ class Change.Model extends Backbone.Model
 
 
 	initialize: () =>
+		@subscribeId = @get 'id'
+
 		if window.globalRouterModel.get('changeId') is @get('id')
 			@set 'selected', true,
 				error: (model, error) => console.error error
@@ -34,6 +38,11 @@ class Change.Model extends Backbone.Model
 		return
 
 
+	onUpdate: (data) =>
+		console.log 'received change event:'
+		console.log data
+
+
 class Change.View extends Backbone.View
 	tagName: 'div'
 	className: 'change'
@@ -46,8 +55,11 @@ class Change.View extends Backbone.View
 		@model.on 'chaneg:status', @render, @
 		@model.on 'change:selected', @_handleSelected, @
 
+		@model.subscribe()
+
 
 	onDispose: () =>
+		@model.unsubscribe()
 		@model.off null, null, @
 
 
