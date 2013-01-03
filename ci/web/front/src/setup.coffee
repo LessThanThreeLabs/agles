@@ -27,7 +27,8 @@ Backbone.Model.prototype.subscribe = () ->
 			if result.eventName is @_currentEventName
 				@onUpdate data
 			else
-				console.error 'Unexpected event!'
+				console.error 'Unexpected event for room: ' + result.eventName
+				console.error data
 				console.log '...maybe the room name changed in between subscribe() calls?'
 
 
