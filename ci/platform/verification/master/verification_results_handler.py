@@ -75,5 +75,7 @@ class VerificationResultsHandler(QueueListener):
 				repo_name, ref, merge_target)
 		except MergeError as e:
 			self._mark_change_merge_failure(change_id)
-			# merge_status = False
+			raise e  # Should alert the user somehow
+		except Exception as e:
+			self._mark_change_failed(change_id)
 			raise e  # Should alert the user somehow
