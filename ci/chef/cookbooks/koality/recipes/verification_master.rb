@@ -9,18 +9,22 @@
 include_recipe "koality::setuppy_install"
 include_recipe "koality::verification_user"
 
-execute "Stop verification master" do
-	command "killall -9 start_verification_master.py"
-	returns [0, 1]
+
+supervisor_service "verification_master" do
+	action [:stop]
 end
 
 directory "/verification/master" do
 	user "verification"
 end
 
-execute "Start verification master" do
-	cwd "/verification/master"
+supervisor_service "verification_master" do
+	action [:enable, :start]
 	environment({"HOME" => "/home/verification"})
-	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py >> /verification/master/master.log 2>&1 &"
+	directory "/verification/master"
+	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py"
+	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/verification_master_stdout.log"
+	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/verification_master_stderr.log"
 	user "verification"
+	priority 1
 end
