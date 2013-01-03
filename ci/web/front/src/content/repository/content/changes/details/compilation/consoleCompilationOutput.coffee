@@ -41,8 +41,6 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 
 
 	_getConsoleOutputModelsForType: (buildOutputs, type) =>
-		console.log 'WHY DO WE HAVE THIS FUNCTION?....'
-
 		consoleOutputModels = []
 
 		for buildOutput in buildOutputs
@@ -53,14 +51,12 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 		return consoleOutputModels
 
 
-	console.log 'NEED TO MAKE IT SO THAT CONSOLES_ADDED FIRED FOR CHANGES, NOT BUILDS'
 	onUpdate: (data) =>
 		if data.type is 'consoles added'
-			console.log 'need to handle consoles added'
-			# buildOutputId = data.contents.buildOutputId
-			# consoleOutputModel = new ConsoleTextOutput.Model id: buildOutputId
-			# @consoleTextOutputModels.add consoleOutputModel,
-			# 	error: (model, error) => console.error error
+			for subtypeName, buildOutputId of data.contents.console_map
+				consoleOutputModel = new ConsoleTextOutput.Model id: buildOutputId
+				@consoleTextOutputModels.add consoleOutputModel,
+					error: (model, error) => console.error error
 
 
 class ConsoleCompilationOutput.View extends Backbone.View
