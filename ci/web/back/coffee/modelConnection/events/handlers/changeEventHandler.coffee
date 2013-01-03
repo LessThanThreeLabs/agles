@@ -13,4 +13,20 @@ class ChangeEventHandler extends EventHandler
 
 
 	processEvent: (data) =>
-		console.log 'need to handle change event...'
+		roomName = @ROOM_PREFIX + data.id
+		eventName = @EVENT_PREFIX + data.id
+
+		switch data.type
+			when 'change started', 'change ended'
+				console.log 'need to handle change started/ended...'
+				@sockets.in(roomName).emit eventName,
+					type: data.type
+					contents: @_sanitizeChange data.contents
+			else
+				throw new Error 'Unexpected event type: ' + data.type
+
+
+	_sanitizeChange: (data) =>
+		status: data.status
+		startTime: data.start_time
+		endTime: data.end_time
