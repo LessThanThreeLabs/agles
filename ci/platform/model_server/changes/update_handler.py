@@ -36,7 +36,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		commit = schema.commit
 		user = schema.user
 
-		query = change.join(commit).join(user).select().where(change.c.id==change_id)
+		query = change.join(commit).join(user).select(use_labels=True).where(change.c.id==change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		email = row[user.c.email]
