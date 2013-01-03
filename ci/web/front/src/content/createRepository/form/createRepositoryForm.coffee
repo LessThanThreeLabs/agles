@@ -70,13 +70,11 @@ class CreateRepositoryForm.View extends Backbone.View
 			description: @model.get 'description'
 			defaultPermissions: 'r/w'
 
-		socket.emit 'repos:create', requestData, (errors, result) =>
+		socket.emit 'repos:create', requestData, (errors, repositoryId) =>
 			if errors?
-				console.error 'fail'
 				@_showErrors errors
 			else
-				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, 'YAY LOOK AT ME I CREATED A REPOSITORY!'
-				globalNotificationManager.addNotification PrettyNotification.Types.SUCCESS, '...should actually change to repository page'
+				window.location.href = '/repository/' + repositoryId
 
 
 	_clearErrors: () =>
