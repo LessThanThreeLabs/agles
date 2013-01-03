@@ -18,10 +18,13 @@ class ChangeEventHandler extends EventHandler
 
 		switch data.type
 			when 'change started', 'change finished'
-				console.log 'need to handle change started/ended...'
 				@sockets.in(roomName).emit eventName,
 					type: data.type
 					contents: @_sanitizeChange data.contents
+			when 'consoles added'
+				@sockets.in(roomName).emit eventName,
+					type: data.type
+					contents: data.contents
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 

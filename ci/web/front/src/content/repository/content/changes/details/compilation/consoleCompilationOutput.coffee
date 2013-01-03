@@ -2,8 +2,12 @@ window.ConsoleCompilationOutput = {}
 
 
 class ConsoleCompilationOutput.Model extends Backbone.Model
+	subscribeUrl: 'changes'
+	subscribeId: null
 
 	initialize: () =>
+		@subscribeId = globalRouterModel.get 'changeId'
+
 		@consoleTextOutputModels = new Backbone.Collection()
 		@consoleTextOutputModels.model = ConsoleTextOutput.Model
 		@consoleTextOutputModels.comparator = (consoleTextOutputModel) =>
@@ -49,6 +53,16 @@ class ConsoleCompilationOutput.Model extends Backbone.Model
 		return consoleOutputModels
 
 
+	console.log 'NEED TO MAKE IT SO THAT CONSOLES_ADDED FIRED FOR CHANGES, NOT BUILDS'
+	onUpdate: (data) =>
+		if data.type is 'consoles added'
+			console.log 'need to handle consoles added'
+			# buildOutputId = data.contents.buildOutputId
+			# consoleOutputModel = new ConsoleTextOutput.Model id: buildOutputId
+			# @consoleTextOutputModels.add consoleOutputModel,
+			# 	error: (model, error) => console.error error
+
+
 class ConsoleCompilationOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleCompilationOutput'
@@ -57,11 +71,22 @@ class ConsoleCompilationOutput.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.consoleTextOutputModels.on 'reset', @_addOutput, @
-		globalRouterModel.on 'change:changeId', @model.fetchOutput, @
+		@model.consoleTextOutputModels.on 'reset', @_addInitialOutput, @
+		@model.consoleTextOutputModels.on 'add', @_addOutput, @
+
+		globalRouterModel.on 'change:changeId', (() =>
+				@model.unsubscribe() if @model.subscribeId?
+				@model.subscribeId = globalRouterModel.get 'changeId'
+				@model.subscribe() if @model.subscribeId?
+				@model.fetchOutput()
+			), @
+
+		@model.subscribeId = globalRouterModel.get 'changeId'
+		@model.subscribe() if @model.subscribeId?
 
 
 	onDispose: () =>
+		@model.unsubscribe() if @model.subscribeId?
 		@model.consoleTextOutputModels.off null, null, @
 		globalRouterModel.off 'change:changeId', null, @
 
@@ -79,12 +104,18 @@ class ConsoleCompilationOutput.View extends Backbone.View
 		@_removeOutputs()
 
 
-	_addOutput: () =>
+	_addInitialOutput: () =>
 		@_clear()
 		@model.consoleTextOutputModels.each (consoleTextOutputModel) =>
 			consoleTextOutputView = new ConsoleTextOutput.View model: consoleTextOutputModel
 			@$el.append consoleTextOutputView.render().el
 			@currentViews.push consoleTextOutputView
+
+
+	_addOutput: (consoleTextOutputModel, collection, options) =>
+		consoleTextOutputView = new ConsoleTextOutput.View model: consoleTextOutputModel
+		@$el.append consoleTextOutputView.render().el
+		@currentViews.push consoleTextOutputView
 
 
 	_removeOutputs: () =>

@@ -128,7 +128,7 @@ class ChangesList.View extends Backbone.View
 		@model.changeModels.off null, null, @
 		globalRouterModel.off null, null, @
 
-		@model.reset()
+		@_disposeAllChanges()
 		@changesListSearchView.dispose()
 
 
