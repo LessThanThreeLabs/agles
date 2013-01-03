@@ -21,5 +21,3 @@ class GlobalNotificationManager extends Backbone.View
 
 window.globalNotificationManager = new GlobalNotificationManager()
 $('body').prepend window.globalNotificationManager.render().el
-
-setTimeout (() => globalNotificationManager.addNotification(PrettyNotification.Types.INFORMATION, 'Check this out.  I can display notifications.  So cool!', 5000)), 500
