@@ -122,6 +122,10 @@ class CreateAccountForm.View extends Backbone.View
 			lastName: @model.get 'lastName'
 			rememberMe: @model.get 'rememberMe'
 
+		if requestData.password != @model.get 'confirmPassword'
+			globalNotificationManager.addNotification PrettyNotification.Types.ERROR, 'Passwords do not match'
+			return
+
 		socket.emit 'users:create', requestData, (errors, result) =>
 			if errors?
 				@_showErrors errors
