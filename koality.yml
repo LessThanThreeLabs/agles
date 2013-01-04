@@ -52,10 +52,10 @@ compile:
       path: ci/web/back
       script: ./compile.sh
 test:
-  - test_platform:
+  - all_tests:
       path: ci/platform
-      script: nosetests -sv --tc=fakeVerifier:True
+      script:
+        - nosetests -sv --tc=fakeVerifier:True
+        - cd ../web/back
+        - npm test
       timeout: 45
-  - test_web:
-      path: ci/web/back
-      script: npm test
