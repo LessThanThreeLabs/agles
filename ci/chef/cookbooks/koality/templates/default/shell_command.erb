@@ -3,7 +3,7 @@ source /home/<%= @user %>/scripts/setup.sh
 cd /home/<%= @user %>/source/<%= @path %>
 timeout <%= @timeout %> bash -c "
 <% for @command in @validated_commands %>
-/home/<%= @user %>/scripts/validator.sh <%= @command %> &&
+source /home/<%= @user %>/scripts/validator.sh <%= @command %> &&
 <% end %>
 true"
 r=$?

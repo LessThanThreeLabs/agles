@@ -1,4 +1,5 @@
 import os
+import socket
 import uuid
 
 import eventlet
@@ -35,7 +36,7 @@ class OpenstackVm(VirtualMachine):
 	@classmethod
 	def construct(cls, vm_directory, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
 		if not name:
-			name = "verification_box_%s" % str(uuid.uuid1())
+			name = "vs_%s@%s" % (vm_directory, socket.gethostname())
 		if not image:
 			image = cls._get_newest_image()
 		if not flavor:
