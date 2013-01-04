@@ -1,4 +1,17 @@
-package "haproxy"
+remote_file "haproxy-1.5-dev17.tar.gz" do
+	source "http://haproxy.1wt.eu/download/1.5/src/devel/haproxy-1.5-dev17.tar.gz"
+	mode "0644"
+end
+
+bash "install haproxy-1.5" do
+	user "root"
+	cwd "/tmp"
+	code <<-EOH
+		tar -xf /tmp/haproxy-1.5-dev17.tar.gz
+		cd haproxy-1.5-dev17
+		make install -j 4
+	EOH
+end
 
 bash "compile_webserver" do
 	cwd "#{node[:koality][:source_path][:internal]}/ci/web/back"
@@ -49,7 +62,7 @@ end
 
 supervisor_service "haproxy" do
 	action [:enable, :start]
-	command "haproxy -f #{node[:koality][:source_path][:internal]}/ci/web/back/conf/haproxy/haproxy_prod.conf"
+	command "haproxy -f #{node[:koality][:source_path][:internal]}/ci/web/back/conf/haproxy/haproxy.conf"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/haproxy_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/haproxy_stderr.log"
 	priority 0
