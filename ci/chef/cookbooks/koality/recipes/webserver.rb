@@ -9,7 +9,8 @@ bash "install haproxy-1.5" do
 	code <<-EOH
 		tar -xf /tmp/haproxy-1.5-dev17.tar.gz
 		cd haproxy-1.5-dev17
-		make install -j 4
+		make clean
+		make install USE_OPENSSL=1 -j 4
 	EOH
 end
 
