@@ -8,7 +8,7 @@ dist/
 *~
 *.DS_Store
 *.ignore
-*.log
+*.log*
 *.orig
 *.out
 *.pdf
@@ -16,7 +16,7 @@ dist/
 *.pyc
 *.pyo
 *.rdb
-*.swp
+*.swp*
 
 *.idea
 *.sublime-project

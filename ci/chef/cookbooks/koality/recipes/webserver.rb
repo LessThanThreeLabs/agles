@@ -25,11 +25,11 @@ bash "compile_webserver" do
 	EOH
 end
 
-supervisor_service "redisSessionStore" do
+supervisor_service "redis-sessionStore" do
 	action [:stop]
 end
 
-supervisor_service "redisCreateAccount" do
+supervisor_service "redis-createAccount" do
 	action [:stop]
 end
 
