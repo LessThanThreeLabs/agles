@@ -6,6 +6,14 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from shared.constants import BuildStatus
 from util.mail import sendmail
 
+FAILMAIL_TEMPLATE = """%s %s,
+
+There was an issue with the change you submitted so it was not merged.
+Please fix the change and resubmit it.
+
+Details for your change are available here: %s
+
+-The Koality Team"""
 
 class ChangesUpdateHandler(ModelServerRpcHandler):
 
@@ -47,13 +55,6 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		change_link = "https://getkoality.com/repository/%d/changes/%d/home" % (repo_id, change_id)
 
 		subject = "There was an issue with your change (#%d)" % change_number
-		text = """%s %s,
+		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link)
 
-		There was an issue with the change you submitted so it was not merged.
-		Please fix the change and resubmit it.
-
-		Details for your change are available here: %s
-
-		-The Koality Team""" % (first_name, last_name, change_link)
-
-		sendmail("buildbuddy@getkoality.com", [email], subject, text)
+		return sendmail("buildbuddy@getkoality.com", [email], subject, text)
