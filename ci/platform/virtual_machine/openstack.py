@@ -67,6 +67,8 @@ class OpenstackVm(VirtualMachine):
 			if vm.server.status == 'ERROR':
 				vm.delete()
 				return None
+			elif vm.server.status == 'DELETED':
+				return None
 			return vm
 		except:
 			return None
