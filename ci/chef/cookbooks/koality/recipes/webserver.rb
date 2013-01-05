@@ -1,4 +1,4 @@
-remote_file "haproxy-1.5-dev17.tar.gz" do
+remote_file "/tmp/haproxy-1.5-dev17.tar.gz" do
 	source "http://haproxy.1wt.eu/download/1.5/src/devel/haproxy-1.5-dev17.tar.gz"
 	mode "0644"
 end
