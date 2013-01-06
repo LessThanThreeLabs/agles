@@ -95,7 +95,8 @@ class OpenstackVm(VirtualMachine):
 		self.server.reboot(reboot_type)
 
 	def delete(self):
-		self.server.delete()
+		for server in self.novaclient.findall(name=self.server.name):  # in case of rouges
+			server.delete()
 		os.remove(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE))
 
 	def save_snapshot(self, image_name):
