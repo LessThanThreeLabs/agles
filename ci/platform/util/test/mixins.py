@@ -17,6 +17,9 @@ from database.engine import ConnectionFactory
 from model_server import ModelServer
 from settings.rabbit import connection_info
 
+FILEDIR = os.path.dirname(os.path.realpath(__file__))
+REDISCONF = os.path.join(FILEDIR, '..', '..', 'conf', 'redis', 'filesystem_repo_server_redis.conf')
+
 
 class BaseTestMixin(object):
 	"""A base class for testing mixins."""
@@ -67,8 +70,7 @@ class RabbitMixin(BaseTestMixin):
 
 
 class RepoStoreTestMixin(BaseTestMixin):
-	def _modify_commit_push(self, repo, filename, contents, parent_commits=None,
-	                        refspec="HEAD:master"):
+	def _modify_commit_push(self, repo, filename, contents, parent_commits=None, refspec="HEAD:master"):
 		with open(os.path.join(repo.working_dir, filename), "w") as f:
 			f.write(contents)
 		repo.index.add([filename])
@@ -80,7 +82,7 @@ class RepoStoreTestMixin(BaseTestMixin):
 class RedisTestMixin(BaseTestMixin):
 	def _start_redis(self):
 		self._redis_process = subprocess.Popen(
-			"redis-server",
+			["redis-server", REDISCONF],
 			stderr=subprocess.PIPE,
 			stdout=subprocess.PIPE)
 
