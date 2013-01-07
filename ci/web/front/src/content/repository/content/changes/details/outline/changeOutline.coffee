@@ -14,6 +14,52 @@ class ChangeOutline.Model extends Backbone.Model
 			return changeModel.get 'beginTime'
 
 
+	fetchStages: () =>
+		@changeOutlineStageModels.reset()
+
+		requestData =
+			method: 'getBuildConsoleIds'
+			args:
+				changeId: globalRouterModel.get('changeId')
+		socket.emit 'buildOutputs:read', requestData, (error, results) =>
+			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
+				console.error error
+			else
+				@_processBuildOutputIds results
+
+
+	_processBuildOutputIds: (buildOutputs) =>
+		console.log 'need to process this stuff...'
+	# 	consoleOutputModels = []
+	# 	consoleOutputModels = consoleOutputModels.concat @_getConsoleOutputModelsForType buildOutputs, 'compile'
+	# 	consoleOutputModels = consoleOutputModels.concat @_getConsoleOutputModelsForType buildOutputs, 'test'
+
+	# 	@consoleTextOutputModels.reset consoleOutputModels,
+	# 		error: (model, error) => console.error error
+
+
+	# _getConsoleOutputModelsForType: (buildOutputs, type) =>
+	# 	consoleOutputModels = []
+
+	# 	for buildOutput in buildOutputs
+	# 		if buildOutput[type]?
+	# 			for buildOutputId in buildOutput[type]
+	# 				consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
+
+	# 	return consoleOutputModels
+
+
+	onUpdate: (data) =>
+		console.log 'need to handle update!'
+		console.log data
+		# if data.type is 'consoles added'
+		# 	for subtypeName, buildOutputId of data.contents.console_map
+		# 		consoleOutputModel = new ConsoleTextOutput.Model id: buildOutputId
+		# 		@consoleTextOutputModels.add consoleOutputModel,
+		# 			error: (model, error) => console.error error
+
+
 class ChangeOutline.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeOutline'
