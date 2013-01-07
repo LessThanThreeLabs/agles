@@ -22,12 +22,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		prev_change_number = 0
 
-		repo_id_query = commit.select().where(commit.c.id==commit_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			commit_result = sqlconn.execute(repo_id_query).first()
-			if not commit_result:
-				raise NoSuchCommitError(commit_id)
-			repo_id = commit_result[commit.c.repo_id]
 			change_number_query = select([func.max(change.c.number)], commit.c.repo_id==repo_id, [change, commit])
 			max_change_number_result = sqlconn.execute(change_number_query).first()
 			if max_change_number_result and max_change_number_result[0]:

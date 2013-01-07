@@ -1,3 +1,4 @@
+import logging
 import random
 import socket
 
@@ -8,6 +9,7 @@ from settings.rabbit import connection_info
 
 class TaskWorker(object):
 	def __init__(self, connection=None):
+		self.logger = logging.getLogger("TaskWorker")
 		random.seed()
 		self.worker_id = str(random.random())[2:]
 		self.connection = connection if connection else Connection(connection_info)
@@ -58,7 +60,7 @@ class TaskWorker(object):
 			self.do_cleanup(self.results)
 			self._stop_listening()
 		except Exception as e:
-			print e
+			logger.error(e)
 		finally:
 			self.allocated = False
 			print "Worker %s freed" % self.worker_id
