@@ -102,11 +102,9 @@ class ChangesList.View extends Backbone.View
 	HEIGHT_BEFORE_FETCHING_MORE_CHANGES: 200
 	tagName: 'div'
 	className: 'changesList'
-	html: '<div class="changesListContainer">
-			<div class="changesListSearchContainer"></div>
-			<div class="changesListPanel">
-				<div class="changesListPanelContainer"></div>
-			</div>
+	html: '<div class="changesListSearchContainer"></div>
+		<div class="changesListPanel">
+			<div class="changesListPanelContainer"></div>
 		</div>'
 	events:	'scroll': '_scrollHandler'
 	changeViews: []

@@ -1,28 +1,21 @@
 div.changesList {
-	display: table-cell;
-	width: 175px;
+	display: table;
+	width: 100%;
 	height: 100%;
-	border-right: #DDDDDD solid 1px;
 
-	.changesListContainer {
-		display: table;
-		width: 100%;
-		height: 100%;
+	.changesListSearchContainer {
+		display: table-row;
+		height: 25px;
+	}
 
-		.changesListSearchContainer {
-			display: table-row;
-			height: 25px;
-		}
+	.changesListPanel {
+		display: table-row;
 
-		.changesListPanel {
-			display: table-row;
-
-			.changesListPanelContainer {
-				width: 100%;
-				height: 100%;
-				overflow-x: visible;
-				overflow-y: auto;
-			}
+		.changesListPanelContainer {
+			width: 100%;
+			height: 100%;
+			overflow-x: visible;
+			overflow-y: auto;
 		}
 	}
 }

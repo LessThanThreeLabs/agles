@@ -5,27 +5,40 @@ class RepositoryChanges.Model extends Backbone.Model
 
 	initialize: () =>
 		@changesListModel = new ChangesList.Model()
-		@changeDetailsModel = new ChangeDetails.Model()
 
 
 class RepositoryChanges.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryChanges'
-	html: ''
+	html: '<div class="changesListContainer"></div>
+		<div class="changeDetailsContainer"></div>'
+	currentDetailsView: null
 
 
 	initialize: () =>
 		@changesListView = new ChangesList.View model: @model.changesListModel
-		@changeDetailsView = new ChangeDetails.View model: @model.changeDetailsModel
+
+		globalRouterModel.on 'change:changeId', @_renderCurrentDetailsView, @
 
 
 	onDispose: () =>
+		globalRouterModel.off null, null, @
+
 		@changesListView.dispose()
-		@changeDetailsView.dispose()
+		@currentDetailsView.dispose() if @currentDetailsView?
 
 
 	render: () =>
 		@$el.html @html
-		@$el.append @changesListView.render().el
-		@$el.append @changeDetailsView.render().el
+		@$('.changesListContainer').html @changesListView.render().el
+		@_renderCurrentDetailsView()
 		return @
+
+
+	_renderCurrentDetailsView: () =>
+		if globalRouterModel.get('changeId')?
+			changeDetailsModel = new ChangeDetails.Model()
+			@currentDetailsView = new ChangeDetails.View model: changeDetailsModel
+			@$('.changeDetailsContainer').html @currentDetailsView.render().el
+		else
+			@$('.changeDetailsContainer').html 'something cool should go here!!'

@@ -4,27 +4,24 @@ window.ChangeDetails = {}
 class ChangeDetails.Model extends Backbone.Model
 
 	initialize: () =>
-		@consoleCompilationOutputModel = new ConsoleCompilationOutput.Model()
+		@changeOutlineModel = new ChangeOutline.Model()
 
 
 class ChangeDetails.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeDetails'
-	html: '<div class="changeDetailsContentContainer">
-				<div class="changeDetailsContent"></div>
-			</div>'
-	currentView: null
+	html: '<div class="changeDetailsContent"></div>'
 
 
 	initialize: () =>
-		@compilationView = new ConsoleCompilationOutput.View model: @model.consoleCompilationOutputModel
+		@changeOutlineView = new ChangeOutline.View model: @model.changeOutlineModel
 
 
 	onDispose: () =>
-		@compilationView.dispose()
+		@changeOutlineView.dispose()
 
 
 	render: () =>
 		@$el.html @html
-		@$('.changeDetailsContent').html @compilationView.render().el
+		@$('.changeDetailsContent').html @changeOutlineView.render().el
 		return @
