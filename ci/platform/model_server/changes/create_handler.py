@@ -23,7 +23,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		prev_change_number = 0
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			change_number_query = select([func.max(change.c.number)], commit.c.repo_id==repo_id, [change, commit])
+			change_number_query = select([func.max(change.c.number)], change.c.repo_id==repo_id)
 			max_change_number_result = sqlconn.execute(change_number_query).first()
 			if max_change_number_result and max_change_number_result[0]:
 				prev_change_number = max_change_number_result[0]
