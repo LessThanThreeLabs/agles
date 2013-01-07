@@ -18,10 +18,10 @@ class ChangeOutlineStage.Model extends Backbone.Model
 	defaults:
 		type: null
 		title: null
-		status: null
+		status: ChangeOutlineStage.AllowedStatuses.QUEUED
 		beginTime: null
 		endTime: null
-	subscribeUrl: 'changes'
+	subscribeUrl: 'buildOutputs'
 	subscribeId: null
 
 
@@ -54,6 +54,11 @@ class ChangeOutlineStage.Model extends Backbone.Model
 			return new Error 'Invalid end time: ' + attributes.endTime
 
 		return
+
+
+	onUpdate: (data) =>
+		console.log 'need to handle new data...'
+		console.log data
 
 
 class ChangeOutlineStage.View extends Backbone.View

@@ -21,33 +21,35 @@ class ChangeOutline.Model extends Backbone.Model
 			method: 'getBuildConsoleIds'
 			args:
 				changeId: globalRouterModel.get('changeId')
-		socket.emit 'buildOutputs:read', requestData, (error, results) =>
+		socket.emit 'buildOutputs:read', requestData, (error, outputFromAllBuilds) =>
 			if error?
 				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
 			else
-				@_processBuildOutputIds results
+				@_processBuildOutputIds outputFromAllBuilds
 
 
-	_processBuildOutputIds: (buildOutputs) =>
-		console.log 'need to process this stuff...'
-	# 	consoleOutputModels = []
-	# 	consoleOutputModels = consoleOutputModels.concat @_getConsoleOutputModelsForType buildOutputs, 'compile'
-	# 	consoleOutputModels = consoleOutputModels.concat @_getConsoleOutputModelsForType buildOutputs, 'test'
+	_processBuildOutputIds: (outputFromAllBuilds) =>
+		changeStageModels = []
+		changeStageModels = changeStageModels.concat @_getChangeStageModelsForType outputFromAllBuilds, 'setup'
+		changeStageModels = changeStageModels.concat @_getChangeStageModelsForType outputFromAllBuilds, 'compile'
+		changeStageModels = changeStageModels.concat @_getChangeStageModelsForType outputFromAllBuilds, 'test'
 
-	# 	@consoleTextOutputModels.reset consoleOutputModels,
-	# 		error: (model, error) => console.error error
+		@changeOutlineStageModels.reset changeStageModels,
+			error: (model, error) => console.error error
 
 
-	# _getConsoleOutputModelsForType: (buildOutputs, type) =>
-	# 	consoleOutputModels = []
+	_getChangeStageModelsForType: (outputFromAllBuilds, type) =>
+		changeStageModels = []
 
-	# 	for buildOutput in buildOutputs
-	# 		if buildOutput[type]?
-	# 			for buildOutputId in buildOutput[type]
-	# 				consoleOutputModels.push new ConsoleTextOutput.Model id: buildOutputId
+		for outputFromSingleBuild in outputFromAllBuilds
+			if outputFromSingleBuild[type]?
+				for buildOutputId in outputFromSingleBuild[type]
+					changeStageModels.push new ChangeOutlineStage.Model 
+						id: buildOutputId
+						type: type
 
-	# 	return consoleOutputModels
+		return changeStageModels
 
 
 	onUpdate: (data) =>
