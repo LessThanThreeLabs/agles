@@ -26,13 +26,15 @@ class TaskWorker(object):
 				routing_key=worker_pool_queue.routing_key)
 		with self.connection.Consumer([self.own_queue], callbacks=[self._assigned], auto_declare=False) as self.consumer:
 			self.consumer.qos(prefetch_count=1)
-			while not self.allocated:
+			self.waiting = True
+			while self.waiting:
 				self.connection.drain_events()
 
 	def _assigned(self, body, message):
 		assert body["type"] == "assign"
 		assert self.allocated == False
 		self.allocated = True
+		self.waiting = False
 		try:
 			self.consumer.cancel()
 			self.do_setup(body["message"])
