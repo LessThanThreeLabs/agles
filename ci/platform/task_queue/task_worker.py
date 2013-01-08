@@ -61,7 +61,7 @@ class TaskWorker(object):
 			self.do_cleanup(self.results)
 			self._stop_listening()
 		except Exception as e:
-			logger.error(e)
+			self.logger.error(e)
 		finally:
 			self.allocated = False
 			print "Worker %s freed" % self.worker_id
