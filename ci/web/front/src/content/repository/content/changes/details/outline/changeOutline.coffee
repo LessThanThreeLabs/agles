@@ -48,6 +48,7 @@ class ChangeOutline.Model extends Backbone.Model
 					changeStageModels.push new ChangeOutlineStage.Model 
 						id: buildOutputId
 						type: type
+						title: 'hello'
 
 		return changeStageModels
 

@@ -87,4 +87,5 @@ class ChangeOutlineStage.View extends Backbone.View
 
 
 	_clickHandler: (event) =>
-		console.log 'clicked!'
+		globalRouterModel.set 'changeView', @model.get('title'),
+			error: (model, error) => console.error error
