@@ -64,8 +64,10 @@ class ChangeOutlineStage.Model extends Backbone.Model
 class ChangeOutlineStage.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeOutlineStage'
-	template: Handlebars.compile '<div class=changeOutlineStageTitle">{{title}}</div>
-		<div class="changeOutlineStageStatus">{{status}}</div>'
+	template: Handlebars.compile '<div class="changeOutlineStageContents">
+			<div class="changeOutlineStageTitle">{{title}}</div>
+			<div class="changeOutlineStageStatus">{{status}}</div>
+		</div>'
 	events: 'click': '_clickHandler'
 
 

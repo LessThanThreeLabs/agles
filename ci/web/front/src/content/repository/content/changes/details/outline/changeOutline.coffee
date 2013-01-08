@@ -8,6 +8,8 @@ class ChangeOutline.Model extends Backbone.Model
 	initialize: () =>
 		@subscribeId = globalRouterModel.get 'changeId'
 
+		@changeOutlineHomeStageModel = new ChangeOutlineHomeStage.Model()
+
 		@changeOutlineStageModels = new Backbone.Collection()
 		@changeOutlineStageModels.model = ChangeOutlineStage.Model
 		@changeOutlineStageModels.comparator = (changeModel) =>
@@ -71,6 +73,8 @@ class ChangeOutline.View extends Backbone.View
 
 
 	initialize: () =>
+		@changeOutlineHomeStageView = new ChangeOutlineHomeStage.View model: @model.changeOutlineHomeStageModel
+
 		@model.changeOutlineStageModels.on 'reset', @_addInitialStages, @
 		@model.changeOutlineStageModels.on 'add', @_addStage, @
 
@@ -84,17 +88,18 @@ class ChangeOutline.View extends Backbone.View
 		@model.unsubscribe()
 		@model.changeOutlineStageModels.off null, null, @
 
+		@changeOutlineHomeStageView.dispose()
 		@_removeStages()
 
 
 	render: () =>
 		@$el.html @html
+		@$el.append @changeOutlineHomeStageView.render().el
 		@_addInitialStages()
 		return @
 
 
 	_addInitialStages: () =>
-		@$el.html @html
 		@_removeStages()
 
 		@model.changeOutlineStageModels.each (changeOutlineStageModel) =>
