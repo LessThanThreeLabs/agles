@@ -10,7 +10,6 @@ exports.create = (modelRpcConnection) ->
 class ChangesReadHandler extends Handler
 
 	default: (socket, data, callback) =>
-		assert.ok socket.session.userId?
 		assert.ok data.id?
 		userId = socket.session.userId
 
@@ -43,17 +42,55 @@ class ChangesReadHandler extends Handler
 						if error.type is 'InvalidPermissionsError' then callback 403
 						else callback 'unable to get changes'
 					else
-						sanitizedChanges = (@_sanitizeChange change, args.repositoryId for change in changes)
+						sanitizedChanges = (@_sanitizeChange change for change in changes)
 						callback null, sanitizedChanges
 
 
-	_sanitizeChange: (change, repositoryId) =>
+	getChangeMetadata: (socket, data, callback) =>
+		assert.ok data.id?
+		userId = socket.session.userId
+
+		if not userId?
+			callback 403
+			return
+		
+		@modelRpcConnection.changes.read.get_change_metadata userId, data.id, (error, metadata) =>
+			if error?
+				if error.type is 'InvalidPermissionsError' then callback 403
+				else callback 'unable to get metadata'
+			else
+				callback null, @_sanitizeMetadata metadata
+
+
+	_sanitizeMetadata: (metadata) =>
+		change: @_sanitizeChange metadata.change 
+		commit: @_sanitizeCommit metadata.commit
+		user: @_sanitizeUser metadata.user
+
+
+	_sanitizeChange: (change) =>
 		id: change.id
-		repositoryId: repositoryId
+		mergeTarget: change.merge_target
+		repositoryId: change.repo_id
 		number: change.number
 		status: change.status
 		startTime: change.start_time
 		endTime: change.end_time
+
+
+	_sanitizeUser: (user) =>
+		id: user.id
+		email: user.email
+		firstName: user.first_name
+		lastName: user.lastName
+
+
+	_sanitizeCommit: (commit) =>
+		id: commit.id
+		repositoryId: commit.repo_id
+		userId: commit.user_id
+		message: commit.message
+		timestamp: commit.timestamp
 
 
 	_sanitizeBuild: (build) =>

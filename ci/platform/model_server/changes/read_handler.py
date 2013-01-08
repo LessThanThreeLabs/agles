@@ -47,8 +47,31 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			if has_repo_permissions(user_id, repo_id):
 				return to_dict(row, change.columns, tablename=change.name)
 			else:
-				raise InvalidPermissionsError("user_id: %d, repo_id: %d"
-												% (user_id, repo_id))
+				raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
+		return {}
+
+	def get_change_metadata(self, user_id, change_id):
+		change = database.schema.change
+		commit = database.schema.commit
+		user = database.schema.user
+
+		query = change.join(commit).join(user).select().apply_labels().where(change.c.id==change_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+
+		if row:
+			repo_id = row[change.c.repo_id]
+			if has_repo_permissions(user_id, repo_id):
+				user_dict = to_dict(row, user.columns, tablename=user.name)
+				change_dict = to_dict(row, change.columns, tablename=change.name)
+				commit_dict = to_dict(row, commit.columns, tablename=commit.name)
+				return {
+					'user': user_dict,
+					'change': change_dict,
+					'commit': commit_dict,
+				}
+			else:
+				raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 		return {}
 
 	def get_visible_builds_from_change_id(self, user_id, change_id):
@@ -67,8 +90,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			if has_repo_permissions(user_id, repo_id):
 				return self.get_builds_from_change_id(change_id)
 			else:
-				raise InvalidPermissionsError("user_id: %d, repo_id: %d"
-												% (user_id, repo_id))
+				raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
 		return {}
 
 	# TODO (jchu): This query is SLOW AS BALLS
@@ -80,8 +102,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 
 		if not has_repo_permissions(user_id, repo_id):
-			raise InvalidPermissionsError("user_id: %d, repo_id %d"
-											% (user_id, repo_id))
+			raise InvalidPermissionsError("user_id: %d, repo_id %d" % (user_id, repo_id))
 
 		query_string = "%" + query_string + "%"
 
