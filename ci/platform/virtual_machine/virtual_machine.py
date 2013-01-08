@@ -34,7 +34,7 @@ class VirtualMachine(object):
 
 	def remote_checkout(self, git_url, refs, output_handler=None):
 		host_url = git_url[:git_url.find(":")]
-		self.ssh_call("mkdir ~/.ssh; ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
+		self.ssh_call("mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
 		pubkey = self.ssh_call("cat .ssh/id_rsa.pub").output
 		alias = str(uuid.uuid1()) + "_box"
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
