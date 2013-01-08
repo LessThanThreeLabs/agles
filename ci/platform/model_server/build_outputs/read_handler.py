@@ -44,6 +44,7 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 				return RepositoryPermissions.has_permissions(
 					row[permission.c.permissions], RepositoryPermissions.R)
 
+	# deprecated?
 	def get_build_console_ids(self, user_id, build_id):
 		if not self._has_permission(user_id, build_id):
 			raise InvalidPermissionsError("user_id: %d, build_id: %d" % (user_id, build_id))
@@ -66,6 +67,19 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 			sorted_v = sorted(v, key=lambda tup: tup[0])
 			result[k] = [row_id for priority, row_id in sorted_v]
 		return result
+
+	def get_build_consoles(self, user_id, build_id):
+		if not self._has_permission(user_id, build_id):
+			raise InvalidPermissionsError("user_id: %d, build_id: %d" % (user_id, build_id))
+
+		build_console = database.schema.build_console
+
+		query = build_console.select().where(
+			build_console.c.build_id==build_id
+		)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			return [to_dict(row, build_console.columns) for row in sqlconn.execute(query)]
 
 	def _has_build_console_permission(self, user_id, build_console_id):
 		build_console = database.schema.build_console
