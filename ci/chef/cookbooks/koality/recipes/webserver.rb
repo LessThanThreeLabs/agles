@@ -25,11 +25,11 @@ bash "compile_webserver" do
 	EOH
 end
 
-supervisor_service "redisSessionStore" do
+supervisor_service "redis-sessionStore" do
 	action [:stop]
 end
 
-supervisor_service "redisCreateAccount" do
+supervisor_service "redis-createAccount" do
 	action [:stop]
 end
 
@@ -43,20 +43,20 @@ end
 
 supervisor_service "redis-sessionStore" do
 	action [:enable, :start]
-	command "redis-server conf/redis/sessionStoreRedis.conf"
+	command "redis-server #{node[:koality][:source_path][:internal]}/ci/web/back/conf/redis/sessionStoreRedis.conf"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/redis-sessionStore_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/redis-sessionStore_stderr.log"
-	directory "#{node[:koality][:source_path][:internal]}/ci/web/back"
+	directory "#{node[:koality][:source_path][:internal]}/ci/production"
 	user node[:koality][:user]
 	priority 0
 end
 
 supervisor_service "redis-createAccount" do
 	action [:enable, :start]
-	command "redis-server conf/redis/createAccountRedis.conf"
+	command "redis-server #{node[:koality][:source_path][:internal]}/ci/web/back/conf/redis/createAccountRedis.conf"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/redis-createAccount_stout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/redis-createAccount_stderr.log"
-	directory "#{node[:koality][:source_path][:internal]}/ci/web/back"
+	directory "#{node[:koality][:source_path][:internal]}/ci/production"
 	user node[:koality][:user]
 	priority 0
 end

@@ -22,7 +22,7 @@ end
 def system(package_name, package_version)
 	package package_name do
 		version package_version if package_version
-		options("--force-yes")
+		options "--force-yes"
 	end
 end
 
@@ -30,6 +30,7 @@ def pip(package_name, package_version)
 	python_pip package_name do
 		virtualenv node[:koality][:languages][:python][:virtualenv].to_s
 		version package_version if package_version
+		options "--use-mirrors"
 		action :install
 	end
 end

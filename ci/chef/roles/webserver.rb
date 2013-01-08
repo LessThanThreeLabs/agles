@@ -9,7 +9,7 @@ default_attributes(
 			:internal => "/home/lt3/code/agles",
 		},
 		:supervisor => {
-			:logdir => "/home/lt3/code/agles/ci/production/supervisor/log",
+			:logdir => "/home/lt3/code/agles/ci/production/logs/supervisor",
 		}
 	}
 )

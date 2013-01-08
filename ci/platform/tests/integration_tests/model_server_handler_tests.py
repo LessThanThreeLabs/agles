@@ -6,17 +6,14 @@ from model_server.build_outputs import ConsoleType
 from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler
 from util.permissions import RepositoryPermissions
 from util.test import BaseIntegrationTest
-from util.test.mixins import RedisTestMixin
 
 
-class BuildsUpdateHandlerTest(BaseIntegrationTest, RedisTestMixin):
+class BuildsUpdateHandlerTest(BaseIntegrationTest):
 	def setUp(self):
 		super(BuildsUpdateHandlerTest, self).setUp()
-		self._start_redis()
 
 	def tearDown(self):
 		super(BuildsUpdateHandlerTest, self).tearDown()
-		self._stop_redis()
 
 	def _initialize(self):
 		with ConnectionFactory.get_sql_connection() as sqlconn:

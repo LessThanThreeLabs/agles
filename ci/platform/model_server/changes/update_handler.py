@@ -15,6 +15,7 @@ Details for your change are available here: %s
 
 -The Koality Team"""
 
+
 class ChangesUpdateHandler(ModelServerRpcHandler):
 
 	def __init__(self):

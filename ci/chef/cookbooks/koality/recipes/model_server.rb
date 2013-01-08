@@ -5,10 +5,6 @@ supervisor_service "model_server" do
 	directory "/tmp/model_server"
 end
 
-supervisor_service "redis-repostore" do
-	action [:stop]
-end
-
 directory "/tmp/model_server" do
 	owner node[:koality][:user]
 	group node[:koality][:user]
@@ -21,14 +17,5 @@ supervisor_service "model_server" do
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/model_server_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/model_server_stderr.log"
 	user node[:koality][:user]
-	priority 1
-end
-
-supervisor_service "redis-repostore" do
-	action [:enable, :start]
-	command "redis-server"
-	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/redis-repostore_stdout.log"
-	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/redis-repostore_stderr.log"
-	user node[:koality][:user]
-	priority 0
+	priority 2
 end

@@ -4,8 +4,6 @@ import uuid
 
 from subprocess import Popen, PIPE, STDOUT
 
-import eventlet
-
 from eventlet.green import select
 from shared.constants import VerificationUser
 from util import greenlets
@@ -28,8 +26,7 @@ class VirtualMachine(object):
 		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=self.vm_directory,
 				env=env)
 
-		output_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
-		output_lines = output_greenlet.wait()
+		output_lines = self._handle_stream(process.stdout, output_handler)
 
 		output = "\n".join(output_lines)
 		returncode = process.poll()
@@ -37,7 +34,7 @@ class VirtualMachine(object):
 
 	def remote_checkout(self, git_url, refs, output_handler=None):
 		host_url = git_url[:git_url.find(":")]
-		self.ssh_call("mkdir ~/.ssh; ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
+		self.ssh_call("mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
 		pubkey = self.ssh_call("cat .ssh/id_rsa.pub").output
 		alias = str(uuid.uuid1()) + "_box"
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)

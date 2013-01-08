@@ -82,8 +82,10 @@ class OpenstackVm(VirtualMachine):
 
 	def wait_until_ready(self):
 		while not (self.server.accessIPv4 and self.server.status == 'ACTIVE'):
-			eventlet.sleep((100 - self.server.progress) / 10.0)  # 0-10 seconds depending on progress
+			eventlet.sleep(1)
 			self.server = self.nova_client.servers.get(self.server.id)
+			if self.server.status == 'ERROR':
+				self.rebuild()
 
 	def provision(self, role, output_handler=None):
 		return self.ssh_call("sudo chef-solo -o role[%s]" % role, output_handler)

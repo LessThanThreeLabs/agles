@@ -1,3 +1,4 @@
+import logging
 import random
 import socket
 
@@ -8,6 +9,7 @@ from settings.rabbit import connection_info
 
 class TaskWorker(object):
 	def __init__(self, connection=None):
+		self.logger = logging.getLogger("TaskWorker")
 		random.seed()
 		self.worker_id = str(random.random())[2:]
 		self.connection = connection if connection else Connection(connection_info)
@@ -24,13 +26,17 @@ class TaskWorker(object):
 				routing_key=worker_pool_queue.routing_key)
 		with self.connection.Consumer([self.own_queue], callbacks=[self._assigned], auto_declare=False) as self.consumer:
 			self.consumer.qos(prefetch_count=1)
-			self.connection.drain_events()
+			self.waiting = True
+			while self.waiting:
+				self.connection.drain_events()
 
 	def _assigned(self, body, message):
 		assert body["type"] == "assign"
 		assert self.allocated == False
 		self.allocated = True
+		self.waiting = False
 		try:
+			self.consumer.cancel()
 			self.do_setup(body["message"])
 			self._begin_listening(body["task_queue"], ack=message.delivery_tag)
 		except Exception as e:
@@ -40,7 +46,6 @@ class TaskWorker(object):
 			self._freed()
 
 	def _begin_listening(self, shared_queue_name, ack):
-		self.consumer.cancel()
 		shared_queue = Queue(shared_queue_name)
 		try:
 			with self.connection.Consumer([shared_queue], callbacks=[self._handle_task], auto_declare=False) as self.consumer:
@@ -58,7 +63,7 @@ class TaskWorker(object):
 			self.do_cleanup(self.results)
 			self._stop_listening()
 		except Exception as e:
-			print e
+			self.logger.error(e)
 		finally:
 			self.allocated = False
 			print "Worker %s freed" % self.worker_id
