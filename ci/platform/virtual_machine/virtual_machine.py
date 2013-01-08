@@ -4,8 +4,6 @@ import uuid
 
 from subprocess import Popen, PIPE, STDOUT
 
-import eventlet
-
 from eventlet.green import select
 from shared.constants import VerificationUser
 from util import greenlets
@@ -28,8 +26,7 @@ class VirtualMachine(object):
 		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=self.vm_directory,
 				env=env)
 
-		output_greenlet = eventlet.spawn(self._handle_stream, process.stdout, output_handler)
-		output_lines = output_greenlet.wait()
+		output_lines = self._handle_stream(process.stdout, output_handler)
 
 		output = "\n".join(output_lines)
 		returncode = process.poll()
