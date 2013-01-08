@@ -17,10 +17,11 @@ ChangeOutlineStage.AllowedStatuses =
 class ChangeOutlineStage.Model extends Backbone.Model
 	defaults:
 		type: null
-		title: null
+		name: null
 		status: ChangeOutlineStage.AllowedStatuses.QUEUED
 		beginTime: null
 		endTime: null
+		selected: false
 	subscribeUrl: 'buildOutputs'
 	subscribeId: null
 
@@ -28,24 +29,28 @@ class ChangeOutlineStage.Model extends Backbone.Model
 	initialize: () =>
 		@subscribeId = @get 'id'
 
+		if globalRouterModel.get('changeView') is @get('name')
+			@set 'selected', true,
+				error: (model, error) => console.error error
+
 
 	validate: (attributes) =>
 		foundType = false
-		for type of ChangeOutlineStage.AllowedTypes
-			foundType = true if type is attributes.type
+		for typeName, typeValue of ChangeOutlineStage.AllowedTypes
+			foundType = true if typeValue is attributes.type
 
 		if not foundType
 			return new Error 'Invaild type: ' + attributes.type
 
 		foundStatus = false
-		for status of ChangeOutlineStage.AllowedStatuses
-			foundStatus = true if status is attributes.status
+		for statusName, statusValue of ChangeOutlineStage.AllowedStatuses
+			foundStatus = true if statusValue is attributes.status
 
 		if not foundStatus
 			return new Error 'Invaild status: ' + attributes.status
 
-		if typeof attributes.title isnt 'string' or attributes.title is ''
-			return new Error 'Invalid title: ' + attributes.title
+		if typeof attributes.name isnt 'string' or attributes.name is ''
+			return new Error 'Invalid name: ' + attributes.name
 
 		if attributes.beginTime? and (typeof attributes.beginTime isnt 'number' or attributes.beginTime < 0)
 			return new Error 'Invalid begin time: ' + attributes.beginTime
@@ -65,7 +70,7 @@ class ChangeOutlineStage.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeOutlineStage'
 	template: Handlebars.compile '<div class="changeOutlineStageContents">
-			<div class="changeOutlineStageTitle">{{title}}</div>
+			<div class="changeOutlineStageName">{{name}}</div>
 			<div class="changeOutlineStageStatus">{{status}}</div>
 		</div>'
 	events: 'click': '_clickHandler'
@@ -73,21 +78,33 @@ class ChangeOutlineStage.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change', @render, @
+		globalRouterModel.on 'change:changeView', (() =>
+			@model.set 'selected', globalRouterModel.get('changeView') is @model.get('name'),
+				error: (model, error) => console.error error
+		), @
+
 		@model.subscribe()
 
 
 	onDispose: () =>
 		@model.off null, null, @
+		globalRouterModel.off null, null, @
+
 		@model.unsubscribe()
 
 
 	render: () =>
 		@$el.html @template
-			title: @model.get 'title'
+			name: @model.get 'name'
 			status: @model.get 'status'
+		@_fixSelectedState()
 		return @
 
 
+	_fixSelectedState: () =>
+		@$el.toggleClass 'selected', @model.get 'selected'
+
+
 	_clickHandler: (event) =>
-		globalRouterModel.set 'changeView', @model.get('title'),
+		globalRouterModel.set 'changeView', @model.get('name'),
 			error: (model, error) => console.error error
