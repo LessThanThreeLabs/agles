@@ -58,4 +58,6 @@ test:
         - nosetests -sv --tc=fakeVerifier:True
         - cd ../web/back
         - npm test
+        - exit 1
       timeout: 120
+      
