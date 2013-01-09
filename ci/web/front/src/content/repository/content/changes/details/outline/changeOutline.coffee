@@ -65,6 +65,12 @@ class ChangeOutline.Model extends Backbone.Model
 		# 			error: (model, error) => console.error error
 
 
+	getBuildOutputIdForBuildNameIdentifier: (buildNameIdentifier) =>
+		changeOutlineStageWithName = @changeOutlineStageModels.find (changeOutlineStageModel) =>
+			return changeOutlineStageModel.getNameIdendtifier() is buildNameIdentifier
+		return changeOutlineStageWithName?.get 'id'
+
+
 class ChangeOutline.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeOutline'

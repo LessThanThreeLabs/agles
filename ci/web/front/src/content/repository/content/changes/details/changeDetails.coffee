@@ -14,6 +14,7 @@ class ChangeDetails.View extends Backbone.View
 			<div class="changeDetailsOutlineContainer"></div>
 			<div class="changeDetailsStageContainer"></div>
 		</div>'
+	_currentStageView = null
 
 
 	initialize: () =>
@@ -26,6 +27,7 @@ class ChangeDetails.View extends Backbone.View
 		globalRouterModel.off null, null, @
 
 		@changeOutlineView.dispose()
+		@_currentStageView.dispose() if @_currentStageView?
 
 
 	render: () =>
@@ -36,7 +38,18 @@ class ChangeDetails.View extends Backbone.View
 
 
 	_updateStageView: () =>
+		@_currentStageView.dispose() if @_currentStageView?
+
 		if globalRouterModel.get('changeView') is 'home'
+			@_currentStageView = null
 			@$('.changeDetailsStageContainer').html 'hello'
 		else
-			@$('.changeDetailsStageContainer').html 'there'
+			buildOutputId = @model.changeOutlineModel.getBuildOutputIdForBuildNameIdentifier globalRouterModel.get 'changeView'
+
+			if buildOutputId?
+				consoleTextOutputModel = new ConsoleTextOutput.Model id: buildOutputId
+				@_currentStageView = new ConsoleTextOutput.View model: consoleTextOutputModel
+				@$('.changeDetailsStageContainer').html @_currentStageView.render().el
+			else
+				@_currentStageView = null
+				@$('.changeDetailsStageContainer').html 'bad'

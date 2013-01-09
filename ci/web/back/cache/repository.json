@@ -90,6 +90,7 @@
 			"/js/src/content/repository/content/admin/content/repositoryAdminContent.js",
 			"/js/src/content/repository/content/admin/repositoryAdmin.js",
 
+			"/js/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutput.js",
 			"/js/src/content/repository/content/changes/details/outline/stage/home/changeOutlineHomeStage.js",
 			"/js/src/content/repository/content/changes/details/outline/stage/changeOutlineStage.js",
 			"/js/src/content/repository/content/changes/details/outline/changeOutline.js",

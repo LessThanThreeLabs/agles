@@ -21,6 +21,11 @@ class GlobalRouterModel extends Backbone.Model
 			@set attributesToSet,
 				error: (model, error) => console.error error
 
+		if @get('changeId')? and not @get('changeView')?
+			attributesToSet = changeView: 'home'
+			@set attributesToSet,
+				error: (model, error) => console.error error
+
 
 	_navigate: () =>
 		assert.ok @get('repositoryId')?
