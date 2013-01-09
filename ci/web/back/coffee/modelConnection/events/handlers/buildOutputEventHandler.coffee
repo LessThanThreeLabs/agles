@@ -17,16 +17,16 @@ class BuildOutputEventHandler extends EventHandler
 		eventName = @EVENT_PREFIX + data.id
 		
 		switch data.type
-			when 'line added'
+			when 'new output'
 				@sockets.in(roomName).emit eventName,
 					type: data.type
-					contents: @_sanitizeLineAdded data.contents
+					contents: data.contents
 			when 'return code added'
 				# do nothing
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 
 
-	_sanitizeLineAdded: (data) =>
-		number: data.line_num
-		text: data.line
+	# _sanitizeLineAdded: (data) =>
+	# 	number: data.line_num
+	# 	text: data.line

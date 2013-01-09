@@ -17,36 +17,31 @@ class ConsoleTextOutput.Model extends Backbone.Model
 				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
 			else
-				@_addLines result.consoleOutput
+				@_addInitialLines result.consoleOutput
 
 
-	_addLines: (consoleOutput) =>
+	_addInitialLines: (consoleOutput) =>
 		linesToAdd = []
 		for number, text of consoleOutput
 			assert.ok not isNaN parseInt number
-
-			lineToAdd =
-				number: parseInt number
-				text: text
-			linesToAdd.push lineToAdd
-
-		linesToAdd.sort (first, second) =>
-			return first.number - second.number
+			linesToAdd[number] = text
 
 		@set 'lines', linesToAdd,
 			error: (model, error) => console.error error
 
 
 	onUpdate: (data) =>
-		if data.type is 'line added'
-			assert.ok data.contents.number? and data.contents.text?
-			lineToAdd =
-				number: data.contents.number
-				text: data.contents.text
-			@get('lines').push lineToAdd
-			@trigger 'lineAdded', lineToAdd
-		else
-			console.error 'Unaccounted for update type: ' + data.type
+		return if  data.type isnt 'new output'
+
+		for lineNumber, lineText of data.contents.new_lines
+			assert.ok lineNumber >= 0
+
+			if @get('lines')[lineNumber]?
+				@get('lines')[lineNumber] = lineText
+				@trigger 'lineUpdated', lineNumber, lineText
+			else
+				@get('lines')[lineNumber] = lineText
+				@trigger 'lineAdded', lineNumber, lineText
 
 
 class ConsoleTextOutput.View extends Backbone.View
@@ -57,6 +52,7 @@ class ConsoleTextOutput.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change:lines', @_addInitialLines, @
+		@model.on 'lineUpdated', @_handleLineUpdated, @
 		@model.on 'lineAdded', @_handleAddLine, @
 
 		@model.subscribe()
@@ -78,23 +74,41 @@ class ConsoleTextOutput.View extends Backbone.View
 		@$('.consoleTextOutputContent').empty()
 
 		htmlToAdd = []
-		for line in @model.get 'lines'
-			htmlToAdd.push @_createLineHtml line
+		for text, number in @model.get 'lines'
+			htmlToAdd.push @_createLineHtml number, text
 
 		@$('.consoleTextOutputContent').html htmlToAdd.join '\n'
 
 
-	_createLineHtml: (line) =>
-		return "<div class='consoleTextOutputLine' lineNumber='#{line.number}'>
-				<span class='consoleTextOutputLineNumber'>#{line.number}</span>
-				<span class='consoleTextOutputLineText'>#{line.text}</span>
+	_createLineHtml: (number, text='') =>
+		return "<div class='consoleTextOutputLine' lineNumber='#{number}'>
+				<span class='consoleTextOutputLineNumber'>#{number}</span>
+				<span class='consoleTextOutputLineText'>#{text}</span>
 			</div>"
 
 
-	_handleAddLine: (line) =>
-		lineHtml = @_createLineHtml line
+	_handleLineUpdated: (number, text) =>
+		oldLine = $(".consoleTextOutputContent .consoleTextOutputLine[lineNumber=#{number}]")
+		oldLine.find('.consoleTextOutputLineText').html text
 
-		if line.number == 0 
+
+	_handleAddLine: (number, text) =>
+		@_addMissingLines number
+
+		lineHtml = @_createLineHtml number, text
+		@_addLineInCorrectPosition lineHtml, number
+
+
+	_addMissingLines: (number) =>
+		numberLines = $('.consoleTextOutputContent .consoleTextOutputLine').length
+
+		for index in [numberLines...number]
+			lineHtml = @_createLineHtml index, ''
+			@_addLineInCorrectPosition lineHtml, index
+
+
+	_addLineInCorrectPosition: (lineHtml, lineNumber) =>
+		if lineNumber is 0
 			@$('.consoleTextOutputContent').prepend lineHtml
 		else 
-			@$('.consoleTextOutputContent .consoleTextOutputLine:nth-child(' + line.number + ')').after lineHtml
+			@$('.consoleTextOutputContent .consoleTextOutputLine:nth-child(' + lineNumber + ')').after lineHtml
