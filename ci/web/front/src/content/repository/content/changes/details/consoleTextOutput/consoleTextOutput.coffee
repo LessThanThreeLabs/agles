@@ -30,7 +30,8 @@ class ConsoleTextOutput.Model extends Backbone.Model
 				text: text
 			linesToAdd.push lineToAdd
 
-		console.log 'need to sort these lines!!'
+		linesToAdd.sort (first, second) =>
+			return first.number - second.number
 
 		@set 'lines', linesToAdd,
 			error: (model, error) => console.error error
