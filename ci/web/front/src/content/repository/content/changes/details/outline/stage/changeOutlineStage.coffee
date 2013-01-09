@@ -29,7 +29,7 @@ class ChangeOutlineStage.Model extends Backbone.Model
 	initialize: () =>
 		@subscribeId = @get 'id'
 
-		if globalRouterModel.get('changeView') is @get('name')
+		if globalRouterModel.get('changeView') is @getNameIdendtifier()
 			@set 'selected', true,
 				error: (model, error) => console.error error
 
@@ -61,6 +61,10 @@ class ChangeOutlineStage.Model extends Backbone.Model
 		return
 
 
+	getNameIdendtifier: () =>
+		return @get('type') + ':' + @get('name')
+
+
 	onUpdate: (data) =>
 		console.log 'need to handle new data...'
 		console.log data
@@ -79,7 +83,7 @@ class ChangeOutlineStage.View extends Backbone.View
 	initialize: () =>
 		@model.on 'change', @render, @
 		globalRouterModel.on 'change:changeView', (() =>
-			@model.set 'selected', globalRouterModel.get('changeView') is @model.get('name'),
+			@model.set 'selected', globalRouterModel.get('changeView') is @model.getNameIdendtifier(),
 				error: (model, error) => console.error error
 		), @
 
@@ -106,5 +110,5 @@ class ChangeOutlineStage.View extends Backbone.View
 
 
 	_clickHandler: (event) =>
-		globalRouterModel.set 'changeView', @model.get('name'),
+		globalRouterModel.set 'changeView', @model.getNameIdendtifier(),
 			error: (model, error) => console.error error

@@ -50,7 +50,7 @@ class ChangeOutline.Model extends Backbone.Model
 					changeStageModels.push new ChangeOutlineStage.Model 
 						id: buildOutputId
 						type: type
-						name: 'hello'
+						name: 'hello ' + Math.round(Math.random() * 1000)
 
 		return changeStageModels
 
