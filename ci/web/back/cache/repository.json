@@ -29,6 +29,7 @@
 			"/css/src/content/repository/content/admin/content/repositoryAdminContent.css",
 			"/css/src/content/repository/content/admin/repositoryAdmin.css",
 
+			"/css/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutput.css",
 			"/css/src/content/repository/content/changes/details/outline/stage/home/changeOutlineHomeStage.css",
 			"/css/src/content/repository/content/changes/details/outline/stage/changeOutlineStage.css",
 			"/css/src/content/repository/content/changes/details/outline/changeOutline.css",

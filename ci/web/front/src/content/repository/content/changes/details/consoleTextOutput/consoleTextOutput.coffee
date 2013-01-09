@@ -84,7 +84,10 @@ class ConsoleTextOutput.View extends Backbone.View
 
 
 	_createLineHtml: (line) =>
-		return "<div class='consoleTextOutputLine' lineNumber='#{line.number}'>#{line.text}</div>"
+		return "<div class='consoleTextOutputLine' lineNumber='#{line.number}'>
+				<span class='consoleTextOutputLineNumber'>#{line.number}</span>
+				<span class='consoleTextOutputLineText'>#{line.text}</span>
+			</div>"
 
 
 	_handleAddLine: (line) =>
