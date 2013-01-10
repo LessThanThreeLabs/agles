@@ -22,7 +22,7 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 	_addInitialLines: (consoleOutput) =>
 		console.log 'THIS NEEDS TO BE FIXED TO ASSUME DISPLAYING AT 1, NOT 0'
-		
+
 		linesToAdd = []
 		for number, text of consoleOutput
 			assert.ok not isNaN parseInt number
@@ -95,10 +95,14 @@ class ConsoleTextOutput.View extends Backbone.View
 
 
 	_handleAddLine: (number, text) =>
+		scrolledToBottom = @_isScrolledToBottom()
+
 		@_addMissingLines number
 
 		lineHtml = @_createLineHtml number, text
 		@_addLineInCorrectPosition lineHtml, number
+
+		@_scrollToBottom() if scrolledToBottom
 
 
 	_addMissingLines: (number) =>
@@ -114,3 +118,17 @@ class ConsoleTextOutput.View extends Backbone.View
 			@$('.consoleTextOutputContent').prepend lineHtml
 		else 
 			@$('.consoleTextOutputContent .consoleTextOutputLine:nth-child(' + lineNumber + ')').after lineHtml
+
+
+	_isScrolledToBottom: () =>
+		return @$('.consoleTextOutputContent').outerHeight() -
+			Math.abs(@$('.consoleTextOutputContent').offset().top) -
+			@$el.height() - @$el.offset().top <= 0
+
+
+	_scrollToBottom: () =>
+		animationProperties = scrollTop: @$('.consoleTextOutputContent').outerHeight()
+		animationOptions =
+			duration: 1000
+			queue: false
+		@$el.animate animationProperties, animationOptions
