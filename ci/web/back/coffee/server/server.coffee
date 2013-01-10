@@ -118,6 +118,7 @@ class Server
 
 	_configureServer: (expressServer) =>
 		# ORDER IS IMPORTANT HERE!!!!
+		expressServer.use express.favicon 'front/favicon.ico'
 		expressServer.use express.cookieParser()
 		expressServer.use express.query()
 		expressServer.use express.session
