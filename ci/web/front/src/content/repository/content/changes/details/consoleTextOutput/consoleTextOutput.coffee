@@ -21,11 +21,9 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 
 	_addInitialLines: (consoleOutput) =>
-		console.log 'THIS NEEDS TO BE FIXED TO ASSUME DISPLAYING AT 1, NOT 0'
-
 		linesToAdd = []
 		for number, text of consoleOutput
-			assert.ok not isNaN parseInt number
+			assert.ok number > 0   # lines[0] will be undefined
 			linesToAdd[number] = text
 
 		@set 'lines', linesToAdd,
@@ -36,7 +34,7 @@ class ConsoleTextOutput.Model extends Backbone.Model
 		return if  data.type isnt 'new output'
 
 		for lineNumber, lineText of data.contents.new_lines
-			assert.ok lineNumber >= 0
+			assert.ok lineNumber > 0
 
 			if @get('lines')[lineNumber]?
 				@get('lines')[lineNumber] = lineText
@@ -77,6 +75,7 @@ class ConsoleTextOutput.View extends Backbone.View
 
 		htmlToAdd = []
 		for text, number in @model.get 'lines'
+			continue if number is 0
 			htmlToAdd.push @_createLineHtml number, text
 
 		@$('.consoleTextOutputContent').html htmlToAdd.join '\n'
@@ -108,16 +107,16 @@ class ConsoleTextOutput.View extends Backbone.View
 	_addMissingLines: (number) =>
 		numberLines = $('.consoleTextOutputContent .consoleTextOutputLine').length
 
-		for index in [numberLines...number]
+		for index in [(numberLines+1)...number]
 			lineHtml = @_createLineHtml index, ''
 			@_addLineInCorrectPosition lineHtml, index
 
 
 	_addLineInCorrectPosition: (lineHtml, lineNumber) =>
-		if lineNumber is 0
+		if lineNumber is 1
 			@$('.consoleTextOutputContent').prepend lineHtml
 		else 
-			@$('.consoleTextOutputContent .consoleTextOutputLine:nth-child(' + lineNumber + ')').after lineHtml
+			@$('.consoleTextOutputContent .consoleTextOutputLine:nth-child(' + (lineNumber-1) + ')').after lineHtml
 
 
 	_isScrolledToBottom: () =>
