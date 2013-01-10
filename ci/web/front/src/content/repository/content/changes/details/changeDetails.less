@@ -9,8 +9,20 @@ div.changeDetails {
 		left: 0px;
 		right: 0px;
 		bottom: 0px;
-		overflow-y: auto;
 		background-color: #202020;
 		color: #E0E0E0;
+
+		@outlineHeight: 60px;
+		.changeDetailsOutlineContainer {
+			height: @outlineHeight;
+		}
+
+		.changeDetailsStageContainer {
+			position: absolute;
+			top: @outlineHeight;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+		}
 	}
 }

@@ -21,6 +21,8 @@ class ConsoleTextOutput.Model extends Backbone.Model
 
 
 	_addInitialLines: (consoleOutput) =>
+		console.log 'THIS NEEDS TO BE FIXED TO ASSUME DISPLAYING AT 1, NOT 0'
+		
 		linesToAdd = []
 		for number, text of consoleOutput
 			assert.ok not isNaN parseInt number
