@@ -126,6 +126,8 @@ class ChangesList.View extends Backbone.View
 		@model.changeModels.off null, null, @
 		globalRouterModel.off null, null, @
 
+		@model.reset()
+
 		@_disposeAllChanges()
 		@changesListSearchView.dispose()
 
@@ -147,7 +149,7 @@ class ChangesList.View extends Backbone.View
 	_disposeAllChanges: () =>
 		for changeView in @changeViews
 			changeView.dispose()
-		@changeViews = []
+		@changeViews.length = 0  # yes, this is the proper way to clear an array
 
 
 	_scrollHandler: () =>
