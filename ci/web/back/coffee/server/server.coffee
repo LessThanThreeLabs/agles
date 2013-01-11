@@ -33,7 +33,7 @@ exports.create = (configurationParams, modelConnection, port) ->
 		cert: fs.readFileSync configurationParams.security.certificate
 		ca: fs.readFileSync configurationParams.security.certrequest
 
-	filesSuffix = '_' + (new Date()).getTime()
+	filesSuffix = '_' + (new Date()).getTime().toString 36
 	handlers =
 		welcomeHandler: WelcomeHandler.create configurationParams, stores, modelConnection, filesSuffix
 		accountHandler: AccountHandler.create configurationParams, stores, modelConnection, filesSuffix
