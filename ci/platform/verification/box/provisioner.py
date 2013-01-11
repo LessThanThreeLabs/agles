@@ -31,17 +31,25 @@ class Provisioner(object):
 		self.handle_config(config, source_path)
 
 	def handle_config(self, config, source_path):
-		languages, setup_steps = self.parse_languages(config)
-		setup_steps = setup_steps + self.parse_setup(config, source_path)
+		languages, language_steps = self.parse_languages(config)
+		setup_steps = self.parse_setup(config, source_path)
 		#compile_steps = self.parse_compile(config)
 		#test_steps = self.parse_test(config)
-		self._provision(languages, setup_steps)
+		self._provision(language_steps, setup_steps)
 
-	def _provision(self, languages, setup_steps):
-		for step in setup_steps:
-			results = step.execute()
-			if results.returncode != 0:
-				raise ProvisionFailedException("%s failed with return code %d" % (step.commands, results.returncode))
+	def _provision(self, language_steps, setup_steps):
+		self.run_setup_steps(language_steps, action_name='Language configuration')
+		self.run_setup_steps(setup_steps)
+
+	def run_setup_steps(self, setup_steps, action_name='Setup'):
+		script = ''.join(map(lambda step: step.to_subshell_command(), setup_steps))
+		script_path = '/tmp/setup-script'
+		with open(script_path, 'w') as setup_script:
+			setup_script.write(script)
+			results = SetupCommand.execute_script(script_path)
+		os.remove(script_path)
+		if results.returncode != 0:
+			raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))
 
 	def parse_languages(self, config):
 		if not 'languages' in config or len(config['languages']) == 0:
