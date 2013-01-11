@@ -29,7 +29,7 @@ class LanguageParser(object):
 	def validate_python(self, version):
 		if not os.access(os.path.join(self._virtualenv_path(), str(version)), os.F_OK):
 			raise InvalidConfigurationException("Python version %s not supported" % version)
-		return version, [SetupCommand("echo \"source ~/virtualenvs/%s/bin/activate\" >> .bashrc")]
+		return version, [SetupCommand("echo \"source ~/virtualenvs/%s/bin/activate\" >> ~/.bashrc" % version)]
 
 	def _virtualenv_path(self):
 		return os.path.join(os.environ['HOME'], 'virtualenvs')
@@ -42,7 +42,7 @@ class LanguageParser(object):
 		else:
 			print "Ruby version %s not pre-installed, attempting to install" % version
 			setup_steps = [SetupCommand("rvm install %s" % version)]
-		setup_steps.append(SetupCommand("echo \"rvm use %s > /dev/null\" >> .bashrc" % version))
+		setup_steps.append(SetupCommand("echo \"rvm use %s > /dev/null\" >> ~/.bashrc" % version))
 		return version, setup_steps
 
 	def _rvm_command(self, shell_command):
@@ -52,11 +52,11 @@ class LanguageParser(object):
 		strip_ansi = re.compile("\033\[[0-9;]+m")
 		nvm_output = subprocess.check_output(shlex.split(self._nvm_command("source ~/nvm.sh > /dev/null; nvm ls %s" % version)))
 		installed_version = strip_ansi.sub("", nvm_output).split()[0]
-		setup_steps = [SetupCommand("echo \"source ~/nvm.sh > /dev/null\" >> .bashrc")]
+		setup_steps = [SetupCommand("echo \"source ~/nvm.sh > /dev/null\" >> ~/.bashrc")]
 		if installed_version == 'N/A':
 			print "Nodejs version %s not pre-installed, attempting to install" % version
 			setup_steps.append(SetupCommand("nvm install %s" % version))
-		setup_steps.append(SetupCommand("echo \"nvm use %s > /dev/null\" >> .bashrc"))
+		setup_steps.append(SetupCommand("echo \"nvm use %s > /dev/null\" >> ~/.bashrc" % version))
 		return version, setup_steps
 
 	def _nvm_command(self, shell_command):
