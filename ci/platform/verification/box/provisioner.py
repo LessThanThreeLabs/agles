@@ -18,21 +18,24 @@ class Provisioner(object):
 		}
 
 	def provision(self, config_path=None, source_path=None):
-		if not config_path:
-			if not source_path:
-				source_path = os.path.join(os.environ['HOME'], 'source')
-			config_path = os.path.join(source_path, 'koality.yml')
-		elif not source_path:
-			source_path = os.path.dirname(config_path)
-		source_path = os.path.abspath(source_path)
-		config_path = os.path.abspath(config_path)
-		with open(config_path) as config_file:
-			config = yaml.load(config_file.read())
-		self.handle_config(config, source_path)
+		try:
+			if not config_path:
+				if not source_path:
+					source_path = os.path.join(os.environ['HOME'], 'source')
+				config_path = os.path.join(source_path, 'koality.yml')
+			elif not source_path:
+				source_path = os.path.dirname(config_path)
+			source_path = os.path.abspath(source_path)
+			config_path = os.path.abspath(config_path)
+			with open(config_path) as config_file:
+				config = yaml.load(config_file.read())
+			self.handle_config(config, source_path)
+		except Exception as e:
+			print "%s: %s" % (type(e).__name__, e.message)
 
 	def handle_config(self, config, source_path):
-		languages, language_steps = self.parse_languages(config)
-		setup_steps = self.parse_setup(config, source_path)
+		language_steps, setup_steps = self.parse_languages(config)
+		setup_steps = setup_steps + self.parse_setup(config, source_path)
 		#compile_steps = self.parse_compile(config)
 		#test_steps = self.parse_test(config)
 		self._provision(language_steps, setup_steps)

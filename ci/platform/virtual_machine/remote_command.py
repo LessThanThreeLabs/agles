@@ -57,12 +57,11 @@ class SimpleRemoteCheckoutCommand(SimpleRemoteSetupCommand):
 
 
 class SimpleRemoteProvisionCommand(SimpleRemoteSetupCommand):
-	def __init__(self, role=None):
-		super(SimpleRemoteProvisionCommand, self).__init__("chef")
-		self.role = role
+	def __init__(self):
+		super(SimpleRemoteProvisionCommand, self).__init__("provision")
 
 	def run(self, virtual_machine, output_handler=None):
-		results = virtual_machine.provision(role=self.role, output_handler=output_handler)
+		results = virtual_machine.provision(output_handler=output_handler)
 		if output_handler:
 			output_handler.set_return_code(results.returncode)
 		return results.returncode

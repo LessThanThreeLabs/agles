@@ -16,20 +16,21 @@ class LanguageParser(object):
 		}
 
 	def parse_languages(self, language_config):
-		languages = {}
+		language_steps = []
 		setup_steps = []
 		for language, version in language_config.items():
 			try:
-				languages[language], steps = self.language_dispatcher[language](version)
+				new_language_steps, new_setup_steps = self.language_dispatcher[language](version)
 			except KeyError:
 				raise InvalidConfigurationException("Unsupported language: %s" % language)
-			setup_steps = setup_steps + steps
-		return languages, setup_steps
+			language_steps = language_steps + new_language_steps
+			setup_steps = setup_steps + new_setup_steps
+		return language_steps, setup_steps
 
 	def validate_python(self, version):
 		if not os.access(os.path.join(self._virtualenv_path(), str(version)), os.F_OK):
 			raise InvalidConfigurationException("Python version %s not supported" % version)
-		return version, [SetupCommand("echo \"source ~/virtualenvs/%s/bin/activate\" >> ~/.bashrc" % version), SetupCommand("python --version")]
+		return [SetupCommand("echo \"source ~/virtualenvs/%s/bin/activate\" >> ~/.bashrc" % version)], [SetupCommand("python --version")]
 
 	def _virtualenv_path(self):
 		return os.path.join(os.environ['HOME'], 'virtualenvs')
@@ -43,8 +44,7 @@ class LanguageParser(object):
 			print "Ruby version %s not pre-installed, attempting to install" % version
 			setup_steps = [SetupCommand("rvm install %s" % version)]
 		setup_steps.append(SetupCommand("echo \"rvm use %s > /dev/null\" >> ~/.bashrc" % version))
-		setup_steps.append(SetupCommand("ruby --version"))
-		return version, setup_steps
+		return setup_steps, [SetupCommand("ruby --version")]
 
 	def _rvm_command(self, shell_command):
 		return "bash --login -c %s" % pipes.quote(shell_command)
@@ -58,8 +58,7 @@ class LanguageParser(object):
 			print "Nodejs version %s not pre-installed, attempting to install" % version
 			setup_steps.append(SetupCommand("nvm install %s" % version))
 		setup_steps.append(SetupCommand("echo \"nvm use %s > /dev/null\" >> ~/.bashrc" % version))
-		setup_steps.append(SetupCommand("node --version"))
-		return version, setup_steps
+		return setup_steps, [SetupCommand("node --version")]
 
 	def _nvm_command(self, shell_command):
 		return "bash --login -c %s" % pipes.quote(shell_command)

@@ -69,6 +69,9 @@ class OpenstackVm(VirtualMachine):
 				return None
 			elif vm.server.status == 'DELETED':
 				return None
+			elif vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
+				vm.delete()
+				return None
 			return vm
 		except:
 			return None
@@ -87,8 +90,8 @@ class OpenstackVm(VirtualMachine):
 			if self.server.status == 'ERROR':
 				self.rebuild()
 
-	def provision(self, role, output_handler=None):
-		return self.ssh_call("sudo chef-solo -o role[%s]" % role, output_handler)
+	def provision(self, output_handler=None):
+		return self.ssh_call("python -c \"from verification.box.provisioner import Provisioner\nProvisioner().provision()", output_handler)
 
 	def ssh_call(self, command, output_handler=None):
 		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)

@@ -87,8 +87,8 @@ class VirtualMachineBuildCore(BuildCore):
 
 	def setup_virtual_machine(self, console_appender, setup_commands=[]):
 		"""Provisions the contained virtual machine for analysis and test running"""
-		chef_command = SimpleRemoteProvisionCommand("verification_box_run")
-		setup_commands = setup_commands + [chef_command]
+		provision_command = SimpleRemoteProvisionCommand()
+		setup_commands = setup_commands + [provision_command]
 		self.declare_commands(console_appender, ConsoleType.Setup, setup_commands)
 		for setup_command in setup_commands:
 			self.run_setup_command(setup_command, console_appender)

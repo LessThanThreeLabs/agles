@@ -24,22 +24,19 @@ class SetupCommand(object):
 	def execute_script_file(cls, script_file):
 		return StreamingExecutor.execute(shlex.split("sudo -E bash --login -i %s" % pipes.quote(script_file)), output_handler=SimplePrinter())
 
-	def to_shell_command(self, fail_silently=False):
+	def to_shell_command(self):
 		script = ''
 		for command in self.commands:
 			script = script + "echo -e $ %s\n" % pipes.quote(command)
 			script = script + "%s\n" % command
-			script = script + self._check_return_code(fail_silently)
+			script = script + self._check_return_code()
 		return script
 
 	def to_subshell_command(self):
-		return "(%s)\n" % self.to_shell_command(True) + self._check_return_code()
+		return "(%s)\n" % self.to_shell_command() + self._check_return_code()
 
-	def _check_return_code(self, fail_silently=False):
-		failure_command = ('' if fail_silently else "echo \"command failed with return code $r\";") + "exit $r"
-		script = "r=$?\n"
-		script = script + "if [ $r -ne 0 ]; then %s; fi\n" % failure_command
-		return script
+	def _check_return_code(self):
+		return "_r=$?; if [ $_r -ne 0 ]; then exit $_r; fi\n"
 
 
 class SimplePrinter(object):
