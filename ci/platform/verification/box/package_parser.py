@@ -49,9 +49,10 @@ class OmnibusPackageParser(object):
 
 
 class SystemPackageParser(PackageParser):
+	first_run = True
+
 	def __init__(self):
 		super(SystemPackageParser, self).__init__('system')
-		self.first_run = True
 
 	def to_package_string(self, name, version):
 		return "%s=%s" % (name, version)
@@ -61,8 +62,8 @@ class SystemPackageParser(PackageParser):
 
 	def parse_packages(self, packages, source_path):
 		package_steps = super(SystemPackageParser, self).parse_packages(packages, source_path)
-		if self.first_run:
-			self.first_run = False
+		if SystemPackageParser.first_run:
+			SystemPackageParser.first_run = False
 			package_steps = [SetupCommand("apt-get update -y")] + package_steps
 		return package_steps
 

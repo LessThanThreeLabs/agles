@@ -47,7 +47,6 @@ setup:
     - script: ./install_virtualbox.sh
       directory: ci/scripts
     - script: vagrant gem install sahara
-      #user: true
     - script:
         - if [ ! -d "/usr/lib/jvm/java-6-sun" ]
         - then mkdir /tmp/src
