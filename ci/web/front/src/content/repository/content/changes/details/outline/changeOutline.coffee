@@ -20,39 +20,11 @@ class ChangeOutline.Model extends Backbone.Model
 		@changeOutlineStageModels.reset()
 
 		requestData =
-			method: 'getBuildConsoleIds'
-			args:
-				changeId: globalRouterModel.get('changeId')
-		socket.emit 'buildOutputs:read', requestData, (error, outputFromAllBuilds) =>
-			if error?
-				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
-				console.error error
-			else
-				@_processBuildOutputIds outputFromAllBuilds
-
-
-	_processBuildOutputIds: (outputFromAllBuilds) =>
-		changeStageModels = []
-		changeStageModels = changeStageModels.concat @_getChangeStageModelsForType outputFromAllBuilds, 'setup'
-		changeStageModels = changeStageModels.concat @_getChangeStageModelsForType outputFromAllBuilds, 'compile'
-		changeStageModels = changeStageModels.concat @_getChangeStageModelsForType outputFromAllBuilds, 'test'
-
-		@changeOutlineStageModels.reset changeStageModels,
-			error: (model, error) => console.error error
-
-
-	_getChangeStageModelsForType: (outputFromAllBuilds, type) =>
-		changeStageModels = []
-
-		for outputFromSingleBuild in outputFromAllBuilds
-			if outputFromSingleBuild[type]?
-				for buildOutputId in outputFromSingleBuild[type]
-					changeStageModels.push new ChangeOutlineStage.Model 
-						id: buildOutputId
-						type: type
-						name: 'hello ' + Math.round(Math.random() * 1000)
-
-		return changeStageModels
+			method: 'getBuildConsolesForChangeId'
+			args: changeId: globalRouterModel.get('changeId')
+		socket.emit 'buildOutputs:read', requestData, (error, buildOutputs) =>
+			@changeOutlineStageModels.reset buildOutputs,
+				error: (model, error) => console.error error
 
 
 	onUpdate: (data) =>

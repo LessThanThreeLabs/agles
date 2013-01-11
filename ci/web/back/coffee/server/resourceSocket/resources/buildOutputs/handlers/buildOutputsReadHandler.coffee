@@ -50,7 +50,21 @@ class BuildOutputsReadHandler extends Handler
 					else callback 'unable to read build console ids'
 					return
 
-			callback null, [].concat resultLists
+			buildOutputs = []
+			for resultList in resultLists
+				buildOutputs = buildOutputs.concat resultList.map (result) =>
+					return @_sanitizeBuildOutput result
+
+			callback null, buildOutputs
+
+
+	_sanitizeBuildOutput: (buildOutput) =>
+		console.log buildOutput
+		id: buildOutput.id
+		buildId: buildOutput.build_id
+		type: buildOutput.type
+		name: buildOutput.subtype
+		returnCode: buildOutput.return_code
 
 
 	getBuildConsoleIds: (socket, args, callback) =>
