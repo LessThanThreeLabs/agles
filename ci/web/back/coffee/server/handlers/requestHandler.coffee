@@ -61,13 +61,13 @@ module.exports = class Resource
 			console.log 'spdy not supported!'
 			return
 
-		for fileType, files of @getFiles()
+		for files in [@getFiles().js, @getFiles().css]
 			for fileName, file of files
-				@_pushFile request, response, fileName, file, request.gzipAllowed
+				@_pushFile request, response, fileName, file
 
 
-	_pushFile: (request, response, fileName, file, useGzip) =>
-		useGzip = false if not file.gzip?
+	_pushFile: (request, response, fileName, file) =>
+		useGzip = request.gzipAllowed and file.gzip?
 
 		headers = 
 			'content-type': file.contentType
