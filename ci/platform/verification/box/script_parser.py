@@ -19,14 +19,14 @@ class ScriptParser(object):
 		for key, value in script_info.items():
 			if key == 'script':
 				if isinstance(script_info['script'], str):
-					script = [script_info['script']]
-				elif isinstance(script_info['script'], list):
 					script = script_info['script']
+				elif isinstance(script_info['script'], list):
+					script = "\n".join(script_info['script'])
 			elif key == 'directory':
 				directory = os.path.join(source_path, script_info['directory'])
 			else:
 				raise InvalidConfigurationException("Invalid script modifier: (%s: %s)" % (key, value))
 		return self.script_command(script, directory)
 
-	def script_command(self, commands, directory):
-		return SetupCommand(["cd %s" % directory] + commands)
+	def script_command(self, command, directory):
+		return SetupCommand(["cd %s" % directory, command])
