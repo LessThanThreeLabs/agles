@@ -70,7 +70,7 @@ class MemberPermissions.View extends Backbone.View
 		<div class="prettyTableColumn permissionsRadio readPermissionColumn"><input type="radio" value="r" name="{{email}}PermissionsRadio"></div>
 		<div class="prettyTableColumn permissionsRadio readWritePermissionColumn"><input type="radio" value="r/w" name="{{email}}PermissionsRadio"></div>
 		<div class="prettyTableColumn permissionsRadio readWriteAdminPermissionColumn"><input type="radio" value="r/w/a" name="{{email}}PermissionsRadio"></div>
-		<div class="prettyTableColumn removeMemberColumn"><img src="/img/icons/removeMember.svg" class="removeMemberImage"></div>'
+		<div class="prettyTableColumn removeMemberColumn"><img src="/img/icons/removeMember' + filesSuffix + '.svg" class="removeMemberImage"></div>'
 	events:
 		'change .permissionsRadio': '_handlePermissionsChange'
 		'click .removeMemberImage': '_handleRemoveMember'

@@ -5,14 +5,14 @@ RequestHandler = require './requestHandler'
 FilesCacher = require './cache/filesCacher'
 
 
-exports.create = (configurationParams, stores, modelConnection) ->
-	filesCacher = FilesCacher.create configurationParams, './cache/recoverPassword.json'
-	return new RecoverPasswordHandler configurationParams, stores, modelConnection, filesCacher
+exports.create = (configurationParams, stores, modelConnection, filesSuffix) ->
+	filesCacher = FilesCacher.create configurationParams, './cache/recoverPassword.json', filesSuffix
+	return new RecoverPasswordHandler configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 
 class RecoverPasswordHandler extends RequestHandler
-	constructor: (configurationParams, stores, modelConnection, filesCacher) ->
-		super configurationParams, stores, modelConnection, filesCacher
+	constructor: (configurationParams, stores, modelConnection, filesCacher, filesSuffix) ->
+		super configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 
 	handleRequest: (request, response) =>

@@ -2,7 +2,7 @@ assert = require 'assert'
 
 
 module.exports = class Resource
-	constructor: (@configurationParams, @stores, @modelConnection, @filesCacher) ->
+	constructor: (@configurationParams, @stores, @modelConnection, @filesCacher, @filesSuffix) ->
 		assert.ok @configurationParams? and @stores? and @modelConnection? and @filesCacher?
 
 
@@ -46,6 +46,7 @@ module.exports = class Resource
 	getTemplateValues: (request) =>
 		templateValues =
 			userId: request.session.userId
+			filesSuffix: @filesSuffix
 			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString
@@ -72,6 +73,7 @@ module.exports = class Resource
 		headers = 
 			'content-type': file.contentType
 			'content-length': if useGzip then file.gzip.length else file.plain.length
+			'cache-control': 'max-age=2592000'
 		headers['content-encoding'] = 'gzip' if useGzip
 
 		response.push fileName, headers, (error, stream) =>

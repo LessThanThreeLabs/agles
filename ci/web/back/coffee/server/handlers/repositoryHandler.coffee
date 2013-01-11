@@ -5,14 +5,14 @@ RequestHandler = require './requestHandler'
 FilesCacher = require './cache/filesCacher'
 
 
-exports.create = (configurationParams, stores, modelConnection) ->
-	filesCacher = FilesCacher.create configurationParams, './cache/repository.json'
-	return new RepositoryHandler configurationParams, stores, modelConnection, filesCacher
+exports.create = (configurationParams, stores, modelConnection, filesSuffix) ->
+	filesCacher = FilesCacher.create configurationParams, './cache/repository.json', filesSuffix
+	return new RepositoryHandler configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 
 class RepositoryHandler extends RequestHandler
-	constructor: (configurationParams, stores, modelConnection, filesCacher) ->
-		super configurationParams, stores, modelConnection, filesCacher
+	constructor: (configurationParams, stores, modelConnection, filesCacher, filesSuffix) ->
+		super configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 
 	handleRequest: (request, response) =>

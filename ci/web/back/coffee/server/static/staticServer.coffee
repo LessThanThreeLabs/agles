@@ -49,7 +49,7 @@ class StaticServer
 		headers = 
 			'content-type': file.contentType
 			'content-length': if useGzip then file.gzip.length else file.plain.length
-		headers['cache-control'] = 'max-age=2592000' if process.env.NODE_ENV is 'production'
+			'cache-control': 'max-age=2592000'
 
 		if useGzip
 			headers['content-encoding'] = 'gzip' if useGzip

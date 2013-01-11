@@ -3,10 +3,10 @@ window.RepositoryHeaderMenu = {}
 
 class RepositoryHeaderMenu.Model extends Backbone.Model
 	POSSIBLE_MENU_OPTIONS:
-		'source': new RepositoryHeaderMenuOption 'source', 'Source Code', '/img/icons/sourceCode.svg'
-		'changes': new RepositoryHeaderMenuOption 'changes', 'Changes', '/img/icons/changes.svg'
-		'settings': new RepositoryHeaderMenuOption 'settings', 'Settings', '/img/icons/settings.svg'
-		'admin': new RepositoryHeaderMenuOption 'admin', 'Admin', '/img/icons/admin.svg'
+		'source': new RepositoryHeaderMenuOption 'source', 'Source Code', '/img/icons/sourceCode' + filesSuffix + '.svg'
+		'changes': new RepositoryHeaderMenuOption 'changes', 'Changes', '/img/icons/changes' + filesSuffix + '.svg'
+		'settings': new RepositoryHeaderMenuOption 'settings', 'Settings', '/img/icons/settings' + filesSuffix + '.svg'
+		'admin': new RepositoryHeaderMenuOption 'admin', 'Admin', '/img/icons/admin' + filesSuffix + '.svg'
 	defaults:
 		menuOptions: []
 

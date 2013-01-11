@@ -15,7 +15,7 @@ class RepositoryUrlTrinket.Model extends Backbone.Model
 class RepositoryUrlTrinket.View extends Backbone.View
 	tagName: 'div'
 	className: 'repositoryUrlTrinket'
-	template: Handlebars.compile '<img src="/img/icons/link.svg" class="repositoryUrlImage">
+	template: Handlebars.compile '<img src="/img/icons/link' + filesSuffix + '.svg" class="repositoryUrlImage">
 		<div class="repositoryUrlTooltip">
 			git clone <span class="repositoryUrl">{{url}}</span>
 		</div>'

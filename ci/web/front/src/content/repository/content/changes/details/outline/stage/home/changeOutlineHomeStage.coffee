@@ -16,7 +16,7 @@ class ChangeOutlineHomeStage.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeOutlineHomeStage changeOutlineStage'
 	html: '<div class="homeImageContainer">
-			<img src="/img/icons/home.svg" class="homeImage" />
+			<img src="/img/icons/home' + filesSuffix + '.svg" class="homeImage" />
 		</div>'
 	events: 'click': '_clickHandler'
 

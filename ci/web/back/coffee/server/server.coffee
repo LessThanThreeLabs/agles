@@ -33,14 +33,15 @@ exports.create = (configurationParams, modelConnection, port) ->
 		cert: fs.readFileSync configurationParams.security.certificate
 		ca: fs.readFileSync configurationParams.security.certrequest
 
+	filesSuffix = '_' + (new Date()).getTime()
 	handlers =
-		welcomeHandler: WelcomeHandler.create configurationParams, stores, modelConnection
-		accountHandler: AccountHandler.create configurationParams, stores, modelConnection
-		createAccountHandler: CreateAccountHandler.create configurationParams, stores, modelConnection
-		verifyAccountHandler: VerifyAccountHandler.create configurationParams, stores, modelConnection
-		recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection
-		createRepositoryHandler: CreateRepositoryHandler.create configurationParams, stores, modelConnection
-		repositoryHandler: RepositoryHandler.create configurationParams, stores, modelConnection
+		welcomeHandler: WelcomeHandler.create configurationParams, stores, modelConnection, filesSuffix
+		accountHandler: AccountHandler.create configurationParams, stores, modelConnection, filesSuffix
+		createAccountHandler: CreateAccountHandler.create configurationParams, stores, modelConnection, filesSuffix
+		verifyAccountHandler: VerifyAccountHandler.create configurationParams, stores, modelConnection, filesSuffix
+		recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection, filesSuffix
+		createRepositoryHandler: CreateRepositoryHandler.create configurationParams, stores, modelConnection, filesSuffix
+		repositoryHandler: RepositoryHandler.create configurationParams, stores, modelConnection, filesSuffix
 
 	return new Server configurationParams, httpsOptions, port, modelConnection, resourceSocket, stores, handlers, staticServer
 
