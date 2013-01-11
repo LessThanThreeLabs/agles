@@ -46,7 +46,7 @@ class Provisioner(object):
 		script_path = '/tmp/setup-script'
 		with open(script_path, 'w') as setup_script:
 			setup_script.write(script)
-			results = SetupCommand.execute_script_file(script_path)
+		results = SetupCommand.execute_script_file(script_path)
 		os.remove(script_path)
 		if results.returncode != 0:
 			raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))
