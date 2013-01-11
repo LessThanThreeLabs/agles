@@ -18,8 +18,11 @@ class SetupCommand(object):
 
 	@classmethod
 	def execute_script(cls, script):
-		results = StreamingExecutor.execute(shlex.split("sudo -E bash --login -i -c %s" % pipes.quote(script)), output_handler=SimplePrinter())
-		return results
+		return StreamingExecutor.execute(shlex.split("sudo -E bash --login -i -c %s" % pipes.quote(script)), output_handler=SimplePrinter())
+
+	@classmethod
+	def execute_script_file(cls, script_file):
+		return StreamingExecutor.execute(shlex.split("sudo -E bash --login -i %s" % pipes.quote(script_file)), output_handler=SimplePrinter())
 
 	def to_shell_command(self):
 		script = ''
