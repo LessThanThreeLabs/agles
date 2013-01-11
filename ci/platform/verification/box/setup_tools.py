@@ -23,7 +23,7 @@ class SetupCommand(object):
 				script_file.write("echo -e $ %s\n" % pipes.quote(command))
 				script_file.write("%s\n" % command)
 				script_file.write("r=$?\n")
-				script_file.write("if [ $r -ne 0 ]; then echo \"command failed with return code $r\"; exit $r; fi")
+				script_file.write("if [ $r -ne 0 ]; then echo \"command failed with return code $r\"; exit $r; fi\n")
 		results = StreamingExecutor.execute(shlex.split("sudo -E bash --login /tmp/setup-script"), output_handler=SimplePrinter())
 		os.remove("/tmp/setup-script")
 		return results
