@@ -5,6 +5,7 @@ class ChangeDetails.Model extends Backbone.Model
 
 	initialize: () =>
 		@changeOutlineModel = new ChangeOutline.Model()
+		@changeMetadataModel = new ChangeMetadata.Model()
 
 
 class ChangeDetails.View extends Backbone.View
@@ -19,6 +20,7 @@ class ChangeDetails.View extends Backbone.View
 
 	initialize: () =>
 		@changeOutlineView = new ChangeOutline.View model: @model.changeOutlineModel
+		@changeMetadataView = new ChangeMetadata.View model: @model.changeMetadataModel
 
 		globalRouterModel.on 'change:changeView', @_updateStageView, @
 
@@ -42,7 +44,7 @@ class ChangeDetails.View extends Backbone.View
 
 		if globalRouterModel.get('changeView') is 'home'
 			@_currentStageView = null
-			@$('.changeDetailsStageContainer').html 'hello'
+			@$('.changeDetailsStageContainer').html @changeMetadataView.render().el
 		else
 			buildOutputId = @model.changeOutlineModel.getBuildOutputIdForBuildNameIdentifier globalRouterModel.get 'changeView'
 

@@ -30,6 +30,7 @@
 			"/css/src/content/repository/content/admin/repositoryAdmin.css",
 
 			"/css/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutput.css",
+			"/css/src/content/repository/content/changes/details/changeMetadata/changeMetadata.css",
 			"/css/src/content/repository/content/changes/details/outline/stage/home/changeOutlineHomeStage.css",
 			"/css/src/content/repository/content/changes/details/outline/stage/changeOutlineStage.css",
 			"/css/src/content/repository/content/changes/details/outline/changeOutline.css",
@@ -92,6 +93,7 @@
 			"/js/src/content/repository/content/admin/repositoryAdmin.js",
 
 			"/js/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutput.js",
+			"/js/src/content/repository/content/changes/details/changeMetadata/changeMetadata.js",
 			"/js/src/content/repository/content/changes/details/outline/stage/home/changeOutlineHomeStage.js",
 			"/js/src/content/repository/content/changes/details/outline/stage/changeOutlineStage.js",
 			"/js/src/content/repository/content/changes/details/outline/changeOutline.js",
