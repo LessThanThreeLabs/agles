@@ -1,4 +1,3 @@
-import os
 import pipes
 import shlex
 
@@ -14,18 +13,14 @@ class SetupCommand(object):
 		else:
 			raise InvalidConfigurationException("Invalid setup command: %s" % commands)
 
-	def to_shell_command(self):
-		return "bash --login -c %s" % pipes.quote("\n".join(self.commands))
-
 	def execute(self):
-		with open("/tmp/setup-script", "w") as script_file:
-			for command in self.commands:
-				script_file.write("echo -e $ %s\n" % pipes.quote(command))
-				script_file.write("%s\n" % command)
-				script_file.write("r=$?\n")
-				script_file.write("if [ $r -ne 0 ]; then echo \"command failed with return code $r\"; exit $r; fi\n")
-		results = StreamingExecutor.execute(shlex.split("sudo -E bash --login -i /tmp/setup-script"), output_handler=SimplePrinter())
-		os.remove("/tmp/setup-script")
+		script = ''
+		for command in self.commands:
+			script = script + "echo -e $ %s\n" % pipes.quote(command)
+			script = script + "%s\n" % command
+			script = script + "r=$?\n"
+			script = script + "if [ $r -ne 0 ]; then echo \"command failed with return code $r\"; exit $r; fi\n"
+		results = StreamingExecutor.execute(shlex.split("sudo -E bash --login -i -c %s" % pipes.quote(script)), output_handler=SimplePrinter())
 		return results
 
 
