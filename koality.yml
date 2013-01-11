@@ -41,9 +41,9 @@ setup:
       - less
       - directory: ci/web/back
   - databases:
-      - postgres:
-        - name: koality
-          username: lt3
+      postgres:
+      - name: koality
+        username: lt3
 compile:
   - compile_platform:
       path: ci/platform
