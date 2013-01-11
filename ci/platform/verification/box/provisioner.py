@@ -64,7 +64,7 @@ class Provisioner(object):
 		package_steps = []
 		for package_info in package_config:
 			package_type, packages = package_info.items()[0]
-			package_steps = package_steps + OmnibusPackageParser().parse_packages(package_type, packages)
+			package_steps = package_steps + OmnibusPackageParser().parse_packages(package_type, packages, source_path)
 		return package_steps
 
 	def parse_scripts(self, script_config, source_path):

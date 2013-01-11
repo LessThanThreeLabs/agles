@@ -1,3 +1,5 @@
+import os
+
 from setup_tools import InvalidConfigurationException, SetupCommand
 
 
@@ -5,13 +7,13 @@ class PackageParser(object):
 	def __init__(self, package_type):
 		self.package_type = package_type
 
-	def parse_packages(self, packages):
+	def parse_packages(self, packages, source_path):
 		package_steps = []
 		for package in packages:
-			package_steps.append(self.parse_package(package))
+			package_steps.append(self.parse_package(package, source_path))
 		return package_steps
 
-	def parse_package(self, package):
+	def parse_package(self, package, source_path):
 		if isinstance(package, str):
 			package_string = package
 		elif isinstance(package, dict):
@@ -38,12 +40,12 @@ class OmnibusPackageParser(object):
 			'npm': NpmPackageParser()
 		}
 
-	def parse_packages(self, package_type, packages):
+	def parse_packages(self, package_type, packages, source_path):
 		try:
 			parser = self.package_dispatcher[package_type]
 		except KeyError:
 			raise InvalidConfigurationException("Unknown package type: %s" % package_type)
-		return parser.parse_packages(packages)
+		return parser.parse_packages(packages, source_path)
 
 
 class SystemPackageParser(PackageParser):
@@ -57,8 +59,8 @@ class SystemPackageParser(PackageParser):
 	def to_install_string(self, package_string):
 		return "apt-get install %s -y --force-yes" % package_string
 
-	def parse_packages(self, packages):
-		package_steps = super(SystemPackageParser, self).parse_packages(packages)
+	def parse_packages(self, packages, source_path):
+		package_steps = super(SystemPackageParser, self).parse_packages(packages, source_path)
 		if self.first_run:
 			self.first_run = False
 			package_steps = [SetupCommand("apt-get update -y")] + package_steps
@@ -91,7 +93,7 @@ class NpmPackageParser(PackageParser):
 	def __init__(self):
 		super(NpmPackageParser, self).__init__('npm')
 
-	def parse_package(self, package):
+	def parse_package(self, package, source_path):
 		if isinstance(package, str):
 			package_string = package
 		elif isinstance(package, dict):
@@ -99,7 +101,7 @@ class NpmPackageParser(PackageParser):
 				raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
 			package_info = package.items()[0]
 			if package_info[0] == 'directory':
-				return SetupCommand(["cd %s" % package_info[1], "npm install"])
+				return SetupCommand(["cd %s" % os.path.join(source_path, package_info[1]), "npm install"])
 			package_string = self.to_package_string(*package_info)
 		else:
 			raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
