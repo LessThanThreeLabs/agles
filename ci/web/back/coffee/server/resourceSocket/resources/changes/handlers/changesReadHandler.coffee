@@ -82,7 +82,7 @@ class ChangesReadHandler extends Handler
 		id: user.id
 		email: user.email
 		firstName: user.first_name
-		lastName: user.lastName
+		lastName: user.last_name
 
 
 	_sanitizeCommit: (commit) =>
