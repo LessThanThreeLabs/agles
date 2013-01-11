@@ -24,6 +24,8 @@ class Provisioner(object):
 			config_path = os.path.join(source_path, 'koality.yml')
 		elif not source_path:
 			source_path = os.path.dirname(config_path)
+		source_path = os.path.abspath(source_path)
+		config_path = os.path.abspath(config_path)
 		with open(config_path) as config_file:
 			config = yaml.load(config_file.read())
 		self.handle_config(config, source_path)
@@ -83,7 +85,3 @@ class Provisioner(object):
 
 class ProvisionFailedException(Exception):
 	pass
-
-"""
-sudo ln -s `which ruby` /usr/local/bin/ruby
-"""
