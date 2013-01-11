@@ -13,7 +13,7 @@ class StreamingExecutor(object):
 		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=cwd, env=env)
 		output_lines = cls._handle_stream(process.stdout, output_handler)
 		output = "\n".join(output_lines)
-		returncode = process.poll()
+		returncode = process.wait()
 		return CommandResults(returncode, output)
 
 	@classmethod
