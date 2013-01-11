@@ -69,7 +69,7 @@ class Provisioner(object):
 				setup_steps = setup_steps + self.setup_dispatcher[step_type](steps, source_path)
 			except KeyError:
 				raise InvalidConfigurationException("Unknown setup type: %s" % step_type)
-		return setup_steps + [SetupCommand("chown -R $USER:$USER $HOME")]
+		return setup_steps + [SetupCommand("chown -R lt3:lt3 /home/lt3")]
 
 	def parse_packages(self, package_config, source_path):
 		package_steps = []
