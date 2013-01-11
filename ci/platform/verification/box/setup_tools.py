@@ -1,6 +1,7 @@
 import pipes
 import shlex
-import subprocess
+
+from util.streaming_executor import StreamingExecutor
 
 
 class SetupCommand(object):
@@ -16,13 +17,18 @@ class SetupCommand(object):
 		return "bash --login -c %s" % pipes.quote("\n".join(self.commands))
 
 	def execute(self):
-		with open("/tmp/setup-script") as script_file:
+		with open("/tmp/setup-script", "w") as script_file:
 			for command in self.commands:
-				script_file.write("echo -e $ %s" % pipes.quote(command))
-				script_file.write(command)
-				script_file.write("r=$?")
+				script_file.write("echo -e $ %s\n" % pipes.quote(command))
+				script_file.write("%s\n" % command)
+				script_file.write("r=$?\n")
 				script_file.write("if [ $r -ne 0 ]; then echo \"command failed with return code $r\"; exit $r; fi")
-		print subprocess.check_output(shlex.split("bash /tmp/setup-script"))
+		return StreamingExecutor.execute(shlex.split("bash /tmp/setup-script", output_handler=SimplePrinter()))
+
+
+class SimplePrinter(object):
+	def append(self, line_number, line):
+		print "%s: %s" % (line_number, line)
 
 
 class InvalidConfigurationException(Exception):

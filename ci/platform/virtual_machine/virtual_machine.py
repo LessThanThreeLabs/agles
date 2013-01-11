@@ -1,12 +1,8 @@
-import collections
-import os
 import uuid
 
-from subprocess import Popen, PIPE, STDOUT
-
-from eventlet.green import select
 from shared.constants import VerificationUser
 from util import greenlets
+from util.streaming_executor import StreamingExecutor
 from verification.shared.pubkey_registrar import PubkeyRegistrar
 
 
@@ -22,15 +18,7 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	def call(self, command, output_handler=None, env={}, **kwargs):
-		env = dict(os.environ.copy(), **env)
-		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=self.vm_directory,
-				env=env)
-
-		output_lines = self._handle_stream(process.stdout, output_handler)
-
-		output = "\n".join(output_lines)
-		returncode = process.poll()
-		return CommandResults(returncode, output)
+		return StreamingExecutor.execute(command, output_handler, cwd=self.vm_directory, env=env, **kwargs)
 
 	def remote_checkout(self, git_url, refs, output_handler=None):
 		host_url = git_url[:git_url.find(":")]
@@ -51,20 +39,3 @@ class VirtualMachine(object):
 		finally:
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 		return results
-
-	def _handle_stream(self, stream, line_handler):
-		lines = list()
-		while True:
-			select.select([stream], [], [])
-			line = stream.readline()
-			if line == "":
-				break
-			line = line.rstrip()
-			lines.append(line)
-			if line_handler:
-				line_handler.append(len(lines), line)
-		return lines
-
-
-CommandResults = collections.namedtuple(
-	"CommandResults", ["returncode", "output"])
