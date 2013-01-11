@@ -49,12 +49,20 @@ class OmnibusPackageParser(object):
 class SystemPackageParser(PackageParser):
 	def __init__(self):
 		super(SystemPackageParser, self).__init__('system')
+		self.first_run = True
 
 	def to_package_string(self, name, version):
 		return "%s=%s" % (name, version)
 
 	def to_install_string(self, package_string):
-		return "sudo apt-get install %s" % package_string
+		return "apt-get install %s -y --force-yes" % package_string
+
+	def parse_packages(self, packages):
+		package_steps = super(SystemPackageParser, self).parse_packages(packages)
+		if self.first_run:
+			self.first_run = False
+			package_steps = [SetupCommand("apt-get update -y")] + package_steps
+		return package_steps
 
 
 class PipPackageParser(PackageParser):

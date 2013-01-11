@@ -4,7 +4,7 @@ from database_parser import OmnibusDatabaseParser
 from language_parser import LanguageParser
 from package_parser import OmnibusPackageParser
 from script_parser import ScriptParser
-from setup_tools import InvalidConfigurationException
+from setup_tools import InvalidConfigurationException, SetupCommand
 
 
 class Provisioner(object):
@@ -32,12 +32,14 @@ class Provisioner(object):
 		for language in languages:
 			print language
 		for step in setup_steps:
-			step.execute()
+			results = step.execute()
+			if results.returncode != 0:
+				raise ProvisionFailedException("%s failed with return code %d" % (step.commands, results.returncode))
 
 	def parse_languages(self, config):
 		if not 'languages' in config or len(config['languages']) == 0:
 			raise InvalidConfigurationException("No languages specified")
-		return {}, []  # LanguageParser().parse_languages(config['languages'])
+		return LanguageParser().parse_languages(config['languages'])
 
 	def parse_setup(self, config):
 		setup_steps = []
@@ -49,7 +51,7 @@ class Provisioner(object):
 				setup_steps = setup_steps + self.setup_dispatcher[step_type](steps)
 			except KeyError:
 				raise InvalidConfigurationException("Unknown setup type: %s" % step_type)
-		return setup_steps
+		return setup_steps + [SetupCommand("chown -R $USER:$USER $HOME")]
 
 	def parse_packages(self, package_config):
 		package_steps = []
@@ -71,6 +73,9 @@ class Provisioner(object):
 			database_steps = database_steps + OmnibusDatabaseParser().parse_databases(database_type, databases)
 		return database_steps
 
+
+class ProvisionFailedException(Exception):
+	pass
 
 """
 sudo ln -s `which ruby` /usr/local/bin/ruby
