@@ -38,8 +38,6 @@ class Provisioner(object):
 		self._provision(languages, setup_steps)
 
 	def _provision(self, languages, setup_steps):
-		for language_info in languages.items():
-			print "%s: %s" % language_info
 		for step in setup_steps:
 			results = step.execute()
 			if results.returncode != 0:
