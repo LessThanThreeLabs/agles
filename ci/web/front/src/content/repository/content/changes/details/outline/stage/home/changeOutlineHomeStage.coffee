@@ -22,7 +22,8 @@ class ChangeOutlineHomeStage.View extends Backbone.View
 
 
 	initialize: () =>
-		@model.on 'change', @render, @
+		@model.on 'change:selected', @_fixSelectedState, @
+
 		globalRouterModel.on 'change:changeView', (() =>
 			@model.set 'selected', globalRouterModel.get('changeView') is 'home',
 				error: (model, error) => console.error error

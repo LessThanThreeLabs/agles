@@ -82,6 +82,7 @@ class ChangeOutlineStage.View extends Backbone.View
 
 	initialize: () =>
 		@model.on 'change', @render, @
+		
 		globalRouterModel.on 'change:changeView', (() =>
 			@model.set 'selected', globalRouterModel.get('changeView') is @model.getNameIdendtifier(),
 				error: (model, error) => console.error error
