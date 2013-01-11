@@ -27,7 +27,7 @@ class VirtualMachine(object):
 		alias = str(uuid.uuid1()) + "_box"
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
 		try:
-			command = "ssh -q -oStrictHostKeyChecking=no %s true" % host_url  # first, bypass the yes/no prompt
+			command = "ssh -q -oStrictHostKeyChecking=no %s true > /dev/null" % host_url  # first, bypass the yes/no prompt
 			command = command + "&& git clone %s source" % git_url
 			command = command + "&& cd source"
 			command = command + "&& git fetch origin %s" % refs[0]

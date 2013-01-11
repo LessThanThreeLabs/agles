@@ -1,6 +1,5 @@
 import os
 import socket
-import uuid
 
 import eventlet
 import novaclient.client

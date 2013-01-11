@@ -17,12 +17,12 @@ class SetupCommand(object):
 		self.execute_script(self.to_shell_command())
 
 	@classmethod
-	def execute_script(cls, script):
-		return StreamingExecutor.execute(shlex.split("sudo -E bash --login -i -c %s" % pipes.quote(script)), output_handler=SimplePrinter())
+	def execute_script(cls, script, env={}):
+		return StreamingExecutor.execute(shlex.split("sudo -E bash --login -i -c %s" % pipes.quote(script)), output_handler=SimplePrinter(), env=env)
 
 	@classmethod
-	def execute_script_file(cls, script_file):
-		return StreamingExecutor.execute(shlex.split("sudo -E bash --login -i %s" % pipes.quote(script_file)), output_handler=SimplePrinter())
+	def execute_script_file(cls, script_file, env={}):
+		return StreamingExecutor.execute(shlex.split("sudo -E bash --login -i %s" % pipes.quote(script_file)), output_handler=SimplePrinter(), env=env)
 
 	def to_shell_command(self):
 		script = ''
@@ -41,7 +41,7 @@ class SetupCommand(object):
 
 class SimplePrinter(object):
 	def append(self, line_number, line):
-		print "%s: %s" % (line_number, line)
+		print line
 
 
 class InvalidConfigurationException(Exception):
