@@ -47,24 +47,24 @@ setup:
     - script: ./install_virtualbox.sh
       directory: ci/scripts
     - script: vagrant gem install sahara
-      user: true
-    - script: |
-        if [ ! -d "/usr/lib/jvm/java-6-sun" ]
-          then mkdir /tmp/src
-          cd /tmp/src
-          git clone https://github.com/flexiondotorg/oab-java6.git
-          cd /tmp/src/oab-java6
-          ./oab-java.sh
-          add-apt-repository ppa:flexiondotorg/java
-          apt-get update
-        fi
+      #user: true
+    - script:
+        - if [ ! -d "/usr/lib/jvm/java-6-sun" ]
+        - then mkdir /tmp/src
+        - cd /tmp/src
+        - git clone https://github.com/flexiondotorg/oab-java6.git
+        - cd /tmp/src/oab-java6
+        - ./oab-java.sh
+        - add-apt-repository ppa:flexiondotorg/java
+        - apt-get update
+        - fi
   - packages:
     - system:
       - sun-java6-jdk
   - databases:
-      postgres:
-      - name: koality
-        username: lt3
+      - postgres:
+        - name: koality
+          username: lt3
 languages:
   # python: 2.7 # This would put pip packages in a virtualenv
   ruby: 1.9.3
