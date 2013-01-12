@@ -114,7 +114,7 @@ class Server
 
 		@resourceSocket.start server
 
-		console.log 'SERVER STARTED'
+		console.log "SERVER STARTED on port #{@port}".bold.magenta
 
 
 	_configureServer: (expressServer) =>

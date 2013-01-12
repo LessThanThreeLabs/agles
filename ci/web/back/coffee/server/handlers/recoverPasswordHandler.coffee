@@ -6,7 +6,7 @@ FilesCacher = require './cache/filesCacher'
 
 
 exports.create = (configurationParams, stores, modelConnection, filesSuffix) ->
-	filesCacher = FilesCacher.create configurationParams, './cache/recoverPassword.json', filesSuffix
+	filesCacher = FilesCacher.create 'recover password', configurationParams, './cache/recoverPassword.json', filesSuffix
 	return new RecoverPasswordHandler configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 

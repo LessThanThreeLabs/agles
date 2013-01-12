@@ -7,7 +7,7 @@ FilesCacher = require './cache/filesCacher'
 
 
 exports.create = (configurationParams, stores, modelConnection, filesSuffix) ->
-	filesCacher = FilesCacher.create configurationParams, './cache/verifyAccount.json', filesSuffix
+	filesCacher = FilesCacher.create 'verify account', configurationParams, './cache/verifyAccount.json', filesSuffix
 	return new VerifyAccountHandler configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 

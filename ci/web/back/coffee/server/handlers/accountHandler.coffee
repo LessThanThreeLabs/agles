@@ -6,7 +6,7 @@ FilesCacher = require './cache/filesCacher'
 
 
 exports.create = (configurationParams, stores, modelConnection, filesSuffix) ->
-	filesCacher = FilesCacher.create configurationParams, './cache/account.json', filesSuffix
+	filesCacher = FilesCacher.create 'account', configurationParams, './cache/account.json', filesSuffix
 	return new AccountHandler configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 

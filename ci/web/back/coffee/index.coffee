@@ -1,3 +1,4 @@
+colors = require 'colors'
 profiler = require 'nodetime'
 configuration = require('./configuration')
 environment = require('./environment')
