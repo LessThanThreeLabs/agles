@@ -8,7 +8,6 @@ ChangeOutlineStage.AllowedTypes =
 
 
 ChangeOutlineStage.AllowedStatuses =
-	QUEUED: 'queued'
 	RUNNING: 'running'
 	FAILED: 'failed'
 	PASSED: 'passed'
@@ -18,7 +17,7 @@ class ChangeOutlineStage.Model extends Backbone.Model
 	defaults:
 		type: null
 		name: null
-		status: ChangeOutlineStage.AllowedStatuses.QUEUED
+		status: ChangeOutlineStage.AllowedStatuses.RUNNING
 		beginTime: null
 		endTime: null
 		selected: false
