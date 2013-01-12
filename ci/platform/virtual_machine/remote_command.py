@@ -18,7 +18,7 @@ class SimpleRemoteCommand(RemoteCommand):
 		self.name = name
 
 	def _get_command(self):
-		return "scripts/%s/%s" % (self.type, self.name)
+		return "bash --login scripts/%s/%s" % (self.type, self.name)
 
 	def run(self, virtual_machine, output_handler=None):
 		results = virtual_machine.ssh_call(self._get_command(), output_handler)
