@@ -1,7 +1,6 @@
 {
 	"css": {
 		"text/css": [
-			"/css/src/fonts.css",
 			"/css/src/setup.css",
 
 			"/css/src/visualElements/prettyDropdown/prettyDropdown.css",
@@ -56,13 +55,6 @@
 	"img": {
 		"image/png": [
 			"/img/awesomeFace.png"
-		]
-	},
-
-	"font": {
-		"application/x-font-woff": [
-			"/font/lobster/lobster.woff",
-			"/font/ubuntu/ubuntu.woff"
 		]
 	}
 }

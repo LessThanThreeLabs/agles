@@ -60,7 +60,5 @@ class FilesLoader
 
 
 	_getFileNameWithSuffix: (fileName, fileType) =>
-		return fileName if fileType is 'font'
-		
 		lastPeriodIndex = fileName.lastIndexOf '.'
 		return fileName.substr(0, lastPeriodIndex) + @filesSuffix + fileName.substr(lastPeriodIndex)

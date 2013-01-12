@@ -3,7 +3,6 @@
 		"text/css": [
 			"/css/libs/tipped.css",
 
-			"/css/src/fonts.css",
 			"/css/src/setup.css",
 
 			"/css/src/visualElements/prettyDropdown/prettyDropdown.css",
@@ -129,14 +128,6 @@
 			"/img/icons/admin.svg",
 			"/img/icons/removeMember.svg",
 			"/img/icons/home.svg"
-		]
-	},
-
-	"font": {
-		"application/x-font-woff": [
-			"/font/lobster/lobster.woff",
-			"/font/sourceCodePro/sourceCodePro.woff",
-			"/font/ubuntu/ubuntu.woff"
 		]
 	}
 }
