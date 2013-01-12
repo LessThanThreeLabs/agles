@@ -36,14 +36,14 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	def _setup_db_entries(self, REPO_URI):
 		repostore_id = self._create_repo_store()
 		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
-			rpc_conn._create_repo_in_db(1, "repo.git", 'desc', REPO_URI, repostore_id, RepositoryPermissions.RW)
+			rpc_conn._create_repo_in_db(1, "repo.git", 'desc', REPO_URI, repostore_id, RepositoryPermissions.RW, "forwardurl")
 
 	def test_new_sshargs(self):
 		REPO_URI = "schacon/repo.git"
 		self._setup_db_entries(REPO_URI)
 
 		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
-		sshargs = rsh.new_sshargs('git-receive-pack', REPO_URI, "1")
+		sshargs = rsh.rp_new_sshargs('git-receive-pack', REPO_URI, "1")
 
 		assert_equal(len(sshargs), 7)
 		assert_equal('ssh', sshargs[0])
@@ -60,4 +60,4 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._setup_db_entries(REPO_URI)
 
 		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
-		assert_raises(InvalidPermissionsError, rsh.new_sshargs, 'git-upload-pack', REPO_URI, "2")
+		assert_raises(InvalidPermissionsError, rsh.rp_new_sshargs, 'git-upload-pack', REPO_URI, "2")

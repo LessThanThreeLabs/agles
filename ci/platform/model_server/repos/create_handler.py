@@ -15,7 +15,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
-	def create_repo(self, user_id, repo_name, repo_description, default_permissions):
+	def create_repo(self, user_id, repo_name, repo_description, default_permissions, forward_url):
 		try:
 			repo_name += ".git"
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
@@ -23,7 +23,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			uri = self._transpose_to_uri(user_id, repo_name)
 
 			# Set entries in db
-			repo_id = self._create_repo_in_db(user_id, repo_name, repo_description, uri, repostore_id, default_permissions)
+			repo_id = self._create_repo_in_db(user_id, repo_name, repo_description, uri, repostore_id, default_permissions, forward_url)
 			self._grant_permissions(user_id, repo_id, RepositoryPermissions.RWA)
 			# make filesystem changes
 			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name)
@@ -39,13 +39,20 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def _create_repo_on_filesystem(self, manager, repostore_id, repo_id, repo_name):
 		manager.create_repository(repostore_id, repo_id, repo_name)
 
-	def _create_repo_in_db(self, user_id, repo_name, repo_description, uri, repostore_id, default_permissions):
+	def _create_repo_in_db(self, user_id, repo_name, repo_description, uri, repostore_id, default_permissions, forward_url):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id==repostore_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
-			ins = repo.insert().values(name=repo_name, description=repo_description, uri=uri, owner=user_id, repostore_id=repostore_id, default_permissions=default_permissions)
+			ins = repo.insert().values(
+				name=repo_name,
+				description=repo_description,
+				uri=uri,
+				owner=user_id,
+				repostore_id=repostore_id,
+				default_permissions=default_permissions,
+				forward_url=forward_url)
 			result = sqlconn.execute(ins)
 		repo_id = result.inserted_primary_key[0]
 		return repo_id
