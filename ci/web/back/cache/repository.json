@@ -57,6 +57,7 @@
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
 			"/js/libs/jquery.js",
+			"/js/libs/dateFormat.js",
 			"/js/libs/tipped.js",
 			"/js/libs/tippedSkin.js",
 			"/js/libs/handlebars.js",

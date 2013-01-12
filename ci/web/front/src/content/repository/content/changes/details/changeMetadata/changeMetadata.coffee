@@ -3,13 +3,13 @@ window.ChangeMetadata = {}
 
 class ChangeMetadata.Model extends Backbone.Model
 	defaults:
-		submitterEmail: ''
-		submitterFirstName: ''
-		submitterLastName: ''
-		commitMessage: ''
-		commitTime: 0
-		startTime: 0
-		endTime: 0
+		committerEmail: null
+		committerFirstName: null
+		committerLastName: null
+		commitMessage: null
+		commitTime: null
+		startTime: null
+		endTime: null
 
 
 	initialize: () =>
@@ -26,10 +26,14 @@ class ChangeMetadata.Model extends Backbone.Model
 				console.error error
 			else
 				attributesToSet =
-					submitterEmail: changeMetadata.user.email
-					submitterFirstName: changeMetadata.user.firstName
-					submitterLastName: changeMetadata.user.lastName
-					commitMessage: changeMetadata.commit.message
+					committerEmail: 'jordannpotter@gmail.com'
+					committerFirstName: 'Jordan'
+					committerLastName: 'Potter'
+					# committerEmail: changeMetadata.user.email
+					# committerFirstName: changeMetadata.user.firstName
+					# committerLastName: changeMetadata.user.lastName
+					commitMessage: 'a real commit message here with stuff and things'
+					# commitMessage: changeMetadata.commit.message
 					commitTime: changeMetadata.commit.timestamp
 					startTime: changeMetadata.change.startTime
 					endTime: changeMetadata.change.endTime
@@ -38,14 +42,14 @@ class ChangeMetadata.Model extends Backbone.Model
 
 
 	validate: (attributes) =>
-		if typeof attributes.submitterEmail isnt 'string' or attributes.submitterEmail is ''
-			return new Error 'Invalid submitter email: ' + attributes.submitterEmail
+		if typeof attributes.committerEmail isnt 'string' or attributes.committerEmail is ''
+			return new Error 'Invalid committer email: ' + attributes.committerEmail
 
-		if typeof attributes.submitterFirstName isnt 'string' or attributes.submitterFirstName is ''
-			return new Error 'Invalid submitter first name: ' + attributes.submitterFirstName
+		if typeof attributes.committerFirstName isnt 'string' or attributes.committerFirstName is ''
+			return new Error 'Invalid committer first name: ' + attributes.committerFirstName
 
-		if typeof attributes.submitterLastName isnt 'string' or attributes.submitterLastName is ''
-			return new Error 'Invalid submitter last name: ' + attributes.submitterLastName
+		if typeof attributes.committerLastName isnt 'string' or attributes.committerLastName is ''
+			return new Error 'Invalid committer last name: ' + attributes.committerLastName
 
 		if typeof attributes.commitMessage isnt 'string'
 			return new Error 'Invalid commitMessage: ' + attributes.commitMessage
@@ -56,7 +60,7 @@ class ChangeMetadata.Model extends Backbone.Model
 		if typeof attributes.startTime isnt 'number' or (new Date attributes.startTime) is 'Invalid Date'
 			return new Error 'Invalid start time: ' + attributes.startTime
 
-		if typeof attributes.endTime isnt 'number' or (new Date attributes.endTime) is 'Invalid Date'
+		if attributes.endTime? and (typeof attributes.endTime isnt 'number' or (new Date attributes.endTime) is 'Invalid Date')
 			return new Error 'Invalid end time: ' + attributes.endTime
 
 		return
@@ -66,14 +70,29 @@ class ChangeMetadata.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeMetadata'
 	template: Handlebars.compile '<div class="changeMetadataContainer">
-			<div class="changeTimeInterval">{{startTime}} to {{endTime}}</div>
-			<div class="changeSubmitter">
-				Submitted by: 
-				<span class="changeSubmitterName">{{submitterFirstName}} {{submitterLastName}}</span>
-				<span class="changeSubmitterEmail">{{submitterEmail}}</span>
+			<div class="changeTimeInterval">
+				<span class="changeStartTime">{{startTime}}</span>
+				<span class="changeTimeDivider"> to </span>
+				<span class="changeEndTime">{{endTime}}</span>
 			</div>
-			<div class="changeCommitTime">Commit time: {{commitTime}}<div>
-			<div class="changeCommitMessage">{{commitMessage}}</div>
+
+			<div class="prettyForm">
+				<div class="prettyFormRow">
+					<div class="prettyFormLabel committerLabel">Committer</div>
+					<div class="prettyFormValue committerValue">
+						{{committerFirstName}} {{committerLastName}}
+						<br> {{committerEmail}}
+					</div>
+				</div>
+				<div class="prettyFormRow">
+					<div class="prettyFormLabel commitTimeLabel">Commit time</div>
+					<div class="prettyFormValue commitTimeValue">{{commitTime}}</div>
+				</div>
+				<div class="prettyFormRow">
+					<div class="prettyFormLabel commitMessageLabel">Commit message</div>
+					<div class="prettyFormValue commitMessageValue">{{commitMessage}}</div>
+				</div>
+			</div>
 		</div>'
 
 
@@ -87,12 +106,19 @@ class ChangeMetadata.View extends Backbone.View
 
 
 	render: () =>
+		startTime = if not @model.get('startTime')? then '??' else
+			$.format.date new Date(@model.get('startTime')), 'MM/dd hh:mm:ss a'
+		endTime = if not @model.get('endTime')? then '??' else
+			$.format.date new Date(@model.get('endTime')), 'hh:mm:ss a'
+		commitTime = if not @model.get('commitTime') then '??' else
+			$.format.date new Date(@model.get('commitTime')), 'ddd MM/dd hh:mm:ss a'
+
 		@$el.html @template
-			submitterEmail: @model.get 'submitterEmail'
-			submitterFirstName: @model.get 'submitterFirstName'
-			submitterLastName: @model.get 'submitterLastName'
+			committerEmail: @model.get 'committerEmail'
+			committerFirstName: @model.get 'committerFirstName'
+			committerLastName: @model.get 'committerLastName'
 			commitMessage: @model.get 'commitMessage'
-			commitTime: new Date @model.get 'commitTime'
-			startTime: new Date @model.get 'startTime'
-			endTime: new Date @model.get 'endTime'
+			commitTime: commitTime
+			startTime: startTime
+			endTime: endTime
 		return @
