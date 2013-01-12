@@ -32,6 +32,18 @@ class ChangeOutlineStage.Model extends Backbone.Model
 			@set 'selected', true,
 				error: (model, error) => console.error error
 
+		@set 'status', @_getStatusFromReturnCode(@get 'returnCode'),
+			error: (model, error) => console.error error
+
+
+	_getStatusFromReturnCode: (returnCode) =>
+		if not returnCode?
+			return ChangeOutlineStage.AllowedStatuses.RUNNING
+		else if returnCode is 0
+			return ChangeOutlineStage.AllowedStatuses.PASSED
+		else
+			return ChangeOutlineStage.AllowedStatuses.FAILED
+
 
 	validate: (attributes) =>
 		foundType = false
@@ -79,9 +91,11 @@ class ChangeOutlineStage.View extends Backbone.View
 	className: 'changeOutlineStage'
 	template: Handlebars.compile '<div class="changeOutlineStageContents">
 			<div class="changeOutlineStageName">{{name}}</div>
-			<div class="changeOutlineStageStatus">{{status}}</div>
+			<div class="changeOutlineStageStatus {{status}}">{{status}}</div>
+			<div class="changeOutlineStageSpinnerContainer"></div>
 		</div>'
 	events: 'click': '_clickHandler'
+	_spinner: null
 
 
 	initialize: () =>
@@ -103,11 +117,36 @@ class ChangeOutlineStage.View extends Backbone.View
 
 
 	render: () =>
+		statusToShow = if @model.get('status') is 'running' then null else @model.get 'status'
+
 		@$el.html @template
 			name: @model.get 'name'
-			status: @model.get 'status'
+			status: statusToShow
 		@_fixSelectedState()
+
+		showSpinner = @model.get('status') is 'running'
+		setTimeout (() => @_setSpinnerState showSpinner), 0
+
 		return @
+
+
+	_setSpinnerState: (spinnerOn) =>
+		if spinnerOn
+			options =
+				lines: 17
+				length: 7
+				width: 2
+				radius: 5
+				corners: 1
+				color: '#A0A0A0'
+				speed: 1.0
+				trail: 50
+				hwaccel: true
+				className: 'spinner'
+			@$('.changeOutlineStageSpinnerContainer').spin options
+		else
+			@$('.changeOutlineStageSpinnerContainer').spin false
+		
 
 
 	_fixSelectedState: () =>
