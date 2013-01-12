@@ -5,6 +5,7 @@ from database_parser import OmnibusDatabaseParser
 from language_parser import LanguageParser
 from package_parser import OmnibusPackageParser
 from script_parser import ScriptParser
+from run_step_parser import CompileStepParser, TestStepParser
 from setup_tools import InvalidConfigurationException, SetupCommand
 
 
@@ -36,8 +37,8 @@ class Provisioner(object):
 	def handle_config(self, config, source_path):
 		language_steps, setup_steps = self.parse_languages(config)
 		setup_steps = setup_steps + self.parse_setup(config, source_path)
-		#compile_steps = self.parse_compile(config)
-		#test_steps = self.parse_test(config)
+		self.parse_compile(config, source_path)
+		self.parse_test(config, source_path)
 		self._provision(language_steps, setup_steps)
 
 	def _provision(self, language_steps, setup_steps):
@@ -90,6 +91,14 @@ class Provisioner(object):
 			database_type, databases = database_info.items()[0]
 			database_steps = database_steps + OmnibusDatabaseParser().parse_databases(database_type, databases)
 		return database_steps
+
+	def parse_compile(self, config, source_path):
+		if 'compile' in config:
+			CompileStepParser().parse(config['compile'])
+
+	def parse_test(self, config, source_path):
+		if 'test' in config:
+			TestStepParser().parse(config['test'])
 
 
 class ProvisionFailedException(Exception):
