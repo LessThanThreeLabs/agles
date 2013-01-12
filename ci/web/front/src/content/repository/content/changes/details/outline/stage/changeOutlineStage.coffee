@@ -65,8 +65,13 @@ class ChangeOutlineStage.Model extends Backbone.Model
 
 
 	onUpdate: (data) =>
-		console.log 'need to handle new data...'
-		console.log data
+		if data.type is 'return code added'
+			if data.contents is 0
+				@set 'status', ChangeOutlineStage.AllowedStatuses.PASSED,
+					error: (model, error) => console.error error
+			else
+				@set 'status', ChangeOutlineStage.AllowedStatuses.FAILED,
+					error: (model, error) => console.error error
 
 
 class ChangeOutlineStage.View extends Backbone.View

@@ -22,11 +22,8 @@ class BuildOutputEventHandler extends EventHandler
 					type: data.type
 					contents: data.contents
 			when 'return code added'
-				# do nothing
+				@sockets.in(roomName).emit eventName,
+					type: data.type
+					contents: data.contents.return_code
 			else
 				throw new Error 'Unexpected event type: ' + data.type
-
-
-	# _sanitizeLineAdded: (data) =>
-	# 	number: data.line_num
-	# 	text: data.line
