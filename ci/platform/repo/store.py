@@ -9,6 +9,7 @@ import re
 import shutil
 import socket
 import sys
+import time
 import yaml
 
 import model_server
@@ -189,6 +190,8 @@ class RepositoryStore(object):
 class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
+	NUM_RETRIES = 10
+
 	logger = logging.getLogger("FileSystemRepositoryStore")
 
 	def __init__(self, root_storage_directory_path):
@@ -197,28 +200,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			os.makedirs(root_storage_directory_path)
 		self._root_path = root_storage_directory_path
 
-	def _push_forward_url(self, repo, remote_repo, ref):
-		try:
-			repo.git.push(remote_repo, ':'.join([ref, ref]), force=True)
-		except GitCommandError:
-			error_msg = "failed to push repo to github: [repo: %s, remote_repo: %s, ref: %s]" % (repo, remote_repo, ref)
-			self.logger.error(error_msg)
-
-	def _push_forward_url_if_necessary(self, repo, repo_id, ref):
-		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
-			remote_repo = conn.get_repo_forward_url(repo_id)
-
-		# remote_repo is None if user doesn't have a pushback url set
-		if remote_repo:
-			self._push_forward_url(repo, remote_repo, ref)
-
-	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
-		assert repo_name.endswith(".git")
-		assert isinstance(repo_id, int)
-
-		repo_path = self._resolve_path(repo_id, repo_name)
-		repo = Repo(repo_path)
-		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
+	def _merge_refs(self, repo_slave, ref_to_merge, ref_to_merge_into):
 		try:
 			repo_slave.git.fetch()  # update branches
 			remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
@@ -232,14 +214,58 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
-			error_msg = "repo: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
-				repo, ref_to_merge, ref_to_merge_into)
+			error_msg = "repo_slave: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
+				repo_slave, ref_to_merge, ref_to_merge_into)
 			self.logger.info(error_msg)
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
 
-		self._push_forward_url_if_necessary(repo, repo_id, ref_to_merge_into)
+	def _update_from_forward_url(self, repo_slave, remote_repo, ref_to_update):
+		try:
+			# branch has to exist on the non-slave (not forward url) because we're trying to push it
+			remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
+			repo_slave.git.fetch(remote_repo, ref_to_update)
+			repo_slave.git.checkout("FETCH_HEAD")
+			ref_sha = repo_slave.head.commit.hexsha
+			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
+			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
+			repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
+		except GitCommandError:
+			stacktrace = sys.exc_info()[2]
+			error_msg = "repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_update)
+			self.logger.info(error_msg)
+			raise MergeError, error_msg, stacktrace
+		finally:
+			repo_slave.git.reset(hard=True)
+
+	def _push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into):
+		i = 0
+		while True:
+			i += 1
+			try:
+				repo.git.push(remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
+				break
+			except GitCommandError:
+				if i >= self.NUM_RETRIES:
+					stacktrace = sys.exc_info()[2]
+					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
+					raise MergeError, error_msg, stacktrace
+				time.sleep(1)
+				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
+
+	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
+		assert repo_name.endswith(".git")
+		assert isinstance(repo_id, int)
+
+		repo_path = self._resolve_path(repo_id, repo_name)
+		repo = Repo(repo_path)
+		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
+
+		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+		self._merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
+		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into)
 
 	def create_repository(self, repo_id, repo_name):
 		"""Creates a new server side repository. Raises an exception on failure.
