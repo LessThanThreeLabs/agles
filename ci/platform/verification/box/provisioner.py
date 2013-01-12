@@ -94,11 +94,11 @@ class Provisioner(object):
 
 	def parse_compile(self, config, source_path):
 		if 'compile' in config:
-			CompileStepParser().parse(config['compile'])
+			CompileStepParser().parse_steps(config['compile'], source_path)
 
 	def parse_test(self, config, source_path):
 		if 'test' in config:
-			TestStepParser().parse(config['test'])
+			TestStepParser().parse_steps(config['test'], source_path)
 
 
 class ProvisionFailedException(Exception):

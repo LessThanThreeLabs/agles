@@ -69,7 +69,7 @@ class RunStepFileBuilder(object):
 	def build_step(self, source_path, step_type, step_name, step_path, commands, timeout):
 		full_command = "%s\n" % "&&\n".join(map(lambda command: pipes.quote(self._advertised_command(command)), commands))
 		script = "#!/bin/bash\n"
-		script = script + self._advertised_command("cd %s\n" % os.path.abspath(os.path.join(source_path, step_path)))
+		script = script + "%s\n" % self._advertised_command("cd %s" % os.path.abspath(os.path.join(source_path, step_path)))
 		script = script + "timeout %d bash --login -c %s\n" % (timeout, pipes.quote(full_command))
 		script = script + "_r=$?\n"
 		script = script + "if [ $_r -eq 124 ]; then echo %s timed out after %s seconds;\n" % (step_name, timeout)
@@ -79,5 +79,4 @@ class RunStepFileBuilder(object):
 			step_file.write(script)
 
 	def _advertised_command(self, command):
-		quoted_command = pipes.quote(command)
-		return "echo -e %s &&\n%s" % (quoted_command, quoted_command)
+		return "echo -e $ %s &&\n%s" % (pipes.quote(command), command)
