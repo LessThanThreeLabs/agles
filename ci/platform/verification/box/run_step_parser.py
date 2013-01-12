@@ -67,7 +67,7 @@ class TestStepParser(RunStepParser):
 
 class RunStepFileBuilder(object):
 	def build_step(self, source_path, step_type, step_name, step_path, commands, timeout):
-		full_command = "%s\n" % "&&\n".join(map(lambda command: pipes.quote(self._advertised_command(command)), commands))
+		full_command = "&&\n".join(map(self._advertised_command, commands))
 		script = "#!/bin/bash\n"
 		script = script + "%s\n" % self._advertised_command("cd %s" % os.path.abspath(os.path.join(source_path, step_path)))
 		script = script + "timeout %d bash --login -c %s\n" % (timeout, pipes.quote(full_command))

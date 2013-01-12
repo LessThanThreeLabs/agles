@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 
 from database_parser import OmnibusDatabaseParser
@@ -33,6 +34,7 @@ class Provisioner(object):
 			self.handle_config(config, source_path)
 		except Exception as e:
 			print "%s: %s" % (type(e).__name__, e.message)
+			sys.exit(1)
 
 	def handle_config(self, config, source_path):
 		language_steps, setup_steps = self.parse_languages(config)
