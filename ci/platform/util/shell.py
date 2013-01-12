@@ -28,9 +28,6 @@ class RestrictedGitShell(object):
 		full_command = ' '.join(command_parts)
 		return "ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command
 
-	def _replace_paths(self, orig_args_str, new_path):
-		return re.sub(REPO_PATH_PATTERN, new_path, orig_args_str)
-
 	def _get_requested_repo_uri(self, cmd_args_str):
 		match = re.search(REPO_PATH_PATTERN, cmd_args_str)
 		assert match is not None
