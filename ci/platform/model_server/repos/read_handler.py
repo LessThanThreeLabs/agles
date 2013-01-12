@@ -167,10 +167,8 @@ class ReposReadHandler(ModelServerRpcHandler):
 
 	def get_repo_forward_url(self, repo_id):
 		repo = database.schema.repo
-		repo_forward_url_map = database.schema.repo_forward_url_map
 
-		query = repo_forward_url_map.join(repo).select().where(
-			repo.c.id==repo_id)
+		query = repo.select().where(repo.c.id==repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-			return row[repo_forward_url_map.c.forward_url] if row else None
+			return row[repo.c.forward_url] if row else None
