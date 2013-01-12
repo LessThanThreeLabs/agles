@@ -68,7 +68,7 @@ class OpenstackVm(VirtualMachine):
 				return None
 			elif vm.server.status == 'DELETED':
 				return None
-			elif vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
+			elif vm.server.status == 'ACTIVE' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
 				vm.delete()
 				return None
 			return vm
@@ -90,7 +90,7 @@ class OpenstackVm(VirtualMachine):
 				self.rebuild()
 
 	def provision(self, output_handler=None):
-		return self.ssh_call("virtualenvs/2.7/bin/python -c \"from verification.box.provisioner import Provisioner; Provisioner().provision()", output_handler)
+		return self.ssh_call("virtualenvs/2.7/bin/python -c \"from verification.box.provisioner import Provisioner; Provisioner().provision()\"", output_handler)
 
 	def ssh_call(self, command, output_handler=None):
 		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)
