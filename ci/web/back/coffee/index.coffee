@@ -9,6 +9,8 @@ RedirectServer = require './server/redirectServer'
 
 
 startEverything = () ->
+	process.title = 'webserver'
+
 	commandLineParser = CommandLineParser.create()
 
 	configurationParams = _getConfigurationFile commandLineParser.getConfigFile()
