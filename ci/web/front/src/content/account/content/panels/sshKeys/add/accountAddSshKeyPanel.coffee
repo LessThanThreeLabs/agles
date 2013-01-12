@@ -30,14 +30,14 @@ class AccountAddSshKeyPanel.View extends Backbone.View
 	className: 'accountAddSshKeyPanel'
 	html: '<div class="prettyForm">
 			<div class="prettyFormRow">
-				<div class="prettyFormLabel">Alias</div>
+				<div class="prettyFormLabel labelPadding">Alias</div>
 				<div class="prettyFormValue">
 					<input type="text" class="sshKeyAlias" placeholder="alias" maxlength=64 autocomplete="on">
 					<div class="prettyFormErrorText" type="alias"></div>
 				</div>
 			</div>
 			<div class="prettyFormRow">
-				<div class="prettyFormLabel">Key</div>
+				<div class="prettyFormLabel labelPadding">Key</div>
 				<div class="prettyFormValue">
 					<textarea type="text" class="sshKey" placeholder="key"></textarea>
 					<div class="prettyFormErrorText" type="key"></div>

@@ -22,14 +22,14 @@ class CreateRepositoryForm.View extends Backbone.View
 	className: 'createRepositoryForm'
 	html: '<div class="prettyForm">
 			<div class="prettyFormRow">
-				<div class="prettyFormLabel">Name</div>
+				<div class="prettyFormLabel labelPadding">Name</div>
 				<div class="prettyFormValue">
 					<input type="text" class="createRepositoryName" placeholder="name" maxlength=128 autocomplete="on">
 					<div class="prettyFormErrorText" type="name"></div>
 				</div>
 			</div>
 			<div class="prettyFormRow">
-				<div class="prettyFormLabel">Description</div>
+				<div class="prettyFormLabel labelPadding">Description</div>
 				<div class="prettyFormValue">
 					<textarea type="text" class="createRepositoryDescription" placeholder="description" maxlength=500></textarea>
 					<div class="prettyFormErrorText" type="description"></div>

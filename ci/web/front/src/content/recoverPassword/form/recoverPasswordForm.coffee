@@ -18,7 +18,7 @@ class RecoverPasswordForm.View extends Backbone.View
 	className: 'recoverPasswordForm'
 	html: '<div class="prettyForm">
 			<div class="prettyFormRow">
-				<div class="prettyFormLabel">Email</div>
+				<div class="prettyFormLabel labelPadding">Email</div>
 				<div class="prettyFormValue">
 					<input type="email" class="recoverPasswordEmail" placeholder="email" maxlength=256 autocomplete="on">
 					<div class="prettyFormErrorText" type="email"></div>

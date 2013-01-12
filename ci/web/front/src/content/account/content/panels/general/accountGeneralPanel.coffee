@@ -23,14 +23,14 @@ class AccountGeneralPanel.View extends Backbone.View
 	template: Handlebars.compile '<div class="accountGeneralPanelContent">
 			<div class="prettyForm">
 				<div class="prettyFormRow">
-					<div class="prettyFormLabel">First name</div>
+					<div class="prettyFormLabel labelPadding">First name</div>
 					<div class="prettyFormValue">
 						<input type="text" class="accountFirstName" placeholder="{{firstName}}" maxlength=256>
 						<div class="prettyFormErrorText" type="firstName"></div>
 					</div>
 				</div>
 				<div class="prettyFormRow">
-					<div class="prettyFormLabel">Last name</div>
+					<div class="prettyFormLabel labelPadding">Last name</div>
 					<div class="prettyFormValue">
 						<input type="text" class="accountLastName" placeholder="{{lastName}}" maxlength=256>
 						<div class="prettyFormErrorText" type="lastName"></div>
