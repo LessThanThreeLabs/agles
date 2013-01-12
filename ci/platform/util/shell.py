@@ -16,6 +16,11 @@ class RestrictedGitShell(object):
 		self.commands_to_permissions = commands_to_permissions
 		self.user_id_commands = user_id_commands
 
+		self._git_command_handlers = {
+			"git-receive-pack": self.handle_receive_pack,
+			"git-upload-pack": self.handle_upload_pack,
+		}
+
 	def _create_ssh_exec_args(self, route, command, path, user_id):
 		uri = "git@%s" % route
 		path = "'%s'" % path
@@ -43,10 +48,7 @@ class RestrictedGitShell(object):
 		if ".." in repo_path:
 			raise MalformedCommandError('repo_path: %s. Repository path cannot contain "..".' % repo_path)
 
-	def new_sshargs(self, command, repo_path, user_id):
-		self._validate(repo_path)
-		requested_repo_uri = self._get_requested_repo_uri(repo_path)
-
+	def rp_new_sshargs(self, command, requested_repo_uri, user_id):
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
 			repostore_id, route, repos_path, repo_id, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
@@ -55,15 +57,32 @@ class RestrictedGitShell(object):
 
 		return self._create_ssh_exec_args(route, command, remote_filesystem_path, user_id)
 
+	def handle_receive_pack(self, requested_repo_uri, user_id):
+		args = self.rp_new_sshargs("git-receive-pack", requested_repo_uri, user_id)
+		os.execlp(*args)
+
+	def handle_upload_pack(self, requested_repo_uri, user_id):
+		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
+			repostore_id, route, repos_path, repo_id, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			forward_url = modelserver_rpc_conn.get_repo_forward_url(repo_id)
+		uri, path = forward_url.split(':')
+		command_parts = ["git-upload-pack", path]
+		full_command = ' '.join(command_parts)
+		args = ["ssh", "ssh", "-oStrictHostKeyChecking=no", uri, full_command]
+		os.execlp(*args)
+
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
 		if not len(command_parts) == self.GIT_COMMAND_ARGS:
 			raise InvalidCommandError(full_ssh_command)
 
 		command, repo_path, user_id = command_parts
+		repo_path = repo_path.strip("'")
+
 		if command in self.commands_to_permissions:
-			args = self.new_sshargs(command, repo_path.strip("'"), user_id)
-			os.execlp(*args)
+			self._validate(repo_path)
+			requested_repo_uri = self._get_requested_repo_uri(repo_path)
+			self._git_command_handlers[command](requested_repo_uri, user_id)
 		else:
 			raise InvalidCommandError(command)
 
