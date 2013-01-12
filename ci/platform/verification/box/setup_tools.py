@@ -17,12 +17,14 @@ class SetupCommand(object):
 		self.execute_script(self.to_shell_command())
 
 	@classmethod
-	def execute_script(cls, script, env={}):
-		return StreamingExecutor.execute(shlex.split("sudo -E bash --login -c %s" % pipes.quote(script)), output_handler=SimplePrinter(), env=env)
+	def execute_script(cls, script, env={}, login=True):
+		flags = '--login -c' if login else '-c'
+		return StreamingExecutor.execute(shlex.split("sudo -E bash %s %s" % (flags, pipes.quote(script))), output_handler=SimplePrinter(), env=env)
 
 	@classmethod
-	def execute_script_file(cls, script_file, env={}):
-		return StreamingExecutor.execute(shlex.split("sudo -E bash --login %s" % pipes.quote(script_file)), output_handler=SimplePrinter(), env=env)
+	def execute_script_file(cls, script_file, env={}, login=True):
+		flags = '--login' if login else ''
+		return StreamingExecutor.execute(shlex.split("sudo -E bash %s %s" % (flags, pipes.quote(script_file))), output_handler=SimplePrinter(), env=env)
 
 	def to_shell_command(self):
 		script = ''
