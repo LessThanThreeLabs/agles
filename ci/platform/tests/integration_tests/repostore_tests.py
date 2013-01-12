@@ -69,7 +69,8 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self._modify_commit_push(work_repo, "test.txt", "c2",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
-		self.store.merge_changeset(self.repo_id, "repo.git", "refs/pending/1", "master")
+		repo_slave = bare_repo.clone(self.repo_path + ".slave")
+		self.store.merge_refs(repo_slave, "refs/pending/1", "master")
 
 	def test_merge_fail(self):
 		self.store.create_repository(self.repo_id, "repo.git")

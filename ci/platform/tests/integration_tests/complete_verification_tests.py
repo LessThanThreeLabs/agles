@@ -50,15 +50,24 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			verifier.setup()
 			cls.verifiers.append(verifier)
 
+		cls.repostore_id = 1
+		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
+		repo_store = Server(FileSystemRepositoryStore(cls.repo_dir))
+		repo_store.bind(store.rpc_exchange_name, [RepositoryStore.queue_name(cls.repostore_id)], auto_delete=True)
+
+		cls.repo_store_process = TestProcess(target=repo_store.run)
+		cls.repo_store_process.start()
+
 	@classmethod
 	def teardown_class(cls):
 		[verifier.teardown() for verifier in cls.verifiers]
 		rmtree(TEST_ROOT, ignore_errors=True)
+		cls.repo_store_process.terminate()
+		cls.repo_store_process.join()
 
 	def setUp(self):
 		super(VerificationRoundTripTest, self).setUp()
 		self._purge_queues()
-		self.repo_dir = os.path.join(TEST_ROOT, 'repo')
 		self.repo_id = 1
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.makedirs(self.repo_dir)
@@ -66,7 +75,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.repo_path = os.path.join(
 			self.repo_dir,
 			to_path(self.repo_id, "repo.git"))
-		self.forward_url = "forwardurl"
+		self.forward_repo_url = os.path.join(self.repo_dir, "forwardrepo.git")
+		Repo.init(self.forward_repo_url, bare=True)
 		self._start_redis()
 		self.vs_processes = []
 		for verifier in self.verifiers:
@@ -75,12 +85,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			vs_process.start()
 			self.vs_processes.append(vs_process)
 
-		repo_store = Server(FileSystemRepositoryStore(self.repo_dir))
-		self.repostore_id = 1
-		repo_store.bind(store.rpc_exchange_name, [RepositoryStore.queue_name(self.repostore_id)], auto_delete=True)
-
-		self.repo_store_process = TestProcess(target=repo_store.run)
-		self.repo_store_process.start()
 		verification_master = VerificationMaster()
 		self.vm_process = TestProcess(target=verification_master.run)
 		self.vm_process.start()
@@ -95,8 +99,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.vm_process.terminate()
 		self.vm_process.join()
 		[(vs_process.terminate(), vs_process.join()) for vs_process in self.vs_processes]
-		self.repo_store_process.terminate()
-		self.repo_store_process.join()
 		self._stop_redis()
 		self._purge_queues()
 
@@ -105,7 +107,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			ins_machine = schema.repostore.insert().values(host_name="localhost", repositories_path=self.repo_dir)
 			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
 			ins_repo = schema.repo.insert().values(id=self.repo_id, name="repo.git", owner=self.user_id, repostore_id=repostore_key, uri=repo_uri,
-					default_permissions=RepositoryPermissions.RW, forward_url="forwardurl")
+					default_permissions=RepositoryPermissions.RW, forward_url=self.forward_repo_url)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			return repo_key
 
@@ -128,14 +130,14 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	def _test_commands(self):
 		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(30)]
 
-	def test_hello_world_repo_roundtrip(self):
+	def _repo_roundtrip(self, modfile, contents):
 		with Client(store.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
 			client.create_repository(self.repo_id, "repo.git")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
-		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
+		init_commit = self._modify_commit_push(work_repo, modfile, contents)
 
 		repo_id = self._insert_repo_info(self.repo_path)
 		commit_id = self._insert_commit_info()
@@ -158,6 +160,27 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 					except socket.timeout:
 						pass
 					assert time.time() - start_time < 120  # 120s timeout
-		assert_equals(BuildStatus.PASSED, self.change_status)
 		work_repo.git.pull()
-		assert_equals(commit_sha, work_repo.head.commit.hexsha)
+		return commit_sha, work_repo
+
+	def test_hello_world_repo_roundtrip(self):
+		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
+		assert_equal(BuildStatus.PASSED, self.change_status)
+		assert_equal(commit_sha, work_repo.head.commit.hexsha)
+
+	def test_roundtrip_with_postmerge_success(self):
+		forward_repo = Repo(self.forward_repo_url)
+		work_repo = forward_repo.clone(forward_repo.working_dir + ".clone")
+
+		self._modify_commit_push(work_repo, "other.txt", "c2")
+		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
+		assert_equal(BuildStatus.PASSED, self.change_status)
+		assert_not_equal(commit_sha, work_repo.head.commit.hexsha)
+
+	def test_roundtrip_with_postmerge_failure(self):
+		forward_repo = Repo(self.forward_repo_url)
+		work_repo = forward_repo.clone(forward_repo.working_dir + ".clone")
+
+		self._modify_commit_push(work_repo, "conflict.txt", "c2")
+		self._repo_roundtrip("conflict.txt", "conflict")
+		assert_equal(BuildStatus.FAILED, self.change_status)

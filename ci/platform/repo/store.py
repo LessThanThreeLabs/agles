@@ -200,7 +200,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			os.makedirs(root_storage_directory_path)
 		self._root_path = root_storage_directory_path
 
-	def _merge_refs(self, repo_slave, ref_to_merge, ref_to_merge_into):
+	def merge_refs(self, repo_slave, ref_to_merge, ref_to_merge_into):
 		try:
 			repo_slave.git.fetch()  # update branches
 			remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
@@ -264,7 +264,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
-		self._merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
+		self.merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
 		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into)
 
 	def create_repository(self, repo_id, repo_name):
