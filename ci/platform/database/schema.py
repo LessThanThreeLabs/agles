@@ -35,7 +35,9 @@ repo = Table('repo', metadata,
 	Column('description', String, nullable=False, default='no description'),
 	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
 	Column('default_permissions', SmallInteger, nullable=False),  # This is a bitmask
-	Column('forward_url', String, nullable=False)  # required forwarding url for repositories
+	Column('forward_url', String, nullable=False),  # required forwarding url for repositories
+	Column('privatekey', String, nullable=False),  # rsa privkey
+	Column('publickey', String, nullable=False)  # rsa pubkey
 )
 
 # refer to util.permissions for permission bitmask documentation
