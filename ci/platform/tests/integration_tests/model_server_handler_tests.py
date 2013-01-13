@@ -38,7 +38,9 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				owner=user_id,
 				repostore_id=repostore_id,
 				default_permissions=RepositoryPermissions.RWA,
-				forward_url="forwardurl"
+				forward_url="forwardurl",
+				privatekey="privatekey",
+				publickey="publickey"
 			)
 
 			repo_id = sqlconn.execute(ins_repo).inserted_primary_key[0]

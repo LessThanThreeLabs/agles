@@ -36,7 +36,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	def _setup_db_entries(self, REPO_URI):
 		repostore_id = self._create_repo_store()
 		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
-			rpc_conn._create_repo_in_db(1, "repo.git", 'desc', REPO_URI, repostore_id, RepositoryPermissions.RW, "forwardurl")
+			rpc_conn._create_repo_in_db(1, "repo.git", 'desc', REPO_URI, repostore_id, RepositoryPermissions.RW, "forwardurl", "privatekey", "publickey")
 
 	def test_new_sshargs(self):
 		REPO_URI = "schacon/repo.git"
