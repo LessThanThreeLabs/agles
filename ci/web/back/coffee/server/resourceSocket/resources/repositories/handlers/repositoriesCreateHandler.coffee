@@ -21,7 +21,7 @@ class RepositoriesCreateHandler extends RepositoriesHandler
 			return
 
 		@modelRpcConnection.repos.create.create_repo userId, data.name, data.description,
-			@_fromPermissionString('r/w'), (error, repositoryId) =>
+			@_fromPermissionString('r/w'), data.forwardUrl, (error, repositoryId) =>
 				if error?
 					callback error
 				else
