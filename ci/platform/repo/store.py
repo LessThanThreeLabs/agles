@@ -8,7 +8,7 @@ from __future__ import print_function
 import logging
 import os
 import re
-import shutil
+import shlex
 import socket
 import sys
 import time
@@ -214,7 +214,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			checkout_branch = remote_branch if remote_branch_exists else "FETCH_HEAD"
 			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
-			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
+			self._push_with_private_key(repo_slave, private_key_path, "origin", "HEAD:%s" % ref_to_merge_into)
+			# repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
 			error_msg = "repo_slave: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
@@ -233,7 +234,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			ref_sha = repo_slave.head.commit.hexsha
 			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
-			repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
+			self._push_with_private_key(repo_slave, private_key_path, "origin", "HEAD:%s" % ref_to_update)
+			# repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
 			error_msg = "repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_update)
@@ -241,6 +243,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
+
+	def _push_with_private_key(self, repo, private_key_path, *args, **kwargs):
+		repo.git.execute(['push'] + args + repo.git.transform_kwargs(kwargs), env={'GIT_SSH': 'ssh -i %s' % os.path.abspath(private_key_path)})
 
 	def _push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into):
 		i = 0

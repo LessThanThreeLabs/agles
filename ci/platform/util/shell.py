@@ -1,3 +1,4 @@
+import hashlib
 import os
 import re
 
@@ -47,7 +48,7 @@ class RestrictedGitShell(object):
 
 	def rp_new_sshargs(self, command, requested_repo_uri, user_id):
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, route, repos_path, repo_id, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 
 		self.verify_user_permissions(command, user_id, repo_id)
@@ -60,12 +61,15 @@ class RestrictedGitShell(object):
 
 	def handle_upload_pack(self, requested_repo_uri, user_id):
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, route, repos_path, repo_id, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 			forward_url = modelserver_rpc_conn.get_repo_forward_url(repo_id)
 		uri, path = forward_url.split(':')
 		command_parts = ["git-upload-pack", path]
 		full_command = ' '.join(command_parts)
-		args = ["ssh", "ssh", "-oStrictHostKeyChecking=no", uri, full_command]
+		private_key_file = os.path.join('/tmp', hashlib.sha1(private_key).hexdigest())
+		with open(private_key_file) as key_file:
+			key_file.write(private_key)
+		args = ["ssh", "ssh", "-oStrictHostKeyChecking=no", "-i", private_key_file, uri, full_command]
 		os.execlp(*args)
 
 	def handle_command(self, full_ssh_command):

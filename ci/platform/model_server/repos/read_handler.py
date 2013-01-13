@@ -46,7 +46,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 			row_result = sqlconn.execute(query).first()
 		if not row_result:
 			return None
-		return row_result[repostore.c.id], row_result[repostore.c.host_name], row_result[repostore.c.repositories_path], row_result[repo.c.id], row_result[repo.c.name]
+		return row_result[repostore.c.id], row_result[repostore.c.host_name], row_result[repostore.c.repositories_path], row_result[repo.c.id], row_result[repo.c.name], row_result[repo.c.privatekey]
 
 	def get_user_id_from_public_key(self, key):
 		ssh_pubkey = database.schema.ssh_pubkey
