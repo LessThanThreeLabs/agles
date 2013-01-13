@@ -53,7 +53,7 @@ class LanguageParser(object):
 		strip_ansi = re.compile("\033\[[0-9;]+m")
 		nvm_output = subprocess.check_output(shlex.split(self._nvm_command("source ~/nvm.sh > /dev/null; nvm ls %s" % version)))
 		installed_version = strip_ansi.sub("", nvm_output).split()[0]
-		setup_steps = [SetupCommand("echo \"source ~/nvm.sh > /dev/null\" >> ~/.bash_profile")]
+		setup_steps = [SetupCommand("echo \"export NVM_DIR=%s\" >> ~/.bash_profile" % self._nvm_path()), SetupCommand("echo \"source ~/nvm.sh > /dev/null\" >> ~/.bash_profile")]
 		if installed_version == 'N/A':
 			print "Nodejs version %s not pre-installed, attempting to install" % version
 			setup_steps.append(SetupCommand(["source ~/nvm.sh", "nvm install %s" % version]))
@@ -62,3 +62,6 @@ class LanguageParser(object):
 
 	def _nvm_command(self, shell_command):
 		return "bash --login -c %s" % pipes.quote(shell_command)
+
+	def _nvm_path(self):
+		return os.path.join(os.environ['HOME'], 'nvm')
