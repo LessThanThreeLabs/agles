@@ -60,6 +60,7 @@ test:
   - all_tests:
       path: ci/platform
       script:
+        - pip freeze
         - nosetests -sv --tc=fakeVerifier:True
         - cd ../web/back
         - npm test

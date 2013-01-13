@@ -304,6 +304,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		repo_path = self._resolve_path(repo_id, repo_name)
 		shutil.rmtree(repo_path)
+		os.remove(repo_path + ".id_rsa")
 
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.
