@@ -51,13 +51,14 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		assert_false(exists(self.repo_path), msg="Repository should not exist.")
 		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
 		assert_true(exists(self.repo_path), msg="Repository does not exist.")
-		assert_true(exists(self.repo_path + ".id_rsa"), msg="Repository was not deleted.")
+		assert_true(exists(self.repo_path + ".id_rsa"), msg="Repository private key file does not exist.")
 
 	def test_repo_create_remove(self):
 		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
 		assert_true(exists(self.repo_path), msg="Repository was not deleted.")
 		self.store.delete_repository(self.repo_id, "repo.git")
 		assert_false(exists(self.repo_path), msg="Repository was not deleted.")
+		assert_false(exists(self.repo_path + ".id_rsa"), msg="Repository private key file was not deleted.")
 
 	def test_merge_pass(self):
 		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
