@@ -19,6 +19,7 @@ setup:
       - amqp
       - pika: 0.9.5
       - kombu: 2.5.3
+      - pycrypto: 2.6
       - librabbitmq
       - sqlalchemy
       - pyyaml
