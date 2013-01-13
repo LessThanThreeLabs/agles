@@ -21,10 +21,10 @@ class ChangeEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					type: data.type
 					contents: @_sanitizeChange data.contents
-			when 'consoles added'
+			when 'new build output'
 				@sockets.in(roomName).emit eventName,
 					type: data.type
-					contents: data.contents
+					contents: @_sanitizeBuildOutput data.contents
 			when 'build added'
 				# do nothing
 			else
@@ -35,3 +35,10 @@ class ChangeEventHandler extends EventHandler
 		status: data.status
 		startTime: data.start_time
 		endTime: data.end_time
+
+
+	_sanitizeBuildOutput: (data) =>
+		id: data.id
+		type: data.type
+		name: data.subtype
+		returnCode: data.return_code

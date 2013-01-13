@@ -7,6 +7,7 @@ class ChangeOutline.Model extends Backbone.Model
 
 	initialize: () =>
 		@subscribeId = globalRouterModel.get 'changeId'
+		console.log '>>>> ' + @subscribeId
 
 		@changeOutlineHomeStageModel = new ChangeOutlineHomeStage.Model()
 
@@ -23,18 +24,16 @@ class ChangeOutline.Model extends Backbone.Model
 			method: 'getBuildConsolesForChangeId'
 			args: changeId: globalRouterModel.get('changeId')
 		socket.emit 'buildOutputs:read', requestData, (error, buildOutputs) =>
+			console.log buildOutputs
 			@changeOutlineStageModels.reset buildOutputs,
 				error: (model, error) => console.error error
 
 
 	onUpdate: (data) =>
-		console.log 'need to handle update!'
-		console.log data
-		# if data.type is 'consoles added'
-		# 	for subtypeName, buildOutputId of data.contents.console_map
-		# 		consoleOutputModel = new ConsoleTextOutput.Model id: buildOutputId
-		# 		@consoleTextOutputModels.add consoleOutputModel,
-		# 			error: (model, error) => console.error error
+		if data.type is 'new build output'
+			console.log data.contents
+			@changeOutlineStageModels.add data.contents,
+				error: (model, error) => console.error error
 
 
 	getBuildOutputIdForBuildNameIdentifier: (buildNameIdentifier) =>
