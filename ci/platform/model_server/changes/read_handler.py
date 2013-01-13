@@ -99,16 +99,15 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		user = database.schema.user
 		change = database.schema.change
 		commit = database.schema.commit
-		repo = database.schema.repo
 
 		if not has_repo_permissions(user_id, repo_id):
 			raise InvalidPermissionsError("user_id: %d, repo_id %d" % (user_id, repo_id))
 
 		query_string = "%" + query_string + "%"
 
-		query = change.join(commit).join(repo).join(user).select().apply_labels().where(
+		query = change.join(commit).join(user).select().apply_labels().where(
 			and_(
-				repo.c.id==repo_id,
+				change.c.repo_id==repo_id,
 				or_(
 					commit.c.message.like(query_string),
 					user.c.email.like(query_string)
