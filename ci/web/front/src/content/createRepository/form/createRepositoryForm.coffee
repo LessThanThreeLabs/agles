@@ -5,6 +5,7 @@ class CreateRepositoryForm.Model extends Backbone.Model
 	defaults:
 		name: ''
 		description: ''
+		forwardUrl: ''
 
 
 	validate: (attributes) =>
@@ -13,6 +14,9 @@ class CreateRepositoryForm.Model extends Backbone.Model
 
 		if typeof attributes.description isnt 'string'
 			return new Error 'Invalid description: ' + attributes.description
+
+		if typeof attributes.forwardUrl isnt 'string'
+			return new Error 'Invalid forward url: ' + attributes.forwardUrl
 
 		return
 
@@ -33,6 +37,13 @@ class CreateRepositoryForm.View extends Backbone.View
 				<div class="prettyFormValue">
 					<textarea type="text" class="createRepositoryDescription" placeholder="description" maxlength=500></textarea>
 					<div class="prettyFormErrorText" type="description"></div>
+				</div>
+			</div>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel labelPadding">Forward Url</div>
+				<div class="prettyFormValue">
+					<input type="text" class="createRepositoryForwardUrl" maxlength=256 placeholder="git@github.com:awesome/repository.git">
+					<div class="prettyFormErrorText" type="forwardUrl"></div>
 				</div>
 			</div>
 		</div>
@@ -60,7 +71,8 @@ class CreateRepositoryForm.View extends Backbone.View
 		attributesToSet = 
 			name: @$('.createRepositoryName').val()
 			description: @$('.createRepositoryDescription').val()
-		@model.set attributesToSet, 
+			forwardUrl: @$('.createRepositoryForwardUrl').val()
+		@model.set attributesToSet,
 			error: (model, error) => console.error error
 
 
@@ -68,7 +80,7 @@ class CreateRepositoryForm.View extends Backbone.View
 		requestData =
 			name: @model.get 'name'
 			description: @model.get 'description'
-			defaultPermissions: 'r/w'
+			forwardUrl: @model.get 'forwardUrl'
 
 		socket.emit 'repos:create', requestData, (errors, repositoryId) =>
 			if errors?

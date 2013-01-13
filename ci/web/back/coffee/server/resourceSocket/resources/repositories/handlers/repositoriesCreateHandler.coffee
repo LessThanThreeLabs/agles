@@ -12,7 +12,7 @@ class RepositoriesCreateHandler extends RepositoriesHandler
 	default: (socket, data, callback) =>
 		assert.ok data.name?
 		assert.ok data.description?
-		assert.ok data.defaultPermissions?
+		assert.ok data.forwardUrl?
 
 		userId = socket.session.userId
 
@@ -21,7 +21,7 @@ class RepositoriesCreateHandler extends RepositoriesHandler
 			return
 
 		@modelRpcConnection.repos.create.create_repo userId, data.name, data.description,
-			@_fromPermissionString(data.defaultPermissions), (error, repositoryId) =>
+			@_fromPermissionString('r/w'), (error, repositoryId) =>
 				if error?
 					callback error
 				else

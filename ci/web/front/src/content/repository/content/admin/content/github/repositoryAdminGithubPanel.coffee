@@ -21,7 +21,7 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 				<div class="prettyFormRow">
 					<div class="prettyFormLabel labelPadding">Forward Url</div>
 					<div class="prettyFormValue">
-						<input type="text" class="repositoryForwardUrlField" maxlength=128 placeholder="git://github.com/awesome/repository.git">
+						<input type="text" class="repositoryForwardUrlField" maxlength=256 placeholder="git@github.com:awesome/repository.git">
 						<div class="prettyFormErrorText" type="forwardUrl"></div>
 					</div>
 				</div>
