@@ -49,17 +49,18 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 
 	def test_repo_create(self):
 		assert_false(exists(self.repo_path), msg="Repository should not exist.")
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
 		assert_true(exists(self.repo_path), msg="Repository does not exist.")
+		assert_true(exists(self.repo_path + ".id_rsa"), msg="Repository was not deleted.")
 
 	def test_repo_create_remove(self):
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
 		assert_true(exists(self.repo_path), msg="Repository was not deleted.")
 		self.store.delete_repository(self.repo_id, "repo.git")
 		assert_false(exists(self.repo_path), msg="Repository was not deleted.")
 
 	def test_merge_pass(self):
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
@@ -73,7 +74,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self.store.merge_refs(repo_slave, "refs/pending/1", "master")
 
 	def test_merge_fail(self):
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")

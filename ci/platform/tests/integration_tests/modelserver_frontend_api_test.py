@@ -126,7 +126,10 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				'description',
 				self.REPO_URI,
 				self.repostore_id,
-				RepositoryPermissions.RW, "forwardurl")
+				RepositoryPermissions.RW,
+				"forwardurl",
+				"privatekey",
+				"publickey")
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			permission_ins = permission.insert().values(user_id=self.user_id, repo_id=self.repo_id, permissions=RepositoryPermissions.RW)
