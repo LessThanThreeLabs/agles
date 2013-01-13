@@ -214,8 +214,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			checkout_branch = remote_branch if remote_branch_exists else "FETCH_HEAD"
 			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
-			self._push_with_private_key(repo_slave, private_key_path, "origin", "HEAD:%s" % ref_to_merge_into)
-			# repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
+			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
 			error_msg = "repo_slave: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
@@ -234,8 +233,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			ref_sha = repo_slave.head.commit.hexsha
 			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
-			self._push_with_private_key(repo_slave, private_key_path, "origin", "HEAD:%s" % ref_to_update)
-			# repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
+			repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
 			error_msg = "repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_update)
@@ -244,15 +242,13 @@ class FileSystemRepositoryStore(RepositoryStore):
 		finally:
 			repo_slave.git.reset(hard=True)
 
-	def _push_with_private_key(self, repo, private_key_path, *args, **kwargs):
-		repo.git.execute(['push'] + args + repo.git.transform_kwargs(kwargs), env={'GIT_SSH': 'ssh -i %s' % os.path.abspath(private_key_path)})
-
 	def _push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into):
 		i = 0
 		while True:
 			i += 1
 			try:
-				repo.git.push(remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
+				self._push_with_private_key(repo, remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
+				# repo.git.push(remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
 				break
 			except GitCommandError:
 				if i >= self.NUM_RETRIES:
@@ -261,6 +257,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 					raise MergeError, error_msg, stacktrace
 				time.sleep(1)
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
+
+	def _push_with_private_key(self, repo, *args, **kwargs):
+		repo_path = os.path.basename(repo.git_dir)
+		private_key_path = repo_path[0:(repo_path.rfind('.git') + len('.git'))] + '.id_rsa'
+		repo.git.execute(['push'] + args + repo.git.transform_kwargs(kwargs), env={'GIT_SSH': 'ssh -i %s' % os.path.abspath(private_key_path)})
 
 	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
