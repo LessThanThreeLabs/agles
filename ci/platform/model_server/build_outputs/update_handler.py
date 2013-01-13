@@ -44,7 +44,6 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 		else:
 			starting_priority = 0
 
-		console_map = {}
 		for index, subtype in enumerate(ordered_subtypes):
 			with ConnectionFactory.get_sql_connection() as sqlconn:
 				priority = index + starting_priority
@@ -56,9 +55,8 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 					subtype_priority=priority,
 				)
 				console_id = sqlconn.execute(ins).inserted_primary_key[0]
-				console_map[subtype] = console_id
-		# TODO: This is firing to changes as a hack for the front end. Needs to go back to builds in the future
-		self.publish_event("changes", change_id, "consoles added", type=type, console_map=console_map)
+				# TODO: This is firing to changes as a hack for the front end. Needs to go back to builds in the future
+				self.publish_event("changes", change_id, "new build output", id=console_id, type=type, subtype=subtype, return_code=None)
 
 	def append_console_line(self, build_id, line_num, line, type, subtype):
 		"""
