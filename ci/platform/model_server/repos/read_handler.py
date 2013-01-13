@@ -147,7 +147,6 @@ class ReposReadHandler(ModelServerRpcHandler):
 		assert row is not None
 		return to_dict(row, repo.columns)
 
-
 	def get_members_with_permissions(self, user_id, repo_id):
 		user = database.schema.user
 		permission = database.schema.permission
@@ -161,9 +160,9 @@ class ReposReadHandler(ModelServerRpcHandler):
 			return [dict(to_dict(row, user.columns, tablename=user.name).items() + [(permission.c.permissions.name, row[permission.c.permissions])])
 				for row in sqlconn.execute(query)]
 
-######################
-# Github Integration #
-######################
+#########################
+# Host Repo Integration #
+#########################
 
 	def get_repo_forward_url(self, repo_id):
 		repo = database.schema.repo

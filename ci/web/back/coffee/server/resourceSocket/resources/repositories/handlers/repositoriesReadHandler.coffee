@@ -86,6 +86,8 @@ class RepositoriesReadHandler extends Handler
 		description: repository.description
 		defaultPermissions: repository.defaultPermissions
 		url: "git@" + @configurationParams.domain + ":" + repository.uri
+		forwardUrl: repository.forward_url
+		publicKey: repository.publickey
 
 
 	_sanitizeUser: (user) =>
