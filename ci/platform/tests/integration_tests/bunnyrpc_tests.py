@@ -20,7 +20,7 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		ttl_event = Event()
 		self.ttl_process = TestProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "ttl_exchange", ["queue"], ttl_event],
-				  kwargs=dict(ttl=0))
+					kwargs=dict(ttl=0))
 		self.ttl_process.start()
 
 		return_event = Event()
@@ -40,7 +40,7 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		self._purge_queues()
 
 	def _runserver(self, base_instance, exchange,
-				   queue_names, event, ttl=30000):
+					queue_names, event, ttl=30000):
 		server = Server(base_instance)
 		server.bind(exchange, queue_names, message_ttl=ttl, auto_delete=True)
 		event.set()
@@ -50,7 +50,7 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		with Client("exchange", "queue0") as client:
 			for i in xrange(1, 10):
 				server_count = client.incr()
-				assert_equals(server_count, i)
+				assert_equal(server_count, i)
 
 	def test_exceptional_controlflow_rpc(self):
 		with Client("exchange", "queue0", globals=globals()) as client:
@@ -62,7 +62,7 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 			for i in xrange(1, 10):
 				client = client0 if i % 2 == 0 else client1
 				server_count = client.incr()
-				assert_equals(server_count, i)
+				assert_equal(server_count, i)
 		finally:
 			client0.close()
 			client1.close()

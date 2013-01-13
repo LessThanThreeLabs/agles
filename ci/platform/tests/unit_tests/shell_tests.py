@@ -25,7 +25,7 @@ class ShellTest(unittest.TestCase):
 
 	def test_command_mutation(self):
 		requested_repo = self.rsh._get_requested_repo_uri("'schacon/simplegit-progit.git'")
-		assert_equals("schacon/simplegit-progit.git", requested_repo,
+		assert_equal("schacon/simplegit-progit.git", requested_repo,
 			msg="Did not correctly parse requested repository from argument string")
 
 		new_cmd_args = self.rsh._replace_paths("'schacon/simplegit-progit.git'",
