@@ -3,6 +3,8 @@
 
 Repository management is done using gitpython.
 """
+from __future__ import print_function
+
 import logging
 import os
 import re
@@ -44,12 +46,13 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repostore_id, repo_id, repo_name):
+	def create_repository(self, repostore_id, repo_id, repo_name, privatekey):
 		"""Creates a repository on the given local store.
 
 		:param repostore_id: The identifier of the local store(machine) to create the repository on.
 		:param repo_id: The unique identifier for the repository being created.
 		:param repo_name: The name of the new repository.
+		:param privatekey: An RSA private key for the repository to push to other forward urls
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -93,12 +96,12 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.merge_changeset(repo_id, repo_name, ref_to_merge, ref_to_merge_into)
 
-	def create_repository(self, repostore_id, repo_id, repo_name):
+	def create_repository(self, repostore_id, repo_id, repo_name, privatekey):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.create_repository(repo_id, repo_name)
+			client.create_repository(repo_id, repo_name, privatekey)
 		self._update_store_repo_count(repostore_id)
 
 	def delete_repository(self, repostore_id, repo_id, repo_name):
@@ -177,7 +180,7 @@ class RepositoryStore(object):
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repo_id, repo_name):
+	def create_repository(self, repo_id, repo_name, privatekey):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def delete_repository(self, repo_id, repo_name):
@@ -267,23 +270,27 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self.merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
 		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into)
 
-	def create_repository(self, repo_id, repo_name):
+	def create_repository(self, repo_id, repo_name, privatekey):
 		"""Creates a new server side repository. Raises an exception on failure.
 		We create bare repositories because they are server side.
 
 		:param repo_id: A unique id assigned to each repository that is used to determine
 						which directory the repository is stored under.
 		:param repo_name: The name of the new repository.
+		:param privatekey: RSA private key for pushing/pulling to other repos
 		"""
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
 		repo_path = self._resolve_path(repo_id, repo_name)
+		privatekey_path = repo_path + ".id_rsa"
 		if not os.path.exists(repo_path):
 			os.makedirs(repo_path)
 		else:
 			raise RepositoryAlreadyExistsException(repo_id, repo_path)
 		Repo.init(repo_path, bare=True)
+		with open(privatekey_path, 'w') as f:
+			print(privatekey, file=f)
 
 	def delete_repository(self, repo_id, repo_name):
 		"""Deletes a server side repository. This cannot be undone. Raises an exception on failure.
