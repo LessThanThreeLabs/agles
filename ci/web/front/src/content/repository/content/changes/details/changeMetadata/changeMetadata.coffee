@@ -26,14 +26,10 @@ class ChangeMetadata.Model extends Backbone.Model
 				console.error error
 			else
 				attributesToSet =
-					committerEmail: 'jordannpotter@gmail.com'
-					committerFirstName: 'Jordan'
-					committerLastName: 'Potter'
-					# committerEmail: changeMetadata.user.email
-					# committerFirstName: changeMetadata.user.firstName
-					# committerLastName: changeMetadata.user.lastName
-					commitMessage: 'a real commit message here with stuff and things'
-					# commitMessage: changeMetadata.commit.message
+					committerEmail: changeMetadata.user.email
+					committerFirstName: changeMetadata.user.firstName
+					committerLastName: changeMetadata.user.lastName
+					commitMessage: changeMetadata.commit.message
 					commitTime: changeMetadata.commit.timestamp
 					startTime: changeMetadata.change.startTime
 					endTime: changeMetadata.change.endTime
