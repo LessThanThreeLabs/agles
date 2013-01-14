@@ -195,6 +195,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
 	NUM_RETRIES = 10
+	PRIVATE_KEY_SCRIPT = os.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+		os.path.pardir, 'bin', 'ssh', 'get_private_key.sh'))
 
 	logger = logging.getLogger("FileSystemRepositoryStore")
 
@@ -265,7 +267,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo_path = repo.git_dir
 		private_key_path = repo_path[0:(repo_path.rfind('.git') + len('.git'))] + '.id_rsa'
 		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
-		repo.git.execute(execute_args, env={'GIT_SSH': 'ssh -i %s' % os.path.abspath(private_key_path)})
+		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT})
 
 	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
@@ -300,6 +302,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			raise RepositoryAlreadyExistsException(repo_id, repo_path)
 		Repo.init(repo_path, bare=True)
 		with open(private_key_path, 'w') as f:
+			os.chmod(private_key_path, 0600)
 			print(private_key, file=f)
 
 	def delete_repository(self, repo_id, repo_name):
