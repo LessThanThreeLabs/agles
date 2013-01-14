@@ -45,6 +45,7 @@ class TaskQueue(object):
 	def _new_worker(self, body, message):
 		try:
 			Queue(body["queue_name"])(self.connection).queue_declare(passive=True)
+			# TODO: CHECK FOR CONSUMERS
 		except self.connection.transport.channel_errors:
 			self.worker_attempt = self.worker_attempt - 1  # Queue doesn't exist, worker is dead
 		else:

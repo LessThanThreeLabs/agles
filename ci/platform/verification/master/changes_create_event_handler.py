@@ -36,7 +36,7 @@ class ChangesCreateEventHandler(EventSubscriber):
 			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		except:
 			msg = "basic_reject for message [body: %s, message: %s]" % (body, message)
-			self.logger.exception(msg)
+			self.logger.error(msg)
 			message.channel.basic_reject(delivery_tag=message.delivery_tag, requeue=True)
 
 	def _handle_new_change(self, contents):

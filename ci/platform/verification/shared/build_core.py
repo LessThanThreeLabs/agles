@@ -108,7 +108,7 @@ class VirtualMachineBuildCore(BuildCore):
 			self._get_output_handler(console_appender, ConsoleType.Test, test_command.name)):
 			raise VerificationException("Testing: %s" % test_command.name)
 
-	def verify(self, repo_uri, refs, callback, console_appender=None):
+	def verify(self, repo_uri, refs, private_key, callback, console_appender=None):
 		"""Runs verification on a desired git commit"""
 		try:
 			verification_config = self.setup_build(repo_uri, refs, private_key, console_appender)

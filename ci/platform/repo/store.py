@@ -9,6 +9,7 @@ import logging
 import os
 import re
 import shlex
+import shutil
 import socket
 import sys
 import time
@@ -46,13 +47,13 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repostore_id, repo_id, repo_name, privatekey):
+	def create_repository(self, repostore_id, repo_id, repo_name, private_key):
 		"""Creates a repository on the given local store.
 
 		:param repostore_id: The identifier of the local store(machine) to create the repository on.
 		:param repo_id: The unique identifier for the repository being created.
 		:param repo_name: The name of the new repository.
-		:param privatekey: An RSA private key for the repository to push to other forward urls
+		:param private_key: An RSA private key for the repository to push to other forward urls
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -96,12 +97,12 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.merge_changeset(repo_id, repo_name, ref_to_merge, ref_to_merge_into)
 
-	def create_repository(self, repostore_id, repo_id, repo_name, privatekey):
+	def create_repository(self, repostore_id, repo_id, repo_name, private_key):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.create_repository(repo_id, repo_name, privatekey)
+			client.create_repository(repo_id, repo_name, private_key)
 		self._update_store_repo_count(repostore_id)
 
 	def delete_repository(self, repostore_id, repo_id, repo_name):
@@ -180,7 +181,7 @@ class RepositoryStore(object):
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repo_id, repo_name, privatekey):
+	def create_repository(self, repo_id, repo_name, private_key):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def delete_repository(self, repo_id, repo_name):
@@ -259,9 +260,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 
 	def _push_with_private_key(self, repo, *args, **kwargs):
-		repo_path = os.path.basename(repo.git_dir)
+		repo_path = repo.git_dir
 		private_key_path = repo_path[0:(repo_path.rfind('.git') + len('.git'))] + '.id_rsa'
-		repo.git.execute(['push'] + args + repo.git.transform_kwargs(kwargs), env={'GIT_SSH': 'ssh -i %s' % os.path.abspath(private_key_path)})
+		execute_args = ['push'] + list(args) + repo.git.transform_kwargs(**kwargs)
+		repo.git.execute(execute_args, env={'GIT_SSH': 'ssh -i %s' % os.path.abspath(private_key_path)})
 
 	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
@@ -276,27 +278,27 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self.merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
 		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into)
 
-	def create_repository(self, repo_id, repo_name, privatekey):
+	def create_repository(self, repo_id, repo_name, private_key):
 		"""Creates a new server side repository. Raises an exception on failure.
 		We create bare repositories because they are server side.
 
 		:param repo_id: A unique id assigned to each repository that is used to determine
 						which directory the repository is stored under.
 		:param repo_name: The name of the new repository.
-		:param privatekey: RSA private key for pushing/pulling to other repos
+		:param private_key: RSA private key for pushing/pulling to other repos
 		"""
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
 		repo_path = self._resolve_path(repo_id, repo_name)
-		privatekey_path = repo_path + ".id_rsa"
+		private_key_path = repo_path + ".id_rsa"
 		if not os.path.exists(repo_path):
 			os.makedirs(repo_path)
 		else:
 			raise RepositoryAlreadyExistsException(repo_id, repo_path)
 		Repo.init(repo_path, bare=True)
-		with open(privatekey_path, 'w') as f:
-			print(privatekey, file=f)
+		with open(private_key_path, 'w') as f:
+			print(private_key, file=f)
 
 	def delete_repository(self, repo_id, repo_name):
 		"""Deletes a server side repository. This cannot be undone. Raises an exception on failure.
