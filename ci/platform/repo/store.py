@@ -195,7 +195,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
 	NUM_RETRIES = 10
-	PRIVATE_KEY_SCRIPT = os.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+	PRIVATE_KEY_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 		os.path.pardir, 'bin', 'ssh', 'get_private_key.sh'))
 
 	logger = logging.getLogger("FileSystemRepositoryStore")
