@@ -19,7 +19,7 @@ class RepositoryAdminGeneralPanel.View extends Backbone.View
 	html: '<div class="repositoryAdminGeneralPanelContent">
 			<div class="prettyForm">
 				<div class="prettyFormRow">
-					<div class="prettyFormLabel">Description</div>
+					<div class="prettyFormLabel labelPadding">Description</div>
 					<div class="prettyFormValue">
 						<textarea type="text" class="repositoryDescriptionField" placeholder="description" maxlength=256></textarea>
 						<div class="prettyFormErrorText" type="description"></div>

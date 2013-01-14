@@ -2,13 +2,13 @@ fs = require 'fs'
 assert = require 'assert'
 
 
-exports.create = (configurationParams, filesToLoadUri) ->
-	return new FilesLoader configurationParams, filesToLoadUri
+exports.create = (configurationParams, filesToLoadUri, filesSuffix) ->
+	return new FilesLoader configurationParams, filesToLoadUri, filesSuffix
 
 
 class FilesLoader
-	constructor: (@configurationParams, @filesToLoadUri) ->
-		assert.ok @configurationParams? and @filesToLoadUri?
+	constructor: (@configurationParams, @filesToLoadUri, @filesSuffix) ->
+		assert.ok @configurationParams? and @filesToLoadUri? and @filesSuffix?
 
 
 	load: (callback) =>
@@ -28,9 +28,10 @@ class FilesLoader
 
 			for contentType, fileNames of contentTypes
 				for fileName in fileNames
-					files[fileType][fileName] = {}
-					files[fileType][fileName].contentType = contentType
-					files[fileType][fileName].location = @_getFileLocation fileName
+					fileNameWithSuffix = @_getFileNameWithSuffix fileName, fileType
+					files[fileType][fileNameWithSuffix] = {}
+					files[fileType][fileNameWithSuffix].contentType = contentType
+					files[fileType][fileNameWithSuffix].location = @_getFileLocation fileName
 
 		return files
 
@@ -56,3 +57,8 @@ class FilesLoader
 
 	_getFileLocation: (fileName) =>
 		return @configurationParams.staticFiles.rootDirectory + fileName
+
+
+	_getFileNameWithSuffix: (fileName, fileType) =>
+		lastPeriodIndex = fileName.lastIndexOf '.'
+		return fileName.substr(0, lastPeriodIndex) + @filesSuffix + fileName.substr(lastPeriodIndex)

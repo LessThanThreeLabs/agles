@@ -3,12 +3,16 @@
 
 Repository management is done using gitpython.
 """
+from __future__ import print_function
+
 import logging
 import os
 import re
+import shlex
 import shutil
 import socket
 import sys
+import time
 import yaml
 
 import model_server
@@ -43,12 +47,13 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repostore_id, repo_id, repo_name):
+	def create_repository(self, repostore_id, repo_id, repo_name, private_key):
 		"""Creates a repository on the given local store.
 
 		:param repostore_id: The identifier of the local store(machine) to create the repository on.
 		:param repo_id: The unique identifier for the repository being created.
 		:param repo_name: The name of the new repository.
+		:param private_key: An RSA private key for the repository to push to other forward urls
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -92,12 +97,12 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.merge_changeset(repo_id, repo_name, ref_to_merge, ref_to_merge_into)
 
-	def create_repository(self, repostore_id, repo_id, repo_name):
+	def create_repository(self, repostore_id, repo_id, repo_name, private_key):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.create_repository(repo_id, repo_name)
+			client.create_repository(repo_id, repo_name, private_key)
 		self._update_store_repo_count(repostore_id)
 
 	def delete_repository(self, repostore_id, repo_id, repo_name):
@@ -176,7 +181,7 @@ class RepositoryStore(object):
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repo_id, repo_name):
+	def create_repository(self, repo_id, repo_name, private_key):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def delete_repository(self, repo_id, repo_name):
@@ -189,6 +194,10 @@ class RepositoryStore(object):
 class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
+	NUM_RETRIES = 10
+	PRIVATE_KEY_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+		'scripts', 'get_private_key.py'))
+
 	logger = logging.getLogger("FileSystemRepositoryStore")
 
 	def __init__(self, root_storage_directory_path):
@@ -197,28 +206,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			os.makedirs(root_storage_directory_path)
 		self._root_path = root_storage_directory_path
 
-	def _push_forward_url(self, repo, remote_repo, ref):
-		try:
-			repo.git.push(remote_repo, ':'.join([ref, ref]), force=True)
-		except GitCommandError:
-			error_msg = "failed to push repo to github: [repo: %s, remote_repo: %s, ref: %s]" % (repo, remote_repo, ref)
-			self.logger.error(error_msg)
-
-	def _push_forward_url_if_necessary(self, repo, repo_id, ref):
-		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
-			remote_repo = conn.get_repo_forward_url(repo_id)
-
-		# remote_repo is None if user doesn't have a pushback url set
-		if remote_repo:
-			self._push_forward_url(repo, remote_repo, ref)
-
-	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
-		assert repo_name.endswith(".git")
-		assert isinstance(repo_id, int)
-
-		repo_path = self._resolve_path(repo_id, repo_name)
-		repo = Repo(repo_path)
-		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
+	def merge_refs(self, repo_slave, ref_to_merge, ref_to_merge_into):
+		self.logger.info("Attempting to merge refs %s into %s on repo %s" % (ref_to_merge, ref_to_merge_into, repo_slave))
 		try:
 			repo_slave.git.fetch()  # update branches
 			remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
@@ -232,32 +221,89 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
-			error_msg = "repo: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
-				repo, ref_to_merge, ref_to_merge_into)
+			error_msg = "Merge failed for repo_slave (potential to retry): %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
+				repo_slave, ref_to_merge, ref_to_merge_into)
 			self.logger.info(error_msg)
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
 
-		self._push_forward_url_if_necessary(repo, repo_id, ref_to_merge_into)
+	def _update_from_forward_url(self, repo_slave, remote_repo, ref_to_update):
+		try:
+			# branch has to exist on the non-slave (not forward url) because we're trying to push it
+			remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
+			repo_slave.git.fetch(remote_repo, ref_to_update)
+			repo_slave.git.checkout("FETCH_HEAD")
+			ref_sha = repo_slave.head.commit.hexsha
+			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
+			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
+			repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
+		except GitCommandError:
+			stacktrace = sys.exc_info()[2]
+			error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_update)
+			self.logger.info(error_msg)
+			raise MergeError, error_msg, stacktrace
+		finally:
+			repo_slave.git.reset(hard=True)
 
-	def create_repository(self, repo_id, repo_name):
+	def _push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into):
+		i = 0
+		while True:
+			i += 1
+			try:
+				self._push_with_private_key(repo, remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
+				break
+			except GitCommandError:
+				if i >= self.NUM_RETRIES:
+					stacktrace = sys.exc_info()[2]
+					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
+					self.logger.debug(error_msg)
+					raise PushForwardError, error_msg, stacktrace
+				time.sleep(1)
+				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
+
+	def _push_with_private_key(self, repo, *args, **kwargs):
+		self.logger.info("Attempting to push repo %s to forward url" % repo)
+		repo_path = repo.git_dir
+		private_key_path = repo_path[0:(repo_path.rfind('.git') + len('.git'))] + '.id_rsa'
+		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
+		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT})
+
+	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
+		assert repo_name.endswith(".git")
+		assert isinstance(repo_id, int)
+
+		repo_path = self._resolve_path(repo_id, repo_name)
+		repo = Repo(repo_path)
+		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
+
+		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+		self.merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
+		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into)
+
+	def create_repository(self, repo_id, repo_name, private_key):
 		"""Creates a new server side repository. Raises an exception on failure.
 		We create bare repositories because they are server side.
 
 		:param repo_id: A unique id assigned to each repository that is used to determine
 						which directory the repository is stored under.
 		:param repo_name: The name of the new repository.
+		:param private_key: RSA private key for pushing/pulling to other repos
 		"""
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
 		repo_path = self._resolve_path(repo_id, repo_name)
+		private_key_path = repo_path + ".id_rsa"
 		if not os.path.exists(repo_path):
 			os.makedirs(repo_path)
 		else:
 			raise RepositoryAlreadyExistsException(repo_id, repo_path)
 		Repo.init(repo_path, bare=True)
+		with open(private_key_path, 'w') as f:
+			os.chmod(private_key_path, 0600)
+			print(private_key, file=f)
 
 	def delete_repository(self, repo_id, repo_name):
 		"""Deletes a server side repository. This cannot be undone. Raises an exception on failure.
@@ -271,6 +317,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		repo_path = self._resolve_path(repo_id, repo_name)
 		shutil.rmtree(repo_path)
+		os.remove(repo_path + ".id_rsa")
 
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.
@@ -302,6 +349,13 @@ class RepositoryOperationException(Exception):
 
 	def __init__(self, msg=''):
 		super(RepositoryOperationException, self).__init__(msg)
+
+
+class PushForwardError(RepositoryOperationException):
+	"""Indicates that an error occured while attempting to push to a forward url"""
+
+	def __init__(self, msg=''):
+		super(PushForwardError, self).__init__(msg)
 
 
 class MergeError(RepositoryOperationException):

@@ -14,7 +14,7 @@ class Welcome.View extends Backbone.View
 					(3) Make sure you call dispose() at the right times<br>
 					(4) Check heap profiles when adding view logic
 				</div>
-				<div><img class="welcomeImage" src="/img/awesomeFace.png"></div>
+				<div><img class="welcomeImage" src="/img/awesomeFace' + filesSuffix + '.png"></div>
 			</div>'
 
 

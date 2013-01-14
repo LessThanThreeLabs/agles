@@ -5,18 +5,10 @@ class ConsoleTextOutput.Model extends Backbone.Model
 	subscribeUrl: 'buildOutputs'
 	subscribeId: null
 	defaults:
-		id: null
-		title: null
-		expanded: false
-
+		lines: []
 
 	initialize: () =>
 		@subscribeId = @get 'id'
-
-		@consoleTextOutputLineModels = new Backbone.Collection()
-		@consoleTextOutputLineModels.model = ConsoleTextOutputLine.Model
-		@consoleTextOutputLineModels.comparator = (consoleTextOutputLine) =>
-			return consoleTextOutputLine.get 'number'
 
 
 	fetchOutput: () =>
@@ -25,57 +17,48 @@ class ConsoleTextOutput.Model extends Backbone.Model
 				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
 				console.error error
 			else
-				@set 'title', result.title
-				@_addLineModels result.consoleOutput
+				@_addInitialLines result.consoleOutput
+
+
+	_addInitialLines: (consoleOutput) =>
+		linesToAdd = []
+		for number, text of consoleOutput
+			assert.ok number > 0   # lines[0] will be undefined
+			linesToAdd[number] = text
+
+		@set 'lines', linesToAdd,
+			error: (model, error) => console.error error
 
 
 	onUpdate: (data) =>
-		assert.ok data.type?
+		return if  data.type isnt 'new output'
 
-		if data.type is 'line added'
-			assert.ok data.contents.number? and data.contents.text?
-			lineModel = new ConsoleTextOutputLine.Model data.contents
-			@consoleTextOutputLineModels.add lineModel
+		# TODO: THIS NEEDS TO BE FIXED TO USE AN ARRAY!!
+		# for lineNumber, lineText of data.contents.new_lines
+		lineNumber = data.contents.line_num
+		lineText = data.contents.line
+
+		assert.ok lineNumber > 0
+
+		if @get('lines')[lineNumber]?
+			@get('lines')[lineNumber] = lineText
+			@trigger 'lineUpdated', lineNumber, lineText
 		else
-			console.error 'Unaccounted for update type: ' + data.type
-
-
-	_addLineModels: (consoleOutput) =>
-		lineModels = []
-		for number, text of consoleOutput
-			assert.ok not isNaN parseInt number
-
-			lineModel = new ConsoleTextOutputLine.Model
-				number: parseInt number
-				text: text
-			lineModels.push lineModel
-
-		@consoleTextOutputLineModels.reset lineModels
-
-
-	toggleExpanded: () =>
-		@set 'expanded', not @get 'expanded'
+			@get('lines')[lineNumber] = lineText
+			@trigger 'lineAdded', lineNumber, lineText
 
 
 class ConsoleTextOutput.View extends Backbone.View
 	tagName: 'div'
 	className: 'consoleTextOutput'
-	html: '<div class="titleContainer">
-			<div class="title"></div>
-			<div class="expandCollapse"></div>
-		</div>
-		<div class="outputSlidingWindow">
-			<div class="output"></div>
-		</div>'
-	events: 'click .titleContainer': '_handleTitleClick'
+	html: '<div class="consoleTextOutputContent"></div>'
 
 
 	initialize: () =>
-		@model.on 'change:title', @_updateTitle, @
-		@model.on 'change:expanded', @_updateExpandedState, @
-		@model.consoleTextOutputLineModels.on 'add', @_handleAddLine, @
-		@model.consoleTextOutputLineModels.on 'reset', @_initializeOutputText, @
-		
+		@model.on 'change:lines', @_addInitialLines, @
+		@model.on 'lineUpdated', @_handleLineUpdated, @
+		@model.on 'lineAdded', @_handleAddLine, @
+
 		@model.subscribe()
 		@model.fetchOutput()
 
@@ -83,60 +66,72 @@ class ConsoleTextOutput.View extends Backbone.View
 	onDispose: () =>
 		@model.off null, null, @
 		@model.unsubscribe()
-		@model.consoleTextOutputLineModels.off null, null, @
 
 
 	render: () =>
 		@$el.html @html 
-		@_updateTitle()
-		@_updateExpandedState()
+		@_addInitialLines()
 		return @
 
 
-	_handleTitleClick: (event) =>
-		@model.toggleExpanded()
+	_addInitialLines: () =>
+		@$('.consoleTextOutputContent').empty()
+
+		htmlToAdd = []
+		for text, number in @model.get 'lines'
+			continue if number is 0
+			htmlToAdd.push @_createLineHtml number, text
+
+		@$('.consoleTextOutputContent').html htmlToAdd.join '\n'
 
 
-	_updateTitle: () =>
-		@$('.title').html @model.get 'title'
+	_createLineHtml: (number, text='') =>
+		return "<div class='consoleTextOutputLine' lineNumber='#{number}'>
+				<span class='consoleTextOutputLineNumber'>#{number}</span>
+				<span class='consoleTextOutputLineText'>#{text}</span>
+			</div>"
 
 
-	_updateExpandedState: () =>
-		if @model.get 'expanded'
-			@$('.titleContainer').addClass 'expanded'
-			@$('.outputSlidingWindow').height @$('.output').outerHeight()
-		else
-			@$('.titleContainer').removeClass 'expanded'
-			@$('.outputSlidingWindow').height 0
-
-		@_updateExpandCollapseText()
+	_handleLineUpdated: (number, text) =>
+		oldLine = $(".consoleTextOutputContent .consoleTextOutputLine[lineNumber=#{number}]")
+		oldLine.find('.consoleTextOutputLineText').html text
 
 
-	_updateExpandCollapseText: () =>
-		if @model.get 'expanded'
-			@$('.expandCollapse').html 'click to collapse'
-		else
-			@$('.expandCollapse').html 'click to expand'
+	_handleAddLine: (number, text) =>
+		scrolledToBottom = @_isScrolledToBottom()
+
+		@_addMissingLines number
+
+		lineHtml = @_createLineHtml number, text
+		@_addLineInCorrectPosition lineHtml, number
+
+		@_scrollToBottom() if scrolledToBottom
 
 
-	_initializeOutputText: () =>
-		@$el.find('.output').empty()
+	_addMissingLines: (number) =>
+		numberLines = $('.consoleTextOutputContent .consoleTextOutputLine').length
 
-		# we want to load all of the DOM elements at once, for performance reasons
-		htmlToAdd = $ '<div>'
-		@model.consoleTextOutputLineModels.each (consoleTextOutputLineModel) =>
-			consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
-			htmlToAdd.append consoleTextOutputLineView.render().el
-		@$('.output').html htmlToAdd.html()
+		for index in [(numberLines+1)...number]
+			lineHtml = @_createLineHtml index, ''
+			@_addLineInCorrectPosition lineHtml, index
 
 
-	_handleAddLine: (consoleTextOutputLineModel, collection, options) =>
-		consoleTextOutputLineView = new ConsoleTextOutputLine.View model: consoleTextOutputLineModel
-		@_insertBuildOutputLineAtIndex consoleTextOutputLineView.render().el, options.index
-
-
-	_insertBuildOutputLineAtIndex: (consoleTextOutputLineView, index) =>
-		if index == 0 
-			@$('.output').prepend consoleTextOutputLineView
+	_addLineInCorrectPosition: (lineHtml, lineNumber) =>
+		if lineNumber is 1
+			@$('.consoleTextOutputContent').prepend lineHtml
 		else 
-			@$('.output .consoleTextOutputLine:nth-child(' + index + ')').after consoleTextOutputLineView
+			@$('.consoleTextOutputContent .consoleTextOutputLine:nth-child(' + (lineNumber-1) + ')').after lineHtml
+
+
+	_isScrolledToBottom: () =>
+		return @$('.consoleTextOutputContent').outerHeight() -
+			Math.abs(@$('.consoleTextOutputContent').offset().top) -
+			@$el.height() - @$el.offset().top <= 0
+
+
+	_scrollToBottom: () =>
+		animationProperties = scrollTop: @$('.consoleTextOutputContent').outerHeight()
+		animationOptions =
+			duration: 1000
+			queue: false
+		@$el.animate animationProperties, animationOptions

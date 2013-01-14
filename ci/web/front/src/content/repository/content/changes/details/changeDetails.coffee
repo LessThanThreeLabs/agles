@@ -4,27 +4,54 @@ window.ChangeDetails = {}
 class ChangeDetails.Model extends Backbone.Model
 
 	initialize: () =>
-		@consoleCompilationOutputModel = new ConsoleCompilationOutput.Model()
+		@changeOutlineModel = new ChangeOutline.Model()
+		@changeMetadataModel = new ChangeMetadata.Model()
 
 
 class ChangeDetails.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeDetails'
-	html: '<div class="changeDetailsContentContainer">
-				<div class="changeDetailsContent"></div>
-			</div>'
-	currentView: null
+	html: '<div class="changeDetailsContent">
+			<div class="changeDetailsOutlineContainer"></div>
+			<div class="changeDetailsStageContainer"></div>
+		</div>'
+	_currentStageView = null
 
 
 	initialize: () =>
-		@compilationView = new ConsoleCompilationOutput.View model: @model.consoleCompilationOutputModel
+		@changeOutlineView = new ChangeOutline.View model: @model.changeOutlineModel
+		@changeMetadataView = new ChangeMetadata.View model: @model.changeMetadataModel
+
+		globalRouterModel.on 'change:changeView', @_updateStageView, @
 
 
 	onDispose: () =>
-		@compilationView.dispose()
+		globalRouterModel.off null, null, @
+
+		@changeOutlineView.dispose()
+		@_currentStageView.dispose() if @_currentStageView?
 
 
 	render: () =>
 		@$el.html @html
-		@$('.changeDetailsContent').html @compilationView.render().el
+		@$('.changeDetailsOutlineContainer').html @changeOutlineView.render().el
+		@_updateStageView()
 		return @
+
+
+	_updateStageView: () =>
+		@_currentStageView.dispose() if @_currentStageView?
+
+		if globalRouterModel.get('changeView') is 'home'
+			@_currentStageView = null
+			@$('.changeDetailsStageContainer').html @changeMetadataView.render().el
+		else
+			buildOutputId = @model.changeOutlineModel.getBuildOutputIdForBuildNameIdentifier globalRouterModel.get 'changeView'
+
+			if buildOutputId?
+				consoleTextOutputModel = new ConsoleTextOutput.Model id: buildOutputId
+				@_currentStageView = new ConsoleTextOutput.View model: consoleTextOutputModel
+				@$('.changeDetailsStageContainer').html @_currentStageView.render().el
+			else
+				@_currentStageView = null
+				@$('.changeDetailsStageContainer').html 'bad'

@@ -71,9 +71,9 @@ class VirtualMachineBuildCore(BuildCore):
 	def rollback_virtual_machine(self):
 		raise NotImplementedError()
 
-	def setup_build(self, repo_uri, refs, console_appender=None):
+	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
 		verification_config = super(VirtualMachineBuildCore, self).setup_build(repo_uri, refs)
-		self.setup_virtual_machine(console_appender)
+		self.setup_virtual_machine(private_key, console_appender)
 		return verification_config
 
 	def _get_output_handler(self, console_appender, type, subtype=""):
@@ -85,9 +85,9 @@ class VirtualMachineBuildCore(BuildCore):
 		if output_handler:
 			output_handler.declare_commands(command_names)
 
-	def setup_virtual_machine(self, console_appender, setup_commands=[]):
+	def setup_virtual_machine(self, private_key, console_appender, setup_commands=[]):
 		"""Provisions the contained virtual machine for analysis and test running"""
-		provision_command = SimpleRemoteProvisionCommand()
+		provision_command = SimpleRemoteProvisionCommand(private_key)
 		setup_commands = setup_commands + [provision_command]
 		self.declare_commands(console_appender, ConsoleType.Setup, setup_commands)
 		for setup_command in setup_commands:
@@ -108,10 +108,10 @@ class VirtualMachineBuildCore(BuildCore):
 			self._get_output_handler(console_appender, ConsoleType.Test, test_command.name)):
 			raise VerificationException("Testing: %s" % test_command.name)
 
-	def verify(self, repo_uri, refs, callback, console_appender=None):
+	def verify(self, repo_uri, refs, private_key, callback, console_appender=None):
 		"""Runs verification on a desired git commit"""
 		try:
-			verification_config = self.setup_build(repo_uri, refs, console_appender)
+			verification_config = self.setup_build(repo_uri, refs, private_key, console_appender)
 			self.run_compile_step(verification_config.compile_commands, console_appender)
 			self.run_test_step(verification_config.test_commands, console_appender)
 		except Exception as e:
@@ -166,15 +166,15 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 	def rollback_virtual_machine(self):
 		self.virtual_machine.rebuild()
 
-	def setup_build(self, repo_uri, refs, console_appender=None):
+	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
 		verification_config = super(VirtualMachineBuildCore, self).setup_build(repo_uri, refs)
-		self.setup_virtual_machine(repo_uri, refs, console_appender)
+		self.setup_virtual_machine(repo_uri, refs, private_key, console_appender)
 		return verification_config
 
-	def setup_virtual_machine(self, repo_uri, refs, console_appender):
+	def setup_virtual_machine(self, repo_uri, refs, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
 		checkout_command = SimpleRemoteCheckoutCommand(checkout_url, refs)
-		super(OpenstackBuildCore, self).setup_virtual_machine(console_appender, [checkout_command])
+		super(OpenstackBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
 
 
 class VerificationException(Exception):

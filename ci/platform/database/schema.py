@@ -34,7 +34,10 @@ repo = Table('repo', metadata,
 	Column('uri', String, nullable=False, unique=True),  # this is the clone uri
 	Column('description', String, nullable=False, default='no description'),
 	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
-	Column('default_permissions', SmallInteger, nullable=False)  # This is a bitmask
+	Column('default_permissions', SmallInteger, nullable=False),  # This is a bitmask
+	Column('forward_url', String, nullable=False),  # required forwarding url for repositories
+	Column('privatekey', String, nullable=False),  # rsa privkey
+	Column('publickey', String, nullable=False)  # rsa pubkey
 )
 
 # refer to util.permissions for permission bitmask documentation
@@ -118,16 +121,6 @@ ssh_pubkey = Table('ssh_pubkey', metadata,
 	Column('ssh_key', String, nullable=False, unique=True),
 
 	UniqueConstraint('user_id', 'alias')
-)
-
-#####################
-# Github Integration
-#####################
-
-repo_forward_url_map = Table('repo_forward_url_map', metadata,
-	Column('id', Integer, primary_key=True),
-	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False, unique=True),
-	Column('forward_url', String, nullable=False)
 )
 
 

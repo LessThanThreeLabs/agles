@@ -18,8 +18,9 @@ class Provisioner(object):
 			'scripts': self.parse_scripts,
 			'databases': self.parse_databases
 		}
+		self.keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.koality'))
 
-	def provision(self, config_path=None, source_path=None):
+	def provision(self, private_key, config_path=None, source_path=None):
 		try:
 			if not config_path:
 				if not source_path:
@@ -31,10 +32,21 @@ class Provisioner(object):
 			config_path = os.path.abspath(config_path)
 			with open(config_path) as config_file:
 				config = yaml.load(config_file.read())
+			self.set_private_key(private_key)
 			self.handle_config(config, source_path)
 		except Exception as e:
 			print "%s: %s" % (type(e).__name__, e.message)
 			sys.exit(1)
+		finally:
+			self.remove_private_key()
+
+	def set_private_key(self, private_key):
+		with open(self.keyfile, 'w') as keyfile:
+			keyfile.write(private_key)
+
+	def remove_private_key(self):
+		if os.access(self.keyfile, os.F_OK):
+			os.remove(self.keyfile)
 
 	def handle_config(self, config, source_path):
 		language_steps, setup_steps = self.parse_languages(config)
@@ -53,7 +65,7 @@ class Provisioner(object):
 		script_path = '/tmp/setup-script'
 		with open(script_path, 'w') as setup_script:
 			setup_script.write(script)
-		results = SetupCommand.execute_script_file(script_path, env={'GIT_SSH': 'ssh -oStrictHostKeyChecking=no'})
+		results = SetupCommand.execute_script_file(script_path, env={'GIT_SSH': 'ssh -oStrictHostKeyChecking=no -i %s' % self.keyfile})
 		os.remove(script_path)
 		if results.returncode != 0:
 			raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))

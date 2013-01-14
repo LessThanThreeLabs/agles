@@ -18,7 +18,7 @@ class FakeBuildVerifier(object):
 		else:
 			callback(VerificationResult.FAILURE)
 
-	def setup_build(self, repo_uri, refs, console_appender=None):
+	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
 		return VerificationConfig(None, None)
 
 	def declare_commands(self, console_appender, console_type, commands):

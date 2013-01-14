@@ -1,0 +1,49 @@
+div.changeOutlineStage {
+	position: relative;
+	display: inline-block;
+	margin-top: 10px;
+	margin-left: 10px;
+	min-width: 100px;
+	height: 50px;
+	vertical-align: top;
+	border-radius: 2px;
+	background-color: #326E81;
+	color: black;
+
+	cursor: hand;
+	cursor: pointer;
+
+	&:hover {
+		background-color: #3F92AC;
+	}
+
+	&.selected {
+		background-color: #3F92AC;
+	}
+
+	.changeOutlineStageName {
+		position: relative;
+		margin-top: 8px;
+		display: block;
+		text-align: center;
+		font-size: 1.2em;
+		z-index: 1;
+	}
+
+	.changeOutlineStageStatus {
+		position: relative;
+		display: block;
+		text-align: center;
+		font-size: 1.0em;
+		z-index: 2;
+	}
+
+	.changeOutlineStageSpinnerContainer {
+		position: absolute;
+		top: 0px;
+		right: 0px;
+		left: 0px;
+		bottom: 0px;
+		z-index: 0;
+	}
+}

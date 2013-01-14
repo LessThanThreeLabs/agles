@@ -19,13 +19,13 @@ setup:
       - amqp
       - pika: 0.9.5
       - kombu: 2.5.3
+      - pycrypto: 2.6
       - librabbitmq
       - sqlalchemy
       - pyyaml
       - msgpack-python
       - nose
       - beautifulsoup4
-      - dulwich
       - redis
       - greenlet
       - eventlet
@@ -41,9 +41,13 @@ setup:
       - less
       - directory: ci/web/back
   - databases:
-      - postgres:
-        - name: koality
-          username: lt3
+    - postgres:
+      - name: koality
+        username: lt3
+  - scripts:
+    - git config --global user.email "koality@getkoality.com"
+    - git config --global user.name "Koality"
+
 compile:
   - compile_platform:
       path: ci/platform

@@ -4,6 +4,18 @@ window.RepositoryAdminGithubPanel = {}
 class RepositoryAdminGithubPanel.Model extends Backbone.Model
 	defaults:
 		forwardUrl: ''
+		publicKey: ''
+
+
+	getPublicKey: () =>
+		requestData = id: globalRouterModel.get 'repositoryId'
+		socket.emit 'repos:read', requestData, (error, data) =>
+			if error?
+				globalRouterModel.set 'view', 'invalidRepositoryState' if error is 403
+				console.error error
+			else
+				@set 'publicKey', data.publicKey,
+					error: (model, error) => console.error error
 
 
 	validate: (attributes) =>
@@ -19,11 +31,15 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 	html: '<div class="repositoryAdminGithubPanelContent">
 			<div class="prettyForm">
 				<div class="prettyFormRow">
-					<div class="prettyFormLabel">Forward Url</div>
+					<div class="prettyFormLabel labelPadding">Forward Url</div>
 					<div class="prettyFormValue">
-						<input type="text" class="repositoryForwardUrlField" maxlength=128 placeholder="git://github.com/awesome/repository.git">
+						<input type="text" class="repositoryForwardUrlField" maxlength=256 placeholder="git@github.com:awesome/repository.git">
 						<div class="prettyFormErrorText" type="forwardUrl"></div>
 					</div>
+				</div>
+				<div class="prettyFormRow">
+					<div class="prettyFormLabel">Public Key</div>
+					<div class="prettyFormValue publicKeyValue"></div>
 				</div>
 			</div>
 			<div class="saveForwardUrlButtonContainer">
@@ -36,15 +52,23 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 
 
 	initialize: () =>
+		@model.on 'change:publicKey', @_updatePublicKey, @
+		@model.getPublicKey()
 
 
 	onDispose: () =>
+		@model.off null, null, @
 
 
 	render: () =>
 		@$el.html @html
+		@_updatePublicKey()
 		setTimeout (() => @$('.repositoryForwardUrlField').focus()), 0
 		return @
+
+
+	_updatePublicKey: () =>
+		@$('.publicKeyValue').html @model.get 'publicKey'
 
 
 	_handleFormEntryChange: () =>

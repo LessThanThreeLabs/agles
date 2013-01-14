@@ -1,7 +1,6 @@
 {
 	"css": {
 		"text/css": [
-			"/css/src/fonts.css",
 			"/css/src/setup.css",
 
 			"/css/src/visualElements/prettyDropdown/prettyDropdown.css",
@@ -69,13 +68,6 @@
 			
 			"/js/src/content/account/globalRouter.js",
 			"/js/src/content/account/main.js"
-		]
-	},
-
-	"font": {
-		"application/x-font-woff": [
-			"/font/lobster/lobster.woff",
-			"/font/ubuntu/ubuntu.woff"
 		]
 	}
 }

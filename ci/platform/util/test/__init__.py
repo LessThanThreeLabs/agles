@@ -1,3 +1,3 @@
 __author__ = 'jchu'
 
-from integrationtest import *
+from basetest import *

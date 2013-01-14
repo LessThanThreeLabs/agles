@@ -5,23 +5,23 @@ FilesMinifier = require './filesMinifier'
 FilesCompressor = require './filesCompressor'
 
 
-exports.create = (configurationParams, filesToLoadUri) ->
-	filesLoader = FilesLoader.create configurationParams, filesToLoadUri
+exports.create = (name, configurationParams, filesToLoadUri, filesSuffix) ->
+	filesLoader = FilesLoader.create configurationParams, filesToLoadUri, filesSuffix
 	filesMinifier = FilesMinifier.create configurationParams
 	filesCompressor = FilesCompressor.create configurationParams
-	return new FilesCacher configurationParams, filesLoader, filesMinifier, filesCompressor
+	return new FilesCacher name, configurationParams, filesLoader, filesMinifier, filesCompressor
 
 
 class FilesCacher
 	_files: null
 
-	constructor: (@configurationParams, @filesLoader, @filesMinifier, @filesCompressor) ->
-		assert.ok @configurationParams? and @filesLoader? and @filesMinifier? and @filesCompressor?
+	constructor: (@name, @configurationParams, @filesLoader, @filesMinifier, @filesCompressor) ->
+		assert.ok @name, @configurationParams? and @filesLoader? and @filesMinifier? and @filesCompressor?
 
 
 	loadFiles: (callback) =>
-		console.log 'loading files'
 		@filesLoader.load (error, files) =>
+			console.log @name.cyan + ' - loaded files'.white
 			if error?
 				callback error
 			else
@@ -31,8 +31,8 @@ class FilesCacher
 
 	_minifyFiles: (callback) =>
 		if process.env.NODE_ENV is 'production'
-			console.log 'minifying files'
 			@filesMinifier.replaceWithMinifiedFiles @_files, (error) =>
+				console.log @name.cyan + ' - minified files'.white
 				if error?
 					callback error
 				else
@@ -42,8 +42,8 @@ class FilesCacher
 
 
 	_compressFiles: (callback) =>
-		console.log 'compressing files'
 		@filesCompressor.addCompressedFiles @_files, callback
+		console.log @name.cyan + ' - compressed files'.white
 
 
 	getFiles: () =>

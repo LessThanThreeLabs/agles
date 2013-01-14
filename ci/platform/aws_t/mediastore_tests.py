@@ -22,5 +22,5 @@ class S3MediaStoreTest(BaseIntegrationTest):
 
 	def test_store_media(self):
 		self.mediastore.store_media(self.binary, self.path)
-		assert_equals(self.mediastore.get_media(self.path), self.binary)
+		assert_equal(self.mediastore.get_media(self.path), self.binary)
 		self.mediastore.remove_media(self.path)

@@ -1,19 +1,28 @@
 div.changeDetails {
-	display: table-cell;
-	vertical-align: top;
+	position: relative;
+	width: 100%;
+	height: 100%;
 
-	.changeDetailsContentContainer {
-		position: relative;
-		width: 100%;
-		height: 100%;
+	.changeDetailsContent {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		right: 0px;
+		bottom: 0px;
+		background-color: #202020;
+		color: #E0E0E0;
 
-		.changeDetailsContent {
+		@outlineHeight: 80px;
+		.changeDetailsOutlineContainer {
+			height: @outlineHeight;
+		}
+
+		.changeDetailsStageContainer {
 			position: absolute;
-			top: 0px;
+			top: @outlineHeight;
 			left: 0px;
 			right: 0px;
 			bottom: 0px;
-			overflow: auto;
 		}
 	}
 }

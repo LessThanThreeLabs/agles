@@ -86,12 +86,12 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 	def _assert_dict_subset(self, expected, actual):
 		for key in expected.iterkeys():
-			assert_equals(expected[key], actual[key])
+			assert_equal(expected[key], actual[key])
 
 	def test_get_user_id(self):
 		with ModelServer.rpc_connect("users", "read") as conn:
 			user_id = conn.get_user_id(self.EMAIL, self.password_hash)
-		assert_equals(self.user_id, user_id)
+		assert_equal(self.user_id, user_id)
 
 	def test_get_user(self):
 		with ModelServer.rpc_connect("users", "read") as conn:
@@ -120,7 +120,16 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			self.repostore_id = result.inserted_primary_key[0]
 
 		with ModelServer.rpc_connect("repos", "create") as conn:
-			self.repo_id = conn._create_repo_in_db(self.user_id, self.REPO_NAME, 'description', self.REPO_URI, self.repostore_id, RepositoryPermissions.RW)
+			self.repo_id = conn._create_repo_in_db(
+				self.user_id,
+				self.REPO_NAME,
+				'description',
+				self.REPO_URI,
+				self.repostore_id,
+				RepositoryPermissions.RW,
+				"forwardurl",
+				"privatekey",
+				"publickey")
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			permission_ins = permission.insert().values(user_id=self.user_id, repo_id=self.repo_id, permissions=RepositoryPermissions.RW)
@@ -135,15 +144,15 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with ModelServer.rpc_connect("repos", "read") as conn:
 			writable_repos = conn.get_writable_repos(self.user_id)
 		repo = list(writable_repos).pop()
-		assert_equals(self.repo_id, repo["id"])
-		assert_equals(self.REPO_NAME, repo["name"])
-		assert_equals(self.repostore_id, repo["repostore_id"])
-		assert_equals(RepositoryPermissions.RW, repo["default_permissions"])
+		assert_equal(self.repo_id, repo["id"])
+		assert_equal(self.REPO_NAME, repo["name"])
+		assert_equal(self.repostore_id, repo["repostore_id"])
+		assert_equal(RepositoryPermissions.RW, repo["default_permissions"])
 
 	def test_get_repo_from_id(self):
 		with ModelServer.rpc_connect("repos", "read") as conn:
 			repo = conn.get_repo_from_id(self.user_id, self.repo_id)
-		assert_equals(self.repo_id, repo["id"])
-		assert_equals(self.REPO_NAME, repo["name"])
-		assert_equals(self.repostore_id, repo["repostore_id"])
-		assert_equals(RepositoryPermissions.RW, repo["default_permissions"])
+		assert_equal(self.repo_id, repo["id"])
+		assert_equal(self.REPO_NAME, repo["name"])
+		assert_equal(self.repostore_id, repo["repostore_id"])
+		assert_equal(RepositoryPermissions.RW, repo["default_permissions"])

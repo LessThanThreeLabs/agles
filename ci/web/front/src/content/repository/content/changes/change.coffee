@@ -5,7 +5,6 @@ class Change.Model extends Backbone.Model
 	ALLOWED_STATUS: ['passed', 'running', 'failed', 'queued']
 	subscribeUrl: 'changes'
 	subscribeId: null
-
 	urlRoot: 'changes'
 	defaults:
 		number: null
@@ -14,9 +13,10 @@ class Change.Model extends Backbone.Model
 
 
 	initialize: () =>
+		@_blah = Math.random()
 		@subscribeId = @get 'id'
 
-		if window.globalRouterModel.get('changeId') is @get('id')
+		if globalRouterModel.get('changeId') is @get('id')
 			@set 'selected', true,
 				error: (model, error) => console.error error
 

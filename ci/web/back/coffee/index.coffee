@@ -1,3 +1,4 @@
+colors = require 'colors'
 profiler = require 'nodetime'
 configuration = require('./configuration')
 environment = require('./environment')
@@ -9,6 +10,8 @@ RedirectServer = require './server/redirectServer'
 
 
 startEverything = () ->
+	process.title = 'webserver'
+
 	commandLineParser = CommandLineParser.create()
 
 	configurationParams = _getConfigurationFile commandLineParser.getConfigFile()

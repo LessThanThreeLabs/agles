@@ -46,7 +46,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 			row_result = sqlconn.execute(query).first()
 		if not row_result:
 			return None
-		return row_result[repostore.c.id], row_result[repostore.c.host_name], row_result[repostore.c.repositories_path], row_result[repo.c.id], row_result[repo.c.name]
+		return row_result[repostore.c.id], row_result[repostore.c.host_name], row_result[repostore.c.repositories_path], row_result[repo.c.id], row_result[repo.c.name], row_result[repo.c.privatekey]
 
 	def get_user_id_from_public_key(self, key):
 		ssh_pubkey = database.schema.ssh_pubkey
@@ -147,7 +147,6 @@ class ReposReadHandler(ModelServerRpcHandler):
 		assert row is not None
 		return to_dict(row, repo.columns)
 
-
 	def get_members_with_permissions(self, user_id, repo_id):
 		user = database.schema.user
 		permission = database.schema.permission
@@ -161,16 +160,14 @@ class ReposReadHandler(ModelServerRpcHandler):
 			return [dict(to_dict(row, user.columns, tablename=user.name).items() + [(permission.c.permissions.name, row[permission.c.permissions])])
 				for row in sqlconn.execute(query)]
 
-######################
-# Github Integration #
-######################
+#########################
+# Host Repo Integration #
+#########################
 
 	def get_repo_forward_url(self, repo_id):
 		repo = database.schema.repo
-		repo_forward_url_map = database.schema.repo_forward_url_map
 
-		query = repo_forward_url_map.join(repo).select().where(
-			repo.c.id==repo_id)
+		query = repo.select().where(repo.c.id==repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-			return row[repo_forward_url_map.c.forward_url] if row else None
+			return row[repo.c.forward_url] if row else None

@@ -6,14 +6,14 @@ RequestHandler = require './requestHandler'
 FilesCacher = require './cache/filesCacher'
 
 
-exports.create = (configurationParams, stores, modelConnection) ->
-	filesCacher = FilesCacher.create configurationParams, './cache/verifyAccount.json'
-	return new VerifyAccountHandler configurationParams, stores, modelConnection, filesCacher
+exports.create = (configurationParams, stores, modelConnection, filesSuffix) ->
+	filesCacher = FilesCacher.create 'verify account', configurationParams, './cache/verifyAccount.json', filesSuffix
+	return new VerifyAccountHandler configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 
 class VerifyAccountHandler extends RequestHandler
-	constructor: (configurationParams, stores, modelConnection, filesCacher) ->
-		super configurationParams, stores, modelConnection, filesCacher
+	constructor: (configurationParams, stores, modelConnection, filesCacher, filesSuffix) ->
+		super configurationParams, stores, modelConnection, filesCacher, filesSuffix
 
 
 	handleRequest: (request, response) =>

@@ -89,8 +89,8 @@ class OpenstackVm(VirtualMachine):
 			if self.server.status == 'ERROR':
 				self.rebuild()
 
-	def provision(self, output_handler=None):
-		return self.ssh_call("virtualenvs/2.7/bin/python -c \"from verification.box.provisioner import Provisioner; Provisioner().provision()\"", output_handler)
+	def provision(self, private_key, output_handler=None):
+		return self.ssh_call("virtualenvs/2.7/bin/python -c \"from verification.box.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key, output_handler)
 
 	def ssh_call(self, command, output_handler=None):
 		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)

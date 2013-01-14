@@ -102,11 +102,9 @@ class ChangesList.View extends Backbone.View
 	HEIGHT_BEFORE_FETCHING_MORE_CHANGES: 200
 	tagName: 'div'
 	className: 'changesList'
-	html: '<div class="changesListContainer">
-			<div class="changesListSearchContainer"></div>
-			<div class="changesListPanel">
-				<div class="changesListPanelContainer"></div>
-			</div>
+	html: '<div class="changesListSearchContainer"></div>
+		<div class="changesListPanel">
+			<div class="changesListPanelContainer"></div>
 		</div>'
 	events:	'scroll': '_scrollHandler'
 	changeViews: []
@@ -127,6 +125,8 @@ class ChangesList.View extends Backbone.View
 		@model.unsubscribe() if @model.subscribeId?
 		@model.changeModels.off null, null, @
 		globalRouterModel.off null, null, @
+
+		@model.reset()
 
 		@_disposeAllChanges()
 		@changesListSearchView.dispose()
@@ -149,7 +149,7 @@ class ChangesList.View extends Backbone.View
 	_disposeAllChanges: () =>
 		for changeView in @changeViews
 			changeView.dispose()
-		@changeViews = []
+		@changeViews.length = 0  # yes, this is the proper way to clear an array
 
 
 	_scrollHandler: () =>

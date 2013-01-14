@@ -44,14 +44,17 @@ class StaticServer
 
 
 	_sendFile: (request, response, file) =>
-		if request.gzipAllowed and file.gzip?
-			response.writeHead 200,
-				'content-type': file.contentType
-				'content-length': file.gzip.length
-				'content-encoding': 'gzip'
+		useGzip = request.gzipAllowed and file.gzip?
+
+		headers = 
+			'content-type': file.contentType
+			'content-length': if useGzip then file.gzip.length else file.plain.length
+			'cache-control': 'max-age=2592000'
+
+		if useGzip
+			headers['content-encoding'] = 'gzip' if useGzip
+			response.writeHead 200, headers
 			response.end file.gzip, 'binary'
 		else
-			response.writeHead 200,
-				'content-type': file.contentType
-				'content-length': file.plain.length
+			response.writeHead 200, headers
 			response.end file.plain, 'binary'

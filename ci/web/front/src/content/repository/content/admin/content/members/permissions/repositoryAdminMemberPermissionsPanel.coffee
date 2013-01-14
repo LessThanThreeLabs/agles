@@ -44,8 +44,6 @@ class RepositoryAdminMemberPermissionsPanel.Model extends Backbone.Model
 			when 'member permissions changed'
 				assert.ok data.contents.email? and data.contents.permissions?
 				@memberPermissionsModels.where(email: data.contents.email)[0].set 'permissions', data.contents.permissions
-			else
-				console.error 'Unaccounted for update type: ' + data.type
 
 
 class RepositoryAdminMemberPermissionsPanel.View extends Backbone.View

@@ -1,4 +1,4 @@
-Backbone.Model.prototype._numSubscribeRequests = 0
+Backbone.Model.prototype._subscribed = false
 Backbone.Model.prototype._currentEventName = null
 
 
@@ -6,9 +6,9 @@ Backbone.Model.prototype.subscribe = () ->
 	assert.ok @subscribeUrl?
 	assert.ok @subscribeId?
 	assert.ok @onUpdate?
+	assert.ok not @_subscribed
 
-	@_numSubscribeRequests++
-
+	@_subscribed = true
 	socket.emit @subscribeUrl + ':subscribe', id: @subscribeId, (error, result) =>
 		if error?
 			console.error error
@@ -35,11 +35,10 @@ Backbone.Model.prototype.subscribe = () ->
 Backbone.Model.prototype.unsubscribe = () ->
 	assert.ok @subscribeUrl?
 	assert.ok @subscribeId?
-	assert.ok @_numSubscribeRequests > 0
+	assert.ok @_subscribed
 
-	@_numSubscribeRequests--
-	if @_numSubscribeRequests is 0
-		socket.emit @subscribeUrl + ':unsubscribe', id: @subscribeId
+	@_subscribed = false
+	socket.emit @subscribeUrl + ':unsubscribe', id: @subscribeId
 
 
 Backbone.View.prototype.dispose = () ->

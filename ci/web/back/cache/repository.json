@@ -3,7 +3,6 @@
 		"text/css": [
 			"/css/libs/tipped.css",
 
-			"/css/src/fonts.css",
 			"/css/src/setup.css",
 
 			"/css/src/visualElements/prettyDropdown/prettyDropdown.css",
@@ -29,9 +28,13 @@
 			"/css/src/content/repository/content/admin/content/repositoryAdminContent.css",
 			"/css/src/content/repository/content/admin/repositoryAdmin.css",
 
-			"/css/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutputLine.css",
 			"/css/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutput.css",
+			"/css/src/content/repository/content/changes/details/changeMetadata/changeMetadata.css",
+			"/css/src/content/repository/content/changes/details/outline/stage/home/changeOutlineHomeStage.css",
+			"/css/src/content/repository/content/changes/details/outline/stage/changeOutlineStage.css",
+			"/css/src/content/repository/content/changes/details/outline/changeOutline.css",
 			"/css/src/content/repository/content/changes/details/changeDetails.css",
+
 			"/css/src/content/repository/content/changes/list/changesList.css",
 			"/css/src/content/repository/content/changes/list/changesListSearch.css",
 			"/css/src/content/repository/content/changes/change.css",
@@ -53,6 +56,8 @@
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
 			"/js/libs/jquery.js",
+			"/js/libs/dateFormat.js",
+			"/js/libs/spinner.js",
 			"/js/libs/tipped.js",
 			"/js/libs/tippedSkin.js",
 			"/js/libs/handlebars.js",
@@ -88,10 +93,13 @@
 			"/js/src/content/repository/content/admin/content/repositoryAdminContent.js",
 			"/js/src/content/repository/content/admin/repositoryAdmin.js",
 
-			"/js/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutputLine.js",
 			"/js/src/content/repository/content/changes/details/consoleTextOutput/consoleTextOutput.js",
-			"/js/src/content/repository/content/changes/details/compilation/consoleCompilationOutput.js",
+			"/js/src/content/repository/content/changes/details/changeMetadata/changeMetadata.js",
+			"/js/src/content/repository/content/changes/details/outline/stage/home/changeOutlineHomeStage.js",
+			"/js/src/content/repository/content/changes/details/outline/stage/changeOutlineStage.js",
+			"/js/src/content/repository/content/changes/details/outline/changeOutline.js",
 			"/js/src/content/repository/content/changes/details/changeDetails.js",
+
 			"/js/src/content/repository/content/changes/list/changesQuery.js",
 			"/js/src/content/repository/content/changes/list/changesFetcher.js",
 			"/js/src/content/repository/content/changes/list/changesList.js",
@@ -119,15 +127,8 @@
 			"/img/icons/changes.svg",
 			"/img/icons/settings.svg",
 			"/img/icons/admin.svg",
-			"/img/icons/removeMember.svg"
-		]
-	},
-
-	"font": {
-		"application/x-font-woff": [
-			"/font/lobster/lobster.woff",
-			"/font/sourceCodePro/sourceCodePro.woff",
-			"/font/ubuntu/ubuntu.woff"
+			"/img/icons/removeMember.svg",
+			"/img/icons/home.svg"
 		]
 	}
 }

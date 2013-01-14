@@ -50,36 +50,17 @@ class BuildOutputsReadHandler extends Handler
 					else callback 'unable to read build console ids'
 					return
 
-			callback null, [].concat resultLists
+			buildOutputs = []
+			for resultList in resultLists
+				buildOutputs = buildOutputs.concat resultList.map (result) =>
+					return @_sanitizeBuildOutput result
+
+			callback null, buildOutputs
 
 
-	getBuildConsoleIds: (socket, args, callback) =>
-		assert.ok args.changeId?
-		userId = socket.session.userId
-
-		if not userId?
-			callback 403
-			return
-
-		@modelRpcConnection.changes.read.get_visible_builds_from_change_id userId, args.changeId, (error, builds) =>
-			if error?
-				if error.type is 'InvalidPermissionsError' then callback 403
-				else callback 'unable to read build console ids'
-				return
-
-			errors = []
-			results = []
-
-			await
-				for build, index in builds
-					@modelRpcConnection.buildOutputs.read.get_build_console_ids userId, build.id, defer errors[index], results[index]
-
-			for error in errors
-				if error?
-					if error.type is 'InvalidPermissionsError' then callback 403
-					else callback 'unable to read build console ids'
-					return
-
-			callback null, results
-
-
+	_sanitizeBuildOutput: (buildOutput) =>
+		id: buildOutput.id
+		buildId: buildOutput.build_id
+		type: buildOutput.type
+		name: buildOutput.subtype
+		returnCode: buildOutput.return_code
