@@ -262,7 +262,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def _push_with_private_key(self, repo, *args, **kwargs):
 		repo_path = repo.git_dir
 		private_key_path = repo_path[0:(repo_path.rfind('.git') + len('.git'))] + '.id_rsa'
-		execute_args = ['push'] + list(args) + repo.git.transform_kwargs(**kwargs)
+		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
 		repo.git.execute(execute_args, env={'GIT_SSH': 'ssh -i %s' % os.path.abspath(private_key_path)})
 
 	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
