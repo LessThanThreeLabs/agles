@@ -38,8 +38,10 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 					</div>
 				</div>
 				<div class="prettyFormRow">
-					<div class="prettyFormLabel">Public Key</div>
-					<div class="prettyFormValue publicKeyValue"></div>
+					<div class="prettyFormLabel labelPadding">Public Key</div>
+					<div class="prettyFormValue">
+						<textarea type="text" class="publicKeyValue" readonly></textarea>
+					</div>
 				</div>
 			</div>
 			<div class="saveForwardUrlButtonContainer">
@@ -68,7 +70,7 @@ class RepositoryAdminGithubPanel.View extends Backbone.View
 
 
 	_updatePublicKey: () =>
-		@$('.publicKeyValue').html @model.get 'publicKey'
+		@$('.publicKeyValue').val @model.get 'publicKey'
 
 
 	_handleFormEntryChange: () =>
