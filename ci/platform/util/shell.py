@@ -3,6 +3,7 @@ import os
 import re
 
 from model_server import ModelServer
+from shared.constants import VerificationUser
 from util import pathgen
 from util.permissions import RepositoryPermissions, InvalidPermissionsError
 
@@ -49,10 +50,10 @@ class RestrictedGitShell(object):
 	def rp_new_sshargs(self, command, requested_repo_uri, user_id):
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
 			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
-		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 
 		self.verify_user_permissions(command, user_id, repo_id)
 
+		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 		return self._create_ssh_exec_args(route, command, remote_filesystem_path, user_id)
 
 	def handle_receive_pack(self, requested_repo_uri, user_id):
@@ -63,6 +64,17 @@ class RestrictedGitShell(object):
 		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
 			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 			forward_url = modelserver_rpc_conn.get_repo_forward_url(repo_id)
+
+		self.verify_user_permissions("git-upload-pack", user_id, repo_id)
+
+		if int(user_id) == VerificationUser.id:
+			remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
+			args = self._create_ssh_exec_args(route, "git-upload-pack", remote_filesystem_path, user_id)
+		else:
+			args = self._up_pullthrough_args(private_key, forward_url, user_id)
+		os.execlp(*args)
+
+	def _up_pullthrough_args(self, private_key, forward_url, user_id):
 		uri, path = forward_url.split(':')
 		command_parts = ["git-upload-pack", path]
 		full_command = ' '.join(command_parts)
@@ -70,7 +82,7 @@ class RestrictedGitShell(object):
 		with open(private_key_file) as key_file:
 			key_file.write(private_key)
 		args = ["ssh", "ssh", "-oStrictHostKeyChecking=no", "-i", private_key_file, uri, full_command]
-		os.execlp(*args)
+		return args
 
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
