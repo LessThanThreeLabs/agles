@@ -26,7 +26,6 @@ setup:
       - msgpack-python
       - nose
       - beautifulsoup4
-      - dulwich
       - redis
       - greenlet
       - eventlet
