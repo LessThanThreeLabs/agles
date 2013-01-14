@@ -196,7 +196,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	NUM_RETRIES = 10
 	PRIVATE_KEY_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-		os.path.pardir, 'bin', 'ssh', 'get_private_key.py'))
+		'scripts', 'get_private_key.py'))
 
 	logger = logging.getLogger("FileSystemRepositoryStore")
 
