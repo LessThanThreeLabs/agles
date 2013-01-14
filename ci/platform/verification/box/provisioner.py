@@ -41,7 +41,7 @@ class Provisioner(object):
 			self.remove_private_key()
 
 	def set_private_key(self, private_key):
-		with open(self.keyfile) as keyfile:
+		with open(self.keyfile, 'w') as keyfile:
 			keyfile.write(private_key)
 
 	def remove_private_key(self):
