@@ -1,8 +1,8 @@
-import unittest
-
 from nose.tools import *
 from util.permissions import RepositoryPermissions
 from util.shell import *
+
+from util.test import BaseUnitTest
 
 COMMANDS_TO_PERMISSIONS = {
 	'git-receive-pack': RepositoryPermissions.RW
@@ -11,7 +11,7 @@ COMMANDS_TO_PERMISSIONS = {
 USER_ID_COMMANDS = ['git-receive-pack']
 
 
-class ShellTest(unittest.TestCase):
+class ShellTest(BaseUnitTest):
 	def setUp(self):
 		self.rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
 

@@ -1,10 +1,10 @@
-import unittest
-
 from nose.tools import *
 from util.permissions import RepositoryPermissions
 
+from util.test import BaseUnitTest
 
-class ShellTest(unittest.TestCase):
+
+class ShellTest(BaseUnitTest):
 	def setUp(self):
 		pass
 
@@ -22,4 +22,3 @@ class ShellTest(unittest.TestCase):
 		assert_false(RepositoryPermissions.has_permissions(RepositoryPermissions.RW, RepositoryPermissions.RWA))
 		assert_false(RepositoryPermissions.has_permissions(RepositoryPermissions.R, RepositoryPermissions.RW))
 		assert_false(RepositoryPermissions.has_permissions(RepositoryPermissions.R, RepositoryPermissions.RWA))
-

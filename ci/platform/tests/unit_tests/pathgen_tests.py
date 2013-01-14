@@ -1,10 +1,9 @@
-import unittest
-
 from nose.tools import *
+from util.test import BaseUnitTest
 from util.pathgen import directory_treeify, to_path
 
 
-class ShellTest(unittest.TestCase):
+class ShellTest(BaseUnitTest):
 	def setUp(self):
 		pass
 
