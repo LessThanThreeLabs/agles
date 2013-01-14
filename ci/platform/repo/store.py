@@ -205,6 +205,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self._root_path = root_storage_directory_path
 
 	def merge_refs(self, repo_slave, ref_to_merge, ref_to_merge_into):
+		self.logger.info("Attempting to merge refs %s into %s on repo %s" % (ref_to_merge, ref_to_merge_into, repo_slave))
 		try:
 			repo_slave.git.fetch()  # update branches
 			remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
@@ -218,7 +219,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
-			error_msg = "repo_slave: %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
+			error_msg = "Merge failed for repo_slave (potential to retry): %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
 				repo_slave, ref_to_merge, ref_to_merge_into)
 			self.logger.info(error_msg)
 			raise MergeError, error_msg, stacktrace
@@ -237,7 +238,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
-			error_msg = "repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_update)
+			error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_update)
 			self.logger.info(error_msg)
 			raise MergeError, error_msg, stacktrace
 		finally:
@@ -249,7 +250,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 			i += 1
 			try:
 				self._push_with_private_key(repo, remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
-				# repo.git.push(remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
 				break
 			except GitCommandError:
 				if i >= self.NUM_RETRIES:
@@ -260,6 +260,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 
 	def _push_with_private_key(self, repo, *args, **kwargs):
+		self.logger.info("Attempting to push repo %s to forward url" % repo)
 		repo_path = repo.git_dir
 		private_key_path = repo_path[0:(repo_path.rfind('.git') + len('.git'))] + '.id_rsa'
 		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
