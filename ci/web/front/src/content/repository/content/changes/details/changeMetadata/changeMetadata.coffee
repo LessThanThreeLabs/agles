@@ -66,11 +66,13 @@ class ChangeMetadata.View extends Backbone.View
 	tagName: 'div'
 	className: 'changeMetadata'
 	template: Handlebars.compile '<div class="changeMetadataContainer">
+			<!--
 			<div class="changeTimeInterval">
 				<span class="changeStartTime">{{startTime}}</span>
 				<span class="changeTimeDivider"> to </span>
 				<span class="changeEndTime">{{endTime}}</span>
 			</div>
+			-->
 
 			<div class="prettyForm">
 				<div class="prettyFormRow">
