@@ -1,3 +1,4 @@
+import logging
 import operator
 
 from kombu.messaging import Producer
@@ -6,12 +7,14 @@ from shared.constants import BuildStatus
 from database.engine import ConnectionFactory
 from shared.handler import QueueListener
 from model_server import ModelServer
-from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError
+from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError, PushForwardError
 from settings.verification_server import *
 from util import pathgen
 
 
 class VerificationResultsHandler(QueueListener):
+	logger = logging.getLogger("FileSystemRepositoryStore")
+
 	def __init__(self):
 		super(VerificationResultsHandler, self).__init__(verification_results_queue)
 		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
@@ -57,6 +60,10 @@ class VerificationResultsHandler(QueueListener):
 		with ModelServer.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.FAILED)
 
+	def _mark_change_pushforward_failure(self, change_id):
+		with ModelServer.rpc_connect("changes", "update") as client:
+			client.mark_change_finished(change_id, BuildStatus.FAILED)
+
 	def send_merge_request(self, change_id):
 		print "Sending merge request for " + str(change_id)
 		with ModelServer.rpc_connect("changes", "read") as client:
@@ -75,7 +82,13 @@ class VerificationResultsHandler(QueueListener):
 				repo_name, ref, merge_target)
 		except MergeError as e:
 			self._mark_change_merge_failure(change_id)
+			self.logger.exception(e)
+			raise e  # Should alert the user somehow
+		except PushForwardError as e:
+			self._mark_change_pushforward_failure(change_id)
+			self.logger.exception(e)
 			raise e  # Should alert the user somehow
 		except Exception as e:
 			self._mark_change_failed(change_id)
+			self.logger.exception(e)
 			raise e  # Should alert the user somehow
