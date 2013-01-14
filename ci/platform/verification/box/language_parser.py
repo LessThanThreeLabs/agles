@@ -62,6 +62,3 @@ class LanguageParser(object):
 
 	def _nvm_command(self, shell_command):
 		return "bash --login -c %s" % pipes.quote(shell_command)
-
-	def _nvm_path(self):
-		return os.path.join(os.environ['HOME'], 'nvm')
