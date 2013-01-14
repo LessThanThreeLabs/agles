@@ -33,15 +33,19 @@ class ConsoleTextOutput.Model extends Backbone.Model
 	onUpdate: (data) =>
 		return if  data.type isnt 'new output'
 
-		for lineNumber, lineText of data.contents.new_lines
-			assert.ok lineNumber > 0
+		# TODO: THIS NEEDS TO BE FIXED TO USE AN ARRAY!!
+		# for lineNumber, lineText of data.contents.new_lines
+		lineNumber = data.contents.line_num
+		lineText = data.contents.line
 
-			if @get('lines')[lineNumber]?
-				@get('lines')[lineNumber] = lineText
-				@trigger 'lineUpdated', lineNumber, lineText
-			else
-				@get('lines')[lineNumber] = lineText
-				@trigger 'lineAdded', lineNumber, lineText
+		assert.ok lineNumber > 0
+
+		if @get('lines')[lineNumber]?
+			@get('lines')[lineNumber] = lineText
+			@trigger 'lineUpdated', lineNumber, lineText
+		else
+			@get('lines')[lineNumber] = lineText
+			@trigger 'lineAdded', lineNumber, lineText
 
 
 class ConsoleTextOutput.View extends Backbone.View
