@@ -80,6 +80,7 @@ class RestrictedGitShell(object):
 		full_command = ' '.join(command_parts)
 		private_key_file = os.path.join('/tmp', hashlib.sha1(private_key).hexdigest())
 		with open(private_key_file) as key_file:
+			os.chmod(private_key_file, 0600)
 			key_file.write(private_key)
 		args = ["ssh", "ssh", "-oStrictHostKeyChecking=no", "-i", private_key_file, uri, full_command]
 		return args
