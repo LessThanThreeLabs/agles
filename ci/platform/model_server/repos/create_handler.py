@@ -28,7 +28,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			# Create private/public key pair
 			keypair = RSA.generate(self.KEYBITS)
 			privatekey = keypair.exportKey()
-			publickey = keypair.publickey()
+			publickey = keypair.publickey().exportKey(format="OpenSSH")
 
 			# Set entries in db
 			repo_id = self._create_repo_in_db(
