@@ -53,7 +53,7 @@ class ChangeMetadata.Model extends Backbone.Model
 		if typeof attributes.commitTime isnt 'number' or (new Date attributes.commitTime) is 'Invalid Date'
 			return new Error 'Invalid commit time: ' + attributes.commitTime
 
-		if typeof attributes.startTime isnt 'number' or (new Date attributes.startTime) is 'Invalid Date'
+		if attributes.startTime? and (typeof attributes.startTime isnt 'number' or (new Date attributes.startTime) is 'Invalid Date')
 			return new Error 'Invalid start time: ' + attributes.startTime
 
 		if attributes.endTime? and (typeof attributes.endTime isnt 'number' or (new Date attributes.endTime) is 'Invalid Date')
