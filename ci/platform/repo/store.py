@@ -257,7 +257,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 				if i >= self.NUM_RETRIES:
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
-					logging.debug(error_msg)
+					self.logger.debug(error_msg)
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
