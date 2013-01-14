@@ -15,7 +15,7 @@ exports.create = (configurationParams, stores, modelConnection) ->
 	accountInformationValidator = AccountInformationValidator.create()
 	createAccountHandler = CreateAccountHandler.create configurationParams, stores.createAccountStore, modelConnection.rpcConnection, passwordHasher, accountInformationValidator
 	loginHandler = LoginHandler.create configurationParams, modelConnection.rpcConnection, passwordHasher
-	createHandler = UsersCreateHandler.create modelConnection.rpcConnection, createAccountHandler
+	createHandler = UsersCreateHandler.create modelConnection.rpcConnection, createAccountHandler, accountInformationValidator
 	readHandler = UsersReadHandler.create modelConnection.rpcConnection
 	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, loginHandler, passwordHasher, accountInformationValidator
 	return new UsersResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler
