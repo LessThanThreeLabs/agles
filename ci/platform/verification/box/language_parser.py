@@ -51,12 +51,12 @@ class LanguageParser(object):
 
 	def validate_nodejs(self, version):
 		strip_ansi = re.compile("\033\[[0-9;]+m")
-		nvm_output = subprocess.check_output(shlex.split(self._nvm_command("source ~/nvm.sh > /dev/null; nvm ls %s" % version)))
+		nvm_output = subprocess.check_output(shlex.split(self._nvm_command("source ~/nvm/nvm.sh > /dev/null; nvm ls %s" % version)))
 		installed_version = strip_ansi.sub("", nvm_output).split()[0]
-		setup_steps = [SetupCommand("echo \"export NVM_DIR=%s\" >> ~/.bash_profile" % self._nvm_path()), SetupCommand("echo \"source ~/nvm.sh > /dev/null\" >> ~/.bash_profile")]
+		setup_steps = [SetupCommand("echo \"source ~/nvm/nvm.sh > /dev/null\" >> ~/.bash_profile")]
 		if installed_version == 'N/A':
 			print "Nodejs version %s not pre-installed, attempting to install" % version
-			setup_steps.append(SetupCommand(["export NVM_DIR=%s" % self._nvm_path(), "source ~/nvm.sh", "nvm install %s" % version]))
+			setup_steps.append(SetupCommand(["source ~/nvm/nvm.sh", "nvm install %s" % version]))
 		setup_steps.append(SetupCommand("echo \"nvm use %s > /dev/null\" >> ~/.bash_profile" % version))
 		return setup_steps, [SetupCommand("node --version")]
 
