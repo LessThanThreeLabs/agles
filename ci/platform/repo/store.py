@@ -255,7 +255,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 				if i >= self.NUM_RETRIES:
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
-					raise MergeError, error_msg, stacktrace
+					logging.debug(error_msg)
+					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 
@@ -345,6 +346,13 @@ class RepositoryOperationException(Exception):
 
 	def __init__(self, msg=''):
 		super(RepositoryOperationException, self).__init__(msg)
+
+
+class PushForwardError(RepositoryOperationException):
+	"""Indicates that an error occured while attempting to push to a forward url"""
+
+	def __init__(self, msg=''):
+		super(PushForwardError, self).__init__(msg)
 
 
 class MergeError(RepositoryOperationException):
