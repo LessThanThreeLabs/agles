@@ -18,13 +18,20 @@ class SetupCommand(object):
 
 	@classmethod
 	def execute_script(cls, script, env={}, login=True):
-		flags = '--login -c' if login else '-c'
-		return StreamingExecutor.execute(shlex.split("sudo -E bash %s %s" % (flags, pipes.quote(script))), output_handler=SimplePrinter(), env=env)
+		command = "bash -c %s" % script
+		return StreamingExecutor.execute(shlex.split(cls.wrap_command(command, login)))
 
 	@classmethod
 	def execute_script_file(cls, script_file, env={}, login=True):
-		flags = '--login' if login else ''
-		return StreamingExecutor.execute(shlex.split("sudo -E bash %s %s" % (flags, pipes.quote(script_file))), output_handler=SimplePrinter(), env=env)
+		command = "bash %s" % script_file
+		return StreamingExecutor.execute(shlex.split(cls.wrap_command(command, login)))
+
+	@classmethod
+	def wrap_command(cls, command, login):
+		if login:
+			return "bash --login -c %s" % pipes.quote("rvmsudo %s" % command)
+		else:
+			return "sudo -E %s" % command
 
 	def to_shell_command(self):
 		script = ''
