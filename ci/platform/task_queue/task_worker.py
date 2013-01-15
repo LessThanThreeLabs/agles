@@ -20,12 +20,17 @@ class TaskWorker(object):
 		self.allocated = False
 		self.results = []
 		worker_pool_queue(self.connection).declare()
+		self.logger.debug("hello")
 		with self.connection.Producer(serializer='msgpack', on_return=self._handle_return) as producer:
+			self.logger.debug("hello1")
 			producer.publish({"worker_id": self.worker_id, "queue_name": self.own_queue.name},
 				exchange=worker_pool_queue.exchange,
 				routing_key=worker_pool_queue.routing_key)
+			self.logger.debug("hello2")
+
 		with self.connection.Consumer([self.own_queue], callbacks=[self._assigned], auto_declare=False) as self.consumer:
 			self.consumer.qos(prefetch_count=1)
+			self.logger.debug("hello3")
 			self.waiting = True
 			while self.waiting:
 				self.connection.drain_events()
@@ -105,8 +110,11 @@ class InfiniteWorker(TaskWorker):
 		self.worker_pool_queue = worker_pool_queue
 
 	def run(self):
-		while True:
-			self.wait_for_assignment(self.worker_pool_queue)
+		try:
+			while True:
+				self.wait_for_assignment(self.worker_pool_queue)
+		except Exception as e:
+			self.logger.exception(e)
 
 
 class InfinitePrinter(InfiniteWorker):
