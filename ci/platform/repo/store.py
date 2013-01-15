@@ -217,8 +217,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 			ref_sha = repo_slave.head.commit.hexsha
 			checkout_branch = remote_branch if remote_branch_exists else "FETCH_HEAD"
 			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
+			original_head = repo_slave.head.commit.hexsha
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
+			return original_head
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
 			error_msg = "Merge failed for repo_slave (potential to retry): %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
@@ -246,7 +248,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		finally:
 			repo_slave.git.reset(hard=True)
 
-	def _push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into):
+	def _push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into, original_head):
 		i = 0
 		while True:
 			i += 1
@@ -258,6 +260,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
 					self.logger.debug(error_msg)
+					self._reset_repository_head(repo, repo_slave, ref_to_reset, original_head)
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
@@ -269,6 +272,15 @@ class FileSystemRepositoryStore(RepositoryStore):
 		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
 		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT})
 
+	def _reset_repository_head(repo, repo_slave, ref_to_reset, original_head):
+		try:
+			repo_slave.push('origin', '%s' % ':'.join(original_head, ref_to_reset), force=True)
+		except GitCommandError as e:
+			error_msg = "Unable to reset repo: %s ref: %s to commit: %s" % (repo, ref_to_reset, original_head)
+			self.logger.error(error_msg)
+			raise e
+
+
 	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
@@ -279,8 +291,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
-		self.merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
-		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into)
+		original_head = self.merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
+		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into, original_head)
 
 	def create_repository(self, repo_id, repo_name, private_key):
 		"""Creates a new server side repository. Raises an exception on failure.
