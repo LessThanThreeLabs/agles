@@ -18,7 +18,7 @@ class SetupCommand(object):
 
 	@classmethod
 	def execute_script(cls, script, env={}, login=True):
-		command = "bash -c %s" % script
+		command = "bash -c %s" % pipes.quote(script)
 		return StreamingExecutor.execute(shlex.split(cls.wrap_command(command, login)), output_handler=SimplePrinter(), env=env)
 
 	@classmethod
