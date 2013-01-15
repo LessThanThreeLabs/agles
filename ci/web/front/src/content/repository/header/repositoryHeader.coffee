@@ -41,7 +41,7 @@ class RepositoryHeader.Model extends Backbone.Model
 		if typeof attributes.name isnt 'string' or attributes.name.length is 0
 			return new Error 'Invalid repository name: ' + attributes.name
 
-		if typeof attributes.description isnt 'string' or attributes.description.length is 0
+		if typeof attributes.description isnt 'string'
 			return new Error 'Invalid repository description: ' + attributes.description
 
 		if typeof attributes.url isnt 'string' or attributes.url.length is 0
