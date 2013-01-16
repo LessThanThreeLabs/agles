@@ -4,16 +4,23 @@ import os
 from subprocess import Popen, PIPE, STDOUT
 
 from eventlet.green import select
+from eventlet.timeout import Timeout
 
 
 class StreamingExecutor(object):
 	@classmethod
-	def execute(cls, command, output_handler=None, cwd=None, env={}, **kwargs):
+	def execute(cls, command, output_handler=None, cwd=None, env={}, timeout=None, **kwargs):
 		env = dict(os.environ.copy(), **env)
 		process = Popen(command, stdout=PIPE, stderr=STDOUT, cwd=cwd, env=env)
-		output_lines = cls._handle_stream(process.stdout, output_handler)
-		output = "\n".join(output_lines)
-		returncode = process.wait()
+		try:
+			with Timeout(timeout):
+				output_lines = cls._handle_stream(process.stdout, output_handler)
+		except Timeout:
+			returncode = 127
+		else:
+			returncode = process.wait()
+		finally:
+			output = "\n".join(output_lines)
 		return CommandResults(returncode, output)
 
 	@classmethod

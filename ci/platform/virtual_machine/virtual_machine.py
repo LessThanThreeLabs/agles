@@ -11,19 +11,23 @@ class VirtualMachine(object):
 	def __init__(self, vm_directory):
 		self.vm_directory = vm_directory
 
-	def provision(self, role, output_handler=None):
+	def provision(self, private_key, output_handler=None):
 		raise NotImplementedError()
 
-	def ssh_call(self, command, output_handler=None):
+	def ssh_call(self, command, timeout=None, output_handler=None):
 		raise NotImplementedError()
 
-	def call(self, command, output_handler=None, env={}, **kwargs):
-		return StreamingExecutor.execute(command, output_handler, cwd=self.vm_directory, env=env, **kwargs)
+	def call(self, command, output_handler=None, env={}, timeout=None, **kwargs):
+		return StreamingExecutor.execute(command, output_handler, cwd=self.vm_directory, env=env, timeout=timeout, **kwargs)
 
 	def remote_checkout(self, git_url, refs, output_handler=None):
 		host_url = git_url[:git_url.find(":")]
-		self.ssh_call("mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa")
-		pubkey = self.ssh_call("cat .ssh/id_rsa.pub").output
+		generate_key = "mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa"
+		pubkey_results = self.ssh_call("(%s) > /dev/null 2>&1; cat .ssh/id_rsa.pub" % generate_key, timeout=20)
+		if pubkey_results.returncode != 0:
+			output_handler.append("Failed to connect to the testing instance. Please try again.")
+			return pubkey_results
+		pubkey = pubkey_results.output
 		alias = str(uuid.uuid1()) + "_box"
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
 		try:
