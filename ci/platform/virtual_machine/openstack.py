@@ -90,7 +90,7 @@ class OpenstackVm(VirtualMachine):
 				self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("virtualenvs/2.7/bin/python -c \"from verification.box.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key, timeout=1200, output_handler=output_handler)
+		return self.ssh_call("virtualenvs/2.7/bin/python -u -c \"from verification.box.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key, timeout=1200, output_handler=output_handler)
 
 	def ssh_call(self, command, timeout=None, output_handler=None):
 		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)

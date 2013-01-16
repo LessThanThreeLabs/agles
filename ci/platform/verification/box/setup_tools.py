@@ -29,7 +29,7 @@ class SetupCommand(object):
 	@classmethod
 	def wrap_command(cls, command, login):
 		if login:
-			return "bash --login -c %s" % pipes.quote("rvmsudo %s" % command)
+			return "bash --login -c %s" % pipes.quote("rvmsudo -E %s" % command)
 		else:
 			return "sudo -E %s" % command
 

@@ -15,7 +15,7 @@ from verification_result import VerificationResult
 class BuildCore(object):
 	def __init__(self, uri_translator=None):
 		self.uri_translator = uri_translator
-		self.source_dir = os.path.join("/tmp", "source")
+		self.source_dir = os.path.join(os.getcwd(), "source")
 
 	def setup_build(self, repo_uri, refs, console_appender=None):
 		self._checkout_refs(repo_uri, refs)
