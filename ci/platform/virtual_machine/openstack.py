@@ -35,7 +35,7 @@ class OpenstackVm(VirtualMachine):
 	@classmethod
 	def construct(cls, vm_directory, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
 		if not name:
-			name = "vs_%s@%s" % (vm_directory, socket.gethostname())
+			name = "%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(os.getcwd())))
 		if not image:
 			image = cls._get_newest_image()
 		if not flavor:
