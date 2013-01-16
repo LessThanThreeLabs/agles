@@ -23,6 +23,6 @@ class RepositoriesCreateHandler extends RepositoriesHandler
 		@modelRpcConnection.repos.create.create_repo userId, data.name, data.description,
 			@_fromPermissionString('r/w'), data.forwardUrl, (error, repositoryId) =>
 				if error?
-					callback error
+					callback "Failed to create repository. Please check that the name, description, and url are valid."
 				else
 					callback null, repositoryId

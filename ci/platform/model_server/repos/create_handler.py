@@ -19,6 +19,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
 	def create_repo(self, user_id, repo_name, repo_description, default_permissions, forward_url):
+		if not repo_name:
+			raise RepositoryCreateError("repo_name cannot be empty")
 		try:
 			repo_name += ".git"
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
