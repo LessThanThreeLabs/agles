@@ -14,7 +14,7 @@ class VirtualMachine(object):
 	def provision(self, private_key, output_handler=None):
 		raise NotImplementedError()
 
-	def ssh_call(self, command, timeout=None, output_handler=None):
+	def ssh_call(self, command, output_handler=None, timeout=None):
 		raise NotImplementedError()
 
 	def call(self, command, output_handler=None, env={}, timeout=None, **kwargs):
