@@ -48,9 +48,10 @@ class VerificationResultsHandler(QueueListener):
 			self.logger.debug("Still waiting for more results to finish build %s" % build_id)
 
 	def _mark_change_finished(self, change_id):
-		self.send_merge_request(change_id)
-		with ModelServer.rpc_connect("changes", "update") as client:
-			client.mark_change_finished(change_id, BuildStatus.PASSED)
+		merge_success = self.send_merge_request(change_id)
+		if merge_success:
+			with ModelServer.rpc_connect("changes", "update") as client:
+				client.mark_change_finished(change_id, BuildStatus.PASSED)
 
 	def _mark_change_failed(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
@@ -80,15 +81,14 @@ class VerificationResultsHandler(QueueListener):
 			self.remote_repo_manager.merge_changeset(
 				repostore_id, repo_id,
 				repo_name, ref, merge_target)
-		except MergeError as e:
+			return True
+		except MergeError:
 			self._mark_change_merge_failure(change_id)
-			self.logger.exception(e)
-			raise e  # Should alert the user somehow
-		except PushForwardError as e:
+			self.logger.info("Failed to merge change %s" % change_id, exc_info=True)
+		except PushForwardError:
 			self._mark_change_pushforward_failure(change_id)
-			self.logger.exception(e)
-			raise e  # Should alert the user somehow
-		except Exception as e:
+			self.logger.warn("Failed to forward push change %s" % change_id, exc_info=True)
+		except:
 			self._mark_change_failed(change_id)
-			self.logger.exception(e)
-			raise e  # Should alert the user somehow
+			self.logger.error("Failed to merge/push change %s" % change_id, exc_info=True)
+		return False
