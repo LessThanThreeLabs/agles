@@ -35,8 +35,7 @@ class ChangesCreateEventHandler(EventSubscriber):
 				self._handle_new_change(body["contents"])
 			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		except:
-			msg = "basic_reject for message [body: %s, message: %s]" % (body, message)
-			self.logger.error(msg)
+			self.logger.error("Failed to handle changes create event message %s" % body, exc_info=True)
 			message.channel.basic_reject(delivery_tag=message.delivery_tag, requeue=True)
 
 	def _handle_new_change(self, contents):
@@ -72,7 +71,7 @@ class ChangesCreateEventHandler(EventSubscriber):
 		for worker in workers.itervalues():
 			build_id = self._create_build(change_id, commit_list, is_primary)
 			task_queue.assign_worker(worker, {"build_id": build_id})
-			print "Sending verification request for " + str(build_id)
+			self.logger.info("Sending verification request for build %s" % build_id)
 			is_primary = False
 
 	def _get_test_commands(self, commit_list):

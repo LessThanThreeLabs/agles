@@ -1,3 +1,6 @@
+import os
+import socket
+
 from kombu.connection import Connection
 
 from model_server import ModelServer
@@ -17,18 +20,21 @@ class VerificationRequestHandler(InfiniteWorker):
 	and triggers a Verify on the commit list.
 	"""
 	def __init__(self, verifier):
-		super(VerificationRequestHandler, self).__init__(verification_worker_queue)
 		self.verifier = verifier
+		super(VerificationRequestHandler, self).__init__(verification_worker_queue)
 		self._register_pubkey()
 
 	def _register_pubkey(self):
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, self.worker_id)
 
+	def get_worker_id(self):
+		return "vs:%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(self.verifier.virtual_machine.vm_directory)))
+
 	def do_setup(self, message):
 		# Check out commit, run all setup and compile stuff
 		self.build_id = message["build_id"]
 		commit_list = self._get_commit_list(self.build_id)
-		print "Processing verification request: " + str((self.build_id, commit_list,))
+		self.logger.info("Worker %s processing verification request: (build id: %s, commit list: %s)" % (self.worker_id, self.build_id, commit_list))
 		self._start_build(self.build_id)
 		repo_uri = self._get_repo_uri(commit_list[0])
 		refs = self._get_ref_list(commit_list)
@@ -43,7 +49,7 @@ class VerificationRequestHandler(InfiniteWorker):
 		with ModelServer.rpc_connect("builds", "update") as builds_update_rpc:
 			callback = self._make_verify_callback(self.build_id, builds_update_rpc)
 			# check that no results are exceptions
-			success = not any([isinstance(result, Exception) for result in results])
+			success = not any(map(lambda result: isinstance(result, Exception), results))
 			if success:
 				self.verifier.mark_success(callback)
 			else:
@@ -57,6 +63,7 @@ class VerificationRequestHandler(InfiniteWorker):
 				self.verifier.declare_commands(console_appender, ConsoleType.Test, [test_command])
 				return self.verifier.run_test_command(test_command, console_appender)
 		except Exception as e:
+			self.logger.debug("Worker %s failed task %s" % (self.worker_id, task["test_command"]), exc_info=True)
 			return e
 
 	def _get_commit_list(self, build_id):
@@ -67,6 +74,7 @@ class VerificationRequestHandler(InfiniteWorker):
 		return [pathgen.hidden_ref(commit) for commit in commit_list]
 
 	def _start_build(self, build_id):
+		self.logger.debug("Worker %s starting build %s" % (self.worker_id, build_id))
 		with ModelServer.rpc_connect("builds", "update") as model_server_rpc:
 			model_server_rpc.start_build(build_id)
 
@@ -83,6 +91,7 @@ class VerificationRequestHandler(InfiniteWorker):
 					routing_key=verification_results_queue.routing_key,
 					mandatory=True,
 				)
+			self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 			cleanup_function()
 		return default_verify_callback
 

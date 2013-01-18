@@ -4,6 +4,7 @@
 environment that restricts the shell user to only git commands and
 replaces certain commands with other actions."""
 
+import logging
 import os
 import sys
 
@@ -37,6 +38,8 @@ def main():
 	except InvalidPermissionsError:
 		print "You do not have the necessary permissions to perform this action."
 	except:
+		logger = logging.getLogger("gitserve")
+		logger.error("Failed to process git command %s for user %s" % (os.environ.get("SSH_ORIGINAL_COMMAND", "<no command supplied>"), user_id), exc_info=True)
 		print "An error has occured. Please contact your system administrator or support for more help."
 
 

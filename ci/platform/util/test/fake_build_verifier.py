@@ -1,3 +1,5 @@
+import random
+
 from verification.shared.verification_config import VerificationConfig
 from verification.shared.verification_result import VerificationResult
 
@@ -5,6 +7,7 @@ from verification.shared.verification_result import VerificationResult
 class FakeBuildVerifier(object):
 	def __init__(self, passes):
 		self.passes = passes
+		self.virtual_machine = FakeVirtualMachine()
 
 	def setup(self):
 		pass
@@ -36,3 +39,8 @@ class FakeBuildVerifier(object):
 
 	def mark_failure(self, callback):
 		callback(VerificationResult.FAILURE)
+
+
+class FakeVirtualMachine(object):
+	def __init__(self):
+		self.vm_directory = "/tmp/fakevm_%s" % str(random.random())[2:]

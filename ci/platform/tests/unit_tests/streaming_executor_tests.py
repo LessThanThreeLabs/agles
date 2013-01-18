@@ -35,9 +35,9 @@ class StreamingExecutorTests(BaseUnitTest):
 
 	def test_execute_background(self):
 		start_time = time.time()
-		results = StreamingExecutor.execute(['bash', '-c', '(sleep 2)&'])
+		results = StreamingExecutor.execute(['bash', '-c', '(sleep 2)& echo hi'])
 		assert_equal(0, results.returncode)
-		assert_equal('', results.output)
+		assert_equal('hi', results.output)
 		assert_true(time.time() - start_time < 1)
 
 	def test_streaming(self):

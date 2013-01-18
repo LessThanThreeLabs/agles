@@ -27,8 +27,8 @@ class VerificationResultsHandler(QueueListener):
 		build_id, results = body
 		try:
 			self.handle_results(build_id, results)
-		except Exception as e:
-			print e  # Should alert the user somehow
+		except:
+			self.logger.error("Failed to handle verification results %s" % body, exc_info=True)
 		finally:
 			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
@@ -45,7 +45,7 @@ class VerificationResultsHandler(QueueListener):
 		elif failure:
 			self._mark_change_failed(build["change_id"])
 		else:
-			print "Still waiting for more results"
+			self.logger.debug("Still waiting for more results to finish build %s" % build_id)
 
 	def _mark_change_finished(self, change_id):
 		self.send_merge_request(change_id)
@@ -65,7 +65,7 @@ class VerificationResultsHandler(QueueListener):
 			client.mark_change_finished(change_id, BuildStatus.FAILED)
 
 	def send_merge_request(self, change_id):
-		print "Sending merge request for " + str(change_id)
+		self.logger.info("Sending merge request for change %s" % change_id)
 		with ModelServer.rpc_connect("changes", "read") as client:
 			change_attributes = client.get_change_attributes(change_id)
 		commit_id = change_attributes[0]

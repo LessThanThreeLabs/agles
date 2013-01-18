@@ -1,4 +1,4 @@
-import random
+import logging
 
 from kombu.connection import Connection
 from kombu.entity import Queue
@@ -7,8 +7,7 @@ from settings.rabbit import connection_info
 
 class TaskQueue(object):
 	def __init__(self, connection=None):
-		random.seed()
-		self.queue_id = str(random.random())[2:]
+		self.logger = logging.getLogger("TaskQueue")
 		if not connection:
 			connection = Connection(connection_info)
 		self.connection = connection
@@ -37,24 +36,37 @@ class TaskQueue(object):
 				while self.worker_attempt < num_workers:
 					self.connection.drain_nowait()
 					self.worker_attempt = self.worker_attempt + 1
-				print "Received %s out of %s workers" % (len(self.workers), num_workers)
+				self.logger.info("Received %s out of %s workers" % (len(self.workers), num_workers))
 				if len(self.workers) == 0:
 					self.shared_work_queue.delete()
 		return self.workers
 
 	def _new_worker(self, body, message):
 		try:
-			Queue(body["queue_name"])(self.connection).queue_declare(passive=True)
-			# TODO: CHECK FOR CONSUMERS
+			queue = Queue(body["queue_name"])(self.connection)
+			queue_name, message_count, consumer_count = queue.queue_declare(passive=True)
 		except self.connection.transport.channel_errors:
-			self.worker_attempt = self.worker_attempt - 1  # Queue doesn't exist, worker is dead
+			self.logger.warn("Worker queue %s not found", body["queue_name"])
+			self._fail_new_worker(body["worker_id"], body["queue_name"])  # Queue doesn't exist, worker is dead
 		else:
+			if not consumer_count:
+				self.loger.warn("Worker queue %s has no consumers, should have %s" % (body["queue_name"], body["worker_id"]))
+				try:
+					queue.delete()
+				except self.connection.transport.channel_errors:
+					self.logger.error("Failed to delete queue %s with no consumers" % queue.name, exc_info=True)
+				finally:
+					self._fail_new_worker(body["worker_id", body["queue_name"]])
 			self._add_worker(body["worker_id"], body["queue_name"])
 		message.ack()
 
+	def _fail_new_worker(self, name, queue):
+		self.worker_attempt = self.worker_attempt - 1
+		self.logger.info("Worker %s on queue %s rejected" % (name, queue))
+
 	def _add_worker(self, name, queue):
 		self.workers[name] = {"queue_name": queue, "status": "working"}
-		print "Allocated worker %s" % name
+		self.logger.info("Allocated worker %s with queue %s" % (name, queue))
 
 	def assign_workers(self, workers, message):
 		for worker in self.workers.itervalues():
