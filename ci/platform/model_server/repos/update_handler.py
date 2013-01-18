@@ -141,9 +141,17 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 		manager.register_remote_store(repostore_id, num_repos=num_repos)
 
-#####################
-# Github Integration
-#####################
+	def push_forwardurl(self, repo_id, user_id, target):
+		repo = database.schema.repo
+		query = repo.select().where(repo.c.id==repo_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+			assert row is not None
+			repostore_id = row[repo.c.repostore_id]
+			repo_name = row[repo.c.name]
+
+		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager.merge_changeset(repostore_id, repo_id, repo_name, target, target)  # merging target into target should do nothing and push
 
 	def set_forward_url(self, user_id, repo_id, forward_url):
 		repo = database.schema.repo
