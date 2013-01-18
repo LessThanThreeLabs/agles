@@ -3,6 +3,8 @@
 See server.py for the RPC protocol definition.
 """
 import msgpack
+import eventlet
+pika = eventlet.import_patched('pika')
 import pika
 
 from bunnyrpc.exceptions import RPCRequestError

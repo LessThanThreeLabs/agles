@@ -15,7 +15,6 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		super(ReposUpdateHandler, self).__init__("repos", "update")
 
 	def update_description(self, user_id, repo_id, description):
-		repo = database.schema.repo
 		permission = database.schema.permission
 
 		row = self._get_repo_permissions(user_id, repo_id)
@@ -141,17 +140,17 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 		manager.register_remote_store(repostore_id, num_repos=num_repos)
 
-	def push_forwardurl(self, repo_id, user_id, target):
-		repo = database.schema.repo
-		query = repo.select().where(repo.c.id==repo_id)
+	def force_push(self, repo_id, user_id, target):
+		schema = database.schema
+		query = schema.repo.select().where(schema.repo.c.id==repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			assert row is not None
-			repostore_id = row[repo.c.repostore_id]
-			repo_name = row[repo.c.name]
+			repostore_id = row[schema.repo.c.repostore_id]
+			repo_name = row[schema.repo.c.name]
 
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
-		manager.merge_changeset(repostore_id, repo_id, repo_name, target, target)  # merging target into target should do nothing and push
+		manager.push_force(repostore_id, repo_id, repo_name, target)
 
 	def set_forward_url(self, user_id, repo_id, forward_url):
 		repo = database.schema.repo
