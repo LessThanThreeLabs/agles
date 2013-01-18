@@ -8,7 +8,6 @@ from __future__ import print_function
 import logging
 import os
 import re
-import shlex
 import shutil
 import socket
 import sys
@@ -260,26 +259,23 @@ class FileSystemRepositoryStore(RepositoryStore):
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
 					self.logger.debug(error_msg)
-					self._reset_repository_head(repo, repo_slave, ref_to_reset, original_head)
+					self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 
 	def _push_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to push repo %s to forward url" % repo)
-		repo_path = repo.git_dir
-		private_key_path = repo_path[0:(repo_path.rfind('.git') + len('.git'))] + '.id_rsa'
 		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
 		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT})
 
-	def _reset_repository_head(repo, repo_slave, ref_to_reset, original_head):
+	def _reset_repository_head(self, repo, repo_slave, ref_to_reset, original_head):
 		try:
 			repo_slave.push('origin', '%s' % ':'.join(original_head, ref_to_reset), force=True)
 		except GitCommandError as e:
 			error_msg = "Unable to reset repo: %s ref: %s to commit: %s" % (repo, ref_to_reset, original_head)
 			self.logger.error(error_msg)
 			raise e
-
 
 	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		assert repo_name.endswith(".git")
