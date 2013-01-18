@@ -26,10 +26,12 @@ class CreateAccount.View extends Backbone.View
 		@createAccountFormView = new CreateAccountForm.View model: @model.createAccountFormModel
 		@createAccountSuccessView = new CreateAccountSuccess.View model: @model.createAccountSuccessModel
 
-		@createAccountFormView.on 'accountCreated', @_showSuccess
+		@createAccountFormView.on 'accountCreated', @_showSuccess, @
 
 
 	onDispose: () =>
+		@createAccountFormView.off null, null, @
+
 		@createAccountFormView.dispose()
 		@createAccountSuccessView.dispose()
 

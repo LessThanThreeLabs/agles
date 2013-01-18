@@ -5,6 +5,13 @@ class RecoverPassword.Model extends Backbone.Model
 
 	initialize: () =>
 		@recoverPasswordFormModel = new RecoverPasswordForm.Model()
+		@recovePasswordSuccessModel = new RecoverPasswordSuccess.Model()
+
+		@recoverPasswordFormModel.on 'change:email', () =>
+			attributesToSet =
+				email: @recoverPasswordFormModel.get 'email'
+			@recovePasswordSuccessModel.set attributesToSet,
+				error: (model, error) => console.error error
 
 
 class RecoverPassword.View extends Backbone.View
@@ -15,9 +22,14 @@ class RecoverPassword.View extends Backbone.View
 
 	initialize: () =>
 		@recoverPasswordFormView = new RecoverPasswordForm.View model: @model.recoverPasswordFormModel
+		@recovePasswordSuccessView = new RecoverPasswordSuccess.View model: @model.recovePasswordSuccessModel
+
+		@recoverPasswordFormView.on 'passwordReset', @_showSuccess, @
 
 
 	onDispose: () =>
+		@recoverPasswordFormView.off null, null, @
+
 		@recoverPasswordFormView.dispose()
 
 
@@ -25,3 +37,7 @@ class RecoverPassword.View extends Backbone.View
 		@$el.html @html
 		@$('.recoverPasswordFormContainer').html @recoverPasswordFormView.render().el
 		return @
+
+
+	_showSuccess: () =>
+		@$el.html @recovePasswordSuccessView.render().el
