@@ -3,16 +3,17 @@ assert = require 'assert'
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection, loginHandler, passwordHasher, accountInformationValidator) ->
-	return new UsersUpdateHandler modelRpcConnection, loginHandler, passwordHasher, accountInformationValidator
+exports.create = (modelRpcConnection, loginHandler, passwordHasher, accountInformationValidator, resetPasswordEmailer) ->
+	return new UsersUpdateHandler modelRpcConnection, loginHandler, passwordHasher, accountInformationValidator, resetPasswordEmailer
 
 
 class UsersUpdateHandler extends Handler
-	constructor: (modelRpcConnection, @loginHandler, @passwordHasher, @accountInformationValidator) ->
+	constructor: (modelRpcConnection, @loginHandler, @passwordHasher, @accountInformationValidator, @resetPasswordEmailer) ->
 		assert.ok modelRpcConnection? 
 		assert.ok @loginHandler?
 		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
+		assert.ok @resetPasswordEmailer
 
 		super modelRpcConnection
 
@@ -82,6 +83,19 @@ class UsersUpdateHandler extends Handler
 						callback 'Unexpected error'
 					else
 						callback null, result
+
+
+	resetPassword: (socket, data, callback) =>
+		assert.ok data.email?
+
+		newPassword = Number(Math.random().toString().substr(2)).toString 36
+
+		@modelRpcConnection.users.update.reset_password data.email, newPassword, (error) =>
+			if error?
+				callback 'Unexpected error'
+			else
+				@resetPasswordEmailer.sendEmail data.email, newPassword
+				callback()
 
 
 	# -- GIVEN --
