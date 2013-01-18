@@ -117,6 +117,10 @@ if not File.exists? '/usr/local/bin/ssh'
 		link "/usr/bin/verify-repository-permissions" do
 			to "#{node[:koality][:source_path][:platform]}/bin/verify_repository_permissions.py"
 		end
+
+		link "/usr/bin/force-push" do
+			to "#{node[:koality][:source_path][:platform]}/bin/force_push.py"
+		end
 	end
 
 end
