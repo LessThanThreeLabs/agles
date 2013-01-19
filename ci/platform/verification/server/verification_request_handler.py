@@ -86,7 +86,7 @@ class VerificationRequestHandler(InfiniteWorker):
 			status = BuildStatus.PASSED if results == VerificationResult.SUCCESS else BuildStatus.FAILED
 			builds_update_rpc.mark_build_finished(build_id, status)
 			with Connection(connection_info).Producer(serializer='msgpack') as producer:
-				producer.publish((build_id, results),
+				producer.publish({'build_id': build_id, 'results': results},
 					exchange=verification_results_queue.exchange,
 					routing_key=verification_results_queue.routing_key,
 					mandatory=True,

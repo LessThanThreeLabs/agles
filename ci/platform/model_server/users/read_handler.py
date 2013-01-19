@@ -67,5 +67,6 @@ class UsersReadHandler(ModelServerRpcHandler):
 			keys = [to_dict(row, ssh_pubkey.columns) for row in sqlconn.execute(query)]
 		return keys
 
+
 class NoSuchUserError(Exception):
 	pass

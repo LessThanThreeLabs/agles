@@ -9,7 +9,7 @@ exports.create = (modelRpcConnection, loginHandler, passwordHasher, accountInfor
 
 class UsersUpdateHandler extends Handler
 	constructor: (modelRpcConnection, @loginHandler, @passwordHasher, @accountInformationValidator, @resetPasswordEmailer) ->
-		assert.ok modelRpcConnection? 
+		assert.ok modelRpcConnection?
 		assert.ok @loginHandler?
 		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
@@ -24,7 +24,7 @@ class UsersUpdateHandler extends Handler
 		errors = {}
 		if not @accountInformationValidator.isValidFirstName data.firstName
 			errors.firstName = @accountInformationValidator.getInvalidFirstNameString()
-		if not @accountInformationValidator.isValidLastName data.lastName 
+		if not @accountInformationValidator.isValidLastName data.lastName
 			errors.lastName = @accountInformationValidator.getInvalidLastNameString()
 		# if not @accountInformationValidator.isValidEmail data.email
 			# errors.email = @accountInformationValidator.getInvalidEmailString()
@@ -66,7 +66,7 @@ class UsersUpdateHandler extends Handler
 			errors.newPassword = @accountInformationValidator.getInvalidPasswordString()
 			callback errors
 			return
-			
+
 		@modelRpcConnection.users.read.get_user_from_id userId, (error, userData) =>
 			if error?
 				callback 'Unexpected error'
@@ -94,7 +94,7 @@ class UsersUpdateHandler extends Handler
 			if error?
 				callback 'Unexpected error'
 			else
-				@resetPasswordEmailer.sendEmail data.email, newPassword
+				@resetPasswordEmailer.sendEmailToUser data.email, newPassword
 				callback()
 
 

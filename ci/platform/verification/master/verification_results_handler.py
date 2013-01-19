@@ -24,7 +24,7 @@ class VerificationResultsHandler(QueueListener):
 		super(VerificationResultsHandler, self).bind(channel)
 
 	def handle_message(self, body, message):
-		build_id, results = body
+		build_id, results = body['build_id'], body['results']
 		try:
 			self.handle_results(build_id, results)
 		except:

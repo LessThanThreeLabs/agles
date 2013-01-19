@@ -1,5 +1,4 @@
 from sqlalchemy import and_
-from sqlalchemy.exc import IntegrityError
 
 import database.schema
 import repo.store
