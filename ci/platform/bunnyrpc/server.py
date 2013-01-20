@@ -18,13 +18,14 @@ Protocol Definition:
 			"value": value
 			}
 """
+from util import greenlets
+
 import sys
 import traceback
 
 from kombu.connection import Connection
 from kombu.entity import Exchange, Queue
 from settings.rabbit import connection_info
-from util import greenlets
 
 
 class Server(object):
