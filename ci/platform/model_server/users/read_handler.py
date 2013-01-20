@@ -36,6 +36,13 @@ class UsersReadHandler(ModelServerRpcHandler):
 		else:
 			raise NoSuchUserError(email)
 
+	def email_in_use(self, email):
+		try:
+			self.get_salt(email)
+			return True
+		except NoSuchUserError:
+			return False
+
 	def get_user_id(self, email, password_hash):
 		return self.get_user(email, password_hash)['id']
 
