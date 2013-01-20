@@ -92,11 +92,13 @@ class UsersUpdateHandler extends Handler
 
 		@modelRpcConnection.users.update.reset_password data.email, newPassword, (error) =>
 			if error?
-				callback 'Unable to send email'
+				if error.type is 'NoSuchUserError'
+					callback email: 'Email does not exist'
+				else
+					callback 'Unable to send email'
 			else
 				@resetPasswordEmailer.sendEmailToUser data.email, newPassword, (error) ->
 				if error?
-					console.error error 
 					callback 'Unable to send email'
 				else
 					callback()
