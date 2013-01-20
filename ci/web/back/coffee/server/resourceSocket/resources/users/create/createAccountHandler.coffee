@@ -5,7 +5,7 @@ CreateAccountEmailer = require './createAccountEmailer'
 
 
 exports.create = (configurationParams, createAccountStore, modelRpcConnection, passwordHasher, accountInformationValidator) ->
-	createAccountEmailer = CreateAccountEmailer.create configurationParams.createAccount.email, configurationParams.domain
+	createAccountEmailer = CreateAccountEmailer.create configurationParams
 	return new CreateAccountHandler configurationParams, createAccountStore, modelRpcConnection, passwordHasher, accountInformationValidator, createAccountEmailer
 
 

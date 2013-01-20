@@ -14,7 +14,7 @@ UsersReadHandler = require './handlers/usersReadHandler'
 exports.create = (configurationParams, stores, modelConnection) ->
 	passwordHasher = PasswordHasher.create()
 	accountInformationValidator = AccountInformationValidator.create()
-	resetPasswordEmailer = ResetPasswordEmailer.create configurationParams.createAccount.email, configurationParams.domain
+	resetPasswordEmailer = ResetPasswordEmailer.create configurationParams
 
 	createAccountHandler = CreateAccountHandler.create configurationParams, stores.createAccountStore, modelConnection.rpcConnection, passwordHasher, accountInformationValidator
 	loginHandler = LoginHandler.create configurationParams, modelConnection.rpcConnection, passwordHasher

@@ -92,10 +92,14 @@ class UsersUpdateHandler extends Handler
 
 		@modelRpcConnection.users.update.reset_password data.email, newPassword, (error) =>
 			if error?
-				callback 'Unexpected error'
+				callback 'Unable to send email'
 			else
-				@resetPasswordEmailer.sendEmailToUser data.email, newPassword
-				callback()
+				@resetPasswordEmailer.sendEmailToUser data.email, newPassword, (error) ->
+				if error?
+					console.error error 
+					callback 'Unable to send email'
+				else
+					callback()
 
 
 	# -- GIVEN --

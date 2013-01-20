@@ -62,6 +62,7 @@ class RecoverPasswordForm.View extends Backbone.View
 				email: @model.get 'email'
 		socket.emit 'users:update', requestData, (errors, result) =>
 			if errors?
+				console.error errors
 				@_showErrors errors
 			else
 				@trigger 'passwordReset'

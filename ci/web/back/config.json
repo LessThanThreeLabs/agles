@@ -48,19 +48,31 @@
 			"certrequest": "keys/certrequest.csr"
 		},
 
+		"emailer": {
+			"mailgun": {
+				"hostname": "api.mailgun.net",
+				"port": "443",
+				"path": "/v2/getkoality.com/messages",
+				"method": "POST",
+				"key": "key-9e06ajco0xurqnioji-egwuwajg4jrn2",
+				"testMode": true
+			}
+		},
+
 		"createAccount": {
 			"email": {
-				"service": "Gmail",
-				"from": "Verify Account <verify-account@lessthanthreelabs.com>",
-				"authorization": {
-					"username": "verify-account@lessthanthreelabs.com",
-					"password": "tentacles69!"
-				}
+				"from": "Verify Account <verify-account@lessthanthreelabs.com>"
 			},
 
 			"redisStore": {
 				"url": "127.0.0.1",
 				"port": 6391
+			}
+		},
+
+		"resetPassword": {
+			"email": {
+				"from": "Reset Password <reset-password@lessthanthreelabs.com>"
 			}
 		}
 	},
