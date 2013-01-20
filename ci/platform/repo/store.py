@@ -250,7 +250,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		try:
 			# branch has to exist on the non-slave (not forward url) because we're trying to push it
 			remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
-			repo_slave.git.fetch(remote_repo, ref_to_update)
+			self._fetch_with_private_key(repo_slave, remote_repo)
 			repo_slave.git.checkout("FETCH_HEAD")
 			ref_sha = repo_slave.head.commit.hexsha
 			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
@@ -259,7 +259,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		except GitCommandError:
 			stacktrace = sys.exc_info()[2]
 			error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_update)
-			self.logger.info(error_msg)
+			self.logger.info(error_msg, exc_info=True)
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
@@ -284,6 +284,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def _push_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to push repo %s to forward url" % repo)
 		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
+		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT})
+
+	def _fetch_with_private_key(self, repo, *args, **kwargs):
+		self.logger.info("Attempting to fetch to repo %s" % repo)
+		execute_args = ['git', 'fetch'] + list(args) + repo.git.transform_kwargs(**kwargs)
 		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT})
 
 	def _reset_repository_head(self, repo, repo_slave, ref_to_reset, original_head):
