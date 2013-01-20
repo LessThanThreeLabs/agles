@@ -11,7 +11,7 @@ class VerifyAccount.View extends Backbone.View
 			<div class="congratulationsMessage">
 				Congratulations {{firstName}} {{lastName}}, your account is now active!
 			</div>
-			<div><img class="congratulationsImage" src="/img/awesomeFace.png"></div>
+			<div><img class="congratulationsImage" src="/img/awesomeFace' + filesSuffix + '.png"></div>
 		</div>'
 
 
