@@ -57,7 +57,9 @@ class CreateAccountHandler
 
 	_performRequest: (socket, data, callback) =>
 		@_createKeyAndAccount data, (error, key, account) =>
-			callback 'Something went wrong...' if error?
+			if error?
+				callback 'Something went wrong...'
+				return
 
 			@createAccountStore.addAccount key, account
 			@createAccountEmailer.sendEmailToUser data.firstName, data.lastName, data.email, key
