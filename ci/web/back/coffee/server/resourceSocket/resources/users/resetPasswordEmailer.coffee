@@ -17,4 +17,4 @@ class ResetPasswordEmailer
 		@emailer.sendText @configurationParams.resetPassword.email.from, email,
 			'Your new Koality password!', "Your new password is: #{newPassword}", (error) ->
 				console.error error if error?
-				callback error
+				callback error if callback?
