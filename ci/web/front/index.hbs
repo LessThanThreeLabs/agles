@@ -6,12 +6,16 @@
 <link href='https://fonts.googleapis.com/css?family=Droid+Sans|Source+Code+Pro|Black+Ops+One' rel='stylesheet' type='text/css'>
 {{{cssFiles}}}
 </head>
-<body>
+<body style="background-image:url('/img/backgrounds/irongrip{{filesSuffix}}.png');">
+	hello
+
 <script>
 	var filesSuffix = '{{filesSuffix}}'
 	var csrfToken = '{{csrfToken}}'
 	var accountInformation = {userId: '{{userId}}', email: '{{email}}', firstName: '{{firstName}}', lastName: '{{lastName}}'}
 </script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js"></script>
 {{{jsFiles}}}
 </body>
 </html>

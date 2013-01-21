@@ -11,13 +11,14 @@ StaticServer = require './static/staticServer'
 SessionStore = require './stores/sessionStore'
 CreateAccountStore = require './stores/createAccountStore'
 
-WelcomeHandler = require './handlers/welcomeHandler'
-AccountHandler = require './handlers/accountHandler'
-CreateAccountHandler = require './handlers/createAccountHandler'
-VerifyAccountHandler = require './handlers/verifyAccountHandler'
-RecoverPasswordHandler = require './handlers/recoverPasswordHandler'
-CreateRepositoryHandler = require './handlers/createRepositoryHandler'
-RepositoryHandler = require './handlers/repositoryHandler'
+IndexHandler = require './handlers/indexHandler'
+# WelcomeHandler = require './handlers/welcomeHandler'
+# AccountHandler = require './handlers/accountHandler'
+# CreateAccountHandler = require './handlers/createAccountHandler'
+# VerifyAccountHandler = require './handlers/verifyAccountHandler'
+# RecoverPasswordHandler = require './handlers/recoverPasswordHandler'
+# CreateRepositoryHandler = require './handlers/createRepositoryHandler'
+# RepositoryHandler = require './handlers/repositoryHandler'
 
 
 exports.create = (configurationParams, modelConnection, port) ->
@@ -35,13 +36,14 @@ exports.create = (configurationParams, modelConnection, port) ->
 
 	filesSuffix = '_' + (new Date()).getTime().toString 36
 	handlers =
-		welcomeHandler: WelcomeHandler.create configurationParams, stores, modelConnection, filesSuffix
-		accountHandler: AccountHandler.create configurationParams, stores, modelConnection, filesSuffix
-		createAccountHandler: CreateAccountHandler.create configurationParams, stores, modelConnection, filesSuffix
-		verifyAccountHandler: VerifyAccountHandler.create configurationParams, stores, modelConnection, filesSuffix
-		recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection, filesSuffix
-		createRepositoryHandler: CreateRepositoryHandler.create configurationParams, stores, modelConnection, filesSuffix
-		repositoryHandler: RepositoryHandler.create configurationParams, stores, modelConnection, filesSuffix
+		indexHandler: IndexHandler.create configurationParams, stores, modelConnection, filesSuffix
+		# welcomeHandler: WelcomeHandler.create configurationParams, stores, modelConnection, filesSuffix
+		# accountHandler: AccountHandler.create configurationParams, stores, modelConnection, filesSuffix
+		# createAccountHandler: CreateAccountHandler.create configurationParams, stores, modelConnection, filesSuffix
+		# verifyAccountHandler: VerifyAccountHandler.create configurationParams, stores, modelConnection, filesSuffix
+		# recoverPasswordHandler: RecoverPasswordHandler.create configurationParams, stores, modelConnection, filesSuffix
+		# createRepositoryHandler: CreateRepositoryHandler.create configurationParams, stores, modelConnection, filesSuffix
+		# repositoryHandler: RepositoryHandler.create configurationParams, stores, modelConnection, filesSuffix
 
 	return new Server configurationParams, httpsOptions, port, modelConnection, resourceSocket, stores, handlers, staticServer
 
@@ -65,13 +67,14 @@ class Server
 		# the maximum number of files you can have open
 		errors = {}
 		await
-			@handlers.welcomeHandler.initialize defer errors.welcomeHandlerError
-			@handlers.accountHandler.initialize defer errors.accountHandlerError
-			@handlers.createAccountHandler.initialize defer errors.createAccountHandlerError
-			@handlers.verifyAccountHandler.initialize defer errors.verifyAccountHandlerError
-			@handlers.recoverPasswordHandler.initialize defer errors.recoverPasswordHandlerError
-			@handlers.createRepositoryHandler.initialize defer errors.createRepositoryHandlerError
-			@handlers.repositoryHandler.initialize defer errors.repositoryHandlerError
+			@handlers.indexHandler.initialize defer errors.indexHandlerError
+			# @handlers.welcomeHandler.initialize defer errors.welcomeHandlerError
+			# @handlers.accountHandler.initialize defer errors.accountHandlerError
+			# @handlers.createAccountHandler.initialize defer errors.createAccountHandlerError
+			# @handlers.verifyAccountHandler.initialize defer errors.verifyAccountHandlerError
+			# @handlers.recoverPasswordHandler.initialize defer errors.recoverPasswordHandlerError
+			# @handlers.createRepositoryHandler.initialize defer errors.createRepositoryHandlerError
+			# @handlers.repositoryHandler.initialize defer errors.repositoryHandlerError
 
 		combinedErrors = []
 		for key, error of errors
@@ -94,17 +97,18 @@ class Server
 		expressServer = express()
 		@_configureServer expressServer
 
-		expressServer.get '/', @handlers.welcomeHandler.handleRequest
-		expressServer.get '/account', @handlers.accountHandler.handleRequest
-		expressServer.get '/account/create', @handlers.createAccountHandler.handleRequest
-		expressServer.get '/account/:view', @handlers.accountHandler.handleRequest
-		expressServer.get '/verifyAccount', @handlers.verifyAccountHandler.handleRequest
-		expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
-		expressServer.get '/repository/create', @handlers.createRepositoryHandler.handleRequest
-		expressServer.get '/repository/:repositoryId', @handlers.repositoryHandler.handleRequest
-		expressServer.get '/repository/:repositoryId/:repositoryView', @handlers.repositoryHandler.handleRequest
-		expressServer.get '/repository/:repositoryId/:repositoryView/:changeId', @handlers.repositoryHandler.handleRequest
-		expressServer.get '/repository/:repositoryId/:repositoryView/:changeId/:changeView', @handlers.repositoryHandler.handleRequest
+		expressServer.get '/', @handlers.indexHandler.handleRequest
+		# expressServer.get '/', @handlers.welcomeHandler.handleRequest
+		# expressServer.get '/account', @handlers.accountHandler.handleRequest
+		# expressServer.get '/account/create', @handlers.createAccountHandler.handleRequest
+		# expressServer.get '/account/:view', @handlers.accountHandler.handleRequest
+		# expressServer.get '/verifyAccount', @handlers.verifyAccountHandler.handleRequest
+		# expressServer.get '/recoverPassword', @handlers.recoverPasswordHandler.handleRequest
+		# expressServer.get '/repository/create', @handlers.createRepositoryHandler.handleRequest
+		# expressServer.get '/repository/:repositoryId', @handlers.repositoryHandler.handleRequest
+		# expressServer.get '/repository/:repositoryId/:repositoryView', @handlers.repositoryHandler.handleRequest
+		# expressServer.get '/repository/:repositoryId/:repositoryView/:changeId', @handlers.repositoryHandler.handleRequest
+		# expressServer.get '/repository/:repositoryId/:repositoryView/:changeId/:changeView', @handlers.repositoryHandler.handleRequest
 		expressServer.get '*', @staticServer.handleRequest		
 
 		expressServer.post '/fixCookieExpiration', @_handleFixCookieExpiration
