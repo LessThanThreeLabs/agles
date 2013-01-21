@@ -20,12 +20,11 @@ class CreateAccountHandler
 
 
 	handleRequest: (socket, data, callback) =>
-		errors = @_getErrors socket, data
-
-		if Object.keys(errors).length isnt 0
-			callback errors, false
-		else
-			@_performRequest socket, data, callback
+		@_getErrors socket, data, (errors) =>
+			if Object.keys(errors).length isnt 0
+				callback errors, false
+			else
+				@_performRequest socket, data, callback
 
 
 	_getErrors: (socket, data, callback) =>
@@ -43,16 +42,19 @@ class CreateAccountHandler
 		if not @accountInformationValidator.isValidLastName data.lastName
 			errors.lastName = @accountInformationValidator.getInvalidLastNameString()
 		
-		# check if the email is already taken last, since it's the most expensive
-		if Object.keys(errors) is 0 and @_checkIfEmailAlreadyExists data.email
-			errors.email = 'Email is already in use'
 
-		return errors
+		if Object.keys(errors).length isnt 0
+			callback errors
+		else
+			# check if the email is already taken last, since it's the most expensive
+			@_checkIfEmailAlreadyExists data.email, (emailInUse) =>
+				errors.email = 'Email is already in use' if emailInUse
+				callback errors
 
 
-	_checkIfEmailAlreadyExists: (email) =>
-		console.log 'need to check if email aleady exists in database...'
-		return false
+	_checkIfEmailAlreadyExists: (email, callback) =>
+		@modelRpcConnection.users.read.email_in_use email, (error, emailInUse) =>
+			callback emailInUse
 
 
 	_performRequest: (socket, data, callback) =>
