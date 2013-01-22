@@ -12,7 +12,8 @@ class LanguageParser(object):
 			'python': self.validate_python,
 			'ruby': self.validate_ruby,
 			'nodejs': self.validate_nodejs,
-			'java': self.validate_java
+			'java': self.validate_java,
+			'jvm': self.validate_java
 		}
 
 	def parse_languages(self, language_config):
