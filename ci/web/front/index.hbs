@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" ng-app>
 <head>
 <meta charset="utf-8">
@@ -11,9 +11,10 @@
 	<div id="main">
 		<div id="header" ng-controller="Header">
 			<span id="headerTitle">Koality</span>
-			<span class="headerOption" ng-repeat="option in options">blah: {{option.title}}</span>
+			<div id="headerOptions">
+				<span class="headerOption" ng-repeat="option in options" ng-bind="option.title"></span>
+			</div>
 		</div>
-
 		<div id="content"></div>
 	</div>
 

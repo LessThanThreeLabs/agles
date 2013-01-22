@@ -1,10 +1,8 @@
 window.Header = ($scope) ->
 	optionA =
-		title: 'blah1'
+		title: 'Jordan Potter'
 	optionB =
-		title: 'blah2'
+		title: 'Repositories'
 	optionC =
-		title: 'blah3'
+		title: 'About'
 	$scope.options = [optionA, optionB, optionC]
-	console.log $scope.options
-
