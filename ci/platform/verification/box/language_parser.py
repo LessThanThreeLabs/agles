@@ -52,7 +52,7 @@ class LanguageParser(object):
 		return "bash --login -c %s" % pipes.quote(shell_command)
 
 	def validate_nodejs(self, version):
-		setup_steps = [SetupCommand(["source ~/nvm/nvm.sh", "nvm install %s" % version, "npm install -g npm"])]
+		setup_steps = [SetupCommand("source ~/nvm/nvm.sh", "nvm install %s" % version, "npm install -g npm")]
 		setup_steps.append(SetupCommand("echo \"source ~/nvm/nvm.sh > /dev/null\" >> ~/.bash_profile"))
 		setup_steps.append(SetupCommand("echo \"nvm use %s > /dev/null\" >> ~/.bash_profile" % version))
 		return setup_steps, [SetupCommand("node --version")]

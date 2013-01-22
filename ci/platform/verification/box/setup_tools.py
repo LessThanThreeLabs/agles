@@ -5,13 +5,8 @@ from util.streaming_executor import StreamingExecutor
 
 
 class SetupCommand(object):
-	def __init__(self, commands):
-		if isinstance(commands, str):
-			self.commands = [commands]
-		elif isinstance(commands, list):
-			self.commands = commands
-		else:
-			raise InvalidConfigurationException("Invalid setup command: %s" % commands)
+	def __init__(self, *commands):
+		self.commands = commands
 
 	def execute(self):
 		self.execute_script(self.to_shell_command())
@@ -33,19 +28,19 @@ class SetupCommand(object):
 		else:
 			return "sudo -E %s" % command
 
+	@classmethod
+	def to_setup_script(cls, commands):
+		return cls._and(*map(lambda command: command.to_subshell_command(), commands))
+
+	@classmethod
+	def _and(cls, *commands):
+		return ' &&\n'.join(commands)
+
 	def to_shell_command(self):
-		script = ''
-		for command in self.commands:
-			script = script + "echo -e $ %s\n" % pipes.quote(command)
-			script = script + "%s\n" % command
-			script = script + self._check_return_code()
-		return script
+		return self._and(*map(lambda command: self._and("echo -e $ %s" % pipes.quote(command), command), self.commands))
 
 	def to_subshell_command(self):
-		return "(%s)\n" % self.to_shell_command() + self._check_return_code()
-
-	def _check_return_code(self):
-		return "_r=$?; if [ $_r -ne 0 ]; then exit $_r; fi\n"
+		return '(%s)' % self.to_shell_command()
 
 
 class SimplePrinter(object):

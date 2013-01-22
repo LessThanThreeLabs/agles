@@ -29,4 +29,4 @@ class ScriptParser(object):
 		return self.script_command(script, directory)
 
 	def script_command(self, command, directory):
-		return SetupCommand(["cd %s" % directory, command])
+		return SetupCommand("cd %s" % directory, command)

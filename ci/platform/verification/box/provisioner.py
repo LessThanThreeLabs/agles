@@ -18,15 +18,16 @@ class Provisioner(object):
 			'scripts': self.parse_scripts,
 			'databases': self.parse_databases
 		}
-		self.keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.koality'))
-		self.git_ssh = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.koality.keyscript'))
+		self.keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa'))
+		self.public_keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.pub'))
+
 
 	def provision(self, private_key, config_path=None, source_path=None):
 		try:
 			if not config_path:
 				if not source_path:
 					source_path = os.path.join(os.environ['HOME'], 'source')
-				config_path = os.path.join(source_path, 'koality.yml')
+				config_path = self._get_config_path(source_path)
 			elif not source_path:
 				source_path = os.path.dirname(config_path)
 			source_path = os.path.abspath(source_path)
@@ -38,23 +39,25 @@ class Provisioner(object):
 		except Exception as e:
 			print "%s: %s" % (type(e).__name__, e.message)
 			sys.exit(1)
-		finally:
-			self.remove_private_key()
+
+	def _get_config_path(self, source_path):
+		possible_file_names = ['koality.yml', '.koality.yml']
+		for file_name in possible_file_names:
+			config_path = os.path.join(source_path, file_name)
+			if os.access(config_path, os.F_OK):
+				return config_path
+		error_message = "Could not find a configuration file.\n"
+		error_message += "Please place one of the following in the base of your repository: %s" % possible_file_names
+		raise ProvisionFailedException(error_message)
 
 	def set_private_key(self, private_key):
+		if os.access(self.keyfile, os.F_OK):
+			os.remove(self.keyfile)
+		if os.access(self.public_keyfile, os.F_OK):
+			os.remove(self.public_keyfile)
 		with open(self.keyfile, 'w') as keyfile:
 			os.chmod(self.keyfile, 0600)
 			keyfile.write(private_key)
-		with open(self.git_ssh, 'w') as git_ssh:
-			os.chmod(self.git_ssh, 0777)
-			git_ssh.write('#!/bin/bash\n' +
-				'ssh -oStrictHostKeyChecking=no -i %s $*' % self.keyfile)
-
-	def remove_private_key(self):
-		if os.access(self.keyfile, os.F_OK):
-			os.remove(self.keyfile)
-		if os.access(self.git_ssh, os.F_OK):
-			os.remove(self.git_ssh)
 
 	def handle_config(self, config, source_path):
 		language_steps, setup_steps = self.parse_languages(config)
@@ -69,11 +72,10 @@ class Provisioner(object):
 		self.run_setup_steps(setup_steps)
 
 	def run_setup_steps(self, setup_steps, action_name='Setup'):
-		script = ''.join(map(lambda step: step.to_subshell_command(), setup_steps))
 		script_path = '/tmp/setup-script'
 		with open(script_path, 'w') as setup_script:
-			setup_script.write(script)
-		results = SetupCommand.execute_script_file(script_path, env={'GIT_SSH': self.git_ssh})
+			setup_script.write(SetupCommand.to_setup_script(setup_steps))
+		results = SetupCommand.execute_script_file(script_path)
 		os.remove(script_path)
 		if results.returncode != 0:
 			raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))
