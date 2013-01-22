@@ -1,0 +1,1 @@
+window.Repository = ($scope) ->

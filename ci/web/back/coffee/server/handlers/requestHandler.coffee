@@ -2,7 +2,7 @@ assert = require 'assert'
 
 
 module.exports = class Resource
-	constructor: (@configurationParams, @stores, @modelConnection, @filesCacher, @filesSuffix) ->
+	constructor: (@configurationParams, @stores, @modelConnection, @filesCacher, @fileSuffix) ->
 		assert.ok @configurationParams? and @stores? and @modelConnection? and @filesCacher?
 
 
@@ -46,7 +46,7 @@ module.exports = class Resource
 	getTemplateValues: (request) =>
 		templateValues =
 			userId: request.session.userId
-			filesSuffix: @filesSuffix
+			fileSuffix: @fileSuffix
 			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString

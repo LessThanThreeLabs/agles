@@ -2,7 +2,10 @@
 	"css": {
 		"text/css": [
 			"/css/src/setup.css",
-			"/css/src/main.css"
+			"/css/src/main.css",
+			"/css/src/header/header.css",
+			"/css/src/repository/repository.css",
+			"/css/src/welcome/welcome.css"
 		]
 	},
 
@@ -11,7 +14,11 @@
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
 
-			"/js/src/header/header.js"
+			"/js/src/setup.js",
+
+			"/js/src/header/header.js",
+			"/js/src/welcome/welcome.js",
+			"/js/src/repository/repository.js"
 		]
 	},
 
@@ -19,6 +26,13 @@
 		"image/png": [
 			"/img/awesomeFace.png",
 			"/img/backgrounds/irongrip.png"
+		]
+	},
+
+	"html": {
+		"text/html": [
+			"/html/welcome.html",
+			"/html/repository.html"
 		]
 	}
 }

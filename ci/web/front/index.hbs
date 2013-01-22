@@ -1,25 +1,28 @@
 <!doctype html>
-<html lang="en" ng-app>
+<html lang="en" ng-app="koality">
 <head>
 <meta charset="utf-8">
 <title>Koality</title>
 <link href='https://fonts.googleapis.com/css?family=Droid+Sans|Source+Code+Pro|Black+Ops+One' rel='stylesheet' type='text/css'>
 {{{cssFiles}}}
 </head>
-<body style="background-image:url('/img/backgrounds/irongrip{{filesSuffix}}.png');">
+<body style="background-image:url('/img/backgrounds/irongrip{{fileSuffix}}.png');">
 
 	<div id="main">
-		<div id="header" ng-controller="Header">
-			<span id="headerTitle">Koality</span>
-			<div id="headerOptions">
-				<span class="headerOption" ng-repeat="option in options" ng-bind="option.title"></span>
+		<div id="headerContanier">
+			<div id="header" ng-controller="Header">
+				<span id="headerTitle">Koality</span>
+				<div id="headerOptions">
+					<span class="headerOption" ng-repeat="option in options" ng-bind="option.title"></span>
+				</div>
 			</div>
 		</div>
-		<div id="content"></div>
+
+		<div id="contentContainer" ng-view></div>
 	</div>
 
 <script>
-	var filesSuffix = '{{filesSuffix}}'
+	var fileSuffix = '{{fileSuffix}}'
 	var csrfToken = '{{csrfToken}}'
 	var accountInformation = {userId: '{{userId}}', email: '{{email}}', firstName: '{{firstName}}', lastName: '{{lastName}}'}
 </script>

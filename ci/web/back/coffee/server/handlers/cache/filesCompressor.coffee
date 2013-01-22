@@ -31,7 +31,7 @@ class FilesCompressor
 
 	_shouldGzip: (contentType) =>
 		switch contentType
-			when 'text/css', 'application/javascript', 'image/svg+xml'
+			when 'text/html', 'text/css', 'application/javascript', 'image/svg+xml'
 				return true
 			when 'image/png'
 				return false
