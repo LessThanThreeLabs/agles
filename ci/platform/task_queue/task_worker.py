@@ -31,16 +31,19 @@ class TaskWorker(object):
 		with self.connection.Consumer([self.own_queue], callbacks=[self._assigned], auto_declare=False) as self.consumer:
 			self.consumer.qos(prefetch_count=1)
 			self.waiting = True
+			self.logger.debug("Worker %s waiting for assignment" % self.worker_id)
 			while self.waiting:
-				self.logger.debug("Worker %s waiting for assignment" % self.worker_id)
-				self.connection.drain_events()
+				try:
+					self.connection.drain_events(timeout=1)  # prevent drain from stalling
+				except socket.timeout:
+					pass
 
 	def _assigned(self, body, message):
-		assert body["type"] == "assign"
-		assert self.allocated == False
-		self.allocated = True
-		self.waiting = False
 		try:
+			assert body["type"] == "assign"
+			assert self.allocated == False
+			self.allocated = True
+			self.waiting = False
 			self.logger.info("Worker %s assigned to task queue %s" % (self.worker_id, body["task_queue"]))
 			self.consumer.cancel()
 			self.do_setup(body["message"])
@@ -117,7 +120,7 @@ class InfiniteWorker(TaskWorker):
 		try:
 			while True:
 				self.wait_for_assignment(self.worker_pool_queue)
-		except Exception as e:
+		except BaseException as e:
 			self.logger.exception(e)
 
 

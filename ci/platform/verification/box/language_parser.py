@@ -78,5 +78,5 @@ class LanguageParser(object):
 			raise InvalidConfigurationException("Java version %s not supported" % version)
 		java_path = os.path.join(java_home, 'bin')
 		setup_steps = [SetupCommand("echo \"export JAVA_HOME=%s\" >> ~/.bash_profile" % java_home)]
-		setup_steps.append(SetupCommand("echo \"export PATH=%s:$PATH\"" % java_path))
+		setup_steps.append(SetupCommand("echo \"export PATH=%s:$PATH\" >> ~/.bash_profile" % java_path))
 		return setup_steps, [SetupCommand("java -version")]
