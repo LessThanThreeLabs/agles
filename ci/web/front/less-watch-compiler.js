@@ -157,7 +157,7 @@ function getFileExtension(string){
 
 // Here's where we run the less compiler
 function compileCSS(file){
-    if (file.indexOf('.coffee') !== -1)
+    if (file.indexOf('.coffee') !== -1 || file.indexOf('.js') !== -1)
       return;
 
     var filename = getFilenameWithoutExtensionFull(file);

@@ -1,9 +1,10 @@
 angular.module('koality.service', []).
-	factory('fileSuffixAdder', () ->
+	factory('fileSuffixAdder', ['$window', ($window) ->
 		return addFileSuffix: (fileSrc) -> 
 			lastPeriodIndex = fileSrc.lastIndexOf '.'
-			return fileSrc.substr(0, lastPeriodIndex) + fileSuffix + fileSrc.substr(lastPeriodIndex)
-	)
+			return fileSrc if lastPeriodIndex is -1
+			return fileSrc.substr(0, lastPeriodIndex) + $window.fileSuffix + fileSrc.substr(lastPeriodIndex)
+	])
 
 
 angular.module('koality.directive', [])

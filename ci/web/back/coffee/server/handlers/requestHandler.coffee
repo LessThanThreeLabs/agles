@@ -62,7 +62,7 @@ module.exports = class Resource
 			console.log 'spdy not supported!'
 			return
 
-		for files in [@getFiles().js, @getFiles().css]
+		for files in [@getFiles().js, @getFiles().css, @getFiles().html]
 			for fileName, file of files
 				@_pushFile request, response, fileName, file
 
