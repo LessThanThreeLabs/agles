@@ -4,8 +4,9 @@
 			"/css/src/setup.css",
 			"/css/src/main.css",
 			"/css/src/header/header.css",
-			"/css/src/repository/repository.css",
-			"/css/src/welcome/welcome.css"
+			"/css/src/welcome/welcome.css",
+			"/css/src/createAccount/createAccount.css",
+			"/css/src/repository/repository.css"
 		]
 	},
 
@@ -18,6 +19,7 @@
 
 			"/js/src/header/header.js",
 			"/js/src/welcome/welcome.js",
+			"/js/src/createAccount/createAccount.js",
 			"/js/src/repository/repository.js"
 		]
 	},
@@ -32,6 +34,7 @@
 	"html": {
 		"text/html": [
 			"/html/welcome.html",
+			"/html/createAccount.html",
 			"/html/repository.html"
 		]
 	}

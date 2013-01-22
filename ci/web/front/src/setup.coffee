@@ -20,6 +20,10 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				templateUrl: "html/welcome#{fileSuffix}.html"
 				controller: Welcome
 			).
+			when('/create/account', 
+				templateUrl: "html/createAccount#{fileSuffix}.html"
+				controller: CreateAccount
+			).
 			when('/repository/:repositoryId', 
 				templateUrl: "html/repository#{fileSuffix}.html"
 				controller: Repository
