@@ -66,7 +66,7 @@ class LanguageParser(object):
 			'1.6': ['6']
 		}
 		version_map = {
-			'1.5': '/usr/lib/jvm/java-1.5.0-sun'
+			'1.5': '/usr/lib/jvm/java-1.5.0-sun',
 			'1.6': '/usr/lib/jvm/java-6-sun'
 		}
 		for version_name, aliases in version_aliases.items():
