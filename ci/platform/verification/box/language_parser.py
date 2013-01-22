@@ -60,14 +60,16 @@ class LanguageParser(object):
 		return "bash -c %s" % pipes.quote(shell_command)
 
 	def validate_java(self, version):
-		version = str(version)
+		version = str(version).lower()
 		version_aliases = {
-			'1.5': ['5'],
-			'1.6': ['6']
+			'5': ['1.5', '1.5.0', '1.5.0.22', '1.5.0_22'],
+			'6': ['1.6', '1.6.0', '1.6.0.24', '1.6.0_24'],
+			'openjdk6': ['openjdk-6']
 		}
 		version_map = {
-			'1.5': '/usr/lib/jvm/java-1.5.0-sun',
-			'1.6': '/usr/lib/jvm/java-6-sun'
+			'5': '/usr/lib/jvm/java-1.5.0-sun',
+			'6': '/usr/lib/jvm/java-6-sun',
+			'openjdk6': '/usr/lib/jvm/java-6-openjdk'
 		}
 		for version_name, aliases in version_aliases.items():
 			for alias in aliases:
