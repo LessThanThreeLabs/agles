@@ -9,43 +9,16 @@
 	"js": {
 		"application/javascript": [
 			"/js/libs/socket.io.js",
-			"/js/libs/assert.js"
+			"/js/libs/assert.js",
+
+			"/js/src/header/header.js"
 		]
 	},
 
 	"img": {
 		"image/png": [
 			"/img/awesomeFace.png",
-			"/img/backgrounds/black_linen_v2_@2X.png",
-			"/img/backgrounds/black_linen_v2.png",
-			"/img/backgrounds/black-Linen_@2X.png",
-			"/img/backgrounds/black-Linen.png",
-			"/img/backgrounds/classy_fabric_@2X.png",
-			"/img/backgrounds/classy_fabric.png",
-			"/img/backgrounds/dark_mosaic_@2X.png",
-			"/img/backgrounds/dark_mosaic.png",
-			"/img/backgrounds/debut_dark_@2X.png",
-			"/img/backgrounds/debut_dark.png",
-			"/img/backgrounds/irongrip_@2X.png",
-			"/img/backgrounds/irongrip.png",
-			"/img/backgrounds/nami_@2X.png",
-			"/img/backgrounds/nami.png",
-			"/img/backgrounds/navy_blue_@2X.png",
-			"/img/backgrounds/navy_blue.png",
-			"/img/backgrounds/office_@2X.png",
-			"/img/backgrounds/office.png",
-			"/img/backgrounds/px_by_Gre3g_@2X.png",
-			"/img/backgrounds/px_by_Gre3g.png",
-			"/img/backgrounds/rebel_@2X.png",
-			"/img/backgrounds/rebel.png",
-			"/img/backgrounds/soft_kill_@2X.png",
-			"/img/backgrounds/soft_kill.png",
-			"/img/backgrounds/stressed_linen_@2X.png",
-			"/img/backgrounds/stressed_linen.png",
-			"/img/backgrounds/tactile_noise_@2X.png",
-			"/img/backgrounds/tactile_noise.png",
-			"/img/backgrounds/wild_oliva_@2X.png",
-			"/img/backgrounds/wild_oliva.png"
+			"/img/backgrounds/irongrip.png"
 		]
 	}
 }

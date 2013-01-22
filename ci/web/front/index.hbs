@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" ng-app>
 <head>
 <meta charset="utf-8">
 <title>Koality</title>
@@ -7,7 +7,15 @@
 {{{cssFiles}}}
 </head>
 <body style="background-image:url('/img/backgrounds/irongrip{{filesSuffix}}.png');">
-	hello
+
+	<div id="main">
+		<div id="header" ng-controller="Header">
+			<span id="headerTitle">Koality</span>
+			<span class="headerOption" ng-repeat="option in options">blah: {{option.title}}</span>
+		</div>
+
+		<div id="content"></div>
+	</div>
 
 <script>
 	var filesSuffix = '{{filesSuffix}}'
