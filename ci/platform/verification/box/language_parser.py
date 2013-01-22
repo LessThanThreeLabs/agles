@@ -11,7 +11,8 @@ class LanguageParser(object):
 		self.language_dispatcher = {
 			'python': self.validate_python,
 			'ruby': self.validate_ruby,
-			'nodejs': self.validate_nodejs
+			'nodejs': self.validate_nodejs,
+			'java': self.validate_java
 		}
 
 	def parse_languages(self, language_config):
@@ -57,3 +58,25 @@ class LanguageParser(object):
 
 	def _nvm_command(self, shell_command):
 		return "bash -c %s" % pipes.quote(shell_command)
+
+	def validate_java(self, version):
+		version = str(version)
+		version_aliases = {
+			'1.5': ['5'],
+			'1.6': ['6']
+		}
+		version_map = {
+			'1.5': '/usr/lib/jvm/java-1.5.0-sun'
+			'1.6': '/usr/lib/jvm/java-6-sun'
+		}
+		for version_name, aliases in version_aliases.items():
+			for alias in aliases:
+				version_map[alias] = version_map[version_name]
+		try:
+			java_home = version_map[version]
+		except KeyError:
+			raise InvalidConfigurationException("Java version %s not supported" % version)
+		java_path = os.path.join(java_home, 'bin')
+		setup_steps = [SetupCommand("echo \"export JAVA_HOME=%s\" >> ~/.bash_profile" % java_home)]
+		setup_steps.append(SetupCommand("echo \"export PATH=%s:$PATH\"" % java_path))
+		return setup_steps, [SetupCommand("java -version")]
