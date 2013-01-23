@@ -44,13 +44,20 @@ class BuildCore(object):
 	def _get_verification_configuration_from_file(self):
 		"""Reads in the yaml config file contained in the checked
 		out user repository which this server is verifying"""
-		config_path = os.path.join(self.source_dir, "koality.yml")
-		if os.access(config_path, os.F_OK):
+		config_path = self._get_config_path()
+		if config_path:
 			with open(config_path) as config_file:
 				config = yaml.load(config_file.read())
 		else:
 			config = dict()
 		return self._get_verification_configuration(config)
+
+	def _get_config_path(self):
+		possible_file_names = ['koality.yml', '.koality.yml']
+		for file_name in possible_file_names:
+			config_path = os.path.join(self.source_dir, file_name)
+			if os.access(config_path, os.F_OK):
+				return config_path
 
 	def _get_verification_configuration(self, config_dict):
 		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"))
