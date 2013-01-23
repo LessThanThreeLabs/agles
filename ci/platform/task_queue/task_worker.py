@@ -46,19 +46,19 @@ class TaskWorker(object):
 			self.waiting = False
 			self.logger.info("Worker %s assigned to task queue %s" % (self.worker_id, body["task_queue"]))
 			self.consumer.cancel()
+			message.ack()
 			self.do_setup(body["message"])
-			self._begin_listening(body["task_queue"], ack=message.delivery_tag)
+			self._begin_listening(body["task_queue"])
 		except Exception as e:
 			self.logger.info("Assignment for worker %s failed" % self.worker_id, exc_info=True)
 			self.results.append(e)
 		finally:
 			self._freed()
 
-	def _begin_listening(self, shared_queue_name, ack):
+	def _begin_listening(self, shared_queue_name):
 		shared_queue = Queue(shared_queue_name)
 		try:
 			with self.connection.Consumer([shared_queue], callbacks=[self._handle_task], auto_declare=False) as self.consumer:
-				self.consumer.channel.basic_ack(delivery_tag=ack)
 				try:
 					while True:
 						self.connection.drain_events(timeout=1)
@@ -84,10 +84,11 @@ class TaskWorker(object):
 		try:
 			assert body["type"] == "task"
 			self.results.append(self.do_task(body["task"]))
-			message.ack()
 		except:
 			self.logger.error("Worker %s failed to handle task %s" % (self.worker_id, body["task"]), exc_info=True)
 			message.requeue()
+		else:
+			message.ack()
 
 	def _handle_return(self, exception, exchange, routing_key, message):
 		raise exception
@@ -121,6 +122,7 @@ class InfiniteWorker(TaskWorker):
 			while True:
 				self.wait_for_assignment(self.worker_pool_queue)
 		except BaseException as e:
+			print e
 			self.logger.exception(e)
 
 

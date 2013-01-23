@@ -11,7 +11,7 @@ class TaskQueue(object):
 		if not connection:
 			connection = Connection(connection_info)
 		self.connection = connection
-		self.shared_work_queue = Queue(durable=False, auto_delete=True)(connection)
+		self.shared_work_queue = Queue(durable=False, auto_delete=True, queue_arguments={"x-expires": 86400000})(connection)  # delete if unused for a day
 		self.shared_work_queue.queue_declare()
 		self.producer = self.connection.Producer(serializer='msgpack')
 		self.workers = {}
