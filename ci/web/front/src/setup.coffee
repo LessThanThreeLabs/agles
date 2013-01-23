@@ -17,20 +17,23 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 	config(['$routeProvider', ($routeProvider) ->
 		$routeProvider.
 			when('/welcome', 
-				templateUrl: "html/welcome#{fileSuffix}.html"
+				templateUrl: "/html/welcome#{fileSuffix}.html"
 				controller: Welcome
 			).
 			when('/create/account', 
-				templateUrl: "html/createAccount#{fileSuffix}.html"
+				templateUrl: "/html/createAccount#{fileSuffix}.html"
 				controller: CreateAccount
 			).
 			when('/repository/:repositoryId', 
-				templateUrl: "html/repository#{fileSuffix}.html"
+				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
 			).
 			otherwise(
 				redirectTo: '/welcome'
 			)
+	]).
+	config(['$locationProvider', ($locationProvider) ->
+		$locationProvider.html5Mode true
 	]).
 	run(() ->
 		console.log 'initialization happens here'

@@ -98,6 +98,9 @@ class Server
 		@_configureServer expressServer
 
 		expressServer.get '/', @handlers.indexHandler.handleRequest
+		expressServer.get '/welcome', @handlers.indexHandler.handleRequest
+		expressServer.get '/create/account', @handlers.indexHandler.handleRequest
+
 		# expressServer.get '/', @handlers.welcomeHandler.handleRequest
 		# expressServer.get '/account', @handlers.accountHandler.handleRequest
 		# expressServer.get '/account/create', @handlers.createAccountHandler.handleRequest

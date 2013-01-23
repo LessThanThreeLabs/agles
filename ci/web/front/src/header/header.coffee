@@ -1,5 +1,4 @@
-# TODO: this is vulnerable to minification?
-window.Header = ($scope, $window) ->
+window.Header = ['$scope', '$location', ($scope, $location) ->
 	optionA =
 		title: 'Jordan Potter'
 	optionB =
@@ -9,4 +8,5 @@ window.Header = ($scope, $window) ->
 	$scope.options = [optionA, optionB, optionC]
 
 	$scope.visitHome = () ->
-		$window.location.href = '/'
+		$location.path '/'
+]

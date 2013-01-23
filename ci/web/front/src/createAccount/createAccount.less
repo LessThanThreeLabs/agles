@@ -7,9 +7,24 @@
 
 		margin-left: auto;
 		margin-right: auto;
-		padding: 30px 35px 30px 35px;
+		padding: 15px 35px 30px 35px;
+		width: 400px;
 		background-color: @backgroundColor;
 		border: 1px solid lighten(@backgroundColor, 15%);
 		border-radius: 8px;
+
+		@boxShadowBlur: 2px;
+		@boxShadowSpread: 2px;
+		@boxShadowColor: #101010;
+		box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+		-moz-box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+		-webkit-box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+
+		.createAccountTitle {
+			padding-bottom: 20px;
+			text-align: center;
+			font-size: 1.5em;
+			font-weight: bold;
+		}
 	}
 }
