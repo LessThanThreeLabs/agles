@@ -33,10 +33,7 @@ class TaskWorker(object):
 			self.waiting = True
 			self.logger.debug("Worker %s waiting for assignment" % self.worker_id)
 			while self.waiting:
-				try:
-					self.connection.drain_events(timeout=1)  # prevent drain from stalling
-				except socket.timeout:
-					pass
+				self.connection.drain_events()
 
 	def _assigned(self, body, message):
 		try:
@@ -122,7 +119,6 @@ class InfiniteWorker(TaskWorker):
 			while True:
 				self.wait_for_assignment(self.worker_pool_queue)
 		except BaseException as e:
-			print e
 			self.logger.exception(e)
 
 
