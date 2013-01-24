@@ -1,34 +1,44 @@
 #createAccount {
-	display: table-cell;
-	vertical-align: middle;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
 
 	.createAccountFormContainer {
-		@backgroundColor: rgba(40, 40, 40, 1.0);
+		position: absolute;
+		top: 30%;
+		left: 0px;
+		right: 0px;
 
-		margin-left: auto;
-		margin-right: auto;
-		padding: 15px 35px 30px 35px;
-		width: 420px;
-		background-color: @backgroundColor;
-		border: 1px solid lighten(@backgroundColor, 15%);
-		border-radius: 8px;
+		.createAccountForm {
+			@backgroundColor: rgba(40, 40, 40, 1.0);
 
-		@boxShadowBlur: 2px;
-		@boxShadowSpread: 2px;
-		@boxShadowColor: #101010;
-		box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
-		-moz-box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
-		-webkit-box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+			margin-left: auto;
+			margin-right: auto;
+			padding: 15px 35px 30px 35px;
+			width: 420px;
+			background-color: @backgroundColor;
+			border: 1px solid lighten(@backgroundColor, 15%);
+			border-radius: 8px;
 
-		.createAccountTitle {
-			padding-bottom: 20px;
-			text-align: center;
-			font-size: 1.5em;
-			font-weight: bold;
-		}
+			@boxShadowBlur: 2px;
+			@boxShadowSpread: 2px;
+			@boxShadowColor: #101010;
+			box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+			-moz-box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+			-webkit-box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
 
-		.createAccountButtonContainer {
-			text-align: right;
+			.createAccountTitle {
+				padding-bottom: 20px;
+				text-align: center;
+				font-size: 1.5em;
+				font-weight: bold;
+			}
+
+			.createAccountButtonContainer {
+				text-align: right;
+			}
 		}
 	}
 }
