@@ -3,7 +3,7 @@
 
 
 // base path, that will be used to resolve files and exclude
-basePath = '../..';
+basePath = '';
 
 
 // list of files / patterns to load in the browser
@@ -57,7 +57,7 @@ autoWatch = true;
 // - Safari (only Mac)
 // - PhantomJS
 // - IE (only Windows)
-browsers = ['Chrome', 'Firefox', 'Safari'];
+browsers = ['Chrome', 'Firefox', 'Safari', 'PhantomJS'];
 
 
 // If browser does not capture in given timeout [ms], kill it
