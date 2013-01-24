@@ -1,9 +1,19 @@
 angular.module('koality.service', []).
-	factory('fileSuffixAdder', ['$window', ($window) ->
+	factory('initialState', ['$window', ($window) ->
+		fileSuffix: $window.fileSuffix
+		csrfToken: $window.csrfToken
+	]).
+	factory('fileSuffixAdder', ['initialState', (initialState) ->
 		return addFileSuffix: (fileSrc) -> 
 			lastPeriodIndex = fileSrc.lastIndexOf '.'
 			return fileSrc if lastPeriodIndex is -1
-			return fileSrc.substr(0, lastPeriodIndex) + $window.fileSuffix + fileSrc.substr(lastPeriodIndex)
+			return fileSrc.substr(0, lastPeriodIndex) + initialState.fileSuffix + fileSrc.substr(lastPeriodIndex)
+	]).
+	factory('socket', ['$location', 'initialState', ($location, initialState) ->
+		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
+		return makeRequest: (resource, requestType, functionName, data, callback) ->
+			console.log 'need to make a request!'
+			callback 'ok'
 	])
 
 
