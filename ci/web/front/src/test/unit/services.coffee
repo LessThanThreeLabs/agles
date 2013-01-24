@@ -1,5 +1,22 @@
 describe 'Koality services', () ->
 
+	describe 'initial state', () ->
+		beforeEach () ->
+			module 'koality.service', ($provide) ->
+				mockedWindow = 
+					fileSuffix: '_d487ab5e'
+					csrfToken: '4ed9a4a31had'
+				$provide.value '$window', mockedWindow
+				return
+
+		it 'should have a file suffix', () ->
+			inject (initialState) ->
+				expect(initialState.fileSuffix).toBe '_d487ab5e'
+
+		it 'should have a csrf token', () ->
+			inject (initialState) ->
+				expect(initialState.csrfToken).toBe '4ed9a4a31had'
+
 	describe 'file suffix adder', () ->
 		beforeEach () ->
 			module 'koality.service', ($provide) ->
