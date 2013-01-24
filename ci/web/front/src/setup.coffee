@@ -46,6 +46,10 @@ angular.module('koality.directive', []).
 		return (scope, element, attributes) ->
 			element.addClass 'unselectable'
 	)
+	.directive('focused', () ->
+		return (scope, element, attributes) ->
+			element.focus()
+	)	
 
 
 angular.module('koality.filter', [])

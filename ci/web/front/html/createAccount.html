@@ -7,7 +7,7 @@
 				<div class="prettyFormRow">
 					<div class="prettyFormLabel labelPadding">Email</div>
 					<div class="prettyFormValue">
-						<input type="email" class="createAccountEmail" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required>
+						<input type="email" class="createAccountEmail" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused>
 						<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: createAccountForm.email.$dirty && createAccountForm.email.$invalid}" title="Invalid email.">
 					</div>
 				</div>
