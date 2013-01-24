@@ -1,7 +1,12 @@
 angular.module('koality.service', []).
 	factory('initialState', ['$window', ($window) ->
-		fileSuffix: $window.fileSuffix
-		csrfToken: $window.csrfToken
+		fileSuffix: if $window.fileSuffix is '' then null else $window.fileSuffix
+		csrfToken: if $window.csrfToken is '' then null else $window.csrfToken
+		user:
+			id: if isNaN(parseInt($window.accountInformation?.userId)) then null else parseInt($window.accountInformation?.userId)
+			email: if $window.accountInformation?.email is '' then null else $window.accountInformation?.email
+			firstName: if $window.accountInformation?.firstName is '' then null else $window.accountInformation?.firstName
+			lastName: if $window.accountInformation?.lastName is '' then null else $window.accountInformation?.lastName
 	]).
 	factory('fileSuffixAdder', ['initialState', (initialState) ->
 		return addFileSuffix: (fileSrc) -> 

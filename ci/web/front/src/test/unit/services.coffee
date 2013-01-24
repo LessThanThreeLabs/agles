@@ -1,21 +1,49 @@
 describe 'Koality services', () ->
 
 	describe 'initial state', () ->
-		beforeEach () ->
+
+		it 'should have non-null values', () ->
 			module 'koality.service', ($provide) ->
 				mockedWindow = 
 					fileSuffix: '_d487ab5e'
 					csrfToken: '4ed9a4a31had'
+					accountInformation:
+						userId: 17
+						email: 'email@address.com'
+						firstName: 'First'
+						lastName: 'Last'
 				$provide.value '$window', mockedWindow
 				return
 
-		it 'should have a file suffix', () ->
 			inject (initialState) ->
 				expect(initialState.fileSuffix).toBe '_d487ab5e'
-
-		it 'should have a csrf token', () ->
-			inject (initialState) ->
 				expect(initialState.csrfToken).toBe '4ed9a4a31had'
+				expect(initialState.user.id).toBe 17
+				expect(initialState.user.email).toBe 'email@address.com'
+				expect(initialState.user.firstName).toBe 'First'
+				expect(initialState.user.lastName).toBe 'Last'
+
+		it 'should have null values', () ->
+			module 'koality.service', ($provide) ->
+				mockedWindow = 
+					fileSuffix: ''
+					csrfToken: ''
+					accountInformation:
+						userId: 'bad_user_id'
+						email: ''
+						firstName: ''
+						lastName: ''
+				$provide.value '$window', mockedWindow
+				return
+
+			inject (initialState) ->
+				expect(initialState.fileSuffix).toBeNull()
+				expect(initialState.csrfToken).toBeNull()
+				expect(initialState.user.id).toBeNull()
+				expect(initialState.user.email).toBeNull()
+				expect(initialState.user.firstName).toBeNull()
+				expect(initialState.user.lastName).toBeNull()
+
 
 	describe 'file suffix adder', () ->
 		beforeEach () ->
