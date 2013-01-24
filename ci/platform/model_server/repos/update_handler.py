@@ -139,7 +139,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 		manager.register_remote_store(repostore_id, num_repos=num_repos)
 
-	def force_push(self, repo_id, user_id, target):
+	def force_push(self, repo_id, user_id, from_target, to_target):
 		schema = database.schema
 		query = schema.repo.select().where(schema.repo.c.id==repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -149,7 +149,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 			repo_name = row[schema.repo.c.name]
 
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
-		manager.push_force(repostore_id, repo_id, repo_name, target)
+		manager.push_force(repostore_id, repo_id, repo_name, from_target, to_target)
 
 	def set_forward_url(self, user_id, repo_id, forward_url):
 		repo = database.schema.repo

@@ -65,13 +65,14 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def push_force(self, repostore_id, repo_id, repo_name, target):
+	def push_force(self, repostore_id, repo_id, repo_name, from_target, to_target):
 		"""Force pushes the repository to the forwarding url
 
 		:param repostore_id: The identifier of the local machine the repo is on
 		:param repo_id: The unique id of the RepositoryStore
 		:param repo_name: The name of the repo
-		:param target: The ref to push
+		:param from_target: The ref we're pushing to target
+		:param to_target: The ref to push
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -122,9 +123,9 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 			client.delete_repository(repo_id, repo_name)
 		self._update_store_repo_count(repostore_id, -1)
 
-	def push_force(self, repostore_id, repo_id, repo_name, target):
+	def push_force(self, repostore_id, repo_id, repo_name, from_target, to_target):
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.push_force(repo_id, repo_name, target)
+			client.push_force(repo_id, repo_name, from_target, to_target)
 
 	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
 		assert old_repo_name.endswith(".git")
@@ -200,7 +201,7 @@ class RepositoryStore(object):
 	def delete_repository(self, repo_id, repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def push_force(self, repo_id, repo_name, target):
+	def push_force(self, repo_id, repo_name, from_target, to_target):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def rename_repository(self, repo_id, old_repo_name, new_repo_name):
@@ -349,14 +350,16 @@ class FileSystemRepositoryStore(RepositoryStore):
 		shutil.rmtree(repo_path)
 		os.remove(repo_path + ".id_rsa")
 
-	def push_force(self, repo_id, repo_name, target):
+	def push_force(self, repo_id, repo_name, from_target, to_target):
 		"""Pushes forward to the url with a force"""
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
 
 		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
-		self._push_with_private_key(repo, remote_repo, ':'.join([target, target]), force=True)
+
+		self.logger.info("Pushing branch %s:%s on %s" % (from_target, to_target, repo_path))
+		self._push_with_private_key(repo, remote_repo, ':'.join([from_target, to_target]), force=True)
 
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.
