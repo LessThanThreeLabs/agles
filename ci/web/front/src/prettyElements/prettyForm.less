@@ -40,15 +40,16 @@
 				resize: none;
 			}
 
-			.prettyFormErrorText {
-				display: none;
-				padding-top: 5px;
-				padding-left: 5px;
-				text-align: left;
-				color: rgba(200, 0, 0, 1.0);
+			.prettyFormError {
+				position: relative;
+				top: 5px;
+				left: 5px;
+				visibility: hidden;
+				width: 20px;
+				height: 20px;
 
 				&.visible {
-					display: block;
+					visibility: visible;
 				}
 			}
 		}

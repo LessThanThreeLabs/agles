@@ -2,8 +2,10 @@ jQuery.extend(Tipped.Skins, {
 	'default' : {
 		fadeIn: 500,
 		fadeOut: 500,
-		border: { size: 4, color: '#959fa9', opacity: 0.8 },
-		background: '#F7F7F7',
-		radius: { size: 4, position: 'border' }
+		maxWidth: 200,
+		border: { size: 3, color: '#4E4E4E'},
+		background: '#282828',
+		radius: { size: 3, position: 'border'},
+		shadow: { blur: 3, color: '#101010', offset: {x: 3, y: 3}, opacity: 0.8}
 	}
 });

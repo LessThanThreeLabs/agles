@@ -1,6 +1,8 @@
 {
 	"css": {
 		"text/css": [
+			"/css/libs/tipped.css",
+
 			"/css/src/setup.css",
 			"/css/src/prettyElements/prettyForm.css",
 			"/css/src/main.css",
@@ -15,6 +17,8 @@
 		"application/javascript": [
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
+			"/js/libs/tipped.js",
+			"/js/libs/tippedSkin.js",
 
 			"/js/src/setup.js",
 
@@ -28,7 +32,8 @@
 	"img": {
 		"image/png": [
 			"/img/awesomeFace.png",
-			"/img/backgrounds/irongrip.png"
+			"/img/backgrounds/irongrip.png",
+			"/img/icons/error.png"
 		]
 	},
 
