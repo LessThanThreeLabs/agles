@@ -11,9 +11,9 @@
 	<div id="main">
 		<div id="headerContanier">
 			<div id="header" ng-controller="Header">
-				<span id="headerTitle" ng-click="visitHome()">Koality</span>
+				<span id="headerTitle" ng-click="visitHome()" unselectable>Koality</span>
 				<div id="headerOptions">
-					<span class="headerOption" ng-repeat="option in options" ng-bind="option.title"></span>
+					<span class="headerOption" ng-repeat="option in options" ng-bind="option.title" unselectable></span>
 				</div>
 			</div>
 		</div>

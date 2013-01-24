@@ -41,7 +41,11 @@ angular.module('koality.service', []).
 	])
 
 
-angular.module('koality.directive', [])
+angular.module('koality.directive', []).
+	directive('unselectable', () ->
+		return (scope, element, attributes) ->
+			element.addClass 'unselectable'
+	)
 
 
 angular.module('koality.filter', [])
