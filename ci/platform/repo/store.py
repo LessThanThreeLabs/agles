@@ -242,7 +242,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			stacktrace = sys.exc_info()[2]
 			error_msg = "Merge failed for repo_slave (potential to retry): %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
 				repo_slave, ref_to_merge, ref_to_merge_into)
-			self.logger.info(error_msg)
+			self.logger.info(error_msg, exc_info=True)
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
@@ -276,14 +276,14 @@ class FileSystemRepositoryStore(RepositoryStore):
 				if i >= self.NUM_RETRIES:
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
-					self.logger.debug(error_msg)
+					self.logger.debug(error_msg, exc_info=True)
 					self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 
 	def _push_with_private_key(self, repo, *args, **kwargs):
-		self.logger.info("Attempting to push repo %s to forward url" % repo)
+		self.logger.info("Attempting to push repo %s to forward url with args: %s, kwargs: %s" % (repo, str(args), str(kwargs)))
 		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
 		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT})
 
@@ -359,7 +359,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 			remote_repo = conn.get_repo_forward_url(repo_id)
 
 		self.logger.info("Pushing branch %s:%s on %s" % (from_target, to_target, repo_path))
-		self._push_with_private_key(repo, remote_repo, ':'.join([from_target, to_target]), force=True)
+		try:
+			self._push_with_private_key(repo, remote_repo, ':'.join([from_target, to_target]), force=True)
+		except GitCommandError as e:
+			self.logger.warning("A git error occurred on force push", exc_info=True)
+			raise e
 
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.
