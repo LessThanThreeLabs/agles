@@ -3,25 +3,28 @@ describe 'Koality services', () ->
 	describe 'initial state', () ->
 
 		it 'should have non-null values', () ->
+			fileSuffix = '_d487ab5e'; csrfToken = '4ed9a4a31had'; userId = 17
+			email ='email@address.com'; firstName = 'First'; lastName = 'Last'
+
 			module 'koality.service', ($provide) ->
 				mockedWindow = 
-					fileSuffix: '_d487ab5e'
-					csrfToken: '4ed9a4a31had'
+					fileSuffix: fileSuffix
+					csrfToken: csrfToken
 					accountInformation:
 						userId: 17
-						email: 'email@address.com'
-						firstName: 'First'
-						lastName: 'Last'
+						email: email
+						firstName: firstName
+						lastName: lastName
 				$provide.value '$window', mockedWindow
 				return
 
 			inject (initialState) ->
-				expect(initialState.fileSuffix).toBe '_d487ab5e'
-				expect(initialState.csrfToken).toBe '4ed9a4a31had'
+				expect(initialState.fileSuffix).toBe fileSuffix
+				expect(initialState.csrfToken).toBe csrfToken
 				expect(initialState.user.id).toBe 17
-				expect(initialState.user.email).toBe 'email@address.com'
-				expect(initialState.user.firstName).toBe 'First'
-				expect(initialState.user.lastName).toBe 'Last'
+				expect(initialState.user.email).toBe email
+				expect(initialState.user.firstName).toBe firstName
+				expect(initialState.user.lastName).toBe lastName
 
 		it 'should have null values', () ->
 			module 'koality.service', ($provide) ->
@@ -46,18 +49,20 @@ describe 'Koality services', () ->
 
 
 	describe 'file suffix adder', () ->
+		fileSuffix = '_hc8oeb1f'
+		
 		beforeEach () ->
 			module 'koality.service', ($provide) ->
-				mockedWindow = fileSuffix: '_hc8oeb1f'
+				mockedWindow = fileSuffix: fileSuffix
 				$provide.value '$window', mockedWindow
 				return
 			
 		it 'should properly add the correct file suffix for valid file urls', () ->
 			inject (fileSuffixAdder) ->
-				expect(fileSuffixAdder.addFileSuffix('a.gif')).toBe 'a_hc8oeb1f.gif'
-				expect(fileSuffixAdder.addFileSuffix('/img/a.png')).toBe '/img/a_hc8oeb1f.png'
-				expect(fileSuffixAdder.addFileSuffix('/short.html')).toBe '/short_hc8oeb1f.html'
-				expect(fileSuffixAdder.addFileSuffix('/img/longerName.fakeExtension')).toBe '/img/longerName_hc8oeb1f.fakeExtension'
+				expect(fileSuffixAdder.addFileSuffix('a.gif')).toBe "a#{fileSuffix}.gif"
+				expect(fileSuffixAdder.addFileSuffix('/img/a.png')).toBe "/img/a#{fileSuffix}.png"
+				expect(fileSuffixAdder.addFileSuffix('/short.html')).toBe "/short#{fileSuffix}.html"
+				expect(fileSuffixAdder.addFileSuffix('/img/longerName.fakeExtension')).toBe "/img/longerName#{fileSuffix}.fakeExtension"
 
 		it 'should fail to add the correct file suffix for invalid file urls', () ->
 			inject (fileSuffixAdder) ->

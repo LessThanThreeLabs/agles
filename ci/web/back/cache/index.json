@@ -5,6 +5,7 @@
 
 			"/css/src/setup.css",
 			"/css/src/prettyElements/prettyForm.css",
+			"/css/src/prettyElements/prettyPanel.css",
 			"/css/src/main.css",
 			"/css/src/header/header.css",
 			"/css/src/welcome/welcome.css",

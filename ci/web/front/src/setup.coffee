@@ -49,7 +49,7 @@ angular.module('koality.directive', []).
 	.directive('focused', () ->
 		return (scope, element, attributes) ->
 			element.focus()
-	)	
+	)
 
 
 angular.module('koality.filter', [])
