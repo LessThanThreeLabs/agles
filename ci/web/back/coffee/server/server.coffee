@@ -99,6 +99,7 @@ class Server
 
 		expressServer.get '/', @handlers.indexHandler.handleRequest
 		expressServer.get '/welcome', @handlers.indexHandler.handleRequest
+		expressServer.get '/login', @handlers.indexHandler.handleRequest
 		expressServer.get '/create/account', @handlers.indexHandler.handleRequest
 
 		# expressServer.get '/', @handlers.welcomeHandler.handleRequest
