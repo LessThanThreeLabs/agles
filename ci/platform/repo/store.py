@@ -378,9 +378,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self.logger.info("Pushing branch %s:%s on %s" % (from_target, to_target, repo_path))
 		try:
 			self._push_with_private_key(repo, remote_repo, ':'.join([from_target, to_target]), force=True)
-		except GitCommandError as e:
+		except GitCommandError:
 			self.logger.warning("A git error occurred on force push", exc_info=True)
-			raise e
+			raise
 
 	def force_delete(self, repo_id, repo_name, target):
 		if self._remote_branch_exists:

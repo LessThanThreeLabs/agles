@@ -150,6 +150,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		return dict(repostore_id=repostore_id, repo_name=repo_name)
 
 	def force_push(self, repo_id, user_id, from_target, to_target):
+		permission = database.schema.permission
 		row = self._get_repo_permissions(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(row[permission.c.permissions], RepositoryPermissions.RWA):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
@@ -159,6 +160,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		manager.push_force(info['repostore_id'], repo_id, info['repo_name'], from_target, to_target)
 
 	def force_delete(self, repo_id, user_id, target):
+		permission = database.schema.permission
 		row = self._get_repo_permissions(user_id, repo_id)
 		if not row or not RepositoryPermissions.has_permissions(row[permission.c.permissions], RepositoryPermissions.RWA):
 			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
