@@ -19,7 +19,9 @@ class Provisioner(object):
 			'databases': self.parse_databases
 		}
 		self.keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa'))
+		self.keyfile_backup = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.bak'))
 		self.public_keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.pub'))
+		self.public_keyfile_backup = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.pub.bak'))
 		self.git_ssh = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.koality'))
 
 	def provision(self, private_key, config_path=None, source_path=None):
@@ -36,6 +38,7 @@ class Provisioner(object):
 				config = yaml.load(config_file.read())
 			self.set_private_key(private_key)
 			self.handle_config(config, source_path)
+			self.reset_private_key()
 		except Exception as e:
 			print "%s: %s" % (type(e).__name__, e.message)
 			sys.exit(1)
@@ -52,9 +55,9 @@ class Provisioner(object):
 
 	def set_private_key(self, private_key):
 		if os.access(self.keyfile, os.F_OK):
-			os.remove(self.keyfile)
+			os.rename(self.keyfile, self.keyfile_backup)
 		if os.access(self.public_keyfile, os.F_OK):
-			os.remove(self.public_keyfile)
+			os.rename(self.public_keyfile, self.public_keyfile_backup)
 		with open(self.keyfile, 'w') as keyfile:
 			os.chmod(self.keyfile, 0600)
 			keyfile.write(private_key)
@@ -62,6 +65,14 @@ class Provisioner(object):
 			os.chmod(self.git_ssh, 0777)
 			git_ssh.write('#!/bin/bash\n' +
 				'ssh -oStrictHostKeyChecking=no $*')
+
+	def reset_private_key(self):
+		if os.access(self.keyfile_backup, os.F_OK):
+			os.rename(self.keyfile_backup, self.keyfile)
+		if os.access(self.public_keyfile_backup, os.F_OK):
+			os.rename(self.public_keyfile_backup, self.public_keyfile)
+		if os.access(self.git_ssh, os.F_OK):
+			os.remove(self.git_ssh)
 
 	def handle_config(self, config, source_path):
 		language_steps, setup_steps = self.parse_languages(config)
