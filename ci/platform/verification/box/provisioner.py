@@ -20,7 +20,7 @@ class Provisioner(object):
 		}
 		self.keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa'))
 		self.public_keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.pub'))
-
+		self.git_ssh = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.koality'))
 
 	def provision(self, private_key, config_path=None, source_path=None):
 		try:
@@ -58,6 +58,10 @@ class Provisioner(object):
 		with open(self.keyfile, 'w') as keyfile:
 			os.chmod(self.keyfile, 0600)
 			keyfile.write(private_key)
+		with open(self.git_ssh, 'w') as git_ssh:
+			os.chmod(self.git_ssh, 0777)
+			git_ssh.write('#!/bin/bash\n' +
+				'ssh -oStrictHostKeyChecking=no $*')
 
 	def handle_config(self, config, source_path):
 		language_steps, setup_steps = self.parse_languages(config)
@@ -75,7 +79,7 @@ class Provisioner(object):
 		script_path = '/tmp/setup-script'
 		with open(script_path, 'w') as setup_script:
 			setup_script.write(SetupCommand.to_setup_script(setup_steps))
-		results = SetupCommand.execute_script_file(script_path)
+		results = SetupCommand.execute_script_file(script_path, env={'GIT_SSH': self.git_ssh})
 		os.remove(script_path)
 		if results.returncode != 0:
 			raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))
