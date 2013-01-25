@@ -1,37 +1,33 @@
-<div id="login" ng-controller="Login" unselectable>
-	<div class="loginFormContainer">
-		<div class="loginForm prettyPanel">
-			<div class="loginTitle">Login</div>
-
-			<form class="prettyForm" name="loginForm" novalidate>
-				<div class="prettyFormRow">
-					<div class="prettyFormLabel labelPadding">Email</div>
-					<div class="prettyFormValue">
-						<input type="email" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused>
-					</div>
+<div id="login" ng-controller="Login">
+	<centered-panel panel-title="Login">
+		<form class="prettyForm" name="loginForm" novalidate>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel labelPadding">Email</div>
+				<div class="prettyFormValue">
+					<input type="email" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused>
 				</div>
-				<div class="prettyFormRow">
-					<div class="prettyFormLabel labelPadding">Password</div>
-					<div class="prettyFormValue">
-						<input type="password" ng-model="account.password" name="password" placeholder="p4ssW0rd" ng-maxlength="256" required>
-					</div>
-				</div>
-				<div class="prettyFormRow">
-					<div class="prettyFormLabel labelPadding"></div>
-					<div class="prettyFormValue">
-						<input type="checkbox" ng-model="account.rememberMe" ng-true-value="yes" ng-false-value="no" name="rememberMe"> Remember me
-					</div>
-				</div>
-			</form>
-
-			<div class="loginButtonContainer">
-				<button ng-click="login()">Login</button>
 			</div>
-
-			<div class="memberOptions">
-				<span class="memberOptionsTitle">Not a member?</span>
-				<a href="/create/account" class="createAccountOption">Create an account</a> | <a href="/recoverPassword" class="recoverPasswordOption">Recover password</a>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel labelPadding">Password</div>
+				<div class="prettyFormValue">
+					<input type="password" ng-model="account.password" name="password" placeholder="p4ssW0rd" ng-maxlength="256" required>
+				</div>
 			</div>
+			<div class="prettyFormRow">
+				<div class="prettyFormLabel labelPadding"></div>
+				<div class="prettyFormValue">
+					<input type="checkbox" ng-model="account.rememberMe" ng-true-value="yes" ng-false-value="no" name="rememberMe"> Remember me
+				</div>
+			</div>
+		</form>
+
+		<div id="loginButtonContainer">
+			<button ng-click="login()">Login</button>
 		</div>
-	</div>
+
+		<div id="loginMemberOptions">
+			<span class="memberOptionsTitle">Not a member?</span>
+			<a href="/create/account" class="createAccountOption">Create an account</a> | <a href="/recoverPassword" class="recoverPasswordOption">Recover password</a>
+		</div>
+	</centered-panel>
 </div>

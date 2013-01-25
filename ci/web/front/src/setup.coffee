@@ -50,6 +50,18 @@ angular.module('koality.directive', []).
 		return (scope, element, attributes) ->
 			element.focus()
 	)
+	.directive('centeredPanel', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		scope: title: '@panelTitle'
+		template: '<div class="prettyPanelContainer">
+				<div class="prettyPanel" unselectable>
+					<div class="prettyPanelTitle">{{title}}</div>
+					<div ng-transclude></div>
+				</div>
+			</div>'
+	)
 
 
 angular.module('koality.filter', [])
