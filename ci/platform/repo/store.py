@@ -387,6 +387,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				self.push_force(repo_id, repo_name, "", target)
 			except GitCommandError as e:
+				self.logger.warn("Force delete encountered an error", exc_info=True)
 				return e.stderr
 			return None
 		# No need to else. Jgit will delete locally

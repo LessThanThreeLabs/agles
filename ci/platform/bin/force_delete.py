@@ -13,7 +13,7 @@ def main():
 
 
 def force_delete(user_id, repo_id, target):
-	with ModelServer.rpc_connect("repos", "update", globals=globals()) as client:
+	with ModelServer.rpc_connect("repos", "update") as client:
 		err = client.force_delete(repo_id, user_id, target)
 	if err:
 		print err
