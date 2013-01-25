@@ -70,6 +70,10 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				templateUrl: "/html/createAccount#{fileSuffix}.html"
 				controller: CreateAccount
 			).
+			when('/recoverPassword', 
+				templateUrl: "/html/recoverPassword#{fileSuffix}.html"
+				controller: RecoverPassword
+			).
 			when('/repository/:repositoryId', 
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
