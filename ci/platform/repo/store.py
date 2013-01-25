@@ -76,6 +76,16 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
+	def force_delete(self, repostore_id, repo_id, repo_name, target):
+		"""Force pushes the repository to the forwarding url
+
+		:param repostore_id: The identifier of the local machine the repo is on
+		:param repo_id: The unique id of the RepositoryStore
+		:param repo_name: The name of the repo
+		:param target: The ref to delete
+		"""
+		raise NotImplementedError("Subclasses should override this!")
+
 	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
 		"""Renames a repository on the given local store.
 
@@ -126,6 +136,10 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 	def push_force(self, repostore_id, repo_id, repo_name, from_target, to_target):
 		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.push_force(repo_id, repo_name, from_target, to_target)
+
+	def force_delete(self, repostore_id, repo_id, repo_name, target):
+		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
+			return client.force_delete(repo_id, repo_name, target)
 
 	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
 		assert old_repo_name.endswith(".git")
@@ -202,6 +216,9 @@ class RepositoryStore(object):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def push_force(self, repo_id, repo_name, from_target, to_target):
+		raise NotImplementedError("Subclasses should override this!")
+
+	def force_delete(repo_id, repo_name, target):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def rename_repository(self, repo_id, old_repo_name, new_repo_name):
@@ -364,6 +381,26 @@ class FileSystemRepositoryStore(RepositoryStore):
 		except GitCommandError as e:
 			self.logger.warning("A git error occurred on force push", exc_info=True)
 			raise e
+
+	def force_delete(self, repo_id, repo_name, target):
+		if self._remote_branch_exists:
+			try:
+				self.push_force(repo_id, repo_name, "", target)
+			except GitCommandError as e:
+				return e.stderr
+			return None
+		# No need to else. Jgit will delete locally
+
+	def _remote_branch_exists(self, repo_id, repo_name, branch):
+		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+
+		repo_path = self._resolve_path(repo_id, repo_name)
+		repo = Repo(repo_path)
+		repo.git.fetch(remote_repo)
+		remote_branch = "origin/%s" % branch
+		remote_branch_exists = re.search("\\s+" + remote_branch + "$", repo.git.branch("-r"), re.MULTILINE)
+		return remote_branch_exists
 
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.
