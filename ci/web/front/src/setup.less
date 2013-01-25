@@ -6,10 +6,11 @@ body {
 	font-family: 'Droid Sans', sans-serif;
 	font-size: 12px;
 
-	a:link { text-decoration: none; }
-	a:visited { text-decoration: none; }
-	a:hover { text-decoration: none; }
-	a:active { text-decoration: none; }
+	@linkColor: rgb(0, 184, 255);
+	a:link { text-decoration: none; color: @linkColor; }
+	a:visited { text-decoration: none; color: @linkColor; }
+	a:hover { text-decoration: none; color: @linkColor; }
+	a:active { text-decoration: none; color: @linkColor; }
 
 	input {
 		margin: 0px;
