@@ -121,6 +121,10 @@ if not File.exists? '/usr/local/bin/ssh'
 		link "/usr/bin/force-push" do
 			to "#{node[:koality][:source_path][:platform]}/bin/force_push.py"
 		end
+
+		link "/usr/bin/force-delete" do
+			to "#{node[:koality][:source_path][:platform]}/bin/force_delete.py"
+		end
 	end
 
 end
