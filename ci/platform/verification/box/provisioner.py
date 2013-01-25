@@ -64,7 +64,7 @@ class Provisioner(object):
 		with open(self.git_ssh, 'w') as git_ssh:
 			os.chmod(self.git_ssh, 0777)
 			git_ssh.write('#!/bin/bash\n' +
-				'ssh -oStrictHostKeyChecking=no -i $*' % self.keyfile)
+				'ssh -oStrictHostKeyChecking=no -i %s $*' % self.keyfile)
 
 	def reset_private_key(self):
 		if os.access(self.keyfile_backup, os.F_OK):
