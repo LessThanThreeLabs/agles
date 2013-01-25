@@ -18,6 +18,8 @@
 
 	"js": {
 		"application/javascript": [
+			"/js/libs/jquery.js",
+			"/js/libs/angular.js",
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
 			"/js/libs/tipped.js",
