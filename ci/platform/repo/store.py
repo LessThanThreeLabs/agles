@@ -393,21 +393,25 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				self.push_force(repo_id, repo_name, "", target)
 			except GitCommandError as e:
+				self.logger.warning("Force delete encountered an error", exc_info=True)
 				self._update_branch(repo_id, repo_name, target)
-				self.logger.warn("Force delete encountered an error", exc_info=True)
 				return e.stderr
 		self._delete_branch(repo_id, repo_name, target)
 		return None
 
 	def _update_branch(self, repo_id, repo_name, target):
-		self.logger.debug("updating local branch %s on repo %d" % (target, repo_id))
-		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
-			remote_repo = conn.get_repo_forward_url(repo_id)
-		repo_path = self._resolve_path(repo_id, repo_name)
-		repo = Repo(repo_path)
-		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
-		self._update_branch_from_forward_url(repo_slave, remote_repo, target)
-		repo_slave.git.push("origin", ":".join([target, target]), force=True)
+		try:
+			self.logger.debug("updating local branch %s on repo %d" % (target, repo_id))
+			with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+				remote_repo = conn.get_repo_forward_url(repo_id)
+			repo_path = self._resolve_path(repo_id, repo_name)
+			repo = Repo(repo_path)
+			repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
+			self._update_branch_from_forward_url(repo_slave, remote_repo, target)
+			repo_slave.git.push("origin", ":".join([target, target]), force=True)
+		except GitCommandError:
+			self.logger.debug("Failed to update branch.", exc_info=True)
+			raise
 
 	def _delete_branch(self, repo_id, repo_name, target):
 		""" This assumes the branch exists"""
