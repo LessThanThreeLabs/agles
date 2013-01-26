@@ -266,11 +266,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def _update_from_forward_url(self, repo_slave, remote_repo, ref_to_update):
 		try:
-			# branch has to exist on the non-slave (not forward url) because we're trying to push it
+			ref_sha = self._update_branch_from_forward_url(repo_slave, remote_repo, ref_to_update)
 			remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
-			self._fetch_with_private_key(repo_slave, remote_repo)
-			repo_slave.git.checkout("FETCH_HEAD")
-			ref_sha = repo_slave.head.commit.hexsha
 			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
@@ -281,6 +278,15 @@ class FileSystemRepositoryStore(RepositoryStore):
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
+
+	def _update_branch_from_forward_url(self, repo_slave, remote_repo, ref_to_update):
+			# branch has to exist on the non-slave (not forward url) because we're trying to push it
+			remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
+			self._fetch_with_private_key(repo_slave, remote_repo)
+			repo_slave.git.checkout("FETCH_HEAD")
+			ref_sha = repo_slave.head.commit.hexsha
+			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
+			return ref_sha
 
 	def _push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into, original_head):
 		i = 0
@@ -400,7 +406,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
 		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
-		self._update_from_forward_url(repo_slave, remote_repo, target)
+		self._update_branch_from_forward_url(repo_slave, remote_repo, target)
+		repo_slave.git.push("origin", ":".join([target, target]), force=True)
 
 	def _delete_branch(self, repo_id, repo_name, target):
 		""" This assumes the branch exists"""
