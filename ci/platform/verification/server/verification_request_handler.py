@@ -1,5 +1,6 @@
 import os
 import socket
+import yaml
 
 from kombu.connection import Connection
 
@@ -12,7 +13,6 @@ from util import pathgen
 from task_queue.task_worker import InfiniteWorker
 from virtual_machine.remote_command import SimpleRemoteTestCommand
 from verification.shared.pubkey_registrar import PubkeyRegistrar
-from verification.shared.verification_result import VerificationResult
 
 
 class VerificationRequestHandler(InfiniteWorker):
@@ -22,13 +22,40 @@ class VerificationRequestHandler(InfiniteWorker):
 	def __init__(self, verifier):
 		self.verifier = verifier
 		super(VerificationRequestHandler, self).__init__(verification_worker_queue)
+		self._check_for_interrupted_build()
 		self._register_pubkey()
 
 	def _register_pubkey(self):
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, self.worker_id)
 
+	def _get_vm_directory(self):
+		return os.path.abspath(self.verifier.virtual_machine.vm_directory)
+
+	def _get_build_info_file(self):
+		return os.path.abspath(os.path.join(self._get_vm_directory(), '.build'))
+
 	def get_worker_id(self):
-		return "vs:%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(self.verifier.virtual_machine.vm_directory)))
+		return "vs:%s:%s" % (socket.gethostname(), os.path.basename(self._get_vm_directory()))
+
+	def _check_for_interrupted_build(self):
+		if os.access(self._get_build_info_file(), os.F_OK):
+			with open(self._get_build_info_file()) as build_file:
+				build_id = yaml.load(build_file.read())['build_id']
+				self._handle_interrupted_build(build_id)
+
+	def _handle_interrupted_build(self, build_id):
+		self.logger.warn("Worker %s found interrupted build with id %s. Failing build." % (self.worker_id, build_id))
+		status = BuildStatus.FAILED
+		builds_update_rpc.mark_build_finished(build_id, status)
+		with Connection(connection_info).Producer(serializer='msgpack') as producer:
+			producer.publish({'build_id': build_id, 'status': status},
+				exchange=verification_results_queue.exchange,
+				routing_key=verification_results_queue.routing_key,
+				mandatory=True,
+			)
+		if os.access(self._get_build_info_file(), os.F_OK):
+			os.remove(self._get_build_info_file())
+		self.logger.debug("Failed interrupted build %s, resuming initialization" % build_id)
 
 	def do_setup(self, message):
 		# Check out commit, run all setup and compile stuff
@@ -77,21 +104,24 @@ class VerificationRequestHandler(InfiniteWorker):
 		self.logger.debug("Worker %s starting build %s" % (self.worker_id, build_id))
 		with ModelServer.rpc_connect("builds", "update") as model_server_rpc:
 			model_server_rpc.start_build(build_id)
+		with open(self._get_build_info_file(), 'w') as build_file:
+			build_file.write(yaml.dump({'build_id': build_id}))
 
 	def _make_verify_callback(self, build_id, builds_update_rpc):
 		"""Returns the default callback function to be
 		called with a return value after verification.
 		Sends a message denoting the return value and acks"""
-		def default_verify_callback(results, cleanup_function=lambda: None):
-			status = BuildStatus.PASSED if results == VerificationResult.SUCCESS else BuildStatus.FAILED
+		def default_verify_callback(status, cleanup_function=lambda: None):
 			builds_update_rpc.mark_build_finished(build_id, status)
 			with Connection(connection_info).Producer(serializer='msgpack') as producer:
-				producer.publish({'build_id': build_id, 'results': results},
+				producer.publish({'build_id': build_id, 'status': status},
 					exchange=verification_results_queue.exchange,
 					routing_key=verification_results_queue.routing_key,
 					mandatory=True,
 				)
 			self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
+			if os.access(self._get_build_info_file(), os.F_OK):
+				os.remove(self._get_build_info_file())
 			cleanup_function()
 		return default_verify_callback
 

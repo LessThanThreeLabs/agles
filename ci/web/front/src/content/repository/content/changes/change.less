@@ -8,7 +8,7 @@
 
 
 @fadeInOpacity: 1.0;
-@keyframes fadeIn { 
+@keyframes fadeIn {
 	from { opacity: 0.0; }
 	to { opacity: @fadeInOpacity; }
 }
@@ -57,7 +57,7 @@ div.change {
 		.statusText { color: @runningColor; }
 	}
 
-	&.failed {
+	&.failed, &.failedToMerge {
 		&.selected { background-color: @failedBackgroundColor; }
 		.statusText { color: @failedColor; }
 	}

@@ -8,12 +8,12 @@ from shutil import rmtree
 from testconfig import config
 
 from settings.verification_server import box_name
+from shared.constants import BuildStatus
 from util.test import BaseIntegrationTest
 from util.test.fake_build_verifier import FakeBuildVerifier
 from util.test.mixins import *
 from virtual_machine.vagrant import Vagrant
 from verification.server.build_verifier import BuildVerifier
-from verification.shared.verification_result import VerificationResult
 
 VM_DIRECTORY = '/tmp/verification'
 
@@ -60,7 +60,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
-			lambda retval, cleanup=None: assert_equal(VerificationResult.SUCCESS, retval))
+			lambda retval, cleanup=None: assert_equal(BuildStatus.PASSED, retval))
 
 	def test_bad_repo(self):
 		if config.get("fakeVerifier"):
@@ -72,4 +72,4 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
-			lambda retval, cleanup=None: assert_equal(VerificationResult.FAILURE, retval))
+			lambda retval, cleanup=None: assert_equal(BuildStatus.FAILED, retval))

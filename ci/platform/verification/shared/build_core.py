@@ -7,9 +7,9 @@ import yaml
 from git import Git, Repo
 
 from model_server.build_outputs import ConsoleType
+from shared.constants import BuildStatus
 from virtual_machine.remote_command import SimpleRemoteCheckoutCommand, SimpleRemoteProvisionCommand
 from verification_config import VerificationConfig
-from verification_result import VerificationResult
 
 
 class BuildCore(object):
@@ -47,7 +47,10 @@ class BuildCore(object):
 		config_path = self._get_config_path()
 		if config_path:
 			with open(config_path) as config_file:
-				config = yaml.load(config_file.read())
+				try:
+					config = yaml.load(config_file.read())
+				except:
+					config = dict()
 		else:
 			config = dict()
 		return self._get_verification_configuration(config)
@@ -136,14 +139,10 @@ class VirtualMachineBuildCore(BuildCore):
 			self.run_test_command(test_command, console_appender)
 
 	def mark_success(self, callback):
-		"""Calls the callback function with a success code"""
-		print "Completed verification request"
-		callback(VerificationResult.SUCCESS, self.rollback_virtual_machine)
+		callback(BuildStatus.PASSED, self.rollback_virtual_machine)
 
 	def mark_failure(self, callback):
-		"""Calls the callback function with a failure code"""
-		print "Failed verification request"
-		callback(VerificationResult.FAILURE, self.rollback_virtual_machine)
+		callback(BuildStatus.FAILED, self.rollback_virtual_machine)
 
 
 class VagrantBuildCore(VirtualMachineBuildCore):

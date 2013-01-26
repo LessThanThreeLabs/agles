@@ -2,7 +2,7 @@ window.Change = {}
 
 
 class Change.Model extends Backbone.Model
-	ALLOWED_STATUS: ['passed', 'running', 'failed', 'queued']
+	ALLOWED_STATUS: ['queued', 'running', 'passed', 'failed', 'failed to merge']
 	subscribeUrl: 'changes'
 	subscribeId: null
 	urlRoot: 'changes'
@@ -70,8 +70,8 @@ class Change.View extends Backbone.View
 		@$el.html @template
 			number: @model.get 'number'
 			status: @model.get 'status'
-			
-		@$el.removeClass().addClass('change').addClass @model.get 'status'
+
+		@$el.removeClass().addClass('change').addClass @_toCamelCase @model.get 'status'
 
 		@_handleSelected()
 
@@ -85,3 +85,8 @@ class Change.View extends Backbone.View
 	_handleSelected: () =>
 		if @model.get 'selected' then @$el.addClass 'selected'
 		else @$el.removeClass 'selected'
+
+
+	_toCamelCase: (status) =>
+		split = f.split(' ')
+		split[0] + (word.charAt(0).toUpperCase() + word.slice(1) for word in split.slice(1)).join ''

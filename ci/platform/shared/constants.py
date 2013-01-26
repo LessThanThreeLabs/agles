@@ -3,7 +3,8 @@ class VerificationUser(object):
 
 
 class BuildStatus(object):
-	QUEUED = "queued"
-	RUNNING = "running"
-	PASSED = "passed"
-	FAILED = "failed"
+	QUEUED = 'queued'
+	RUNNING = 'running'
+	PASSED = 'passed'
+	FAILED = 'failed'
+	FAILED_TO_MERGE = 'failed to merge'

@@ -1,5 +1,4 @@
 import logging
-import operator
 
 from kombu.messaging import Producer
 
@@ -24,22 +23,22 @@ class VerificationResultsHandler(QueueListener):
 		super(VerificationResultsHandler, self).bind(channel)
 
 	def handle_message(self, body, message):
-		build_id, results = body['build_id'], body['results']
+		build_id, status = body['build_id'], body['status']
 		try:
-			self.handle_results(build_id, results)
+			self.handle_results(build_id, status)
 		except:
 			self.logger.error("Failed to handle verification results %s" % body, exc_info=True)
 		finally:
 			message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
-	def handle_results(self, build_id, results):
+	def handle_results(self, build_id, status):
 		# TODO (bbland): do something more useful than this trivial case
 		with ModelServer.rpc_connect("builds", "read") as client:
 			build = client.get_build_from_id(build_id)
 		with ModelServer.rpc_connect("changes", "read") as client:
 			builds = client.get_builds_from_change_id(build["change_id"])
-		success = reduce(operator.and_, map(lambda build: build["status"] == BuildStatus.PASSED, builds), True)
-		failure = reduce(operator.or_, map(lambda build: build["status"] == BuildStatus.FAILED, builds), False)
+		success = all(map(lambda build: build["status"] == BuildStatus.PASSED, builds))
+		failure = any(map(lambda build: build["status"] == BuildStatus.FAILED, builds))
 		if success:
 			self._mark_change_finished(build["change_id"])
 		elif failure:
@@ -59,11 +58,11 @@ class VerificationResultsHandler(QueueListener):
 
 	def _mark_change_merge_failure(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
-			client.mark_change_finished(change_id, BuildStatus.FAILED)
+			client.mark_change_finished(change_id, BuildStatus.FAILED_TO_MERGE)
 
 	def _mark_change_pushforward_failure(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
-			client.mark_change_finished(change_id, BuildStatus.FAILED)
+			client.mark_change_finished(change_id, BuildStatus.FAILED_TO_MERGE)
 
 	def send_merge_request(self, change_id):
 		self.logger.info("Sending merge request for change %s" % change_id)
