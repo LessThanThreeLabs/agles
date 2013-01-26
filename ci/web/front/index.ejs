@@ -15,7 +15,9 @@
 				<div id="headerOptions">
 					<span class="headerOption" ng-show="!loggedIn" ng-click="visitLogin()" unselectable>Login</span>
 					<span class="headerOption" ng-bind-template="{{user.firstName}} {{user.lastName}}" ng-show="loggedIn" ng-click="visitProfile()" unselectable></span>
-					<span class="headerOption" ng-show="loggedIn" unselectable>Repositories</span>
+					<span class="headerOption" ng-show="true" ng-click="repositoryClick()" unselectable>Repositories
+						<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-show="repositoryDropdownOpen" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
+					</span>
 					<span class="headerOption" ng-click="visitAbout()" unselectable>About</span>
 				</div>
 			</div>

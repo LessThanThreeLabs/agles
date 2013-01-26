@@ -63,6 +63,17 @@ angular.module('koality.directive', []).
 				</div>
 			</div>'
 	)
+	.directive('dropdown', () ->
+		restrict: 'E'
+		scope: 
+			alignment: '@alignment'
+			options: '=dropdownOptions'
+			show: '=dropdownShow'
+			clickHandler: '&dropdownOptionClick'
+		template: '<div class="prettyDropdown {{alignment}}Aligned" ng-show="show">
+			<div class="prettyDropdownOption" ng-repeat="option in options" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
+			</div>'
+	)
 
 
 angular.module('koality.filter', [])

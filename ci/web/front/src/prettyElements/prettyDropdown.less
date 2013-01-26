@@ -1,0 +1,39 @@
+.prettyDropdown {
+	position: absolute;
+	top: 100%;
+	z-index: 9000;
+	display: block;
+	min-width: 100%;
+	background-color: rgba(30, 30, 30, 1.0);
+
+	&.leftAligned {
+		left: 0px;
+		text-align: left;
+	}
+
+	&.rightAligned {
+		right: 0px;
+		text-align: right;
+	}
+
+	.prettyDropdownOption {
+		cursor: hand;
+		cursor: pointer;
+
+		@backgroundColorTransitionTime: 0.5s;
+		transition: background-color @backgroundColorTransitionTime ease-out;
+		-moz-transition: background-color @backgroundColorTransitionTime ease-out;
+		-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+		-o-transition: background-color @backgroundColorTransitionTime ease-out;
+
+		@height: 30px;
+		padding: 0px 20px 0px 20px;
+		height: @height;
+		line-height: @height;
+		white-space: nowrap;
+
+		&:hover {
+			background-color: rgba(40, 40, 40, 1.0);
+		}
+	}
+}

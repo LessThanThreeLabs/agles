@@ -4,6 +4,7 @@
 			"/css/libs/tipped.css",
 
 			"/css/src/setup.css",
+			"/css/src/prettyElements/prettyDropdown.css",
 			"/css/src/prettyElements/prettyForm.css",
 			"/css/src/prettyElements/prettyPanel.css",
 			"/css/src/main.css",

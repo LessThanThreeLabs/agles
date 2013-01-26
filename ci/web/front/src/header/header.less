@@ -32,6 +32,7 @@
 		.headerOption {
 			cursor: hand; cursor: pointer;
 
+			position: relative;
 			display: table-cell;
 			padding-left: 20px;
 			padding-right: 20px;
@@ -47,7 +48,7 @@
 			-o-transition: background-color @backgroundColorTransitionTime ease-out;
 
 			&:hover {
-				background-color: darken(@headerBackgroundColor, 3%);
+				background-color: rgba(30, 30, 30, 1.0);
 			}
 
 			&:active {

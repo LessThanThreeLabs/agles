@@ -45,14 +45,18 @@ module.exports = class Resource
 
 	getTemplateValues: (request) =>
 		templateValues =
-			userId: request.session.userId
+			# userId: request.session.userId
+			userId: 17
 			fileSuffix: @fileSuffix
 			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString
-			email: request.session.email
-			firstName: request.session.firstName
-			lastName: request.session.lastName
+			# email: request.session.email
+			# firstName: request.session.firstName
+			# lastName: request.session.lastName
+			email: 'jordannpotter@gmail.com'
+			firstName: 'Jordan'
+			lastName: 'Potter'
 
 		return templateValues
 
