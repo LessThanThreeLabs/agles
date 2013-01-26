@@ -387,10 +387,31 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				self.push_force(repo_id, repo_name, "", target)
 			except GitCommandError as e:
+				self._update_branch(repo_id, repo_name, target)
 				self.logger.warn("Force delete encountered an error", exc_info=True)
 				return e.stderr
-			return None
-		# No need to else. Jgit will delete locally
+		self._delete_branch(repo_id, repo_name, target)
+		return None
+
+	def _update_branch(self, repo_id, repo_name, target):
+		self.logger.debug("updating local branch %s on repo %d" % (target, repo_id))
+		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+		repo_path = self._resolve_path(repo_id, repo_name)
+		repo = Repo(repo_path)
+		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
+		self._update_from_forward_url(repo_slave, remote_repo, target)
+
+	def _delete_branch(self, repo_id, repo_name, target):
+		""" This assumes the branch exists"""
+		self.logger.debug("deleting local branch %s on repo %d" % (target, repo_id))
+		repo_path = self._resolve_path(repo_id, repo_name)
+		repo = Repo(repo_path)
+		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
+		try:
+			self._push_with_private_key(repo_slave, "origin", ':'.join(["", target]), force=True)
+		except GitCommandError:
+			self.logger.warning("Failed to delete local branch", exc_info=True)
 
 	def _remote_branch_exists(self, repo_id, repo_name, branch):
 		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
