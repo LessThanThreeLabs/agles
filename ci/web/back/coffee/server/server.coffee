@@ -142,7 +142,7 @@ class Server
 		expressServer.use csrf()
 		expressServer.use gzip()
 
-		expressServer.set 'view engine', 'hbs'
+		expressServer.set 'view engine', 'ejs'
 		expressServer.set 'views', @configurationParams.staticFiles.rootDirectory
 		expressServer.locals.layout = false
 

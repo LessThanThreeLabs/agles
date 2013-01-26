@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <title>Koality</title>
 <link href='https://fonts.googleapis.com/css?family=Droid+Sans|Source+Code+Pro|Black+Ops+One' rel='stylesheet' type='text/css'>
-{{{cssFiles}}}
+<%- cssFiles %>
 </head>
-<body style="background-image:url('/img/backgrounds/irongrip{{fileSuffix}}.png');">
+<body style="background-image:url('/img/backgrounds/irongrip<%- fileSuffix %>.png');">
 
 	<div id="main">
 		<div id="headerContanier">
@@ -22,11 +22,11 @@
 	</div>
 
 <script>
-	var fileSuffix = '{{fileSuffix}}'
-	var csrfToken = '{{csrfToken}}'
-	var accountInformation = {userId: '{{userId}}', email: '{{email}}', firstName: '{{firstName}}', lastName: '{{lastName}}'}
+	var fileSuffix = '<%- fileSuffix %>'
+	var csrfToken = '<%- csrfToken %>'
+	var accountInformation = {userId: '<%- userId %>', email: '<%- email %>', firstName: '<%- firstName %>', lastName: '<%- lastName %>'}
 </script>
-{{{jsFiles}}}
+<%- jsFiles %>
 
 <script type="text/javascript">
 var _gaq = _gaq || [];
