@@ -88,5 +88,5 @@ class Change.View extends Backbone.View
 
 
 	_toCamelCase: (status) =>
-		split = f.split(' ')
+		split = status.split(' ')
 		split[0] + (word.charAt(0).toUpperCase() + word.slice(1) for word in split.slice(1)).join ''
