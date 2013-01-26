@@ -1,12 +1,11 @@
-window.Header = ['$scope', '$location', ($scope, $location) ->
-	optionA =
-		title: 'Jordan Potter'
-	optionB =
-		title: 'Repositories'
-	optionC =
-		title: 'About'
-	$scope.options = [optionA, optionB, optionC]
+window.Header = ['$scope', '$location', 'initialState', ($scope, $location, initialState) ->
+	$scope.loggedIn = initialState.user.id?
 
-	$scope.visitHome = () ->
-		$location.path '/'
+	$scope.user =
+		firstName: initialState.user.firstName
+		lastName: initialState.user.lastName
+
+	$scope.visitHome = () -> $location.path '/'
+	$scope.visitLogin = () -> $location.path '/login'
+	$scope.visitProfile = () -> $location.path '/account'
 ]
