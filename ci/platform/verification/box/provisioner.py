@@ -34,13 +34,16 @@ class Provisioner(object):
 				source_path = os.path.dirname(config_path)
 			source_path = os.path.abspath(source_path)
 			config_path = os.path.abspath(config_path)
-			with open(config_path) as config_file:
-				config = yaml.load(config_file.read())
+			try:
+				with open(config_path) as config_file:
+					config = yaml.load(config_file.read())
+			except:
+				raise InvalidConfigurationException("Unable to parse configuration file: %s\nPlease verify that this is a valid YAML file using a tool such as http://yamllint.com/." % os.path.basename(config_path))
 			self.set_private_key(private_key)
 			self.handle_config(config, source_path)
 			self.reset_private_key()
 		except Exception as e:
-			print "%s: %s" % (type(e).__name__, e.message)
+			print "%s: %s" % (type(e).__name__, e)
 			sys.exit(1)
 
 	def _get_config_path(self, source_path):
@@ -51,7 +54,7 @@ class Provisioner(object):
 				return config_path
 		error_message = "Could not find a configuration file.\n"
 		error_message += "Please place one of the following in the base of your repository: %s" % possible_file_names
-		raise ProvisionFailedException(error_message)
+		raise InvalidConfigurationException(error_message)
 
 	def set_private_key(self, private_key):
 		if os.access(self.keyfile, os.F_OK):
