@@ -79,6 +79,10 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				templateUrl: "/html/login#{fileSuffix}.html"
 				controller: Login
 			).
+			when('/account', 
+				templateUrl: "/html/account#{fileSuffix}.html"
+				controller: Account
+			).
 			when('/create/account', 
 				templateUrl: "/html/createAccount#{fileSuffix}.html"
 				controller: CreateAccount
@@ -90,6 +94,10 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 			when('/repository/:repositoryId', 
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
+			).
+			when('/about', 
+				templateUrl: "/html/about#{fileSuffix}.html"
+				controller: About
 			).
 			otherwise(
 				redirectTo: '/welcome'
