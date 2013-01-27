@@ -63,7 +63,7 @@ angular.module('koality.directive', []).
 				</div>
 			</div>'
 	)
-	.directive('dropdown', () ->
+	.directive('dropdown', ['$document', '$timeout', ($document, $timeout) ->
 		restrict: 'E'
 		scope: 
 			alignment: '@alignment'
@@ -73,7 +73,19 @@ angular.module('koality.directive', []).
 		template: '<div class="prettyDropdown {{alignment}}Aligned" ng-show="show">
 			<div class="prettyDropdownOption" ng-repeat="option in options" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
 			</div>'
-	)
+		link: (scope, element, attributes) ->
+			documentClickHandler = (event) ->
+				scope.$apply () -> scope.show = false
+			
+			scope.$watch 'show', () ->
+				if scope.show then $timeout (() -> $document.bind 'click', documentClickHandler), 0
+				else $document.unbind 'click', documentClickHandler
+				
+			element.bind 'click', (event) ->
+				scope.$apply () -> scope.show = false
+				event.preventDefault()
+				event.stopPropagation()
+	])
 
 
 angular.module('koality.filter', [])
