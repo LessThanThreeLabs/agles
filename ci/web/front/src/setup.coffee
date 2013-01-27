@@ -65,6 +65,7 @@ angular.module('koality.directive', []).
 	)
 	.directive('dropdown', ['$document', '$timeout', ($document, $timeout) ->
 		restrict: 'E'
+		replace: true
 		scope: 
 			alignment: '@alignment'
 			options: '=dropdownOptions'
