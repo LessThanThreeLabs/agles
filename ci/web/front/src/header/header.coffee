@@ -7,17 +7,16 @@ window.Header = ['$scope', '$location', 'initialState', ($scope, $location, init
 
 	$scope.visitHome = () -> $location.path '/'
 	$scope.visitLogin = () -> $location.path '/login'
-	$scope.visitProfile = () -> $location.path '/account'
+	$scope.profileClick = () -> $scope.profileDropdownOpen = !$scope.profileDropdownOpen
 	$scope.repositoryClick = () -> $scope.repositoryDropdownOpen = !$scope.repositoryDropdownOpen
 	$scope.visitAbout = () -> $location.path '/about'
 
-	optionA = 
-		title: 'Blah 1'
-		name: 'blah1'
-	optionB =
-		title: 'Blah 2'
-		name: 'blah2'
-	$scope.repositoryDropdownOptions = [optionA, optionB]
-	$scope.repositoryDropdownOptionClick = (dropdownOption) ->
-		console.log dropdownOption
+	$scope.profileDropdownOptions = [{title: 'Account', name: 'account'}, {title: 'Logout', name: 'logout'}]
+	$scope.profileDropdownOptionClick = (profileOption) ->
+		if profileOption is 'account' then $location.path '/account'
+		else console.log 'need to handle logout!'
+
+	$scope.repositoryDropdownOptions = [{title: 'Repository 1', name: 17}, {title: 'Repository 2', name: 18}]
+	$scope.repositoryDropdownOptionClick = (repositoryId) ->
+		$location.path '/repository/' + repositoryId
 ]

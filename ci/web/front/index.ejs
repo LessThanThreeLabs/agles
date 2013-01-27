@@ -14,7 +14,9 @@
 				<span id="headerTitle" ng-click="visitHome()" unselectable>Koality</span>
 				<div id="headerOptions">
 					<span class="headerOption" ng-show="!loggedIn" ng-click="visitLogin()" unselectable>Login</span>
-					<span class="headerOption" ng-bind-template="{{user.firstName}} {{user.lastName}}" ng-show="loggedIn" ng-click="visitProfile()" unselectable></span>
+					<span class="headerOption" ng-show="loggedIn" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
+						<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-show="profileDropdownOpen" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
+					</span>
 					<span class="headerOption" ng-show="true" ng-click="repositoryClick()" unselectable>Repositories
 						<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-show="repositoryDropdownOpen" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
 					</span>
