@@ -41,10 +41,17 @@ describe 'Koality directives', () ->
 			scope.handleClick = (dropdownOptionName) ->
 				optionClicked = dropdownOptionName
 
+			spyOn(scope, 'handleClick').andCallThrough()
+
 			options = element.find('.prettyDropdownOption')
 
 			options.eq(0).click()
-			expect(optionClicked).toBe 'first'
+			expect(scope.handleClick).toHaveBeenCalledWith 'first'
+			expect(scope.handleClick.calls.length).toBe 1
 
 			options.eq(1).click()
-			expect(optionClicked).toBe 'second'
+			expect(scope.handleClick).toHaveBeenCalledWith 'second'
+			expect(scope.handleClick.calls.length).toBe 2
+
+			options.eq(1).click()
+			expect(scope.handleClick.calls.length).toBe 3
