@@ -46,6 +46,10 @@
 			"/img/awesomeFace.png",
 			"/img/backgrounds/irongrip.png",
 			"/img/icons/error.png"
+		],
+
+		"image/jpeg": [
+			"/img/balling.jpg"
 		]
 	},
 

@@ -33,7 +33,7 @@ class FilesCompressor
 		switch contentType
 			when 'text/html', 'text/css', 'application/javascript', 'image/svg+xml'
 				return true
-			when 'image/png'
+			when 'image/png', 'image/jpeg'
 				return false
 			else
 				throw new Error 'Unaccounted for content type'
