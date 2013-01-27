@@ -56,6 +56,7 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		with Client("exchange", "queue0", globals=globals()) as client:
 			assert_raises(ZeroDivisionError, lambda: client.div(6, 0))
 			assert_raises(MyError, lambda: client.raise_my_error())
+			assert_raises(RPCRequestError, lambda: client.raise_special_error())
 
 	def _run_multiclients_in_tandem(self, client0, client1):
 		try:
@@ -99,6 +100,14 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		def raise_my_error(self):
 			raise MyError
 
+		def raise_special_error(self):
+			raise MySpecialError(1, 2, 3)
+
 
 class MyError(Exception):
 	pass
+
+
+class MySpecialError(Exception):
+	def __init__(self, arg1, arg2, arg3):
+		pass

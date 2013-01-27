@@ -2,6 +2,8 @@
 
 See server.py for the RPC protocol definition.
 """
+import sys
+
 import msgpack
 import eventlet
 pika = eventlet.import_patched('pika')
@@ -159,8 +161,11 @@ class Client(ClientBase):
 			eval_str = "%s(r''' %s\n RemoteTraceback (most recent call last):%s ''')" % exc_tuple
 			try:
 				raise eval(eval_str, self.caller_globals_dict)
-			except NameError:
-				raise RPCRequestError(msg=eval_str)
+			except:
+				new_exc_tuple = sys.exc_info()
+				if new_exc_tuple[0].__name__ == exc_tuple[0]:  # If we receive the exception we wanted, everything is good
+					raise
+				raise RPCRequestError(msg=eval_str)  # Otherwise, we don't know how to recreate it, so wrap the info
 		else:
 			return proto["value"]
 
