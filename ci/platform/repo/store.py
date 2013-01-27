@@ -411,7 +411,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.push("origin", ":".join([target, target]), force=True)
 		except GitCommandError:
 			self.logger.debug("Failed to update branch.", exc_info=True)
-			raise
 
 	def _delete_branch(self, repo_id, repo_name, target):
 		""" This assumes the branch exists"""
