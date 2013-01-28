@@ -1,9 +1,62 @@
 <div id="account">
 	<centered-panel panel-title="Account">
 		<menu menu-options="['Basic', 'Password', 'SSH Keys']" default-menu-option="Basic" menu-option-click="menuOptionClick(option)">
-			<div class="prettyMenuContent" option="Basic">hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello</div>
-			<div class="prettyMenuContent" option="Password">there</div>
+			<div class="prettyMenuContent" option="Basic">
+				<form class="prettyForm" name="accountBasicForm" novalidate>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">First name</div>
+						<div class="prettyFormValue">
+							<input type="text" ng-model="account.basic.firstName" name="firstName" placeholder="First" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required>
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountBasicForm.firstName.$dirty && accountBasicForm.firstName.$invalid}" title="Invalid first name.">
+						</div>
+					</div>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">Last name</div>
+						<div class="prettyFormValue">
+							<input type="text" ng-model="account.basic.lastName" name="lastName" placeholder="Last" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required>
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountBasicForm.lastName.$dirty && accountBasicForm.lastName.$invalid}" title="Invalid last name.">
+						</div>
+					</div>
+				</form>
+
+				<div id="accountBasicButtonContainer">
+					<button ng-click="basicSubmit()">Submit</button>
+				</div>
+			</div>
+
+			<div class="prettyMenuContent" option="Password">
+				<form class="prettyForm" name="accountPasswordForm" novalidate>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">New Password</div>
+						<div class="prettyFormValue">
+							<input type="password" ng-model="account.password.oldPassword" name="oldPassword" placeholder="p4ssW0rd" required>
+						</div>
+					</div>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">New Password</div>
+						<div class="prettyFormValue">
+							<input type="password" ng-model="account.password.newPassword" name="newPassword" placeholder="p4ssW0rd" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountPasswordForm.newPassword.$dirty && accountPasswordForm.newPassword.$invalid}" title="Password must contain at least 8 characters, a letter, and a number.">
+						</div>
+					</div>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">Confirm password</div>
+						<div class="prettyFormValue">
+							<input type="password" ng-model="account.password.confirmPassword" name="confirmPassword" placeholder="p4ssW0rd, again" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountPasswordForm.confirmPassword.$dirty && accountPasswordForm.newPassword != accountPasswordForm.confirmPassword}" title="Passwords do not match.">
+						</div>
+					</div>
+				</form>
+
+				<div id="accountPasswordButtonContainer">
+					<button ng-click="passwordSubmit()">Submit</button>
+				</div>
+
+			</div>
+
 			<div class="prettyMenuContent" option="SSH Keys">sir</div>
 		</menu>
 	</centered-panel>
 </div>
+
+<script>Tipped.create('.prettyFormError', {skin: 'default', hook: 'rightmiddle'});</script>
