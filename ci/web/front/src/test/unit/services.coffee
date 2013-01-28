@@ -1,3 +1,5 @@
+'use strict'
+
 describe 'Koality services', () ->
 
 	describe 'initial state', () ->
@@ -46,6 +48,19 @@ describe 'Koality services', () ->
 				expect(initialState.user.email).toBeNull()
 				expect(initialState.user.firstName).toBeNull()
 				expect(initialState.user.lastName).toBeNull()
+
+		it 'should not allow edits', () ->
+			module 'koality.service'
+
+			inject (initialState) ->
+				addValueToInitialState = () ->
+					initialState.blah = 'blah'
+
+				removeValueFromInitialState = () ->
+					delete initialState.user
+
+				expect(addValueToInitialState).toThrow()
+				expect(removeValueFromInitialState).toThrow()
 
 	describe 'account information', () ->
 		id = 17
