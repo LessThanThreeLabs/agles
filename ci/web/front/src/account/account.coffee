@@ -1,10 +1,12 @@
 'use strict'
 
-window.Account = ['$scope', 'fileSuffixAdder', 'socket', ($scope, fileSuffixAdder, socket) ->
+window.Account = ['$scope', 'fileSuffixAdder', 'accountInformation', 'socket', ($scope, fileSuffixAdder, accountInformation, socket) ->
 	$scope.formErrorImageSource = fileSuffixAdder.addFileSuffix '/img/icons/error.png'
 
 	$scope.account = {}
 	$scope.account.basic = {}
+	$scope.account.basic.firstName = accountInformation.firstName
+	$scope.account.basic.lastName = accountInformation.lastName
 	$scope.account.password = {}
 
 	$scope.basicSubmit = () ->
