@@ -15,10 +15,10 @@
 				<div id="headerOptions">
 					<span class="headerOption" ng-show="!loggedIn" ng-click="visitLogin()" unselectable>Login</span>
 					<span class="headerOption" ng-show="loggedIn" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
-						<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-show="profileDropdownOpen" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
+						<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
 					</span>
 					<span class="headerOption" ng-show="true" ng-click="repositoryClick()" unselectable>Repositories
-						<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-show="repositoryDropdownOpen" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
+						<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
 					</span>
 					<span class="headerOption" ng-click="visitAbout()" unselectable>About</span>
 				</div>

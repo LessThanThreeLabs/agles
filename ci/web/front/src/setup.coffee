@@ -69,12 +69,14 @@ angular.module('koality.directive', []).
 		scope: 
 			alignment: '@alignment'
 			options: '=dropdownOptions'
-			show: '=dropdownShow'
 			clickHandler: '&dropdownOptionClick'
 		template: '<div class="prettyDropdown {{alignment}}Aligned" ng-show="show">
 			<div class="prettyDropdownOption" ng-repeat="option in options" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
 			</div>'
 		link: (scope, element, attributes) ->
+			element.parent().bind 'click', () ->
+				scope.show = !scope.show
+
 			documentClickHandler = (event) ->
 				scope.$apply () -> scope.show = false
 			
@@ -105,7 +107,6 @@ angular.module('koality.directive', []).
 				scope.options = scope.$eval attributes.menuOptions
 			post: (scope, element, attributes, controller) ->
 				scope.$watch 'selectedOption', () ->
-					console.log 'blah ' + scope.selectedOption
 					element.find('.prettyMenuContent').removeClass 'selected'
 					element.find(".prettyMenuContent[option='#{scope.selectedOption}']").addClass 'selected'
 

@@ -7,8 +7,6 @@ window.Header = ['$scope', '$location', 'initialState', 'socket', ($scope, $loca
 
 	$scope.visitHome = () -> $location.path '/'
 	$scope.visitLogin = () -> $location.path '/login'
-	$scope.profileClick = () -> $scope.profileDropdownOpen = !$scope.profileDropdownOpen
-	$scope.repositoryClick = () -> $scope.repositoryDropdownOpen = !$scope.repositoryDropdownOpen
 	$scope.visitAbout = () -> $location.path '/about'
 
 	$scope.profileDropdownOptions = [{title: 'Account', name: 'account'}, {title: 'Logout', name: 'logout'}]
