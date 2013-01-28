@@ -1,3 +1,5 @@
+'use strict'
+
 describe 'Koality directives', () ->
 
 	describe 'dropdown directive', () ->

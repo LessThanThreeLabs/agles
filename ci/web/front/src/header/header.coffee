@@ -1,3 +1,5 @@
+'use strict'
+
 window.Header = ['$scope', '$location', 'initialState', 'socket', ($scope, $location, initialState, socket) ->
 	$scope.loggedIn = initialState.user.id?
 

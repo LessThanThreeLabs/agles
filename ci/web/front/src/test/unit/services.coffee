@@ -13,7 +13,6 @@ describe 'Koality services', () ->
 					fileSuffix: fileSuffix
 					csrfToken: csrfToken
 					accountInformation:
-						userId: 17
 						email: email
 						firstName: firstName
 						lastName: lastName
@@ -23,7 +22,6 @@ describe 'Koality services', () ->
 			inject (initialState) ->
 				expect(initialState.fileSuffix).toBe fileSuffix
 				expect(initialState.csrfToken).toBe csrfToken
-				expect(initialState.user.id).toBe 17
 				expect(initialState.user.email).toBe email
 				expect(initialState.user.firstName).toBe firstName
 				expect(initialState.user.lastName).toBe lastName
@@ -34,7 +32,6 @@ describe 'Koality services', () ->
 					fileSuffix: ''
 					csrfToken: ''
 					accountInformation:
-						userId: 'bad_user_id'
 						email: ''
 						firstName: ''
 						lastName: ''
@@ -44,7 +41,6 @@ describe 'Koality services', () ->
 			inject (initialState) ->
 				expect(initialState.fileSuffix).toBeNull()
 				expect(initialState.csrfToken).toBeNull()
-				expect(initialState.user.id).toBeNull()
 				expect(initialState.user.email).toBeNull()
 				expect(initialState.user.firstName).toBeNull()
 				expect(initialState.user.lastName).toBeNull()
@@ -63,7 +59,6 @@ describe 'Koality services', () ->
 				expect(removeValueFromInitialState).toThrow()
 
 	describe 'account information', () ->
-		id = 17
 		email = 'email@address.com'
 		firstName = 'First'
 		lastName = 'Last'
@@ -72,7 +67,6 @@ describe 'Koality services', () ->
 			module 'koality.service', ($provide) ->
 				mockedInitialState =
 					user:
-						id: id
 						email: email
 						firstName: firstName
 						lastName: lastName
@@ -80,7 +74,6 @@ describe 'Koality services', () ->
 				return
 
 			inject (accountInformation) ->
-				expect(accountInformation.id).toBe id
 				expect(accountInformation.email).toBe email
 				expect(accountInformation.firstName).toBe firstName
 				expect(accountInformation.lastName).toBe lastName

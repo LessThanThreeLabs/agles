@@ -1,3 +1,5 @@
+'use strict'
+
 window.RecoverPassword = ['$scope', 'socket', ($scope, socket) ->
 	$scope.account = {}
 	

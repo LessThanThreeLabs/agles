@@ -1,3 +1,5 @@
+'use strict'
+
 window.Login = ['$scope', 'socket', ($scope, socket) ->
 	$scope.account = {}
 	
