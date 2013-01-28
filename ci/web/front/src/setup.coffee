@@ -91,10 +91,12 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		scope: clickHandler: '&menuOptionClick'
+		scope: 
+			selectedOption: '@defaultMenuOption'
+			clickHandler: '&menuOptionClick'
 		template: '<div class="prettyMenu">
 				<div class="prettyMenuOptions">
-					<div class="prettyMenuOption" ng-repeat="option in options" ng-click="clickHandler({menuOption: option}); internalClickHandler(option)" optionName="{{option}}">{{option}}</div>
+					<div class="prettyMenuOption" ng-repeat="option in options" ng-class="{selected: option == selectedOption}" ng-click="clickHandler({option: option}); internalClickHandler(option)">{{option}}</div>
 				</div>
 				<div class="prettyMenuContents" ng-transclude></div>
 			</div>'
@@ -102,12 +104,12 @@ angular.module('koality.directive', []).
 			pre: (scope, element, attributes, controller) ->
 				scope.options = scope.$eval attributes.menuOptions
 			post: (scope, element, attributes, controller) ->
-				scope.internalClickHandler = (optionName) ->
-					element.find('.prettyMenuOption').removeClass 'selected'
-					element.find(".prettyMenuOption[optionName='#{optionName}']").addClass 'selected'
-
+				scope.$watch 'selectedOption', () ->
 					element.find('.prettyMenuContent').removeClass 'selected'
-					element.find(".prettyMenuContent[optionName='#{optionName}']").addClass 'selected'
+					element.find(".prettyMenuContent[option='#{scope.selectedOption}']").addClass 'selected'
+
+				scope.internalClickHandler = (option) ->
+					scope.selectedOption = option
 	)
 
 
