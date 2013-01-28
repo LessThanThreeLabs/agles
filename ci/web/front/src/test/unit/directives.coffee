@@ -13,12 +13,6 @@ describe 'Koality directives', () ->
 				$compile(element)(scope)
 				scope.$digest()
 
-		it 'should handle showing correctly', () ->
-			expect(element.css 'display').toBe 'none'
-
-			scope.$apply () -> scope.dropdownShow = true
-			expect(element.css 'display').not.toBe 'none'
-
 		it 'should render the correct number of options', () ->
 			createOption = (optionNum) ->
 				title: optionNum
