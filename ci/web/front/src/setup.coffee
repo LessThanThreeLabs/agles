@@ -8,6 +8,12 @@ angular.module('koality.service', []).
 			firstName: if $window.accountInformation?.firstName is '' then null else $window.accountInformation?.firstName
 			lastName: if $window.accountInformation?.lastName is '' then null else $window.accountInformation?.lastName
 	]).
+	factory('accountInformation', ['initialState', (initialState) ->
+		id: initialState.user.id
+		email: initialState.user.email
+		firstName: initialState.user.firstName
+		lastName: initialState.user.lastName
+	]).
 	factory('fileSuffixAdder', ['initialState', (initialState) ->
 		return addFileSuffix: (fileSrc) -> 
 			lastPeriodIndex = fileSrc.lastIndexOf '.'

@@ -47,14 +47,36 @@ describe 'Koality services', () ->
 				expect(initialState.user.firstName).toBeNull()
 				expect(initialState.user.lastName).toBeNull()
 
+	describe 'account information', () ->
+		id = 17
+		email = 'email@address.com'
+		firstName = 'First'
+		lastName = 'Last'
+
+		it 'should have correct values', () ->
+			module 'koality.service', ($provide) ->
+				mockedInitialState =
+					user:
+						id: id
+						email: email
+						firstName: firstName
+						lastName: lastName
+				$provide.value 'initialState', mockedInitialState
+				return
+
+			inject (accountInformation) ->
+				expect(accountInformation.id).toBe id
+				expect(accountInformation.email).toBe email
+				expect(accountInformation.firstName).toBe firstName
+				expect(accountInformation.lastName).toBe lastName
 
 	describe 'file suffix adder', () ->
 		fileSuffix = '_hc8oeb1f'
 		
 		beforeEach () ->
 			module 'koality.service', ($provide) ->
-				mockedWindow = fileSuffix: fileSuffix
-				$provide.value '$window', mockedWindow
+				mockedInitialState = fileSuffix: fileSuffix
+				$provide.value 'initialState', mockedInitialState
 				return
 			
 		it 'should properly add the correct file suffix for valid file urls', () ->
