@@ -1,4 +1,4 @@
-<div id="account">
+<div id="account" ng-controller="Account">
 	<centered-panel panel-title="Account">
 		<menu menu-options="['Basic', 'Password', 'SSH Keys']" default-menu-option="Basic" menu-option-click="menuOptionClick(option)">
 			<div class="prettyMenuContent" option="Basic">
@@ -20,14 +20,14 @@
 				</form>
 
 				<div id="accountBasicButtonContainer">
-					<button ng-click="basicSubmit()">Submit</button>
+					<button ng-click="basicSubmit()" ng-disabled="accountBasicForm.$invalid">Submit</button>
 				</div>
 			</div>
 
 			<div class="prettyMenuContent" option="Password">
 				<form class="prettyForm" name="accountPasswordForm" novalidate>
 					<div class="prettyFormRow">
-						<div class="prettyFormLabel labelPadding">New Password</div>
+						<div class="prettyFormLabel labelPadding">Old Password</div>
 						<div class="prettyFormValue">
 							<input type="password" ng-model="account.password.oldPassword" name="oldPassword" placeholder="p4ssW0rd" required>
 						</div>
@@ -43,13 +43,13 @@
 						<div class="prettyFormLabel labelPadding">Confirm password</div>
 						<div class="prettyFormValue">
 							<input type="password" ng-model="account.password.confirmPassword" name="confirmPassword" placeholder="p4ssW0rd, again" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
-							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountPasswordForm.confirmPassword.$dirty && accountPasswordForm.newPassword != accountPasswordForm.confirmPassword}" title="Passwords do not match.">
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountPasswordForm.confirmPassword.$dirty && account.password.newPassword != account.password.confirmPassword}" title="Passwords do not match.">
 						</div>
 					</div>
 				</form>
 
 				<div id="accountPasswordButtonContainer">
-					<button ng-click="passwordSubmit()">Submit</button>
+					<button ng-click="passwordSubmit()" ng-disabled="accountPasswordForm.$invalid">Submit</button>
 				</div>
 
 			</div>
@@ -58,5 +58,3 @@
 		</menu>
 	</centered-panel>
 </div>
-
-<script>Tipped.create('.prettyFormError', {skin: 'default', hook: 'rightmiddle'});</script>

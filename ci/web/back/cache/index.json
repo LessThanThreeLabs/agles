@@ -1,8 +1,6 @@
 {
 	"css": {
 		"text/css": [
-			"/css/libs/tipped.css",
-
 			"/css/src/setup.css",
 			"/css/src/prettyElements/prettyDropdown.css",
 			"/css/src/prettyElements/prettyForm.css",
@@ -26,8 +24,6 @@
 			"/js/libs/angular.js",
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
-			"/js/libs/tipped.js",
-			"/js/libs/tippedSkin.js",
 
 			"/js/src/setup.js",
 
