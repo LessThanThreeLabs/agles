@@ -105,6 +105,7 @@ angular.module('koality.directive', []).
 				scope.options = scope.$eval attributes.menuOptions
 			post: (scope, element, attributes, controller) ->
 				scope.$watch 'selectedOption', () ->
+					console.log 'blah ' + scope.selectedOption
 					element.find('.prettyMenuContent').removeClass 'selected'
 					element.find(".prettyMenuContent[option='#{scope.selectedOption}']").addClass 'selected'
 

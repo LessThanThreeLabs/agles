@@ -37,13 +37,10 @@ describe 'Koality directives', () ->
 		it 'should handle option click properly', () ->
 			scope.$apply () -> scope.dropdownOptions = [{title: 'First', name: 'first'}, {title: 'Second', name: 'second'}]
 			
-			optionClicked = null
 			scope.handleClick = (dropdownOptionName) ->
-				optionClicked = dropdownOptionName
+			spyOn(scope, 'handleClick')
 
-			spyOn(scope, 'handleClick').andCallThrough()
-
-			options = element.find('.prettyDropdownOption')
+			options = element.find '.prettyDropdownOption'
 
 			options.eq(0).click()
 			expect(scope.handleClick).toHaveBeenCalledWith 'first'
@@ -54,4 +51,43 @@ describe 'Koality directives', () ->
 			expect(scope.handleClick.calls.length).toBe 2
 
 			options.eq(1).click()
+			expect(scope.handleClick.calls.length).toBe 3
+
+	describe 'menu directive', () ->
+		element = null
+		scope = null
+
+		beforeEach module 'koality.directive'
+
+		beforeEach () ->
+			inject ($rootScope, $compile) ->
+				scope = $rootScope.$new()
+				element = angular.element '<menu menu-options="[\'optionA\', \'optionB\', \'optionC\', \'optionD\']" default-menu-option="optionB" menu-option-click="handleClick(option)">
+						<div class="prettyMenuContent" option="optionA">blahA</div>
+						<div class="prettyMenuContent" option="optionB">blahB</div>
+						<div class="prettyMenuContent" option="optionC">blahC</div>
+						<div class="prettyMenuContent" option="optionD">blahD</div>
+					</menu>'
+				$compile(element)(scope)
+				scope.$digest()
+
+		it 'should render the correct number of options', () ->
+			options = element.find '.prettyMenuOption'
+			expect(options.length).toBe 4
+
+		it 'should handle option click properly', () ->
+			scope.handleClick = (dropdownOptionName) ->
+			spyOn(scope, 'handleClick')
+
+			options = element.find '.prettyMenuOption'
+
+			options.eq(0).click()
+			expect(scope.handleClick).toHaveBeenCalledWith 'optionA'
+			expect(scope.handleClick.calls.length).toBe 1
+
+			options.eq(2).click()
+			expect(scope.handleClick).toHaveBeenCalledWith 'optionC'
+			expect(scope.handleClick.calls.length).toBe 2
+
+			options.eq(0).click()
 			expect(scope.handleClick.calls.length).toBe 3
