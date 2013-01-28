@@ -87,6 +87,28 @@ angular.module('koality.directive', []).
 				event.preventDefault()
 				event.stopPropagation()
 	])
+	.directive('menu', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		scope: clickHandler: '&menuOptionClick'
+		template: '<div class="prettyMenu">
+				<div class="prettyMenuOptions">
+					<div class="prettyMenuOption" ng-repeat="option in options" ng-click="clickHandler({menuOption: option}); internalClickHandler(option)" optionName="{{option}}">{{option}}</div>
+				</div>
+				<div class="prettyMenuContents" ng-transclude></div>
+			</div>'
+		compile: (element, attributes, transclude) ->
+			pre: (scope, element, attributes, controller) ->
+				scope.options = scope.$eval attributes.menuOptions
+			post: (scope, element, attributes, controller) ->
+				scope.internalClickHandler = (optionName) ->
+					element.find('.prettyMenuOption').removeClass 'selected'
+					element.find(".prettyMenuOption[optionName='#{optionName}']").addClass 'selected'
+
+					element.find('.prettyMenuContent').removeClass 'selected'
+					element.find(".prettyMenuContent[optionName='#{optionName}']").addClass 'selected'
+	)
 
 
 angular.module('koality.filter', [])

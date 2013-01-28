@@ -1,0 +1,49 @@
+.prettyMenu {
+	@menuOptionsWidth: 150px;
+
+	.prettyMenuOptions {
+		float: left;
+		width: @menuOptionsWidth;
+		text-align: right;
+		padding-top: 0px;
+
+		.prettyMenuOption {
+			display: block;
+			padding: 10px 15px 10px 0px;
+			font-size: 1.2em;
+			border-radius: 4px;
+
+			@backgroundColorTransitionTime: 0.25s;
+			transition: background-color @backgroundColorTransitionTime ease-out;
+			-moz-transition: background-color @backgroundColorTransitionTime ease-out;
+			-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+			-o-transition: background-color @backgroundColorTransitionTime ease-out;
+
+			&.selected {
+				background-color: rgba(0, 94, 131, 1.0);
+				// padding-right: 13px;
+				// border-right: 2px solid rgba(0, 94, 131, 1.0);
+			}
+
+			&:hover {
+				background-color: rgba(0, 94, 131, 1.0);
+				// padding-right: 13px;
+				// border-right: 2px solid rgba(0, 94, 131, 1.0);
+			}
+		}
+	}
+
+	.prettyMenuContents {
+		display: block;
+		margin-left: @menuOptionsWidth + 30px;
+		min-width: 200px;
+
+		.prettyMenuContent {
+			display: none;
+
+			&.selected {
+				display: block;
+			}
+		}
+	}
+}
