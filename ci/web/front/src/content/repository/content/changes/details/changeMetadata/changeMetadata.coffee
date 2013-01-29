@@ -31,6 +31,7 @@ class ChangeMetadata.Model extends Backbone.Model
 					committerLastName: changeMetadata.user.lastName
 					commitMessage: changeMetadata.commit.message
 					commitTime: changeMetadata.commit.timestamp
+					commitSha: changeMetadata.commit.sha
 					startTime: changeMetadata.change.startTime
 					endTime: changeMetadata.change.endTime
 				@set attributesToSet,
@@ -87,6 +88,10 @@ class ChangeMetadata.View extends Backbone.View
 					<div class="prettyFormValue commitTimeValue">{{commitTime}}</div>
 				</div>
 				<div class="prettyFormRow">
+					<div class="prettyFormLabel commitShaLabel">Commit sha</div>
+					<div class="prettyFormValue commitShaValue">{{commitSha}}</div>
+				</div>
+				<div class="prettyFormRow">
 					<div class="prettyFormLabel commitMessageLabel">Commit message</div>
 					<div class="prettyFormValue commitMessageValue">{{commitMessage}}</div>
 				</div>
@@ -115,6 +120,7 @@ class ChangeMetadata.View extends Backbone.View
 			committerEmail: @model.get 'committerEmail'
 			committerFirstName: @model.get 'committerFirstName'
 			committerLastName: @model.get 'committerLastName'
+			commitSha: @model.get 'commitSha'
 			commitMessage: @model.get 'commitMessage'
 			commitTime: commitTime
 			startTime: startTime

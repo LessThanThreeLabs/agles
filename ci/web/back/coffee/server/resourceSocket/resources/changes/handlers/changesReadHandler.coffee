@@ -90,6 +90,7 @@ class ChangesReadHandler extends Handler
 		repositoryId: commit.repo_id
 		userId: commit.user_id
 		message: commit.message
+		sha: commit.sha
 		timestamp: commit.timestamp
 
 

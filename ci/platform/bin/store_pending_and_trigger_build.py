@@ -10,8 +10,9 @@ def main():
 	repo_dir = sys.argv[2]
 	repo_id = pathgen.get_repo_id(repo_dir)
 	message = sys.argv[3]
-	merge_target = sys.argv[4]
-	pending_change_ref = store_pending_ref_and_trigger_build(user_id, repo_id, message, merge_target)
+	sha = sys.argv[4]
+	merge_target = sys.argv[5]
+	pending_change_ref = store_pending_ref_and_trigger_build(user_id, repo_id, message, sha, merge_target)
 	print pending_change_ref
 
 
