@@ -55,7 +55,8 @@ commit = Table('commit', metadata,
 	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
 	Column('message', String, nullable=False),
-	Column('timestamp', Integer, nullable=False)
+	Column('timestamp', Integer, nullable=False),
+	Column('sha', String, nullable=False)
 )
 
 change = Table('change', metadata,

@@ -49,6 +49,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				repo_id=repo_id,
 				user_id=user_id,
 				message='a',
+				sha="sha",
 				timestamp=1,
 			)
 

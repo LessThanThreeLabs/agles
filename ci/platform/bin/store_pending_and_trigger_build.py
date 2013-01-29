@@ -15,12 +15,13 @@ def main():
 	print pending_change_ref
 
 
-def store_pending_ref_and_trigger_build(user_id, repo_id, message, merge_target):
+def store_pending_ref_and_trigger_build(user_id, repo_id, message, sha, merge_target):
 	with ModelServer.rpc_connect("changes", "create") as client:
 		commit_id = client.create_commit_and_change(
 			repo_id,
 			user_id,
 			message,
+			sha,
 			merge_target)["commit_id"]
 	return pathgen.hidden_ref(commit_id)
 
