@@ -4,13 +4,60 @@
 	left: 0px;
 	right: 0px;
 
-	#accountBasicButtonContainer {
-		margin-top: 20px;
-		text-align: right;
+	#accountBasic {
+
+		#accountBasicButtonContainer {
+			margin-top: 20px;
+			text-align: right;
+		}
 	}
 
-	#accountPasswordButtonContainer {
-		margin-top: 20px;
-		text-align: right;
+	#accountPassword {
+
+		#accountPasswordButtonContainer {
+			margin-top: 20px;
+			text-align: right;
+		}
+	}
+
+	#accountSshKeys {
+
+		table {
+			width: 400px;
+
+			.title {
+				font-size: 1.1em;
+			}
+
+			.aliasColumn {
+
+			}
+
+			.createdColumn {
+				text-align: center;
+			}
+
+			.removeColumn {
+				text-align: center;
+
+				.removeLink {
+					@linkBuffer: 8px;
+
+					cursor: hand; cursor: pointer;
+					padding-left: @linkBuffer;
+					padding-right: @linkBuffer;
+					font-width: bold;
+				}
+			}
+		}
+
+		.prettyForm {
+			margin-top: 30px;
+		}
+
+		#accountAddSshKeyButtonContainer {
+			margin-top: 10px;
+			text-align: right;
+		}
 	}
 }
