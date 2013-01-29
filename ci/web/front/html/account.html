@@ -63,24 +63,31 @@
 					</tr>
 				</table>
 
-				<form class="prettyForm" name="accountAddSshKeyForm" novalidate>
-					<div class="prettyFormRow">
-						<div class="prettyFormLabel labelPadding">Alias</div>
-						<div class="prettyFormValue">
-							<input type="text" ng-model="account.sshKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
+				<modal modal-visible="showAddSshKeyModal" modal-close-handler="showAddSshKeyModal = false">
+					<form class="prettyForm" name="accountAddSshKeyForm" novalidate>
+						<div class="prettyFormRow">
+							<div class="prettyFormLabel labelPadding">Alias</div>
+							<div class="prettyFormValue">
+								<input type="text" ng-model="account.sshKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
+							</div>
 						</div>
-					</div>
-					<div class="prettyFormRow">
-						<div class="prettyFormLabel labelPadding">Key</div>
-						<div class="prettyFormValue">
-							<textarea type="text" ng-model="account.sshKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
-							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountAddSshKeyForm.key.$dirty && accountAddSshKeyForm.key.$invalid}" title="Invalid key.">
+						<div class="prettyFormRow">
+							<div class="prettyFormLabel labelPadding">Key</div>
+							<div class="prettyFormValue">
+								<textarea type="text" ng-model="account.sshKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
+								<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountAddSshKeyForm.key.$dirty && accountAddSshKeyForm.key.$invalid}" title="Invalid key.">
+							</div>
 						</div>
-					</div>
-				</form>
+					</form>
 
-				<div id="accountAddSshKeyButtonContainer">
-					<button ng-click="addSshKey()" ng-disabled="accountAddSshKeyForm.$invalid">Submit</button>
+					<div id="accountAddSshKeyButtonContainer">
+						<button ng-click="addSshKey()" ng-disabled="accountAddSshKeyForm.$invalid">Add Key</button>
+					</div>
+				</modal>
+
+
+				<div id="accountOpenAddSshKeyModalContainel">
+					<button ng-click="showAddSshKeyModal = true">Add a New Key</button>
 				</div>
 			</div>
 		</menu>

@@ -54,12 +54,12 @@ angular.module('koality.directive', []).
 	directive('unselectable', () ->
 		return (scope, element, attributes) ->
 			element.addClass 'unselectable'
-	)
-	.directive('focused', () ->
+	).
+	directive('focused', () ->
 		return (scope, element, attributes) ->
 			element.focus()
-	)
-	.directive('centeredPanel', () ->
+	).
+	directive('centeredPanel', () ->
 		restrict: 'E'
 		replace: true
 		transclude: true
@@ -70,8 +70,8 @@ angular.module('koality.directive', []).
 					<div ng-transclude></div>
 				</div>
 			</div>'
-	)
-	.directive('dropdown', ['$document', '$timeout', ($document, $timeout) ->
+	).
+	directive('dropdown', ['$document', '$timeout', ($document, $timeout) ->
 		restrict: 'E'
 		replace: true
 		scope: 
@@ -96,8 +96,8 @@ angular.module('koality.directive', []).
 				scope.$apply () -> scope.show = false
 				event.preventDefault()
 				event.stopPropagation()
-	])
-	.directive('menu', () ->
+	]).
+	directive('menu', () ->
 		restrict: 'E'
 		replace: true
 		transclude: true
@@ -120,7 +120,27 @@ angular.module('koality.directive', []).
 
 				scope.internalClickHandler = (option) ->
 					scope.selectedOption = option
-	)
+	).
+	directive('modal', ['$document', ($document) ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		scope: 
+			show: '=modalVisible'
+			closeHandler: '&modalCloseHandler'
+		template: '<div class="prettyModal" ng-class="{visible: show}">
+				<div class="prettyModalBackdrop" ng-click="closeHandler()"></div>
+				<div class="prettyModalContent" ng-transclude></div>
+			</div>'
+		link: (scope, element, attributes) ->
+			escapeClickHandler = (event) ->
+				if event.keyCode is 27
+					scope.$apply () -> scope.closeHandler()
+
+			scope.$watch 'show', () ->
+				if scope.show then $document.bind 'keydown', escapeClickHandler
+				else $document.unbind 'keydown', escapeClickHandler
+	])
 
 
 angular.module('koality.filter', [])

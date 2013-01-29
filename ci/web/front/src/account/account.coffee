@@ -23,4 +23,9 @@ window.Account = ['$scope', 'fileSuffixAdder', 'accountInformation', 'socket', (
 	$scope.addSshKey = () ->
 		console.log 'add ssh key'
 		console.log $scope.account.sshKey
+
+	# $scope.displayModal = true
+	$scope.modalClosed = () ->
+		console.log 'closed!'
+	# 	$scope.$apply () -> $scope.displayModal = false
 ]
