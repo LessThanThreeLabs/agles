@@ -39,6 +39,7 @@ setup:
     - npm:
       - iced-coffee-script
       - less
+      - testacular
       - directory: ci/web/back
   - databases:
     - postgres:
