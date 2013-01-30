@@ -87,3 +87,22 @@ describe 'Koality directives', () ->
 
 			options.eq(0).click()
 			expect(scope.handleClick.calls.length).toBe 3
+
+	describe 'modal directive', () ->
+		element = null
+		scope = null
+
+		beforeEach module 'koality.directive'
+
+		it 'should become invisible when background is clicked', () ->
+			inject ($rootScope, $compile) ->
+				scope = $rootScope.$new()
+				scope.modalVisible = true
+				element = angular.element '<modal modal-visible="modalVisible">blah</modal>'
+				$compile(element)(scope)
+				scope.$digest()
+
+			expect(scope.modalVisible).toBe true
+			element.find('.prettyModalBackdrop').click()
+			expect(scope.modalVisible).toBe false
+			
