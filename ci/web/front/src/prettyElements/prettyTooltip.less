@@ -6,8 +6,8 @@
 		position: absolute;
 		left: 50%;
 		bottom: 100%;
-		width: 1px;
-		height: 1px;
+		width: 0px;
+		height: 0px;
 
 		.prettyTooltip {
 			@backgroundColor: rgba(40, 40, 40, 1.0);
@@ -21,7 +21,7 @@
 			padding: @padding;
 			position: absolute;
 			bottom: 50px;
-			left: 0 - @width / 2 - @padding / 2 - @borderThickness / 2 - @borderRadius / 2;
+			left: floor(0 - @width / 2 - @padding / 2 - @borderThickness / 2 - @borderRadius / 2);
 			width: @width;
 			text-align: center;
 			background-color: @backgroundColor;
@@ -59,7 +59,6 @@
 
 	&:hover {
 		.prettyTooltipCenterContainer {
-			// opacity: 0.95;
 
 			.prettyTooltip {
 				opacity: 0.95;
