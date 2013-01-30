@@ -14,7 +14,6 @@
     "iced-coffee-script": "1.4.0a",
     "mailgun": "0.4.2",
     "msgpack": "0.1.7",
-    "nodemailer": "0.3.x",
     "nodetime": "0.6.5",
     "redis": "0.8.2",
     "socket.io": "git://github.com/jchonphoenix/socket.io.git",
