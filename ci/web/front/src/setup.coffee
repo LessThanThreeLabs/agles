@@ -143,6 +143,7 @@ angular.module('koality.directive', []).
 		restrict: 'A'
 		replace: true
 		transclude: true
+		scope: true
 		template: '<span class="prettyTooltipContainer" ng-transclude>
 				<span class="prettyTooltipCenterContainer">
 					<span class="prettyTooltip">{{text}}</span>

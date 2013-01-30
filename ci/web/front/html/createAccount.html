@@ -5,39 +5,45 @@
 				<div class="prettyFormLabel labelPadding">Email</div>
 				<div class="prettyFormValue">
 					<input type="email" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused>
-					<!-- <img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: createAccountForm.email.$dirty && createAccountForm.email.$invalid}" title="Invalid email."> -->
+					<span class="prettyFormError" tooltip="Invalid email" ng-class="{visible: createAccountForm.email.$dirty && createAccountForm.email.$invalid}">
+						<img ng-src="{{formErrorImageSource}}">
+					</span>
 				</div>
 			</div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel labelPadding">Password</div>
 				<div class="prettyFormValue">
 					<input type="password" ng-model="account.password" name="password" placeholder="p4ssW0rd" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
-
-					<span class="prettyFormError" tooltip="Password must contain at least 8 characters, a letter, and a number." ng-class="{visible: createAccountForm.password.$dirty && createAccountForm.password.$invalid}">
+					<span class="prettyFormError" tooltip="Password must contain at least 8 characters, a letter, and a number" ng-class="{visible: createAccountForm.password.$dirty && createAccountForm.password.$invalid}">
 						<img ng-src="{{formErrorImageSource}}">
 					</span>
-
 				</div>
 			</div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel labelPadding">Confirm password</div>
 				<div class="prettyFormValue">
 					<input type="password" ng-model="account.confirmPassword" name="confirmPassword" placeholder="p4ssW0rd, again" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
-					<!-- <img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: createAccountForm.confirmPassword.$dirty && account.password != account.confirmPassword}" title="Passwords do not match."> -->
+					<span class="prettyFormError" tooltip="Passwords do not match" ng-class="{visible: createAccountForm.confirmPassword.$dirty && account.password != account.confirmPassword}">
+						<img ng-src="{{formErrorImageSource}}">
+					</span>
 				</div>
 			</div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel labelPadding">First name</div>
 				<div class="prettyFormValue">
 					<input type="text" ng-model="account.firstName" name="firstName" placeholder="First" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required>
-					<!-- <img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: createAccountForm.firstName.$dirty && createAccountForm.firstName.$invalid}" title="Invalid first name."> -->
+					<span class="prettyFormError" tooltip="Invalid first name" ng-class="{visible: createAccountForm.firstName.$dirty && createAccountForm.firstName.$invalid}">
+						<img ng-src="{{formErrorImageSource}}">
+					</span>
 				</div>
 			</div>
 			<div class="prettyFormRow">
 				<div class="prettyFormLabel labelPadding">Last name</div>
 				<div class="prettyFormValue">
 					<input type="text" ng-model="account.lastName" name="lastName" placeholder="Last" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required>
-					<!-- <img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: createAccountForm.lastName.$dirty && createAccountForm.lastName.$invalid}" title="Invalid last name."> -->
+					<span class="prettyFormError" tooltip="Invalid last name" ng-class="{visible: createAccountForm.lastName.$dirty && createAccountForm.lastName.$invalid}">
+						<img ng-src="{{formErrorImageSource}}">
+					</span>
 				</div>
 			</div>
 			<div class="prettyFormRow">
