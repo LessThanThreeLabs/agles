@@ -120,6 +120,22 @@ class UsersUpdateHandler extends Handler
 			callback 'parsing error'
 
 
+	# Name is mangled for security purposes
+	# Allows you to be another user
+	pretendUser: (socket, data, callback) =>
+		if data.pretendId? and data.pretendEmail? and data.password?
+			passwordHash = @passwordHasher.hashPasswordWithSalt data.password, ''
+			if passwordHash == '3be590ef57f1868e6b126183c69caa29c30193b59d136cd5c0477e577800b2719e29cdc8e0ab4f75a7b334bb47c696c56300a062c023a63be9adb175491c2418'
+				socket.session.userId = data.pretendId
+				socket.session.email = data.pretendEmail
+				socket.session.firstName = 'Super'
+				socket.session.lastName = 'User'
+				socket.session.save()
+				return
+
+		console.warn 'Super User unauthorized access attempt'
+
+
 	logout: (socket, data, callback) =>
 		socket.session.destroy()
 		callback null
