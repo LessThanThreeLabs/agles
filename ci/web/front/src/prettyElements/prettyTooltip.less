@@ -1,0 +1,70 @@
+.prettyTooltipContainer {
+	position: relative;
+
+	.prettyTooltipCenterContainer {
+		display: inline-block;
+		position: absolute;
+		left: 50%;
+		bottom: 100%;
+		width: 1px;
+		height: 1px;
+
+		.prettyTooltip {
+			@backgroundColor: rgba(40, 40, 40, 1.0);
+			@width: 200px;
+			@padding: 10px;
+			@borderThickness: 1px;
+			@borderRadius: 8px;
+
+			pointer-events: none;
+
+			padding: @padding;
+			position: absolute;
+			bottom: 50px;
+			left: 0 - @width / 2 - @padding / 2 - @borderThickness / 2 - @borderRadius / 2;
+			width: @width;
+			text-align: center;
+			background-color: @backgroundColor;
+			border: @borderThickness solid lighten(@backgroundColor, 15%);
+			border-radius: @borderRadius;
+			opacity: 0.0;
+
+			@boxShadowBlur: 2px;
+			@boxShadowSpread: 2px;
+			@boxShadowColor: #101010;
+			box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+			-moz-box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+			-webkit-box-shadow: 0 0 @boxShadowBlur @boxShadowSpread @boxShadowColor;
+
+			@allTransitionTime: 0.3s;
+			transition: all @allTransitionTime ease-in-out;
+			-moz-transition: all @allTransitionTime ease-in-out;
+			-webkit-transition: all @allTransitionTime ease-in-out;
+			-o-transition: all @allTransitionTime ease-in-out;
+
+			&:after{
+				content: '';
+				position: absolute;
+				left: 50%;
+				bottom: -11px;
+				margin-left: -10px;
+				width: 0;
+				height: 0;
+				border-left: 10px solid transparent;
+				border-right: 10px solid transparent;
+				border-top: 10px solid lighten(@backgroundColor, 15%);
+			}
+		}
+	}
+
+	&:hover {
+		.prettyTooltipCenterContainer {
+			// opacity: 0.95;
+
+			.prettyTooltip {
+				opacity: 0.95;
+				bottom: 15px;
+			}
+		}
+	}
+}

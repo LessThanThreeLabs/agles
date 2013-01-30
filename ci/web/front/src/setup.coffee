@@ -138,7 +138,22 @@ angular.module('koality.directive', []).
 			scope.$watch 'show', () ->
 				if scope.show then $document.bind 'keydown', escapeClickHandler
 				else $document.unbind 'keydown', escapeClickHandler
-	])
+	]).
+	directive('tooltip', () ->
+		restrict: 'A'
+		replace: true
+		transclude: true
+		template: '<span class="prettyTooltipContainer" ng-transclude>
+				<span class="prettyTooltipCenterContainer">
+					<span class="prettyTooltip">{{text}}</span>
+				</span>
+			</span>'
+		compile: (element, attributes, transclude) ->
+			pre: (scope, element, attributes, controller) ->
+				scope.text = attributes.tooltip
+	)
+		
+
 
 
 angular.module('koality.filter', [])
