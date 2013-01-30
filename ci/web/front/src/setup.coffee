@@ -145,16 +145,16 @@ angular.module('koality.directive', []).
 		transclude: true
 		scope: true
 		template: '<span class="prettyTooltipContainer" ng-transclude>
-				<span class="prettyTooltipCenterContainer">
-					<span class="prettyTooltip">{{text}}</span>
+				<span class="prettyTooltipCenterAnchor">
+					<span class="prettyTooltipCenterContainer">
+						<span class="prettyTooltip">{{text}}</span>
+					</span>
 				</span>
 			</span>'
 		compile: (element, attributes, transclude) ->
 			pre: (scope, element, attributes, controller) ->
 				scope.text = attributes.tooltip
 	)
-		
-
 
 
 angular.module('koality.filter', [])
