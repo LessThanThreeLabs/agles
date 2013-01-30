@@ -105,4 +105,30 @@ describe 'Koality directives', () ->
 			expect(scope.modalVisible).toBe true
 			element.find('.prettyModalBackdrop').click()
 			expect(scope.modalVisible).toBe false
+
+	describe 'tooltip directive', () ->
+		element = null
+		scope = null
+
+		beforeEach module 'koality.directive'
+
+		it 'should render the correct tooltip text when valid text is provided', () ->
+			tooltipText = 'blah'
+
+			inject ($rootScope, $compile) ->
+				scope = $rootScope.$new()
+				element = angular.element "<span tooltip='#{tooltipText}'>hello</span>"
+				$compile(element)(scope)
+				scope.$digest()
+
+			expect(element.find('.prettyTooltip').html()).toBe tooltipText
+
+		it 'should render no tooltip text when no valid text is provided', () ->
+			inject ($rootScope, $compile) ->
+				scope = $rootScope.$new()
+				element = angular.element "<span tooltip>hello</span>"
+				$compile(element)(scope)
+				scope.$digest()
+
+			expect(element.find('.prettyTooltip').html()).toBe ''
 			
