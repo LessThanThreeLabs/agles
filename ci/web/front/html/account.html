@@ -1,93 +1,92 @@
 <div id="account" ng-controller="Account">
 	<centered-panel panel-title="Account">
 		<menu menu-options="['Basic', 'Password', 'SSH Keys']" default-menu-option="Basic" menu-option-click="menuOptionClick(option)">
-			<div id="accountBasic" class="prettyMenuContent" option="Basic">
-				<form class="prettyForm" name="accountBasicForm" novalidate>
+			<div id="accountBasic" class="prettyMenuContent" option="Basic" ng-controller="AccountBasic">
+				<form class="prettyForm" name="basicForm" novalidate>
 					<div class="prettyFormRow">
 						<div class="prettyFormLabel labelPadding">First name</div>
 						<div class="prettyFormValue">
-							<input type="text" ng-model="account.basic.firstName" name="firstName" placeholder="First" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required>
-							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountBasicForm.firstName.$dirty && accountBasicForm.firstName.$invalid}" title="Invalid first name.">
+							<input type="text" ng-model="firstName" name="firstName" placeholder="First" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required focused>
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: basicForm.firstName.$dirty && basicForm.firstName.$invalid}" title="Invalid first name.">
 						</div>
 					</div>
 					<div class="prettyFormRow">
 						<div class="prettyFormLabel labelPadding">Last name</div>
 						<div class="prettyFormValue">
-							<input type="text" ng-model="account.basic.lastName" name="lastName" placeholder="Last" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required>
-							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountBasicForm.lastName.$dirty && accountBasicForm.lastName.$invalid}" title="Invalid last name.">
+							<input type="text" ng-model="lastName" name="lastName" placeholder="Last" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required>
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: basicForm.lastName.$dirty && basicForm.lastName.$invalid}" title="Invalid last name.">
 						</div>
 					</div>
 				</form>
 
 				<div id="accountBasicButtonContainer">
-					<button ng-click="basicSubmit()" ng-disabled="accountBasicForm.$invalid">Submit</button>
+					<button ng-click="submit()" ng-disabled="basicForm.$invalid">Submit</button>
 				</div>
 			</div>
 
-			<div id="accountPassword" class="prettyMenuContent" option="Password">
-				<form class="prettyForm" name="accountPasswordForm" novalidate>
+			<div id="accountPassword" class="prettyMenuContent" option="Password" ng-controller="AccountPassword">
+				<form class="prettyForm" name="passwordForm" novalidate>
 					<div class="prettyFormRow">
 						<div class="prettyFormLabel labelPadding">Old Password</div>
 						<div class="prettyFormValue">
-							<input type="password" ng-model="account.password.oldPassword" name="oldPassword" placeholder="old p4ssW0rd" required>
+							<input type="password" ng-model="oldPassword" name="oldPassword" placeholder="old p4ssW0rd" required focused>
 						</div>
 					</div>
 					<div class="prettyFormRow">
 						<div class="prettyFormLabel labelPadding">New Password</div>
 						<div class="prettyFormValue">
-							<input type="password" ng-model="account.password.newPassword" name="newPassword" placeholder="new p4ssW0rd" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
-							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountPasswordForm.newPassword.$dirty && accountPasswordForm.newPassword.$invalid}" title="Password must contain at least 8 characters, a letter, and a number.">
+							<input type="password" ng-model="newPassword" name="newPassword" placeholder="new p4ssW0rd" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: passwordForm.newPassword.$dirty && passwordForm.newPassword.$invalid}" title="Password must contain at least 8 characters, a letter, and a number.">
 						</div>
 					</div>
 					<div class="prettyFormRow">
 						<div class="prettyFormLabel labelPadding">Confirm password</div>
 						<div class="prettyFormValue">
-							<input type="password" ng-model="account.password.confirmPassword" name="confirmPassword" placeholder="p4ssW0rd, again" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
-							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountPasswordForm.confirmPassword.$dirty && account.password.newPassword != account.password.confirmPassword}" title="Passwords do not match.">
+							<input type="password" ng-model="confirmPassword" name="confirmPassword" placeholder="p4ssW0rd, again" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
+							<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: passwordForm.confirmPassword.$dirty && newPassword != confirmPassword}" title="Passwords do not match.">
 						</div>
 					</div>
 				</form>
 
 				<div id="accountPasswordButtonContainer">
-					<button ng-click="passwordSubmit()" ng-disabled="accountPasswordForm.$invalid">Submit</button>
+					<button ng-click="submit()" ng-disabled="passwordForm.$invalid">Submit</button>
 				</div>
 			</div>
 
-			<div id="accountSshKeys" class="prettyMenuContent" option="SSH Keys">
+			<div id="accountSshKeys" class="prettyMenuContent" option="SSH Keys" ng-controller="AccountSshKeys">
 				<table id="sshKeysTable" class="prettyTable">
 					<tr class="title">
 						<td class="aliasColumn">Alias</td><td class="createdColumn">Created</td><td class="removeColumn">Remove</td>
 					</tr>
-					<tr ng-repeat="sshKey in sshKeys">
-						<td class="aliasColumn">{{sshKey.alias}}</td><td class="createdColumn">{{sshKey.timestamp | date:'medium'}}</td><td class="removeColumn"><span class="removeLink">X</span></td>
+					<tr ng-repeat="key in keys">
+						<td class="aliasColumn">{{key.alias}}</td><td class="createdColumn">{{key.timestamp | date:'medium'}}</td><td class="removeColumn"><span class="removeLink">X</span></td>
 					</tr>
 				</table>
 
-				<modal modal-visible="showAddSshKeyModal" modal-close-handler="showAddSshKeyModal = false">
-					<form class="prettyForm" name="accountAddSshKeyForm" novalidate>
+				<modal modal-visible="addKey.modalVisible" modal-close-handler="addKey.hideModal(); addKey.resetValues()">
+					<form class="prettyForm" name="addSshKeyForm" novalidate>
 						<div class="prettyFormRow">
 							<div class="prettyFormLabel labelPadding">Alias</div>
 							<div class="prettyFormValue">
-								<input type="text" ng-model="account.sshKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
+								<input type="text" ng-model="addKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
 							</div>
 						</div>
 						<div class="prettyFormRow">
 							<div class="prettyFormLabel labelPadding">Key</div>
 							<div class="prettyFormValue">
-								<textarea type="text" ng-model="account.sshKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
-								<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: accountAddSshKeyForm.key.$dirty && accountAddSshKeyForm.key.$invalid}" title="Invalid key.">
+								<textarea type="text" ng-model="addKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
+								<img class="prettyFormError" ng-src="{{formErrorImageSource}}" ng-class="{visible: addSshKeyForm.key.$dirty && addSshKeyForm.key.$invalid}" title="Invalid key.">
 							</div>
 						</div>
 					</form>
 
 					<div id="accountAddSshKeyButtonContainer">
-						<button ng-click="addSshKey()" ng-disabled="accountAddSshKeyForm.$invalid">Add Key</button>
+						<button ng-click="addKey.submit()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
 					</div>
 				</modal>
 
-
 				<div id="accountOpenAddSshKeyModalContainel">
-					<button ng-click="showAddSshKeyModal = true">Add a New Key</button>
+					<button ng-click="addKey.showModal()">Add a New Key</button>
 				</div>
 			</div>
 		</menu>

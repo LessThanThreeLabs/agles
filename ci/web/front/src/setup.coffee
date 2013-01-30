@@ -135,6 +135,7 @@ angular.module('koality.directive', []).
 		link: (scope, element, attributes) ->
 			escapeClickHandler = (event) ->
 				if event.keyCode is 27
+					console.log 'escape pressed!'
 					scope.$apply () -> scope.closeHandler()
 
 			scope.$watch 'show', () ->

@@ -1,31 +1,41 @@
 'use strict'
 
-window.Account = ['$scope', 'fileSuffixAdder', 'accountInformation', 'socket', ($scope, fileSuffixAdder, accountInformation, socket) ->
+window.Account = ['$scope', 'fileSuffixAdder', ($scope, fileSuffixAdder) ->
 	$scope.formErrorImageSource = fileSuffixAdder.addFileSuffix '/img/icons/error.png'
+]
 
-	$scope.account = {}
-	$scope.account.basic = {}
-	$scope.account.basic.firstName = accountInformation.firstName
-	$scope.account.basic.lastName = accountInformation.lastName
-	$scope.account.password = {}
-	$scope.account.sshKey = {}
+window.AccountBasic = ['$scope', 'accountInformation', 'socket', ($scope, accountInformation, socket) ->
+	$scope.firstName = accountInformation.firstName
+	$scope.lastName = accountInformation.lastName
+	$scope.submit = () ->
+		console.log
+			firstName: $scope.firstName
+			lastName: $scope.lastName
+]
 
-	$scope.sshKeys = [{alias: 'first', timestamp: 13928471}, {alias: 'second', timestamp: 13928471}, {alias: 'third', timestamp: 13928471}]
+window.AccountPassword = ['$scope', 'socket', ($scope, socket) ->
+	$scope.submit = () ->
+		console.log
+			oldPassword: $scope.oldPassword
+			newPassword: $scope.newPassword
+			confirmPassword: $scope.confirmPassword
+]
 
-	$scope.basicSubmit = () ->
-		console.log 'basic submit'
-		console.log $scope.account.basic
+window.AccountSshKeys = ['$scope', 'socket', ($scope, socket) ->
+	$scope.keys = [{alias: 'first', timestamp: 13928471}, {alias: 'second', timestamp: 13928471}, {alias: 'third', timestamp: 13928471}]
+	
+	$scope.addKey = {}
 
-	$scope.passwordSubmit = () ->
-		console.log 'password submit'
-		console.log $scope.account.password
-
-	$scope.addSshKey = () ->
-		console.log 'add ssh key'
-		console.log $scope.account.sshKey
-
-	# $scope.displayModal = true
-	$scope.modalClosed = () ->
-		console.log 'closed!'
-	# 	$scope.$apply () -> $scope.displayModal = false
+	$scope.addKey.modalVisible = false
+	$scope.addKey.showModal = () -> $scope.addKey.modalVisible = true
+	$scope.addKey.hideModal = () -> $scope.addKey.modalVisible = false
+	$scope.addKey.submit = () ->
+		$scope.addKey.hideModal()
+		console.log 
+			alias: $scope.addKey.alias
+			key: $scope.addKey.key
+		$scope.addKey.resetValues()
+	$scope.addKey.resetValues = () ->
+		$scope.addKey.alias = ''
+		$scope.addKey.key = ''
 ]
