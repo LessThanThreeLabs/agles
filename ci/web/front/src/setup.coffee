@@ -125,18 +125,15 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		scope: 
-			show: '=modalVisible'
-			closeHandler: '&modalCloseHandler'
+		scope: show: '=modalVisible'
 		template: '<div class="prettyModal" ng-class="{visible: show}">
-				<div class="prettyModalBackdrop" ng-click="closeHandler()"></div>
+				<div class="prettyModalBackdrop" ng-click="show=false"></div>
 				<div class="prettyModalContent" ng-transclude></div>
 			</div>'
 		link: (scope, element, attributes) ->
 			escapeClickHandler = (event) ->
 				if event.keyCode is 27
-					console.log 'escape pressed!'
-					scope.$apply () -> scope.closeHandler()
+					scope.$apply () -> scope.show = false
 
 			scope.$watch 'show', () ->
 				if scope.show then $document.bind 'keydown', escapeClickHandler

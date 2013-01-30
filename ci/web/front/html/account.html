@@ -63,7 +63,7 @@
 					</tr>
 				</table>
 
-				<modal modal-visible="addKey.modalVisible" modal-close-handler="addKey.hideModal(); addKey.resetValues()">
+				<modal modal-visible="addKey.modalVisible">
 					<form class="prettyForm" name="addSshKeyForm" novalidate>
 						<div class="prettyFormRow">
 							<div class="prettyFormLabel labelPadding">Alias</div>
@@ -86,7 +86,7 @@
 				</modal>
 
 				<div id="accountOpenAddSshKeyModalContainel">
-					<button ng-click="addKey.showModal()">Add a New Key</button>
+					<button ng-click="addKey.modalVisible=true">Add a New Key</button>
 				</div>
 			</div>
 		</menu>

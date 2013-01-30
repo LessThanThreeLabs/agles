@@ -25,17 +25,14 @@ window.AccountSshKeys = ['$scope', 'socket', ($scope, socket) ->
 	$scope.keys = [{alias: 'first', timestamp: 13928471}, {alias: 'second', timestamp: 13928471}, {alias: 'third', timestamp: 13928471}]
 	
 	$scope.addKey = {}
-
 	$scope.addKey.modalVisible = false
-	$scope.addKey.showModal = () -> $scope.addKey.modalVisible = true
-	$scope.addKey.hideModal = () -> $scope.addKey.modalVisible = false
 	$scope.addKey.submit = () ->
-		$scope.addKey.hideModal()
+		$scope.addKey.modalVisible = false
 		console.log 
 			alias: $scope.addKey.alias
 			key: $scope.addKey.key
-		$scope.addKey.resetValues()
-	$scope.addKey.resetValues = () ->
+		resetValues()
+	resetValues = () ->
 		$scope.addKey.alias = ''
 		$scope.addKey.key = ''
 ]
