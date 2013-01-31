@@ -2,11 +2,11 @@
 
 describe 'Koality filters', () ->
 
-	beforeEach module 'koality.filter'
-
-	describe 'ansiparse', () ->
-
+	describe 'ansiparse filter', () ->
 		ansiparse = null
+
+		beforeEach module 'koality.filter'
+
 		beforeEach () ->
 			inject (ansiparseFilter) ->
 				ansiparse = ansiparseFilter
@@ -34,3 +34,28 @@ describe 'Koality filters', () ->
 
 		it 'should overwrite old characters with new styles', () ->
 			expect(ansiparse 'plain\x1b[0G\x1b[32mgreen').toBe '<span class="foregroundGreen backgroundDefault">green</span>'
+
+
+	describe 'fileSuffix filter', () ->
+		fileSuffix = null
+		suffixString = '_qa8aset32'
+
+		beforeEach module 'koality.filter', ($provide) ->
+			mockedInitialState = fileSuffix: suffixString
+			$provide.value 'initialState', mockedInitialState
+			return
+
+		beforeEach () ->
+			inject (fileSuffixFilter) ->
+				fileSuffix = fileSuffixFilter
+
+		it 'should correctly add file suffix for valid file urls', () ->
+			expect(fileSuffix 'hello.png').toBe "hello#{suffixString}.png"
+			expect(fileSuffix 'hello/there.jpg').toBe "hello/there#{suffixString}.jpg"
+			expect(fileSuffix '/hello/there/sir.gif').toBe "/hello/there/sir#{suffixString}.gif"
+
+		it 'should fail to add the correct file suffix for invalid file urls', () ->
+			expect(fileSuffix 'hellopng').toBe 'hellopng'
+			expect(fileSuffix 'hello/therejpg').toBe 'hello/therejpg'
+			expect(fileSuffix '/hello/there/sirgif').toBe '/hello/there/sirgif'
+			
