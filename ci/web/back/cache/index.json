@@ -37,7 +37,7 @@
 			"/js/src/createAccount/createAccount.js",
 			"/js/src/recoverPassword/recoverPassword.js",
 			"/js/src/repository/repository.js",
-			"/js/src/repository/content/changes/details/consoleTextOutput/ansiparse.js",
+			"/js/src/util/ansiparse.js",
 			"/js/src/about/about.js"
 		]
 	},

@@ -23,20 +23,20 @@
   @white: rgb(229, 229, 229);
   @brightWhite: rgb(255, 255, 255);
 
-  @fgDefault: @white;
-  @fgBrightDefault: @brightWhite;
-  @bgDefault: @black;
+  @foregroundDefault: @white;
+  @foregroundBrightDefault: @brightWhite;
+  @backgroundDefault: @black;
 
   font-family: Menlo;
 
   .foregroundDefault {
-    color: @fgDefault;
+    color: @foregroundDefault;
     &.bright {
-      color: @fgBrightDefault;
+      color: @foregroundBrightDefault;
     }
   }
   .backgroundDefault {
-    background-color: @bgDefault;
+    background-color: @backgroundDefault;
   }
   .foregroundBlack {
     color: @black;

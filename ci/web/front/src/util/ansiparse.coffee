@@ -73,7 +73,7 @@ class ConsoleLine
         '<span class="' + styles + '">'
 
 
-@ansiparse = (str) ->
+window.ansiparse = (str) ->
     if not str?
         return
     consoleLine = new ConsoleLine()

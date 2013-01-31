@@ -15,7 +15,7 @@ files = [
   'js/libs/angularMock.js',
   'js/src/setup.js',
   'js/src/test/unit/*.js',
-  'js/src/**/*.js'  // TODO: remove this hack
+  'js/src/util/**/*.js'
 ];
 
 
