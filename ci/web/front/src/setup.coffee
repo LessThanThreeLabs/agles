@@ -175,11 +175,15 @@ angular.module('koality.directive', []).
 	)
 
 
-angular.module('koality.filter', []).
+angular.module('koality.filter', ['koality.service']).
 	filter('ansiparse', () ->
-			(input) ->
-				window.ansiparse input
-		)
+		(input) ->
+			window.ansiparse input
+	).
+	filter('fileSuffix', ['fileSuffixAdder', (fileSuffixAdder) ->
+		(input) ->
+			return fileSuffixAdder.addFileSuffix input
+	])
 
 
 angular.module('koality', ['koality.service', 'koality.directive', 'koality.filter']).

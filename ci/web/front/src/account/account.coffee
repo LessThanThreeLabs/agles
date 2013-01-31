@@ -1,7 +1,7 @@
 'use strict'
 
 window.Account = ['$scope', 'fileSuffixAdder', ($scope, fileSuffixAdder) ->
-	$scope.formErrorImageSource = fileSuffixAdder.addFileSuffix '/img/icons/error.png'
+
 ]
 
 window.AccountBasic = ['$scope', 'accountInformation', 'socket', ($scope, accountInformation, socket) ->
