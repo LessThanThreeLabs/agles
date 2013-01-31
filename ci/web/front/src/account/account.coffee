@@ -5,20 +5,21 @@ window.Account = ['$scope', 'fileSuffixAdder', ($scope, fileSuffixAdder) ->
 ]
 
 window.AccountBasic = ['$scope', 'accountInformation', 'socket', ($scope, accountInformation, socket) ->
-	$scope.firstName = accountInformation.firstName
-	$scope.lastName = accountInformation.lastName
+	$scope.account =
+		firstName: accountInformation.firstName
+		lastName: accountInformation.lastName
+
 	$scope.submit = () ->
-		console.log
-			firstName: $scope.firstName
-			lastName: $scope.lastName
+		socket.makeRequest 'users', 'update', 'basic', $scope.account, (result) ->
+			console.log 'result: ' + result
 ]
 
 window.AccountPassword = ['$scope', 'socket', ($scope, socket) ->
+	$scope.account = {}
+
 	$scope.submit = () ->
-		console.log
-			oldPassword: $scope.oldPassword
-			newPassword: $scope.newPassword
-			confirmPassword: $scope.confirmPassword
+		socket.makeRequest 'users', 'update', 'basic', $scope.account, (result) ->
+			console.log 'result: ' + result
 ]
 
 window.AccountSshKeys = ['$scope', 'socket', ($scope, socket) ->
@@ -26,12 +27,14 @@ window.AccountSshKeys = ['$scope', 'socket', ($scope, socket) ->
 	
 	$scope.addKey = {}
 	$scope.addKey.modalVisible = false
+
 	$scope.addKey.submit = () ->
 		$scope.addKey.modalVisible = false
 		console.log 
 			alias: $scope.addKey.alias
 			key: $scope.addKey.key
 		resetValues()
+
 	resetValues = () ->
 		$scope.addKey.alias = ''
 		$scope.addKey.key = ''

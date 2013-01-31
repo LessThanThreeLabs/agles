@@ -1,28 +1,13 @@
-<div id="login" ng-controller="Login">
+<div id="login">
 	<centered-panel panel-title="Login">
-		<form class="prettyForm" name="loginForm" novalidate>
-			<div class="prettyFormRow">
-				<div class="prettyFormLabel labelPadding">Email</div>
-				<div class="prettyFormValue">
-					<input type="email" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused>
-				</div>
-			</div>
-			<div class="prettyFormRow">
-				<div class="prettyFormLabel labelPadding">Password</div>
-				<div class="prettyFormValue">
-					<input type="password" ng-model="account.password" name="password" placeholder="p4ssW0rd" ng-maxlength="256" required>
-				</div>
-			</div>
-			<div class="prettyFormRow">
-				<div class="prettyFormLabel labelPadding"></div>
-				<div class="prettyFormValue">
-					<input type="checkbox" ng-model="account.rememberMe" ng-true-value="yes" ng-false-value="no" name="rememberMe"> Remember me
-				</div>
-			</div>
-		</form>
+		<styled-form name="loginForm">
+			<styled-form-field label="Email"><input type="email" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused></styled-form-field>
+			<styled-form-field label="Password"><input type="password" ng-model="account.password" name="password" placeholder="p4ssW0rd" ng-maxlength="256" required></styled-form-field>
+			<styled-form-field label=""><input type="checkbox" ng-model="account.rememberMe" ng-true-value="yes" ng-false-value="no" name="rememberMe"> Remember me</styled-form-field>
+		</styled-form>
 
 		<div id="loginButtonContainer">
-			<button ng-click="login()">Login</button>
+			<button ng-click="login()" ng-disabled="loginForm.$invalid">Login</button>
 		</div>
 
 		<div id="loginMemberOptions">

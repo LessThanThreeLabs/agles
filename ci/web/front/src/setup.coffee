@@ -154,6 +154,24 @@ angular.module('koality.directive', []).
 		compile: (element, attributes, transclude) ->
 			pre: (scope, element, attributes, controller) ->
 				scope.text = attributes.tooltip
+	).
+	directive('styledForm', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<form class="prettyForm" novalidate ng-transclude>
+			</form>'
+	).
+	directive('styledFormField', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		scope: label: '@label'
+		template: '<div class="prettyFormRow">
+				<div class="prettyFormLabel labelPadding">{{label}}</div>
+				<div class="prettyFormValue" ng-transclude>
+				</div>
+			</div>'
 	)
 
 
