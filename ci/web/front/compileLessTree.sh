@@ -21,14 +21,14 @@ for (( i=0; i<$(( ${#pids[*]} )); i++ )); do
 	wait $pid
 	if [ $? -ne "0" ]; then
 		let failures=$failures+1
-		printf "\x1b[31mFailed to compile file $lessfile\x1b[0m\n"
+		printf "\x1b[31mFailed to compile file $lessfile\x1b[39m\n"
 	else
-		printf "\x1b[32mCompiled $lessfile successfully\x1b[0m\n"
+		printf "\x1b[32mCompiled $lessfile successfully\x1b[39m\n"
 	fi
 	let index=$index+1
 done
 if [ $failures -ne "0" ]; then
-	printf "\x1b[31;1mFailed to compile $failures less files\x1b[0m\n"
+	printf "\x1b[31;1mFailed to compile $failures less files\x1b[39;22m\n"
 	exit 1
 fi
-printf "\x1b[32;1mAll less files compiled successfully\x1b[0m\n"
+printf "\x1b[32;1mAll less files compiled successfully\x1b[39;22m\n"
