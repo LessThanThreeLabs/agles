@@ -11,7 +11,7 @@ sudo python setup.py install
 cd ~/code/agles/ci/web/back
 ./compile.sh
 cd ~/code/agles/ci/web/front
-timeout 3 ./continuousCompile.sh
+./compile.sh
 cd
 sudo rabbitmqctl stop_app
 sudo rabbitmqctl reset
