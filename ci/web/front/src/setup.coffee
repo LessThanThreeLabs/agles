@@ -17,7 +17,7 @@ angular.module('koality.service', []).
 		lastName: initialState.user.lastName
 	]).
 	factory('fileSuffixAdder', ['initialState', (initialState) ->
-		return addFileSuffix: (fileSrc) -> 
+		return addFileSuffix: (fileSrc) ->
 			lastPeriodIndex = fileSrc.lastIndexOf '.'
 			return fileSrc if lastPeriodIndex is -1
 			return fileSrc.substr(0, lastPeriodIndex) + initialState.fileSuffix + fileSrc.substr(lastPeriodIndex)
@@ -74,7 +74,7 @@ angular.module('koality.directive', []).
 	directive('dropdown', ['$document', '$timeout', ($document, $timeout) ->
 		restrict: 'E'
 		replace: true
-		scope: 
+		scope:
 			alignment: '@alignment'
 			options: '=dropdownOptions'
 			clickHandler: '&dropdownOptionClick'
@@ -87,11 +87,11 @@ angular.module('koality.directive', []).
 
 			documentClickHandler = (event) ->
 				scope.$apply () -> scope.show = false
-			
+
 			scope.$watch 'show', () ->
 				if scope.show then $timeout (() -> $document.bind 'click', documentClickHandler), 0
 				else $document.unbind 'click', documentClickHandler
-				
+
 			element.bind 'click', (event) ->
 				scope.$apply () -> scope.show = false
 				event.preventDefault()
@@ -101,7 +101,7 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		scope: 
+		scope:
 			selectedOption: '@defaultMenuOption'
 			clickHandler: '&menuOptionClick'
 		template: '<div class="prettyMenu">
@@ -157,37 +157,41 @@ angular.module('koality.directive', []).
 	)
 
 
-angular.module('koality.filter', [])
+angular.module('koality.filter', []).
+	filter('ansiparse', () ->
+			(input) ->
+				window.ansiparse input
+		)
 
 
 angular.module('koality', ['koality.service', 'koality.directive', 'koality.filter']).
 	config(['$routeProvider', ($routeProvider) ->
 		$routeProvider.
-			when('/welcome', 
+			when('/welcome',
 				templateUrl: "/html/welcome#{fileSuffix}.html"
 				controller: Welcome
 			).
-			when('/login', 
+			when('/login',
 				templateUrl: "/html/login#{fileSuffix}.html"
 				controller: Login
 			).
-			when('/account', 
+			when('/account',
 				templateUrl: "/html/account#{fileSuffix}.html"
 				controller: Account
 			).
-			when('/create/account', 
+			when('/create/account',
 				templateUrl: "/html/createAccount#{fileSuffix}.html"
 				controller: CreateAccount
 			).
-			when('/recoverPassword', 
+			when('/recoverPassword',
 				templateUrl: "/html/recoverPassword#{fileSuffix}.html"
 				controller: RecoverPassword
 			).
-			when('/repository/:repositoryId', 
+			when('/repository/:repositoryId',
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
 			).
-			when('/about', 
+			when('/about',
 				templateUrl: "/html/about#{fileSuffix}.html"
 				controller: About
 			).

@@ -1,0 +1,114 @@
+.ansi {
+  @black: rgba(0, 0, 0, 0);
+  @brightBlack: rgb(127, 127, 127);
+
+  @red: rgb(205, 0, 0);
+  @brightRed: rgb(255, 0, 0);
+
+  @green: rgb(0, 205, 0);
+  @brightGreen: rgb(0, 255, 0);
+
+  @yellow: rgb(205, 205, 0);
+  @brightYellow: rgb(255, 255, 0);
+
+  @blue: rgb(0, 0, 205);
+  @brightBlue: rgb(0, 0, 255);
+
+  @magenta: rgb(205, 0, 205);
+  @brightMagenta: rgb(255, 0, 255);
+
+  @cyan: rgb(0, 205, 205);
+  @brightCyan: rgb(0, 255, 255);
+
+  @white: rgb(229, 229, 229);
+  @brightWhite: rgb(255, 255, 255);
+
+  @fgDefault: @white;
+  @fgBrightDefault: @brightWhite;
+  @bgDefault: @black;
+
+  font-family: Menlo;
+
+  .foregroundDefault {
+    color: @fgDefault;
+    &.bright {
+      color: @fgBrightDefault;
+    }
+  }
+  .backgroundDefault {
+    background-color: @bgDefault;
+  }
+  .foregroundBlack {
+    color: @black;
+    &.bright {
+      color: @brightBlack;
+    }
+  }
+  .backgroundBlack {
+    background-color: @black;
+  }
+  .foregroundRed {
+    color: @red;
+    &.bright {
+      color: @brightRed;
+    }
+  }
+  .backgroundRed {
+    background-color: @red;
+  }
+  .foregroundGreen {
+    color: @green;
+    &.bright {
+      color: @brightGreen;
+    }
+  }
+  .backgroundGreen {
+    background-color: @green;
+  }
+  .foregroundYellow {
+    color: @yellow;
+    &.bright {
+      color: @brightYellow;
+    }
+  }
+  .backgroundYellow {
+    background-color: @yellow;
+  }
+  .foregroundBlue {
+    color: @blue;
+    &.bright {
+      color: @brightBlue;
+    }
+  }
+  .backgroundBlue {
+    background-color: @blue;
+  }
+  .foregroundMagenta {
+    color: @magenta;
+    &.bright {
+      color: @brightMagenta;
+    }
+  }
+  .backgroundMagenta {
+    background-color: @magenta;
+  }
+  .foregroundCyan {
+    color: @cyan;
+    &.bright {
+      color: @brightCyan;
+    }
+  }
+  .backgroundCyan {
+    background-color: @cyan;
+  }
+  .foregroundWhite {
+    color: @white;
+    &.bright {
+      color: @brightWhite;
+    }
+  }
+  .backgroundWhite {
+    background-color: @white;
+  }
+
+}

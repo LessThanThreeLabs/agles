@@ -1,14 +1,14 @@
-/* Copyright 2012, Jonathan Cheung Licensed and released under the MIT 
+/* Copyright 2012, Jonathan Cheung Licensed and released under the MIT
    license. Refer to MIT-LICENSE.txt.
-   
-   A nodejs script that allows you to watch a folder for changes and 
+
+   A nodejs script that allows you to watch a folder for changes and
    compile the less css files into another folder.
 
-   Always give credit where it's due. Parts of this script is modified 
+   Always give credit where it's due. Parts of this script is modified
    from Mikeal Rogers's watch script (https://github.com/mikeal/watch)
 
    Usage:     node less-watch-compiler.js FOLDER_TO_WATCH FOLDER_TO_OUTPUT
-   Example:   "node less-watch-compiler.js less css" will watch ./less folder 
+   Example:   "node less-watch-compiler.js less css" will watch ./less folder
               and compile the less css files into ./css when they are added/changed
 */
 var allowedExtensions = ["less"];
@@ -166,8 +166,12 @@ function compileCSS(file){
     if (directory !== null) {
       fs.mkdir(argvs[1] + '/' + directory);
     }
-
-    var command = "lessc "+file.replace(/\s+/g,"\\ ")+" "+argvs[1]+"/"+filename.replace(/\s+/g,"\\ ")+".css";
+    var destination = argvs[1]+"/"+filename.replace(/\s+/g,"\\ ")+".css";
+    var dirname = destination.replace(/\\/g,"/").replace(/\/[^\/]*$/, "");
+    exec("mkdir -p " + dirname, function (){
+      // Do nothing
+    });
+    var command = "lessc "+file.replace(/\s+/g,"\\ ")+" "+destination;
     console.log("Command: '"+command+"'");
     // Run the command
     exec(command, function (error, stdout, stderr){
@@ -183,8 +187,8 @@ function compileCSS(file){
 function filterFiles(f, stat){
   var filename = getFilenameWithoutExtention(f);
   var extension = getFileExtension(f);
-  if (filename.substr(0,1) == "_" || 
-      filename.substr(0,1) == "." || 
+  if (filename.substr(0,1) == "_" ||
+      filename.substr(0,1) == "." ||
       filename == "" //||
       // allowedExtensions.indexOf(extension) == -1
       ) {
@@ -192,13 +196,13 @@ function filterFiles(f, stat){
   }
   else{
     return false;
-  }   
+  }
 }
 
-// Here's where we setup the watch function 
+// Here's where we setup the watch function
 watchTree(
-  argvs[0], 
-  {interval: 500, ignoreDotFiles:true,filter:filterFiles}, 
+  argvs[0],
+  {interval: 500, ignoreDotFiles:true,filter:filterFiles},
   function (f, curr, prev) {
     if (typeof f == "object" && prev === null && curr === null) {
       // Finished walking the tree
