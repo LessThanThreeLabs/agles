@@ -52,8 +52,11 @@ compile:
   - compile_platform:
       path: ci/platform
       script: python setup.py install
-  - compile_web:
+  - compile_webserver:
       path: ci/web/back
+      script: ./compile.sh
+  - compile_website:
+      path: ci/web/front
       script: ./compile.sh
 test:
   - all_tests:
