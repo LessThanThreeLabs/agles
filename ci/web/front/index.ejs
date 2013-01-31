@@ -12,7 +12,7 @@
 		<div id="headerContanier">
 			<div id="header" ng-controller="Header">
 				<span id="headerTitle" ng-click="visitHome()" unselectable>Koality</span>
-				<div id="headerOptions">
+				<div id="headerOptions" ng-cloak>
 					<span class="headerOption" ng-show="!loggedIn" ng-click="visitLogin()" unselectable>Login</span>
 					<span class="headerOption" ng-show="loggedIn" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
 						<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
