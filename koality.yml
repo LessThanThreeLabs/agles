@@ -55,7 +55,10 @@ compile:
       script: python setup.py install
   - compile_web:
       path: ci/web/back
-      script: ./compile.sh
+      script:
+        - ./compile.sh
+        - cd front
+        - timeout 3 ./continuousCompile.sh || true
 test:
   - all_tests:
       path: ci/platform
