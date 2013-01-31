@@ -49,7 +49,6 @@ angular.module('koality.service', []).
 		unsubscribe: unsubscribeHandler
 	])
 
-
 angular.module('koality.directive', []).
 	directive('unselectable', () ->
 		return (scope, element, attributes) ->
@@ -174,7 +173,6 @@ angular.module('koality.directive', []).
 			</div>'
 	)
 
-
 angular.module('koality.filter', ['koality.service']).
 	filter('ansiparse', () ->
 		(input) ->
@@ -184,7 +182,6 @@ angular.module('koality.filter', ['koality.service']).
 		(input) ->
 			return fileSuffixAdder.addFileSuffix input
 	])
-
 
 angular.module('koality', ['koality.service', 'koality.directive', 'koality.filter']).
 	config(['$routeProvider', ($routeProvider) ->

@@ -35,7 +35,6 @@ describe 'Koality filters', () ->
 		it 'should overwrite old characters with new styles', () ->
 			expect(ansiparse 'plain\x1b[0G\x1b[32mgreen').toBe '<span class="foregroundGreen backgroundDefault">green</span>'
 
-
 	describe 'fileSuffix filter', () ->
 		fileSuffix = null
 		suffixString = '_qa8aset32'
