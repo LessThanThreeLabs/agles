@@ -13,7 +13,7 @@
 			<input ng-model="query">
 		</div>
 		<div id="repositoryChanges">
-			<div class="repositoryChange" ng-repeat="change in changes" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId}">{{change.number}}</div>
+			<div class="repositoryChange" ng-repeat="change in changes" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', failed: change.status == 'failed'}">{{change.number}}</div>
 		</div>
 	</div>
 

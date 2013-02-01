@@ -5,6 +5,10 @@ window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, 
 		$scope.changes = (createRandomChange number for number in [0..137]).reverse()
 		$scope.currentChangeId ?= $scope.changes[0].id
 
+		$scope.changes[0].status = 'queued'
+		$scope.changes[1].status = 'running'
+		$scope.changes[2].status = 'running'
+
 	$scope.name = 'awesome.git'
 	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
 
@@ -24,4 +28,7 @@ window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, 
 createRandomChange = (number) ->
 	id: Math.floor Math.random() * 10000
 	number: number
-	status: if Math.random() > .5 then 'passed' else 'failed'
+	status: createRandomStatus()
+
+createRandomStatus = () ->
+	if Math.random() > .25 then 'passed' else 'failed'
