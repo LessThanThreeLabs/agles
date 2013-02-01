@@ -58,7 +58,8 @@ describe 'Koality directives', () ->
 		beforeEach () ->
 			inject ($rootScope, $compile) ->
 				scope = $rootScope.$new()
-				element = angular.element '<menu menu-options="[\'optionA\', \'optionB\', \'optionC\', \'optionD\']" default-menu-option="optionB" menu-option-click="handleClick(option)">
+				scope.currentOptionName = 'optionB'
+				element = angular.element '<menu options="[{title: \'Option A\', name: \'optionA\'}, {title: \'Option B\', name: \'optionB\'}, {title: \'Option C\', name: \'optionC\'}]" current-option-name="currentOptionName" option-click="handleClick(optionName)">
 						<div class="prettyMenuContent" option="optionA">blahA</div>
 						<div class="prettyMenuContent" option="optionB">blahB</div>
 						<div class="prettyMenuContent" option="optionC">blahC</div>
@@ -69,9 +70,13 @@ describe 'Koality directives', () ->
 
 		it 'should render the correct number of options', () ->
 			options = element.find '.prettyMenuOption'
-			expect(options.length).toBe 4
+			expect(options.length).toBe 3
 
-		it 'should handle option click properly', () ->
+		it 'should have the current option name selected', () ->
+			selectedOption = element.find '.prettyMenuOption.selected'
+			expect(selectedOption.html()).toBe 'Option B'
+
+		it 'should call handleClick() on option click with correct values', () ->
 			scope.handleClick = (dropdownOptionName) ->
 			spyOn(scope, 'handleClick')
 
@@ -87,6 +92,22 @@ describe 'Koality directives', () ->
 
 			options.eq(0).click()
 			expect(scope.handleClick.calls.length).toBe 3
+
+		it 'should select the correct option upon click', () ->
+			options = element.find '.prettyMenuOption'
+
+			options.eq(0).click()
+			expect(scope.currentOptionName).toBe 'optionA'
+
+			options.eq(2).click()
+			expect(scope.currentOptionName).toBe 'optionC'
+
+			options.eq(0).click()
+			expect(scope.currentOptionName).toBe 'optionA'
+
+			options.eq(1).click()
+			expect(scope.currentOptionName).toBe 'optionB'
+
 
 	describe 'modal directive', () ->
 		element = null
