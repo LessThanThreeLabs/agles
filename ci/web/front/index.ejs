@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <title>Koality</title>
 <link href='https://fonts.googleapis.com/css?family=Droid+Sans|Source+Code+Pro|Black+Ops+One' rel='stylesheet' type='text/css'>
+<style type="text/css">[ng\:cloak], [ng-cloak], .ng-cloak { display: none; }</style>
+
 <%- cssFiles %>
+
 </head>
 <body style="background-image:url('/img/backgrounds/irongrip<%- fileSuffix %>.png');">
 
@@ -12,9 +15,9 @@
 		<div id="headerContanier">
 			<div id="header" ng-controller="Header">
 				<span id="headerTitle" ng-click="visitHome()" unselectable>Koality</span>
-				<div id="headerOptions" ng-cloak>
+				<div id="headerOptions">
 					<span class="headerOption" ng-show="!loggedIn" ng-click="visitLogin()" unselectable>Login</span>
-					<span class="headerOption" ng-show="loggedIn" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
+					<span class="headerOption" ng-show="loggedIn" ng-click="profileClick()" unselectable ng-cloak>{{user.firstName}} {{user.lastName}}
 						<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
 					</span>
 					<span class="headerOption" ng-show="true" ng-click="repositoryClick()" unselectable>Repositories
@@ -33,6 +36,7 @@
 	var csrfToken = '<%- csrfToken %>'
 	var accountInformation = {email: '<%- email %>', firstName: '<%- firstName %>', lastName: '<%- lastName %>'}
 </script>
+
 <%- jsFiles %>
 
 <script type="text/javascript">
