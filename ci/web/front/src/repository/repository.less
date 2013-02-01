@@ -43,13 +43,35 @@
 		top: @finalTop;
 		left: 8px;
 		right: 8px;
-		height: 50px;
+		height: 40px;
 
 		@animateFromTopTime: 0.5s;
 		animation: animateFromTop @animateFromTopTime ease-out;
 		-moz-animation: animateFromTop @animateFromTopTime ease-out;
 		-webkit-animation: animateFromTop @animateFromTopTime ease-out;
 		-o-animation: animateFromTop @animateFromTopTime ease-out;
+
+		#repositoryHeaderTitle {
+			display: inline-block;
+			margin-top: 7px;
+			margin-left: 10px;
+			font-size: 1.8em;
+		}
+
+		#repositoryHeaderLink {
+			float: right;
+			display: inline-block;
+			margin-top: 7px;
+			margin-right: 10px;
+			padding: 6px 15px 6px 15px;
+			background-color: rgba(50, 55, 60, 1.0);
+			border-radius: 3px;
+
+			@boxShadowColor: #4B4B4B;
+			box-shadow: 1px 1px @boxShadowColor;
+			-moz-box-shadow: 1px 1px @boxShadowColor;
+			-webkit-box-shadow: 1px 1px @boxShadowColor;
+		}
 	}	
 
 	#repositoryChangesPanel {
@@ -76,7 +98,7 @@
 		}
 
 		position: absolute;
-		top: 68px;
+		top: 58px;
 		left: @finalLeft;
 		bottom: 10px;
 		width: 150px;
@@ -90,7 +112,7 @@
 
 	#repositoryChangeDetailsPanel {
 		position: absolute;
-		top: 68px;
+		top: 58px;
 		left: 168px;
 		right: 8px;
 		bottom: 10px;

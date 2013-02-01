@@ -54,6 +54,10 @@ angular.module('koality.directive', []).
 		return (scope, element, attributes) ->
 			element.addClass 'unselectable'
 	).
+	directive('textSelectable', () ->
+		return (scope, element, attributes) ->
+			element.addClass 'textSelectable'
+	).
 	directive('focused', () ->
 		return (scope, element, attributes) ->
 			element.focus()
