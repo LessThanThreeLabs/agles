@@ -16,9 +16,9 @@ window.Header = ['$scope', '$location', 'initialState', 'socket', ($scope, $loca
 		if profileOption is 'account' then $location.path('/account').search(null)
 		else console.log performLogout()
 
-	$scope.repositoryDropdownOptions = [{title: 'Repository 1', name: 17}, {title: 'Repository 2', name: 18}]
-	$scope.repositoryDropdownOptionClick = (repositoryId) ->
-		$location.path('/repository/' + repositoryId).search(null)
+	$scope.repositoryDropdownOptions = [{title: 'awesome.git', name: 'awesome'}, {title: 'neat.git', name: 'neat'}]
+	$scope.repositoryDropdownOptionClick = (repositoryName) ->
+		$location.path('/repository/' + repositoryName).search(null)
 
 	performLogout = () ->
 		socket.makeRequest 'users', 'update', 'logout', null, (error) ->
