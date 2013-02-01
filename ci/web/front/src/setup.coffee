@@ -58,17 +58,14 @@ angular.module('koality.directive', []).
 		return (scope, element, attributes) ->
 			element.addClass 'textSelectable'
 	).
-	directive('highlightOnFirstClick', ['$window', ($window) ->
+	directive('highlightOnFirstClick', () ->
 		return (scope, element, attributes) ->
 			highlightText = () ->
-				range = document.createRange()
-				range.selectNode element[0]
-				$window.getSelection().removeAllRanges()
-				$window.getSelection().addRange range
+				element.select()
 				element.unbind 'click', highlightText
 
 			element.bind 'click', highlightText
-	]).
+	).
 	directive('focused', () ->
 		return (scope, element, attributes) ->
 			element.focus()
