@@ -100,25 +100,26 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		scope:
-			selectedOption: '@defaultMenuOption'
-			clickHandler: '&menuOptionClick'
+		scope: 
+			currentOptionName: '=currentOptionName'
+			clickHandler: '&optionClick'
 		template: '<div class="prettyMenu">
 				<div class="prettyMenuOptions">
-					<div class="prettyMenuOption" ng-repeat="option in options" ng-class="{selected: option == selectedOption}" ng-click="clickHandler({option: option}); internalClickHandler(option)">{{option}}</div>
+					<div class="prettyMenuOption" ng-repeat="option in options" ng-class="{selected: option.name == currentOptionName}" ng-click="clickHandler({optionName: option.name}); internalClickHandler(option)">{{option.title}}</div>
 				</div>
 				<div class="prettyMenuContents" ng-transclude></div>
 			</div>'
 		compile: (element, attributes, transclude) ->
 			pre: (scope, element, attributes, controller) ->
-				scope.options = scope.$eval attributes.menuOptions
+				scope.options = scope.$eval attributes.options
 			post: (scope, element, attributes, controller) ->
-				scope.$watch 'selectedOption', () ->
+				scope.$watch 'currentOptionName', () ->
 					element.find('.prettyMenuContent').removeClass 'selected'
-					element.find(".prettyMenuContent[option='#{scope.selectedOption}']").addClass 'selected'
+					element.find(".prettyMenuContent[optionName='#{scope.currentOptionName}']").addClass 'selected'
 
 				scope.internalClickHandler = (option) ->
-					scope.selectedOption = option
+					scope.currentOptionName = option.name
+
 	).
 	directive('modal', ['$document', ($document) ->
 		restrict: 'E'
@@ -195,6 +196,9 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				controller: Login
 			).
 			when('/account',
+				redirectTo: '/account/basic'
+			).
+			when('/account/:menuOption',
 				templateUrl: "/html/account#{fileSuffix}.html"
 				controller: Account
 			).

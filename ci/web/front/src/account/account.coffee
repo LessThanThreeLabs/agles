@@ -1,7 +1,9 @@
 'use strict'
 
-window.Account = ['$scope', 'fileSuffixAdder', ($scope, fileSuffixAdder) ->
-
+window.Account = ['$scope', '$location', '$routeParams', 'fileSuffixAdder', ($scope, $location, $routeParams, fileSuffixAdder) ->
+	$scope.currentView = $routeParams.menuOption
+	$scope.menuOptionClick = (optionName) ->
+		$location.path('/account/' + optionName).replace()
 ]
 
 window.AccountBasic = ['$scope', 'accountInformation', 'socket', ($scope, accountInformation, socket) ->

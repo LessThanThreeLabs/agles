@@ -1,7 +1,7 @@
 <div id="account">
 	<centered-panel panel-title="Account">
-		<menu menu-options="['Basic', 'Password', 'SSH Keys']" default-menu-option="Basic" menu-option-click="menuOptionClick(option)">
-			<div id="accountBasic" class="prettyMenuContent" option="Basic" ng-controller="AccountBasic">
+		<menu options="[{title: 'Basic', name: 'basic'}, {title: 'Password', name: 'password'}, {title: 'SSH Keys', name: 'sshKeys'}]" current-option-name="currentView" option-click="menuOptionClick(optionName)">
+			<div id="accountBasic" class="prettyMenuContent" optionName="basic" ng-controller="AccountBasic">
 				<styled-form name="basicForm">
 					<styled-form-field label="First name">
 						<input type="text" ng-model="account.firstName" name="firstName" placeholder="First" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required focused>
@@ -22,7 +22,7 @@
 				</div>
 			</div>
 
-			<div id="accountPassword" class="prettyMenuContent" option="Password" ng-controller="AccountPassword">
+			<div id="accountPassword" class="prettyMenuContent" optionName="password" ng-controller="AccountPassword">
 				<styled-form name="passwordForm">
 					<styled-form-field label="Old password">
 						<input type="password" ng-model="account.oldPassword" name="oldPassword" placeholder="old p4ssW0rd" required focused>
@@ -46,7 +46,7 @@
 				</div>
 			</div>
 
-			<div id="accountSshKeys" class="prettyMenuContent" option="SSH Keys" ng-controller="AccountSshKeys">
+			<div id="accountSshKeys" class="prettyMenuContent" optionName="sshKeys" ng-controller="AccountSshKeys">
 				<table id="sshKeysTable" class="prettyTable">
 					<tr class="title">
 						<td class="aliasColumn">Alias</td><td class="createdColumn">Created</td><td class="removeColumn">Remove</td>
