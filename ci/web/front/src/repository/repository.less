@@ -90,23 +90,78 @@
 			to { left: @finalLeft; }
 		}
 
+		@bottomBorderColor: rgba(109, 113, 131, 0.14);
+
 		position: absolute;
 		top: 58px;
 		left: @finalLeft;
 		bottom: 10px;
-		width: 150px;
+		width: 175px;
 
 		@animateFromLeftTime: 0.5s;
 		animation: animateFromLeft @animateFromLeftTime ease-out;
 		-moz-animation: animateFromLeft @animateFromLeftTime ease-out;
 		-webkit-animation: animateFromLeft @animateFromLeftTime ease-out;
 		-o-animation: animateFromLeft @animateFromLeftTime ease-out;
+
+		#repositoryChangesSearch {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			height: 35px;
+			border-bottom: 1px solid @bottomBorderColor;
+
+			input {
+				position: absolute;
+				top: 0px;
+				left: 30px;
+				right: 0px;
+				bottom: 0px;
+				color: #D0D0D0;
+				font-size: 18px;
+				border: none;
+				background-color: rgba(0, 0, 0, 0.0);
+
+				&:focus {
+					outline: none;
+				}
+			}
+		}
+
+		#repositoryChanges {
+			position: absolute;
+			top: 40px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			overflow-y: auto;
+
+			.repositoryChange {
+				height: 35px;
+				text-align: center;
+				font-size: 14px;
+				line-height: 35px;
+				font-weight: bold;
+				border-bottom: 1px solid @bottomBorderColor;
+
+				@backgroundColorTransitionTime: 0.5s;
+				transition: background-color @backgroundColorTransitionTime ease-out;
+				-moz-transition: background-color @backgroundColorTransitionTime ease-out;
+				-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+				-o-transition: background-color @backgroundColorTransitionTime ease-out;
+
+				&:hover {
+					background-color: rgba(20, 20, 20, 0.75);
+				}
+			}
+		}
 	}
 
 	#repositoryChangeDetailsPanel {
 		position: absolute;
 		top: 58px;
-		left: 168px;
+		left: 193px;
 		right: 8px;
 		bottom: 10px;
 	}
