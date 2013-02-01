@@ -1,4 +1,98 @@
 #repository {
+	@panelBackgroundColor: rgba(40, 40, 40, 1.0);
+
 	width: 100%;
 	height: 100%;
+
+	#repositoryHeaderPanel, #repositoryChangesPanel, #repositoryChangeDetailsPanel {
+		background-color: @panelBackgroundColor;
+		border-radius: 4px;
+
+		@boxShadowBlur: 2px;
+		@boxShadowSpread: 2px;
+		@boxShadowColor: #101010;
+		box-shadow: 0 2px @boxShadowBlur @boxShadowSpread @boxShadowColor;
+		-moz-box-shadow: 0 2px @boxShadowBlur @boxShadowSpread @boxShadowColor;
+		-webkit-box-shadow: 0 2px @boxShadowBlur @boxShadowSpread @boxShadowColor;
+	}
+
+	#repositoryHeaderPanel {
+		@beginningTop: -100px;
+		@finalTop: 8px;
+		@keyframes animateFromTop { 
+			from { top: @beginningTop; }
+			to { top: @finalTop; }
+		}
+
+		@-moz-keyframes animateFromTop {
+			from { top: @beginningTop; }
+			to { top: @finalTop; }
+		}
+
+		@-webkit-keyframes animateFromTop {
+			from { top: @beginningTop; }
+			to { top: @finalTop; }
+		}
+
+		@-o-keyframes animateFromTop {
+			from { top: @beginningTop; }
+			to { top: @finalTop; }
+		}
+
+		position: absolute;
+		top: @finalTop;
+		left: 8px;
+		right: 8px;
+		height: 50px;
+
+		@animateFromTopTime: 0.5s;
+		animation: animateFromTop @animateFromTopTime ease-out;
+		-moz-animation: animateFromTop @animateFromTopTime ease-out;
+		-webkit-animation: animateFromTop @animateFromTopTime ease-out;
+		-o-animation: animateFromTop @animateFromTopTime ease-out;
+	}	
+
+	#repositoryChangesPanel {
+		@beginningLeft: -200px;
+		@finalLeft: 8px;
+		@keyframes animateFromLeft { 
+			from { left: @beginningLeft; }
+			to { left: @finalLeft; }
+		}
+
+		@-moz-keyframes animateFromLeft {
+			from { left: @beginningLeft; }
+			to { left: @finalLeft; }
+		}
+
+		@-webkit-keyframes animateFromLeft {
+			from { left: @beginningLeft; }
+			to { left: @finalLeft; }
+		}
+
+		@-o-keyframes animateFromLeft {
+			from { left: @beginningLeft; }
+			to { left: @finalLeft; }
+		}
+
+		position: absolute;
+		top: 68px;
+		left: @finalLeft;
+		bottom: 10px;
+		width: 150px;
+
+		@animateFromLeftTime: 0.5s;
+		animation: animateFromLeft @animateFromLeftTime ease-out;
+		-moz-animation: animateFromLeft @animateFromLeftTime ease-out;
+		-webkit-animation: animateFromLeft @animateFromLeftTime ease-out;
+		-o-animation: animateFromLeft @animateFromLeftTime ease-out;
+	}
+
+	#repositoryChangeDetailsPanel {
+		position: absolute;
+		top: 68px;
+		left: 168px;
+		right: 8px;
+		bottom: 10px;
+	}
 }
