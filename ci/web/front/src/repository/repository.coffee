@@ -1,20 +1,21 @@
 'use strict'
 
-window.Repository = ['$scope', ($scope) ->
+window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
 	$scope.name = 'awesome.git'
 	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
 
 	$scope.changes = (createRandomChange number for number in [0..137]).reverse()
-	$scope.currentChange = null
+	$scope.currentChangeId = $routeParams.id
 
 	$scope.changeClick = (change) ->
-		console.log 'change clicked!'
-		$scope.currentChange = change
+		$scope.currentChangeId = change.id
 
-	$scope.$watch 'currentChange', (newValue, oldValue) ->
-		console.log 'current change: ' + newValue
+	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
+		$location.search 'id', newValue ? null
 ]
 
 createRandomChange = (number) ->
+	id: Math.floor Math.random() * 10000
 	number: number
 	status: if Math.random() > .5 then 'passed' else 'failed'
+	
