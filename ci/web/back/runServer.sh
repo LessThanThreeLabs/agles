@@ -3,6 +3,9 @@
 if [ "$(dirname $0)" != "." ]; then
 	echo 'You must run this script from its directory'
 elif [ -d 'js' ]; then
+	./compile.sh
+	cd front; ./compile.sh; cd ..
+
 	mkdir -p logs/redis
 	redis-server conf/redis/sessionStoreRedis.conf &
 	redis-server conf/redis/createAccountRedis.conf &
