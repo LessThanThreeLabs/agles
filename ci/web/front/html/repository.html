@@ -1,11 +1,15 @@
 <div id="repository">
 	<div id="repositoryHeaderPanel" unselectable>
 		<span id="repositoryHeaderTitle">> {{name}}</span>
-		<input id="repositoryHeaderLink" ng-model="link" highlight-on-first-click readonly>
+		<div id="repositoryHeaderLink">
+			<img ng-src="{{'/img/icons/link.png' | fileSuffix}}">
+			<input ng-model="link" highlight-on-first-click readonly>
+		</div>
 	</div>
 
 	<div id="repositoryChangesPanel" unselectable>
 		<div id="repositoryChangesSearch">
+			<img ng-src="{{'/img/icons/search.png' | fileSuffix}}">
 			<input ng-model="query">
 		</div>
 		<div id="repositoryChanges">

@@ -32,10 +32,19 @@
 
 		#repositoryHeaderLink {
 			float: right;
-			display: inline-block;
+			// display: inline-block;
 			margin-top: 7px;
 			margin-right: 10px;
-			width: 300px;
+
+			img {
+				width: 30px;
+				vertical-align: top;
+			}
+
+			input {
+				width: 300px;
+				vertical-align: top;
+			}
 		}
 	}	
 
@@ -55,6 +64,13 @@
 			right: 0px;
 			height: 35px;
 			border-bottom: 1px solid @bottomBorderColor;
+
+			img {
+				position: absolute;
+				top: 6px;
+				left: 5px;
+				width: 22px;
+			}
 
 			input {
 				position: absolute;
