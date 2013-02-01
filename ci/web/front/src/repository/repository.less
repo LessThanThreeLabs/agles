@@ -17,39 +17,11 @@
 	}
 
 	#repositoryHeaderPanel {
-		@beginningTop: -100px;
-		@finalTop: 8px;
-		@keyframes animateFromTop { 
-			from { top: @beginningTop; }
-			to { top: @finalTop; }
-		}
-
-		@-moz-keyframes animateFromTop {
-			from { top: @beginningTop; }
-			to { top: @finalTop; }
-		}
-
-		@-webkit-keyframes animateFromTop {
-			from { top: @beginningTop; }
-			to { top: @finalTop; }
-		}
-
-		@-o-keyframes animateFromTop {
-			from { top: @beginningTop; }
-			to { top: @finalTop; }
-		}
-
 		position: absolute;
-		top: @finalTop;
+		top: 8px;
 		left: 8px;
 		right: 8px;
 		height: 40px;
-
-		@animateFromTopTime: 0.5s;
-		animation: animateFromTop @animateFromTopTime ease-out;
-		-moz-animation: animateFromTop @animateFromTopTime ease-out;
-		-webkit-animation: animateFromTop @animateFromTopTime ease-out;
-		-o-animation: animateFromTop @animateFromTopTime ease-out;
 
 		#repositoryHeaderTitle {
 			display: inline-block;
@@ -68,41 +40,13 @@
 	}	
 
 	#repositoryChangesPanel {
-		@beginningLeft: -160px;
-		@finalLeft: 8px;
-		@keyframes animateFromLeft { 
-			from { left: @beginningLeft; }
-			to { left: @finalLeft; }
-		}
-
-		@-moz-keyframes animateFromLeft {
-			from { left: @beginningLeft; }
-			to { left: @finalLeft; }
-		}
-
-		@-webkit-keyframes animateFromLeft {
-			from { left: @beginningLeft; }
-			to { left: @finalLeft; }
-		}
-
-		@-o-keyframes animateFromLeft {
-			from { left: @beginningLeft; }
-			to { left: @finalLeft; }
-		}
-
 		@bottomBorderColor: rgba(109, 113, 131, 0.14);
 
 		position: absolute;
 		top: 58px;
-		left: @finalLeft;
+		left: 8px;
 		bottom: 10px;
 		width: 175px;
-
-		@animateFromLeftTime: 0.5s;
-		animation: animateFromLeft @animateFromLeftTime ease-out;
-		-moz-animation: animateFromLeft @animateFromLeftTime ease-out;
-		-webkit-animation: animateFromLeft @animateFromLeftTime ease-out;
-		-o-animation: animateFromLeft @animateFromLeftTime ease-out;
 
 		#repositoryChangesSearch {
 			position: absolute;

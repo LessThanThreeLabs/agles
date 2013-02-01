@@ -1,11 +1,15 @@
 'use strict'
 
 window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
+	retrieveChanges = () ->
+		$scope.changes = (createRandomChange number for number in [0..137]).reverse()
+		$scope.currentChangeId ?= $scope.changes[0].id
+
 	$scope.name = 'awesome.git'
 	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
 
-	$scope.changes = (createRandomChange number for number in [0..137]).reverse()
-	$scope.currentChangeId = $routeParams.id
+	$scope.currentChangeId = $routeParams.id ? null
+	retrieveChanges()
 
 	$scope.changeClick = (change) ->
 		if $scope.currentChangeId is change.id
@@ -14,7 +18,7 @@ window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, 
 			$scope.currentChangeId = change.id
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
-		$location.search 'id', newValue ? null
+		$location.search 'id', newValue
 ]
 
 createRandomChange = (number) ->
