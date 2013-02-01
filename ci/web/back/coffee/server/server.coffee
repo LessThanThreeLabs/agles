@@ -105,6 +105,7 @@ class Server
 		expressServer.get '/create/account', @handlers.indexHandler.handleRequest
 		expressServer.get '/recoverPassword', @handlers.indexHandler.handleRequest
 		expressServer.get '/repository/:repositoryId', @handlers.indexHandler.handleRequest
+		expressServer.get '/repository/:repositoryId/:repositoryView', @handlers.indexHandler.handleRequest
 		expressServer.get '/about', @handlers.indexHandler.handleRequest
 
 		# expressServer.get '/', @handlers.welcomeHandler.handleRequest
