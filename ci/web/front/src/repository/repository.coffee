@@ -8,7 +8,10 @@ window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, 
 	$scope.currentChangeId = $routeParams.id
 
 	$scope.changeClick = (change) ->
-		$scope.currentChangeId = change.id
+		if $scope.currentChangeId is change.id
+			$scope.currentChangeId = null
+		else
+			$scope.currentChangeId = change.id
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'id', newValue ? null
@@ -18,4 +21,3 @@ createRandomChange = (number) ->
 	id: Math.floor Math.random() * 10000
 	number: number
 	status: if Math.random() > .5 then 'passed' else 'failed'
-	
