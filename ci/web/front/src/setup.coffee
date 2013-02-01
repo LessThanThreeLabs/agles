@@ -208,15 +208,13 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				controller: Login
 			).
 			when('/account',
-				redirectTo: '/account/basic'
-			).
-			when('/account/:menuOption',
 				templateUrl: "/html/account#{fileSuffix}.html"
 				controller: Account
 			).
 			when('/create/account',
 				templateUrl: "/html/createAccount#{fileSuffix}.html"
 				controller: CreateAccount
+				reloadOnSearch: false
 			).
 			when('/recoverPassword',
 				templateUrl: "/html/recoverPassword#{fileSuffix}.html"
