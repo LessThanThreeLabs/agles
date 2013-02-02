@@ -7,13 +7,21 @@ window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, 
 
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
 	retrieveChanges = () ->
-		$scope.changes = (createRandomChange number for number in [0..137]).reverse()
-		$scope.currentChangeId ?= $scope.changes[0].id
+		maxChanges = 9001
+		max = maxChanges - $scope.changes.length
+		min = maxChanges - $scope.changes.length - 100
 
-		$scope.changes[0].status = 'queued'
-		$scope.changes[1].status = 'running'
-		$scope.changes[2].status = 'running'
+		setTimeout (() ->			
+			$scope.$apply () ->
+				$scope.changes = $scope.changes.concat (createRandomChange number for number in [min..max].reverse())
+				$scope.currentChangeId ?= $scope.changes[0].id
 
+				$scope.changes[0].status = 'queued'
+				$scope.changes[1].status = 'running'
+				$scope.changes[2].status = 'running'
+		), 500
+
+	$scope.changes = []
 	$scope.currentChangeId = $routeParams.id ? null
 	retrieveChanges()
 
@@ -23,9 +31,8 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'id', newValue
 
-
 	$scope.scrolledToBottom = () ->
-		console.log 'scrolled to bottom!!'
+		retrieveChanges()
 ]
 
 window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
