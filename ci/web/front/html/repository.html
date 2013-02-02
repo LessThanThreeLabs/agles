@@ -7,7 +7,7 @@
 		</div>
 	</div>
 
-	<div id="repositoryChangesPanel" unselectable>
+	<div id="repositoryChangesPanel" unselectable ng-controller="RepositoryChanges">
 		<div id="repositoryChangesSearch">
 			<img ng-src="{{'/img/icons/search.png' | fileSuffix}}">
 			<input ng-model="query">
@@ -17,7 +17,7 @@
 		</div>
 	</div>
 
-	<div id="repositoryChangeDetailsPanel" ng-show="currentChangeId">
+	<div id="repositoryChangeDetailsPanel" ng-controller="RepositoryDetails">
 
 	</div>
 </div>

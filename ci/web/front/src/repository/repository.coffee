@@ -1,6 +1,11 @@
 'use strict'
 
 window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
+	$scope.name = 'awesome.git'
+	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
+]
+
+window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
 	retrieveChanges = () ->
 		$scope.changes = (createRandomChange number for number in [0..137]).reverse()
 		$scope.currentChangeId ?= $scope.changes[0].id
@@ -9,26 +14,35 @@ window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, 
 		$scope.changes[1].status = 'running'
 		$scope.changes[2].status = 'running'
 
-	$scope.name = 'awesome.git'
-	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
-
 	$scope.currentChangeId = $routeParams.id ? null
 	retrieveChanges()
 
 	$scope.changeClick = (change) ->
-		if $scope.currentChangeId is change.id
-			$scope.currentChangeId = null
-		else
-			$scope.currentChangeId = change.id
+		$scope.currentChangeId = if $scope.currentChangeId is change.id then null else change.id
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'id', newValue
 ]
 
+window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
+
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 createRandomChange = (number) ->
 	id: Math.floor Math.random() * 10000
 	number: number
-	status: createRandomStatus()
-
-createRandomStatus = () ->
-	if Math.random() > .25 then 'passed' else 'failed'
+	status: if Math.random() > .25 then 'passed' else 'failed'
