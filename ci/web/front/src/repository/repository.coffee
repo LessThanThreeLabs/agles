@@ -22,6 +22,10 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'id', newValue
+
+
+	$scope.scrolledToBottom = () ->
+		console.log 'scrolled to bottom!!'
 ]
 
 window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->

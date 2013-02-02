@@ -133,6 +133,13 @@ angular.module('koality.directive', []).
 					scope.currentOptionName = option.name
 
 	).
+	directive('notifyOnBottomScroll', () ->
+		restrict: 'A'
+		link: (scope, element, attributes) ->
+			element.bind 'scroll', () ->
+				if element[0].scrollTop + element[0].offsetHeight >= element[0].scrollHeight
+					scope.$apply attributes.notifyOnBottomScroll
+	).
 	directive('modal', ['$document', ($document) ->
 		restrict: 'E'
 		replace: true
