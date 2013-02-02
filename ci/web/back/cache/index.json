@@ -28,9 +28,9 @@
 			"/js/libs/angular.js",
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
+			"/js/libs/d3.js",
 
 			"/js/src/setup.js",
-
 			"/js/src/header/header.js",
 			"/js/src/welcome/welcome.js",
 			"/js/src/login/login.js",
