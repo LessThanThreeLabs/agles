@@ -98,7 +98,27 @@
 			overflow-y: auto;
 
 			.repositoryChange {
+				@startColor: rgba(0, 184, 255, 0.4);
+				@finalColor: rgba(0, 184, 255, 1.0);
+				@keyframes heartbeat { 
+					from { color: @startColor; }
+					to { color: @finalColor; }
+				}
+				@-moz-keyframes heartbeat { 
+					from { color: @startColor; }
+					to { color: @finalColor; }
+				}
+				@-webkit-keyframes heartbeat { 
+					from { color: @startColor; }
+					to { color: @finalColor; }
+				}
+				@-o-keyframes heartbeat { 
+					from { color: @startColor; }
+					to { color: @finalColor; }
+				}
+
 				height: 35px;
+				color: #D0D0D0;
 				text-align: center;
 				font-size: 14px;
 				line-height: 35px;
@@ -120,15 +140,29 @@
 				}
 
 				&.failed {
-					color: rgba(255, 0, 0, 1.0);
+					color: rgba(160, 0, 0, 1.0);
 				}
 
 				&.queued {
-					color: rgba(0, 184, 255, 1.0);
+					color: @startColor;
+
+					@heartbeatSpeed: 3.0s;
+					@heartbeatDelay: 0.0s;
+					animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
 				}
 
 				&.running {
-					color: rgba(0, 184, 255, 1.0);
+					color: @startColor;
+
+					@heartbeatSpeed: 1.5s;
+					@heartbeatDelay: 0.0s;
+					animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
 				}
 
 				&.passed {
