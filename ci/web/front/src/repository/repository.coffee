@@ -33,6 +33,9 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 
 	$scope.scrolledToBottom = () ->
 		retrieveChanges()
+
+	$scope.$watch 'query', (newValue, oldValue) ->
+		console.log 'query changed: ' + newValue
 ]
 
 window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->

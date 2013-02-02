@@ -217,11 +217,11 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 			when('/account',
 				templateUrl: "/html/account#{fileSuffix}.html"
 				controller: Account
+				reloadOnSearch: false
 			).
 			when('/create/account',
 				templateUrl: "/html/createAccount#{fileSuffix}.html"
 				controller: CreateAccount
-				reloadOnSearch: false
 			).
 			when('/recoverPassword',
 				templateUrl: "/html/recoverPassword#{fileSuffix}.html"
@@ -234,6 +234,10 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
 				reloadOnSearch: false
+			).
+			when('/create/repository',
+				templateUrl: "/html/createRepository#{fileSuffix}.html"
+				controller: CreateRepository
 			).
 			when('/about',
 				templateUrl: "/html/about#{fileSuffix}.html"

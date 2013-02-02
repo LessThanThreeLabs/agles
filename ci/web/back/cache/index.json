@@ -17,6 +17,7 @@
 			"/css/src/createAccount/createAccount.css",
 			"/css/src/recoverPassword/recoverPassword.css",
 			"/css/src/repository/repository.css",
+			"/css/src/createRepository/createRepository.css",
 			"/css/src/about/about.css"
 		]
 	},
@@ -37,6 +38,7 @@
 			"/js/src/createAccount/createAccount.js",
 			"/js/src/recoverPassword/recoverPassword.js",
 			"/js/src/repository/repository.js",
+			"/js/src/createRepository/createRepository.js",
 			"/js/src/util/ansiparse.js",
 			"/js/src/about/about.js"
 		]
@@ -64,6 +66,7 @@
 			"/html/createAccount.html",
 			"/html/recoverPassword.html",
 			"/html/repository.html",
+			"/html/createRepository.html",
 			"/html/about.html"
 		]
 	}
