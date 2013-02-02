@@ -1,9 +1,9 @@
 'use strict'
 
-window.CreateRepository = ['$scope', '$location', 'socket', ($scope, $location, socket) ->
+window.AddRepository = ['$scope', '$location', 'socket', ($scope, $location, socket) ->
 	$scope.repository = {}
 
-	$scope.createRepository = () ->
+	$scope.addRepository = () ->
 		socket.makeRequest 'repositories', 'create', 'createRepository', $scope.repository, (result) ->
 			console.log 'result: ' + result
 ]

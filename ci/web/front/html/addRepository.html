@@ -1,22 +1,22 @@
-<div id="createRepository">
-	<centered-panel panel-title="Create a Repository">
-		<styled-form name="createRepositoryForm">
+<div id="addRepository">
+	<centered-panel panel-title="Add a Repository">
+		<styled-form name="addRepositoryForm">
 			<styled-form-field label="Alias">
 				<input type="text" ng-model="repository.alias" name="alias" placeholder="alias" ng-pattern="/^[A-Za-z0-9-_]+$/" ng-maxlength="64" required focused>
-				<span class="prettyFormError" tooltip="Alias contains invalid characters" ng-class="{visible: createRepositoryForm.alias.$dirty && createRepositoryForm.alias.$invalid}">
+				<span class="prettyFormError" tooltip="Alias contains invalid characters" ng-class="{visible: addRepositoryForm.alias.$dirty && addRepositoryForm.alias.$invalid}">
 					<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 				</span>
 			</styled-form-field>
 			<styled-form-field label="Forward Url">
 				<input type="text" ng-model="repository.forwardUrl" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
-				<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: createRepositoryForm.forwardUrl.$dirty && createRepositoryForm.forwardUrl.$invalid}">
+				<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: addRepositoryForm.forwardUrl.$dirty && addRepositoryForm.forwardUrl.$invalid}">
 					<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 				</span>
 			</styled-form-field>
 		</styled-form>
 
-		<div id="createRepositoryButtonContainer">
-			<button ng-click="createRepository()" ng-disabled="createRepositoryForm.$invalid">Create</button>
+		<div id="addRepositoryButtonContainer">
+			<button ng-click="addRepository()" ng-disabled="addRepositoryForm.$invalid">Add</button>
 		</div>
 	</centered-panel>
 </div>

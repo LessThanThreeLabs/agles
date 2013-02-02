@@ -235,9 +235,9 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				controller: Repository
 				reloadOnSearch: false
 			).
-			when('/create/repository',
-				templateUrl: "/html/createRepository#{fileSuffix}.html"
-				controller: CreateRepository
+			when('/add/repository',
+				templateUrl: "/html/addRepository#{fileSuffix}.html"
+				controller: AddRepository
 			).
 			when('/about',
 				templateUrl: "/html/about#{fileSuffix}.html"
