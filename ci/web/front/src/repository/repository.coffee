@@ -25,7 +25,8 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 ]
 
 window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
-
+	$scope.$on '$routeUpdate', () ->
+		console.log 'update to route!! ' + $routeParams.id
 ]
 
 
