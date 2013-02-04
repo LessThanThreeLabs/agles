@@ -43,6 +43,10 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $loc
 		console.log 'update to route!! ' + $routeParams.id
 
 	$scope.stages = (createRandomStage 'blah ' + number for number in [0..8])
+
+	$scope.currentStageId = null
+	$scope.stageClick = (stage) ->
+		$scope.currentStageId = if $scope.currentStageId is stage.id then null else stage.id
 ]
 
 

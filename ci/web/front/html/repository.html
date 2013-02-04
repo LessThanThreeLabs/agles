@@ -19,7 +19,7 @@
 
 	<div id="repositoryChangeDetailsPanel" ng-controller="RepositoryDetails">
 		<div id="repositoryChangeDetailsStages">
-			<span class="repositoryChangeStage" ng-repeat="stage in stages" ng-class="{queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}">{{stage.name}}</span>
+			<span class="repositoryChangeStage" ng-repeat="stage in stages" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, queued: stage.status == 'queued', running: stage.status == 'running', passed: stage.status == 'passed', failed: stage.status == 'failed'}">{{stage.name}}</span>
 		</div>
 		<div id="repositoryChangeDetailsOutput">
 

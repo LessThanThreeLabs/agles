@@ -200,12 +200,29 @@
 				display: inline-block;
 				margin: 0px 10px 10px 0px;
 				min-width: 100px;
-				height: 35px;
-				line-height: 35px;
+				height: 32px;
+				line-height: 32px;
 				text-align: center;
+				font-size: 1.1em;
 				font-weight: bold;
 				border-radius: 4px;
-				background-color: rgba(25, 25, 25, 1.0);
+				border: 3px solid rgb(45, 45, 45);
+
+				@transitionTime: 0.5s;
+				transition: all @transitionTime ease-out;
+				-moz-transition: all @transitionTime ease-out;
+				-webkit-transition: all @transitionTime ease-out;
+				-o-transition: all @transitionTime ease-out;
+
+				&:hover {
+					background-color: rgba(20, 20, 20, 0.75);
+					border-color: rgb(20, 20, 20);
+				}
+
+				&.selected {
+					background-color: rgba(20, 20, 20, 0.75);
+					border-color: rgb(20, 20, 20);
+				}
 
 				&.queued {
 					color: @heartbeatStartColor;
