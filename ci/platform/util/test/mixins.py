@@ -15,7 +15,7 @@ from kombu.connection import Connection
 
 from database.engine import ConnectionFactory
 from model_server import ModelServer
-from settings.rabbit import connection_info
+from settings.rabbit import RabbitSettings
 
 FILEDIR = os.path.dirname(os.path.realpath(__file__))
 REDISCONF = os.path.join(FILEDIR, '..', '..', 'conf', 'redis', 'filesystem_repo_server_redis.conf')
@@ -46,7 +46,7 @@ class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	def _start_model_server(self):
-		connection = Connection(connection_info)
+		connection = Connection(RabbitSettings.kombu_connection_info)
 		self.model_server_channel = connection.channel()
 		self.model_server_process = TestProcess(target=ModelServer(self.model_server_channel).start)
 		self.model_server_process.start()

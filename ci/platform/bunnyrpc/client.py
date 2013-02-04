@@ -9,7 +9,7 @@ import eventlet
 pika = eventlet.import_patched('pika')
 
 from bunnyrpc.exceptions import RPCRequestError
-from settings.rabbit import connection_parameters
+from settings.rabbit import RabbitSettings
 
 
 class ClientBase(object):
@@ -76,7 +76,7 @@ class Client(ClientBase):
 			remote_method, *args, **kwargs)
 
 	def _connect(self):
-		self.connection = pika.SelectConnection(connection_parameters,
+		self.connection = pika.SelectConnection(RabbitSettings.pika_connection_parameters,
 			self._on_connected)
 		self.connection.ioloop.start()
 

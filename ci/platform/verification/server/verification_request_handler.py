@@ -6,8 +6,8 @@ from kombu.connection import Connection
 
 from model_server import ModelServer
 from model_server.build_outputs import ConsoleType
-from settings.rabbit import connection_info
-from settings.verification_server import *
+from settings.rabbit import RabbitSettings
+from settings.verification_server import VerificationServerSettings
 from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
 from task_queue.task_worker import InfiniteWorker
@@ -21,7 +21,7 @@ class VerificationRequestHandler(InfiniteWorker):
 	"""
 	def __init__(self, verifier):
 		self.verifier = verifier
-		super(VerificationRequestHandler, self).__init__(verification_worker_queue)
+		super(VerificationRequestHandler, self).__init__(VerificationServerSettings.verification_worker_queue)
 		self._check_for_interrupted_build()
 		self._register_pubkey()
 
@@ -113,10 +113,17 @@ class VerificationRequestHandler(InfiniteWorker):
 		Sends a message denoting the return value and acks"""
 		def default_verify_callback(status, cleanup_function=lambda: None):
 			builds_update_rpc.mark_build_finished(build_id, status)
+<<<<<<< HEAD
 			with Connection(connection_info).Producer(serializer='msgpack') as producer:
 				producer.publish({'build_id': build_id, 'status': status},
 					exchange=verification_results_queue.exchange,
 					routing_key=verification_results_queue.routing_key,
+=======
+			with Connection(RabbitSettings.kombu_connection_info).Producer(serializer='msgpack') as producer:
+				producer.publish({'build_id': build_id, 'results': results},
+					exchange=VerificationServerSettings.verification_results_queue.exchange,
+					routing_key=VerificationServerSettings.verification_results_queue.routing_key,
+>>>>>>> 1be2e70... Made all settings auto-overridable, verification master is self cleaning, fakeVerifier is default
 					mandatory=True,
 				)
 			self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)

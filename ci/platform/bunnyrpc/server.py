@@ -25,7 +25,7 @@ import traceback
 
 from kombu.connection import Connection
 from kombu.entity import Exchange, Queue
-from settings.rabbit import connection_info
+from settings.rabbit import RabbitSettings
 
 
 class Server(object):
@@ -73,7 +73,7 @@ class Server(object):
 		if channel:
 			self.channel = channel
 		else:
-			connection = Connection(connection_info)
+			connection = Connection(RabbitSettings.kombu_connection_info)
 			self.channel = connection.channel()
 		self.consumer = self.channel.Consumer(callbacks=[self._handle_call])
 		self.producer = self.channel.Producer(serializer="msgpack")

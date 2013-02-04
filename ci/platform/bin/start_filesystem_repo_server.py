@@ -6,7 +6,7 @@ import settings.log
 
 from bunnyrpc.server import Server
 from repo.store import RepositoryStore, FileSystemRepositoryStore
-from settings import store
+from settings.store import StoreSettings
 
 DEFAULT_ROOT_DIR = "/repositories"
 
@@ -24,7 +24,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-e", "--exchange_name", help="The exchange to bind this server to")
 	parser.add_argument("-r", "--root_dir", help="The root directory to add repositories to")
-	parser.set_defaults(exchange_name=store.rpc_exchange_name, root_dir=DEFAULT_ROOT_DIR)
+	parser.set_defaults(exchange_name=StoreSettings.rpc_exchange_name, root_dir=DEFAULT_ROOT_DIR)
 	args = parser.parse_args()
 
 	root_dir = os.path.realpath(args.root_dir)

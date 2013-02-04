@@ -7,7 +7,7 @@ from nose.tools import *
 from shutil import rmtree
 from testconfig import config
 
-from settings.verification_server import box_name
+from settings.verification_server import VerificationServerSettings
 from shared.constants import BuildStatus
 from util.test import BaseIntegrationTest
 from util.test.fake_build_verifier import FakeBuildVerifier
@@ -22,11 +22,12 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 	RabbitMixin, RepoStoreTestMixin):
 	@classmethod
 	def setup_class(cls):
-		if config.get("fakeVerifier"):
-			cls.verifier = FakeBuildVerifier(passes=True)
-		else:
-			vagrant = Vagrant(VM_DIRECTORY, box_name)
+		cls.use_vagrant = config.get('useVagrant')
+		if cls.use_vagrant:
+			vagrant = Vagrant(VM_DIRECTORY, VerificationServerSettings.local_box_name)
 			cls.verifier = BuildVerifier.for_virtual_machine(vagrant)
+		else:
+			cls.verifier = FakeBuildVerifier(passes=True)
 		cls.verifier.setup()
 
 	@classmethod
@@ -51,8 +52,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._purge_queues()
 
 	def test_hello_world_repo(self):
-		if config.get("fakeVerifier"):
-			self.verifier = FakeBuildVerifier(passes=True)
+		if not self.use_vagrant:
+			self.verifier.passes = True
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
 		self._modify_commit_push(work_repo, "koality.yml",
@@ -63,8 +64,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 			lambda retval, cleanup=None: assert_equal(BuildStatus.PASSED, retval))
 
 	def test_bad_repo(self):
-		if config.get("fakeVerifier"):
-			self.verifier = FakeBuildVerifier(passes=False)
+		if not self.use_vagrant:
+			self.verifier.passes = False
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
 		self._modify_commit_push(work_repo, "koality.yml",

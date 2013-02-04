@@ -5,13 +5,13 @@ import util.pathgen
 from database.engine import ConnectionFactory
 from model_server.mediastore import S3MediaStore
 from model_server.rpc_handler import ModelServerRpcHandler
-from settings.aws.s3 import media_bucket
+from settings.aws.s3 import S3Settings
 
 
 class UsersCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(UsersCreateHandler, self).__init__("users", "create")
-		self.mediastore = S3MediaStore(media_bucket)
+		self.mediastore = S3MediaStore(S3Settings.media_bucket)
 
 	def upload_media(self, media_binary):
 		media = database.schema.media

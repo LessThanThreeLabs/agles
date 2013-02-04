@@ -2,14 +2,14 @@ import logging
 
 from kombu.connection import Connection
 from kombu.entity import Queue
-from settings.rabbit import connection_info
+from settings.rabbit import RabbitSettings
 
 
 class TaskQueue(object):
 	def __init__(self, connection=None):
 		self.logger = logging.getLogger("TaskQueue")
 		if not connection:
-			connection = Connection(connection_info)
+			connection = Connection(RabbitSettings.kombu_connection_info)
 		self.connection = connection
 		self.shared_work_queue = Queue(durable=False, auto_delete=True, queue_arguments={"x-expires": 86400000})(connection)  # delete if unused for a day
 		self.shared_work_queue.queue_declare()

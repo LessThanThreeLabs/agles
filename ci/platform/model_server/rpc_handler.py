@@ -1,7 +1,7 @@
 from bunnyrpc.server import Server
 from events_broker import EventsBroker
 from kombu.connection import Connection
-from settings.rabbit import connection_info
+from settings.rabbit import RabbitSettings
 
 
 class ModelServerRpcHandler(object):
@@ -27,6 +27,6 @@ class ModelServerRpcHandler(object):
 		rabbit connection info.
 		Not recommended for use with multiple events.
 		"""
-		with Connection(connection_info) as connection:
+		with Connection(RabbitSettings.kombu_connection_info) as connection:
 			broker = EventsBroker(connection)
 			broker.publish(_resource, _id, _event_type, **contents)

@@ -4,7 +4,7 @@ import os
 
 import settings.log
 
-from settings.verification_server import box_name
+from settings.verification_server import VerificationServerSettings
 from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer
 from verification.server.build_verifier import BuildVerifier
@@ -31,7 +31,7 @@ def main():
 	print "Starting Verification Server (%s) with vm directory %s ..." % (
 			"cloud" if args.cloud else "local", vm_dir)
 
-	virtual_machine = OpenstackVm.from_directory_or_construct(vm_dir) if args.cloud else Vagrant(vm_dir, box_name)
+	virtual_machine = OpenstackVm.from_directory_or_construct(vm_dir) if args.cloud else Vagrant(vm_dir, VerificationServerSettings.local_box_name)
 
 	verifier = BuildVerifier.for_virtual_machine(virtual_machine, RepositoryUriTranslator())
 	if not args.fast_startup:

@@ -19,7 +19,7 @@ import model_server
 from git import GitCommandError, Repo
 
 from bunnyrpc.client import Client
-from settings.store import rpc_exchange_name
+from settings.store import StoreSettings
 from util import pathgen
 
 
@@ -114,14 +114,14 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
-		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.merge_changeset(repo_id, repo_name, ref_to_merge, ref_to_merge_into)
 
 	def create_repository(self, repostore_id, repo_id, repo_name, private_key):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
-		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.create_repository(repo_id, repo_name, private_key)
 		self._update_store_repo_count(repostore_id)
 
@@ -129,16 +129,16 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
-		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id)) as client:
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id)) as client:
 			client.delete_repository(repo_id, repo_name)
 		self._update_store_repo_count(repostore_id, -1)
 
 	def push_force(self, repostore_id, repo_id, repo_name, from_target, to_target):
-		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.push_force(repo_id, repo_name, from_target, to_target)
 
 	def force_delete(self, repostore_id, repo_id, repo_name, target):
-		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			return client.force_delete(repo_id, repo_name, target)
 
 	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
@@ -146,7 +146,7 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		assert new_repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
-		with Client(rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.rename_repository(repo_id, old_repo_name, new_repo_name)
 
 	def get_least_loaded_store(self):

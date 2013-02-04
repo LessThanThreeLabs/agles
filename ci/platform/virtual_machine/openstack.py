@@ -5,7 +5,7 @@ import eventlet
 import novaclient.client
 import yaml
 
-from settings.openstack import credentials, image_filter
+from settings.openstack import OpenstackSettings
 from verification.shared.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
 
@@ -13,7 +13,7 @@ from virtual_machine import VirtualMachine
 class OpenstackClient(object):
 	@classmethod
 	def get_client(cls):
-		return novaclient.client.Client(*credentials[0], **credentials[1])
+		return novaclient.client.Client(*OpenstackSettings.credentials[0], **OpenstackSettings.credentials[1])
 
 
 class OpenstackVm(VirtualMachine):
@@ -124,5 +124,5 @@ class OpenstackVm(VirtualMachine):
 	@classmethod
 	def _get_newest_image(cls):
 		images = OpenstackClient.get_client().images.list()
-		images = [image for image in images if image_filter(image) and image.status == 'ACTIVE']
+		images = [image for image in images if OpenstackSettings.image_filter(image) and image.status == 'ACTIVE']
 		return max(images, key=lambda image: int(image.name[image.name.rfind('_') + 1:]))  # get image with greatest suffix number
