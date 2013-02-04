@@ -42,7 +42,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $loc
 	$scope.$on '$routeUpdate', () ->
 		console.log 'update to route!! ' + $routeParams.id
 
-	$scope.blahs = (number for number in [0..1000])
+	$scope.stages = (createRandomStage 'blah ' + number for number in [0..8])
 ]
 
 
@@ -62,4 +62,10 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $loc
 createRandomChange = (number) ->
 	id: Math.floor Math.random() * 10000
 	number: number
+	status: if Math.random() > .25 then 'passed' else 'failed'
+
+
+createRandomStage = (name) ->
+	id: Math.floor Math.random() * 10000
+	name: name
 	status: if Math.random() > .25 then 'passed' else 'failed'

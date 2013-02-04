@@ -13,16 +13,16 @@
 			<input ng-model="query">
 		</div>
 		<div id="repositoryChanges" notify-on-bottom-scroll="scrolledToBottom()">
-			<div class="repositoryChange" ng-repeat="change in changes" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', failed: change.status == 'failed'}">{{change.number}}</div>
+			<div class="repositoryChange" ng-repeat="change in changes" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}">{{change.number}}</div>
 		</div>
 	</div>
 
 	<div id="repositoryChangeDetailsPanel" ng-controller="RepositoryDetails">
 		<div id="repositoryChangeDetailsStages">
-			hello<br>hello<br>hello<br>hello<br>hello<br>hello<br>hello<br>hello
+			<span class="repositoryChangeStage" ng-repeat="stage in stages" ng-class="{queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}">{{stage.name}}</span>
 		</div>
 		<div id="repositoryChangeDetailsOutput">
-			<div ng-repeat="blah in blahs">{{blah}}</div>
+
 		</div>
 	</div>
 </div>

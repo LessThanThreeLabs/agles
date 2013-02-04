@@ -1,3 +1,24 @@
+// @heartbeatStartColor: rgba(0, 184, 255, 0.4);
+// @heartbeatFinalColor: rgba(0, 184, 255, 1.0);
+@heartbeatStartColor: rgba(208, 208, 208, 0.4);
+@heartbeatFinalColor: rgba(208, 208, 208, 1.0);
+@keyframes heartbeat { 
+	from { color: @heartbeatStartColor; }
+	to { color: @heartbeatFinalColor; }
+}
+@-moz-keyframes heartbeat { 
+	from { color: @heartbeatStartColor; }
+	to { color: @heartbeatFinalColor; }
+}
+@-webkit-keyframes heartbeat { 
+	from { color: @heartbeatStartColor; }
+	to { color: @heartbeatFinalColor; }
+}
+@-o-keyframes heartbeat { 
+	from { color: @heartbeatStartColor; }
+	to { color: @heartbeatFinalColor; }
+}
+
 #repository {
 	@panelBackgroundColor: rgba(30, 30, 30, 0.75);
 
@@ -32,7 +53,6 @@
 
 		#repositoryHeaderLink {
 			float: right;
-			// display: inline-block;
 			margin-top: 7px;
 			margin-right: 10px;
 
@@ -98,27 +118,6 @@
 			overflow-y: auto;
 
 			.repositoryChange {
-				// @startColor: rgba(0, 184, 255, 0.4);
-				// @finalColor: rgba(0, 184, 255, 1.0);
-				@startColor: rgba(208, 208, 208, 0.4);
-				@finalColor: rgba(208, 208, 208, 1.0);
-				@keyframes heartbeat { 
-					from { color: @startColor; }
-					to { color: @finalColor; }
-				}
-				@-moz-keyframes heartbeat { 
-					from { color: @startColor; }
-					to { color: @finalColor; }
-				}
-				@-webkit-keyframes heartbeat { 
-					from { color: @startColor; }
-					to { color: @finalColor; }
-				}
-				@-o-keyframes heartbeat { 
-					from { color: @startColor; }
-					to { color: @finalColor; }
-				}
-
 				height: 35px;
 				color: #D0D0D0;
 				text-align: center;
@@ -141,12 +140,8 @@
 					background-color: rgba(20, 20, 20, 0.75);
 				}
 
-				&.failed {
-					color: rgba(160, 0, 0, 1.0);
-				}
-
 				&.queued {
-					color: @startColor;
+					color: @heartbeatStartColor;
 
 					@heartbeatSpeed: 3.0s;
 					@heartbeatDelay: 0.0s;
@@ -157,7 +152,7 @@
 				}
 
 				&.running {
-					color: @startColor;
+					color: @heartbeatStartColor;
 
 					@heartbeatSpeed: 1.5s;
 					@heartbeatDelay: 0.0s;
@@ -169,6 +164,10 @@
 
 				&.passed {
 					
+				}
+
+				&.failed {
+					color: rgba(160, 0, 0, 1.0);
 				}
 			}
 		}
@@ -191,11 +190,53 @@
 		box-orient: vertical;
 
 		#repositoryChangeDetailsStages {
-			border-bottom: 1px solid teal;
+			padding: 10px 10px 0px 10px;
 
 			-moz-box-flex: 0.0;
 			-webkit-box-flex: 0.0;
 			box-flex: 0.0;
+
+			.repositoryChangeStage {
+				display: inline-block;
+				margin: 0px 10px 10px 0px;
+				min-width: 100px;
+				height: 35px;
+				line-height: 35px;
+				text-align: center;
+				font-weight: bold;
+				border-radius: 4px;
+				background-color: rgba(25, 25, 25, 1.0);
+
+				&.queued {
+					color: @heartbeatStartColor;
+
+					@heartbeatSpeed: 3.0s;
+					@heartbeatDelay: 0.0s;
+					animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				}
+
+				&.running {
+					color: @heartbeatStartColor;
+
+					@heartbeatSpeed: 1.5s;
+					@heartbeatDelay: 0.0s;
+					animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+					-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				}
+
+				&.passed {
+					
+				}
+
+				&.failed {
+					color: rgba(160, 0, 0, 1.0);
+				}
+			}
 		}
 
 		#repositoryChangeDetailsOutput {
