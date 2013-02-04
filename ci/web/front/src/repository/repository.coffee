@@ -19,7 +19,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 				$scope.changes[0].status = 'queued'
 				$scope.changes[1].status = 'running'
 				$scope.changes[2].status = 'running'
-		), 500
+		), 250
 
 	$scope.changes = []
 	$scope.currentChangeId = $routeParams.id ? null
@@ -27,6 +27,9 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 
 	$scope.changeClick = (change) ->
 		$scope.currentChangeId = if $scope.currentChangeId is change.id then null else change.id
+
+	$scope.$on '$routeUpdate', () ->
+		$scope.currentChangeId = $routeParams.id
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'id', newValue
@@ -39,16 +42,32 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 ]
 
 window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
+	retrieveStages = (changeId) ->
+		$scope.stages = null
+		$scope.lines = null
+		if changeId?
+			$scope.stages = null
+			setTimeout (() -> $scope.$apply () ->
+				$scope.stages = (createRandomStage 'blah ' + number for number in [0..8])
+			), 250
+
+	retrieveLines = (stageId) ->
+		$scope.lines = null
+		if stageId?
+			$scope.lines = null
+			setTimeout (() -> $scope.$apply () ->
+				$scope.lines = (createRandomLine number for number in [1..300])
+			), 250
+
 	$scope.$on '$routeUpdate', () ->
-		console.log 'update to route!! ' + $routeParams.id
+		retrieveStages $routeParams.id
+	retrieveStages $routeParams.id
 
-	$scope.stages = (createRandomStage 'blah ' + number for number in [0..8])
-
-	$scope.currentStageId = null
 	$scope.stageClick = (stage) ->
 		$scope.currentStageId = if $scope.currentStageId is stage.id then null else stage.id
 
-	$scope.lines = (createRandomLine number for number in [0...300])
+	$scope.$watch 'currentStageId', (newValue, oldValue) ->
+		retrieveLines newValue
 ]
 
 
