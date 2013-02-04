@@ -19,7 +19,7 @@ from changes.update_handler import ChangesUpdateHandler
 from repos.create_handler import ReposCreateHandler
 from repos.read_handler import ReposReadHandler
 from repos.update_handler import ReposUpdateHandler
-from settings.rabbit import connection_info
+from settings.rabbit import RabbitSettings
 from users.create_handler import UsersCreateHandler
 from users.read_handler import UsersReadHandler
 from users.update_handler import UsersUpdateHandler
@@ -59,7 +59,7 @@ class ModelServer(object):
 		if channel:
 			self.channel = channel
 		else:
-			connection = Connection(connection_info)
+			connection = Connection(RabbitSettings.kombu_connection_info)
 			self.channel = connection.channel()
 
 	def start(self):

@@ -18,12 +18,11 @@ from model_server.events_broker import EventsBroker
 from verification.master import *
 from verification.server import *
 from verification.server.build_verifier import BuildVerifier
-from settings.rabbit import connection_info
-from settings.verification_server import *
+from settings.rabbit import RabbitSettings
 from shared.constants import BuildStatus
 from repo.store import FileSystemRepositoryStore, RepositoryStore
 from util.pathgen import to_path
-from settings import store
+from settings.store import StoreSettings
 from bunnyrpc.server import Server
 from bunnyrpc.client import Client
 from git import Repo
@@ -42,18 +41,18 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		cls.vs_processes = []
 		num_verifiers = int(config["numVerifiers"]) if config.get("numVerifiers") else DEFAULT_NUM_VERIFIERS
 		for x in range(num_verifiers):
-			if config.get("fakeVerifier"):
-				verifier = FakeBuildVerifier(passes=True)
-			else:
+			if config.get("useVagrant"):
 				vagrant = Vagrant(os.path.join(TEST_ROOT, str(x)), box_name)
 				verifier = BuildVerifier.for_virtual_machine(vagrant)
+			else:
+				verifier = FakeBuildVerifier(passes=True)
 			verifier.setup()
 			cls.verifiers.append(verifier)
 
 		cls.repostore_id = 1
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
 		repo_store = Server(FileSystemRepositoryStore(cls.repo_dir))
-		repo_store.bind(store.rpc_exchange_name, [RepositoryStore.queue_name(cls.repostore_id)], auto_delete=True)
+		repo_store.bind(StoreSettings.rpc_exchange_name, [RepositoryStore.queue_name(cls.repostore_id)], auto_delete=True)
 
 		cls.repo_store_process = TestProcess(target=repo_store.run)
 		cls.repo_store_process.start()
@@ -131,7 +130,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(30)]
 
 	def _repo_roundtrip(self, modfile, contents):
-		with Client(store.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
 			client.create_repository(self.repo_id, "repo.git", "privatekey")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
@@ -146,7 +145,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			yaml.dump({'test': self._test_commands()}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
-		with Connection(connection_info) as connection:
+		with Connection(RabbitSettings.kombu_connection_info) as connection:
 			events_broker = EventsBroker(connection)
 			events_broker.publish("repos", repo_id, "change added",
 				change_id=commit_id, merge_target="master")

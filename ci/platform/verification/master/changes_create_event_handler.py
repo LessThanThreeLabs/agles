@@ -7,10 +7,10 @@ from kombu.messaging import Producer
 from shared.constants import VerificationUser
 from shared.handler import EventSubscriber
 from model_server import ModelServer
-from settings.verification_server import *
+from settings.verification_server import VerificationServerSettings
 from task_queue.task_queue import TaskQueue
 from util import pathgen
-from verification.shared.build_core import BuildCore
+from verification.shared.build_core import SelfCleaningBuildCore
 from verification.shared.pubkey_registrar import PubkeyRegistrar
 
 
@@ -44,7 +44,7 @@ class ChangesCreateEventHandler(EventSubscriber):
 		test_commands = self._get_test_commands(commit_list)
 		num_workers = max(1, min(4, len(test_commands)))  # between 1 and 4 workers
 		task_queue = TaskQueue()
-		workers = task_queue.get_workers(num_workers, verification_worker_queue)
+		workers = task_queue.get_workers(num_workers, VerificationServerSettings.verification_worker_queue)
 		if not workers:
 			raise NoWorkersFoundException()
 		with ModelServer.rpc_connect("changes", "update") as model_server_rpc:
@@ -78,7 +78,7 @@ class ChangesCreateEventHandler(EventSubscriber):
 		with ModelServer.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_list[0])
 		refs = [pathgen.hidden_ref(commit) for commit in commit_list]
-		build_core = BuildCore(self.uri_translator)
+		build_core = SelfCleaningBuildCore(self.uri_translator)
 		verification_config = build_core.setup_build(repo_uri, refs)
 		return verification_config.test_commands
 

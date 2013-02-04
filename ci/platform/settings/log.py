@@ -17,4 +17,3 @@ def configure(log_home=LOG_HOME, filepath='/default.log'):
 	# loggers
 	root_logger = logging.getLogger()
 	root_logger.addHandler(default_handler)
-

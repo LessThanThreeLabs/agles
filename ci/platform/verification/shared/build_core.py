@@ -22,9 +22,12 @@ class BuildCore(object):
 		verification_config = self._get_verification_configuration_from_file()
 		return verification_config
 
-	def _checkout_refs(self, repo_uri, refs):
+	def _cleanup_source_dir(self):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
+
+	def _checkout_refs(self, repo_uri, refs):
+		self._cleanup_source_dir()
 		if self.uri_translator:
 			checkout_url = self.uri_translator.translate(repo_uri)
 			host_url = checkout_url[:checkout_url.find(":")]
@@ -54,6 +57,13 @@ class BuildCore(object):
 
 	def _get_verification_configuration(self, config_dict):
 		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"))
+
+
+class SelfCleaningBuildCore(BuildCore):
+	def setup_build(self, repo_uri, refs, console_appender=None):
+		verification_config = super(SelfCleaningBuildCore, self).setup_build(repo_uri, refs, console_appender)
+		self._cleanup_source_dir()
+		return verification_config
 
 
 class VirtualMachineBuildCore(BuildCore):

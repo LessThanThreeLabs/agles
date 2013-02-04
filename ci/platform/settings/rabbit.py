@@ -1,6 +1,16 @@
 import pika
 
-connection_info = 'pyamqp://guest:guest@localhost//'
+from settings import Settings
 
-connection_parameters = pika.ConnectionParameters(
-		host='localhost')
+
+class RabbitSettings(Settings):
+	def __init__(self):
+		super(RabbitSettings, self).__init__(
+			__file__,
+			rabbit_host='localhost')
+		self.add_values(
+			kombu_connection_info='pyamqp://guest:guest@localhost//',
+			pika_connection_parameters=pika.ConnectionParameters(
+				host='localhost'))
+
+RabbitSettings.initialize()

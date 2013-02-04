@@ -63,7 +63,7 @@ test:
   - all_tests:
       path: ci/platform
       script:
-        - nosetests -sv --tc=fakeVerifier:True
+        - nosetests -sv
         - cd ../web/back
         - npm test
       timeout: 120

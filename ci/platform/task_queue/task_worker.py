@@ -4,7 +4,7 @@ import socket
 
 from kombu.connection import Connection
 from kombu.entity import Queue
-from settings.rabbit import connection_info
+from settings.rabbit import RabbitSettings
 
 
 class TaskWorker(object):
@@ -12,7 +12,7 @@ class TaskWorker(object):
 		self.logger = logging.getLogger("TaskWorker")
 		random.seed()
 		self.worker_id = self.get_worker_id()
-		self.connection = connection if connection else Connection(connection_info)
+		self.connection = connection if connection else Connection(RabbitSettings.kombu_connection_info)
 
 	def wait_for_assignment(self, worker_pool_queue):
 		self.own_queue = Queue(auto_delete=True, durable=False)(self.connection)

@@ -8,7 +8,7 @@ from database.engine import ConnectionFactory
 from shared.handler import QueueListener
 from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError, PushForwardError
-from settings.verification_server import *
+from settings.verification_server import VerificationServerSettings
 from util import pathgen
 
 
@@ -16,7 +16,7 @@ class VerificationResultsHandler(QueueListener):
 	logger = logging.getLogger("FileSystemRepositoryStore")
 
 	def __init__(self):
-		super(VerificationResultsHandler, self).__init__(verification_results_queue)
+		super(VerificationResultsHandler, self).__init__(VerificationServerSettings.verification_results_queue)
 		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 
 	def bind(self, channel):
