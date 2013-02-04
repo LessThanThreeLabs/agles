@@ -4,7 +4,6 @@ from settings import Settings
 class OpenstackSettings(Settings):
 	def __init__(self):
 		super(OpenstackSettings, self).__init__(
-			__file__,
 			version="2",
 			username="lessthanthree",
 			api_key="8eb41c1eaab4e10b3e7603d7630b26c3",

@@ -1,3 +1,4 @@
+import inspect
 import os
 import yaml
 
@@ -18,8 +19,8 @@ class Settings(object):
 	def reinitialize(cls):
 		cls()
 
-	def __init__(self, filename, **kwargs):
-		self.filename = os.path.basename(filename)
+	def __init__(self, **kwargs):
+		self.filename = os.path.basename(inspect.getfile(inspect.currentframe().f_back))
 		self.settings_dict = {}
 		self._init_from_files()
 		self.add_values(**kwargs)

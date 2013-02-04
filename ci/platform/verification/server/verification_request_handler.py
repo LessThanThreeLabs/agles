@@ -113,17 +113,10 @@ class VerificationRequestHandler(InfiniteWorker):
 		Sends a message denoting the return value and acks"""
 		def default_verify_callback(status, cleanup_function=lambda: None):
 			builds_update_rpc.mark_build_finished(build_id, status)
-<<<<<<< HEAD
-			with Connection(connection_info).Producer(serializer='msgpack') as producer:
-				producer.publish({'build_id': build_id, 'status': status},
-					exchange=verification_results_queue.exchange,
-					routing_key=verification_results_queue.routing_key,
-=======
 			with Connection(RabbitSettings.kombu_connection_info).Producer(serializer='msgpack') as producer:
-				producer.publish({'build_id': build_id, 'results': results},
+				producer.publish({'build_id': build_id, 'status': status},
 					exchange=VerificationServerSettings.verification_results_queue.exchange,
 					routing_key=VerificationServerSettings.verification_results_queue.routing_key,
->>>>>>> 1be2e70... Made all settings auto-overridable, verification master is self cleaning, fakeVerifier is default
 					mandatory=True,
 				)
 			self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
