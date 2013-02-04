@@ -46,11 +46,12 @@ class VerificationRequestHandler(InfiniteWorker):
 	def _handle_interrupted_build(self, build_id):
 		self.logger.warn("Worker %s found interrupted build with id %s. Failing build." % (self.worker_id, build_id))
 		status = BuildStatus.FAILED
-		builds_update_rpc.mark_build_finished(build_id, status)
-		with Connection(connection_info).Producer(serializer='msgpack') as producer:
+		with ModelServer.rpc_connect("builds", "update") as builds_update_rpc:
+			builds_update_rpc.mark_build_finished(build_id, status)
+		with Connection(VerificationServerSettings.kombu_connection_info).Producer(serializer='msgpack') as producer:
 			producer.publish({'build_id': build_id, 'status': status},
-				exchange=verification_results_queue.exchange,
-				routing_key=verification_results_queue.routing_key,
+				exchange=VerificationServerSettings.verification_results_queue.exchange,
+				routing_key=VerificationServerSettings.verification_results_queue.routing_key,
 				mandatory=True,
 			)
 		if os.access(self._get_build_info_file(), os.F_OK):

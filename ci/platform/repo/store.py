@@ -183,7 +183,7 @@ class RepositoryStore(object):
 	def parse_config(cls, root_dir):
 		config_path = os.path.join(root_dir, cls.CONFIG_FILE)
 		with open(config_path) as config_file:
-			config = yaml.load(config_file.read())
+			config = yaml.safe_load(config_file.read())
 		return config
 
 	@classmethod

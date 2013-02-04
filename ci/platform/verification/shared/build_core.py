@@ -51,7 +51,7 @@ class BuildCore(object):
 		if config_path:
 			with open(config_path) as config_file:
 				try:
-					config = yaml.load(config_file.read())
+					config = yaml.safe_load(config_file.read())
 				except:
 					config = dict()
 		else:

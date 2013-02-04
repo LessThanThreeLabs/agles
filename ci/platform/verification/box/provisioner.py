@@ -36,7 +36,7 @@ class Provisioner(object):
 			config_path = os.path.abspath(config_path)
 			try:
 				with open(config_path) as config_file:
-					config = yaml.load(config_file.read())
+					config = yaml.safe_load(config_file.read())
 			except:
 				raise InvalidConfigurationException("Unable to parse configuration file: %s\nPlease verify that this is a valid YAML file using a tool such as http://yamllint.com/." % os.path.basename(config_path))
 			self.set_private_key(private_key)

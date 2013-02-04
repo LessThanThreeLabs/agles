@@ -50,7 +50,7 @@ class OpenstackVm(VirtualMachine):
 	def from_directory(cls, vm_directory):
 		try:
 			with open(os.path.join(vm_directory, OpenstackVm.VM_INFO_FILE)) as vm_info_file:
-				config = yaml.load(vm_info_file.read())
+				config = yaml.safe_load(vm_info_file.read())
 				vm_id = config['server_id']
 				vm_username = config['username']
 		except:
