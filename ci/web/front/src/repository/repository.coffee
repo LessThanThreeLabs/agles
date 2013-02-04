@@ -47,6 +47,8 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $loc
 	$scope.currentStageId = null
 	$scope.stageClick = (stage) ->
 		$scope.currentStageId = if $scope.currentStageId is stage.id then null else stage.id
+
+	$scope.lines = (createRandomLine number for number in [0...300])
 ]
 
 
@@ -73,3 +75,12 @@ createRandomStage = (name) ->
 	id: Math.floor Math.random() * 10000
 	name: name
 	status: if Math.random() > .25 then 'passed' else 'failed'
+
+createRandomLine = (number) ->
+	randString = () ->
+		a = Math.random().toString(36).substr(2)
+		a += Math.random().toString(36).substr(2) for number in [0..(Math.random() * 7)]
+		return a
+
+	number: number
+	text: randString()
