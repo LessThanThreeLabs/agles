@@ -35,6 +35,9 @@ describe 'Koality filters', () ->
 		it 'should overwrite old characters with new styles', () ->
 			expect(ansiparse 'plain\x1b[0G\x1b[32mgreen').toBe '<span class="foregroundGreen backgroundDefault">green</span>'
 
+		it 'should handle carriage returns', () ->
+			expect(ansiparse 'originalString\rnewString').toBe '<span class="foregroundDefault backgroundDefault">newString</span>'
+
 	describe 'fileSuffix filter', () ->
 		fileSuffix = null
 		suffixString = '_qa8aset32'
@@ -57,4 +60,4 @@ describe 'Koality filters', () ->
 			expect(fileSuffix 'hellopng').toBe 'hellopng'
 			expect(fileSuffix 'hello/therejpg').toBe 'hello/therejpg'
 			expect(fileSuffix '/hello/there/sirgif').toBe '/hello/there/sirgif'
-			
+

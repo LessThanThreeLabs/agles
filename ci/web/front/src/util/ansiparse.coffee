@@ -29,8 +29,15 @@ class ConsoleLine
 
     write: (str) =>
         for char, index in str
-            @buffer[@position] = new ConsoleCharacter char, @style
-            @position++
+            if char is '\r'  # Carriage return
+                @_carriage_return()
+            else
+                @buffer[@position] = new ConsoleCharacter char, @style
+                @position++
+
+    _carriage_return: () =>
+        @buffer = []
+        @position = 0
 
     setStyles: (styles) =>
         for style in styles
