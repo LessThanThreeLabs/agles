@@ -7,6 +7,8 @@ window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, 
 
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
 	retrieveChanges = () ->
+		$scope.changes ?= []
+
 		maxChanges = 9001
 		max = maxChanges - $scope.changes.length
 		min = maxChanges - $scope.changes.length - 100
@@ -21,24 +23,23 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 				$scope.changes[2].status = 'running'
 		), 250
 
-	$scope.changes = []
+	$scope.$on '$routeUpdate', () ->
+		$scope.currentChangeId = $routeParams.id ? null
 	$scope.currentChangeId = $routeParams.id ? null
+
 	retrieveChanges()
 
 	$scope.changeClick = (change) ->
-		$scope.currentChangeId = if $scope.currentChangeId is change.id then null else change.id
-
-	$scope.$on '$routeUpdate', () ->
-		$scope.currentChangeId = $routeParams.id
+		$scope.currentChangeId = change.id
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'id', newValue
 
-	$scope.scrolledToBottom = () ->
-		retrieveChanges()
-
 	$scope.$watch 'query', (newValue, oldValue) ->
 		console.log 'query changed: ' + newValue
+
+	$scope.scrolledToBottom = () ->
+		retrieveChanges()
 ]
 
 window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
@@ -64,7 +65,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $loc
 	retrieveStages $routeParams.id
 
 	$scope.stageClick = (stage) ->
-		$scope.currentStageId = if $scope.currentStageId is stage.id then null else stage.id
+		$scope.currentStageId = stage.id
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
 		retrieveLines newValue
