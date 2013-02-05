@@ -74,15 +74,11 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 	def _create_user(self):
 		self.password_hash = sha512().hexdigest()
+		self.user_info = {'email': self.EMAIL, 'first_name': 'bob', 'last_name': 'barker',
+			'password_hash': self.password_hash, 'salt': 'Sodium Chloride.'}
 		with ModelServer.rpc_connect("users", "create") as conn:
-			self.user_info = {
-				"email": self.EMAIL,
-				"first_name": "asdf",
-				"last_name": "bdsf",
-				"salt": "a" * 16,
-				"password_hash": self.password_hash
-			}
-			self.user_id = conn.create_user(self.user_info)
+			self.user_id = conn.create_user(self.user_info['email'], self.user_info['first_name'],
+				self.user_info['last_name'], self.user_info['password_hash'], self.user_info['salt'])
 
 	def _assert_dict_subset(self, expected, actual):
 		for key in expected.iterkeys():
@@ -135,14 +131,14 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			permission_ins = permission.insert().values(user_id=self.user_id, repo_id=self.repo_id, permissions=RepositoryPermissions.RW)
 			conn.execute(permission_ins)
 
-	def test_get_writable_repo_ids(self):
+	def test_get_repository_ids(self):
 		with ModelServer.rpc_connect("repos", "read") as conn:
-			writable_repo_ids = conn.get_writable_repo_ids(self.user_id)
+			writable_repo_ids = conn.get_repository_ids(self.user_id)
 		assert_in(self.repo_id, writable_repo_ids)
 
-	def test_get_writable_repos(self):
+	def test_get_repositories(self):
 		with ModelServer.rpc_connect("repos", "read") as conn:
-			writable_repos = conn.get_writable_repos(self.user_id)
+			writable_repos = conn.get_repositories(self.user_id)
 		repo = list(writable_repos).pop()
 		assert_equal(self.repo_id, repo["id"])
 		assert_equal(self.REPO_NAME, repo["name"])

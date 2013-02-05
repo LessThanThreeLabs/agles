@@ -14,7 +14,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 	def get_change_attributes(self, change_id):
 		change = database.schema.change
-		query = change.select().where(change.c.id==change_id)
+		query = change.select().where(change.c.id == change_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
@@ -26,7 +26,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 	def get_builds_from_change_id(self, change_id):
 		build = database.schema.build
 
-		query = build.select().where(build.c.change_id==change_id)
+		query = build.select().where(build.c.change_id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return [to_dict(row, build.columns) for row in sqlconn.execute(query)]
 
@@ -38,7 +38,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		change = database.schema.change
 		repo = database.schema.repo
 
-		query = change.join(repo).select().apply_labels().where(change.c.id==change_id)
+		query = change.join(repo).select().apply_labels().where(change.c.id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
@@ -55,7 +55,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		commit = database.schema.commit
 		user = database.schema.user
 
-		query = change.join(commit).join(user).select().apply_labels().where(change.c.id==change_id)
+		query = change.join(commit).join(user).select().apply_labels().where(change.c.id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
@@ -80,7 +80,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 
 		query = build.join(change).join(repo).select().apply_labels().where(
-			change.c.id==change_id
+			change.c.id == change_id
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
@@ -94,7 +94,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		return {}
 
 	# TODO (jchu): This query is SLOW AS BALLS
-	def query_changes(self, user_id, repo_id, query_string,
+	def query_changes(self, user_id, repo_id, group, query_string,
 						start_index_inclusive, num_results):
 		user = database.schema.user
 		change = database.schema.change
@@ -107,7 +107,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		query = change.join(commit).join(user).select().apply_labels().where(
 			and_(
-				change.c.repo_id==repo_id,
+				change.c.repo_id == repo_id,
 				or_(
 					commit.c.message.like(query_string),
 					user.c.email.like(query_string)
@@ -118,6 +118,6 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			start_index_inclusive)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			builds = map(lambda row: to_dict(row, change.columns,
+			changes = map(lambda row: to_dict(row, change.columns,
 				tablename=change.name), sqlconn.execute(query))
-			return builds
+			return changes

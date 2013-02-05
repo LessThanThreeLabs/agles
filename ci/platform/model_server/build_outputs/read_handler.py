@@ -1,7 +1,5 @@
 import database.schema
 
-from collections import defaultdict
-
 from sqlalchemy import and_
 
 from database.engine import ConnectionFactory
@@ -19,21 +17,21 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 
 		query = build_console.select().where(
 			and_(
-				build_console.c.build_id==build_id,
-				build_console.c.type==console,
+				build_console.c.build_id == build_id,
+				build_console.c.type == console,
 			)
 		)
 		return query
 
-	def _has_permission(self, user_id, build_id):
-		build = database.schema.build
+	def _has_permission(self, user_id, change_id):
+		change = database.schema.change
 		repo = database.schema.repo
 		permission = database.schema.permission
 
-		query = build.join(repo).join(permission).select().where(
+		query = change.join(repo).join(permission).select().where(
 			and_(
-				build.c.id==build_id,
-				permission.c.user_id==user_id,
+				change.c.id == change_id,
+				permission.c.user_id == user_id,
 			)
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -44,42 +42,19 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 				return RepositoryPermissions.has_permissions(
 					row[permission.c.permissions], RepositoryPermissions.R)
 
-	# deprecated?
-	def get_build_console_ids(self, user_id, build_id):
-		if not self._has_permission(user_id, build_id):
-			raise InvalidPermissionsError("user_id: %d, build_id: %d" % (user_id, build_id))
+	def get_build_consoles(self, user_id, change_id):
+		if not self._has_permission(user_id, change_id):
+			raise InvalidPermissionsError("user_id: %d, change_id: %d" % (user_id, change_id))
 
+		build = database.schema.build
 		build_console = database.schema.build_console
 
-		query = build_console.select().where(
-			build_console.c.build_id==build_id
-		)
-
-		result = defaultdict(list)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			for row in sqlconn.execute(query):
-				type = row[build_console.c.type]
-				row_id = row[build_console.c.id]
-				subtype_priority = row[build_console.c.subtype_priority]
-				result[type].append((subtype_priority, row_id))
-
-		for k, v in result.iteritems():
-			sorted_v = sorted(v, key=lambda tup: tup[0])
-			result[k] = [row_id for priority, row_id in sorted_v]
-		return result
-
-	def get_build_consoles(self, user_id, build_id):
-		if not self._has_permission(user_id, build_id):
-			raise InvalidPermissionsError("user_id: %d, build_id: %d" % (user_id, build_id))
-
-		build_console = database.schema.build_console
-
-		query = build_console.select().where(
-			build_console.c.build_id==build_id
+		query = build_console.join(build).select().where(
+			build.c.change_id == change_id
 		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			return [to_dict(row, build_console.columns) for row in sqlconn.execute(query)]
+			return [to_dict(row, build_console.columns, tablename=build_console.name) for row in sqlconn.execute(query)]
 
 	def _has_build_console_permission(self, user_id, build_console_id):
 		build_console = database.schema.build_console
@@ -88,8 +63,8 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 
 		query = build_console.join(repo).join(permission).select().where(
 			and_(
-				build_console.c.id==build_console_id,
-				permission.c.user_id==user_id,
+				build_console.c.id == build_console_id,
+				permission.c.user_id == user_id,
 			)
 		)
 
@@ -100,6 +75,20 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 			else:
 				return RepositoryPermissions.has_permissions(
 					row[permission.c.permissions], RepositoryPermissions.R)
+
+	def get_output_lines(self, user_id, build_console_id):
+		if not self._has_build_console_permission(user_id, build_console_id):
+			raise InvalidPermissionsError("user_id: %d, build_console_id: %d" %
+											(user_id, build_console_id))
+
+		console_output = database.schema.console_output
+		build_console = database.schema.build_console
+
+		output_query = console_output.select().where(console_output.c.build_console_id == build_console_id)
+		metadata_query = build_console.select().where(build_console.c.id == build_console_id)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			return {row[console_output.c.line_number]: row[console_output.c.line] for row in sqlconn.execute(output_query)}
 
 	def get_console_output(self, user_id, build_console_id):
 		if not self._has_build_console_permission(user_id, build_console_id):
@@ -109,8 +98,8 @@ class BuildOutputsReadHandler(ModelServerRpcHandler):
 		console_output = database.schema.console_output
 		build_console = database.schema.build_console
 
-		output_query = console_output.select().where(console_output.c.build_console_id==build_console_id)
-		metadata_query = build_console.select().where(build_console.c.id==build_console_id)
+		output_query = console_output.select().where(console_output.c.build_console_id == build_console_id)
+		metadata_query = build_console.select().where(build_console.c.id == build_console_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			output = dict([(row[console_output.c.line_number], row[console_output.c.line]) for row in sqlconn.execute(output_query)])

@@ -68,21 +68,21 @@ class SchemaDataGenerator(object):
 
 			for user in range(random.randint(1, 10)):
 				ins_user = schema.user.insert().values(first_name="firstname_%d" % user, last_name="lastname_%d" % user, email="%d@b.com" % user,
-					password_hash=hashlib.sha512(str(user)).hexdigest(), salt='a'*16)
+					password_hash=hashlib.sha512(str(user)).hexdigest(), salt=SALT)
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
-				repo_id= random.choice(repo_ids)
+				repo_id = random.choice(repo_ids)
 				permissions = random.choice(RepositoryPermissions.valid_permissions())
 				ins_permission = schema.permission.insert().values(user_id=user_id, repo_id=repo_id, permissions=permissions)
 				conn.execute(ins_permission)
 
 				for commit in range(random.randint(1, 20)):
 					repo_id = random.choice(repos.keys())
-					repo_id_query = schema.repo.select().where(schema.repo.c.id==repo_id)
+					repo_id_query = schema.repo.select().where(schema.repo.c.id == repo_id)
 					repo_id = conn.execute(repo_id_query).first()[schema.repo.c.id]
 					repos[repo_id] += 1
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
-						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())))
+						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())), sha="sha%d%d" % (user, commit))
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target_%d" % commit,
 						number=repos[repo_id], status=random.choice(VALID_STATUSES),
@@ -106,7 +106,6 @@ class SchemaDataGenerator(object):
 							subtype="subtype2", subtype_priority=priority)
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)
-
 
 		self._grantall(self.admin_id, repo_ids, RepositoryPermissions.RWA)
 		self._grantall(self.user_id, repo_ids[:1], RepositoryPermissions.R)

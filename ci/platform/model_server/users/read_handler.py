@@ -17,24 +17,24 @@ class UsersReadHandler(ModelServerRpcHandler):
 
 		query = user.select().where(
 			and_(
-				user.c.email==email,
-				user.c.password_hash==password_hash
+				user.c.email == email,
+				user.c.password_hash == password_hash
 			)
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		return row
 
-	def get_salt(self, email):
+	def get_hashed_password_and_salt(self, user_id):
 		user = database.schema.user
 
-		query = user.select().where(user.c.email==email)
+		query = user.select().where(user.c.id == user_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		if row:
-			return row[user.c.salt]
+			return to_dict(row, [user.c.password_hash, user.c.salt])
 		else:
-			raise NoSuchUserError(email)
+			raise NoSuchUserError(user_id)
 
 	def email_in_use(self, email):
 		try:
@@ -58,7 +58,7 @@ class UsersReadHandler(ModelServerRpcHandler):
 	def get_user_from_id(self, user_id):
 		user = database.schema.user
 
-		query = user.select().where(user.c.id==user_id)
+		query = user.select().where(user.c.id == user_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		if row:
@@ -69,7 +69,7 @@ class UsersReadHandler(ModelServerRpcHandler):
 	def get_ssh_keys(self, user_id):
 		ssh_pubkey = database.schema.ssh_pubkey
 
-		query = ssh_pubkey.select().where(ssh_pubkey.c.user_id==user_id)
+		query = ssh_pubkey.select().where(ssh_pubkey.c.user_id == user_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			keys = [to_dict(row, ssh_pubkey.columns) for row in sqlconn.execute(query)]
 		return keys

@@ -119,6 +119,7 @@ ssh_pubkey = Table('ssh_pubkey', metadata,
 	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
 	Column('alias', String, nullable=False),
 	Column('ssh_key', String, nullable=False, unique=True),
+	Column('timestamp', Integer, nullable=True),
 
 	UniqueConstraint('user_id', 'alias')
 )
