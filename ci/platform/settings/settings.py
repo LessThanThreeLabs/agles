@@ -50,7 +50,10 @@ class Settings(object):
 
 	def _value(self, name, default_value):
 		value = self._load_value(name, default_value)
-		setattr(type(self), name, value)
+		if inspect.isfunction(value):
+			setattr(type(self), name, classmethod(value))
+		else:
+			setattr(type(self), name, value)
 
 	def _load_value(self, name, default_value):
 		return self.settings_dict.get(name, default_value)
