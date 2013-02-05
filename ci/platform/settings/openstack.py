@@ -15,6 +15,6 @@ class OpenstackSettings(Settings):
 			credentials=([str(self.version), str(self.username), str(self.api_key), str(self.username)], dict(
 				auth_url=str(self.auth_url), auth_system=str(self.auth_system),
 				region_name=str(self.region_name))),
-			image_filter=lambda image: image.name.startswith(self.vm_image_name_prefix))
+			image_filter=lambda cls, image: image.name.startswith(cls.vm_image_name_prefix))
 
 OpenstackSettings.initialize()

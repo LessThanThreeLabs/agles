@@ -36,7 +36,7 @@ class OpenstackVm(VirtualMachine):
 		if not name:
 			name = "%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(os.getcwd())))
 		if not image:
-			image = cls._get_newest_image()
+			image = cls.get_newest_image()
 		if not flavor:
 			flavor = OpenstackClient.get_client().flavors.find(ram=2048)
 		server = OpenstackClient.get_client().servers.create(name, image, flavor, files=cls._default_files(vm_username))
@@ -113,7 +113,7 @@ class OpenstackVm(VirtualMachine):
 
 	def rebuild(self, image=None):
 		if not image:
-			image = self._get_newest_image()
+			image = self.get_newest_image()
 		name = self.server.name
 		flavor = self.server.flavor['id']
 		self.delete()
@@ -122,7 +122,7 @@ class OpenstackVm(VirtualMachine):
 		self.wait_until_ready()
 
 	@classmethod
-	def _get_newest_image(cls):
+	def get_newest_image(cls):
 		images = OpenstackClient.get_client().images.list()
 		images = [image for image in images if OpenstackSettings.image_filter(image) and image.status == 'ACTIVE']
 		return max(images, key=lambda image: int(image.name[image.name.rfind('_') + 1:]))  # get image with greatest suffix number
