@@ -25,7 +25,7 @@ class UsersReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 		return row
 
-	def get_hashed_password_and_salt(self, user_id):
+	def get_password_hash_and_salt(self, user_id):
 		user = database.schema.user
 
 		query = user.select().where(user.c.id == user_id)

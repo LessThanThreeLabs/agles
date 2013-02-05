@@ -45,13 +45,13 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 			first_name=first_name, last_name=last_name)
 		return True
 
-	def change_password(self, user_id, hashed_password, salt):
+	def change_password(self, user_id, password_hash, salt):
 		user = schema.user
-		update = user.update().where(user.c.id == user_id).values(hashed_password=hashed_password, salt=salt)
+		update = user.update().where(user.c.id == user_id).values(password_hash=password_hash, salt=salt)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
 		self.publish_event("users", user_id, "user updated", user_id=user_id,
-			hashed_password=hashed_password, salt=salt)
+			password_hash=password_hash, salt=salt)
 		return True
 
 	def reset_password(self, email, new_password):
