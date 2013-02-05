@@ -86,12 +86,12 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 	def test_get_user_id(self):
 		with ModelServer.rpc_connect("users", "read") as conn:
-			user_id = conn.get_user_id(self.EMAIL, self.password_hash)
+			user_id = conn.get_user_id(self.EMAIL)
 		assert_equal(self.user_id, user_id)
 
 	def test_get_user(self):
 		with ModelServer.rpc_connect("users", "read") as conn:
-			user = conn.get_user(self.EMAIL, self.password_hash)
+			user = conn.get_user(self.EMAIL)
 		self._assert_dict_subset(self.user_info, user)
 
 	def test_get_user_from_id(self):

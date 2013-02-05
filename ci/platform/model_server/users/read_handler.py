@@ -12,19 +12,6 @@ class UsersReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(UsersReadHandler, self).__init__("users", "read")
 
-	def _get_user_row(self, email, password_hash):
-		user = database.schema.user
-
-		query = user.select().where(
-			and_(
-				user.c.email == email,
-				user.c.password_hash == password_hash
-			)
-		)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row = sqlconn.execute(query).first()
-		return row
-
 	def get_password_hash_and_salt(self, user_id):
 		user = database.schema.user
 
@@ -43,17 +30,19 @@ class UsersReadHandler(ModelServerRpcHandler):
 		except NoSuchUserError:
 			return False
 
-	def get_user_id(self, email, password_hash):
-		return self.get_user(email, password_hash)['id']
+	def get_user_id(self, email):
+		return self.get_user(email)['id']
 
-	def get_user(self, email, password_hash):
+	def get_user(self, email):
 		user = database.schema.user
 
-		row = self._get_user_row(email, password_hash)
+		query = user.select().where(user.c.email == email)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
 		if row:
 			return to_dict(row, user.columns)
 		else:
-			raise NoSuchUserError(email, password_hash)
+			raise NoSuchUserError(email)
 
 	def get_user_from_id(self, user_id):
 		user = database.schema.user
