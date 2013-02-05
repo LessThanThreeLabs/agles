@@ -49,12 +49,9 @@ module.exports = class Resource
 			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString
-			# email: request.session.email
-			# firstName: request.session.firstName
-			# lastName: request.session.lastName
-			email: 'jordannpotter@gmail.com'
-			firstName: 'Jordan'
-			lastName: 'Potter'
+			email: request.session.email
+			firstName: request.session.firstName
+			lastName: request.session.lastName
 
 		return templateValues
 

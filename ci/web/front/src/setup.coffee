@@ -25,10 +25,10 @@ angular.module('koality.service', []).
 	factory('socket', ['$location', 'initialState', ($location, initialState) ->
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
 
-		makeRequestHandler = (resource, requestType, functionName, data, callback) ->
+		makeRequestHandler = (resource, requestType, methodName, data, callback) ->
 			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
-			socket.emit "#{resource}.${requestType}", {function: functionName, data: data}, callback
-			console.log "socket request made for #{resource} - #{requestType}, #{functionName} with:"
+			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, callback
+			console.log "socket request made for #{resource} - #{requestType}, #{methodName} with:"
 			console.log data
 
 		subscribeHandler = (resource, resourceId, eventName, callback) ->

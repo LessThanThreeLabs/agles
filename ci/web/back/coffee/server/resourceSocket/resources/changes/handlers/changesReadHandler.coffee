@@ -12,7 +12,7 @@ class ChangesReadHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.changeId?
+		else if not data?.changeId?
 			callback 400
 		else
 			callback 'IMPLEMENT THIS!!'

@@ -8,7 +8,7 @@ exports.create = (modelRpcConnection, passwordHasher, accountInformationValidato
 
 
 class UsersUpdateHandler extends Handler
-	constructor: (modelRpcConnection, @loginHandler, @passwordHasher, @accountInformationValidator, @resetPasswordEmailer) ->
+	constructor: (modelRpcConnection, @passwordHasher, @accountInformationValidator, @resetPasswordEmailer) ->
 		super modelRpcConnection
 		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
@@ -19,7 +19,7 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.firstName? or not data.lastName?
+		else if not data?.firstName? or not data?.lastName?
 			callback 400
 		else
 			errors = {}
@@ -42,7 +42,7 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.oldPassword? or not data.newPassword?
+		else if not data?.oldPassword? or not data?.newPassword?
 			callback 400
 		else
 			errors = {}
@@ -74,7 +74,7 @@ class UsersUpdateHandler extends Handler
 
 
 	resetPassword: (socket, data, callback) =>
-		if not data.email?
+		if not data?.email?
 			callback 400
 		else
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
@@ -91,10 +91,14 @@ class UsersUpdateHandler extends Handler
 
 
 	login: (socket, data, callback) =>
-		if not data.email? or not data.password? or not data.rememberMe?
+		console.log 'received login request:'
+		console.log data
+
+		if not data?.email? or not data?.password?
 			callback 400
 		else
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
+				console.error error
 				if error? then callback 500
 				else
 					passwordHash = @passwordHasher.hashPasswordWithSalt data.password, user.salt
@@ -119,7 +123,7 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.alias? or not data.key?
+		else if not data?.alias? or not data?.key?
 			callback 400
 		else
 			errors = {}
@@ -142,7 +146,7 @@ class UsersUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.id
+		else if not data?.id?
 			callback 400
 		else
 			@modelRpcConnection.users.update.remove_ssh_pubkey userId, data.id, (error, result) =>

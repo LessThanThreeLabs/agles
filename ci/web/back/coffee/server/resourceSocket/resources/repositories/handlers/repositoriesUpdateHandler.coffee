@@ -12,7 +12,7 @@ class RepositoriesUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.repositoryId? or not data.emails?
+		else if not data?.repositoryId? or not data?.emails?
 			callback 400
 		else
 			callback 'IMPLEMENT THIS!!'
@@ -22,7 +22,7 @@ class RepositoriesUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.repositoryId? or not data.email? or not data.permissions?
+		else if not data?.repositoryId? or not data?.email? or not data?.permissions?
 			callback 400
 		else
 			callback 'IMPLEMENT THIS!!'
@@ -32,7 +32,7 @@ class RepositoriesUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.repositoryId? or not data.userId?
+		else if not data?.repositoryId? or not data?.userId?
 			callback 400
 		else
 			callback 'IMPLEMENT THIS!!'
@@ -42,7 +42,7 @@ class RepositoriesUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.repositoryId? or not data.forwardUrl?
+		else if not data?.repositoryId? or not data?.forwardUrl?
 			callback 400
 		else
 			callback 'IMPLEMENT THIS!!'

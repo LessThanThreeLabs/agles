@@ -1,7 +1,7 @@
 'use strict'
 
 window.Header = ['$scope', '$location', 'initialState', 'socket', ($scope, $location, initialState, socket) ->
-	$scope.loggedIn = initialState.user.id?
+	$scope.loggedIn = initialState.user.email?
 
 	$scope.user =
 		firstName: initialState.user.firstName

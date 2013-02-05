@@ -12,7 +12,7 @@ class RepositoriesCreateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data.name? or not data.forwardUrl?
+		else if not data?.name? or not data?.forwardUrl?
 			callback 400
 		else
 			@modelRpcConnection.repos.create.create_repo userId, data.name, data.forwardUrl, (error, repositoryId) =>

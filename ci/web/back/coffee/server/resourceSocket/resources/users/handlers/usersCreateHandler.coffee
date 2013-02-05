@@ -17,7 +17,7 @@ class UsersCreateHandler extends Handler
 
 
 	create: (socket, data, callback) =>
-		if not data.email? or not data.password? or not data.firstName? or not data.lastName? or not data.rememberMe?
+		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName?
 			callback 400
 		else
 			errors = {}
@@ -36,9 +36,8 @@ class UsersCreateHandler extends Handler
 				if passwordHashError?
 					callback 500
 				else
-					@modelConnection.rpcConnection.users.create.create_user 
-						data.email, data.firstName, data.lastName, passwordHashResult.hashedPassword, passwordHashResult.salt,
-						(error, userId) =>
+					@modelConnection.rpcConnection.users.create.create_user data.email, data.firstName, data.lastName, 
+						passwordHashResult.hashedPassword, passwordHashResult.salt, (error, userId) =>
 							if error?.type is 'UserExistsError' then callback 'User already exists'
 							else if error? then callback 500
 							else callback 'ok'
