@@ -7,7 +7,7 @@ class DatabaseSettings(Settings):
 	def __init__(self):
 		super(DatabaseSettings, self).__init__(
 			postgres_host='localhost',
-			redis_host='127.0.0.1',
+			redis_host='localhost',
 			redis_port=6400,
 			redis_db=0)
 		self.add_values(

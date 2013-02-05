@@ -81,8 +81,8 @@
 		"messageBroker": {
 			"host": "localhost",
 			"port": 5672,
-			"login": "guest",
-			"password": "guest",
+			"login": "lt3",
+			"password": "42f6e8eacf66b9ee7c7b0a5b6a0e1498f7c0d42f",
 			"vhost": "/"
 		},
 

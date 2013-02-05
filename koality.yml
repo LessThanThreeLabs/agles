@@ -47,6 +47,8 @@ setup:
   - scripts:
     - git config --global user.email "koality@getkoality.com"
     - git config --global user.name "Koality"
+    - directory: ci/scripts
+      script: ./rabbitmq_setup.sh
 
 compile:
   - compile_platform:
