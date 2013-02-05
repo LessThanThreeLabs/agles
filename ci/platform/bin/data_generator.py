@@ -4,6 +4,7 @@ import hashlib
 import random
 import string
 import time
+import binascii
 
 from database import schema
 from database.engine import ConnectionFactory
@@ -36,16 +37,18 @@ class SchemaDataGenerator(object):
 			email="admin@admin.com",
 			first_name="admin",
 			last_name="admin",
-			password_hash=hash.hexdigest(),
+			password_hash=binascii.b2a_base64(hash.digest())[0:-1],
 			salt=SALT
 		)
 		ins_user = schema.user.insert().values(
 			email="user@user.com",
 			first_name="user",
 			last_name="user",
-			password_hash=hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).hexdigest(),
+			password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1],
 			salt=SALT
 		)
+
+		print binascii.b2a_base64(hash.digest())
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			self.admin_id = conn.execute(ins_admin).inserted_primary_key[0]
