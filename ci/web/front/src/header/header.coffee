@@ -23,6 +23,9 @@ window.Header = ['$scope', '$location', 'initialState', 'socket', ($scope, $loca
 
 	performLogout = () ->
 		socket.makeRequest 'users', 'update', 'logout', null, (error) ->
-			# this will force a refresh, rather than do html5 pushstate
-			window.location.href = '/'
+			if error?
+				console.error error
+			else
+				# this will force a refresh, rather than do html5 pushstate
+				window.location.href = '/'
 ]

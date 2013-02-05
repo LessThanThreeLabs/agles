@@ -91,18 +91,14 @@ class UsersUpdateHandler extends Handler
 
 
 	login: (socket, data, callback) =>
-		console.log 'received login request:'
-		console.log data
-
 		if not data?.email? or not data?.password?
 			callback 400
 		else
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
-				console.error error
 				if error? then callback 500
 				else
 					passwordHash = @passwordHasher.hashPasswordWithSalt data.password, user.salt
-					if passwordHash isnt user.passwordHash
+					if passwordHash isnt user.password_hash
 						callback 403
 					else
 						socket.session.userId = user.id

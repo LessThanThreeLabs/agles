@@ -13,9 +13,9 @@ class PasswordHasher
 				callback error
 			else
 				callback null,
-					salt: salt.toString('base64')
+					salt: salt.toString 'base64'
 					passwordHash: @hashPasswordWithSalt password, salt
 
 
 	hashPasswordWithSalt: (password, salt) =>
-		return crypto.createHash('sha512').update(salt, 'base64').update(password, 'utf8').digest('base64')
+		return crypto.createHash('sha512').update(salt, 'ascii').update(password, 'utf8').digest('base64')

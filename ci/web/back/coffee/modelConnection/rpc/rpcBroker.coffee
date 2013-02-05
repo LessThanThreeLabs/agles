@@ -50,14 +50,14 @@ class RpcBroker
 			mandatory: true
 
 		console.log '-- calling function: ' + route + ' > ' + methodName
-		# console.log 'sent: ' + JSON.stringify msgpack.unpack message
+		console.log 'sent: ' + JSON.stringify msgpack.unpack message
 
 
 	_handleResponse: (message, headers, deliveryInformation) =>
 		messageId = deliveryInformation.correlationId
 		data = msgpack.unpack message.data
 
-		# console.log 'received: ' + JSON.stringify msgpack.unpack message.data
+		console.log 'received: ' + JSON.stringify msgpack.unpack message.data
 
 		if not @messageIdsToCallbacks[messageId]?
 			console.error 'Received unexpected rpc message ' + JSON.stringify data
