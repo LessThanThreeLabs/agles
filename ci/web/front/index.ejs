@@ -16,14 +16,14 @@
 			<div id="header" ng-controller="Header">
 				<span id="headerTitle" ng-click="visitHome()" unselectable>Koality</span>
 				<div id="headerOptions" ng-cloak>
-					<span class="headerOption" ng-show="!loggedIn" ng-click="visitLogin()" unselectable>Login</span>
-					<span class="headerOption" ng-show="loggedIn" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
+					<span class="headerOption" ng-controller="HeaderLogin" ng-show="!loggedIn" ng-click="visitLogin()" unselectable>Login</span>
+					<span class="headerOption" ng-controller="HeaderProfile" ng-show="loggedIn" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
 						<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
 					</span>
-					<span class="headerOption" ng-show="loggedIn" ng-click="repositoryClick()" unselectable>Repositories
+					<span class="headerOption" ng-controller="HeaderRepositories" ng-show="loggedIn" ng-click="repositoryClick()" unselectable>Repositories
 						<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
 					</span>
-					<span class="headerOption" ng-click="visitAbout()" unselectable>About</span>
+					<span class="headerOption" ng-controller="HeaderAbout" ng-click="visitAbout()" unselectable>About</span>
 				</div>
 			</div>
 		</div>
@@ -40,14 +40,15 @@
 <%- jsFiles %>
 
 <script type="text/javascript">
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-37984512-1']);
-_gaq.push(['_trackPageview']);
-(function() {
-var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-})();
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-37984512-1']);
+	_gaq.push(['_trackPageview']);
+	(function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
 </script>
+
 </body>
 </html>

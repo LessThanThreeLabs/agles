@@ -9,6 +9,7 @@ angular.module('koality.service', []).
 				email: if $window.accountInformation?.email is '' then null else $window.accountInformation?.email
 				firstName: if $window.accountInformation?.firstName is '' then null else $window.accountInformation?.firstName
 				lastName: if $window.accountInformation?.lastName is '' then null else $window.accountInformation?.lastName
+			loggedIn: $window.accountInformation?.email isnt ''
 		return Object.freeze toReturn
 	]).
 	factory('accountInformation', ['initialState', (initialState) ->
@@ -48,6 +49,7 @@ angular.module('koality.service', []).
 		subscribe: subscribeHandler
 		unsubscribe: unsubscribeHandler
 	])
+
 
 angular.module('koality.directive', []).
 	directive('unselectable', () ->
@@ -193,6 +195,7 @@ angular.module('koality.directive', []).
 			</div>'
 	)
 
+
 angular.module('koality.filter', ['koality.service']).
 	filter('ansiparse', ['$window', ($window) ->
 		(input) ->
@@ -202,6 +205,7 @@ angular.module('koality.filter', ['koality.service']).
 		(input) ->
 			return fileSuffixAdder.addFileSuffix input
 	])
+
 
 angular.module('koality', ['koality.service', 'koality.directive', 'koality.filter']).
 	config(['$routeProvider', ($routeProvider) ->
@@ -228,9 +232,6 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				controller: RecoverPassword
 			).
 			when('/repository/:repositoryName',
-				redirectTo: '/repository/:repositoryName/change'
-			).
-			when('/repository/:repositoryName/:repositoryView',
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
 				reloadOnSearch: false

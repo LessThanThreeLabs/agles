@@ -1,11 +1,12 @@
 'use strict'
 
-window.Repository = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
+window.Repository = ['$scope', 'socket', ($scope, socket) ->
 	$scope.name = 'awesome.git'
 	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
 ]
 
-window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
+
+window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'socket', ($scope, $location, $routeParams, socket) ->
 	retrieveChanges = () ->
 		$scope.changes ?= []
 
@@ -42,7 +43,8 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', ($scope, $loc
 		retrieveChanges()
 ]
 
-window.RepositoryDetails = ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) ->
+
+window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($scope, $location, $routeParams, socket) ->
 	retrieveStages = (changeId) ->
 		$scope.stages = null
 		$scope.lines = null
