@@ -119,7 +119,6 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			self.repo_id = conn._create_repo_in_db(
 				self.user_id,
 				self.REPO_NAME,
-				'description',
 				self.REPO_URI,
 				self.repostore_id,
 				RepositoryPermissions.RW,

@@ -13,20 +13,6 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposUpdateHandler, self).__init__("repos", "update")
 
-	def update_description(self, user_id, repo_id, description):
-		permission = database.schema.permission
-
-		row = self._get_repo_permissions(user_id, repo_id)
-		if not row or not RepositoryPermissions.has_permissions(
-				row[permission.c.permissions], RepositoryPermissions.RWA):
-			raise InvalidPermissionsError("user_id: %d, repo_id: %d" % (user_id, repo_id))
-
-		update = repo.update().where(repo.c.id==repo_id).values(description=description)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(update)
-
-		self.publish_event("repos", repo_id, "description updated", description=description)
-
 	def add_member(self, user_id, email, repo_id):
 		repo = database.schema.repo
 		user = database.schema.user

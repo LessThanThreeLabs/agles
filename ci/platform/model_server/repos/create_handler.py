@@ -18,7 +18,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
-	def create_repo(self, user_id, repo_name, repo_description, default_permissions, forward_url):
+	def create_repo(self, user_id, repo_name, default_permissions, forward_url):
 		if not repo_name:
 			raise RepositoryCreateError("repo_name cannot be empty")
 		try:
@@ -36,7 +36,6 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			repo_id = self._create_repo_in_db(
 				user_id,
 				repo_name,
-				repo_description,
 				uri,
 				repostore_id,
 				default_permissions,
@@ -58,7 +57,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def _create_repo_on_filesystem(self, manager, repostore_id, repo_id, repo_name, privatekey):
 		manager.create_repository(repostore_id, repo_id, repo_name, privatekey)
 
-	def _create_repo_in_db(self, user_id, repo_name, repo_description, uri, repostore_id, default_permissions, forward_url, privatekey, publickey):
+	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, default_permissions, forward_url, privatekey, publickey):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id==repostore_id)
@@ -66,7 +65,6 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
 			ins = repo.insert().values(
 				name=repo_name,
-				description=repo_description,
 				uri=uri,
 				owner=user_id,
 				repostore_id=repostore_id,
