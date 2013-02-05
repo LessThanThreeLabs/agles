@@ -3,40 +3,41 @@ assert = require 'assert'
 
 module.exports = class Resource
 	constructor: (@configurationParams, @stores, @modelConnection) ->
-		assert.ok @configurationParams? and @stores? and @modelConnection?
+		assert.ok @configurationParams?
+		assert.ok @stores?
+		assert.ok @modelConnection?
 
 
 	create: (socket, data, callback) ->
-		callback 'create not written yet' if callback?
+		callback 404
 
 
 	read: (socket, data, callback) ->
-		callback 'read not written yet' if callback?
+		callback 404
 
 
 	update: (socket, data, callback) ->
-		callback 'update not written yet' if callback?
+		callback 404
 
 
 	delete: (socket, data, callback) ->
-		callback 'delete not written yet' if callback?
+		callback 404
 
 
 	subscribe: (socket, data, callback) ->
-		callback 'subscribe not written yet' if callback?
+		callback 404
 
 
 	unsubscribe: (socket, data, callback) ->
-		callback 'unsubscribe not written yet' if callback?
+		callback 404
 
 
 	_call: (handler, socket, data, callback) ->
-		assert.ok data?
-		if data.method? and data.args?
-			if typeof handler[data.method] is 'function'
-				handler[data.method] socket, data.args, callback
-			else
-				callback 'Class #{handler} has no method #{data.method}'
+		if not data?
+			callback 400
+		else if data.method.indexOf '_' is 0
+			callback 404
+		else if typeof handler[data.method] isnt 'function'
+			callback 404
 		else
-			handler.default socket, data, callback
-
+			handler[data.method] socket, data.args, callback

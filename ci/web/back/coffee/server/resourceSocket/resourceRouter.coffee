@@ -1,43 +1,39 @@
 assert = require 'assert'
 
 UsersResource = require './resources/users/usersResource'
-OrganizationsResource = require './resources/organizations/organizationsResource'
 ChangesResource = require './resources/changes/changesResource'
-BuildsResource = require './resources/builds/buildsResource'
 BuildOutputsResource = require './resources/buildOutputs/buildOutputsResource'
 RepositoriesResource = require './resources/repositories/repositoriesResource'
 
 
 exports.create = (configurationParams, stores, modelConnection) ->
-	usersResource = UsersResource.create configurationParams, stores, modelConnection
-	organizationsResource = OrganizationsResource.create configurationParams, stores, modelConnection
-	changesResource = ChangesResource.create configurationParams, stores, modelConnection
-	buildsResource = BuildsResource.create configurationParams, stores, modelConnection
-	buildOutputsResource = BuildOutputsResource.create configurationParams, stores, modelConnection
-	repositoriesResource = RepositoriesResource.create configurationParams, stores, modelConnection
-	return new ResourceRouter usersResource, organizationsResource, changesResource, buildsResource, buildOutputsResource, repositoriesResource
+	resources =
+		users: UsersResource.create configurationParams, stores, modelConnection
+		repositories: RepositoriesResource.create configurationParams, stores, modelConnection
+		changes: ChangesResource.create configurationParams, stores, modelConnection
+		buildOutputs: BuildOutputsResource.create configurationParams, stores, modelConnection
+	return new ResourceRouter resources
 
 
 class ResourceRouter
-	constructor: (@usersResource, @organizationsResource, @changesResource, @buildsResource, @buildOutputsResource, @repositoriesResource) ->
+	constructor: (@resources) ->
+		assert.ok @resources?
+		for resourceName, resource of @resources
+			assert.ok resource?
 
 
 	bindToResources: (socket) ->
-		@_bindToResource socket, 'users', @usersResource
-		@_bindToResource socket, 'organizations', @organizationsResource
-		@_bindToResource socket, 'changes', @changesResource
-		@_bindToResource socket, 'builds', @buildsResource
-		@_bindToResource socket, 'buildOutputs', @buildOutputsResource
-		@_bindToResource socket, 'repos', @repositoriesResource
+		for resourceName, resource of @resources
+			@_bindToResource socket, resourceName, resource
 
 
-	_bindToResource: (socket, name, resource) ->
-		allowedActions = (key for key in Object.keys(resource) when typeof resource[key] is 'function')
-		for action in allowedActions
-			@_bindToResourceFunction socket, name, action, resource
+	_bindToResource: (socket, noun, resource) ->
+		verbs = (key for key in Object.keys(resource) when typeof resource[key] is 'function')
+		for verb in verbs
+			@_bindToResourceFunction socket, noun, verb, resource
 
 
-	_bindToResourceFunction: (socket, name, action, resource) ->
-		eventName = name + ':' + action
-		socket.on eventName, (data, callback) ->
-			resource[action] socket, data, callback
+	_bindToResourceFunction: (socket, noun, verb, resource) ->
+		socket.on noun + '.' + verb, (data, callback) ->
+			callback ?= () ->
+			resource[verb] socket, data, callback

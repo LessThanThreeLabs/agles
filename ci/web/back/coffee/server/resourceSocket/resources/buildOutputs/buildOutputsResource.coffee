@@ -1,7 +1,6 @@
 assert = require 'assert'
 
 Resource = require '../resource'
-
 BuildOutputsReadHandler = require './handlers/buildOutputsReadHandler'
 
 
@@ -13,6 +12,7 @@ exports.create = (configurationParams, stores, modelConnection) ->
 class BuildOutputsResource extends Resource
 	constructor: (configurationParams, stores, modelConnection, @readHandler) ->
 		super configurationParams, stores, modelConnection
+		assert.ok @readHandler
 
 
 	read: (socket, data, callback) =>

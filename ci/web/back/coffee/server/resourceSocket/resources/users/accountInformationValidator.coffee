@@ -6,10 +6,12 @@ exports.create = () ->
 
 
 class AccountInformationValidator
+	
 	emailRegex: new RegExp "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b"
 	passwordRegex: new RegExp "^(?=.*[a-zA-Z])(?=.*\\d).+$"
 	firstNameRegex: new RegExp "^[A-Z][-'a-zA-Z]+$"
 	lastNameRegex: new RegExp "^[A-Z][-'a-zA-Z]+$"
+	sshKeyRegex: new RegExp "^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}"
 
 
 	getInvalidEmailString: () =>
@@ -45,7 +47,7 @@ class AccountInformationValidator
 
 
 	getInvalidSshAliasString: () =>
-		return "Invalid Alias"
+		return 'Invalid Alias'
 
 
 	isValidSshAlias: (alias) =>
@@ -53,8 +55,8 @@ class AccountInformationValidator
 
 
 	getInvalidSshKeyString: () =>
-		return "Invalid Key"
+		return 'Invalid Key'
 
 
 	isValidSshKey: (key) =>
-		return key? and key isnt ''
+		return key? and key.match @sshKeyRegex

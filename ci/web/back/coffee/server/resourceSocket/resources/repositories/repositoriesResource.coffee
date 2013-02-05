@@ -1,10 +1,10 @@
 assert = require 'assert'
 
 Resource = require '../resource'
-
 RepositoriesCreateHandler = require './handlers/repositoriesCreateHandler'
 RepositoriesReadHandler = require './handlers/repositoriesReadHandler'
 RepositoriesUpdateHandler = require './handlers/repositoriesUpdateHandler'
+
 
 exports.create = (configurationParams, stores, modelConnection) ->
 	createHandler = RepositoriesCreateHandler.create modelConnection.rpcConnection
@@ -16,6 +16,9 @@ exports.create = (configurationParams, stores, modelConnection) ->
 class RepositoriesResource extends Resource
 	constructor: (configurationParams, stores, modelConnection, @createHandler, @readHandler, @updateHandler) ->
 		super configurationParams, stores, modelConnection
+		assert.ok @createHandler
+		assert.ok @readHandler
+		assert.ok @updateHandler
 
 
 	create: (socket, data, callback) =>
@@ -33,9 +36,9 @@ class RepositoriesResource extends Resource
 	subscribe: (socket, data, callback) =>
 		console.log 'need to make sure this user is allowed to receive updates for id ' + data.id
 		eventName = @modelConnection.eventConnection.repositories.registerForEvents socket, data.id
-		callback null, eventName: eventName if callback?
+		callback null, eventName: eventName
 
 
 	unsubscribe: (socket, data, callback) =>
 		@modelConnection.eventConnection.repositories.unregisterForEvents socket, data.id
-		callback null, 'ok' if callback?
+		callback null, 'ok'

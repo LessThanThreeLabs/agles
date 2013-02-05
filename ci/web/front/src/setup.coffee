@@ -26,9 +26,9 @@ angular.module('koality.service', []).
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
 
 		makeRequestHandler = (resource, requestType, functionName, data, callback) ->
-			assert resource.indexOf('.') is -1 and requestType.indexOf('.') is -1 and functionName.indexOf('.') is -1
-			socket.emit "#{resource}.${requestType}.#{functionName}", data, callback
-			console.log "socket request made for #{resource} - #{requestType} - #{functionName} with:"
+			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
+			socket.emit "#{resource}.${requestType}", {function: functionName, data: data}, callback
+			console.log "socket request made for #{resource} - #{requestType}, #{functionName} with:"
 			console.log data
 
 		subscribeHandler = (resource, resourceId, eventName, callback) ->

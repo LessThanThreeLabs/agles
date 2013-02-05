@@ -11,26 +11,24 @@ UsersCreateHandler = require './handlers/usersCreateHandler'
 UsersUpdateHandler = require './handlers/usersUpdateHandler'
 UsersReadHandler = require './handlers/usersReadHandler'
 
+
 exports.create = (configurationParams, stores, modelConnection) ->
 	passwordHasher = PasswordHasher.create()
 	accountInformationValidator = AccountInformationValidator.create()
 	resetPasswordEmailer = ResetPasswordEmailer.create configurationParams
 
-	createAccountHandler = CreateAccountHandler.create configurationParams, stores.createAccountStore, modelConnection.rpcConnection, passwordHasher, accountInformationValidator
-	loginHandler = LoginHandler.create configurationParams, modelConnection.rpcConnection, passwordHasher
-	createHandler = UsersCreateHandler.create modelConnection.rpcConnection, createAccountHandler, accountInformationValidator
+	createHandler = UsersCreateHandler.create modelConnection.rpcConnection, passwordHasher, accountInformationValidator
 	readHandler = UsersReadHandler.create modelConnection.rpcConnection
-	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, loginHandler, passwordHasher, accountInformationValidator, resetPasswordEmailer
+	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer
 	return new UsersResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler
 
 
 class UsersResource extends Resource
 	constructor: (configurationParams, stores, modelConnection, @createHandler, @readHandler, @updateHandler) ->
+		super configurationParams, stores, modelConnection
 		assert.ok @createHandler?
 		assert.ok @readHandler?
 		assert.ok @updateHandler?
-
-		super configurationParams, stores, modelConnection
 
 
 	create: (socket, data, callback) =>

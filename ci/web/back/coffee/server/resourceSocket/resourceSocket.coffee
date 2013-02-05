@@ -13,7 +13,8 @@ exports.create = (configurationParams, stores, modelConnection) ->
 
 class ResourceSocket
 	constructor: (@configurer, @resourceRouter) ->
-		assert.ok @configurer? and @resourceRouter?
+		assert.ok @configurer?
+		assert.ok @resourceRouter?
 
 
 	start: (server) ->

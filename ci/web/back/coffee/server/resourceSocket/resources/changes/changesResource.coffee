@@ -1,8 +1,8 @@
 assert = require 'assert'
 
 Resource = require '../resource'
-
 ChangesReadHandler = require './handlers/changesReadHandler'
+
 
 exports.create = (configurationParams, stores, modelConnection) ->
 	readHandler = ChangesReadHandler.create modelConnection.rpcConnection
@@ -12,6 +12,7 @@ exports.create = (configurationParams, stores, modelConnection) ->
 class ChangesResource extends Resource
 	constructor: (configurationParams, stores, modelConnection, @readHandler) ->
 		super configurationParams, stores, modelConnection
+		assert.ok @readHandler
 
 
 	read: (socket, data, callback) =>
