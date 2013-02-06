@@ -2,6 +2,7 @@ import hashlib
 import time
 
 from sqlalchemy import and_
+from sqlalchemy.exc import IntegrityError
 
 from database import schema
 from database.engine import ConnectionFactory
@@ -18,22 +19,32 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 		timestamp = int(time.time())
 		ins = ssh_pubkey.insert().values(user_id=user_id, alias=alias, ssh_key=ssh_key, timestamp=timestamp)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			result = sqlconn.execute(ins)
+			try:
+				result = sqlconn.execute(ins)
+			except IntegrityError:
+				if sqlconn.execute(ssh_pubkey.select().where(ssh_pubkey.c.ssh_key == ssh_key)).first():
+					raise KeyAlreadyInUseError(ssh_key)
+				if sqlconn.execute(ssh_pubkey.select().where(
+					and_(
+						ssh_pubkey.c.user_id == user_id,
+						ssh_pubkey.c.alias == alias))).first():
+					raise AliasAlreadyInUseError("user_id: %s, alias: %s" % (user_id, alias))
+				raise
 		pubkey_id = result.inserted_primary_key[0]
 		self.publish_event("users", user_id, "ssh pubkey added", pubkey_id=pubkey_id, alias=alias, ssh_key=ssh_key, timestamp=timestamp)
 		return pubkey_id
 
-	def remove_ssh_pubkey(self, user_id, alias):
+	def remove_ssh_pubkey(self, user_id, key_id):
 		ssh_pubkey = schema.ssh_pubkey
 		delete = ssh_pubkey.delete().where(
 			and_(
 				ssh_pubkey.c.user_id == user_id,
-				ssh_pubkey.c.alias == alias
+				ssh_pubkey.c.id == key_id
 			)
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(delete)
-		self.publish_event("users", user_id, "ssh pubkey removed", alias=alias)
+		self.publish_event("users", user_id, "ssh pubkey removed", id=key_id)
 		return True
 
 	def change_basic_information(self, user_id, first_name, last_name):
@@ -71,4 +82,12 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 
 
 class NoSuchUserError(Exception):
+	pass
+
+
+class KeyAlreadyInUseError(Exception):
+	pass
+
+
+class AliasAlreadyInUseError(Exception):
 	pass

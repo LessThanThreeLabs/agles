@@ -1,5 +1,3 @@
-from sqlalchemy import and_
-
 from model_server.rpc_handler import ModelServerRpcHandler
 
 import database.schema
