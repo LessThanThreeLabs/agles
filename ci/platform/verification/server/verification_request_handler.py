@@ -4,7 +4,7 @@ import socket
 from kombu.connection import Connection
 
 from model_server import ModelServer
-from model_server.build_outputs import ConsoleType
+from model_server.build_consoles import ConsoleType
 from settings.rabbit import RabbitSettings
 from settings.verification_server import VerificationServerSettings
 from shared.constants import BuildStatus, VerificationUser
@@ -39,8 +39,8 @@ class VerificationRequestHandler(InfiniteWorker):
 		repo_uri = self._get_repo_uri(commit_list[0])
 		refs = self._get_ref_list(commit_list)
 		private_key = self._get_private_key(repo_uri)
-		with ModelServer.rpc_connect("build_outputs", "update") as build_outputs_update_rpc:
-			console_appender = self._make_console_appender(build_outputs_update_rpc, self.build_id)
+		with ModelServer.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
+			console_appender = self._make_console_appender(build_consoles_update_rpc, self.build_id)
 			verification_config = self.verifier.setup_build(repo_uri, refs, private_key, console_appender)
 			self.verifier.declare_commands(console_appender, ConsoleType.Compile, verification_config.compile_commands)
 			self.verifier.run_compile_step(verification_config.compile_commands, console_appender)
@@ -58,8 +58,8 @@ class VerificationRequestHandler(InfiniteWorker):
 	def do_task(self, task):
 		try:
 			test_command = SimpleRemoteTestCommand(task["test_command"])
-			with ModelServer.rpc_connect("build_outputs", "update") as build_outputs_update_rpc:
-				console_appender = self._make_console_appender(build_outputs_update_rpc, self.build_id)
+			with ModelServer.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
+				console_appender = self._make_console_appender(build_consoles_update_rpc, self.build_id)
 				self.verifier.declare_commands(console_appender, ConsoleType.Test, [test_command])
 				return self.verifier.run_test_command(test_command, console_appender)
 		except Exception as e:
@@ -106,21 +106,21 @@ class VerificationRequestHandler(InfiniteWorker):
 			repostore_id, host_name, repo_path, repo_id, repo_name, private_key = repos_read_rpc.get_repo_attributes(repo_uri)
 		return private_key
 
-	def _make_console_appender(self, build_outputs_update_rpc, build_id):
+	def _make_console_appender(self, build_consoles_update_rpc, build_id):
 		class ConsoleAppender(object):
 			def __init__(self, type, subtype):
-				self.build_outputs_update_rpc = build_outputs_update_rpc
+				self.build_consoles_update_rpc = build_consoles_update_rpc
 				self.build_id = build_id
 				self.type = type
 				self.subtype = subtype
 
 			def declare_commands(self, commands):
-				self.build_outputs_update_rpc.add_subtypes(self.build_id, self.type, commands)
+				self.build_consoles_update_rpc.add_subtypes(self.build_id, self.type, commands)
 
 			def append(self, line_num, line):
-				self.build_outputs_update_rpc.append_console_line(self.build_id, line_num, line, self.type, self.subtype)
+				self.build_consoles_update_rpc.append_console_line(self.build_id, line_num, line, self.type, self.subtype)
 
 			def set_return_code(self, return_code):
-				self.build_outputs_update_rpc.set_return_code(self.build_id, return_code, self.type, self.subtype)
+				self.build_consoles_update_rpc.set_return_code(self.build_id, return_code, self.type, self.subtype)
 
 		return ConsoleAppender

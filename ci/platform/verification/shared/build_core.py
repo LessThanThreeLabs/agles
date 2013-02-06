@@ -6,7 +6,7 @@ import yaml
 
 from git import Git, Repo
 
-from model_server.build_outputs import ConsoleType
+from model_server.build_consoles import ConsoleType
 from virtual_machine.remote_command import SimpleRemoteCheckoutCommand, SimpleRemoteProvisionCommand
 from verification_config import VerificationConfig
 from verification_result import VerificationResult

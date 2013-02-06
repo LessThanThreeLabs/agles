@@ -2,8 +2,8 @@ from nose.tools import *
 
 from database.engine import ConnectionFactory
 from database.schema import *
-from model_server.build_outputs import ConsoleType
-from model_server.build_outputs.update_handler import BuildOutputsUpdateHandler
+from model_server.build_consoles import ConsoleType
+from model_server.build_consoles.update_handler import BuildConsolesUpdateHandler
 from util.permissions import RepositoryPermissions
 from util.test import BaseIntegrationTest
 
@@ -81,7 +81,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 
 	def console_append_test(self):
 		self._initialize()
-		update_handler = BuildOutputsUpdateHandler()
+		update_handler = BuildConsolesUpdateHandler()
 
 		compile_line_dict = {}
 		test_line_dict = {}

@@ -8,9 +8,9 @@ from util.permissions import RepositoryPermissions, InvalidPermissionsError
 from util.sql import to_dict
 
 
-class BuildOutputsReadHandler(ModelServerRpcHandler):
+class BuildConsolesReadHandler(ModelServerRpcHandler):
 	def __init__(self):
-		super(BuildOutputsReadHandler, self).__init__("build_outputs", "read")
+		super(BuildConsolesReadHandler, self).__init__("build_consoles", "read")
 
 	def _subtypes_query(self, build_id, console):
 		build_console = database.schema.build_console

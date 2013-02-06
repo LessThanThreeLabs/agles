@@ -10,10 +10,10 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
-class BuildOutputsUpdateHandler(ModelServerRpcHandler):
+class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 
 	def __init__(self):
-		super(BuildOutputsUpdateHandler, self).__init__("build_outputs", "update")
+		super(BuildConsolesUpdateHandler, self).__init__("build_consoles", "update")
 
 	def add_subtypes(self, build_id, type, ordered_subtypes):
 		assert isinstance(ordered_subtypes, collections.Iterable)
@@ -24,13 +24,13 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
 		query = select([func.max(build_console.c.subtype_priority)],
 			and_(
-				build_console.c.build_id==build_id,
-				build_console.c.type==type
+				build_console.c.build_id == build_id,
+				build_console.c.type == type
 			),
 			[build_console]
 		)
 
-		build_query = build.select().where(build.c.id==build_id)
+		build_query = build.select().where(build.c.id == build_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			max_priority_result = sqlconn.execute(query).first()
@@ -71,9 +71,9 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
 		query = build_console.select().where(
 			and_(
-				build_console.c.build_id==build_id,
-				build_console.c.type==type,
-				build_console.c.subtype==subtype,
+				build_console.c.build_id == build_id,
+				build_console.c.type == type,
+				build_console.c.subtype == subtype,
 			)
 		)
 
@@ -94,12 +94,12 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 				sqlconn.execute(
 					build_console.update().where(
 						and_(
-							console_output.c.build_console_id==build_console_id,
-							console_output.c.line_number==line_num
+							console_output.c.build_console_id == build_console_id,
+							console_output.c.line_number == line_num
 						)
 					).values(line=line)
 				)
-			self.publish_event("build_outputs", build_console_id, "new output",
+			self.publish_event("build_consoles", build_console_id, "new output",
 				line_num=line_num, line=line)
 
 	def set_return_code(self, build_id, return_code, type, subtype):
@@ -107,9 +107,9 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 
 		query = build_console.select().where(
 			and_(
-				build_console.c.build_id==build_id,
-				build_console.c.type==type,
-				build_console.c.subtype==subtype,
+				build_console.c.build_id == build_id,
+				build_console.c.type == type,
+				build_console.c.subtype == subtype,
 			)
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -119,9 +119,9 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 			build_console_id = row[build_console.c.id]
 			sqlconn.execute(
 				build_console.update().where(
-					build_console.c.id==build_console_id
+					build_console.c.id == build_console_id
 				).values(return_code=return_code)
 			)
 
-		self.publish_event("build_outputs", build_console_id, "return code added",
+		self.publish_event("build_consoles", build_console_id, "return code added",
 			return_code=return_code)
