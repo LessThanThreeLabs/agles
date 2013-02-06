@@ -28,7 +28,18 @@ class BuildConsolesReadHandler extends Handler
 		else
 			@modelRpcConnection.buildConsoles.read.get_build_consoles userId, data.changeId, (error, buildConsoles) ->
 				if error?.type is 'InvalidPermissionsError' then callback 403
-				else if error?
-					console.log error.traceback
-					callback 500
+				else if error? then callback 500
 				else callback null, (sanitizeResult buildConsole for buildConsole in buildConsoles)
+
+
+	getLines: (socket, data, callback) ->
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		else if not data?.id?
+			callback 400
+		else
+			@modelRpcConnection.buildConsoles.read.get_output_lines userId, data.id, (error, buildConsolesLines) ->
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback null, buildConsolesLines

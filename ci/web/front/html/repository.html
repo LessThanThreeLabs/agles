@@ -30,7 +30,7 @@
 
 				<div class="consoleText">
 					<div class="consoleTextLine" ng-repeat="line in lines">
-						<span class="consoleTextLineNumber">{{line.number}}</span><span class="consoleTextLineText" ng-bind-html="line.text | ansiparse"></span>
+						<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse"></span>
 					</div>
 				</div>
 			</div>

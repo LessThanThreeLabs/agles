@@ -63,12 +63,15 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($s
 			else $scope.$apply () -> $scope.stages = buildConsoles
 
 	retrieveLines = () ->
-		$scope.lines = null
+		$scope.lines = []
 		return if not $scope.currentStageId?
 
-		socket.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, lines) ->
+		socket.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
 			if error? then console.error error
-			else $scope.$apply () -> $scope.lines = buildConsoles
+			else
+				$scope.$apply () -> 
+					for lineNumber, lineText of lines
+						$scope.lines[lineNumber-1] = lineText
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id
@@ -78,6 +81,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($s
 		$scope.currentStageId = stage.id
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
+		$scope.currentStageId = null
 		retrieveStages newValue
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
