@@ -2,7 +2,7 @@ assert = require 'assert'
 
 UsersResource = require './resources/users/usersResource'
 ChangesResource = require './resources/changes/changesResource'
-BuildOutputsResource = require './resources/buildOutputs/buildOutputsResource'
+BuildConsolesResource = require './resources/buildConsoles/buildConsolesResource'
 RepositoriesResource = require './resources/repositories/repositoriesResource'
 
 
@@ -11,7 +11,7 @@ exports.create = (configurationParams, stores, modelConnection) ->
 		users: UsersResource.create configurationParams, stores, modelConnection
 		repositories: RepositoriesResource.create configurationParams, stores, modelConnection
 		changes: ChangesResource.create configurationParams, stores, modelConnection
-		buildOutputs: BuildOutputsResource.create configurationParams, stores, modelConnection
+		buildConsoles: BuildConsolesResource.create configurationParams, stores, modelConnection
 	return new ResourceRouter resources
 
 

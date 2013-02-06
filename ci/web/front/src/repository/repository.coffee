@@ -7,17 +7,29 @@ window.Repository = ['$scope', 'socket', ($scope, socket) ->
 
 
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'socket', ($scope, $location, $routeParams, socket) ->
+	noMoreChangesToRetrieve = false
+	waitingOnChanges = false
+	numChangesToRequest = 100
+
 	retrieveMoreChanges = () ->
-		$scope.changes ?= []
+		return if noMoreChangesToRetrieve or waitingOnChanges
+		waitingOnChanges = true
+
 		changesQuery =
 			repositoryId: $routeParams.repositoryId
 			group: 'all'
-			query: $scope.query ? ''
+			query: $scope.query
 			startIndex: $scope.changes.length
-			numToRetrieve: 20
+			numToRetrieve: numChangesToRequest
 		socket.makeRequest 'changes', 'read', 'getChanges', changesQuery, (error, changes) ->
 			if error? then console.error error
-			else $scope.$apply () -> $scope.changes = $scope.changes.concat changes
+			else
+				noMoreChangesToRetrieve = changes.length < numChangesToRequest
+				$scope.$apply () -> $scope.changes = $scope.changes.concat changes
+				waitingOnChanges = false
+
+	$scope.changes = []
+	$scope.query = ''
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id ? null
@@ -44,11 +56,13 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($s
 	retrieveStages = (changeId) ->
 		$scope.stages = null
 		$scope.lines = null
-		if changeId?
-			$scope.stages = null
-			setTimeout (() -> $scope.$apply () ->
-				$scope.stages = (createRandomStage 'blah ' + number for number in [0..8])
-			), 250
+		return if not changeId?
+
+		socket.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changesQuery, (error, buildOutputs) ->
+			if error? then console.error error
+			else
+				console.log buildOutputs
+				# $scope.$apply () -> $scope.changes = $scope.changes.concat changes
 
 	retrieveLines = (stageId) ->
 		$scope.lines = null
@@ -59,11 +73,14 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($s
 			), 250
 
 	$scope.$on '$routeUpdate', () ->
-		retrieveStages $routeParams.id
-	retrieveStages $routeParams.id
+		$scope.currentChangeId = $routeParams.id
+	$scope.currentChangeId = $routeParams.id
 
 	$scope.stageClick = (stage) ->
 		$scope.currentStageId = stage.id
+
+	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
+		retrieveStages newValue
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
 		retrieveLines newValue

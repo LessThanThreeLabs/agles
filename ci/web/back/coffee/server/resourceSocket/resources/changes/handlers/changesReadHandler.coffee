@@ -9,8 +9,6 @@ exports.create = (modelRpcConnection) ->
 
 class ChangesReadHandler extends Handler
 	getChanges: (socket, data, callback) =>
-		console.log data
-		
 		sanitizeResult = (change) ->
 			id: change.id
 			number: change.number

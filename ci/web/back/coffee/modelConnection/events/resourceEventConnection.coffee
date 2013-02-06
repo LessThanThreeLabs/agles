@@ -7,7 +7,11 @@ exports.create = (connection, exchange, routeName, queueName, handler) ->
 
 class ResourceEventConnection
 	constructor: (@connection, @exchange, @routeName, @queueName, @handler) ->
-		assert.ok @connection? and @exchange? and @routeName? and @queueName? and @handler?
+		assert.ok @connection?
+		assert.ok @exchange?
+		assert.ok @routeName?
+		assert.ok @queueName?
+		assert.ok @handler?
 
 
 	connect: (callback) ->

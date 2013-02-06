@@ -4,12 +4,12 @@ EventHandler = require './eventHandler'
 
 
 exports.create = (sockets) ->
-	return new BuildOutputEventHandler sockets
+	return new BuildConsolesEventHandler sockets
 
 
-class BuildOutputEventHandler extends EventHandler
-	ROOM_PREFIX: 'buildOutput-'
-	EVENT_PREFIX: 'buildOutput-'
+class BuildConsolesEventHandler extends EventHandler
+	ROOM_PREFIX: 'buildConsole-'
+	EVENT_PREFIX: 'buildConsole-'
 
 
 	processEvent: (data) =>
