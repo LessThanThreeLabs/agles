@@ -1,10 +1,10 @@
 'use strict'
 
-window.Login = ['$scope', 'socket', ($scope, socket) ->
+window.Login = ['$scope', 'rpc', ($scope, rpc) ->
 	$scope.account = {}
 	
 	$scope.login = () ->
-		socket.makeRequest 'users', 'update', 'login', $scope.account, (error, result) ->
+		rpc.makeRequest 'users', 'update', 'login', $scope.account, (error, result) ->
 			if error?
 				console.error error
 			else

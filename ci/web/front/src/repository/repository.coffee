@@ -1,12 +1,12 @@
 'use strict'
 
-window.Repository = ['$scope', 'socket', ($scope, socket) ->
+window.Repository = ['$scope', ($scope) ->
 	$scope.name = 'awesome.git'
 	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
 ]
 
 
-window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'socket', ($scope, $location, $routeParams, socket) ->
+window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', ($scope, $location, $routeParams, rpc) ->
 	noMoreChangesToRetrieve = false
 	waitingOnChanges = false
 	numChangesToRequest = 100
@@ -21,7 +21,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'socket', ($s
 			query: $scope.query
 			startIndex: $scope.changes.length
 			numToRetrieve: numChangesToRequest
-		socket.makeRequest 'changes', 'read', 'getChanges', changesQuery, (error, changes) ->
+		rpc.makeRequest 'changes', 'read', 'getChanges', changesQuery, (error, changes) ->
 			if error? then console.error error
 			else
 				noMoreChangesToRetrieve = changes.length < numChangesToRequest
@@ -52,13 +52,13 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'socket', ($s
 ]
 
 
-window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'socket', ($scope, $location, $routeParams, crazyAnsiText, socket) ->
+window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', ($scope, $location, $routeParams, crazyAnsiText, rpc) ->
 	retrieveStages = () ->
 		$scope.stages = null
 		$scope.lines = null
 		return if not $scope.currentChangeId?
 
-		socket.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
+		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
 			if error? then console.error error
 			else $scope.$apply () -> $scope.stages = buildConsoles
 
@@ -66,7 +66,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 		$scope.lines = []
 		return if not $scope.currentStageId?
 
-		socket.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
+		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
 			if error? then console.error error
 			else
 				$scope.$apply () -> 

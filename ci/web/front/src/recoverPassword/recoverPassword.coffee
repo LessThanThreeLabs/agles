@@ -1,9 +1,9 @@
 'use strict'
 
-window.RecoverPassword = ['$scope', 'socket', ($scope, socket) ->
+window.RecoverPassword = ['$scope', 'rpc', ($scope, rpc) ->
 	$scope.account = {}
 	
 	$scope.recoverPassword = () ->
-		socket.makeRequest 'users', 'update', 'recoverPassword', $scope.account, (result) ->
+		rpc.makeRequest 'users', 'update', 'recoverPassword', $scope.account, (result) ->
 			console.log 'result: ' + result
 ]

@@ -11,33 +11,33 @@ window.Account = ['$scope', '$location', '$routeParams', 'fileSuffixAdder', ($sc
 ]
 
 
-window.AccountBasic = ['$scope', 'accountInformation', 'socket', ($scope, accountInformation, socket) ->
+window.AccountBasic = ['$scope', 'accountInformation', 'rpc', ($scope, accountInformation, rpc) ->
 	$scope.account =
 		firstName: accountInformation.firstName
 		lastName: accountInformation.lastName
 
 	$scope.submit = () ->
-		socket.makeRequest 'users', 'update', 'changeBasicInformation', $scope.account, (error, result) ->
+		rpc.makeRequest 'users', 'update', 'changeBasicInformation', $scope.account, (error, result) ->
 			if error?
 				console.error
 			console.log 'result: ' + result
 ]
 
 
-window.AccountPassword = ['$scope', 'socket', ($scope, socket) ->
+window.AccountPassword = ['$scope', 'rpc', ($scope, rpc) ->
 	$scope.account = {}
 
 	$scope.submit = () ->
-		socket.makeRequest 'users', 'update', 'changePassword', $scope.account, (error, result) ->
+		rpc.makeRequest 'users', 'update', 'changePassword', $scope.account, (error, result) ->
 			if error?
 				console.error error
 			console.log 'result: ' + result
 ]
 
 
-window.AccountSshKeys = ['$scope', 'socket', ($scope, socket) ->
+window.AccountSshKeys = ['$scope', 'rpc', ($scope, rpc) ->
 	getKeys = () ->
-		socket.makeRequest 'users', 'read', 'getSshKeys', null, (error, keys) ->
+		rpc.makeRequest 'users', 'read', 'getSshKeys', null, (error, keys) ->
 			if error? then console.error error
 			else $scope.$apply () -> $scope.keys = keys
 
@@ -45,7 +45,7 @@ window.AccountSshKeys = ['$scope', 'socket', ($scope, socket) ->
 		keyToAdd =
 			alias: $scope.addKey.alias
 			key: $scope.addKey.key
-		socket.makeRequest 'users', 'update', 'addSshKey', keyToAdd, (error, result) ->
+		rpc.makeRequest 'users', 'update', 'addSshKey', keyToAdd, (error, result) ->
 			if error? then console.error error
 			else console.log result
 
@@ -64,7 +64,7 @@ window.AccountSshKeys = ['$scope', 'socket', ($scope, socket) ->
 		$scope.addKey.key = ''
 
 	$scope.removeKey = (key) ->
-		socket.makeRequest 'users', 'update', 'removeSshKey', id: key.id, (error, result) ->
+		rpc.makeRequest 'users', 'update', 'removeSshKey', id: key.id, (error, result) ->
 			if error? then console.error error
 			else console.log result
 ]

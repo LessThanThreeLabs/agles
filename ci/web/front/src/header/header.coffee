@@ -1,13 +1,13 @@
 'use strict'
 
-window.Header = ['$scope', '$location', 'initialState', 'socket', ($scope, $location, initialState, socket) ->
+window.Header = ['$scope', '$location', 'initialState', ($scope, $location, initialState) ->
 	$scope.loggedIn = initialState.loggedIn
 
 	$scope.visitHome = () -> $location.path('/').search({})
 ]
 
 
-window.HeaderProfile = ['$scope', '$location', 'initialState', 'socket', ($scope, $location, initialState, socket) ->
+window.HeaderProfile = ['$scope', '$location', 'initialState', 'rpc', ($scope, $location, initialState, rpc) ->
 	$scope.user =
 		firstName: initialState.user.firstName
 		lastName: initialState.user.lastName
@@ -18,7 +18,7 @@ window.HeaderProfile = ['$scope', '$location', 'initialState', 'socket', ($scope
 		if profileOption is 'logout' then performLogout()
 
 	performLogout = () ->
-		socket.makeRequest 'users', 'update', 'logout', null, (error) ->
+		rpc.makeRequest 'users', 'update', 'logout', null, (error) ->
 			if error? then console.error error
 			else
 				# this will force a refresh, rather than do html5 pushstate
@@ -31,9 +31,9 @@ window.HeaderLogin = ['$scope', '$location', ($scope, $location) ->
 ]
 
 
-window.HeaderRepositories = ['$scope', '$location', 'initialState', 'socket', ($scope, $location, initialState, socket) ->
+window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($scope, $location, initialState, rpc) ->
 	getRepositories = () ->
-		socket.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
+		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
 			if error? then console.error error
 			else $scope.$apply () -> $scope.repositoryDropdownOptions = (createDropdownOptionFromRepository repository for repository in repositories)
 

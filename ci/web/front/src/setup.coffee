@@ -26,29 +26,33 @@ angular.module('koality.service', []).
 	]).
 	factory('socket', ['$location', 'initialState', ($location, initialState) ->
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
-
-		makeRequestHandler = (resource, requestType, methodName, data, callback) ->
+		
+		makeRequest: (resource, requestType, methodName, data, callback) ->
+			assert.ok typeof resource is 'string' and typeof requestType is 'string' and typeof methodName is 'string'
 			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
 			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, callback
 			console.log "socket request made for #{resource} - #{requestType}, #{methodName} with:"
 			console.log data
+	]).
+	factory('rpc', ['socket', (socket) ->
+		makeRequest: socket.makeRequest
+	]).
+	factory('events', ['socket', (socket) ->
+		_callback: null
 
-		subscribeHandler = (resource, resourceId, eventName, callback) ->
-			makeRequestHandler resource, 'subscribe', eventName, resourceId: resourceId, (error, eventToListenFor) ->
-				if error?
-					console.error error
-				else
-					socket.on eventToListenFor, callback
-					console.log "subscribed to event #{resource} - #{eventName}"
+		setCallback: (callback) => 
+			assert.ok callback?
+			@_callback = callback
 
-		unsubscribeHandler = (resource, resourceId, eventName) ->
+		subscribe: () =>
+			makeRequestHandler resource, 'subscribe', eventName, resourceId: resourceId, (error, eventToListenFor) =>
+				if error? then console.error error
+				else socket.on eventToListenFor, (data) =>
+					@_callback data if @_callback?
+
+		unsubscribe: () =>
 			makeRequestHandler resource, 'unsubscribe', eventName, resourceId: resourceId, (error) ->
-				console.error if error?
-			console.log "unsubscribed to event #{resource} - #{eventName}"
-
-		makeRequest: makeRequestHandler
-		subscribe: subscribeHandler
-		unsubscribe: unsubscribeHandler
+				console.error if error?	
 	]).
 	factory('crazyAnsiText', ['initialState', (initialState) ->
 		return makeCrazy: (text) ->
