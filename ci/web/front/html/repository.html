@@ -24,9 +24,13 @@
 			</div>
 
 			<div id="repositoryChangeDetailsOutput">
+				<div class="changeDetailsHome" ng-show="currentStageId == null">
+					hello there
+				</div>
+
 				<div class="consoleText">
 					<div class="consoleTextLine" ng-repeat="line in lines">
-						<span class="consoleTextLineNumber">{{line.number}}</span><span class="consoleTextLineText">{{line.text}}</span>
+						<span class="consoleTextLineNumber">{{line.number}}</span><span class="consoleTextLineText" ng-bind-html="line.text | ansiparse"></span>
 					</div>
 				</div>
 			</div>

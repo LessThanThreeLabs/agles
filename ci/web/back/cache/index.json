@@ -1,6 +1,8 @@
 {
 	"css": {
 		"text/css": [
+			"/css/src/util/ansi.css",
+
 			"/css/src/setup.css",
 			"/css/src/prettyElements/prettyDropdown.css",
 			"/css/src/prettyElements/prettyForm.css",
@@ -26,6 +28,7 @@
 		"application/javascript": [
 			"/js/libs/jquery.js",
 			"/js/libs/angular.js",
+			"/js/libs/angularSanitize.js",
 			"/js/libs/socket.io.js",
 			"/js/libs/assert.js",
 			"/js/libs/d3.js",

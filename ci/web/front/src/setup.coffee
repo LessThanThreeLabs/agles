@@ -199,7 +199,7 @@ angular.module('koality.directive', []).
 angular.module('koality.filter', ['koality.service']).
 	filter('ansiparse', ['$window', ($window) ->
 		(input) ->
-			return $window.ansiparse input
+			return '<span class="ansi">' + $window.ansiparse input + '</span>'
 	]).
 	filter('fileSuffix', ['fileSuffixAdder', (fileSuffixAdder) ->
 		(input) ->
@@ -207,7 +207,7 @@ angular.module('koality.filter', ['koality.service']).
 	])
 
 
-angular.module('koality', ['koality.service', 'koality.directive', 'koality.filter']).
+angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive', 'koality.filter']).
 	config(['$routeProvider', ($routeProvider) ->
 		$routeProvider.
 			when('/welcome',

@@ -53,24 +53,24 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'socket', ($s
 
 
 window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($scope, $location, $routeParams, socket) ->
-	retrieveStages = (changeId) ->
+	retrieveStages = () ->
 		$scope.stages = null
 		$scope.lines = null
-		return if not changeId?
+		return if not $scope.currentChangeId?
 
-		socket.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changesQuery, (error, buildOutputs) ->
+		socket.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
 			if error? then console.error error
 			else
-				console.log buildOutputs
-				# $scope.$apply () -> $scope.changes = $scope.changes.concat changes
+				$scope.$apply () -> $scope.stages = buildConsoles
 
-	retrieveLines = (stageId) ->
+	retrieveLines = () ->
 		$scope.lines = null
-		if stageId?
-			$scope.lines = null
-			setTimeout (() -> $scope.$apply () ->
-				$scope.lines = (createRandomLine number for number in [1..300])
-			), 250
+		return if not $scope.currentStageId?
+
+		setTimeout (() -> $scope.$apply () ->
+			lines = (createRandomLine number for number in [1..300])
+			$scope.lines = lines
+		), 250
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id
@@ -100,12 +100,6 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($s
 
 
 
-createRandomChange = (number) ->
-	id: Math.floor Math.random() * 10000
-	number: number
-	status: if Math.random() > .25 then 'passed' else 'failed'
-
-
 createRandomStage = (name) ->
 	id: Math.floor Math.random() * 10000
 	name: name
@@ -113,7 +107,8 @@ createRandomStage = (name) ->
 
 createRandomLine = (number) ->
 	randString = () ->
-		a = Math.random().toString(36).substr(2)
+		a = '\x1b[' + (Math.round(Math.random() * 9) + 30) + ';1m'
+		a += Math.random().toString(36).substr(2)
 		a += Math.random().toString(36).substr(2) for number in [0..(Math.random() * 7)]
 		return a
 

@@ -49,7 +49,7 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 		build = database.schema.build
 		build_console = database.schema.build_console
 
-		query = build_console.join(build).select().where(
+		query = build_console.join(build).select(use_labels=True).where(
 			build.c.change_id == change_id
 		)
 

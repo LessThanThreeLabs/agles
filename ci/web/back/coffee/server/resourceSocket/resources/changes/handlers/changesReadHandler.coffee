@@ -34,8 +34,6 @@ class ChangesReadHandler extends Handler
 		else if not data?.id?
 			callback 400
 		else
-			callback 'IMPLEMENT THIS!!'
-
 			# @modelRpcConnection.changes.read.get_change_metadata userId, data.id, (error, metadata) =>
 			# 	if error?
 			# 		if error.type is 'InvalidPermissionsError' then callback 403

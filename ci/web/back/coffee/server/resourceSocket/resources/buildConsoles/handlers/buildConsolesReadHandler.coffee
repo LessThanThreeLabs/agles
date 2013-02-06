@@ -8,11 +8,17 @@ exports.create = (modelRpcConnection) ->
 
 
 class BuildConsolesReadHandler extends Handler
-	getBuildOutputs: (socket, data, callback) =>
-		# sanitizeResult = (change) ->
-		# 	id: change.id
-		# 	number: change.number
-		# 	status: change.status
+	getBuildConsoles: (socket, data, callback) =>
+		returnCodeToStatus = (returnCode) ->
+			if not returnCode? then return 'running'
+			else if returnCode is 0 then return 'passed'
+			else return 'failed'
+
+		sanitizeResult = (buildConsole) ->
+			id: buildConsole.id
+			type: buildConsole.type
+			name: buildConsole.subtype
+			status: returnCodeToStatus buildConsole.return_code
  		
 		userId = socket.session.userId
 		if not userId?
@@ -20,7 +26,9 @@ class BuildConsolesReadHandler extends Handler
 		else if not data?.changeId?
 			callback 400
 		else
-			@modelRpcConnection.buildConsoles.read.get_build_consoles userId, data.changeId, (error, buildConsoles) =>
-					if error?.type is 'InvalidPermissionsError' then callback 403
-					else if error? then callback 500
-					else callback null, buildOutputs
+			@modelRpcConnection.buildConsoles.read.get_build_consoles userId, data.changeId, (error, buildConsoles) ->
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error?
+					console.log error.traceback
+					callback 500
+				else callback null, (sanitizeResult buildConsole for buildConsole in buildConsoles)
