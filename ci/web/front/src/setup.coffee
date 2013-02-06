@@ -10,6 +10,7 @@ angular.module('koality.service', []).
 				firstName: if $window.accountInformation?.firstName is '' then null else $window.accountInformation?.firstName
 				lastName: if $window.accountInformation?.lastName is '' then null else $window.accountInformation?.lastName
 			loggedIn: $window.accountInformation?.email isnt ''
+			partyMode: false
 		return Object.freeze toReturn
 	]).
 	factory('accountInformation', ['initialState', (initialState) ->
@@ -48,6 +49,13 @@ angular.module('koality.service', []).
 		makeRequest: makeRequestHandler
 		subscribe: subscribeHandler
 		unsubscribe: unsubscribeHandler
+	]).
+	factory('crazyAnsiText', ['initialState', (initialState) ->
+		return makeCrazy: (text) ->
+			return text if not initialState.partyMode
+
+			prefix = '\x1b[' + (Math.round(Math.random() * 9) + 30) + ';' + (Math.round(Math.random() * 9) + 40) + 'm'
+			return prefix + text
 	])
 
 

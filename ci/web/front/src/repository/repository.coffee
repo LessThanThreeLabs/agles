@@ -52,7 +52,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'socket', ($s
 ]
 
 
-window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($scope, $location, $routeParams, socket) ->
+window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'socket', ($scope, $location, $routeParams, crazyAnsiText, socket) ->
 	retrieveStages = () ->
 		$scope.stages = null
 		$scope.lines = null
@@ -71,7 +71,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($s
 			else
 				$scope.$apply () -> 
 					for lineNumber, lineText of lines
-						$scope.lines[lineNumber-1] = lineText
+						$scope.lines[lineNumber-1] = crazyAnsiText.makeCrazy lineText
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id
@@ -87,32 +87,3 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($s
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
 		retrieveLines newValue
 ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-createRandomStage = (name) ->
-	id: Math.floor Math.random() * 10000
-	name: name
-	status: if Math.random() > .25 then 'passed' else 'failed'
-
-createRandomLine = (number) ->
-	randString = () ->
-		a = '\x1b[' + (Math.round(Math.random() * 9) + 30) + ';' + (Math.round(Math.random() * 9) + 40) + 'm'
-		a += Math.random().toString(36).substr(2)
-		a += Math.random().toString(36).substr(2) for number in [0..(Math.random() * 7)]
-		return a
-
-	number: number
-	text: randString()
