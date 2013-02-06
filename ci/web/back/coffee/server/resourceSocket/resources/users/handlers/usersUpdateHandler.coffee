@@ -58,12 +58,12 @@ class UsersUpdateHandler extends Handler
 				else if error? then callback 500
 				else
 					oldPasswordHash = @passwordHasher.hashPasswordWithSalt data.oldPassword, result.salt
-					if oldPasswordHash isnt result.passwordHash
+					if oldPasswordHash isnt result.password_hash
 						callback 'Invalid old password'
 						return
 					
 					newPasswordHash = @passwordHasher.hashPasswordWithSalt data.newPassword, result.salt
-					@modelRpcConnection.users.update.change_password userId, newPasswordHash, (error, result) =>
+					@modelRpcConnection.users.update.change_password userId, newPasswordHash, result.salt, (error, result) =>
 						if error?.type is 'InvalidPermissionsError' then callback 403
 						else if error? then callback 500
 						else callback()
@@ -125,17 +125,17 @@ class UsersUpdateHandler extends Handler
 			errors = {}
 			if not @accountInformationValidator.isValidSshAlias data.alias
 				errors.alias = @accountInformationValidator.getInvalidSshAliasString()
-			if not @accountInformationValidator.isValidSshKey data.sshKey
+			if not @accountInformationValidator.isValidSshKey data.key
 				errors.sshKey = @accountInformationValidator.getInvalidSshKeyString()
 
-			if Object.keys(errors).length != 0
+			if Object.keys(errors).length isnt 0
 				callback errors
 				return
 
-			@modelRpcConnection.users.update.add_ssh_pubkey userId, data.alias, data.sshKey, (error, result) =>
+			@modelRpcConnection.users.update.add_ssh_pubkey userId, data.alias, data.key, (error, result) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
-				else callback result
+				else callback null, result
 
 
 	removeSshKey: (socket, data, callback) =>

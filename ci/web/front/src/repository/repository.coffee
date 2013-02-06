@@ -7,40 +7,36 @@ window.Repository = ['$scope', 'socket', ($scope, socket) ->
 
 
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'socket', ($scope, $location, $routeParams, socket) ->
-	retrieveChanges = () ->
+	retrieveMoreChanges = () ->
 		$scope.changes ?= []
-
-		maxChanges = 9001
-		max = maxChanges - $scope.changes.length
-		min = maxChanges - $scope.changes.length - 100
-
-		setTimeout (() ->			
-			$scope.$apply () ->
-				$scope.changes = $scope.changes.concat (createRandomChange number for number in [min..max].reverse())
-				$scope.currentChangeId ?= $scope.changes[0].id
-
-				$scope.changes[0].status = 'queued'
-				$scope.changes[1].status = 'running'
-				$scope.changes[2].status = 'running'
-		), 250
+		changesQuery =
+			repositoryId: $routeParams.repositoryId
+			group: 'all'
+			query: $scope.query ? ''
+			startIndex: $scope.changes.length
+			numToRetrieve: 20
+		socket.makeRequest 'changes', 'read', 'getChanges', changesQuery, (error, changes) ->
+			if error? then console.error error
+			else $scope.$apply () -> $scope.changes = $scope.changes.concat changes
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id ? null
 	$scope.currentChangeId = $routeParams.id ? null
 
-	retrieveChanges()
+	retrieveMoreChanges()
 
 	$scope.changeClick = (change) ->
 		$scope.currentChangeId = change.id
+
+	$scope.scrolledToBottom = () ->
+		retrieveMoreChanges()
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'id', newValue
 
 	$scope.$watch 'query', (newValue, oldValue) ->
-		console.log 'query changed: ' + newValue
-
-	$scope.scrolledToBottom = () ->
-		retrieveChanges()
+		$scope.changes = []
+		retrieveMoreChanges()
 ]
 
 

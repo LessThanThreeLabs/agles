@@ -8,11 +8,32 @@ exports.create = (modelRpcConnection) ->
 
 
 class ChangesReadHandler extends Handler
-	getMetadata: (socket, data, callback) =>
+	getChanges: (socket, data, callback) =>
+		console.log data
+		
+		sanitizeResult = (change) ->
+			id: change.id
+			number: change.number
+			status: change.status
+ 		
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data?.changeId?
+		else if not data?.repositoryId? or not data.group? or not data.query? or not data.startIndex? or not data.numToRetrieve?
+			callback 400
+		else
+			@modelRpcConnection.changes.read.query_changes userId, data.repositoryId, 
+				data.group, data.query, data.startIndex, data.numToRetrieve, (error, changes) =>
+					if error?.type is 'InvalidPermissionsError' then callback 403
+					else if error? then callback 500
+					else callback null, (sanitizeResult change for change in changes)
+
+
+	getChangeMetadata: (socket, data, callback) =>
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		else if not data?.id?
 			callback 400
 		else
 			callback 'IMPLEMENT THIS!!'

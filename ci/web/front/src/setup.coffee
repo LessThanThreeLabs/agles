@@ -231,7 +231,7 @@ angular.module('koality', ['koality.service', 'koality.directive', 'koality.filt
 				templateUrl: "/html/recoverPassword#{fileSuffix}.html"
 				controller: RecoverPassword
 			).
-			when('/repository/:repositoryName',
+			when('/repository/:repositoryId',
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
 				reloadOnSearch: false

@@ -17,7 +17,9 @@ window.AccountBasic = ['$scope', 'accountInformation', 'socket', ($scope, accoun
 		lastName: accountInformation.lastName
 
 	$scope.submit = () ->
-		socket.makeRequest 'users', 'update', 'basic', $scope.account, (result) ->
+		socket.makeRequest 'users', 'update', 'changeBasicInformation', $scope.account, (error, result) ->
+			if error?
+				console.error
 			console.log 'result: ' + result
 ]
 
@@ -26,25 +28,43 @@ window.AccountPassword = ['$scope', 'socket', ($scope, socket) ->
 	$scope.account = {}
 
 	$scope.submit = () ->
-		socket.makeRequest 'users', 'update', 'basic', $scope.account, (result) ->
+		socket.makeRequest 'users', 'update', 'changePassword', $scope.account, (error, result) ->
+			if error?
+				console.error error
 			console.log 'result: ' + result
 ]
 
 
 window.AccountSshKeys = ['$scope', 'socket', ($scope, socket) ->
-	$scope.keys = [{alias: 'first', timestamp: 13928471}, {alias: 'second', timestamp: 13928471}, {alias: 'third', timestamp: 13928471}]
-	
+	getKeys = () ->
+		socket.makeRequest 'users', 'read', 'getSshKeys', null, (error, keys) ->
+			if error? then console.error error
+			else $scope.$apply () -> $scope.keys = keys
+
+	addKey = () ->
+		keyToAdd =
+			alias: $scope.addKey.alias
+			key: $scope.addKey.key
+		socket.makeRequest 'users', 'update', 'addSshKey', keyToAdd, (error, result) ->
+			if error? then console.error error
+			else console.log result
+
+	getKeys()
+
 	$scope.addKey = {}
 	$scope.addKey.modalVisible = false
 
 	$scope.addKey.submit = () ->
 		$scope.addKey.modalVisible = false
-		console.log 
-			alias: $scope.addKey.alias
-			key: $scope.addKey.key
+		addKey()
 		resetValues()
 
 	resetValues = () ->
 		$scope.addKey.alias = ''
 		$scope.addKey.key = ''
+
+	$scope.removeKey = (key) ->
+		socket.makeRequest 'users', 'update', 'removeSshKey', id: key.id, (error, result) ->
+			if error? then console.error error
+			else console.log result
 ]
