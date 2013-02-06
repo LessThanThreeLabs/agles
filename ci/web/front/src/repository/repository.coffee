@@ -60,17 +60,15 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'socket', ($s
 
 		socket.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
 			if error? then console.error error
-			else
-				$scope.$apply () -> $scope.stages = buildConsoles
+			else $scope.$apply () -> $scope.stages = buildConsoles
 
 	retrieveLines = () ->
 		$scope.lines = null
 		return if not $scope.currentStageId?
 
-		setTimeout (() -> $scope.$apply () ->
-			lines = (createRandomLine number for number in [1..300])
-			$scope.lines = lines
-		), 250
+		socket.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, lines) ->
+			if error? then console.error error
+			else $scope.$apply () -> $scope.lines = buildConsoles
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id
@@ -107,7 +105,7 @@ createRandomStage = (name) ->
 
 createRandomLine = (number) ->
 	randString = () ->
-		a = '\x1b[' + (Math.round(Math.random() * 9) + 30) + ';1m'
+		a = '\x1b[' + (Math.round(Math.random() * 9) + 30) + ';' + (Math.round(Math.random() * 9) + 40) + 'm'
 		a += Math.random().toString(36).substr(2)
 		a += Math.random().toString(36).substr(2) for number in [0..(Math.random() * 7)]
 		return a
