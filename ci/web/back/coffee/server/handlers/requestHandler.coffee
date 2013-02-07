@@ -49,6 +49,7 @@ module.exports = class Resource
 			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString
+			userId: request.session.userId
 			email: request.session.email
 			firstName: request.session.firstName
 			lastName: request.session.lastName

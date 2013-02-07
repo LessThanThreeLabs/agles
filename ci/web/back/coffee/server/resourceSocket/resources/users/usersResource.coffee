@@ -44,9 +44,16 @@ class UsersResource extends Resource
 
 
 	subscribe: (socket, data, callback) =>
-		console.log 'need to make sure this user is allowed to receive updates for id ' + data.id
-		eventName = @modelConnection.eventConnection.users.registerForEvents socket, data.id
-		callback null, eventName: eventName if callback?
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		if not data.method? and data.args?.id?
+			callback 400
+		else
+			console.log 'need to make sure this user is allowed to receive updates for id ' + data.args.id
+			eventName = @modelConnection.eventConnection.users.registerForEvents socket, data.args.id, data.method
+			if eventName? then callback null, eventName
+			else callback 400
 
 
 	unsubscribe: (socket, data, callback) =>

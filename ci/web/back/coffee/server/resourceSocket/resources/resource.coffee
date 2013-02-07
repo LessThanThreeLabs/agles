@@ -35,7 +35,7 @@ module.exports = class Resource
 	_call: (handler, socket, data, callback) ->
 		if not data? or typeof data.method isnt 'string'
 			callback 400
-		else if data.method[0] is '-'
+		else if data.method[0] is '_'
 			callback 404
 		else if typeof handler[data.method] isnt 'function'
 			callback 404

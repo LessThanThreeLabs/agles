@@ -6,17 +6,13 @@ angular.module('koality.service', []).
 			fileSuffix: if $window.fileSuffix is '' then null else $window.fileSuffix
 			csrfToken: if $window.csrfToken is '' then null else $window.csrfToken
 			user:
+				id: if isNaN(parseInt($window.accountInformation?.id)) then null else parseInt($window.accountInformation.id)
 				email: if $window.accountInformation?.email is '' then null else $window.accountInformation?.email
 				firstName: if $window.accountInformation?.firstName is '' then null else $window.accountInformation?.firstName
 				lastName: if $window.accountInformation?.lastName is '' then null else $window.accountInformation?.lastName
-			loggedIn: $window.accountInformation?.email isnt ''
+			loggedIn: $window.accountInformation?.id?
 			partyMode: false
 		return Object.freeze toReturn
-	]).
-	factory('accountInformation', ['initialState', (initialState) ->
-		email: initialState.user.email
-		firstName: initialState.user.firstName
-		lastName: initialState.user.lastName
 	]).
 	factory('fileSuffixAdder', ['initialState', (initialState) ->
 		return addFileSuffix: (fileSrc) ->
@@ -33,26 +29,35 @@ angular.module('koality.service', []).
 			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, callback
 			console.log "socket request made for #{resource} - #{requestType}, #{methodName} with:"
 			console.log data
+
+		respondTo: (eventName, callback) ->
+			console.log 'going to listen for: ' + eventName
+			socket.on eventName, callback
 	]).
 	factory('rpc', ['socket', (socket) ->
 		makeRequest: socket.makeRequest
 	]).
 	factory('events', ['socket', (socket) ->
-		_callback: null
+		listen: (resource, eventName, id) ->
+			_callback: null
 
-		setCallback: (callback) => 
-			assert.ok callback?
-			@_callback = callback
+			setCallback: (callback) -> 
+				assert.ok callback?
+				@_callback = callback
+				return @
 
-		subscribe: () =>
-			makeRequestHandler resource, 'subscribe', eventName, resourceId: resourceId, (error, eventToListenFor) =>
-				if error? then console.error error
-				else socket.on eventToListenFor, (data) =>
-					@_callback data if @_callback?
+			subscribe: () ->
+				socket.makeRequest resource, 'subscribe', eventName, id: id, (error, eventToListenFor) =>
+					console.log '~ ' + eventToListenFor
+					if error? then console.error error
+					else socket.respondTo eventToListenFor, (data) =>
+						@_callback data if @_callback?
+				return @
 
-		unsubscribe: () =>
-			makeRequestHandler resource, 'unsubscribe', eventName, resourceId: resourceId, (error) ->
-				console.error if error?	
+			unsubscribe: () ->
+				socket.makeRequest resource, 'unsubscribe', eventName, id: id, (error) ->
+					console.error if error?	
+				return @
 	]).
 	factory('crazyAnsiText', ['initialState', (initialState) ->
 		return makeCrazy: (text) ->

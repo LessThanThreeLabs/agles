@@ -8,14 +8,15 @@ module.exports = class EventHandler
 		assert.ok @sockets?
 
 
-	registerForEvents: (socket, id) =>
+	registerForEvents: (socket, id, eventName) =>
 		assert.ok @ROOM_PREFIX
 		assert.ok socket?
-		assert.ok id? 
-		assert.ok typeof id is 'number'
+		assert.ok id? and typeof id is 'number'
+		assert.ok eventName? and typeof eventName is 'string'
 
-		roomName = @ROOM_PREFIX + id
-		
+		return null if eventName not in @eventNames
+
+		roomName = @_getRoomName id, eventName
 		if socket.roomCounter[roomName]?
 			socket.roomCounter[roomName]++
 		else
@@ -23,20 +24,29 @@ module.exports = class EventHandler
 
 		console.log 'adding to room: ' + roomName
 		socket.join roomName if socket.roomCounter[roomName] > 0
-		return @EVENT_PREFIX + id
+
+		return @_getCompleteEventName id, eventName
 
 
-	unregisterForEvents: (socket, id) =>
+	unregisterForEvents: (socket, id, eventName) =>
 		assert.ok @ROOM_PREFIX
 		assert.ok socket? 
-		assert.ok id? 
-		assert.ok typeof id is 'number'
+		assert.ok id? and typeof id is 'number'
+		assert.ok eventName? and typeof eventName is 'string'
 
-		roomName = @ROOM_PREFIX + id
+		roomName = @_getRoomName id, eventName
 
 		socket.roomCounter[roomName] = Math.max socket.roomCounter[roomName] - 1, 0
 		console.log 'removing from room: ' + roomName
 		socket.leave roomName if socket.roomCounter[roomName] is 0
+
+
+	_getRoomName: (id, eventName) =>
+		return @ROOM_PREFIX + id + ' | ' + eventName
+
+
+	_getCompleteEventName: (id, eventName) =>
+		return @EVENT_PREFIX + id + ' | ' + eventName
 
 
 	handleEvent: (message, headers, deliveryInfo) =>

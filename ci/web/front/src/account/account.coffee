@@ -11,10 +11,10 @@ window.Account = ['$scope', '$location', '$routeParams', 'fileSuffixAdder', ($sc
 ]
 
 
-window.AccountBasic = ['$scope', 'accountInformation', 'rpc', ($scope, accountInformation, rpc) ->
+window.AccountBasic = ['$scope', 'initialState', 'rpc', ($scope, initialState, rpc) ->
 	$scope.account =
-		firstName: accountInformation.firstName
-		lastName: accountInformation.lastName
+		firstName: initialState.user.firstName
+		lastName: initialState.user.lastName
 
 	$scope.submit = () ->
 		rpc.makeRequest 'users', 'update', 'changeBasicInformation', $scope.account, (error, result) ->
