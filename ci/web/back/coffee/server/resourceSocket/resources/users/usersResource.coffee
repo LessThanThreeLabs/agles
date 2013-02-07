@@ -44,6 +44,8 @@ class UsersResource extends Resource
 
 
 	subscribe: (socket, data, callback) =>
+		console.log data
+		
 		userId = socket.session.userId
 		if not userId?
 			callback 403

@@ -10,8 +10,8 @@ angular.module('koality.service', []).
 				email: if $window.accountInformation?.email is '' then null else $window.accountInformation?.email
 				firstName: if $window.accountInformation?.firstName is '' then null else $window.accountInformation?.firstName
 				lastName: if $window.accountInformation?.lastName is '' then null else $window.accountInformation?.lastName
-			loggedIn: $window.accountInformation?.id?
 			partyMode: false
+		toReturn.loggedIn = toReturn.user.id?
 		return Object.freeze toReturn
 	]).
 	factory('fileSuffixAdder', ['initialState', (initialState) ->

@@ -13,11 +13,9 @@ window.HeaderProfile = ['$scope', '$location', 'initialState', 'rpc', 'events', 
 		lastName: initialState.user.lastName
 
 	handleUpdate = (data) -> $scope.$apply () ->
-		console.log '~~~~'
-		console.log data
 		$scope.user.firstName = data.firstName
 		$scope.user.lastName = data.lastName
-	events.listen('users', 'user updated', initialState.user.id).setCallback(handleUpdate).subscribe()
+	events.listen('users', 'user updated', initialState.user.id).setCallback(handleUpdate).subscribe() if $scope.loggedIn
 
 	$scope.profileDropdownOptions = [{title: 'Account', name: 'account'}, {title: 'Logout', name: 'logout'}]
 	$scope.profileDropdownOptionClick = (profileOption) ->
