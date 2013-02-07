@@ -11,10 +11,10 @@ module.exports = class EventHandler
 	registerForEvents: (socket, id, eventName) =>
 		assert.ok @ROOM_PREFIX
 		assert.ok socket?
-		assert.ok id? and typeof id is 'number'
-		assert.ok eventName? and typeof eventName is 'string'
 
-		return null if eventName not in @eventNames
+		return null if typeof id isnt 'number'
+		return null if typeof eventName isnt 'string'
+		return null if eventName not in @EVENT_NAMES
 
 		roomName = @_getRoomName id, eventName
 		if socket.roomCounter[roomName]?

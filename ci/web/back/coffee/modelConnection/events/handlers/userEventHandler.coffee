@@ -10,11 +10,9 @@ exports.create = (sockets) ->
 class UserEventHandler extends EventHandler
 	ROOM_PREFIX: 'user-'
 	EVENT_PREFIX: 'user-'
-	eventNames: ['user updated']
+	EVENT_NAMES: ['user updated']
 
 	processEvent: (data) =>
-		assert.ok data.type in @eventNames
-
 		roomName = @_getRoomName data.id, data.type
 		eventName = @_getCompleteEventName data.id, data.type
 
@@ -25,12 +23,6 @@ class UserEventHandler extends EventHandler
 					lastName: data.contents.last_name
 			when 'ssh pubkey added', 'ssh pubkey removed'
 				@sockets.in(roomName).emit eventName,
-					type: data.type
-					contents: @_sanitizeSshKey data.contents
+					data.contents
 			else
 				throw new Error 'Unexpected event type: ' + data.type
-
-
-	_sanitizeSshKey: (data) =>
-		alias: data.alias
-		dateAdded: 'need a real timestamp here...'
