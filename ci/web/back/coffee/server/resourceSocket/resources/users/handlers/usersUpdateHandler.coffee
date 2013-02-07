@@ -35,7 +35,12 @@ class UsersUpdateHandler extends Handler
 			@modelRpcConnection.users.update.change_basic_information userId, data.firstName, data.lastName, (error, result) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
-				else callback()
+				else
+					socket.session.firstName = data.firstName
+					socket.session.lastName = data.lastName
+					socket.session.save()
+					
+					callback()
 
 
 	changePassword: (socket, data, callback) =>
