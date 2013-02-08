@@ -69,19 +69,24 @@ def main():
 	else:
 		print "Aborting"
 
+
 def _ssh(remote_host, command):
 	return subprocess.check_call(shlex.split('ssh %s %s' % (remote_host, pipes.quote(command))))
 
+
 def _and(*commands):
 	return ' && '.join(commands)
+
 
 def _yes_no(message):
 	response = _prompt("%s (y/N)" % message)
 	if response:
 		return response.lower() in ['y', 'yes']
 
+
 def _prompt(message, default=None):
 	return raw_input("%s%s:\n" % (message, " (%s)" % default if default else "")) or default
+
 
 def _get_config_file_path():
 	git_root = subprocess.check_output(shlex.split('git rev-parse --show-toplevel')).strip()
