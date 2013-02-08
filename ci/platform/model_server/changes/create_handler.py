@@ -17,13 +17,12 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		commit_id = self._create_commit(repo_id, user_id, commit_message)
 
 		change = database.schema.change
-		commit = database.schema.commit
 		repo = database.schema.repo
 
 		prev_change_number = 0
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			change_number_query = select([func.max(change.c.number)], change.c.repo_id==repo_id)
+			change_number_query = select([func.max(change.c.number)], change.c.repo_id == repo_id)
 			max_change_number_result = sqlconn.execute(change_number_query).first()
 			if max_change_number_result and max_change_number_result[0]:
 				prev_change_number = max_change_number_result[0]
@@ -32,7 +31,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				number=change_number, status=BuildStatus.QUEUED)
 			result = sqlconn.execute(ins)
 			change_id = result.inserted_primary_key[0]
-			repo_id_query = repo.select().where(repo.c.id==repo_id)
+			repo_id_query = repo.select().where(repo.c.id == repo_id)
 			repo_id = sqlconn.execute(repo_id_query).first()[repo.c.id]
 		self.publish_event("repos", repo_id, "change added", change_id=change_id, change_number=change_number,
 			change_status="queued", commit_id=commit_id, merge_target=merge_target)
@@ -41,7 +40,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def _create_commit(self, repo_id, user_id, commit_message):
 		commit = database.schema.commit
 
-		timestamp = int(time.time())
+		timestamp = int(time.time() * 1000)
 		ins = commit.insert().values(repo_id=repo_id, user_id=user_id,
 			message=commit_message, timestamp=timestamp)
 		with ConnectionFactory.get_sql_connection() as sqlconn:

@@ -16,7 +16,7 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 	def add_ssh_pubkey(self, user_id, alias, ssh_key):
 		ssh_key = " ".join(ssh_key.split()[:2])  # Retain only type and key
 		ssh_pubkey = schema.ssh_pubkey
-		timestamp = int(time.time())
+		timestamp = int(time.time() * 1000)
 		ins = ssh_pubkey.insert().values(user_id=user_id, alias=alias, ssh_key=ssh_key, timestamp=timestamp)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			try:
@@ -45,6 +45,18 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(delete)
 		self.publish_event("users", user_id, "ssh pubkey removed", id=key_id)
+		return True
+
+	def remove_ssh_pubkey_by_alias(self, user_id, alias):
+		ssh_pubkey = schema.ssh_pubkey
+		delete = ssh_pubkey.delete().where(
+			and_(
+				ssh_pubkey.c.user_id == user_id,
+				ssh_pubkey.c.alias == alias
+			)
+		)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(delete)
 		return True
 
 	def change_basic_information(self, user_id, first_name, last_name):

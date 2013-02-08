@@ -85,16 +85,16 @@ class SchemaDataGenerator(object):
 					repo_id = conn.execute(repo_id_query).first()[schema.repo.c.id]
 					repos[repo_id] += 1
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
-						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())), sha="sha%d%d" % (user, commit))
+						message="message_%d" % commit, timestamp=random.randint(1, int(time.time() * 1000)), sha="sha%d%d" % (user, commit))
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target_%d" % commit,
 						number=repos[repo_id], status=random.choice(VALID_STATUSES),
-						start_time=int(time.time()) + random.randint(-10000, 10000),
-						end_time=int(time.time()) + random.randint(10000, 12000))
+						start_time=int(time.time() * 1000) + random.randint(-10000, 10000),
+						end_time=int(time.time() * 1000) + random.randint(10000, 12000))
 					change_id = conn.execute(ins_change).inserted_primary_key[0]
 					ins_build = schema.build.insert().values(change_id=change_id, repo_id=repo_id, is_primary=True, status=random.choice(VALID_STATUSES),
-						start_time=int(time.time()) + random.randint(-10000, 10000),
-						end_time=int(time.time()) + random.randint(10000, 12000))
+						start_time=int(time.time() * 1000) + random.randint(-10000, 10000),
+						end_time=int(time.time() * 1000) + random.randint(10000, 12000))
 					build_id = conn.execute(ins_build).inserted_primary_key[0]
 					ins_map = schema.build_commits_map.insert().values(build_id=build_id, commit_id=commit_id)
 					conn.execute(ins_map)

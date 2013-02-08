@@ -16,7 +16,7 @@ class PubkeyRegistrar(object):
 	def unregister_pubkey(self, user_id, alias):
 		try:
 			with ModelServer.rpc_connect("users", "update") as users_update_rpc:
-				users_update_rpc.remove_ssh_pubkey(user_id, alias)
+				users_update_rpc.remove_ssh_pubkey_by_alias(user_id, alias)
 		except:
 			pass
 

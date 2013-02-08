@@ -28,17 +28,20 @@ class VirtualMachine(object):
 			output_handler.append("Failed to connect to the testing instance. Please try again.")
 			return pubkey_results
 		pubkey = pubkey_results.output
-		alias = str(uuid.uuid1()) + "_box"
+		alias = '__vm_' + str(uuid.uuid1())
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
 		try:
-			command = "ssh -oStrictHostKeyChecking=no %s true > /dev/null" % host_url  # first, bypass the yes/no prompt
-			command = command + "&& git clone %s source" % git_url
-			command = command + "&& cd source"
-			command = command + "&& git fetch origin %s" % refs[0]
-			command = command + "&& git checkout FETCH_HEAD"
+			command = ' && '.join([
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null' % host_url,  # first, bypass the yes/no prompt
+				'git init source',
+				'cd source',
+				'git fetch %s %s -n --depth 1' % (git_url, refs[0]),
+				'git checkout FETCH_HEAD'])
 			for ref in refs[1:]:
-				command = command + "&& git fetch origin %s" % ref
-				command = command + "&& git merge FETCH_HEAD"
+				command = ' && '.join([
+					command,
+					'git fetch origin %s' % ref,
+					'git merge FETCH_HEAD'])
 			results = self.ssh_call(command, output_handler)
 		finally:
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)

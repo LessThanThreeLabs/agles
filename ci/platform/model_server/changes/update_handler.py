@@ -23,11 +23,11 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 
 	def mark_change_started(self, change_id):
 		self._update_change_status(change_id, BuildStatus.RUNNING,
-			"change started", start_time=int(time.time()))
+			"change started", start_time=int(time.time() * 1000))
 
 	def mark_change_finished(self, change_id, status):
 		self._update_change_status(change_id, status,
-			"change finished", end_time=int(time.time()))
+			"change finished", end_time=int(time.time() * 1000))
 		if status == BuildStatus.FAILED:
 			self._notify_failure(change_id)
 

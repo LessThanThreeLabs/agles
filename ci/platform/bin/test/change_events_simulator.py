@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import random
 import string
 import sys
@@ -9,14 +10,19 @@ from settings.rabbit import RabbitSettings
 from shared.constants import BuildStatus
 
 
-console_id = 1
+class Globals(object):
+	console_id = 1
 
 
 def main():
-	if len(sys.argv) < 1:
+	if len(sys.argv) < 2:
 		print "Must provide a repository id and optionally a change number"
-	repo_id = sys.argv[0]
-	change_id = sys.argv.get(1, random.randint(9001, 9999))
+		sys.exit(1)
+	repo_id = int(sys.argv[1])
+	if len(sys.argv) == 3:
+		change_id = int(sys.argv[2])
+	else:
+		change_id = random.randint(9001, 9999)
 	mock_change(repo_id, change_id)
 
 
@@ -24,7 +30,7 @@ def mock_change(repo_id, change_id):
 	publish_event("repos", repo_id, "change added", change_id=change_id, change_number=change_id,
 		change_status="queued", commit_id=change_id, merge_target="master")
 	time.sleep(random.uniform(0, 2))
-	publish_event("changes", change_id, "change started", status=BuildStatus.RUNNING, start_time=int(time.time()))
+	publish_event("changes", change_id, "change started", status=BuildStatus.RUNNING, start_time=int(time.time() * 1000))
 	time.sleep(random.uniform(0, 2))
 	publish_event("changes", change_id, "build added", build_id=change_id, commit_list=["ABCDEF123456"])
 	time.sleep(random.uniform(0, 2))
@@ -36,28 +42,30 @@ def mock_change(repo_id, change_id):
 	time.sleep(random.uniform(0, 2))
 	publish_event("builds", change_id, "build finished", status=BuildStatus.PASSED)
 	time.sleep(random.uniform(0, 2))
-	publish_event("changes", change_id, "change finished", status=BuildStatus.PASSED, end_time=int(time.time()))
+	publish_event("changes", change_id, "change finished", status=BuildStatus.PASSED, end_time=int(time.time() * 1000))
 
 
 def mock_stage(change_id, step_name, num_substeps):
 	for step_number in range(num_substeps):
-		publish_event("changes", change_id, "new build console", id=console_id, type=step_name,
+		publish_event("changes", change_id, "new build console", id=Globals.console_id, type=step_name,
 			subtype="%s_%d" % (step_name, step_number), return_code=None)
 		time.sleep(random.uniform(0, 1))
 		for line_number in range(random.randint(10, 300)):
-			publish_event("build_consoles", console_id, "new_output", line_num=line_number, line=random_line())
-			time.sleep(random.uniform(0, 0.2))
-		publish_event("build_consoles", console_id, "return code added", return_code=0)
+			publish_event("build_consoles", Globals.console_id, "new_output", line_num=line_number, line=random_line())
+			time.sleep(random.uniform(0, 0.1))
+		publish_event("build_consoles", Globals.console_id, "return code added", return_code=0)
+		Globals.console_id += 1
 
 
 def random_line():
-	''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(random.randint(1, 100)))
+	return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(random.randint(1, 100)))
 
 
-def publish_event(self, _resource, _id, _event_type, **contents):
+def publish_event(_resource, _id, _event_type, **contents):
 	with Connection(RabbitSettings.kombu_connection_info) as connection:
 		broker = EventsBroker(connection)
 		broker.publish(_resource, _id, _event_type, **contents)
+		print contents
 
 
 if __name__ == '__main__':
