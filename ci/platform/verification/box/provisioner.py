@@ -85,7 +85,7 @@ class Provisioner(object):
 		self._provision(language_steps, setup_steps)
 
 	def _provision(self, language_steps, setup_steps):
-		SetupCommand.execute_script("service rabbitmq-server start > /dev/null", login=False)
+		SetupCommand.execute_script("(pkill -9 -u rabbitmq beam; service rabbitmq-server start) > /dev/null", login=False)
 		self.run_setup_steps(language_steps, action_name='Language configuration')
 		self.run_setup_steps(setup_steps)
 
