@@ -51,7 +51,7 @@ def mock_stage(change_id, step_name, num_substeps):
 			subtype="%s_%d" % (step_name, step_number), return_code=None)
 		time.sleep(random.uniform(0, 1))
 		for line_number in range(random.randint(10, 300)):
-			publish_event("build_consoles", Globals.console_id, "new_output", line_num=line_number, line=random_line())
+			publish_event("build_consoles", Globals.console_id, "new output", line_num=line_number, line=random_line())
 			time.sleep(random.uniform(0, 0.1))
 		publish_event("build_consoles", Globals.console_id, "return code added", return_code=0)
 		Globals.console_id += 1

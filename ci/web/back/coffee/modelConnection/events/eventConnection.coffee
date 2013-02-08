@@ -4,7 +4,7 @@ ResourceEventConnection = require './resourceEventConnection'
 
 UserEventHandler = require './handlers/userEventHandler'
 ChangeEventHandler = require './handlers/changeEventHandler'
-BuildConsoleEventHandler = require './handlers/buildOutputEventHandler'
+BuildConsoleEventHandler = require './handlers/buildConsoleEventHandler'
 RepositoryEventHandler = require './handlers/repositoryEventHandler'
 
 

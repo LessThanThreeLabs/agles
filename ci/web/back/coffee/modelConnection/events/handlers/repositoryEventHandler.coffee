@@ -20,7 +20,10 @@ class RepositoryEventHandler extends EventHandler
 		switch data.type
 			when 'change added'
 				@sockets.in(roomName).emit eventName,
-					data.contents
+					id: data.contents.change_id
+					number: data.contents.change_number
+					status: data.contents.change_status
+				# do nothing
 			# when 'member added', 'member removed', 'member permissions changed'
 			# 	@sockets.in(roomName).emit eventName,
 			# 		type: data.type

@@ -18,12 +18,14 @@ class BuildConsolesEventHandler extends EventHandler
 		
 		switch data.type
 			when 'new output'
-				@sockets.in(roomName).emit eventName,
-					type: data.type
-					contents: data.contents
+				console.log 'new output'
+				# @sockets.in(roomName).emit eventName,
+				# 	type: data.type
+				# 	contents: data.contents
 			when 'return code added'
-				@sockets.in(roomName).emit eventName,
-					type: data.type
-					contents: data.contents.return_code
+				console.log 'return code added'
+				# @sockets.in(roomName).emit eventName,
+				# 	type: data.type
+				# 	contents: data.contents.return_code
 			else
 				throw new Error 'Unexpected event type: ' + data.type

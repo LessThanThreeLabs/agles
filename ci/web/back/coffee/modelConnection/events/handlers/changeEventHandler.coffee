@@ -21,10 +21,11 @@ class ChangeEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					type: data.type
 					contents: @_sanitizeChange data.contents
-			when 'new build output'
-				@sockets.in(roomName).emit eventName,
-					type: data.type
-					contents: @_sanitizeBuildOutput data.contents
+			when 'new build console'
+				console.log 'new build console'
+				# @sockets.in(roomName).emit eventName,
+				# 	type: data.type
+				# 	contents: @_sanitizeBuildOutput data.contents
 			when 'build added'
 				# do nothing
 			else

@@ -4,8 +4,6 @@ Resource = require '../resource'
 PasswordHasher = require './passwordHasher'
 AccountInformationValidator = require './accountInformationValidator'
 ResetPasswordEmailer = require './resetPasswordEmailer'
-CreateAccountHandler = require './create/createAccountHandler'
-LoginHandler = require './login/loginHandler'
 
 UsersCreateHandler = require './handlers/usersCreateHandler'
 UsersUpdateHandler = require './handlers/usersUpdateHandler'
