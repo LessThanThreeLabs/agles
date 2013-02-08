@@ -31,14 +31,18 @@ module.exports = class EventHandler
 	unregisterForEvents: (socket, id, eventName) =>
 		assert.ok @ROOM_PREFIX
 		assert.ok socket? 
-		assert.ok id? and typeof id is 'number'
-		assert.ok eventName? and typeof eventName is 'string'
+
+		return false if typeof id isnt 'number'
+		return false if typeof eventName isnt 'string'
+		return false if eventName not in @EVENT_NAMES
 
 		roomName = @_getRoomName id, eventName
 
 		socket.roomCounter[roomName] = Math.max socket.roomCounter[roomName] - 1, 0
 		console.log 'removing from room: ' + roomName
 		socket.leave roomName if socket.roomCounter[roomName] is 0
+
+		return true
 
 
 	_getRoomName: (id, eventName) =>

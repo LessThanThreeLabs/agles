@@ -57,5 +57,12 @@ class UsersResource extends Resource
 
 
 	unsubscribe: (socket, data, callback) =>
-		@modelConnection.eventConnection.users.unregisterForEvents socket, data.id
-		callback null, 'ok' if callback?
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		if typeof data.method isnt 'string' or typeof data.args?.id isnt 'number'
+			callback 400
+		else
+			success = @modelConnection.eventConnection.users.unregisterForEvents socket, data.args.id, data.method
+			if success then callback()
+			else callback 400

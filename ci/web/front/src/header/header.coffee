@@ -16,7 +16,9 @@ window.HeaderProfile = ['$scope', '$location', 'initialState', 'rpc', 'events', 
 		$scope.user.firstName = data.firstName
 		$scope.user.lastName = data.lastName
 
-	events.listen('users', 'user updated', initialState.user.id).setCallback(handleUpdate).subscribe() if $scope.loggedIn
+	if $scope.loggedIn
+		userEvents = events.listen('users', 'user updated', initialState.user.id).setCallback(handleUpdate).subscribe()
+		$scope.$on '$destroy', userEvents.unsubscribe
 
 	$scope.profileDropdownOptions = [{title: 'Account', name: 'account'}, {title: 'Logout', name: 'logout'}]
 	$scope.profileDropdownOptionClick = (profileOption) ->
