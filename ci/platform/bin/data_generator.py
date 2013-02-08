@@ -48,8 +48,6 @@ class SchemaDataGenerator(object):
 			salt=SALT
 		)
 
-		print binascii.b2a_base64(hash.digest())
-
 		with ConnectionFactory.get_sql_connection() as conn:
 			self.admin_id = conn.execute(ins_admin).inserted_primary_key[0]
 			self.user_id = conn.execute(ins_user).inserted_primary_key[0]

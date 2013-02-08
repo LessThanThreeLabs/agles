@@ -4,7 +4,7 @@ import subprocess
 
 import yaml
 
-from git import Git, Repo
+from git import Repo
 
 from model_server.build_consoles import ConsoleType
 from virtual_machine.remote_command import SimpleRemoteCheckoutCommand, SimpleRemoteProvisionCommand
@@ -35,13 +35,12 @@ class BuildCore(object):
 			subprocess.call(["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "true"])
 		else:
 			checkout_url = repo_uri
-		Git().clone(checkout_url, self.source_dir)
-		repo = Repo(self.source_dir)
+		repo = Repo.init(self.source_dir)
 		ref = refs[0]
-		repo.git.fetch("origin", ref)
+		repo.git.fetch(checkout_url, ref, "-n", depth=1)
 		repo.git.checkout("FETCH_HEAD")
 		for ref in refs[1:]:
-			repo.git.fetch("origin", ref)
+			repo.git.fetch(checkout_url, ref, "-n", depth=1)
 			repo.git.merge("FETCH_HEAD")
 
 	def _get_verification_configuration_from_file(self):
