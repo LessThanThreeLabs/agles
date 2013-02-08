@@ -40,7 +40,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def _create_commit(self, repo_id, user_id, commit_message):
 		commit = database.schema.commit
 
-		timestamp = int(time.time() * 1000)
+		timestamp = int(time.time())
 		ins = commit.insert().values(repo_id=repo_id, user_id=user_id,
 			message=commit_message, timestamp=timestamp)
 		with ConnectionFactory.get_sql_connection() as sqlconn:

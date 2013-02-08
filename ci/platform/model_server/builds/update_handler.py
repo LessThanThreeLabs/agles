@@ -14,7 +14,7 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 	def start_build(self, build_id):
 		build = schema.build
 		update = build.update().where(build.c.id==build_id).values(
-			status=BuildStatus.RUNNING, start_time=int(time.time() * 1000))
+			status=BuildStatus.RUNNING, start_time=int(time.time()))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(update)
 		if not result.rowcount == 1:
@@ -24,7 +24,7 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 	def mark_build_finished(self, build_id, status):
 		build = schema.build
 		update = build.update().where(build.c.id==build_id).values(
-			status=status, end_time=int(time.time() * 1000))
+			status=status, end_time=int(time.time()))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(update)
 		if not result.rowcount == 1:

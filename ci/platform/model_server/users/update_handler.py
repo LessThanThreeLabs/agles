@@ -16,7 +16,7 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 	def add_ssh_pubkey(self, user_id, alias, ssh_key):
 		ssh_key = " ".join(ssh_key.split()[:2])  # Retain only type and key
 		ssh_pubkey = schema.ssh_pubkey
-		timestamp = int(time.time() * 1000)
+		timestamp = int(time.time())
 		ins = ssh_pubkey.insert().values(user_id=user_id, alias=alias, ssh_key=ssh_key, timestamp=timestamp)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			try:
