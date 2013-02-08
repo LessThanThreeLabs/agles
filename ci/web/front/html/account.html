@@ -52,7 +52,7 @@
 						<td class="aliasColumn">Alias</td><td class="createdColumn">Created</td><td class="removeColumn">Remove</td>
 					</tr>
 					<tr ng-repeat="key in keys">
-						<td class="aliasColumn">{{key.alias}}</td><td class="createdColumn">{{key.timestamp | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeKey(key)">X</span></td>
+						<td class="aliasColumn">{{key.alias}}</td><td class="createdColumn">{{key.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeKey(key)">X</span></td>
 					</tr>
 				</table>
 
