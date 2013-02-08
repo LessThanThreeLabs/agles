@@ -56,26 +56,28 @@
 					</tr>
 				</table>
 
-				<modal modal-visible="addKey.modalVisible">
-					<styled-form name="addSshKeyForm">
-						<styled-form-field label="Alias">
-							<input type="text" ng-model="addKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
-						</styled-form-field>
-						<styled-form-field label="Key">
-							<textarea type="text" ng-model="addKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
-							<span class="prettyFormError" tooltip="Invalid key" ng-class="{visible: addSshKeyForm.key.$dirty && addSshKeyForm.key.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
-						</styled-form-field>
-					</styled-form>
+				<div ng-controller="AccountAddSshKeys">
+					<modal modal-visible="modalVisible">
+						<styled-form name="addSshKeyForm">
+							<styled-form-field label="Alias">
+								<input type="text" ng-model="addKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
+							</styled-form-field>
+							<styled-form-field label="Key">
+								<textarea type="text" ng-model="addKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
+								<span class="prettyFormError" tooltip="Invalid key" ng-class="{visible: addSshKeyForm.key.$dirty && addSshKeyForm.key.$invalid}">
+									<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+								</span>
+							</styled-form-field>
+						</styled-form>
 
-					<div id="accountAddSshKeyButtonContainer">
-						<button ng-click="addKey.submit()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
+						<div id="accountAddSshKeyButtonContainer">
+							<button ng-click="submit()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
+						</div>
+					</modal>
+
+					<div id="accountOpenAddSshKeyModalContainel">
+						<button ng-click="modalVisible=true">Add a New Key</button>
 					</div>
-				</modal>
-
-				<div id="accountOpenAddSshKeyModalContainel">
-					<button ng-click="addKey.modalVisible=true">Add a New Key</button>
 				</div>
 			</div>
 		</menu>

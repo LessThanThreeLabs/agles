@@ -31,7 +31,7 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 					raise AliasAlreadyInUseError("user_id: %s, alias: %s" % (user_id, alias))
 				raise
 		pubkey_id = result.inserted_primary_key[0]
-		self.publish_event("users", user_id, "ssh pubkey added", pubkey_id=pubkey_id, alias=alias, ssh_key=ssh_key, timestamp=timestamp)
+		self.publish_event("users", user_id, "ssh pubkey added", id=pubkey_id, alias=alias, ssh_key=ssh_key, timestamp=timestamp)
 		return pubkey_id
 
 	def remove_ssh_pubkey(self, user_id, key_id):
