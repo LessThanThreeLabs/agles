@@ -111,6 +111,8 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 				build_console.c.subtype == subtype,
 			)
 		)
+		change_id_query = build.select().where(build_id == build_id)
+
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			assert row is not None
@@ -122,5 +124,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 				).values(return_code=return_code)
 			)
 
-		self.publish_event("build_consoles", build_console_id, "return code added",
-			return_code=return_code)
+			change_id = sqlconn.execute(change_id_query).first()[build.c.change_id]
+
+		self.publish_event("changes", change_id, "return code added",
+			build_console_id=build_console_id, return_code=return_code)

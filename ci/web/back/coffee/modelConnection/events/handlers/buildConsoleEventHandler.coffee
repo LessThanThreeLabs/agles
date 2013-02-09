@@ -10,7 +10,7 @@ exports.create = (sockets) ->
 class BuildConsolesEventHandler extends EventHandler
 	ROOM_PREFIX: 'buildConsole-'
 	EVENT_PREFIX: 'buildConsole-'
-	EVENT_NAMES: ['new output', 'return code added']
+	EVENT_NAMES: ['new output']
 
 
 	processEvent: (data) =>
@@ -21,10 +21,5 @@ class BuildConsolesEventHandler extends EventHandler
 			when 'new output'
 				@sockets.in(roomName).emit eventName,
 					data.contents
-			when 'return code added'
-				console.log 'return code added'
-				# @sockets.in(roomName).emit eventName,
-				# 	type: data.type
-				# 	contents: data.contents.return_code
 			else
 				throw new Error 'Unexpected event type: ' + data.type
