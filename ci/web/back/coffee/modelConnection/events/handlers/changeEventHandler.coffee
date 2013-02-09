@@ -10,36 +10,28 @@ exports.create = (sockets) ->
 class ChangeEventHandler extends EventHandler
 	ROOM_PREFIX: 'change-'
 	EVENT_PREFIX: 'change-'
+	EVENT_NAMES: ['new build console']
 
 
 	processEvent: (data) =>
-		roomName = @ROOM_PREFIX + data.id
-		eventName = @EVENT_PREFIX + data.id
+		roomName = @_getRoomName data.id, data.type
+		eventName = @_getCompleteEventName data.id, data.type
 
 		switch data.type
-			# when 'change started', 'change finished'
-			# 	@sockets.in(roomName).emit eventName,
-			# 		type: data.type
-			# 		contents: @_sanitizeChange data.contents
 			when 'new build console'
 				console.log 'new build console'
-				# @sockets.in(roomName).emit eventName,
-				# 	type: data.type
-				# 	contents: @_sanitizeBuildOutput data.contents
+				@sockets.in(roomName).emit eventName,
+					id: data.contents.id
+					type: data.contents.type
+					name: data.contents.subtype
+					status: @_returnCodeToStatus data.contents.return_code
 			when 'build added'
 				# do nothing
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 
 
-	_sanitizeChange: (data) =>
-		status: data.status
-		startTime: data.start_time
-		endTime: data.end_time
-
-
-	_sanitizeBuildOutput: (data) =>
-		id: data.id
-		type: data.type
-		name: data.subtype
-		returnCode: data.return_code
+	_returnCodeToStatus = (returnCode) ->
+		if not returnCode? then return 'running'
+		else if returnCode is 0 then return 'passed'
+		else return 'failed'
