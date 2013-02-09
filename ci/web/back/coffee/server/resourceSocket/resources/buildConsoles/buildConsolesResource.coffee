@@ -20,11 +20,25 @@ class BuildConsolesResource extends Resource
 
 
 	subscribe: (socket, data, callback) =>
-		console.log 'need to make sure this user is allowed to receive updates for id ' + data.id
-		eventName = @modelConnection.eventConnection.buildConsoles.registerForEvents socket, data.id
-		callback null, eventName: eventName if callback?
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		if typeof data.method isnt 'string' or typeof data.args?.id isnt 'number'
+			callback 400
+		else
+			console.log 'need to make sure this user is allowed to receive updates for id ' + data.args.id
+			eventName = @modelConnection.eventConnection.buildConsoles.registerForEvents socket, data.args.id, data.method
+			if eventName? then callback null, eventName
+			else callback 400
 
 
 	unsubscribe: (socket, data, callback) =>
-		@modelConnection.eventConnection.buildConsoles.unregisterForEvents socket, data.id
-		callback null, 'ok' if callback?
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		if typeof data.method isnt 'string' or typeof data.args?.id isnt 'number'
+			callback 400
+		else
+			success = @modelConnection.eventConnection.buildConsoles.unregisterForEvents socket, data.args.id, data.method
+			if success then callback()
+			else callback 400

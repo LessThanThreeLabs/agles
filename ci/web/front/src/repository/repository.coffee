@@ -95,8 +95,11 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 		$scope.stages ?= []
 		$scope.stages.push data
 
+	handleLineAdded = (data) -> $scope.$apply () ->
+		console.log data
+
 	buildConsoleAddedEvents = null
-	updateBuildConsoleAddedListener = (changeId) ->
+	updateBuildConsoleAddedListener = () ->
 		if buildConsoleAddedEvents?
 			buildConsoleAddedEvents.unsubscribe()
 			buildConsoleAddedEvents = null
@@ -104,6 +107,16 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 		if $scope.currentChangeId?
 			buildConsoleAddedEvents = events.listen('changes', 'new build console', $scope.currentChangeId).setCallback(handleBuildConsoleAdded).subscribe()
 	$scope.$on '$destroy', () -> buildConsoleAddedEvents.unsubscribe() if buildConsoleAddedEvents?
+
+	addedLineEvents = null
+	updateAddedLineListener = () ->
+		if addedLineEvents?
+			addedLineEvents.unsubscribe()
+			addedLineEvents = null
+
+		if $scope.currentStageId?
+			addedLineEvents = events.listen('buildConsoles', 'new output', $scope.currentStageId).setCallback(handleLineAdded).subscribe()
+		$scope.$on '$destroy', () -> addedLineEvents.unsubscribe() if addedLineEvents?
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id
@@ -119,4 +132,5 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
 		retrieveLines newValue
+		updateAddedLineListener()
 ]

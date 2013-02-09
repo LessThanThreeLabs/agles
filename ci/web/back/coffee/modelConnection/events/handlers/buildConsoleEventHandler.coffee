@@ -10,6 +10,7 @@ exports.create = (sockets) ->
 class BuildConsolesEventHandler extends EventHandler
 	ROOM_PREFIX: 'buildConsole-'
 	EVENT_PREFIX: 'buildConsole-'
+	EVENT_NAMES: ['new output', 'return code added']
 
 
 	processEvent: (data) =>
