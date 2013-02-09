@@ -6,7 +6,7 @@ window.Repository = ['$scope', ($scope) ->
 ]
 
 
-window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', ($scope, $location, $routeParams, rpc) ->
+window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'events', ($scope, $location, $routeParams, rpc, events) ->
 	noMoreChangesToRetrieve = false
 	waitingOnChanges = false
 	numChangesToRequest = 100
@@ -16,7 +16,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', ($scop
 		waitingOnChanges = true
 
 		changesQuery =
-			repositoryId: $routeParams.repositoryId
+			repositoryId: parseInt $routeParams.repositoryId
 			group: 'all'
 			query: $scope.query
 			startIndex: $scope.changes.length
@@ -31,11 +31,17 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', ($scop
 	$scope.changes = []
 	$scope.query = ''
 
+	handeChangeAdded = (data) -> $scope.$apply () ->
+		$scope.changes.unshift data
+
+	changeAddedEvents = events.listen('repositories', 'change added', $routeParams.repositoryId).setCallback(handeChangeAdded).subscribe()
+	$scope.$on '$destroy', changeAddedEvents.unsubscribe
+
+	retrieveMoreChanges()
+
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id ? null
 	$scope.currentChangeId = $routeParams.id ? null
-
-	retrieveMoreChanges()
 
 	$scope.changeClick = (change) ->
 		$scope.currentChangeId = change.id

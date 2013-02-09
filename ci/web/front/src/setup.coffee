@@ -40,6 +40,7 @@ angular.module('koality.service', []).
 	factory('events', ['socket', (socket) ->
 		listen: (resource, eventName, id) ->
 			_callback: null
+			id = parseInt id
 
 			setCallback: (callback) -> 
 				assert.ok callback?
