@@ -58,7 +58,7 @@ def main():
 			"cp .bash_profile .bash_profile.bak",
 			"echo %s > /tmp/koality.yml" % pipes.quote(config),
 			"virtualenvs/2.7/bin/python -u -c " +
-				"\"from verification.box.provisioner import Provisioner; Provisioner().provision('', config_path='/tmp/koality.yml')\"",
+				"\"from provisioner.provisioner import Provisioner; Provisioner().provision('', config_path='/tmp/koality.yml')\"",
 			"([ ! -f /tmp/koality.yml ] || rm /tmp/koality.yml)",
 			"mv .bash_profile.bak .bash_profile"))
 
