@@ -31,7 +31,7 @@ class ChangeEventHandler extends EventHandler
 				throw new Error 'Unexpected event type: ' + data.type
 
 
-	_returnCodeToStatus = (returnCode) ->
+	_returnCodeToStatus: (returnCode) ->
 		if not returnCode? then return 'running'
 		else if returnCode is 0 then return 'passed'
 		else return 'failed'

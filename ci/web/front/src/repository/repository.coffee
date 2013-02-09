@@ -92,9 +92,8 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 						$scope.lines[lineNumber-1] = crazyAnsiText.makeCrazy lineText
 
 	handleBuildConsoleAdded = (data) -> $scope.$apply () ->
-		console.log '>>>>>>>>>>>>>>'
-		console.log data
-		console.log '<<<<<<<<<<<<<<'
+		$scope.stages ?= []
+		$scope.stages.push data
 
 	buildConsoleAddedEvents = null
 	updateBuildConsoleAddedListener = (changeId) ->
