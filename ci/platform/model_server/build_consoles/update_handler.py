@@ -99,8 +99,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 						)
 					).values(line=line)
 				)
-			self.publish_event("build_consoles", build_console_id, "new output",
-				line_num=line_num, line=line)
+			self.publish_event("build_consoles", build_console_id, "new output", **{str(line_num): line})
 
 	def set_return_code(self, build_id, return_code, type, subtype):
 		build_console = schema.build_console

@@ -14,15 +14,13 @@ class BuildConsolesEventHandler extends EventHandler
 
 
 	processEvent: (data) =>
-		roomName = @ROOM_PREFIX + data.id
-		eventName = @EVENT_PREFIX + data.id
+		roomName = @_getRoomName data.id, data.type
+		eventName = @_getCompleteEventName data.id, data.type
 		
 		switch data.type
 			when 'new output'
-				console.log 'new output'
-				# @sockets.in(roomName).emit eventName,
-				# 	type: data.type
-				# 	contents: data.contents
+				@sockets.in(roomName).emit eventName,
+					data.contents
 			when 'return code added'
 				console.log 'return code added'
 				# @sockets.in(roomName).emit eventName,

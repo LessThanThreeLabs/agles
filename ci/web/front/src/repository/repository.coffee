@@ -89,14 +89,19 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 			else
 				$scope.$apply () -> 
 					for lineNumber, lineText of lines
-						$scope.lines[lineNumber-1] = crazyAnsiText.makeCrazy lineText
+						addLine lineNumber, lineText
+
+	addLine = (lineNumber, lineText) ->
+		$scope.lines[lineNumber-1] = crazyAnsiText.makeCrazy lineText
 
 	handleBuildConsoleAdded = (data) -> $scope.$apply () ->
 		$scope.stages ?= []
 		$scope.stages.push data
 
-	handleLineAdded = (data) -> $scope.$apply () ->
-		console.log data
+	handleLinesAdded = (data) -> $scope.$apply () ->
+		$scope.lines ?= []
+		for lineNumber, lineText of data
+			addLine lineNumber, lineText
 
 	buildConsoleAddedEvents = null
 	updateBuildConsoleAddedListener = () ->
@@ -115,8 +120,8 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 			addedLineEvents = null
 
 		if $scope.currentStageId?
-			addedLineEvents = events.listen('buildConsoles', 'new output', $scope.currentStageId).setCallback(handleLineAdded).subscribe()
-		$scope.$on '$destroy', () -> addedLineEvents.unsubscribe() if addedLineEvents?
+			addedLineEvents = events.listen('buildConsoles', 'new output', $scope.currentStageId).setCallback(handleLinesAdded).subscribe()
+	$scope.$on '$destroy', () -> addedLineEvents.unsubscribe() if addedLineEvents?
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = $routeParams.id
