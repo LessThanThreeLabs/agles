@@ -14,19 +14,17 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 	def get_change_attributes(self, change_id):
 		change = database.schema.change
-		query = change.select().where(change.c.id==change_id)
+		query = change.select().where(change.c.id == change_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		if row:
-			return (row[change.c.commit_id], row[change.c.merge_target],
-				row[change.c.number], row[change.c.status],
-				row[change.c.start_time], row[change.c.end_time])
+			return to_dict(row, change.columns)
 
 	def get_builds_from_change_id(self, change_id):
 		build = database.schema.build
 
-		query = build.select().where(build.c.change_id==change_id)
+		query = build.select().where(build.c.change_id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return [to_dict(row, build.columns) for row in sqlconn.execute(query)]
 
@@ -38,7 +36,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		change = database.schema.change
 		repo = database.schema.repo
 
-		query = change.join(repo).select().apply_labels().where(change.c.id==change_id)
+		query = change.join(repo).select().apply_labels().where(change.c.id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
@@ -55,7 +53,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		commit = database.schema.commit
 		user = database.schema.user
 
-		query = change.join(commit).join(user).select().apply_labels().where(change.c.id==change_id)
+		query = change.join(commit).join(user).select().apply_labels().where(change.c.id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
@@ -80,7 +78,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 
 		query = build.join(change).join(repo).select().apply_labels().where(
-			change.c.id==change_id
+			change.c.id == change_id
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
@@ -107,7 +105,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		query = change.join(commit).join(user).select().apply_labels().where(
 			and_(
-				change.c.repo_id==repo_id,
+				change.c.repo_id == repo_id,
 				or_(
 					commit.c.message.like(query_string),
 					user.c.email.like(query_string)

@@ -91,9 +91,7 @@ class VirtualMachineBuildCore(BuildCore):
 		raise NotImplementedError()
 
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
-		verification_config = super(VirtualMachineBuildCore, self).setup_build(repo_uri, refs)
 		self.setup_virtual_machine(private_key, console_appender)
-		return verification_config
 
 	def _get_output_handler(self, console_appender, type, subtype=""):
 		return console_appender(type, subtype) if console_appender else None
@@ -182,9 +180,7 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 		self.virtual_machine.rebuild()
 
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
-		verification_config = super(VirtualMachineBuildCore, self).setup_build(repo_uri, refs)
 		self.setup_virtual_machine(repo_uri, refs, private_key, console_appender)
-		return verification_config
 
 	def setup_virtual_machine(self, repo_uri, refs, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)

@@ -68,8 +68,11 @@ class VerificationResultsHandler(QueueListener):
 		self.logger.info("Sending merge request for change %s" % change_id)
 		with ModelServer.rpc_connect("changes", "read") as client:
 			change_attributes = client.get_change_attributes(change_id)
-		commit_id = change_attributes[0]
-		merge_target = change_attributes[1]
+		if change_attributes['status'] == BuildStatus.PASSED:
+			return True  # Already merged, don't waste our time
+
+		commit_id = change_attributes['commit_id']
+		merge_target = change_attributes['merge_target']
 
 		with ModelServer.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)

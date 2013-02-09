@@ -13,6 +13,7 @@ from util import pathgen
 from task_queue.task_worker import InfiniteWorker
 from virtual_machine.remote_command import SimpleRemoteTestCommand
 from verification.shared.pubkey_registrar import PubkeyRegistrar
+from verification.shared.verification_config import VerificationConfig
 
 
 class VerificationRequestHandler(InfiniteWorker):
@@ -59,8 +60,8 @@ class VerificationRequestHandler(InfiniteWorker):
 		self.logger.debug("Failed interrupted build %s, resuming initialization" % build_id)
 
 	def do_setup(self, message):
-		# Check out commit, run all setup and compile stuff
 		self.build_id = message["build_id"]
+		verification_config = VerificationConfig.from_dict(message["verification_config"])
 		commit_list = self._get_commit_list(self.build_id)
 		self.logger.info("Worker %s processing verification request: (build id: %s, commit list: %s)" % (self.worker_id, self.build_id, commit_list))
 		self._start_build(self.build_id)
@@ -69,7 +70,7 @@ class VerificationRequestHandler(InfiniteWorker):
 		private_key = self._get_private_key(repo_uri)
 		with ModelServer.rpc_connect("build_outputs", "update") as build_outputs_update_rpc:
 			console_appender = self._make_console_appender(build_outputs_update_rpc, self.build_id)
-			verification_config = self.verifier.setup_build(repo_uri, refs, private_key, console_appender)
+			self.verifier.setup_build(repo_uri, refs, private_key, console_appender)
 			self.verifier.declare_commands(console_appender, ConsoleType.Compile, verification_config.compile_commands)
 			self.verifier.run_compile_step(verification_config.compile_commands, console_appender)
 

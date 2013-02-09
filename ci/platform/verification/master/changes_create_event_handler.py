@@ -41,19 +41,19 @@ class ChangesCreateEventHandler(EventSubscriber):
 	def _handle_new_change(self, contents):
 		change_id = contents["change_id"]
 		commit_list = self._get_commit_permutations(change_id)[0]
-		test_commands = self._get_test_commands(commit_list)
-		num_workers = max(1, min(4, len(test_commands)))  # between 1 and 4 workers
+		verification_config = self._get_verification_config(commit_list)
+		num_workers = max(1, min(4, len(verification_config.test_commands)))  # between 1 and 4 workers
 		task_queue = TaskQueue()
 		workers = task_queue.get_workers(num_workers, VerificationServerSettings.verification_worker_queue)
 		if not workers:
 			raise NoWorkersFoundException()
 		with ModelServer.rpc_connect("changes", "update") as model_server_rpc:
 			model_server_rpc.mark_change_started(change_id)
-		self._send_verification_request(change_id, task_queue, workers, commit_list, test_commands)
+		self._send_verification_request(change_id, task_queue, workers, commit_list, verification_config)
 
 	def _get_commit_id(self, change_id):
 		with ModelServer.rpc_connect("changes", "read") as model_server_rpc:
-			return model_server_rpc.get_change_attributes(change_id)[0]
+			return model_server_rpc.get_change_attributes(change_id)['commit_id']
 
 	def _create_build(self, change_id, commit_list, is_primary):
 		with ModelServer.rpc_connect("builds", "create") as model_server_rpc:
@@ -64,23 +64,23 @@ class ChangesCreateEventHandler(EventSubscriber):
 		# This is a single permutation which is a single commit id
 		return [[self._get_commit_id(change_id)]]
 
-	def _send_verification_request(self, change_id, task_queue, workers, commit_list, test_commands):
-		for test_command in test_commands:
+	def _send_verification_request(self, change_id, task_queue, workers, commit_list, verification_config):
+		for test_command in verification_config.test_commands:
 			task_queue.delegate_task({"test_command": test_command.name})
 		is_primary = True
 		for worker in workers.itervalues():
 			build_id = self._create_build(change_id, commit_list, is_primary)
-			task_queue.assign_worker(worker, {"build_id": build_id})
+			task_queue.assign_worker(worker, {'build_id': build_id, 'verification_config': verification_config.to_dict()})
 			self.logger.info("Sending verification request for build %s" % build_id)
 			is_primary = False
 
-	def _get_test_commands(self, commit_list):
+	def _get_verification_config(self, commit_list):
 		with ModelServer.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_list[0])
 		refs = [pathgen.hidden_ref(commit) for commit in commit_list]
 		build_core = SelfCleaningBuildCore(self.uri_translator)
 		verification_config = build_core.setup_build(repo_uri, refs)
-		return verification_config.test_commands
+		return verification_config
 
 
 class NoWorkersFoundException(Exception):
