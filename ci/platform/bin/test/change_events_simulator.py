@@ -30,7 +30,7 @@ def mock_change(repo_id, change_id):
 	publish_event("repos", repo_id, "change added", change_id=change_id, change_number=change_id,
 		change_status="queued", commit_id=change_id, merge_target="master")
 	time.sleep(random.uniform(0, 2))
-	publish_event("changes", change_id, "change started", status=BuildStatus.RUNNING, start_time=int(time.time()))
+	publish_event("repos", repo_id, "change started", change_id=change_id, status=BuildStatus.RUNNING, start_time=int(time.time()))
 	time.sleep(random.uniform(0, 2))
 	publish_event("changes", change_id, "build added", build_id=change_id, commit_list=["ABCDEF123456"])
 	time.sleep(random.uniform(0, 2))
@@ -42,7 +42,7 @@ def mock_change(repo_id, change_id):
 	time.sleep(random.uniform(0, 2))
 	publish_event("builds", change_id, "build finished", status=BuildStatus.PASSED)
 	time.sleep(random.uniform(0, 2))
-	publish_event("changes", change_id, "change finished", status=BuildStatus.PASSED, end_time=int(time.time()))
+	publish_event("repos", repo_id, "change finished", change_id=change_id, status=BuildStatus.PASSED, end_time=int(time.time()))
 
 
 def mock_stage(change_id, step_name, num_substeps):

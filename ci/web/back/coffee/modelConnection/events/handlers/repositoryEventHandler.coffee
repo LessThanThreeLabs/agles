@@ -10,7 +10,7 @@ exports.create = (sockets) ->
 class RepositoryEventHandler extends EventHandler
 	ROOM_PREFIX: 'repository-'
 	EVENT_PREFIX: 'repository-'
-	EVENT_NAMES: ['change added']
+	EVENT_NAMES: ['change added', 'change started', 'change finished']
 
 
 	processEvent: (data) =>
@@ -23,6 +23,10 @@ class RepositoryEventHandler extends EventHandler
 					id: data.contents.change_id
 					number: data.contents.change_number
 					status: data.contents.change_status
+			when 'change started', 'change finished'
+				@sockets.in(roomName).emit eventName,
+					id: data.contents.change_id
+					status: data.contents.status
 				# do nothing
 			# when 'member added', 'member removed', 'member permissions changed'
 			# 	@sockets.in(roomName).emit eventName,

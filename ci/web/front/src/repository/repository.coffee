@@ -34,8 +34,20 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'event
 	handeChangeAdded = (data) -> $scope.$apply () ->
 		$scope.changes.unshift data
 
+	handleChangeStarted = (data) -> $scope.$apply () ->
+		change = (change for change in $scope.changes when change.id is data.id)[0]
+		change.status = data.status if change?
+
+	handleChangeFinished = (data) -> $scope.$apply () ->
+		change = (change for change in $scope.changes when change.id is data.id)[0]
+		change.status = data.status if change?
+
 	changeAddedEvents = events.listen('repositories', 'change added', $routeParams.repositoryId).setCallback(handeChangeAdded).subscribe()
+	changeStartedEvents = events.listen('repositories', 'change started', $routeParams.repositoryId).setCallback(handleChangeStarted).subscribe()
+	changeFinishedEvents = events.listen('repositories', 'change finished', $routeParams.repositoryId).setCallback(handleChangeFinished).subscribe()
 	$scope.$on '$destroy', changeAddedEvents.unsubscribe
+	$scope.$on '$destroy', changeStartedEvents.unsubscribe
+	$scope.$on '$destroy', changeFinishedEvents.unsubscribe
 
 	retrieveMoreChanges()
 

@@ -17,10 +17,10 @@ class ChangeEventHandler extends EventHandler
 		eventName = @EVENT_PREFIX + data.id
 
 		switch data.type
-			when 'change started', 'change finished'
-				@sockets.in(roomName).emit eventName,
-					type: data.type
-					contents: @_sanitizeChange data.contents
+			# when 'change started', 'change finished'
+			# 	@sockets.in(roomName).emit eventName,
+			# 		type: data.type
+			# 		contents: @_sanitizeChange data.contents
 			when 'new build console'
 				console.log 'new build console'
 				# @sockets.in(roomName).emit eventName,

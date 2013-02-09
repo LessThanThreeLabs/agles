@@ -33,19 +33,23 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 
 	def _update_change_status(self, change_id, status, event_name, **kwargs):
 		change = schema.change
-		update = change.update().where(change.c.id==change_id).values(
-			status=status, **kwargs)
+		update = change.update().where(change.c.id == change_id).values(status=status, **kwargs)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
 
-		self.publish_event("changes", change_id, event_name, status=status, **kwargs)
+		query = change.select().where(change.c.id == change_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+		repository_id = row[change.c.repo_id]
+
+		self.publish_event("repos", repository_id, event_name, change_id=change_id, status=status, **kwargs)
 
 	def _notify_failure(self, change_id):
 		change = schema.change
 		commit = schema.commit
 		user = schema.user
 
-		query = change.join(commit).join(user).select(use_labels=True).where(change.c.id==change_id)
+		query = change.join(commit).join(user).select(use_labels=True).where(change.c.id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		email = row[user.c.email]
