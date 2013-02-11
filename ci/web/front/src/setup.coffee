@@ -266,10 +266,6 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 				templateUrl: "/html/addRepository#{fileSuffix}.html"
 				controller: AddRepository
 			).
-			when('/about',
-				templateUrl: "/html/about#{fileSuffix}.html"
-				controller: About
-			).
 			otherwise(
 				redirectTo: '/welcome'
 			)

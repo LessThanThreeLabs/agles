@@ -54,8 +54,3 @@ window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($sco
 	$scope.repositoryDropdownOptionClick = (repositoryId) ->
 		$location.path('/repository/' + repositoryId).search({})
 ]
-
-
-window.HeaderAbout = ['$scope', '$location', 'initialState', ($scope, $location, initialState) ->
-	$scope.visitAbout = () -> $location.path('/about').search({})
-]
