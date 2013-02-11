@@ -16,11 +16,9 @@
 			"/css/src/welcome/welcome.css",
 			"/css/src/login/login.css",
 			"/css/src/account/account.css",
-			"/css/src/createAccount/createAccount.css",
 			"/css/src/recoverPassword/recoverPassword.css",
 			"/css/src/repository/repository.css",
-			"/css/src/addRepository/addRepository.css",
-			"/css/src/about/about.css"
+			"/css/src/addRepository/addRepository.css"
 		]
 	},
 
@@ -38,12 +36,10 @@
 			"/js/src/welcome/welcome.js",
 			"/js/src/login/login.js",
 			"/js/src/account/account.js",
-			"/js/src/createAccount/createAccount.js",
 			"/js/src/recoverPassword/recoverPassword.js",
 			"/js/src/repository/repository.js",
 			"/js/src/addRepository/addRepository.js",
-			"/js/src/util/ansiparse.js",
-			"/js/src/about/about.js"
+			"/js/src/util/ansiparse.js"
 		]
 	},
 
@@ -66,11 +62,9 @@
 			"/html/welcome.html",
 			"/html/login.html",
 			"/html/account.html",
-			"/html/createAccount.html",
 			"/html/recoverPassword.html",
 			"/html/repository.html",
-			"/html/addRepository.html",
-			"/html/about.html"
+			"/html/addRepository.html"
 		]
 	}
 }
