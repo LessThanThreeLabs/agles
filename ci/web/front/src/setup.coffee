@@ -256,9 +256,9 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 				controller: Account
 				reloadOnSearch: false
 			).
-			when('/recoverPassword',
-				templateUrl: "/html/recoverPassword#{fileSuffix}.html"
-				controller: RecoverPassword
+			when('/resetPassword',
+				templateUrl: "/html/resetPassword#{fileSuffix}.html"
+				controller: ResetPassword
 			).
 			when('/repository/:repositoryId',
 				templateUrl: "/html/repository#{fileSuffix}.html"
