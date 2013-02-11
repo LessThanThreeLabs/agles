@@ -5,8 +5,10 @@ from util.streaming_executor import StreamingExecutor
 
 
 class SetupCommand(object):
-	def __init__(self, *commands):
+	def __init__(self, *commands, **kwargs):
 		self.commands = commands
+		self.silent = kwargs.pop('silent', False)
+		self.ignore_failure = kwargs.pop('ignore_failures', False)
 
 	def execute(self):
 		self.execute_script(self.to_shell_command())
@@ -37,7 +39,12 @@ class SetupCommand(object):
 		return ' &&\n'.join(commands)
 
 	def to_shell_command(self):
-		return self._and(*map(lambda command: self._and("echo -e $ %s" % pipes.quote(command), command), self.commands))
+		return self._and(*map(self._to_command, self.commands))
+
+	def _to_command(self, command):
+		if self.silent:
+			return '(%s) > /dev/null' % command
+		return self._and("echo -e $ %s" % pipes.quote(command), command)
 
 	def to_subshell_command(self):
 		return '(%s)' % self.to_shell_command()

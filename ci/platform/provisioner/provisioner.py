@@ -79,13 +79,13 @@ class Provisioner(object):
 
 	def handle_config(self, config, source_path):
 		language_steps, setup_steps = self.parse_languages(config)
-		setup_steps = setup_steps + self.parse_setup(config, source_path)
+		setup_steps = [SetupCommand("pkill -9 -u rabbitmq beam; service rabbitmq-server start", silent=True, ignore_failure=True)] + setup_steps
+		setup_steps += self.parse_setup(config, source_path)
 		self.parse_compile(config, source_path)
 		self.parse_test(config, source_path)
 		self._provision(language_steps, setup_steps)
 
 	def _provision(self, language_steps, setup_steps):
-		SetupCommand.execute_script("(pkill -9 -u rabbitmq beam; service rabbitmq-server start) > /dev/null", login=False)
 		self.run_setup_steps(language_steps, action_name='Language configuration')
 		self.run_setup_steps(setup_steps)
 
