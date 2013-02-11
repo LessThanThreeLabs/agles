@@ -159,6 +159,15 @@ angular.module('koality.directive', []).
 				if element[0].scrollTop + element[0].offsetHeight >= element[0].scrollHeight
 					scope.$apply attributes.notifyOnBottomScroll
 	).
+	directive('autoScrollToBottom', () ->
+		restrict: 'A'
+		link: (scope, element, attributes) ->
+			scrollBottomBuffer = 20
+			scope.$watch attributes.autoScrollToBottom, (() ->
+				isScrolledToBottomIsh = element[0].scrollTop + element[0].offsetHeight + scrollBottomBuffer >= element[0].scrollHeight
+				element[0].scrollTop = element[0].scrollHeight if isScrolledToBottomIsh
+				), true
+	).
 	directive('modal', ['$document', ($document) ->
 		restrict: 'E'
 		replace: true

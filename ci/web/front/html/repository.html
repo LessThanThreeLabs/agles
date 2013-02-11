@@ -28,7 +28,7 @@
 					hello there
 				</div>
 
-				<div class="consoleText">
+				<div class="consoleText" auto-scroll-to-bottom="lines">
 					<div class="consoleTextLine" ng-repeat="line in lines">
 						<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse"></span>
 					</div>
