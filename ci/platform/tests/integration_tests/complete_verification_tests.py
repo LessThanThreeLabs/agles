@@ -6,6 +6,7 @@ import yaml
 
 from hashlib import sha512
 from kombu.connection import Connection
+from kombu.entity import Queue
 from shutil import rmtree
 from nose.tools import *
 from util.permissions import RepositoryPermissions
@@ -146,6 +147,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
+			Queue("verification_master:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
 			events_broker = EventsBroker(connection)
 			events_broker.publish("repos", repo_id, "change added",
 				change_id=commit_id, merge_target="master")
