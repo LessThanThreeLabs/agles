@@ -100,11 +100,11 @@ class UsersUpdateHandler extends Handler
 			callback 400
 		else
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
-				if error? then callback 500
+				if error? then callback 401
 				else
 					passwordHash = @passwordHasher.hashPasswordWithSalt data.password, user.salt
 					if passwordHash isnt user.password_hash
-						callback 403
+						callback 401
 					else
 						socket.session.userId = user.id
 						socket.session.email = user.email

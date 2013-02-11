@@ -85,6 +85,13 @@ angular.module('koality.directive', []).
 
 			element.bind 'click', highlightText
 	).
+	directive('listenForEnterKey', () ->
+		return (scope, element, attributes) ->
+			element.bind 'keypress', (event) ->
+				if event.keyCode is 13
+					ignoreEnter = scope.$eval attributes.ignoreEnterKeyIf
+					scope.$apply attributes.listenForEnterKey if not ignoreEnter
+	).
 	directive('focused', () ->
 		return (scope, element, attributes) ->
 			element.focus()
