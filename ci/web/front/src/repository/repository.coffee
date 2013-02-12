@@ -28,6 +28,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'event
 				else
 					noMoreChangesToRetrieve = changes.length < numChangesToRequest
 					$scope.changes = $scope.changes.concat changes
+					$scope.currentChangeId ?= $scope.changes[0].id
 					waitingOnChanges = false
 
 	$scope.changes = []
