@@ -6,7 +6,7 @@ window.Repository = ['$scope', ($scope) ->
 ]
 
 
-window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'events', ($scope, $location, $routeParams, rpc, events) ->
+window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, events, integerConverter) ->
 	noMoreChangesToRetrieve = false
 	waitingOnChanges = false
 	numChangesToRequest = 100
@@ -22,11 +22,13 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'event
 			startIndex: $scope.changes.length
 			numToRetrieve: numChangesToRequest
 		rpc.makeRequest 'changes', 'read', 'getChanges', changesQuery, (error, changes) ->
-			if error? then console.error error
-			else
-				noMoreChangesToRetrieve = changes.length < numChangesToRequest
-				$scope.$apply () -> $scope.changes = $scope.changes.concat changes
-				waitingOnChanges = false
+			$scope.$apply () -> 
+				if error? 
+					console.error error
+				else
+					noMoreChangesToRetrieve = changes.length < numChangesToRequest
+					$scope.changes = $scope.changes.concat changes
+					waitingOnChanges = false
 
 	$scope.changes = []
 	$scope.query = ''
@@ -52,8 +54,8 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'event
 	retrieveMoreChanges()
 
 	$scope.$on '$routeUpdate', () ->
-		$scope.currentChangeId = $routeParams.id ? null
-	$scope.currentChangeId = $routeParams.id ? null
+		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
+	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
 
 	$scope.changeClick = (change) ->
 		$scope.currentChangeId = change.id
@@ -62,7 +64,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'event
 		retrieveMoreChanges()
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
-		$location.search 'id', newValue
+		$location.search 'change', newValue
 
 	$scope.$watch 'query', (newValue, oldValue) ->
 		$scope.changes = []
@@ -70,24 +72,38 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'event
 ]
 
 
-window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', ($scope, $location, $routeParams, crazyAnsiText, rpc, events) ->
+window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, crazyAnsiText, rpc, events, integerConverter) ->
+	isStageIdInStages = (stageId) ->
+		return false if not $scope.stages?
+		stage = (stage for stage in $scope.stages when stage.id is stageId)[0]
+		return stage?
+
 	retrieveStages = () ->
 		$scope.stages = null
 		$scope.lines = null
 		return if not $scope.currentChangeId?
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
-			if error? then console.error error
-			else $scope.$apply () -> $scope.stages = buildConsoles
+			$scope.$apply () ->
+				if error? then console.error error
+				else $scope.stages = buildConsoles
+
+				if isStageIdInStages $scope.currentStageId
+					retrieveLines()
+					updateAddedLineListener()
+				else
+					$scope.currentStageId = null
 
 	retrieveLines = () ->
 		$scope.lines = []
 		return if not $scope.currentStageId?
+		return if not isStageIdInStages $scope.currentStageId
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
-			if error? then console.error error
-			else
-				$scope.$apply () -> 
+			$scope.$apply () ->
+				if error?
+					console.error error
+				else
 					for lineNumber, lineText of lines
 						addLine lineNumber, lineText
 
@@ -138,19 +154,22 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 	$scope.$on '$destroy', () -> addedLineEvents.unsubscribe() if addedLineEvents?
 
 	$scope.$on '$routeUpdate', () ->
-		$scope.currentChangeId = $routeParams.id
-	$scope.currentChangeId = $routeParams.id
+		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
+		$scope.currentStageId = integerConverter.toInteger $routeParams.stage
+	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
+	$scope.currentStageId = integerConverter.toInteger $routeParams.stage
 
 	$scope.stageClick = (stage) ->
 		$scope.currentStageId = stage.id
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
-		$scope.currentStageId = null
 		retrieveStages()
 		updateBuildConsoleAddedListener()
 		updateBuildConsoleStatusListener()
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
-		retrieveLines newValue
-		updateAddedLineListener()
+		if isStageIdInStages $scope.currentStageId
+			retrieveLines()
+			updateAddedLineListener()
+		$location.search 'stage', newValue
 ]

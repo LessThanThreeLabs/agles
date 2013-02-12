@@ -58,8 +58,9 @@ describe 'Koality directives', () ->
 		beforeEach () ->
 			inject ($rootScope, $compile) ->
 				scope = $rootScope.$new()
+				scope.menuOptions = [{title: 'Option A', name: 'optionA'}, {title: 'Option B', name: 'optionB'}, {title: 'Option C', name: 'optionC'}]
 				scope.currentOptionName = 'optionB'
-				element = angular.element '<menu options="[{title: \'Option A\', name: \'optionA\'}, {title: \'Option B\', name: \'optionB\'}, {title: \'Option C\', name: \'optionC\'}]" current-option-name="currentOptionName" option-click="handleClick(optionName)">
+				element = angular.element '<menu options="menuOptions" current-option-name="currentOptionName" option-click="handleClick(optionName)">
 						<div class="prettyMenuContent" option="optionA">blahA</div>
 						<div class="prettyMenuContent" option="optionB">blahB</div>
 						<div class="prettyMenuContent" option="optionC">blahC</div>

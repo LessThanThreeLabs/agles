@@ -27,7 +27,8 @@ window.HeaderProfile = ['$scope', '$location', 'initialState', 'rpc', 'events', 
 
 	performLogout = () ->
 		rpc.makeRequest 'users', 'update', 'logout', null, (error) ->
-			if error? then console.error error
+			if error? 
+				console.error error
 			else
 				# this will force a refresh, rather than do html5 pushstate
 				window.location.href = '/'
@@ -42,8 +43,9 @@ window.HeaderLogin = ['$scope', '$location', ($scope, $location) ->
 window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($scope, $location, initialState, rpc) ->
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
-			if error? then console.error error
-			else $scope.$apply () -> $scope.repositoryDropdownOptions = (createDropdownOptionFromRepository repository for repository in repositories)
+			$scope.$apply () ->
+				if error? then console.error error
+				else $scope.repositoryDropdownOptions = (createDropdownOptionFromRepository repository for repository in repositories)
 
 	createDropdownOptionFromRepository = (repository) ->
 		title: repository.name

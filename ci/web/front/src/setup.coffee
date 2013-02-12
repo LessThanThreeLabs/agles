@@ -20,6 +20,12 @@ angular.module('koality.service', []).
 			return fileSrc if lastPeriodIndex is -1
 			return fileSrc.substr(0, lastPeriodIndex) + initialState.fileSuffix + fileSrc.substr(lastPeriodIndex)
 	]).
+	factory('integerConverter', [() ->
+		return toInteger: (integerAsString) ->
+			integer = parseInt integerAsString
+			if isNaN(integer) then return null
+			else return integer
+	]).
 	factory('socket', ['$location', 'initialState', ($location, initialState) ->
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
 		
@@ -27,20 +33,20 @@ angular.module('koality.service', []).
 			assert.ok typeof resource is 'string' and typeof requestType is 'string' and typeof methodName is 'string'
 			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
 			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, callback
-			console.log "rpc >> socket request made for #{resource} - #{requestType}, #{methodName} with:"
-			console.log data
+			# console.log "rpc >> socket request made for #{resource} - #{requestType}, #{methodName} with:"
+			# console.log data
 
 		respondTo: (eventName, callback) ->
-			console.log 'events >> going to listen for event: ' + eventName
+			# console.log 'events >> going to listen for event: ' + eventName
 			socket.on eventName, callback
 	]).
 	factory('rpc', ['socket', (socket) ->
 		makeRequest: socket.makeRequest
 	]).
-	factory('events', ['socket', (socket) ->
+	factory('events', ['socket', 'integerConverter', (socket, integerConverter) ->
 		listen: (resource, eventName, id) ->
 			_callback: null
-			id = parseInt id
+			id = integerConverter.toInteger id
 
 			setCallback: (callback) -> 
 				assert.ok callback?
