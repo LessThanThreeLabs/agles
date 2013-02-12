@@ -24,11 +24,11 @@
 			</div>
 
 			<div id="repositoryChangeDetailsOutput">
-				<div class="changeDetailsHome" ng-show="currentStageId == null">
-					hello there
+				<div id="changeDetailsHome" ng-show="currentChangeId != null && currentStageId == null">
+					basic information about change here
 				</div>
 
-				<div class="consoleText" auto-scroll-to-bottom="lines">
+				<div id="changeConsoleText" auto-scroll-to-bottom="lines">
 					<div class="consoleTextLine" ng-repeat="line in lines">
 						<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse"></span>
 					</div>
