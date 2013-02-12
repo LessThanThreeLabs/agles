@@ -161,7 +161,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 	$scope.currentStageId = integerConverter.toInteger $routeParams.stage
 
 	$scope.stageClick = (stage) ->
-		$scope.currentStageId = stage.id
+		$scope.currentStageId = if stage? then stage.id else null
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		retrieveStages()
