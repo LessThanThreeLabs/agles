@@ -84,6 +84,7 @@ class Server
 		expressServer.get '/resetPassword', @handlers.indexHandler.handleRequest
 		expressServer.get '/repository/:repositoryId', @handlers.indexHandler.handleRequest
 		expressServer.get '/add/repository', @handlers.indexHandler.handleRequest
+		expressServer.get '/admin', @handlers.indexHandler.handleRequest
 
 		expressServer.get '*', @staticServer.handleRequest		
 

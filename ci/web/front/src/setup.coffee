@@ -139,6 +139,7 @@ angular.module('koality.directive', []).
 		replace: true
 		transclude: true
 		scope: 
+			options: '=options'
 			currentOptionName: '=currentOptionName'
 			clickHandler: '&optionClick'
 		template: '<div class="prettyMenu">
@@ -147,16 +148,13 @@ angular.module('koality.directive', []).
 				</div>
 				<div class="prettyMenuContents" ng-transclude></div>
 			</div>'
-		compile: (element, attributes, transclude) ->
-			pre: (scope, element, attributes, controller) ->
-				scope.options = scope.$eval attributes.options
-			post: (scope, element, attributes, controller) ->
-				scope.$watch 'currentOptionName', () ->
-					element.find('.prettyMenuContent').removeClass 'selected'
-					element.find(".prettyMenuContent[optionName='#{scope.currentOptionName}']").addClass 'selected'
+		link: (scope, element, attributes) ->
+			scope.$watch 'currentOptionName', () ->
+				element.find('.prettyMenuContent').removeClass 'selected'
+				element.find(".prettyMenuContent[optionName='#{scope.currentOptionName}']").addClass 'selected'
 
-				scope.internalClickHandler = (option) ->
-					scope.currentOptionName = option.name
+			scope.internalClickHandler = (option) ->
+				scope.currentOptionName = option.name
 
 	).
 	directive('notifyOnBottomScroll', () ->
@@ -268,6 +266,10 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 			when('/add/repository',
 				templateUrl: "/html/addRepository#{fileSuffix}.html"
 				controller: AddRepository
+			).
+			when('/admin',
+				templateUrl: "/html/admin#{fileSuffix}.html"
+				controller: Admin
 			).
 			otherwise(
 				redirectTo: '/welcome'

@@ -1,0 +1,30 @@
+<div id="admin">
+	<centered-panel panel-title="Admin">
+		<menu options="menuOptions" initial-option-name="repositories" current-option-name="currentView" option-click="menuOptionClick(optionName)">
+			<div id="adminRepositories" class="prettyMenuContent" optionName="repositories" ng-controller="AdminRepositories">
+				<table id="repositoriesTable" class="prettyTable">
+					<tr class="title">
+						<td class="aliasColumn">Alias</td><td class="createdColumn">Created</td><td class="removeColumn">Remove</td>
+					</tr>
+					<tr ng-repeat="repository in repositories">
+						<td class="aliasColumn">{{repository.alias}}</td><td class="createdColumn">{{repository.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeRepository(repository)">X</span></td>
+					</tr>
+				</table>
+			</div>
+
+			<div id="adminMembers" class="prettyMenuContent" optionName="members" ng-controller="AdminMembers">
+				<table id="membersTable" class="prettyTable">
+					<tr class="title">
+						<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
+						<td class="emailColumn" ng-click="orderByPredicate = 'email'; orderByReverse = !orderByReverse">Email</td>
+						<td class="addedColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Added Date</td>
+						<td class="removeColumn">Remove</td>
+					</tr>
+					<tr ng-repeat="member in members | orderBy:orderByPredicate:orderByReverse">
+						<td class="nameColumn">{{member.firstName}} {{member.lastName}}</td><td class="emailColumn">{{member.email}}</td><td class="addedColumn">{{member.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeMember(member)">X</span></td>
+					</tr>
+				</table>
+			</div>
+		</menu>
+	</centered-panel>
+</div>

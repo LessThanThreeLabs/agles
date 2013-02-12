@@ -1,6 +1,7 @@
 'use strict'
 
 window.Account = ['$scope', '$location', '$routeParams', 'fileSuffixAdder', ($scope, $location, $routeParams, fileSuffixAdder) ->
+	$scope.menuOptions = [{title: 'Basic', name: 'basic'}, {title: 'Password', name: 'password'}, {title: 'SSH Keys', name: 'sshKeys'}]
 	$scope.currentView = $routeParams.view ? 'basic'
 
 	$scope.menuOptionClick = (optionName) ->
@@ -59,7 +60,6 @@ window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc
 		rpc.makeRequest 'users', 'update', 'removeSshKey', id: key.id, (error, result) ->
 			if error? then console.error error
 			else console.log result
-
 ]
 
 

@@ -1,6 +1,6 @@
 <div id="account">
 	<centered-panel panel-title="Account">
-		<menu options="[{title: 'Basic', name: 'basic'}, {title: 'Password', name: 'password'}, {title: 'SSH Keys', name: 'sshKeys'}]" current-option-name="currentView" option-click="menuOptionClick(optionName)">
+		<menu options="menuOptions" current-option-name="currentView" option-click="menuOptionClick(optionName)">
 			<div id="accountBasic" class="prettyMenuContent" optionName="basic" ng-controller="AccountBasic">
 				<styled-form name="basicForm">
 					<styled-form-field label="First name">

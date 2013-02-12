@@ -1,0 +1,51 @@
+#admin {
+	position: absolute;
+	top: 25%;
+	left: 0px;
+	right: 0px;
+
+	#adminRepositories {
+
+	}
+
+	#adminMembers {
+		max-height: 395px;
+		overflow: auto;
+
+		table {
+			width: 600px;
+
+			.title {
+
+				.nameColumn, .emailColumn, .addedColumn {
+					cursor: hand; cursor: pointer;
+				}
+			}
+
+			.nameColumn {
+
+			}
+
+			.emailColumn {
+				text-align: center;
+			}
+
+			.addedColumn {
+				text-align: center;	
+			}
+
+			.removeColumn {
+				text-align: center;
+
+				.removeLink {
+					@linkBuffer: 8px;
+
+					cursor: hand; cursor: pointer;
+					padding-left: @linkBuffer;
+					padding-right: @linkBuffer;
+					font-width: bold;
+				}
+			}
+		}
+	}
+}
