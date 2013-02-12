@@ -49,7 +49,6 @@ setup:
     - git config --global user.name "Koality"
     - directory: ci/scripts
       script: ./rabbitmq_setup.sh
-
 compile:
   - compile_platform:
       path: ci/platform

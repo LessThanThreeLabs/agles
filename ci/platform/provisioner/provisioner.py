@@ -18,13 +18,14 @@ class Provisioner(object):
 			'scripts': self.parse_scripts,
 			'databases': self.parse_databases
 		}
-		self.keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa'))
-		self.keyfile_backup = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.bak'))
-		self.public_keyfile = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.pub'))
-		self.public_keyfile_backup = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.pub.bak'))
-		self.git_ssh = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh', 'id_rsa.koality'))
+		self.ssh_dir = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh'))
+		self.keyfile = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa'))
+		self.keyfile_backup = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.bak'))
+		self.public_keyfile = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.pub'))
+		self.public_keyfile_backup = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.pub.bak'))
+		self.git_ssh = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.koality'))
 
-	def provision(self, private_key, config_path=None, source_path=None):
+	def provision(self, private_key=None, config_path=None, source_path=None):
 		try:
 			if not config_path:
 				if not source_path:
@@ -39,7 +40,8 @@ class Provisioner(object):
 					config = yaml.safe_load(config_file.read())
 			except:
 				raise InvalidConfigurationException("Unable to parse configuration file: %s\nPlease verify that this is a valid YAML file using a tool such as http://yamllint.com/." % os.path.basename(config_path))
-			self.set_private_key(private_key)
+			if private_key:
+				self.set_private_key(private_key)
 			self.handle_config(config, source_path)
 			self.reset_private_key()
 		except Exception as e:
@@ -61,6 +63,8 @@ class Provisioner(object):
 			os.rename(self.keyfile, self.keyfile_backup)
 		if os.access(self.public_keyfile, os.F_OK):
 			os.rename(self.public_keyfile, self.public_keyfile_backup)
+		if not os.access(self.ssh_dir, os.F_OK):
+			os.mkdir(self.ssh_dir)
 		with open(self.keyfile, 'w') as keyfile:
 			os.chmod(self.keyfile, 0600)
 			keyfile.write(private_key)

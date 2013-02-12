@@ -64,10 +64,7 @@ end
 # Setup postgresql local connection trusting
 
 bash "trust local postgres" do
-	code <<-EOH
-	sed -r 's/^(\\w+(\\s+\\S+){2,3}\\s+)\\w+$/\\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf > /etc/postgresql/9.1/main/pg_hba.conf.tmp
-	mv /etc/postgresql/9.1/main/pg_hba.conf.tmp /etc/postgresql/9.1/main/pg_hba.conf
-	EOH
+	code "sed -i.bak -r 's/^(\\w+(\\s+\\S+){2,3}\\s+)\\w+$/\\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf"
 end
 
 service "postgresql" do
