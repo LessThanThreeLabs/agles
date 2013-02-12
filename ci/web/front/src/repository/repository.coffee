@@ -169,7 +169,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 		updateBuildConsoleStatusListener()
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
-		if isStageIdInStages $scope.currentStageId
+		if isStageIdInStages($scope.currentStageId) or not $scope.currentStageId?
 			retrieveLines()
 			updateAddedLineListener()
 		$location.search 'stage', newValue
