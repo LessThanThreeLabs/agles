@@ -2,8 +2,8 @@
 	<centered-panel panel-title="Login">
 		<div id="loginError" ng-show="showError">Email and password do not match</div>
 		<styled-form name="loginForm" listen-for-enter-key="login()" ignore-enter-key-if="loginForm.$invalid">
-			<styled-form-field label="Email"><input type="email" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused></styled-form-field>
-			<styled-form-field label="Password"><input type="password" ng-model="account.password" name="password" placeholder="p4ssW0rd" ng-maxlength="256" required></styled-form-field>
+			<styled-form-field label="Email" label-padding="true"><input type="email" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused></styled-form-field>
+			<styled-form-field label="Password" label-padding="true"><input type="password" ng-model="account.password" name="password" placeholder="p4ssW0rd" ng-maxlength="256" required></styled-form-field>
 			<styled-form-field label=""><input type="checkbox" ng-model="account.rememberMe" ng-true-value="yes" ng-false-value="no" name="rememberMe"> Remember me</styled-form-field>
 		</styled-form>
 

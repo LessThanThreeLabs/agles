@@ -79,6 +79,17 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 		stage = (stage for stage in $scope.stages when stage.id is stageId)[0]
 		return stage?
 
+	retrieveMetadata = () ->
+		$scope.metadata = {}
+		return if not $scope.currentChangeId?
+
+		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, metadata) ->
+			$scope.$apply () ->
+				console.log 'metadata:'
+				console.log metadata
+				if error? then console.error error
+				else $scope.metadata = metadata
+
 	retrieveStages = () ->
 		$scope.stages = null
 		$scope.lines = null
@@ -164,6 +175,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 		$scope.currentStageId = if stage? then stage.id else null
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
+		retrieveMetadata()
 		retrieveStages()
 		updateBuildConsoleAddedListener()
 		updateBuildConsoleStatusListener()

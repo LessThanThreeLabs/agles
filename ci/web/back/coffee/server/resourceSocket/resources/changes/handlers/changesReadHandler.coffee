@@ -27,16 +27,25 @@ class ChangesReadHandler extends Handler
 					else callback null, (sanitizeResult change for change in changes)
 
 
-	getChangeMetadata: (socket, data, callback) =>
+	getMetadata: (socket, data, callback) =>
+		sanitizeResult = (metadata) ->
+			user: 
+				email: metadata.user.email
+				firstName: metadata.user.first_name
+				lastName: metadata.user.last_name
+			message: metadata.commit.message
+			commitTime: metadata.commit.timestamp
+			startTime: metadata.change.start_time
+			endTime: metadata.change.end_time
+			target: metadata.change.merge_target
+
 		userId = socket.session.userId
 		if not userId?
 			callback 403
 		else if not data?.id?
 			callback 400
 		else
-			# @modelRpcConnection.changes.read.get_change_metadata userId, data.id, (error, metadata) =>
-			# 	if error?
-			# 		if error.type is 'InvalidPermissionsError' then callback 403
-			# 		else callback 'unable to get metadata'
-			# 	else
-			# 		callback null, @_sanitizeMetadata metadata
+			@modelRpcConnection.changes.read.get_change_metadata userId, data.id, (error, metadata) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback null, sanitizeResult metadata

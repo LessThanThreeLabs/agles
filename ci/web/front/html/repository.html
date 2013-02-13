@@ -26,7 +26,12 @@
 
 			<div id="repositoryChangeDetailsOutput">
 				<div id="changeDetailsHome" ng-show="currentChangeId != null && currentStageId == null">
-					basic information about change here
+					<styled-form>
+						<styled-form-field label="User">{{metadata.user.firstName}} {{metadata.user.lastName}}</styled-form-field>
+						<styled-form-field label="Message">{{metadata.message}}</styled-form-field>
+						<styled-form-field label="Target">{{metadata.target}}</styled-form-field>
+						<styled-form-field label="Commit time">{{metadata.commitTime*1000 | date:'medium'}}</styled-form-field>
+					</styled-form>
 				</div>
 
 				<div id="changeConsoleText" auto-scroll-to-bottom="lines">
