@@ -27,10 +27,10 @@
 			<div id="repositoryChangeDetailsOutput">
 				<div id="changeDetailsHome" ng-show="currentChangeId != null && currentStageId == null">
 					<styled-form>
-						<styled-form-field label="User">{{metadata.user.firstName}} {{metadata.user.lastName}}</styled-form-field>
-						<styled-form-field label="Message">{{metadata.message}}</styled-form-field>
-						<styled-form-field label="Target">{{metadata.target}}</styled-form-field>
-						<styled-form-field label="Commit time">{{metadata.commitTime*1000 | date:'medium'}}</styled-form-field>
+						<styled-form-field label="User"><span ng-bind-template="{{metadata.user.firstName}} {{metadata.user.lastName}}"></span></styled-form-field>
+						<styled-form-field label="Message"><span ng-bind="metadata.message"></span></styled-form-field>
+						<styled-form-field label="Target"><span ng-bind="metadata.target"></span></styled-form-field>
+						<styled-form-field label="Commit time"><span ng-bind="metadata.commitTime | date:'medium'"></span></styled-form-field>
 					</styled-form>
 				</div>
 

@@ -4,6 +4,8 @@
 	margin-right: auto;
 
 	.prettyFormRow {
+		@bottomPadding: 15px;
+
 		display: table-row;
 
 		&:last-child {
@@ -18,17 +20,20 @@
 			vertical-align: top;
 			text-align: right;
 			font-weight: bold;
+			padding-bottom: @bottomPadding;
 
 			&.labelPadding {
-				padding-top: 6px;
+				@paddingTop: 6px;
+				padding-top: @paddingTop;
+				padding-bottom: @bottomPadding - @paddingTop;
 			}
 		}
 
 		.prettyFormValue {
 			display: table-cell;
 			text-align: left;
-			vertical-align: middle;
-			padding-bottom: 15px;
+			vertical-align: top;
+			padding-bottom: @bottomPadding;
 
 			input[type="text"], input[type="search"], input[type="email"], input[type="password"] {
 				width: 250px;
