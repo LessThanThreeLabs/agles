@@ -65,6 +65,57 @@ angular.module('koality.service', []).
 					console.error if error?	
 				return @
 	]).
+	factory('changesRpc', ['rpc', (rpc) ->
+		NUM_CHANGES_TO_REQUEST = 100
+		noMoreChangesToRequest = false
+		
+		currentQuery = null
+		currentCallback = null
+		nextQuery = null
+		nextCallback = null
+
+		createChangesQuery = (repositoryId, group, query, startIndex) ->
+			repositoryId: repositoryId
+			group: group
+			query: query
+			startIndex: startIndex
+			numToRetrieve: NUM_CHANGES_TO_REQUEST
+
+		shiftChangesRequest = () ->
+			if not nextQuery?
+				currentQuery = null
+				currentCallback = null
+			else
+				currentQuery = nextQuery
+				currentCallback = nextCallback
+				nextQuery = null
+				nextCallback = null
+
+				retrieveMoreChanges()
+
+		retrieveMoreChanges = () ->
+			assert.ok currentQuery?
+			assert.ok currentCallback?
+
+			noMoreChangesToRequest = false if currentQuery.startIndex is 0
+
+			if noMoreChangesToRequest
+				shiftChangesRequest()
+			else
+				rpc.makeRequest 'changes', 'read', 'getChanges', currentQuery, (error, changes) ->
+					noMoreChangesToRequest = changes.length < NUM_CHANGES_TO_REQUEST
+					currentCallback error, changes
+					shiftChangesRequest()
+
+		return queueRequest: (repositoryId, group, query, startIndex, callback) ->
+			if currentQuery?
+				nextQuery = createChangesQuery repositoryId, group, query, startIndex
+				nextCallback = callback
+			else
+				currentQuery = createChangesQuery repositoryId, group, query, startIndex
+				currentCallback = callback
+				retrieveMoreChanges()
+	]).
 	factory('crazyAnsiText', ['initialState', (initialState) ->
 		return makeCrazy: (text) ->
 			return text if not initialState.partyMode

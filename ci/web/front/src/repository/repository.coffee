@@ -6,33 +6,20 @@ window.Repository = ['$scope', ($scope) ->
 ]
 
 
-window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, events, integerConverter) ->
-	noMoreChangesToRetrieve = false
-	waitingOnChanges = false
-	numChangesToRequest = 100
-
-	retrieveMoreChanges = () ->
-		return if noMoreChangesToRetrieve or waitingOnChanges
-		waitingOnChanges = true
-
-		changesQuery =
-			repositoryId: parseInt $routeParams.repositoryId
-			group: 'all'
-			query: $scope.query
-			startIndex: $scope.changes.length
-			numToRetrieve: numChangesToRequest
-		rpc.makeRequest 'changes', 'read', 'getChanges', changesQuery, (error, changes) ->
-			$scope.$apply () -> 
-				if error? 
-					console.error error
-				else
-					noMoreChangesToRetrieve = changes.length < numChangesToRequest
-					$scope.changes = $scope.changes.concat changes
-					$scope.currentChangeId ?= $scope.changes[0].id
-					waitingOnChanges = false
-
+window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, changesRpc, events, integerConverter) ->
 	$scope.changes = []
+	$scope.group = 'all'
 	$scope.query = ''
+
+	handleInitialChanges = (error, changes) -> $scope.$apply () -> 
+			if error? then console.error error
+			else
+				$scope.changes = changes
+				$scope.currentChangeId ?= $scope.changes[0].id
+
+	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
+			if error? then console.error error
+			else $scope.changes = $scope.changes.concat changes
 
 	handeChangeAdded = (data) -> $scope.$apply () ->
 		$scope.changes.unshift data
@@ -52,8 +39,6 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'event
 	$scope.$on '$destroy', changeStartedEvents.unsubscribe
 	$scope.$on '$destroy', changeFinishedEvents.unsubscribe
 
-	retrieveMoreChanges()
-
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
 	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
@@ -62,14 +47,13 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'event
 		$scope.currentChangeId = change.id
 
 	$scope.scrolledToBottom = () ->
-		retrieveMoreChanges()
+		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, $scope.query, $scope.changes.length, handleMoreChanges
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'change', newValue
 
 	$scope.$watch 'query', (newValue, oldValue) ->
-		$scope.changes = []
-		retrieveMoreChanges()
+		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, $scope.query, 0, handleInitialChanges
 ]
 
 
