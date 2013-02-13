@@ -34,7 +34,7 @@
 					</styled-form>
 				</div>
 
-				<div id="changeConsoleText" auto-scroll-to-bottom="lines">
+				<div id="changeConsoleText" auto-scroll-to-bottom="lines" ng-show="currentChangeId != null && currentStageId != null">
 					<div class="consoleTextLine" ng-repeat="line in lines">
 						<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse"></span>
 					</div>

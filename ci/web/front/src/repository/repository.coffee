@@ -85,8 +85,6 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 
 		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, metadata) ->
 			$scope.$apply () ->
-				console.log 'metadata:'
-				console.log metadata
 				if error? then console.error error
 				else $scope.metadata = metadata
 
