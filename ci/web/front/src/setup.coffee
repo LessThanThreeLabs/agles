@@ -33,11 +33,8 @@ angular.module('koality.service', []).
 			assert.ok typeof resource is 'string' and typeof requestType is 'string' and typeof methodName is 'string'
 			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
 			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, callback
-			# console.log "rpc >> socket request made for #{resource} - #{requestType}, #{methodName} with:"
-			# console.log data
 
 		respondTo: (eventName, callback) ->
-			# console.log 'events >> going to listen for event: ' + eventName
 			socket.on eventName, callback
 	]).
 	factory('rpc', ['socket', (socket) ->
