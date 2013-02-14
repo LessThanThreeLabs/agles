@@ -66,4 +66,4 @@ test:
         - nosetests -sv
         - cd ../web/back
         - npm test
-      timeout: 120
+      timeout: 300
