@@ -80,7 +80,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			for i in xrange(10):
 				self.build_ids.append(sqlconn.execute(ins_build).inserted_primary_key[0])
 
-	def console_append_test(self):
+	def test_console_append(self):
 		self._initialize()
 		update_handler = BuildOutputsUpdateHandler()
 
