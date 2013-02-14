@@ -36,11 +36,9 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 	getRepositories()
 
 	$scope.removeRepository = (repository) ->
-		console.log 'need to remove repository:'
-		console.log repository
-		# rpc.makeRequest 'repositories', 'delete', 'deleteRepository', id: repository.id, (error, result) ->
-		# 	if error? then console.error error
-		# 	else console.log result
+		$location.path('/remove/repository').search
+			id: repository.id
+			name: repository.name
 
 	$scope.addRepository = () ->
 		$location.path('/add/repository').search({})

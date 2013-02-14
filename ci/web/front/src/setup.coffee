@@ -323,6 +323,10 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 				templateUrl: "/html/addRepository#{fileSuffix}.html"
 				controller: AddRepository
 			).
+			when('/remove/repository',
+				templateUrl: "/html/removeRepository#{fileSuffix}.html"
+				controller: RemoveRepository
+			).
 			when('/admin',
 				templateUrl: "/html/admin#{fileSuffix}.html"
 				controller: Admin
