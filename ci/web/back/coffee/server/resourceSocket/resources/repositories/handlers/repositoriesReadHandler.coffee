@@ -17,6 +17,7 @@ class RepositoriesReadHandler extends Handler
 		sanitizeResult = (repository) ->
 			id: repository.id
 			name: repository.name
+			timestamp: 0
 
 		userId = socket.session.userId
 		if not userId?

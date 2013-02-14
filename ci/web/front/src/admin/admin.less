@@ -5,7 +5,40 @@
 	right: 0px;
 
 	#adminRepositories {
+		max-height: 395px;
+		overflow: auto;
 
+		table {
+			width: 400px;
+
+			.title {
+
+				.nameColumn, .createdColumn {
+					cursor: hand; cursor: pointer;
+				}
+			}
+
+			.nameColumn {
+
+			}
+
+			.createdColumn {
+				text-align: center;
+			}
+
+			.removeColumn {
+				text-align: center;
+
+				.removeLink {
+					@linkBuffer: 8px;
+
+					cursor: hand; cursor: pointer;
+					padding-left: @linkBuffer;
+					padding-right: @linkBuffer;
+					font-width: bold;
+				}
+			}
+		}
 	}
 
 	#adminMembers {

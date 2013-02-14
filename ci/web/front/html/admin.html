@@ -4,10 +4,12 @@
 			<div id="adminRepositories" class="prettyMenuContent" optionName="repositories" ng-controller="AdminRepositories">
 				<table id="repositoriesTable" class="prettyTable">
 					<tr class="title">
-						<td class="aliasColumn">Alias</td><td class="createdColumn">Created</td><td class="removeColumn">Remove</td>
+						<td class="nameColumn" ng-click="orderByPredicate = 'name'; orderByReverse = !orderByReverse">Name</td>
+						<td class="createdColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Created</td>
+						<td class="removeColumn">Remove</td>
 					</tr>
-					<tr ng-repeat="repository in repositories">
-						<td class="aliasColumn">{{repository.alias}}</td><td class="createdColumn">{{repository.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeRepository(repository)">X</span></td>
+					<tr ng-repeat="repository in repositories | orderBy:orderByPredicate:orderByReverse">
+						<td class="nameColumn">{{repository.name}}</td><td class="createdColumn">{{repository.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeRepository(repository)">X</span></td>
 					</tr>
 				</table>
 			</div>
