@@ -12,6 +12,10 @@
 						<td class="nameColumn">{{repository.name}}</td><td class="createdColumn">{{repository.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeRepository(repository)">X</span></td>
 					</tr>
 				</table>
+
+				<div id="addRepositoryButtonContainer">
+					<button ng-click="addRepository()">Add Repository</button>
+				</div>
 			</div>
 
 			<div id="adminMembers" class="prettyMenuContent" optionName="members" ng-controller="AdminMembers">

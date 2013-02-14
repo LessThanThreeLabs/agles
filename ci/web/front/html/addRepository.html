@@ -1,22 +1,44 @@
 <div id="addRepository">
 	<centered-panel panel-title="Add a Repository">
-		<styled-form name="addRepositoryForm">
-			<styled-form-field label="Alias">
-				<input type="text" ng-model="repository.alias" name="alias" placeholder="alias" ng-pattern="/^[A-Za-z0-9-_]+$/" ng-maxlength="64" required focused>
-				<span class="prettyFormError" tooltip="Alias contains invalid characters" ng-class="{visible: addRepositoryForm.alias.$dirty && addRepositoryForm.alias.$invalid}">
-					<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-				</span>
-			</styled-form-field>
-			<styled-form-field label="Forward Url">
-				<input type="text" ng-model="repository.forwardUrl" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
-				<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: addRepositoryForm.forwardUrl.$dirty && addRepositoryForm.forwardUrl.$invalid}">
-					<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-				</span>
-			</styled-form-field>
-		</styled-form>
+		<div id="firstStage" ng-show="stage == 'first'">
+			<styled-form name="addRepositoryForm" listen-for-enter-key="addRepository()" ignore-enter-key-if="addRepositoryForm.$invalid">
+				<styled-form-field label="Name">
+					<input type="text" ng-model="repository.name" name="name" placeholder="name" ng-pattern="/^[A-Za-z0-9-_]+$/" ng-maxlength="64" required focused>
+					<span class="prettyFormError" tooltip="Name contains invalid characters" ng-class="{visible: addRepositoryForm.name.$dirty && addRepositoryForm.name.$invalid}">
+						<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+					</span>
+				</styled-form-field>
+				<styled-form-field label="Forward Url">
+					<input type="text" ng-model="repository.forwardUrl" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
+					<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: addRepositoryForm.forwardUrl.$dirty && addRepositoryForm.forwardUrl.$invalid}">
+						<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+					</span>
+				</styled-form-field>
+			</styled-form>
 
-		<div id="addRepositoryButtonContainer">
-			<button ng-click="addRepository()" ng-disabled="addRepositoryForm.$invalid">Add</button>
+			<div id="addRepositoryButtonContainer">
+				<button ng-click="addRepository()" ng-disabled="addRepositoryForm.$invalid">Add</button>
+			</div>
+		</div>
+
+		<div id="secondStage" ng-show="stage == 'second'">
+			<div id="sshKeyInformation">
+				To finish setting up your repository, Koality needs permission to connect!<br>
+				Add this ssh key to the list of allowed keys for {{repository.name}}.
+			</div>
+
+			<textarea id="sshKey" ng-model="repository.sshKey" highlight-on-first-click readonly></textarea>
+
+			<div id="verifySshKeyButtonContainer">
+				<button ng-click="verifyConnection()">Verify Connection</button>
+			</div>
+		</div>
+
+		<div id="thirdStage" ng-show="stage == 'third'">
+			<div id="congratulationsMessage">
+				Congratulations, you have successfully set up {{repository.name}}!<br>
+				Your users now have access to this repository.
+			</div>
 		</div>
 	</centered-panel>
 </div>

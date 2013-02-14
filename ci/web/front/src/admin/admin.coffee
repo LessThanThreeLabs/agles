@@ -12,7 +12,7 @@ window.Admin = ['$scope', '$location', '$routeParams', 'fileSuffixAdder', ($scop
 ]
 
 
-window.AdminRepositories = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
+window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'events', ($scope, $location, initialState, rpc, events) ->
 	$scope.orderByPredicate = 'name'
 	$scope.orderByReverse = false
 
@@ -41,6 +41,9 @@ window.AdminRepositories = ['$scope', 'initialState', 'rpc', 'events', ($scope, 
 		# rpc.makeRequest 'repositories', 'delete', 'deleteRepository', id: repository.id, (error, result) ->
 		# 	if error? then console.error error
 		# 	else console.log result
+
+	$scope.addRepository = () ->
+		$location.path('/add/repository').search({})
 ]
 
 
