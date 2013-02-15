@@ -175,7 +175,7 @@ angular.module('koality.directive', []).
 			</div>'
 		link: (scope, element, attributes) ->
 			element.parent().bind 'click', () ->
-				scope.show = !scope.show
+				scope.$apply () -> scope.show = !scope.show
 
 			documentClickHandler = (event) ->
 				scope.$apply () -> scope.show = false
