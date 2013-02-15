@@ -53,6 +53,7 @@ module.exports = class Resource
 			email: request.session.email
 			firstName: request.session.firstName
 			lastName: request.session.lastName
+			isAdmin: request.session.isAdmin ? false
 
 		return templateValues
 

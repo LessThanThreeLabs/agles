@@ -23,6 +23,7 @@
 					<span class="headerOption" ng-controller="HeaderRepositories" ng-show="loggedIn" ng-click="repositoryClick()" unselectable>Repositories
 						<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
 					</span>
+					<span class="headerOption" ng-controller="HeaderAdmin" ng-show="isAdmin" ng-click="visitAdmin()" unselectable>Admin</span>
 				</div>
 			</div>
 		</div>
@@ -33,7 +34,7 @@
 <script>
 	var fileSuffix = '<%- fileSuffix %>'
 	var csrfToken = '<%- csrfToken %>'
-	var accountInformation = {id: '<%- userId %>', email: '<%- email %>', firstName: '<%- firstName %>', lastName: '<%- lastName %>'}
+	var accountInformation = {id: '<%- userId %>', email: '<%- email %>', firstName: '<%- firstName %>', lastName: '<%- lastName %>', isAdmin: '<%- isAdmin %>'}
 </script>
 
 <%- jsFiles %>

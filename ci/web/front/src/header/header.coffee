@@ -2,6 +2,7 @@
 
 window.Header = ['$scope', '$location', 'initialState', ($scope, $location, initialState) ->
 	$scope.loggedIn = initialState.loggedIn
+	$scope.isAdmin = initialState.user.isAdmin
 
 	$scope.visitHome = () -> $location.path('/').search({})
 ]
@@ -55,4 +56,8 @@ window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($sco
 
 	$scope.repositoryDropdownOptionClick = (repositoryId) ->
 		$location.path('/repository/' + repositoryId).search({})
+]
+
+window.HeaderAdmin = ['$scope', '$location', ($scope, $location) ->
+	$scope.visitAdmin = () -> $location.path('/admin').search({})
 ]
