@@ -19,17 +19,32 @@
 			</div>
 
 			<div id="adminMembers" class="prettyMenuContent" optionName="members" ng-controller="AdminMembers">
-				<table id="membersTable" class="prettyTable">
-					<tr class="title">
-						<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
-						<td class="emailColumn" ng-click="orderByPredicate = 'email'; orderByReverse = !orderByReverse">Email</td>
-						<td class="addedColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Added Date</td>
-						<td class="removeColumn">Remove</td>
-					</tr>
-					<tr ng-repeat="member in members | orderBy:orderByPredicate:orderByReverse">
-						<td class="nameColumn">{{member.firstName}} {{member.lastName}}</td><td class="emailColumn">{{member.email}}</td><td class="addedColumn">{{member.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeMember(member)">X</span></td>
-					</tr>
-				</table>
+				<div id="membersTableContainer">
+					<table id="membersTable" class="prettyTable">
+						<tr class="title">
+							<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
+							<td class="emailColumn" ng-click="orderByPredicate = 'email'; orderByReverse = !orderByReverse">Email</td>
+							<td class="addedColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Added Date</td>
+							<td class="removeColumn">Remove</td>
+						</tr>
+						<tr ng-repeat="member in members | orderBy:orderByPredicate:orderByReverse">
+							<td class="nameColumn">{{member.firstName}} {{member.lastName}}</td><td class="emailColumn">{{member.email}}</td><td class="addedColumn">{{member.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeMember(member)">X</span></td>
+						</tr>
+					</table>
+				</div>
+
+				<div ng-controller="AdminAddMembers">
+					<modal modal-visible="modalVisible">
+
+						<div id="addMembersButtonContainer">
+							<button ng-click="submit()">Add</button>
+						</div>
+					</modal>
+
+					<div id="addMembersModalButtonContainer">
+						<button ng-click="modalVisible=true">Add Members</button>
+					</div>
+				</div>
 			</div>
 		</menu>
 	</centered-panel>

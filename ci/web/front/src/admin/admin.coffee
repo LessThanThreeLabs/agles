@@ -57,6 +57,11 @@ window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initi
 ]
 
 
+window.AdminAddMembers = ['$scope', 'rpc', ($scope, rpc) ->
+
+]
+
+
 createMember = (number) ->
 	id: number
 	email: "#{number}@email.com"

@@ -5,37 +5,40 @@
 	right: 0px;
 
 	#adminRepositories {
-		max-height: 395px;
-		overflow: auto;
 
-		table {
-			width: 400px;
+		#repositoriesTableContainer {
+			max-height: 395px;
+			overflow: auto;
 
-			.title {
+			table {
+				width: 400px;
 
-				.nameColumn, .createdColumn {
-					cursor: hand; cursor: pointer;
+				.title {
+
+					.nameColumn, .createdColumn {
+						cursor: hand; cursor: pointer;
+					}
 				}
-			}
 
-			.nameColumn {
+				.nameColumn {
 
-			}
+				}
 
-			.createdColumn {
-				text-align: center;
-			}
+				.createdColumn {
+					text-align: center;
+				}
 
-			.removeColumn {
-				text-align: center;
+				.removeColumn {
+					text-align: center;
 
-				.removeLink {
-					@linkBuffer: 8px;
+					.removeLink {
+						@linkBuffer: 8px;
 
-					cursor: hand; cursor: pointer;
-					padding-left: @linkBuffer;
-					padding-right: @linkBuffer;
-					font-width: bold;
+						cursor: hand; cursor: pointer;
+						padding-left: @linkBuffer;
+						padding-right: @linkBuffer;
+						font-width: bold;
+					}
 				}
 			}
 		}
@@ -47,43 +50,51 @@
 	}
 
 	#adminMembers {
-		max-height: 395px;
-		overflow: auto;
 
-		table {
-			width: 600px;
+		#membersTableContainer {
+			max-height: 395px;
+			overflow: auto;
 
-			.title {
+			table {
+				width: 600px;
 
-				.nameColumn, .emailColumn, .addedColumn {
-					cursor: hand; cursor: pointer;
+				.title {
+
+					.nameColumn, .emailColumn, .addedColumn {
+						cursor: hand; cursor: pointer;
+					}
+				}
+
+				.nameColumn {
+
+				}
+
+				.emailColumn {
+					text-align: center;
+				}
+
+				.addedColumn {
+					text-align: center;	
+				}
+
+				.removeColumn {
+					text-align: center;
+
+					.removeLink {
+						@linkBuffer: 8px;
+
+						cursor: hand; cursor: pointer;
+						padding-left: @linkBuffer;
+						padding-right: @linkBuffer;
+						font-width: bold;
+					}
 				}
 			}
+		}
 
-			.nameColumn {
-
-			}
-
-			.emailColumn {
-				text-align: center;
-			}
-
-			.addedColumn {
-				text-align: center;	
-			}
-
-			.removeColumn {
-				text-align: center;
-
-				.removeLink {
-					@linkBuffer: 8px;
-
-					cursor: hand; cursor: pointer;
-					padding-left: @linkBuffer;
-					padding-right: @linkBuffer;
-					font-width: bold;
-				}
-			}
+		#addMembersModalButtonContainer {
+			margin-top: 15px;
+			text-align: center;
 		}
 	}
 }
