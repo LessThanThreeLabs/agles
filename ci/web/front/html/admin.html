@@ -35,6 +35,7 @@
 
 				<div ng-controller="AdminAddMembers">
 					<modal modal-visible="modalVisible">
+						<textarea id="membersToAdd" ng-model="membersToAdd"></textarea>
 
 						<div id="addMembersButtonContainer">
 							<button ng-click="submit()">Add</button>

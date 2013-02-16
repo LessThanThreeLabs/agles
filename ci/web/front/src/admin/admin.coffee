@@ -58,7 +58,7 @@ window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initi
 
 
 window.AdminAddMembers = ['$scope', 'rpc', ($scope, rpc) ->
-
+	$scope.membersToAdd = ''
 ]
 
 
