@@ -58,7 +58,12 @@ window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initi
 
 
 window.AdminAddMembers = ['$scope', 'rpc', ($scope, rpc) ->
+	$scope.stage = 'first'
 	$scope.membersToAdd = ''
+
+	$scope.submit = () ->
+		console.log 'need to submit!'
+		$scope.stage = 'second'
 ]
 
 
