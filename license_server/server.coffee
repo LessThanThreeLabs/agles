@@ -42,6 +42,8 @@ app.post '/do_upgrade', (request, response) ->
 	key = request.body.key
 	currentVersion = request.body.currentVersion
 	upgradeVersion = request.body.upgradeVersion
+	response.sendfile 'schema.sql'
+	# stream upgradeVersion codebase to box 
 
 
 app.listen 9001
