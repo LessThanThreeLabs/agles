@@ -30,7 +30,7 @@ class UsersReadHandler extends Handler
 
 
 	getEmailFromToken: (socket, data, callback) =>
-		if not data.token?
+		if not data?.token?
 			callback 400
 		else
 			@stores.createAccountStore.getAccount data.token, (error, account) =>

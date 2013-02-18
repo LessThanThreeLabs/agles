@@ -17,8 +17,8 @@ class UsersCreateHandler extends Handler
 		assert.ok @inviteUserEmailer?
 
 
-	create: (socket, data, callback) =>
-		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName?
+	createUser: (socket, data, callback) =>
+		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName? or not data?.token?
 			callback 400
 		else
 			errors = {}
@@ -34,18 +34,31 @@ class UsersCreateHandler extends Handler
 				return
 
 			@passwordHasher.getPasswordHash data.password, (passwordHashError, passwordHashResult) =>
+				console.log passwordHashResult
 				if passwordHashError?
 					callback 500
 				else
-					@modelConnection.rpcConnection.users.create.create_user data.email, data.firstName, data.lastName, 
-						passwordHashResult.hashedPassword, passwordHashResult.salt, (error, userId) =>
+					@modelRpcConnection.users.create.create_user data.email, data.firstName, data.lastName, 
+						passwordHashResult.passwordHash, passwordHashResult.salt, (error, userId) =>
+							console.error error
+
 							if error?.type is 'UserExistsError' then callback 'User already exists'
 							else if error? then callback 500
-							else callback 'ok'
+							else
+								socket.session.userId = userId
+								socket.session.email = data.email
+								socket.session.firstName = data.firstName
+								socket.session.lastName = data.lastName
+								socket.session.isAdmin = false
+								socket.session.save()
+
+								@stores.createAccountStore.removeAccount data.token
+
+								callback()
 
 
 	inviteUsers: (socket, data, callback) =>
-		if not data.users?.emails?
+		if not data?.users?.emails?
 			callback 400
 		else
 			if data.users.emails.indexOf(',') isnt -1
