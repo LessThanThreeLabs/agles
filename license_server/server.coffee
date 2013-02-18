@@ -1,5 +1,6 @@
 express = require 'express'
 pg = require 'pg'
+fs = require 'fs'
 
 connectionString = "postgres:///license"
 
@@ -20,9 +21,9 @@ app.get '/versions', (request, response) ->
 		client.query 'SELECT version_num, release_date FROM version ORDER BY id ASC', (error, result) ->
 			if error
 				console.log error
-				response.end JSON.stringify []
+				response.json JSON.stringify []
 			else
-				response.end JSON.stringify result.rows
+				response.json JSON.stringify result.rows
 
 
 app.post '/license_check', (request, response) ->
@@ -42,8 +43,18 @@ app.post '/do_upgrade', (request, response) ->
 	key = request.body.key
 	currentVersion = request.body.currentVersion
 	upgradeVersion = request.body.upgradeVersion
-	response.sendfile 'schema.sql'
-	# stream upgradeVersion codebase to box 
+
+	validateLicenseKey key, (error, valid) ->
+		if error
+			console.log error
+			response.send 404
+		else
+			if valid
+				upgradeTarPath = "upgrades/versions/#{upgradeVersion}"
+				if fs.existsSync upgradeTarPath
+					response.sendfile upgradeTarPath
+					return
+			response.send 404 
 
 
 app.listen 9001
