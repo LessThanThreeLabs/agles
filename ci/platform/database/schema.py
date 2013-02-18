@@ -30,7 +30,6 @@ media = Table('media', metadata,
 repo = Table('repo', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('name', String, nullable=False),
-	Column('owner', Integer, ForeignKey('user.id'), nullable=False),
 	Column('uri', String, nullable=False, unique=True),  # this is the clone uri
 	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
 	Column('default_permissions', SmallInteger, nullable=False),  # This is a bitmask

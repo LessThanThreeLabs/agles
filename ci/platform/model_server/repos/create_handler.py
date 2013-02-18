@@ -66,7 +66,6 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			ins = repo.insert().values(
 				name=repo_name,
 				uri=uri,
-				owner=user_id,
 				repostore_id=repostore_id,
 				default_permissions=default_permissions,
 				forward_url=forward_url,

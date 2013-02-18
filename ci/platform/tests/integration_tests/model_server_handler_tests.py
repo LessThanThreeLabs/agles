@@ -35,7 +35,6 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			ins_repo = repo.insert().values(
 				name='a',
 				uri='a',
-				owner=user_id,
 				repostore_id=repostore_id,
 				default_permissions=RepositoryPermissions.RWA,
 				forward_url="forwardurl",
