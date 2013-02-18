@@ -73,7 +73,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 ###################
 
 	def _create_user(self):
-		self.password_hash = sha512().hexdigest()
+		self.password_hash = binascii.b2a_base64(sha512().digest())
 		self.user_info = {'email': self.EMAIL, 'first_name': 'bob', 'last_name': 'barker',
 			'password_hash': self.password_hash, 'salt': 'Sodium Chloride.'}
 		with ModelServer.rpc_connect("users", "create") as conn:
