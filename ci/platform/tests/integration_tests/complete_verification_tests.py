@@ -1,6 +1,7 @@
 import os
 import socket
 import time
+import binascii
 
 import yaml
 
