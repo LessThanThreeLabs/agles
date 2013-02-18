@@ -13,7 +13,8 @@ user = Table('user', metadata,
 	Column('first_name', String, nullable=False),
 	Column('last_name', String, nullable=False),
 	Column('password_hash', String(88), nullable=False),
-	Column('salt', String(24), nullable=False)
+	Column('salt', String(24), nullable=False),
+	Column('admin', Boolean, nullable=False, default=False)
 )
 
 event.listen(
