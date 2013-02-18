@@ -15,11 +15,13 @@ window.Admin = ['$scope', '$location', '$routeParams', 'fileSuffixAdder', ($scop
 window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'events', ($scope, $location, initialState, rpc, events) ->
 	$scope.orderByPredicate = 'name'
 	$scope.orderByReverse = false
+	$scope.repositories = []
 
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
-			if error? then console.error error
-			else $scope.$apply () -> $scope.repositories = repositories
+			$scope.$apply () -> 
+				if error? then console.error error
+				else $scope.repositories = $scope.repositories.concat repositories
 
 	handleAddedRepositoryUpdated = (data) -> $scope.$apply () ->
 		$scope.repositories.push data
@@ -28,10 +30,10 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 		repositoryToRemoveIndex = (index for repository, index in $scope.repositories when repository.id is data.id)[0]
 		$scope.repositories.splice repositoryToRemoveIndex, 1 if repositoryToRemoveIndex?
 
-	# addRepositoryEvents = events.listen('users', 'repository added', initialState.user.id).setCallback(handleAddedKeyUpdated).subscribe()
-	# removeRepositoryEvents = events.listen('users', 'repository removed', initialState.user.id).setCallback(handleRemovedKeyUpdate).subscribe()
-	# $scope.$on '$destroy', addRepositoryEvents.unsubscribe
-	# $scope.$on '$destroy', removeRepositoryEvents.unsubscribe
+	addRepositoryEvents = events.listen('users', 'repository added', initialState.user.id).setCallback(handleAddedRepositoryUpdated).subscribe()
+	removeRepositoryEvents = events.listen('users', 'repository removed', initialState.user.id).setCallback(handleRemovedRepositoryUpdate).subscribe()
+	$scope.$on '$destroy', addRepositoryEvents.unsubscribe
+	$scope.$on '$destroy', removeRepositoryEvents.unsubscribe
 
 	getRepositories()
 
@@ -48,8 +50,27 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
 	$scope.orderByPredicate = 'lastName'
 	$scope.orderByReverse = false
+	$scope.members = []
 
-	$scope.members = (createMember number for number in [9001..9051])
+	getMembers = () ->
+		rpc.makeRequest 'users', 'read', 'getAllUsers', null, (error, members) ->
+			$scope.$apply () ->
+				if error? then console.error error
+				else $scope.members = $scope.members.concat members
+
+	handleMemberAdded = (data) -> $scope.$apply () ->
+		$scope.members.push data
+
+	handleMemberRemoved = (data) -> $scope.$apply () ->
+		userToRemoveIndex = (index for member, index in $scope.members when member.id is data.id)[0]
+		$scope.members.splice userToRemoveIndex, 1 if userToRemoveIndex?
+
+	addMemberEvents = events.listen('users', 'user added', initialState.user.id).setCallback(handleMemberAdded).subscribe()
+	removeMemberEvents = events.listen('users', 'user removed', initialState.user.id).setCallback(handleMemberRemoved).subscribe()
+	$scope.$on '$destroy', addMemberEvents.unsubscribe
+	$scope.$on '$destroy', removeMemberEvents.unsubscribe
+
+	getMembers()
 
 	$scope.removeMember = (member) ->
 		rpc.makeRequest 'users', 'delete', 'deleteUser', id: member.id, (error) ->
@@ -78,11 +99,3 @@ window.AdminAddMembers = ['$scope', 'rpc', ($scope, rpc) ->
 					$scope.stage = 'second'
 					$scope.showError = false
 ]
-
-
-createMember = (number) ->
-	id: number
-	email: "#{number}@email.com"
-	firstName: "hello#{number}"
-	lastName: "there#{number}"
-	timestamp: Math.floor(Math.random() * 1000000000000)

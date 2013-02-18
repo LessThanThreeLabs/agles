@@ -55,7 +55,10 @@ class UsersCreateHandler extends Handler
 	inviteUsers: (socket, data, callback) =>
 		console.log data
 
-		if not data?.users?.emails?
+		userId = socket.session.userId
+		if not userId? or not socket.session.isAdmin
+			callback 403
+		else if not data?.users?.emails?
 			callback 400
 		else
 			if data.users.emails.indexOf(',') isnt -1

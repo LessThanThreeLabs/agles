@@ -10,7 +10,7 @@ exports.create = (sockets) ->
 class UserEventHandler extends EventHandler
 	ROOM_PREFIX: 'user-'
 	EVENT_PREFIX: 'user-'
-	EVENT_NAMES: ['user updated', 'ssh pubkey added', 'ssh pubkey removed']
+	EVENT_NAMES: ['user added', 'user removed', 'user updated', 'ssh pubkey added', 'ssh pubkey removed', 'repository added', 'repository removed']
 
 	processEvent: (data) =>
 		roomName = @_getRoomName data.id, data.type
