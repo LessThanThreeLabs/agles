@@ -37,6 +37,7 @@ buildTestLines[] : dict = getTestOutput(userId, buildId)
 <more to be added>
 '''
 import database
+import binascii
 
 from hashlib import sha512
 
@@ -73,7 +74,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 ###################
 
 	def _create_user(self):
-		self.password_hash = binascii.b2a_base64(sha512().digest())
+		self.password_hash = binascii.b2a_base64(sha512().digest())[0:-1]
 		self.user_info = {'email': self.EMAIL, 'first_name': 'bob', 'last_name': 'barker',
 			'password_hash': self.password_hash, 'salt': 'Sodium Chloride.'}
 		with ModelServer.rpc_connect("users", "create") as conn:
