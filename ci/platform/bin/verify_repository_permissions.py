@@ -3,7 +3,6 @@ import sys
 
 from model_server import ModelServer
 from util import pathgen
-from util.permissions import RepositoryPermissions
 
 
 def main():
@@ -14,9 +13,10 @@ def main():
 
 
 def verify_repository_permissions(user_id, repo_id):
-	with ModelServer.rpc_connect("repos", "read") as client:
-		permissions = client.get_permissions(user_id, repo_id)
-	return _to_return_code(permissions >= RepositoryPermissions.RW)
+	with ModelServer.rpc_connect("users", "read") as client:
+		user = client.get_user_from_id(user_id)
+	exists = user is not None
+	return _to_return_code(exists)
 
 
 def _to_return_code(bool):

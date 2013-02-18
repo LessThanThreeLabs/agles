@@ -8,7 +8,6 @@ import binascii
 
 from database import schema
 from database.engine import ConnectionFactory
-from util.permissions import RepositoryPermissions
 
 SALT = 'GMZhGiZU4/JYE3NlmCZgGA=='
 
@@ -61,7 +60,7 @@ class SchemaDataGenerator(object):
 
 				for repo in range(random.randint(1, NUM_REPOS)):
 					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, uri="uri_%d_%d" % (repostore, repo),
-						repostore_id=repostore_id, default_permissions=RepositoryPermissions.RW, forward_url="bogusurl",
+						repostore_id=repostore_id, forward_url="bogusurl",
 						publickey="somepublickey", privatekey="someprivatekey")
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
 					repos[repo_id] = 0
@@ -73,10 +72,6 @@ class SchemaDataGenerator(object):
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 				repo_id = random.choice(repo_ids)
-				permissions = random.choice(RepositoryPermissions.valid_permissions())
-				ins_permission = schema.permission.insert().values(user_id=user_id, repo_id=repo_id, permissions=permissions)
-				conn.execute(ins_permission)
-
 				for commit in range(random.randint(1, 20)):
 					repo_id = random.choice(repos.keys())
 					repo_id_query = schema.repo.select().where(schema.repo.c.id == repo_id)
@@ -107,21 +102,6 @@ class SchemaDataGenerator(object):
 							subtype="subtype2", subtype_priority=priority)
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)
-
-		self._grantall(self.admin_id, repo_ids, RepositoryPermissions.RWA)
-		self._grantall(self.user_id, repo_ids[:1], RepositoryPermissions.R)
-
-	def _grantall(self, user_id, repo_ids, permissions):
-		insert_values = []
-		for repo_id in repo_ids:
-			insert_values.append({
-				'user_id': user_id,
-				'repo_id': repo_id,
-				'permissions': permissions
-			})
-
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(schema.permission.insert(), insert_values)
 
 	def generate_console_output(self, sqlconn, console_id):
 		console_output = schema.console_output

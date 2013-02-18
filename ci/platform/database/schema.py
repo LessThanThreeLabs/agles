@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Boolean, Integer, SmallInteger, String, Sequence, MetaData, ForeignKey, UniqueConstraint
+from sqlalchemy import Table, Column, Boolean, Integer, String, Sequence, MetaData, ForeignKey, UniqueConstraint
 from sqlalchemy import event, text, DDL
 from sqlalchemy.exc import SQLAlchemyError
 from database.engine import ConnectionFactory
@@ -33,20 +33,9 @@ repo = Table('repo', metadata,
 	Column('name', String, nullable=False),
 	Column('uri', String, nullable=False, unique=True),  # this is the clone uri
 	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
-	Column('default_permissions', SmallInteger, nullable=False),  # This is a bitmask
 	Column('forward_url', String, nullable=False),  # required forwarding url for repositories
 	Column('privatekey', String, nullable=False),  # rsa privkey
 	Column('publickey', String, nullable=False)  # rsa pubkey
-)
-
-# refer to util.permissions for permission bitmask documentation
-permission = Table('permission', metadata,
-	Column('id', Integer, primary_key=True),
-	Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
-	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False, index=True),
-	Column('permissions', SmallInteger, nullable=False),  # This is a bitmask
-
-	UniqueConstraint('user_id', 'repo_id')
 )
 
 commit = Table('commit', metadata,

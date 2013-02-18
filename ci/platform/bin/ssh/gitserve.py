@@ -9,15 +9,15 @@ import os
 import sys
 
 from model_server import ModelServer
-from util.permissions import RepositoryPermissions, InvalidPermissionsError
+from util.permissions import InvalidPermissionsError
 from util.shell import RestrictedGitShell, InvalidCommandError
 
-commands_to_permissions = {
-	"git-receive-pack": RepositoryPermissions.RW,
-	"git-upload-pack": RepositoryPermissions.R,
-	"git-upload-archive": RepositoryPermissions.R,
-	"true": RepositoryPermissions.NONE
-}
+valid_commands = [
+	"git-receive-pack",
+	"git-upload-pack",
+	"git-upload-archive",
+	"true"
+]
 
 user_id_commands = ["git-receive-pack"]
 
@@ -27,7 +27,7 @@ def main():
 	try:
 		if "SSH_ORIGINAL_COMMAND" in os.environ:
 			command = os.environ["SSH_ORIGINAL_COMMAND"] + ' ' + user_id
-			rsh = RestrictedGitShell(commands_to_permissions, user_id_commands)
+			rsh = RestrictedGitShell(valid_commands, user_id_commands)
 			rsh.handle_command(command)
 		else:
 			with ModelServer.rpc_connect("users", "read") as client:

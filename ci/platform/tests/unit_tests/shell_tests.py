@@ -1,19 +1,18 @@
 from nose.tools import *
-from util.permissions import RepositoryPermissions
 from util.shell import *
 
 from util.test import BaseUnitTest
 
-COMMANDS_TO_PERMISSIONS = {
-	'git-receive-pack': RepositoryPermissions.RW
-}
+VALID_COMMANDS = [
+	'git-receive-pack'
+]
 
 USER_ID_COMMANDS = ['git-receive-pack']
 
 
 class ShellTest(BaseUnitTest):
 	def setUp(self):
-		self.rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
+		self.rsh = RestrictedGitShell(VALID_COMMANDS, USER_ID_COMMANDS)
 
 	def tearDown(self):
 		pass

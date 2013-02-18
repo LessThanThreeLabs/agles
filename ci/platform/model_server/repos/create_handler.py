@@ -7,7 +7,6 @@ import repo.store
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from util.permissions import RepositoryPermissions
 from util.pathgen import to_clone_path
 
 
@@ -18,7 +17,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
-	def create_repo(self, user_id, repo_name, default_permissions, forward_url):
+	def create_repo(self, user_id, repo_name, forward_url):
 		if not repo_name:
 			raise RepositoryCreateError("repo_name cannot be empty")
 		try:
@@ -38,26 +37,23 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				repo_name,
 				uri,
 				repostore_id,
-				default_permissions,
 				forward_url,
 				privatekey,
 				publickey)
-			self._grant_permissions(user_id, repo_id, RepositoryPermissions.RWA)
 			# make filesystem changes
 			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name, privatekey)
 
-			self.publish_event("global", None, "repo added",
-				repo_id=repo_id, repo_name=repo_name, default_permissions=default_permissions)
+			self.publish_event("global", None, "repo added", repo_id=repo_id, repo_name=repo_name)
 			return repo_id
 		except Exception as e:
-			error_msg = "failed to create repo: [user_id: %d, repo_name: %s, default_permissions: %d]" % (user_id, repo_name, default_permissions)
+			error_msg = "failed to create repo: [user_id: %d, repo_name: %s]" % (user_id, repo_name)
 			self.logger.exception(error_msg)
 			raise RepositoryCreateError(e)
 
 	def _create_repo_on_filesystem(self, manager, repostore_id, repo_id, repo_name, privatekey):
 		manager.create_repository(repostore_id, repo_id, repo_name, privatekey)
 
-	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, default_permissions, forward_url, privatekey, publickey):
+	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, privatekey, publickey):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id==repostore_id)
@@ -67,23 +63,12 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				name=repo_name,
 				uri=uri,
 				repostore_id=repostore_id,
-				default_permissions=default_permissions,
 				forward_url=forward_url,
 				privatekey=privatekey,
 				publickey=publickey)
 			result = sqlconn.execute(ins)
 		repo_id = result.inserted_primary_key[0]
 		return repo_id
-
-	def _grant_permissions(self, user_id, repo_id, permissions):
-		permission = database.schema.permission
-		ins = permission.insert().values(
-			user_id=user_id,
-			repo_id=repo_id,
-			permissions=permissions)
-
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(ins)
 
 	def _transpose_to_uri(self, user_id, repo_name):
 		user = database.schema.user

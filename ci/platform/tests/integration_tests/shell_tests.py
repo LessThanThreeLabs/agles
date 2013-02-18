@@ -2,17 +2,19 @@ from nose.tools import *
 
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
-from util.permissions import RepositoryPermissions, InvalidPermissionsError
+from util.permissions import InvalidPermissionsError
 from util.shell import *
 from database.engine import ConnectionFactory
 from database import schema
 
-COMMANDS_TO_PERMISSIONS = {
-	'git-receive-pack': RepositoryPermissions.NONE,
-	'git-upload-pack': RepositoryPermissions.RWA
-}
+VALID_COMMADS = [
+	'git-receive-pack',
+	'git-upload-pack'
+]
 
 USER_ID_COMMANDS = ['git-receive-pack']
+
+NON_EXISTANT_USER_ID = "0"
 
 
 class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
@@ -36,13 +38,13 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	def _setup_db_entries(self, REPO_URI):
 		repostore_id = self._create_repo_store()
 		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
-			rpc_conn._create_repo_in_db(1, "repo.git", REPO_URI, repostore_id, RepositoryPermissions.RW, "forwardurl", "privatekey", "publickey")
+			rpc_conn._create_repo_in_db(1, "repo.git", REPO_URI, repostore_id, "forwardurl", "privatekey", "publickey")
 
 	def test_new_sshargs(self):
 		REPO_URI = "schacon/repo.git"
 		self._setup_db_entries(REPO_URI)
 
-		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
+		rsh = RestrictedGitShell(VALID_COMMANDS, USER_ID_COMMANDS)
 		sshargs = rsh.rp_new_sshargs('git-receive-pack', REPO_URI, "1")
 
 		assert_equal(len(sshargs), 7)
@@ -59,5 +61,5 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		REPO_URI = "schacon/repo.git"
 		self._setup_db_entries(REPO_URI)
 
-		rsh = RestrictedGitShell(COMMANDS_TO_PERMISSIONS, USER_ID_COMMANDS)
-		assert_raises(InvalidPermissionsError, rsh.rp_new_sshargs, 'git-upload-pack', REPO_URI, "2")
+		rsh = RestrictedGitShell(VALID_COMMANDS, USER_ID_COMMANDS)
+		assert_raises(InvalidPermissionsError, rsh.rp_new_sshargs, 'git-upload-pack', REPO_URI, NON_EXISTANT_USER_ID)

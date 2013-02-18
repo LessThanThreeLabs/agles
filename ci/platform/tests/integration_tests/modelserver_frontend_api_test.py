@@ -45,7 +45,6 @@ from nose.tools import *
 
 from database.engine import ConnectionFactory
 from model_server import ModelServer
-from util.permissions import RepositoryPermissions
 from util.pathgen import to_clone_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
@@ -108,8 +107,6 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 	def _create_repo(self):
 		repostore = database.schema.repostore
-		permission = database.schema.permission
-
 		repostore_ins = repostore.insert().values(host_name="localhost", repositories_path="/tmp")
 
 		with ConnectionFactory.get_sql_connection() as conn:
@@ -122,14 +119,9 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				self.REPO_NAME,
 				self.REPO_URI,
 				self.repostore_id,
-				RepositoryPermissions.RW,
 				"forwardurl",
 				"privatekey",
 				"publickey")
-
-		with ConnectionFactory.get_sql_connection() as conn:
-			permission_ins = permission.insert().values(user_id=self.user_id, repo_id=self.repo_id, permissions=RepositoryPermissions.RW)
-			conn.execute(permission_ins)
 
 	def test_get_repository_ids(self):
 		with ModelServer.rpc_connect("repos", "read") as conn:
@@ -143,7 +135,6 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		assert_equal(self.repo_id, repo["id"])
 		assert_equal(self.REPO_NAME, repo["name"])
 		assert_equal(self.repostore_id, repo["repostore_id"])
-		assert_equal(RepositoryPermissions.RW, repo["default_permissions"])
 
 	def test_get_repo_from_id(self):
 		with ModelServer.rpc_connect("repos", "read") as conn:
@@ -151,4 +142,3 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		assert_equal(self.repo_id, repo["id"])
 		assert_equal(self.REPO_NAME, repo["name"])
 		assert_equal(self.repostore_id, repo["repostore_id"])
-		assert_equal(RepositoryPermissions.RW, repo["default_permissions"])

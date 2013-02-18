@@ -5,7 +5,6 @@ import database.schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from util.sql import to_dict
-from util.permissions import has_repo_permissions
 
 
 class BuildsReadHandler(ModelServerRpcHandler):
@@ -40,8 +39,7 @@ class BuildsReadHandler(ModelServerRpcHandler):
 
 		if row:
 			repo_id = row[repo.c.id]
-			if has_repo_permissions(user_id, repo_id):
-				return to_dict(row, build.columns, tablename=build.name)
+			return to_dict(row, build.columns, tablename=build.name)
 		return {}
 
 	# TODO (jchu): This query is SLOW AS BALLS
@@ -52,9 +50,6 @@ class BuildsReadHandler(ModelServerRpcHandler):
 		change = database.schema.change
 		commit = database.schema.commit
 		repo = database.schema.repo
-
-		if not has_repo_permissions(user_id, repo_id):
-			return []
 
 		query_string = "%" + query_string + "%"
 
