@@ -12,8 +12,8 @@ user = Table('user', metadata,
 	Column('email', String, nullable=False, unique=True),
 	Column('first_name', String, nullable=False),
 	Column('last_name', String, nullable=False),
-	Column('password_hash', String, nullable=False),
-	Column('salt', String(16), nullable=False)
+	Column('password_hash', String(88), nullable=False),
+	Column('salt', String(24), nullable=False)
 )
 
 event.listen(
@@ -130,8 +130,8 @@ def _create_and_initialize(engine):
 
 def _insert_admin_user():
 	ins = user.insert().values(id=1, email="lt3@getkoality.com", first_name="Admin", last_name="Admin",
-		password_hash="b87e08ca180fafd3239a067683e5c564cd68717b184d04adb3eaed208be8619d2526553dff3b9515d35a03a94ed367445490f9b63ea63f9bfe25b752eb6364cb",
-		salt="aaaaaaaaaaaaaaaa")
+		password_hash="mooonIJXsb0zgz2V0LXvN/N4N4zbZE9FadrFl/YBJvzh3Z8O3VT/FH1q6OzWplbrX99D++PO6mpez7QdoIUQ6A==",
+		salt="GMZhGiZU4/JYE3NlmCZgGA==")
 	with ConnectionFactory.get_sql_connection() as sqlconn:
 		sqlconn.execute(ins)
 

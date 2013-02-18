@@ -10,7 +10,7 @@ from database import schema
 from database.engine import ConnectionFactory
 from util.permissions import RepositoryPermissions
 
-SALT = 'a' * 16
+SALT = 'GMZhGiZU4/JYE3NlmCZgGA=='
 
 ADMIN_EMAIL = 'admin@admin.com'
 ADMIN_PASSWORD = 'admin123'
@@ -69,7 +69,7 @@ class SchemaDataGenerator(object):
 
 			for user in range(random.randint(1, 10)):
 				ins_user = schema.user.insert().values(first_name="firstname_%d" % user, last_name="lastname_%d" % user, email="%d@b.com" % user,
-					password_hash=hashlib.sha512(str(user)).hexdigest(), salt=SALT)
+					password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1], salt=SALT)
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 				repo_id = random.choice(repo_ids)
