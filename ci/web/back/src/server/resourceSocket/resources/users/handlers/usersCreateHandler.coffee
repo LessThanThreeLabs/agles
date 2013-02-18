@@ -110,4 +110,5 @@ class UsersCreateHandler extends Handler
 	_sendEmail: (email, callback) =>
 		crypto.randomBytes 4, (keyError, keyBuffer) =>
 			key = keyBuffer.toString 'hex'
+			@stores.createAccountStore.addAccount key, email: email
 			@inviteUserEmailer.inviteUser email, key, callback

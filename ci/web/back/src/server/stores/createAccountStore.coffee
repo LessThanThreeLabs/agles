@@ -39,4 +39,4 @@ class CreateAccountStore
 		assert.ok key?
 		@redisConnection.del key, (error, numRemoved) ->
 			throw new Error error if error?
-			console.log numRemoved
+			console.log 'createAccountStore - num removed: ' + numRemoved
