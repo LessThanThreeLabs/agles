@@ -39,6 +39,7 @@
 					<modal modal-visible="modalVisible">
 						<div ng-show="stage == 'first'">
 							<div id="addMembersDescription">Enter a list of email addresses</div>
+							<div id="addMembersErrorMessage" ng-show="showError">There was an error inviting members. Check formatting.</div>
 							<textarea id="membersToAddEmails" ng-model="membersToAdd.emails"></textarea>
 							<div id="addMembersButtonContainer">
 								<button ng-click="submit()">Add</button>
