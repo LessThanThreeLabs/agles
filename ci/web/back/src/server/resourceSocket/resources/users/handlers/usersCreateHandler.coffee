@@ -18,7 +18,9 @@ class UsersCreateHandler extends Handler
 
 
 	createUser: (socket, data, callback) =>
-		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName?
+		console.log data
+
+		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName? or not data?.token?
 			callback 400
 		else
 			errors = {}
@@ -33,23 +35,33 @@ class UsersCreateHandler extends Handler
 				callback errors
 				return
 
-			@passwordHasher.getPasswordHash data.password, (passwordHashError, passwordHashResult) =>
-				if passwordHashError?
-					callback 500
-				else
-					@modelRpcConnection.users.create.create_user data.email, data.firstName, data.lastName, 
-						passwordHashResult.passwordHash, passwordHashResult.salt, (error, userId) =>
-							if error?.type is 'UserExistsError' then callback 'User already exists'
-							else if error? then callback 500
-							else
-								socket.session.userId = userId
-								socket.session.email = data.email
-								socket.session.firstName = data.firstName
-								socket.session.lastName = data.lastName
-								socket.session.isAdmin = false
-								socket.session.save()
+			# This checks against the following attack:
+			#   Client attempts to create an account for his own email address,
+			#   using someone else's token.
+			@stores.createAccountStore.getAccount data.token, (error, account) =>
+				if error? then callback 500
+				else if account.email isnt data.email then callback 403
+				else @_addUser socket.session, data, callback
 
-								callback()
+
+	_addUser: (session, account, callback) =>
+		@passwordHasher.getPasswordHash account.password, (passwordHashError, passwordHashResult) =>
+			if passwordHashError?
+				callback 500
+			else
+				@modelRpcConnection.users.create.create_user account.email, account.firstName, account.lastName, 
+					passwordHashResult.passwordHash, passwordHashResult.salt, (error, userId) =>
+						if error?.type is 'UserAlreadyExistsError' then callback 'User already exists'
+						else if error? then callback 500
+						else
+							session.userId = userId
+							session.email = account.email
+							session.firstName = account.firstName
+							session.lastName = account.lastName
+							session.isAdmin = false
+							session.save()
+
+							callback()
 
 
 	inviteUsers: (socket, data, callback) =>

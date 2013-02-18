@@ -30,7 +30,7 @@ class CreateAccountStore
 			if error? 
 				callback error
 			else if not reply? 
-				callback 'No account found'
+				callback 404
 			else 
 				callback null, msgpack.unpack reply
 

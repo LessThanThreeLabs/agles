@@ -11,14 +11,17 @@ window.CreateAccount = ['$scope', '$routeParams', 'initialState', 'rpc', ($scope
 					$scope.account.email = email
 
 	$scope.account = {}
+	$scope.account.token = $routeParams.token
 	getEmailFromToken()
 	
 	$scope.submit = () ->
 		rpc.makeRequest 'users', 'create', 'createUser', $scope.account, (error, result) ->
-			if error?
-				console.error error
-				$scope.errorText = 'Unexpected error. Please contact your administator.'
-			else
-				# this will force a refresh, rather than do html5 pushstate
-				window.location.href = '/'
+			$scope.$apply () ->
+				if error?
+					console.error error
+					if error is 'User already exists' then $scope.errorText = 'User already exists...'
+					else $scope.errorText = 'Unexpected error. Please contact your administator.'
+				else
+					# this will force a refresh, rather than do html5 pushstate
+					window.location.href = '/'
 ]
