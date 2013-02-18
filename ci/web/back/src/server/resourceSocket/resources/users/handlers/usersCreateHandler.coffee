@@ -18,7 +18,7 @@ class UsersCreateHandler extends Handler
 
 
 	createUser: (socket, data, callback) =>
-		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName? or not data?.token?
+		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName?
 			callback 400
 		else
 			errors = {}
@@ -34,14 +34,11 @@ class UsersCreateHandler extends Handler
 				return
 
 			@passwordHasher.getPasswordHash data.password, (passwordHashError, passwordHashResult) =>
-				console.log passwordHashResult
 				if passwordHashError?
 					callback 500
 				else
 					@modelRpcConnection.users.create.create_user data.email, data.firstName, data.lastName, 
 						passwordHashResult.passwordHash, passwordHashResult.salt, (error, userId) =>
-							console.error error
-
 							if error?.type is 'UserExistsError' then callback 'User already exists'
 							else if error? then callback 500
 							else
@@ -52,12 +49,12 @@ class UsersCreateHandler extends Handler
 								socket.session.isAdmin = false
 								socket.session.save()
 
-								@stores.createAccountStore.removeAccount data.token
-
 								callback()
 
 
 	inviteUsers: (socket, data, callback) =>
+		console.log data
+
 		if not data?.users?.emails?
 			callback 400
 		else
@@ -79,8 +76,7 @@ class UsersCreateHandler extends Handler
 				if error?
 					callback 500
 				else
-					@_sendEmails unusedEmails, (error) =>
-						console.log error
+					@_sendEmailInvites unusedEmails, (error) =>
 						if error? then callback 500
 						else callback()
 
@@ -94,8 +90,8 @@ class UsersCreateHandler extends Handler
 				@modelRpcConnection.users.read.email_in_use email, defer emailInUseErrors[index], emailInUse[index]
 
 		emailInUseErrors = emailInUseErrors.filter (error) -> error?
-		console.log 'NEED TO FIX THIS!!'
-		if emailInUseErrors.length isnt 0 and false
+
+		if emailInUseErrors.length isnt 0
 			callback 500
 		else
 			emailsNotInUse = []
@@ -105,11 +101,11 @@ class UsersCreateHandler extends Handler
 			callback null, emailsNotInUse
 
 
-	_sendEmails: (emails, callback) =>
+	_sendEmailInvites: (emails, callback) =>
 		emailErrors = []
 		await
 			for email, index in emails
-				@_sendEmail email, emailErrors[index]
+				@_sendEmailAndAddToStore email, emailErrors[index]
 
 		emailErrors = emailErrors.filter (error) -> return error?
 
@@ -119,8 +115,11 @@ class UsersCreateHandler extends Handler
 			callback()
 
 
-	_sendEmail: (email, callback) =>
+	_sendEmailAndAddToStore: (email, callback) =>
 		crypto.randomBytes 4, (keyError, keyBuffer) =>
-			key = keyBuffer.toString 'hex'
-			@stores.createAccountStore.addAccount key, email: email
-			@inviteUserEmailer.inviteUser email, key, callback
+			if keyError?
+				callback keyError
+			else
+				key = keyBuffer.toString 'hex'
+				@stores.createAccountStore.addAccount key, email: email
+				@inviteUserEmailer.inviteUser email, key, callback

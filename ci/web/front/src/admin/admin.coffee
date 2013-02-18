@@ -59,15 +59,20 @@ window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initi
 
 window.AdminAddMembers = ['$scope', 'rpc', ($scope, rpc) ->
 	$scope.stage = 'first'
+	$scope.modalVisible = false
 	$scope.membersToAdd = {}
 
-	$scope.submit = () ->
-		console.log 'called submit'
-		console.log $scope.membersToAdd.emails
-		rpc.makeRequest 'users', 'create', 'inviteUsers', users: $scope.membersToAdd, (error) ->
-			console.error error if error?
+	$scope.$watch 'modalVisible', (newValue, oldValue) ->
+		$scope.stage = 'first'
+		$scope.membersToAdd = {}
 
-			$scope.stage = 'second' if not error?
+	$scope.submit = () ->
+		rpc.makeRequest 'users', 'create', 'inviteUsers', users: $scope.membersToAdd, (error) ->
+			$scope.$apply () ->
+				if error?
+					console.error error
+				else
+					$scope.stage = 'second'
 ]
 
 

@@ -23,7 +23,7 @@ class UsersReadHandler(ModelServerRpcHandler):
 
 	def email_in_use(self, email):
 		try:
-			self.get_salt(email)
+			self.get_user(email)
 			return True
 		except NoSuchUserError:
 			return False

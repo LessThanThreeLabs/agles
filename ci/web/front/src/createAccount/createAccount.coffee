@@ -1,8 +1,8 @@
 'use strict'
 
-window.CreateAccount = ['$scope', '$routeParams', 'rpc', ($scope, $routeParams, rpc) ->
+window.CreateAccount = ['$scope', '$routeParams', 'initialState', 'rpc', ($scope, $routeParams, initialState, rpc) ->
 	getEmailFromToken = () ->
-		rpc.makeRequest 'users', 'read', 'getEmailFromToken', token: $scope.account.token, (error, email) ->
+		rpc.makeRequest 'users', 'read', 'getEmailFromToken', token: $routeParams.token, (error, email) ->
 			$scope.$apply () ->
 				if error?
 					console.error error
@@ -11,7 +11,6 @@ window.CreateAccount = ['$scope', '$routeParams', 'rpc', ($scope, $routeParams, 
 					$scope.account.email = email
 
 	$scope.account = {}
-	$scope.account.token = $routeParams.token
 	getEmailFromToken()
 	
 	$scope.submit = () ->
