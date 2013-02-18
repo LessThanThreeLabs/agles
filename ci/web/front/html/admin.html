@@ -39,9 +39,7 @@
 					<modal modal-visible="modalVisible">
 						<div ng-show="stage == 'first'">
 							<div id="addMembersDescription">Enter a list of email addresses</div>
-
-							<textarea id="membersToAdd" ng-model="membersToAdd"></textarea>
-
+							<textarea id="membersToAddEmails" ng-model="membersToAdd.emails"></textarea>
 							<div id="addMembersButtonContainer">
 								<button ng-click="submit()">Add</button>
 							</div>

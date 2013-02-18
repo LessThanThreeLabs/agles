@@ -1,43 +1,113 @@
 assert = require 'assert'
+crypto = require 'crypto'
 
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection, passwordHasher, accountInformationValidator) ->
-	return new UsersCreateHandler modelRpcConnection, passwordHasher, accountInformationValidator
+exports.create = (stores, modelRpcConnection, passwordHasher, accountInformationValidator, inviteUserEmailer) ->
+	return new UsersCreateHandler stores, modelRpcConnection, passwordHasher, accountInformationValidator, inviteUserEmailer
 
 
 class UsersCreateHandler extends Handler
 
-	constructor: (modelRpcConnection, @passwordHasher, @accountInformationValidator) ->
+	constructor: (@stores, modelRpcConnection, @passwordHasher, @accountInformationValidator, @inviteUserEmailer) ->
 		super modelRpcConnection
-		assert.ok modelRpcConnection? 
+		assert.ok @stores?
 		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
+		assert.ok @inviteUserEmailer?
 
 
-	create: (socket, data, callback) =>
-		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName?
+	# create: (socket, data, callback) =>
+	# 	if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName?
+	# 		callback 400
+	# 	else
+	# 		errors = {}
+	# 		if not @accountInformationValidator.isValidFirstName data.firstName
+	# 			errors.firstName = @accountInformationValidator.getInvalidFirstNameString()
+	# 		if not @accountInformationValidator.isValidLastName data.lastName 
+	# 			errors.lastName = @accountInformationValidator.getInvalidLastNameString()
+	# 		if not @accountInformationValidator.isValidPassword data.password
+	# 			errors.password = @accountInformationValidator.getInvalidPasswordString()
+
+	# 		if Object.keys(errors).length isnt 0
+	# 			callback errors
+	# 			return
+
+	# 		@passwordHasher.getPasswordHash data.password, (passwordHashError, passwordHashResult) =>
+	# 			if passwordHashError?
+	# 				callback 500
+	# 			else
+	# 				@modelConnection.rpcConnection.users.create.create_user data.email, data.firstName, data.lastName, 
+	# 					passwordHashResult.hashedPassword, passwordHashResult.salt, (error, userId) =>
+	# 						if error?.type is 'UserExistsError' then callback 'User already exists'
+	# 						else if error? then callback 500
+	# 						else callback 'ok'
+
+
+	inviteUsers: (socket, data, callback) =>
+		if not data.users?.emails?
 			callback 400
 		else
-			errors = {}
-			if not @accountInformationValidator.isValidFirstName data.firstName
-				errors.firstName = @accountInformationValidator.getInvalidFirstNameString()
-			if not @accountInformationValidator.isValidLastName data.lastName 
-				errors.lastName = @accountInformationValidator.getInvalidLastNameString()
-			if not @accountInformationValidator.isValidPassword data.password
-				errors.password = @accountInformationValidator.getInvalidPasswordString()
+			if data.users.emails.indexOf(',') isnt -1
+				emails = data.users.emails.split ','
+			else if data.users.emails.indexOf(';') isnt -1
+				emails = data.users.emails.split ';'
+			else
+				emails = data.users.emails.split '\n'
 
-			if Object.keys(errors).length isnt 0
-				callback errors
-				return
+			emails = emails.map (email) -> return email.trim()
 
-			@passwordHasher.getPasswordHash data.password, (passwordHashError, passwordHashResult) =>
-				if passwordHashError?
+			for email in emails
+				if not @accountInformationValidator.isValidEmail email
+					callback 400
+					return
+
+			@_getUnusedEmails emails, (error, unusedEmails) =>
+				if error?
 					callback 500
 				else
-					@modelConnection.rpcConnection.users.create.create_user data.email, data.firstName, data.lastName, 
-						passwordHashResult.hashedPassword, passwordHashResult.salt, (error, userId) =>
-							if error?.type is 'UserExistsError' then callback 'User already exists'
-							else if error? then callback 500
-							else callback 'ok'
+					@_sendEmails unusedEmails, (error) =>
+						console.log error
+						if error? then callback 500
+						else callback()
+
+
+	_getUnusedEmails: (emails, callback) =>
+		emailInUseErrors = []
+		emailInUse = []
+
+		await
+			for email, index in emails
+				@modelRpcConnection.users.read.email_in_use email, defer emailInUseErrors[index], emailInUse[index]
+
+		emailInUseErrors = emailInUseErrors.filter (error) -> error?
+		console.log 'NEED TO FIX THIS!!'
+		if emailInUseErrors.length isnt 0 and false
+			callback 500
+		else
+			emailsNotInUse = []
+			for email, index in emails
+				emailsNotInUse.push email if not emailInUse[index]
+
+			callback null, emailsNotInUse
+
+
+	_sendEmails: (emails, callback) =>
+		emailErrors = []
+		await
+			for email, index in emails
+				@_sendEmail email, emailErrors[index]
+
+		emailErrors = emailErrors.filter (error) -> return error?
+
+		if emailErrors.length isnt 0
+			callback 400
+		else
+			callback()
+
+
+	_sendEmail: (email, callback) =>
+		crypto.randomBytes 4, (keyError, keyBuffer) =>
+			key = keyBuffer.toString 'hex'
+			@inviteUserEmailer.inviteUser email, key, callback

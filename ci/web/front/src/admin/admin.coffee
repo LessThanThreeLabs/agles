@@ -59,11 +59,15 @@ window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initi
 
 window.AdminAddMembers = ['$scope', 'rpc', ($scope, rpc) ->
 	$scope.stage = 'first'
-	$scope.membersToAdd = ''
+	$scope.membersToAdd = {}
 
 	$scope.submit = () ->
-		console.log 'need to submit!'
-		$scope.stage = 'second'
+		console.log 'called submit'
+		console.log $scope.membersToAdd.emails
+		rpc.makeRequest 'users', 'create', 'inviteUsers', users: $scope.membersToAdd, (error) ->
+			console.error error if error?
+
+			$scope.stage = 'second' if not error?
 ]
 
 
