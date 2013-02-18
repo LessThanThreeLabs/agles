@@ -3,11 +3,16 @@ assert = require 'assert'
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection) ->
-	return new UsersReadHandler modelRpcConnection
+exports.create = (stores, modelRpcConnection) ->
+	return new UsersReadHandler stores, modelRpcConnection
 
 
 class UsersReadHandler extends Handler
+	constructor: (@stores, modelRpcConnection) ->
+		super modelRpcConnection
+		assert.ok @stores?
+
+
 	getSshKeys: (socket, data, callback) =>
 		sanitizeResult = (key) ->
 			id: key.id
@@ -22,3 +27,13 @@ class UsersReadHandler extends Handler
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback null, (sanitizeResult key for key in keys)
+
+
+	getEmailFromToken: (socket, data, callback) =>
+		if not data.token?
+			callback 400
+		else
+			@stores.createAccountStore.getAccount data.token, (error, account) =>
+				console.log error
+				if error? then callback 500
+				else callback null, account.email

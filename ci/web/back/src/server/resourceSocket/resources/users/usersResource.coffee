@@ -18,7 +18,7 @@ exports.create = (configurationParams, stores, modelConnection) ->
 	resetPasswordEmailer = ResetPasswordEmailer.create configurationParams
 
 	createHandler = UsersCreateHandler.create stores, modelConnection.rpcConnection, passwordHasher, accountInformationValidator, inviteUserEmailer
-	readHandler = UsersReadHandler.create modelConnection.rpcConnection
+	readHandler = UsersReadHandler.create stores, modelConnection.rpcConnection
 	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer
 	return new UsersResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler
 

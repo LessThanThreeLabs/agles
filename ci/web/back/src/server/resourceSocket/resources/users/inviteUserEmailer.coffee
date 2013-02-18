@@ -15,6 +15,6 @@ class InviteUserEmailer
 
 	inviteUser: (email, userToken, callback) =>
 		@emailer.sendText @configurationParams.createAccount.email.from, email,
-			'Welcome to Koality!', "Click here to create your account: koalitycode.com/account/create?token=#{userToken}", (error) ->
+			'Welcome to Koality!', "Click here to create your account: koalitycode.com/create/account?token=#{userToken}", (error) ->
 				console.error error if error?
 				callback error if callback?

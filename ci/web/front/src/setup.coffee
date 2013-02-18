@@ -311,6 +311,11 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 				controller: Account
 				reloadOnSearch: false
 			).
+			when('/create/account',
+				templateUrl: "/html/createAccount#{fileSuffix}.html"
+				controller: CreateAccount
+				reloadOnSearch: false
+			).
 			when('/resetPassword',
 				templateUrl: "/html/resetPassword#{fileSuffix}.html"
 				controller: ResetPassword
