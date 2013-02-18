@@ -52,8 +52,8 @@ window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initi
 	$scope.members = (createMember number for number in [9001..9051])
 
 	$scope.removeMember = (member) ->
-		console.log 'need to remove member:'
-		console.log member
+		rpc.makeRequest 'users', 'delete', 'deleteUser', id: member.id, (error) ->
+			console.error if error?
 ]
 
 

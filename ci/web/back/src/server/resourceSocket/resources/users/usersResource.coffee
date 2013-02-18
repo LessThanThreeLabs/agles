@@ -7,8 +7,9 @@ InviteUserEmailer = require './inviteUserEmailer'
 ResetPasswordEmailer = require './resetPasswordEmailer'
 
 UsersCreateHandler = require './handlers/usersCreateHandler'
-UsersUpdateHandler = require './handlers/usersUpdateHandler'
 UsersReadHandler = require './handlers/usersReadHandler'
+UsersUpdateHandler = require './handlers/usersUpdateHandler'
+UsersDeleteHandler = require './handlers/usersDeleteHandler'
 
 
 exports.create = (configurationParams, stores, modelConnection) ->
@@ -20,15 +21,17 @@ exports.create = (configurationParams, stores, modelConnection) ->
 	createHandler = UsersCreateHandler.create stores, modelConnection.rpcConnection, passwordHasher, accountInformationValidator, inviteUserEmailer
 	readHandler = UsersReadHandler.create stores, modelConnection.rpcConnection
 	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer
-	return new UsersResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler
+	deleteHandler = UsersDeleteHandler.create modelConnection.rpcConnection
+	return new UsersResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler, deleteHandler
 
 
 class UsersResource extends Resource
-	constructor: (configurationParams, stores, modelConnection, @createHandler, @readHandler, @updateHandler) ->
+	constructor: (configurationParams, stores, modelConnection, @createHandler, @readHandler, @updateHandler, @deleteHandler) ->
 		super configurationParams, stores, modelConnection
 		assert.ok @createHandler?
 		assert.ok @readHandler?
 		assert.ok @updateHandler?
+		assert.ok @deleteHandler?
 
 
 	create: (socket, data, callback) =>
@@ -41,6 +44,10 @@ class UsersResource extends Resource
 
 	update: (socket, data, callback) =>
 		@_call @updateHandler, socket, data, callback
+
+
+	delete: (socket, data, callback) =>
+		@_call @deleteHandler, socket, data, callback
 
 
 	subscribe: (socket, data, callback) =>
