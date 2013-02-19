@@ -305,62 +305,46 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 			when('/login',
 				templateUrl: "/html/login#{fileSuffix}.html"
 				controller: Login
-				redirectTo: (routeParams, path, search) ->
-					if window.accountInformation.id is '' then return '/login'
-					else return '/'
+				redirectTo: if window.accountInformation.id is '' then null else '/'
 			).
 			when('/account',
 				templateUrl: "/html/account#{fileSuffix}.html"
 				controller: Account
 				reloadOnSearch: false
-				redirectTo: (routeParams, path, search) ->
-					if window.accountInformation.id is '' then return '/'
-					else return path
+				redirectTo: if window.accountInformation.id is '' then '/' else null
 			).
 			when('/create/account',
 				templateUrl: "/html/createAccount#{fileSuffix}.html"
 				controller: CreateAccount
 				reloadOnSearch: false
-				redirectTo: (routeParams, path, search) ->
-					if window.accountInformation.id is '' then return path
-					else return '/'
+				redirectTo: if window.accountInformation.id is '' then null else '/'
 			).
 			when('/resetPassword',
 				templateUrl: "/html/resetPassword#{fileSuffix}.html"
 				controller: ResetPassword
-				redirectTo: (routeParams, path, search) ->
-					if window.accountInformation.id is '' then return path
-					else return '/'
+				redirectTo: if window.accountInformation.id is '' then null else '/'
 			).
 			when('/repository/:repositoryId',
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
 				reloadOnSearch: false
-				redirectTo: (routeParams, path, search) ->
-					if window.accountInformation.id is '' then return '/'
-					else return path
+				redirectTo: if window.accountInformation.id is '' then '/' else null
 			).
 			when('/add/repository',
 				templateUrl: "/html/addRepository#{fileSuffix}.html"
 				controller: AddRepository
-				redirectTo: (routeParams, path, search) ->
-					if window.accountInformation.isAdmin then return path
-					else return '/'
+				redirectTo: if window.accountInformation.isAdmin then '/' else null
 			).
 			when('/remove/repository',
 				templateUrl: "/html/removeRepository#{fileSuffix}.html"
 				controller: RemoveRepository
-				redirectTo: (routeParams, path, search) ->
-					if window.accountInformation.isAdmin then return path
-					else return '/'
+				redirectTo: if window.accountInformation.isAdmin then '/' else null
 			).
 			when('/admin',
 				templateUrl: "/html/admin#{fileSuffix}.html"
 				controller: Admin
 				reloadOnSearch: false
-				redirectTo: (routeParams, path, search) ->
-					if window.accountInformation.isAdmin then return path
-					else return '/'
+				redirectTo: if window.accountInformation.isAdmin then '/' else null
 			).
 			otherwise(
 				redirectTo: '/welcome'
