@@ -1,4 +1,5 @@
 { "run_list": [
+	"recipe[supervisor]",
 	"role[model_server]",
 	"role[webserver]",
 	"role[repostore]",
