@@ -87,9 +87,10 @@ class OpenstackVm(VirtualMachine):
 			self.server = self.nova_client.servers.get(self.server.id)
 			if self.server.status == 'ERROR':
 				self.rebuild()
-		for attempts in range(3):
+		for attempts in range(10):
 			if self.ssh_call("true").returncode == 0:
 				return
+			eventlet.sleep(2)
 		# Failed to ssh into machine, try again
 		self.rebuild()
 
