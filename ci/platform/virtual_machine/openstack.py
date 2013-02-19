@@ -87,6 +87,11 @@ class OpenstackVm(VirtualMachine):
 			self.server = self.nova_client.servers.get(self.server.id)
 			if self.server.status == 'ERROR':
 				self.rebuild()
+		for attempts in range(3):
+			if self.ssh_call("true").returncode == 0:
+				return
+		# Failed to ssh into machine, try again
+		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("virtualenvs/2.7/bin/python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key, timeout=1200, output_handler=output_handler)

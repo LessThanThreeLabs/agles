@@ -75,6 +75,8 @@ class RunStepFileBuilder(object):
 		script = script + "if [ $_r -eq 124 ]; then echo %s timed out after %s seconds;\n" % (step_name, timeout)
 		script = script + "elif [ $_r -ne 0 ]; then echo %s failed with return code $_r; fi\n" % step_name
 		script = script + "exit $_r"
+		if not os.access(os.path.join(os.environ['HOME'], 'scripts', step_type), os.F_OK):
+			os.makedirs(os.path.join(os.environ['HOME'], 'scripts', step_type))
 		with open(os.path.join(os.environ['HOME'], 'scripts', step_type, step_name), 'w') as step_file:
 			step_file.write(script)
 
