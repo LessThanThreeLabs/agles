@@ -7,7 +7,7 @@ from util.shell import *
 from database.engine import ConnectionFactory
 from database import schema
 
-VALID_COMMADS = [
+VALID_COMMANDS = [
 	'git-receive-pack',
 	'git-upload-pack'
 ]
@@ -39,13 +39,15 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		repostore_id = self._create_repo_store()
 		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
 			rpc_conn._create_repo_in_db(1, "repo.git", REPO_URI, repostore_id, "forwardurl", "privatekey", "publickey")
+		with ModelServer.rpc_connect("users", "create") as rpc_conn:
+			self.user_id = rpc_conn.create_user("email", "first_name", "last_name", "hash", "salt")
 
 	def test_new_sshargs(self):
 		REPO_URI = "schacon/repo.git"
 		self._setup_db_entries(REPO_URI)
 
 		rsh = RestrictedGitShell(VALID_COMMANDS, USER_ID_COMMANDS)
-		sshargs = rsh.rp_new_sshargs('git-receive-pack', REPO_URI, "1")
+		sshargs = rsh.rp_new_sshargs('git-receive-pack', REPO_URI, str(self.user_id))
 
 		assert_equal(len(sshargs), 7)
 		assert_equal('ssh', sshargs[0])

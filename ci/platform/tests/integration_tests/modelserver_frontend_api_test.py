@@ -123,11 +123,6 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				"privatekey",
 				"publickey")
 
-	def test_get_repository_ids(self):
-		with ModelServer.rpc_connect("repos", "read") as conn:
-			writable_repo_ids = conn.get_repository_ids(self.user_id)
-		assert_in(self.repo_id, writable_repo_ids)
-
 	def test_get_repositories(self):
 		with ModelServer.rpc_connect("repos", "read") as conn:
 			writable_repos = conn.get_repositories(self.user_id)

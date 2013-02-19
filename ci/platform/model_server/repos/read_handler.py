@@ -1,5 +1,3 @@
-from sqlalchemy import and_
-
 import database.schema
 
 from database.engine import ConnectionFactory
@@ -71,7 +69,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 	def get_repositories(self, user_id):
 		repo = database.schema.repo
 
-		query = repo.select()
+		query = repo.select().apply_labels()
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			rows = sqlconn.execute(query)
 		return map(lambda row: to_dict(row, repo.columns, tablename=repo.name), rows)

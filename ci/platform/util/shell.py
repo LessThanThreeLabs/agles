@@ -5,7 +5,7 @@ import re
 from model_server import ModelServer
 from shared.constants import VerificationUser
 from util import pathgen
-from util.permission import InvalidPermissionsError
+from util.permissions import InvalidPermissionsError
 REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"
 
 
@@ -34,9 +34,9 @@ class RestrictedGitShell(object):
 		return match.group()
 
 	def verify_user_exists(self, command, user_id, repo_id):
-		with ModelServer.rpc_connect("repos", "read") as client:
+		with ModelServer.rpc_connect("users", "read") as client:
 			try:
-				client.get_user_from_id(self, user_id)
+				client.get_user_from_id(user_id)
 			except:
 				raise InvalidPermissionsError("User %s does not have the necessary permissions to run %s on repository %d" % (user_id, command, repo_id))
 
