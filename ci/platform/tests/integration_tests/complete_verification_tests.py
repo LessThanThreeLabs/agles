@@ -143,7 +143,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		commit_id = self._insert_commit_info()
 
 		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
-			yaml.dump({'test': self._test_commands()}),
+			yaml.safe_dump({'test': self._test_commands()}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection(RabbitSettings.kombu_connection_info) as connection:

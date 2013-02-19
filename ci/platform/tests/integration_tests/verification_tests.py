@@ -57,7 +57,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
 		self._modify_commit_push(work_repo, "koality.yml",
-			yaml.dump({'test': [{'hello_world': {'script': 'echo Hello World!'}}]}),
+			yaml.safe_dump({'test': [{'hello_world': {'script': 'echo Hello World!'}}]}),
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
@@ -69,7 +69,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
 		self._modify_commit_push(work_repo, "koality.yml",
-			yaml.dump({'test': [{'fail': {'script': 'exit 42'}}]}),
+			yaml.safe_dump({'test': [{'fail': {'script': 'exit 42'}}]}),
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],

@@ -176,7 +176,7 @@ class RepositoryStore(object):
 		if not os.path.exists(root_dir):
 			os.makedirs(root_dir)
 		with open(config_path, "w") as stream:
-			yaml.dump(config, stream, default_flow_style=False)
+			yaml.safe_dump(config, stream, default_flow_style=False)
 		return config
 
 	@classmethod

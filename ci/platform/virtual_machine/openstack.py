@@ -75,7 +75,7 @@ class OpenstackVm(VirtualMachine):
 			return None
 
 	def _write_vm_info(self):
-		config = yaml.dump({'server_id': self.server.id, 'username': self.vm_username})
+		config = yaml.safe_dump({'server_id': self.server.id, 'username': self.vm_username})
 		if not os.access(self.vm_directory, os.F_OK):
 			os.makedirs(self.vm_directory)
 		with open(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE), "w") as vm_info_file:

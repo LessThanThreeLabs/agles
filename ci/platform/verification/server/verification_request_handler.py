@@ -107,7 +107,7 @@ class VerificationRequestHandler(InfiniteWorker):
 		with ModelServer.rpc_connect("builds", "update") as model_server_rpc:
 			model_server_rpc.start_build(build_id)
 		with open(self._get_build_info_file(), 'w') as build_file:
-			build_file.write(yaml.dump({'build_id': build_id}))
+			build_file.write(yaml.safe_dump({'build_id': build_id}))
 
 	def _make_verify_callback(self, build_id, builds_update_rpc):
 		"""Returns the default callback function to be
