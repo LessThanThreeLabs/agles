@@ -4,7 +4,7 @@ window.Header = ['$scope', '$location', 'initialState', ($scope, $location, init
 	$scope.loggedIn = initialState.loggedIn
 	$scope.isAdmin = initialState.user.isAdmin
 
-	$scope.visitHome = () -> $location.path('/').search({})
+	$scope.visitHome = () -> $location.path('/')
 ]
 
 
@@ -23,7 +23,7 @@ window.HeaderProfile = ['$scope', '$location', 'initialState', 'rpc', 'events', 
 
 	$scope.profileDropdownOptions = [{title: 'Account', name: 'account'}, {title: 'Logout', name: 'logout'}]
 	$scope.profileDropdownOptionClick = (profileOption) ->
-		if profileOption is 'account' then $location.path('/account').search({})
+		if profileOption is 'account' then $location.path('/account')
 		if profileOption is 'logout' then performLogout()
 
 	performLogout = () ->
@@ -37,7 +37,7 @@ window.HeaderProfile = ['$scope', '$location', 'initialState', 'rpc', 'events', 
 
 
 window.HeaderLogin = ['$scope', '$location', ($scope, $location) ->
-	$scope.visitLogin = () -> $location.path('/login').search({})
+	$scope.visitLogin = () -> $location.path('/login')
 ]
 
 
@@ -55,9 +55,9 @@ window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($sco
 	getRepositories() if $scope.loggedIn
 
 	$scope.repositoryDropdownOptionClick = (repositoryId) ->
-		$location.path('/repository/' + repositoryId).search({})
+		$location.path('/repository/' + repositoryId)
 ]
 
 window.HeaderAdmin = ['$scope', '$location', ($scope, $location) ->
-	$scope.visitAdmin = () -> $location.path('/admin').search({})
+	$scope.visitAdmin = () -> $location.path('/admin')
 ]

@@ -305,37 +305,62 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 			when('/login',
 				templateUrl: "/html/login#{fileSuffix}.html"
 				controller: Login
+				redirectTo: (routeParams, path, search) ->
+					if window.accountInformation.id is '' then return '/login'
+					else return '/'
 			).
 			when('/account',
 				templateUrl: "/html/account#{fileSuffix}.html"
 				controller: Account
 				reloadOnSearch: false
+				redirectTo: (routeParams, path, search) ->
+					if window.accountInformation.id is '' then return '/'
+					else return path
 			).
 			when('/create/account',
 				templateUrl: "/html/createAccount#{fileSuffix}.html"
 				controller: CreateAccount
 				reloadOnSearch: false
+				redirectTo: (routeParams, path, search) ->
+					if window.accountInformation.id is '' then return path
+					else return '/'
 			).
 			when('/resetPassword',
 				templateUrl: "/html/resetPassword#{fileSuffix}.html"
 				controller: ResetPassword
+				redirectTo: (routeParams, path, search) ->
+					if window.accountInformation.id is '' then return path
+					else return '/'
 			).
 			when('/repository/:repositoryId',
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
 				reloadOnSearch: false
+				redirectTo: (routeParams, path, search) ->
+					if window.accountInformation.id is '' then return '/'
+					else return path
 			).
 			when('/add/repository',
 				templateUrl: "/html/addRepository#{fileSuffix}.html"
 				controller: AddRepository
+				redirectTo: (routeParams, path, search) ->
+					if window.accountInformation.isAdmin then return path
+					else return '/'
 			).
 			when('/remove/repository',
 				templateUrl: "/html/removeRepository#{fileSuffix}.html"
 				controller: RemoveRepository
+				redirectTo: (routeParams, path, search) ->
+					if window.accountInformation.isAdmin then return path
+					else return '/'
 			).
 			when('/admin',
 				templateUrl: "/html/admin#{fileSuffix}.html"
 				controller: Admin
+				reloadOnSearch: false
+				redirectTo: (routeParams, path, search) ->
+					if window.accountInformation.isAdmin then return path
+					else return '/'
 			).
 			otherwise(
 				redirectTo: '/welcome'

@@ -43,7 +43,7 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 			name: repository.name
 
 	$scope.addRepository = () ->
-		$location.path('/add/repository').search({})
+		$location.path('/add/repository')
 ]
 
 
