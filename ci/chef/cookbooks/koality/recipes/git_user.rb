@@ -16,8 +16,8 @@ bash "register own ssh key" do
 	cwd "/home/git"
 	user "git"
 	code <<-EOH
-		ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa -C git_user
-		cat ~/.ssh/id_rsa.pub >> .ssh/authorized_keys
+		ssh-keygen -t rsa -N "" -f /home/git/.ssh/id_rsa -C git_user
+		cat /home/git/.ssh/id_rsa.pub >> /home/git/.ssh/authorized_keys
 		EOH
 	not_if {File.exists?("/home/git/.ssh/id_rsa")}
 end

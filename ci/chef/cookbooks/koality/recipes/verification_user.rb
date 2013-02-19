@@ -14,10 +14,6 @@ directory "/verification" do
 	mode "0777"
 end
 
-link "/home/verification/chef-repo" do
-	to "/home/#{node[:koality][:user]}/code/agles/ci/chef/"
-end
-
 bash "generate ssh key" do
 	cwd "/home/verification"
 	user "verification"
@@ -27,7 +23,3 @@ bash "generate ssh key" do
 		EOH
 	not_if {File.exists?("/home/verification/.ssh/id_rsa")}
 end
-
-rvm_gem "vagrant"
-
-rvm_shell "vagrant gem install sahara"
