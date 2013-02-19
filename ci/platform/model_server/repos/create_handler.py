@@ -9,6 +9,7 @@ import repo.store
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from util.pathgen import to_clone_path
+from util.permissions import is_admin, InvalidPermissionsError
 
 
 class ReposCreateHandler(ModelServerRpcHandler):
@@ -21,6 +22,9 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def create_repo(self, user_id, repo_name, forward_url):
 		if not repo_name:
 			raise RepositoryCreateError("repo_name cannot be empty")
+		if not is_admin(user_id):
+			raise InvalidPermissionsError("%d is not an admin" % user_id)
+
 		try:
 			repo_name += ".git"
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())

@@ -26,9 +26,9 @@ class UsersCreateHandler(ModelServerRpcHandler):
 		path = self._generate_path(media_id, md5hash)
 		self.mediastore.store_media(media_binary, path)
 
-	def create_user(self, email, first_name, last_name, password_hash, salt):
+	def create_user(self, email, first_name, last_name, password_hash, salt, admin=False):
 		user = database.schema.user
-		ins = user.insert().values(email=email, first_name=first_name, last_name=last_name, password_hash=password_hash, salt=salt)
+		ins = user.insert().values(email=email, first_name=first_name, last_name=last_name, password_hash=password_hash, salt=salt, admin=admin)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			try:
 				result = sqlconn.execute(ins)
@@ -37,7 +37,7 @@ class UsersCreateHandler(ModelServerRpcHandler):
 
 		user_id = result.inserted_primary_key[0]
 		self.publish_event("global", None, "user created", user_id=user_id, email=email, first_name=first_name, last_name=last_name,
-			password_hash=password_hash, salt=salt)
+			password_hash=password_hash, salt=salt, admin=admin)
 		return user_id
 
 	def _generate_path(self, media_id, hash):
