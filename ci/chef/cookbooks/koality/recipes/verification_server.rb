@@ -18,6 +18,7 @@ node[:koality][:verification][:server_count].to_i.times do |server_num|
 	server_path = "/verification/server/#{server_num}"
 	bash "Start cloud verification server #{server_num}}" do
 		user "verification"
+		environment({"HOME" => "/home/verification"})
 		code <<-EOH
 			mkdir -p #{server_path}
 			cd #{server_path}
