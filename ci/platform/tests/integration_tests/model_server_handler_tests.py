@@ -37,7 +37,8 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				repostore_id=repostore_id,
 				forward_url="forwardurl",
 				privatekey="privatekey",
-				publickey="publickey"
+				publickey="publickey",
+				created=1234
 			)
 
 			repo_id = sqlconn.execute(ins_repo).inserted_primary_key[0]

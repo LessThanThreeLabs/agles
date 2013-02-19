@@ -38,7 +38,8 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	def _setup_db_entries(self, REPO_URI):
 		repostore_id = self._create_repo_store()
 		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
-			rpc_conn._create_repo_in_db(1, "repo.git", REPO_URI, repostore_id, "forwardurl", "privatekey", "publickey")
+			rpc_conn._create_repo_in_db(1, "repo.git", REPO_URI, repostore_id, "forwardurl",
+				"privatekey", "publickey")
 		with ModelServer.rpc_connect("users", "create") as rpc_conn:
 			self.user_id = rpc_conn.create_user("email", "first_name", "last_name", "hash", "salt")
 

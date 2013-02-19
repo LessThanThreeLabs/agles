@@ -60,8 +60,8 @@ class SchemaDataGenerator(object):
 
 				for repo in range(random.randint(1, NUM_REPOS)):
 					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, uri="uri_%d_%d" % (repostore, repo),
-						repostore_id=repostore_id, forward_url="bogusurl",
-						publickey="somepublickey", privatekey="someprivatekey")
+						repostore_id=repostore_id, forward_url="bogusurl", publickey="somepublickey",
+						privatekey="someprivatekey", created=int(time.time()))
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
 					repos[repo_id] = 0
 					repo_ids.append(repo_id)

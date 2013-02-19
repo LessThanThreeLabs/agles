@@ -35,7 +35,8 @@ repo = Table('repo', metadata,
 	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
 	Column('forward_url', String, nullable=False),  # required forwarding url for repositories
 	Column('privatekey', String, nullable=False),  # rsa privkey
-	Column('publickey', String, nullable=False)  # rsa pubkey
+	Column('publickey', String, nullable=False),  # rsa pubkey
+	Column('created', Integer, nullable=False)
 )
 
 commit = Table('commit', metadata,

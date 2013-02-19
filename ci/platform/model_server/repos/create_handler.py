@@ -1,4 +1,5 @@
 import logging
+import time
 
 from Crypto.PublicKey import RSA
 
@@ -57,16 +58,20 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id==repostore_id)
+
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
+			current_time = int(time.time())
 			ins = repo.insert().values(
 				name=repo_name,
 				uri=uri,
 				repostore_id=repostore_id,
 				forward_url=forward_url,
 				privatekey=privatekey,
-				publickey=publickey)
+				publickey=publickey,
+				created=current_time)
 			result = sqlconn.execute(ins)
+
 		repo_id = result.inserted_primary_key[0]
 		return repo_id
 
