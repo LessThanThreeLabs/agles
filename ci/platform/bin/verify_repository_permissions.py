@@ -15,8 +15,7 @@ def main():
 def verify_repository_permissions(user_id, repo_id):
 	with ModelServer.rpc_connect("users", "read") as client:
 		user = client.get_user_from_id(user_id)
-	exists = user is not None
-	return _to_return_code(exists)
+	return _to_return_code(user)
 
 
 def _to_return_code(bool):
