@@ -1,17 +1,19 @@
-remote_file "/tmp/haproxy-1.5-dev17.tar.gz" do
-	source "http://haproxy.1wt.eu/download/1.5/src/devel/haproxy-1.5-dev17.tar.gz"
-	mode "0644"
-end
+if not File.exists? "/usr/local/sbin/haproxy"
+	remote_file "/tmp/haproxy-1.5-dev17.tar.gz" do
+		source "http://haproxy.1wt.eu/download/1.5/src/devel/haproxy-1.5-dev17.tar.gz"
+		mode "0644"
+	end
 
-bash "install haproxy-1.5" do
-	user "root"
-	cwd "/tmp"
-	code <<-EOH
-		tar -xf /tmp/haproxy-1.5-dev17.tar.gz
-		cd haproxy-1.5-dev17
-		make clean
-		make install USE_OPENSSL=1 -j 4
-	EOH
+	bash "install haproxy-1.5" do
+		user "root"
+		cwd "/tmp"
+		code <<-EOH
+			tar -xf /tmp/haproxy-1.5-dev17.tar.gz
+			cd haproxy-1.5-dev17
+			make clean
+			make install USE_OPENSSL=1 -j 4
+		EOH
+	end
 end
 
 bash "compile_webserver" do

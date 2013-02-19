@@ -21,5 +21,5 @@ bash "generate ssh key" do
 		mkdir -p /home/verification/.ssh
 		ssh-keygen -t rsa -N "" -f /home/verification/.ssh/id_rsa -C verification_user
 		EOH
-	not_if {File.exists?("/home/verification/.ssh/id_rsa")}
+	not_if {File.exists? "/home/verification/.ssh/id_rsa"}
 end
