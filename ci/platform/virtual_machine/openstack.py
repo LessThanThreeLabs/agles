@@ -82,7 +82,7 @@ class OpenstackVm(VirtualMachine):
 			vm_info_file.write(config)
 
 	def wait_until_ready(self):
-		while not (self.server.accessIPv4 and self.server.status == 'ACTIVE'):
+		while not (self.server.addresses['private'] and self.server.status == 'ACTIVE'):
 			eventlet.sleep(1)
 			self.server = self.nova_client.servers.get(self.server.id)
 			if self.server.status == 'ERROR':
@@ -98,7 +98,7 @@ class OpenstackVm(VirtualMachine):
 		return self.ssh_call("python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key, timeout=1200, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)
+		login = "%s@%s" % (self.vm_username, self.server.accessIPv4 or self.server.addresses['private'][0]['addr'])
 		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
