@@ -9,7 +9,10 @@ window.Repository = ['$scope', ($scope) ->
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, changesRpc, events, integerConverter) ->
 	$scope.changes = []
 	$scope.group = 'all'
-	$scope.nameQuery = ''
+	$scope.namesQuery = ''
+
+	getNamesFromNamesQuery = () ->
+		return $scope.namesQuery.toLowerCase().split ' '
 
 	handleInitialChanges = (error, changes) -> $scope.$apply () -> 
 		if error? then console.error error
@@ -22,7 +25,9 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'chang
 		else $scope.changes = $scope.changes.concat changes
 
 	doesChangeMatchQuery = (change) ->
-		return ($scope.nameQuery.indexOf(data.submitter.firstName) isnt -1) or ($scope.nameQuery.indexOf(data.submitter.lastName) isnt -1)
+		return true if $scope.namesQuery is ''
+		return (change.submitter.firstName.toLowerCase() in getNamesFromNamesQuery()) or
+			(change.submitter.lastName.toLowerCase() in getNamesFromNamesQuery())
 
 	handeChangeAdded = (data) -> $scope.$apply () ->
 		if doesChangeMatchQuery data
@@ -51,14 +56,14 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'chang
 		$scope.currentChangeId = change.id
 
 	$scope.scrolledToBottom = () ->
-		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, $scope.nameQuery, $scope.changes.length, handleMoreChanges
+		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, getNamesFromNamesQuery(), $scope.changes.length, handleMoreChanges
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'change', newValue
 
-	$scope.$watch 'nameQuery', (newValue, oldValue) ->
+	$scope.$watch 'namesQuery', (newValue, oldValue) ->
 		$scope.changes = []
-		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, $scope.nameQuery, 0, handleInitialChanges
+		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, getNamesFromNamesQuery(), 0, handleInitialChanges
 ]
 
 

@@ -65,7 +65,8 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				'change': change_dict,
 				'commit': commit_dict,
 			}
-		return {}
+
+		raise InvalidPermissionsError(user_id, change_id)
 
 	def get_visible_builds_from_change_id(self, user_id, change_id):
 		build = database.schema.build
@@ -84,22 +85,14 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		return {}
 
 	# TODO (jchu): This query is SLOW AS BALLS
-	def query_changes(self, user_id, repo_id, group, query_string,
+	def query_changes(self, user_id, repo_id, group, names,
 						start_index_inclusive, num_results):
 		user = database.schema.user
 		change = database.schema.change
 		commit = database.schema.commit
 
-		query_string = "%" + query_string + "%"
-
 		query = change.join(commit).join(user).select().apply_labels().where(
-			and_(
-				change.c.repo_id == repo_id,
-				or_(
-					commit.c.message.like(query_string),
-					user.c.email.like(query_string)
-				)
-			)
+			change.c.repo_id == repo_id
 		)
 		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
 			start_index_inclusive)
@@ -108,3 +101,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			changes = map(lambda row: to_dict(row, change.columns,
 				tablename=change.name), sqlconn.execute(query))
 			return changes
+
+
+class InvalidPermissionsError(Exception):
+	pass

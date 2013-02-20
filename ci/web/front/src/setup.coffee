@@ -72,10 +72,10 @@ angular.module('koality.service', []).
 		nextNameQuery = null
 		nextCallback = null
 
-		createChangesQuery = (repositoryId, group, query, startIndex) ->
+		createChangesQuery = (repositoryId, group, names, startIndex) ->
 			repositoryId: repositoryId
 			group: group
-			query: query
+			names: names
 			startIndex: startIndex
 			numToRetrieve: NUM_CHANGES_TO_REQUEST
 
@@ -105,12 +105,12 @@ angular.module('koality.service', []).
 					currentCallback error, changes
 					shiftChangesRequest()
 
-		return queueRequest: (repositoryId, group, query, startIndex, callback) ->
+		return queueRequest: (repositoryId, group, names, startIndex, callback) ->
 			if currentNameQuery?
-				nextNameQuery = createChangesQuery repositoryId, group, query, startIndex
+				nextNameQuery = createChangesQuery repositoryId, group, names, startIndex
 				nextCallback = callback
 			else
-				currentNameQuery = createChangesQuery repositoryId, group, query, startIndex
+				currentNameQuery = createChangesQuery repositoryId, group, names, startIndex
 				currentCallback = callback
 				retrieveMoreChanges()
 	]).
