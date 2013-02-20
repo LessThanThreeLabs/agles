@@ -73,7 +73,7 @@ end
 
 supervisor_service "webserver" do
 	action [:enable, :start]
-	command "node --harmony js/index.js --httpPort 9001 --httpsPort 10443"
+	command "/home/#{node[:koality][:user]}/nvm/v0.8.9/bin/node --harmony js/index.js --httpPort 9001 --httpsPort 10443"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stderr.log"
 	user node[:koality][:user]
