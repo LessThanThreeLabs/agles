@@ -76,7 +76,7 @@ class PipPackageParser(PackageParser):
 		return "%s==%s" % (name, version)
 
 	def to_install_string(self, package_string):
-		return "pip install %s" % package_string
+		return "pip install %s --upgrade" % package_string
 
 
 class GemPackageParser(PackageParser):

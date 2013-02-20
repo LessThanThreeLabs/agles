@@ -21,7 +21,7 @@ setup:
       - kombu: 2.5.3
       - pycrypto: 2.6
       - librabbitmq
-      - sqlalchemy
+      - sqlalchemy: 0.7.8
       - pyyaml
       - msgpack-python
       - nose
