@@ -63,5 +63,7 @@ window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($sco
 ]
 
 window.HeaderAdmin = ['$scope', '$location', ($scope, $location) ->
-	$scope.visitAdmin = () -> $location.path('/admin').search({})
+	$scope.visitAdmin = () -> 
+		if $location.path() isnt '/admin'
+			$location.path('/admin').search({})
 ]

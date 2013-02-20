@@ -333,18 +333,18 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 			when('/add/repository',
 				templateUrl: "/html/addRepository#{fileSuffix}.html"
 				controller: AddRepository
-				redirectTo: if window.accountInformation.isAdmin then '/' else null
+				redirectTo: if window.accountInformation.isAdmin then null else '/'
 			).
 			when('/remove/repository',
 				templateUrl: "/html/removeRepository#{fileSuffix}.html"
 				controller: RemoveRepository
-				redirectTo: if window.accountInformation.isAdmin then '/' else null
+				redirectTo: if window.accountInformation.isAdmin then null else '/'
 			).
 			when('/admin',
 				templateUrl: "/html/admin#{fileSuffix}.html"
 				controller: Admin
 				reloadOnSearch: false
-				redirectTo: if window.accountInformation.isAdmin then '/' else null
+				redirectTo: if window.accountInformation.isAdmin then null else '/'
 			).
 			otherwise(
 				redirectTo: '/welcome'
