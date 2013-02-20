@@ -23,6 +23,10 @@ class RepositoryEventHandler extends EventHandler
 					id: data.contents.change_id
 					number: data.contents.change_number
 					status: data.contents.change_status
+					submitter:
+						email: 'jpotter@getkoality.com'
+						firstName: 'Jordan'
+						lastName: 'Potter'
 			when 'change started', 'change finished'
 				@sockets.in(roomName).emit eventName,
 					id: data.contents.change_id

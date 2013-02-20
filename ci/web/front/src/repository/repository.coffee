@@ -9,20 +9,24 @@ window.Repository = ['$scope', ($scope) ->
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, changesRpc, events, integerConverter) ->
 	$scope.changes = []
 	$scope.group = 'all'
-	$scope.query = ''
+	$scope.nameQuery = ''
 
 	handleInitialChanges = (error, changes) -> $scope.$apply () -> 
-			if error? then console.error error
-			else
-				$scope.changes = changes
-				$scope.currentChangeId ?= $scope.changes[0].id
+		if error? then console.error error
+		else
+			$scope.changes = $scope.changes.concat changes
+			$scope.currentChangeId ?= $scope.changes[0].id
 
 	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
-			if error? then console.error error
-			else $scope.changes = $scope.changes.concat changes
+		if error? then console.error error
+		else $scope.changes = $scope.changes.concat changes
+
+	doesChangeMatchQuery = (change) ->
+		return ($scope.nameQuery.indexOf(data.submitter.firstName) isnt -1) or ($scope.nameQuery.indexOf(data.submitter.lastName) isnt -1)
 
 	handeChangeAdded = (data) -> $scope.$apply () ->
-		$scope.changes.unshift data
+		if doesChangeMatchQuery data
+			$scope.changes.unshift data
 
 	handleChangeStarted = (data) -> $scope.$apply () ->
 		change = (change for change in $scope.changes when change.id is data.id)[0]
@@ -47,13 +51,14 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'chang
 		$scope.currentChangeId = change.id
 
 	$scope.scrolledToBottom = () ->
-		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, $scope.query, $scope.changes.length, handleMoreChanges
+		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, $scope.nameQuery, $scope.changes.length, handleMoreChanges
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'change', newValue
 
-	$scope.$watch 'query', (newValue, oldValue) ->
-		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, $scope.query, 0, handleInitialChanges
+	$scope.$watch 'nameQuery', (newValue, oldValue) ->
+		$scope.changes = []
+		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, $scope.nameQuery, 0, handleInitialChanges
 ]
 
 

@@ -67,9 +67,9 @@ angular.module('koality.service', []).
 		NUM_CHANGES_TO_REQUEST = 100
 		noMoreChangesToRequest = false
 		
-		currentQuery = null
+		currentNameQuery = null
 		currentCallback = null
-		nextQuery = null
+		nextNameQuery = null
 		nextCallback = null
 
 		createChangesQuery = (repositoryId, group, query, startIndex) ->
@@ -80,37 +80,37 @@ angular.module('koality.service', []).
 			numToRetrieve: NUM_CHANGES_TO_REQUEST
 
 		shiftChangesRequest = () ->
-			if not nextQuery?
-				currentQuery = null
+			if not nextNameQuery?
+				currentNameQuery = null
 				currentCallback = null
 			else
-				currentQuery = nextQuery
+				currentNameQuery = nextNameQuery
 				currentCallback = nextCallback
-				nextQuery = null
+				nextNameQuery = null
 				nextCallback = null
 
 				retrieveMoreChanges()
 
 		retrieveMoreChanges = () ->
-			assert.ok currentQuery?
+			assert.ok currentNameQuery?
 			assert.ok currentCallback?
 
-			noMoreChangesToRequest = false if currentQuery.startIndex is 0
+			noMoreChangesToRequest = false if currentNameQuery.startIndex is 0
 
 			if noMoreChangesToRequest
 				shiftChangesRequest()
 			else
-				rpc.makeRequest 'changes', 'read', 'getChanges', currentQuery, (error, changes) ->
+				rpc.makeRequest 'changes', 'read', 'getChanges', currentNameQuery, (error, changes) ->
 					noMoreChangesToRequest = changes.length < NUM_CHANGES_TO_REQUEST
 					currentCallback error, changes
 					shiftChangesRequest()
 
 		return queueRequest: (repositoryId, group, query, startIndex, callback) ->
-			if currentQuery?
-				nextQuery = createChangesQuery repositoryId, group, query, startIndex
+			if currentNameQuery?
+				nextNameQuery = createChangesQuery repositoryId, group, query, startIndex
 				nextCallback = callback
 			else
-				currentQuery = createChangesQuery repositoryId, group, query, startIndex
+				currentNameQuery = createChangesQuery repositoryId, group, query, startIndex
 				currentCallback = callback
 				retrieveMoreChanges()
 	]).

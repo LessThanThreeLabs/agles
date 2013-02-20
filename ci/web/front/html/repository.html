@@ -10,10 +10,10 @@
 	<div id="repositoryChangesPanel" unselectable ng-controller="RepositoryChanges">
 		<div id="repositoryChangesSearch">
 			<img ng-src="{{'/img/icons/search.png' | fileSuffix}}">
-			<input ng-model="query">
+			<input ng-model="nameQuery">
 		</div>
 		<div id="repositoryChanges" notify-on-bottom-scroll="scrolledToBottom()">
-			<div class="repositoryChange" ng-repeat="change in changes" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}">{{change.number}}</div>
+			<div class="repositoryChange" ng-repeat="change in changes | orderBy:'number':true" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}">{{change.number}}</div>
 		</div>
 	</div>
 

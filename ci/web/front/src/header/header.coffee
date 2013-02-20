@@ -55,7 +55,8 @@ window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($sco
 	getRepositories() if $scope.loggedIn
 
 	$scope.repositoryDropdownOptionClick = (repositoryId) ->
-		$location.path('/repository/' + repositoryId).search({})
+		# if $location.path() isnt '/repository/' + repositoryId
+			$location.path('/repository/' + repositoryId).search({})
 ]
 
 window.HeaderAdmin = ['$scope', '$location', ($scope, $location) ->
