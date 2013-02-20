@@ -16,27 +16,28 @@ class LanguageParser(object):
 			'jvm': self.validate_java
 		}
 
-	def parse_languages(self, language_config):
+	def parse_languages(self, language_config, global_install):
 		language_steps = []
 		setup_steps = []
 		for language, version in language_config.items():
 			try:
-				new_language_steps, new_setup_steps = self.language_dispatcher[language](version)
+				new_language_steps, new_setup_steps = self.language_dispatcher[language](version, global_install)
 			except KeyError:
 				raise InvalidConfigurationException("Unsupported language: %s" % language)
 			language_steps = language_steps + new_language_steps
 			setup_steps = setup_steps + new_setup_steps
 		return language_steps, setup_steps
 
-	def validate_python(self, version):
+	def validate_python(self, version, global_install):
 		if not os.access(os.path.join(self._virtualenv_path(), str(version)), os.F_OK):
 			raise InvalidConfigurationException("Python version %s not supported" % version)
-		return [SetupCommand("echo \"source ~/virtualenvs/%s/bin/activate\" >> ~/.bash_profile" % version)], [SetupCommand("python --version")]
+		language_commands = [] if global_install else [SetupCommand("echo \"source ~/virtualenvs/%s/bin/activate\" >> ~/.bash_profile" % version)]
+		return language_commands, [SetupCommand("python --version")]
 
 	def _virtualenv_path(self):
 		return os.path.join(os.environ['HOME'], 'virtualenvs')
 
-	def validate_ruby(self, version):
+	def validate_ruby(self, version, global_install):
 		installed_versions = subprocess.check_output(shlex.split(self._rvm_command("rvm list strings"))).split()
 		version_found = any(map(lambda version_string: version_string.find(version) != -1, installed_versions))
 		if version_found:
@@ -52,7 +53,7 @@ class LanguageParser(object):
 	def _rvm_command(self, shell_command):
 		return "bash --login -c %s" % pipes.quote(shell_command)
 
-	def validate_nodejs(self, version):
+	def validate_nodejs(self, version, global_install):
 		setup_steps = [SetupCommand("source ~/nvm/nvm.sh", "nvm install %s" % version, "npm install -g npm")]
 		setup_steps.append(SetupCommand("echo \"source ~/nvm/nvm.sh > /dev/null\" >> ~/.bash_profile"))
 		setup_steps.append(SetupCommand("echo \"nvm use %s > /dev/null\" >> ~/.bash_profile" % version))
@@ -61,7 +62,7 @@ class LanguageParser(object):
 	def _nvm_command(self, shell_command):
 		return "bash -c %s" % pipes.quote(shell_command)
 
-	def validate_java(self, version):
+	def validate_java(self, version, global_install):
 		version = str(version).lower()
 		version_aliases = {
 			'5': ['1.5', '1.5.0', '1.5.0.22', '1.5.0_22'],

@@ -40,7 +40,7 @@ def main():
 		"git clone https://%s:%s@github.com/Randominator/agles.git" % (username, password),
 		"cd agles/ci/platform",
 		"git checkout %s" % branch,
-		"~/virtualenvs/2.7/bin/python setup.py install",
+		"python setup.py install",
 		"cd",
 		"rm -rf agles",
 		"([ ! -f .bash_history ] || rm .bash_history)")  # delete .bash_history if it exists
@@ -57,7 +57,7 @@ def main():
 		_ssh(remote_host, _and(
 			"cp .bash_profile .bash_profile.bak",
 			"echo %s > /tmp/koality.yml" % pipes.quote(config),
-			"virtualenvs/2.7/bin/python -u -c " +
+			"python -u -c " +
 				"\"from provisioner.provisioner import Provisioner; Provisioner().provision('', config_path='/tmp/koality.yml')\"",
 			"([ ! -f /tmp/koality.yml ] || rm /tmp/koality.yml)",
 			"mv .bash_profile.bak .bash_profile"))

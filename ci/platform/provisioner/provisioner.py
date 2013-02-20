@@ -25,7 +25,7 @@ class Provisioner(object):
 		self.public_keyfile_backup = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.pub.bak'))
 		self.git_ssh = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.koality'))
 
-	def provision(self, private_key=None, config_path=None, source_path=None):
+	def provision(self, private_key=None, config_path=None, source_path=None, global_install=False):
 		try:
 			if not config_path:
 				if not source_path:
@@ -42,7 +42,7 @@ class Provisioner(object):
 				raise InvalidConfigurationException("Unable to parse configuration file: %s\nPlease verify that this is a valid YAML file using a tool such as http://yamllint.com/." % os.path.basename(config_path))
 			if private_key:
 				self.set_private_key(private_key)
-			self.handle_config(config, source_path)
+			self.handle_config(config, source_path, global_install)
 			self.reset_private_key()
 		except Exception as e:
 			print "%s: %s" % (type(e).__name__, e)
@@ -81,8 +81,8 @@ class Provisioner(object):
 		if os.access(self.git_ssh, os.F_OK):
 			os.remove(self.git_ssh)
 
-	def handle_config(self, config, source_path):
-		language_steps, setup_steps = self.parse_languages(config)
+	def handle_config(self, config, source_path, global_install):
+		language_steps, setup_steps = self.parse_languages(config, global_install)
 		setup_steps = [SetupCommand("pkill -9 -u rabbitmq beam; service rabbitmq-server start", silent=True, ignore_failure=True)] + setup_steps
 		setup_steps += self.parse_setup(config, source_path)
 		self.parse_compile(config, source_path)
@@ -102,10 +102,10 @@ class Provisioner(object):
 		if results.returncode != 0:
 			raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))
 
-	def parse_languages(self, config):
+	def parse_languages(self, config, global_install):
 		if not 'languages' in config or len(config['languages']) == 0:
 			raise InvalidConfigurationException("No languages specified")
-		return LanguageParser().parse_languages(config['languages'])
+		return LanguageParser().parse_languages(config['languages'], global_install)
 
 	def parse_setup(self, config, source_path):
 		setup_steps = []
