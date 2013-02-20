@@ -23,8 +23,11 @@ window.HeaderProfile = ['$scope', '$location', 'initialState', 'rpc', 'events', 
 
 	$scope.profileDropdownOptions = [{title: 'Account', name: 'account'}, {title: 'Logout', name: 'logout'}]
 	$scope.profileDropdownOptionClick = (profileOption) ->
-		if profileOption is 'account' then $location.path('/account').search({})
-		if profileOption is 'logout' then performLogout()
+		if profileOption is 'account' and $location.path() isnt '/account'
+			$location.path('/account').search({})
+
+		if profileOption is 'logout'
+			performLogout()
 
 	performLogout = () ->
 		rpc.makeRequest 'users', 'update', 'logout', null, (error) ->
@@ -55,7 +58,7 @@ window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($sco
 	getRepositories() if $scope.loggedIn
 
 	$scope.repositoryDropdownOptionClick = (repositoryId) ->
-		# if $location.path() isnt '/repository/' + repositoryId
+		if $location.path() isnt '/repository/' + repositoryId
 			$location.path('/repository/' + repositoryId).search({})
 ]
 
