@@ -15,10 +15,10 @@ ADMIN_PASSWORD = 'admin123'
 USER_EMAIL = 'user@user.com'
 USER_PASSWORD = 'user123'
 
-
-NUM_REPOS = 3
+NUM_REPOS = 2
 REPOSITORIES_PATH = 'repos'
 VALID_STATUSES = ['queued', 'running', 'passed', 'failed', 'failed to merge']
+
 
 class SchemaDataGenerator(object):
 	def __init__(self, seed=None):
@@ -63,19 +63,19 @@ class SchemaDataGenerator(object):
 					repos[repo_id] = 0
 					repo_ids.append(repo_id)
 
-			for user in range(random.randint(1, 10)):
+			for user in range(random.randint(1, 3)):
 				ins_user = schema.user.insert().values(first_name="firstname_%d" % user, last_name="lastname_%d" % user, email="%d@b.com" % user,
-					password_hash=hashlib.sha512(str(user)).hexdigest(), salt='a'*16)
+					password_hash=hashlib.sha512(str(user)).hexdigest(), salt=SALT)
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
-				repo_id= random.choice(repo_ids)
+				repo_id = random.choice(repo_ids)
 				permissions = random.choice(RepositoryPermissions.valid_permissions())
 				ins_permission = schema.permission.insert().values(user_id=user_id, repo_id=repo_id, permissions=permissions)
 				conn.execute(ins_permission)
 
-				for commit in range(random.randint(1, 20)):
+				for commit in range(random.randint(1, 8)):
 					repo_id = random.choice(repos.keys())
-					repo_id_query = schema.repo.select().where(schema.repo.c.id==repo_id)
+					repo_id_query = schema.repo.select().where(schema.repo.c.id == repo_id)
 					repo_id = conn.execute(repo_id_query).first()[schema.repo.c.id]
 					repos[repo_id] += 1
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
@@ -104,7 +104,6 @@ class SchemaDataGenerator(object):
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)
 
-
 		self._grantall(self.admin_id, repo_ids, RepositoryPermissions.RWA)
 		self._grantall(self.user_id, repo_ids[:1], RepositoryPermissions.R)
 
@@ -123,8 +122,8 @@ class SchemaDataGenerator(object):
 	def generate_console_output(self, sqlconn, console_id):
 		console_output = schema.console_output
 
-		for line_num in range(1, random.randint(20, 500)):
-			output = ''.join(random.choice(string.ascii_letters + string.digits + ' ') for x in range(random.randint(1, 100)))
+		for line_num in range(1, random.randint(4, 160)):
+			output = ''.join(random.choice(string.ascii_letters + string.digits + ' ') for x in range(random.randint(1, 80)))
 			ins = console_output.insert().values(
 				build_console_id=console_id,
 				line_number=line_num,
