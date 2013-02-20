@@ -48,6 +48,16 @@ function setup_rabbitmq () {
 	sudo mv rabbitmqadmin /usr/local/bin/rabbitmqadmin
 }
 
+function setup_redis () {
+	wget http://redis.googlecode.com/files/redis-2.6.10.tar.gz
+	tar xzf redis-2.6.10.tar.gz
+	pushd redis-2.6.10
+	make
+	sudo make install
+	popd
+	rm -rf redis-2.6.10.tar.gz redis-2.6.10
+}
+
 function setup_python () {
 	makedir ~/virtualenvs
 	sudo add-apt-repository http://ppa.launchpad.net/fkrull/deadsnakes/ubuntu
@@ -91,6 +101,7 @@ function main_setup () {
 	# Install dependencies
 	sudo apt-get install -y python-pip make postgresql mysql-server python-software-properties git
 	setup_rabbitmq
+	setup_redis
 
 	setup_python
 	setup_ruby
