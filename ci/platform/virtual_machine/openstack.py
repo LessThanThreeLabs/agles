@@ -82,7 +82,7 @@ class OpenstackVm(VirtualMachine):
 			vm_info_file.write(config)
 
 	def wait_until_ready(self):
-		while not (self.server.addresses['private'] and self.server.status == 'ACTIVE'):
+		while not ('private' in self.server.addresses and self.server.status == 'ACTIVE'):
 			eventlet.sleep(1)
 			self.server = self.nova_client.servers.get(self.server.id)
 			if self.server.status == 'ERROR':
