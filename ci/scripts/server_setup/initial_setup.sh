@@ -47,7 +47,7 @@ function setup_python () {
 		virtualenv "$HOME/virtualenvs/$p" -p "python$p"
 	done
 
-	pip install pip pyyaml eventlet
+	sudo pip install pyyaml eventlet
 }
 
 function setup_ruby () {
@@ -67,7 +67,7 @@ function provision () {
 	read -s -p "Github password: " password
 	git clone https://"$username":"$password"@github.com/Randominator/agles.git ~/source
 	pushd ~/source/ci/platform
-	python setup.py install
+	sudo python setup.py install
 	popd
 	python -u -c "from provisioner.provisioner import Provisioner; Provisioner().provision(global_install=True)"
 }

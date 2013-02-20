@@ -35,6 +35,7 @@ setup:
       - nose-testconfig
       - boto
       - rackspace-novaclient
+      - python-novaclient
       - requests
     - npm:
       - iced-coffee-script
