@@ -37,6 +37,17 @@ function keygen () {
 	fi
 }
 
+function setup_rabbitmq () {
+	wget http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.7/rabbitmq-server_2.8.7-1_all.deb
+	sudo dpkg -i rabbitmq-server_2.8.7-1_all.deb
+	rm rabbitmq-server_2.8.7-1_all.deb
+	sudo rabbitmq-plugins enable rabbitmq_management
+	sudo service rabbitmq-server restart
+	wget --http-user=guest --http-password=guest localhost:55672/cli/rabbitmqadmin
+	chmod +x rabbitmqadmin
+	sudo mv rabbitmqadmin /usr/local/bin/rabbitmqadmin
+}
+
 function setup_python () {
 	makedir ~/virtualenvs
 	sudo add-apt-repository http://ppa.launchpad.net/fkrull/deadsnakes/ubuntu
@@ -78,7 +89,8 @@ function main_setup () {
 	keygen
 
 	# Install dependencies
-	sudo apt-get install -y python-pip make postgresql mysql-server rabbitmq-server python-software-properties git
+	sudo apt-get install -y python-pip make postgresql mysql-server python-software-properties git
+	setup_rabbitmq
 
 	setup_python
 	setup_ruby
