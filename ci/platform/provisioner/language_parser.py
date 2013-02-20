@@ -47,7 +47,6 @@ class LanguageParser(object):
 			setup_steps = [SetupCommand("rvm install %s" % version)]
 		setup_steps.append(SetupCommand("echo \"rvm use %s > /dev/null\" >> ~/.bash_profile" % version))
 		setup_steps.append(SetupCommand("echo \"alias sudo=rvmsudo\" >> ~/.bash_profile"))
-		setup_steps.append(SetupCommand("echo \"export rvmsudo_secure_path=1\" >> ~/.bash_profile"))
 		return setup_steps, [SetupCommand("ruby --version")]
 
 	def _rvm_command(self, shell_command):
