@@ -70,9 +70,6 @@ window.AccountAddSshKeys = ['$scope', 'rpc', ($scope, rpc) ->
 	$scope.addKey = {}
 	$scope.modalVisible = false
 
-	$scope.$watch 'addKey.key', (newValue, oldValue) ->
-		console.log newValue
-
 	$scope.submit = () ->
 		$scope.modalVisible = false
 		addKey()
