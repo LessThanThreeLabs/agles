@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Boolean, Integer, String, Sequence, MetaData, ForeignKey, UniqueConstraint
+from sqlalchemy import Table, Column, Boolean, Integer, String, Sequence, MetaData, ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy import event, text, DDL
 from sqlalchemy.exc import SQLAlchemyError
 from database.engine import ConnectionFactory
@@ -9,12 +9,16 @@ metadata = MetaData()
 # We reserve the first 999 users as special users
 user = Table('user', metadata,
 	Column('id', Integer, Sequence('user_id_seq', start=1000), primary_key=True),
-	Column('email', String, nullable=False, unique=True),
+	Column('email', String, nullable=False),
 	Column('first_name', String, nullable=False),
 	Column('last_name', String, nullable=False),
 	Column('password_hash', String(88), nullable=False),
 	Column('salt', String(24), nullable=False),
-	Column('admin', Boolean, nullable=False, default=False)
+	Column('admin', Boolean, nullable=False, default=False),
+	Column('deleted', Integer, nullable=False, default=0),  # when deleted, set this column to the id
+
+	UniqueConstraint('email', 'deleted'),
+	CheckConstraint('deleted = 0 OR id = deleted')
 )
 
 event.listen(
