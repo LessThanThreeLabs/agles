@@ -15,17 +15,20 @@ class RepositoriesCreateHandler extends Handler
 		assert.ok @sshKeyPairGenerator?
 
 
-	create: (socket, data, callback) =>
+	createRepository: (socket, data, callback) =>
 		userId = socket.session.userId
 		if not userId? or not socket.session?.isAdmin
 			callback 403
 		else if not data?.name? or not data?.forwardUrl?
 			callback 400
 		else
-			@modelRpcConnection.repos.create.create_repo userId, data.name, data.forwardUrl, (error, repositoryId) =>
-				if error?.type is 'InvalidPermissionsError' then callback 403
-				else if error? then callback 500
-				else callback null, repositoryId
+			@stores.createRepositoryStore.getRepository data.name, (error, repository) =>
+				if error? then callback 500
+				else
+					@modelRpcConnection.repos.create.create_repo userId, data.name, data.forwardUrl, repository.keyPair, (error, repositoryId) =>
+						if error?.type is 'InvalidPermissionsError' then callback 403
+						else if error? then callback 500
+						else callback null, repositoryId
 
 
 	getSshPublicKey: (socket, data, callback) =>
