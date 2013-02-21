@@ -49,7 +49,7 @@ class VerificationRequestHandler(InfiniteWorker):
 		status = BuildStatus.FAILED
 		with ModelServer.rpc_connect("builds", "update") as builds_update_rpc:
 			builds_update_rpc.mark_build_finished(build_id, status)
-		with Connection(VerificationServerSettings.kombu_connection_info).Producer(serializer='msgpack') as producer:
+		with Connection(RabbitSettings.kombu_connection_info).Producer(serializer='msgpack') as producer:
 			producer.publish({'build_id': build_id, 'status': status},
 				exchange=VerificationServerSettings.verification_results_queue.exchange,
 				routing_key=VerificationServerSettings.verification_results_queue.routing_key,

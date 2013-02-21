@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import subprocess
@@ -14,6 +15,7 @@ from verification_config import VerificationConfig
 
 class BuildCore(object):
 	def __init__(self, uri_translator=None):
+		self.logger = logging.getLogger("BuildCore")
 		self.uri_translator = uri_translator
 		self.source_dir = os.path.join("/tmp", "source")
 
@@ -171,13 +173,25 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 		super(OpenstackBuildCore, self).__init__(openstack_vm, uri_translator)
 
 	def setup(self):
-		self.virtual_machine.wait_until_ready()
+		while True:
+			try:
+				self.virtual_machine.wait_until_ready()
+			except:
+				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id))
+			else:
+				break
 
 	def teardown(self):
 		self.virtual_machine.delete()
 
 	def rollback_virtual_machine(self):
-		self.virtual_machine.rebuild()
+		while True:
+			try:
+				self.virtual_machine.rebuild()
+			except:
+				self.logger.warn("Failed to roll back virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id))
+			else:
+				break
 
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
 		self.setup_virtual_machine(repo_uri, refs, private_key, console_appender)
