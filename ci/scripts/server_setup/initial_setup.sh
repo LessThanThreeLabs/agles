@@ -58,6 +58,14 @@ function setup_redis () {
 	rm -rf redis-2.6.10.tar.gz redis-2.6.10
 }
 
+function setup_postgres () {
+	# Trust postgresql logins
+	sudo sed -i.bak -r 's/^(\w+(\s+\S+){2,3}\s+)\w+$/\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf
+	# Turn off fsync on postgresql
+	sudo sed -i.bak -r 's/^.*fsync .*$/fsync off/g' /etc/postgresql/9.1/main/postgresql.conf
+	sudo service postgresql restart
+}
+
 function setup_python () {
 	makedir ~/virtualenvs
 	sudo add-apt-repository http://ppa.launchpad.net/fkrull/deadsnakes/ubuntu
@@ -102,14 +110,11 @@ function main_setup () {
 	sudo apt-get install -y python-pip make postgresql mysql-server python-software-properties git
 	setup_rabbitmq
 	setup_redis
+	setup_postgres
 
 	setup_python
 	setup_ruby
 	setup_nodejs
-
-	# Trust postgresql logins
-	sudo sed -i.bak -r 's/^(\w+(\s+\S+){2,3}\s+)\w+$/\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf
-	sudo service postgresql reload
 
 	provision
 }
