@@ -1,4 +1,5 @@
 assert = require 'assert'
+crypto = require 'crypto'
 
 Handler = require '../../handler'
 
@@ -74,10 +75,6 @@ class UsersUpdateHandler extends Handler
 						else callback()
 
 
-	_createRandomPassword: () ->
-		return Number(Math.random().toString().substr(2)).toString(36) + Number(Math.random().toString().substr(2)).toString(36)
-
-
 	resetPassword: (socket, data, callback) =>
 		if not data?.email?
 			callback 400
@@ -85,14 +82,17 @@ class UsersUpdateHandler extends Handler
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
 				if error? then callback 500
 				else
-					newPassword = @_createRandomPassword()
-					newPasswordHash = @passwordHasher.hashPasswordWithSalt newPassword, user.salt
-					@modelRpcConnection.users.update.change_password userId, newPasswordHash, (error, result) =>
+					crypto.randomBytes 8, (error, randomBuffer) =>
 						if error? then callback 500
 						else
-							@resetPasswordEmailer.sendEmailToUser data.email, newPassword, (error) =>
+							newPassword = randomBuffer.toString 'base64'
+							newPasswordHash = @passwordHasher.hashPasswordWithSalt newPassword, user.salt
+							@modelRpcConnection.users.update.change_password userId, newPasswordHash, (error, result) =>
 								if error? then callback 500
-								else callback()
+								else
+									@resetPasswordEmailer.sendEmailToUser data.email, newPassword, (error) =>
+										if error? then callback 500
+										else callback()
 
 
 	login: (socket, data, callback) =>
