@@ -1,3 +1,4 @@
+import logging
 import os
 import socket
 
@@ -19,6 +20,7 @@ class OpenstackClient(object):
 class OpenstackVm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
+	logger = logging.getLogger("OpenstackVm")
 
 	def __init__(self, vm_directory, server, vm_username=VM_USERNAME):
 		super(OpenstackVm, self).__init__(vm_directory)
@@ -63,6 +65,7 @@ class OpenstackVm(VirtualMachine):
 		try:
 			vm = OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
 			if vm.server.status == 'ERROR':
+				logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, vm_id))
 				vm.delete()
 				return None
 			elif vm.server.status == 'DELETED':
@@ -86,12 +89,16 @@ class OpenstackVm(VirtualMachine):
 			eventlet.sleep(3)
 			self.server = self.nova_client.servers.get(self.server.id)
 			if self.server.status == 'ERROR':
+				logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.server.id))
 				self.rebuild()
-		for attempts in range(10):
+		for remaining_attempts in range(24, 0, -1):
+			if remaining_attempts <= 3:
+				logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.server.id, remaining_attempts))
 			if self.ssh_call("true").returncode == 0:
 				return
-			eventlet.sleep(2)
+			eventlet.sleep(5)
 		# Failed to ssh into machine, try again
+		logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.server.id))
 		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
