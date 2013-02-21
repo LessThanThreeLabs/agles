@@ -53,10 +53,6 @@ class UsersCreateHandler extends Handler
 						else if error? then callback 500
 						else
 							session.userId = userId
-							session.email = account.email
-							session.firstName = account.firstName
-							session.lastName = account.lastName
-							session.isAdmin = false
 							session.save()
 
 							callback()
@@ -77,7 +73,7 @@ class UsersCreateHandler extends Handler
 		console.log data
 
 		userId = socket.session.userId
-		if not userId? or not socket.session.isAdmin
+		if not userId?
 			callback 403
 		else if not data?.users?.emails?
 			callback 400

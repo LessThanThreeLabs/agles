@@ -31,7 +31,7 @@ exports.create = (configurationParams, modelConnection) ->
 
 	filesSuffix = '_' + (new Date()).getTime().toString 36
 	handlers =
-		indexHandler: IndexHandler.create configurationParams, stores, modelConnection, filesSuffix
+		indexHandler: IndexHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
 
 	return new Server configurationParams, httpsOptions, modelConnection, resourceSocket, stores, handlers, staticServer
 

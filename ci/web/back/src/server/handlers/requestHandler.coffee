@@ -2,8 +2,12 @@ assert = require 'assert'
 
 
 module.exports = class Resource
-	constructor: (@configurationParams, @stores, @modelConnection, @filesCacher, @fileSuffix) ->
-		assert.ok @configurationParams? and @stores? and @modelConnection? and @filesCacher?
+	constructor: (@configurationParams, @stores, @modelRpcConnection, @filesCacher, @fileSuffix) ->
+		assert.ok @configurationParams? 
+		assert.ok @stores?
+		assert.ok @modelRpcConnection?
+		assert.ok @filesCacher?
+		assert.ok @fileSuffix?
 
 
 	initialize: (callback) =>
@@ -43,19 +47,25 @@ module.exports = class Resource
 		@jsFilesString = formattedJsFiles.join '\n'
 
 
-	getTemplateValues: (request) =>
-		templateValues =
-			fileSuffix: @fileSuffix
-			csrfToken: request.session.csrfToken
-			cssFiles: @cssFilesString
-			jsFiles: @jsFilesString
-			userId: request.session.userId
-			email: request.session.email
-			firstName: request.session.firstName
-			lastName: request.session.lastName
-			isAdmin: request.session.isAdmin ? false
+	getTemplateValues: (session, callback) =>
+		if session.userId?
+			@modelRpcConnection.users.read.get_user_from_id session.userId, (error, user) =>
+				if error? then callback error
+				else callback null, @_generateTemplateValues session, user
+		else
+			callback null, @_generateTemplateValues session, null
 
-		return templateValues
+
+	_generateTemplateValues: (session, user={}) =>
+		fileSuffix: @fileSuffix
+		csrfToken: session.csrfToken
+		cssFiles: @cssFilesString
+		jsFiles: @jsFilesString
+		userId: session.userId
+		email: user.email
+		firstName: user.first_name
+		lastName: user.last_name
+		isAdmin: user.admin		
 
 
 	pushFiles: (request, response) =>

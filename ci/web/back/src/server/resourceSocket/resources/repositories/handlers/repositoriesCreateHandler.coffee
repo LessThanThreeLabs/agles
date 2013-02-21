@@ -17,7 +17,7 @@ class RepositoriesCreateHandler extends Handler
 
 	createRepository: (socket, data, callback) =>
 		userId = socket.session.userId
-		if not userId? or not socket.session?.isAdmin
+		if not userId?
 			callback 403
 		else if not data?.name? or not data?.forwardUrl?
 			callback 400
@@ -33,7 +33,7 @@ class RepositoriesCreateHandler extends Handler
 
 	getSshPublicKey: (socket, data, callback) =>
 		userId = socket.session.userId
-		if not userId? or not socket.session?.isAdmin
+		if not userId?
 			callback 403
 		else if not data?.name?
 			callback 400

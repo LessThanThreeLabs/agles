@@ -22,7 +22,7 @@ class UsersReadHandler extends Handler
 			timestamp: Math.floor(Math.random() * 1000000000000)
 
 		userId = socket.session.userId
-		if not userId? or not socket.session?.isAdmin
+		if not userId?
 			callback 403
 		else
 			callback null, (createFakeUser number for number in [0..100])
