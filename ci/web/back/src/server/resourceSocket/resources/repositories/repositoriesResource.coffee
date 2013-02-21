@@ -1,7 +1,5 @@
 assert = require 'assert'
 
-SshKeyGenerator = require './sshKeyGenerator'
-
 Resource = require '../resource'
 RepositoriesCreateHandler = require './handlers/repositoriesCreateHandler'
 RepositoriesReadHandler = require './handlers/repositoriesReadHandler'
@@ -9,9 +7,7 @@ RepositoriesUpdateHandler = require './handlers/repositoriesUpdateHandler'
 
 
 exports.create = (configurationParams, stores, modelConnection) ->
-	sshKeyGenerator = SshKeyGenerator.create()
-
-	createHandler = RepositoriesCreateHandler.create modelConnection.rpcConnection, sshKeyGenerator
+	createHandler = RepositoriesCreateHandler.create modelConnection.rpcConnection
 	readHandler = RepositoriesReadHandler.create configurationParams, modelConnection.rpcConnection
 	updateHandler = RepositoriesUpdateHandler.create modelConnection.rpcConnection
 	return new RepositoriesResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler

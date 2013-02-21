@@ -1,18 +1,14 @@
 assert = require 'assert'
+createKeys = require 'rsa-json'
 
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection, sshKeyGenerator) ->
-	return new RepositoriesCreateHandler modelRpcConnection, sshKeyGenerator
+exports.create = (modelRpcConnection) ->
+	return new RepositoriesCreateHandler modelRpcConnection
 
 
 class RepositoriesCreateHandler extends Handler
-	constructor: (modelRpcConnection, @sshKeyGenerator) ->
-		super modelRpcConnection
-		assert.ok @sshKeyGenerator?
-
-
 	create: (socket, data, callback) =>
 		userId = socket.session.userId
 		if not userId?
@@ -27,6 +23,6 @@ class RepositoriesCreateHandler extends Handler
 
 
 	getSshPublicKey: (socket, data, callback) =>
-		@sshKeyGenerator.generateKey (error, keyPair) =>
+		createKeys (error, keyPair) =>
 			console.error error
 			console.log keyPair
