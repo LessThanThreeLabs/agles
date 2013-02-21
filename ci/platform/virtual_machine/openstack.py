@@ -65,7 +65,7 @@ class OpenstackVm(VirtualMachine):
 		try:
 			vm = OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
 			if vm.server.status == 'ERROR':
-				logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, vm_id))
+				OpenstackVm.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, vm_id))
 				vm.delete()
 				return None
 			elif vm.server.status == 'DELETED':
@@ -118,7 +118,10 @@ class OpenstackVm(VirtualMachine):
 				server.delete()
 			except:
 				pass
-		os.remove(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE))
+		try:
+			os.remove(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE))
+		except:
+			pass
 
 	def save_snapshot(self, image_name):
 		image_id = self.server.create_image(image_name)

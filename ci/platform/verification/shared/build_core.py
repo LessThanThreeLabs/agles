@@ -177,7 +177,7 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 			try:
 				self.virtual_machine.wait_until_ready()
 			except:
-				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id))
+				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id), exc_info=True)
 			else:
 				break
 
@@ -189,7 +189,7 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 			try:
 				self.virtual_machine.rebuild()
 			except:
-				self.logger.warn("Failed to roll back virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id))
+				self.logger.warn("Failed to roll back virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id), exc_info=True)
 			else:
 				break
 
