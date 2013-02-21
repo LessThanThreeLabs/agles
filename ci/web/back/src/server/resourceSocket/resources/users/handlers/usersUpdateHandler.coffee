@@ -100,9 +100,6 @@ class UsersUpdateHandler extends Handler
 			callback 400
 		else
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
-				console.log 'usersUpdateHandler: hack for now!!'
-				user.is_admin = true
-
 				if error? then callback 401
 				else
 					passwordHash = @passwordHasher.hashPasswordWithSalt data.password, user.salt
@@ -113,7 +110,7 @@ class UsersUpdateHandler extends Handler
 						socket.session.email = user.email
 						socket.session.firstName = user.first_name
 						socket.session.lastName = user.last_name
-						socket.session.isAdmin = user.is_admin
+						socket.session.isAdmin = user.admin
 						socket.session.save()
 
 						callback()

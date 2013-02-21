@@ -18,8 +18,6 @@ class UsersCreateHandler extends Handler
 
 
 	createUser: (socket, data, callback) =>
-		console.log data
-
 		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName? or not data?.token?
 			callback 400
 		else
