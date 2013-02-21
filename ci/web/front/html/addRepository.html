@@ -29,8 +29,8 @@
 
 			<textarea id="sshKey" ng-model="repository.sshKey" highlight-on-first-click readonly></textarea>
 
-			<div id="verifySshKeyButtonContainer">
-				<button ng-click="verifyConnection()">Verify Connection</button>
+			<div id="createRepositoryButtonContainer">
+				<button ng-click="createRepository()">Complete Creation</button>
 			</div>
 		</div>
 
@@ -42,10 +42,15 @@
 		</div>
 	</centered-panel>
 
-	<modal modal-visible="verifyConnectionErrorModalVisible">
-		<div id="verifyConnectionErrorText">
-			Unable to verify the connection.<br>
-			Be sure to add the ssh-key to repository {{repository.name}}.
+	<modal modal-visible="stageOneErrorModalVisible">
+		<div id="stageOneErrorText">
+			Unexepected error
+		</div>
+	</modal>
+
+	<modal modal-visible="createRepositoryErrorModalVisible">
+		<div id="createRepositoryErrorText">
+			Unexpected error
 		</div>
 	</modal>
 </div>

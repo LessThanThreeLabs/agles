@@ -2,23 +2,26 @@
 
 window.AddRepository = ['$scope', 'rpc', ($scope, rpc) ->
 	$scope.stage = 'first'
-	$scope.verifyConnectionErrorModalVisible = false
+	$scope.stageOneErrorModalVisible = false
+	$scope.createRepositoryErrorModalVisible = false
 
 	$scope.repository = {}
 
 	$scope.moveToStageTwo = () ->
 		rpc.makeRequest 'repositories', 'create', 'getSshPublicKey', $scope.repository, (error, publicKey) ->
 			$scope.$apply () ->
-				if error? then console.error error
+				if error?
+					console.error error
+					$scope.stageOneErrorModalVisible = true
 				else 
 					$scope.repository.sshKey = publicKey
 					$scope.stage = 'second'
 
-	$scope.verifyConnection = () ->
+	$scope.createRepository = () ->
 		rpc.makeRequest 'repositories', 'create', 'createRepository', $scope.repository, (error) ->
 			if error?
 				console.error error
-				$scope.verifyConnectionErrorModalVisible = true
+				$scope.createRepositoryErrorModalVisible = true
 			else
 				$scope.stage = 'third'
 ]
