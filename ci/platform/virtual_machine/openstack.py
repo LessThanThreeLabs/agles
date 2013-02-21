@@ -89,16 +89,16 @@ class OpenstackVm(VirtualMachine):
 			eventlet.sleep(3)
 			self.server = self.nova_client.servers.get(self.server.id)
 			if self.server.status == 'ERROR':
-				logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.server.id))
+				OpenstackVm.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.server.id))
 				self.rebuild()
 		for remaining_attempts in range(24, 0, -1):
 			if remaining_attempts <= 3:
-				logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.server.id, remaining_attempts))
+				OpenstackVm.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.server.id, remaining_attempts))
 			if self.ssh_call("true").returncode == 0:
 				return
 			eventlet.sleep(5)
 		# Failed to ssh into machine, try again
-		logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.server.id))
+		OpenstackVm.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.server.id))
 		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
