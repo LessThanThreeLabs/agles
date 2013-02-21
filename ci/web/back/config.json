@@ -68,6 +68,13 @@
 			"email": {
 				"from": "Reset Password <reset-password@koalitycode.com>"
 			}
+		},
+
+		"createRepository": {
+			"redisStore": {
+				"url": "127.0.0.1",
+				"port": 6392
+			}	
 		}
 	},
 

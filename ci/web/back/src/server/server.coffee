@@ -10,6 +10,7 @@ StaticServer = require './static/staticServer'
 
 SessionStore = require './stores/sessionStore'
 CreateAccountStore = require './stores/createAccountStore'
+CreateRepositoryStore = require './stores/createRepositoryStore'
 
 IndexHandler = require './handlers/indexHandler'
 
@@ -18,6 +19,7 @@ exports.create = (configurationParams, modelConnection, port) ->
 	stores =
 		sessionStore: SessionStore.create configurationParams
 		createAccountStore: CreateAccountStore.create configurationParams
+		createRepositoryStore: CreateRepositoryStore.create configurationParams
 	
 	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection
 	staticServer = StaticServer.create configurationParams
