@@ -4,7 +4,7 @@ import yaml
 
 
 class Settings(object):
-	SETTINGS_DIRECTORIES = [os.path.join(os.environ['HOME'], 'koality')]
+	SETTINGS_DIRECTORIES = [os.path.join(os.environ.get('HOME', '/'), 'koality')]
 	SETTINGS_FILE_EXTENSIONS = ['yml']
 	SETTINGS_EXTENSION_TO_HANDLER = {'yml': yaml.safe_load}
 	_is_initialized = False
