@@ -2,7 +2,7 @@
 
 window.CreateAccount = ['$scope', '$routeParams', 'initialState', 'rpc', ($scope, $routeParams, initialState, rpc) ->
 	getEmailFromToken = () ->
-		rpc.makeRequest 'users', 'read', 'getEmailFromToken', token: $routeParams.token, (error, email) ->
+		rpc.makeRequest 'users', 'create', 'getEmailFromToken', token: $routeParams.token, (error, email) ->
 			$scope.$apply () ->
 				if error?
 					console.error error

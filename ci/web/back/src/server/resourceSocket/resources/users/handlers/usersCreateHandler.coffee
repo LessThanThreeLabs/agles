@@ -64,6 +64,17 @@ class UsersCreateHandler extends Handler
 							callback()
 
 
+	getEmailFromToken: (socket, data, callback) =>
+		if not data?.token?
+			callback 400
+		else
+			@stores.createAccountStore.getAccount data.token, (error, account) =>
+				console.log error
+				if error? then callback 500
+				else callback null, account.email
+
+
+
 	inviteUsers: (socket, data, callback) =>
 		console.log data
 
