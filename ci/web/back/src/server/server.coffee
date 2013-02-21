@@ -89,6 +89,7 @@ class Server
 		expressServer.get '/add/repository', @handlers.indexHandler.handleRequest
 		expressServer.get '/remove/repository', @handlers.indexHandler.handleRequest
 		expressServer.get '/admin', @handlers.indexHandler.handleRequest
+		expressServer.get '/unexpectedError', @handlers.indexHandler.handleRequest
 		expressServer.get '/invalidPermissions', @handlers.indexHandler.handleRequest
 
 		expressServer.get '*', @staticServer.handleRequest		

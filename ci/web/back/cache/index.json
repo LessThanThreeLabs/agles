@@ -22,6 +22,7 @@
 			"/css/src/addRepository/addRepository.css",
 			"/css/src/removeRepository/removeRepository.css",
 			"/css/src/admin/admin.css",
+			"/css/src/unexpectedError/unexpectedError.css",
 			"/css/src/invalidPermissions/invalidPermissions.css"
 		]
 	},
@@ -48,6 +49,7 @@
 			"/js/src/addRepository/addRepository.js",
 			"/js/src/removeRepository/removeRepository.js",
 			"/js/src/admin/admin.js",
+			"/js/src/unexpectedError/unexpectedError.js",
 			"/js/src/invalidPermissions/invalidPermissions.js"
 		]
 	},
@@ -77,6 +79,7 @@
 			"/html/addRepository.html",
 			"/html/removeRepository.html",
 			"/html/admin.html",
+			"/html/unexpectedError.html",
 			"/html/invalidPermissions.html"
 		]
 	}

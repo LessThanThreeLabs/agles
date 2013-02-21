@@ -346,6 +346,10 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 				reloadOnSearch: false
 				redirectTo: if window.accountInformation.isAdmin then null else '/'
 			).
+			when('/unexpectedError',
+				templateUrl: "/html/unexpectedError#{fileSuffix}.html"
+				controller: UnexpectedError
+			).
 			when('/invalidPermissions',
 				templateUrl: "/html/invalidPermissions#{fileSuffix}.html"
 				controller: InvalidPermissions
