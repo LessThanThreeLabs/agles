@@ -10,7 +10,7 @@ elif [ -d 'js' ]; then
 	redis-server conf/redis/sessionStoreRedis.conf &
 	redis-server conf/redis/createAccountRedis.conf &
 	redis-server conf/redis/createRepositoryRedis.conf &
-	node --harmony js/index.js --httpPort 9001 --httpsPort 10443
+	node --harmony js/index.js --httpsPort 10443
 else
 	echo 'You must first compile coffeescript into javascript by running compile.sh'
 fi

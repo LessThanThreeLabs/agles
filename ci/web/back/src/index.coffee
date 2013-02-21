@@ -1,11 +1,11 @@
+fs = require 'fs'
 colors = require 'colors'
-configuration = require('./configuration')
-environment = require('./environment')
+
+environment = require './environment'
 
 CommandLineParser = require './commandLineParser'
 ModelConnection = require './modelConnection/modelConnection'
 Server = require './server/server'
-RedirectServer = require './server/redirectServer'
 
 
 startEverything = () ->
@@ -13,31 +13,30 @@ startEverything = () ->
 
 	commandLineParser = CommandLineParser.create()
 
-	configurationParams = _getConfigurationFile commandLineParser.getConfigFile()
-	httpPort = commandLineParser.getHttpPort() ? configurationParams.server.http.defaultPort
-	httpsPort = commandLineParser.getHttpsPort() ? configurationParams.server.https.defaultPort
+	configurationParams = getConfiguration commandLineParser.getConfigFile(),
+		commandLineParser.getMode(), commandLineParser.getHttpsPort()
 
 	environment.setEnvironmentMode configurationParams.mode
 
 	modelConnection = ModelConnection.create configurationParams.modelConnection
 	modelConnection.connect (error) =>
 		throw error if error?
-		createServers configurationParams.server, httpPort, httpsPort, modelConnection
+		createServers configurationParams.server, modelConnection
 
 	if process.env.NODE_ENV is 'production'
 		process.on 'uncaughtException', (error) =>
 			console.error error
 
 
-_getConfigurationFile = (configFile = './config.json') =>
-	return configuration.getConfigurationParams configFile
+getConfiguration = (configFileLocation = './config.json', mode, httpsPort) =>
+	config = JSON.parse(fs.readFileSync configFileLocation, 'ascii')
+	if mode? then config.mode = mode
+	if httpsPort? then config.server.https.port = httpsPort
+	return Object.freeze config
 
 
-createServers = (serverConfigurationParams, httpPort, httpsPort, modelConnection) =>
-	redirectServer = RedirectServer.create httpPort
-	redirectServer.start()
-
-	server = Server.create serverConfigurationParams, modelConnection, httpsPort
+createServers = (serverConfigurationParams, modelConnection) =>
+	server = Server.create serverConfigurationParams, modelConnection
 	server.initialize (error) =>
 		if error?
 			console.error error

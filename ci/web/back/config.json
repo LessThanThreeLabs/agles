@@ -4,12 +4,8 @@
 	"server": {
 		"domain": "127.0.0.1",
 
-		"http": {
-			"defaultPort": 80
-		},
-
 		"https": {
-			"defaultPort": 443
+			"port": 443
 		},
 
 		"staticFiles": {

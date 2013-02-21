@@ -15,7 +15,7 @@ CreateRepositoryStore = require './stores/createRepositoryStore'
 IndexHandler = require './handlers/indexHandler'
 
 
-exports.create = (configurationParams, modelConnection, port) ->
+exports.create = (configurationParams, modelConnection) ->
 	stores =
 		sessionStore: SessionStore.create configurationParams
 		createAccountStore: CreateAccountStore.create configurationParams
@@ -33,12 +33,12 @@ exports.create = (configurationParams, modelConnection, port) ->
 	handlers =
 		indexHandler: IndexHandler.create configurationParams, stores, modelConnection, filesSuffix
 
-	return new Server configurationParams, httpsOptions, port, modelConnection, resourceSocket, stores, handlers, staticServer
+	return new Server configurationParams, httpsOptions, modelConnection, resourceSocket, stores, handlers, staticServer
 
 
 class Server
-	constructor: (@configurationParams, @httpsOptions, @port, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer) ->
-		assert.ok @configurationParams? and @httpsOptions? and @port? and @modelConnection? and 
+	constructor: (@configurationParams, @httpsOptions, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer) ->
+		assert.ok @configurationParams? and @httpsOptions? and @modelConnection? and 
 			@resourceSocket? and @stores? and @handlers? and @staticServer?
 
 
@@ -95,11 +95,11 @@ class Server
 		expressServer.post '/fixCookieExpiration', @_handleFixCookieExpiration
 
 		server = spdy.createServer @httpsOptions, expressServer
-		server.listen @port
+		server.listen @configurationParams.https.port
 
 		@resourceSocket.start server
 
-		console.log "SERVER STARTED on port #{@port}".bold.magenta
+		console.log "SERVER STARTED on port #{@configurationParams.https.port}".bold.magenta
 
 
 	_configureServer: (expressServer) =>
