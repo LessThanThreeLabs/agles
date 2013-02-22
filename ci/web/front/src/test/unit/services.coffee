@@ -105,3 +105,38 @@ describe 'Koality services', () ->
 				expect(integerConverter.toInteger undefined).toBeNull()
 				expect(integerConverter.toInteger '1.3').toBeNull()
 				expect(integerConverter.toInteger 'five').toBeNull()
+
+	describe 'rpc', () ->
+		mockedSocket = null
+
+		beforeEach () ->
+			jasmine.Clock.useMock()
+
+			mockedSocket =
+				makeRequest: jasmine.createSpy('makeRequest').andCallFake (resource, requestType, methodName, data, callback) ->
+					setTimeout (() -> if callback? then callback null, 'ok'), 100
+
+			module 'koality.service', ($provide) ->
+				$provide.value 'socket', mockedSocket
+				return
+			
+		it 'should properly call socket when making rpc requests', () ->
+			inject (rpc) ->
+				rpc.makeRequest 'users', 'update', 'login', id: 9001
+				expect(mockedSocket.makeRequest).toHaveBeenCalled()
+				expect(mockedSocket.makeRequest.calls.length).toBe 1
+
+				rpc.makeRequest 'users', 'update', 'logout', id: 9001
+				expect(mockedSocket.makeRequest).toHaveBeenCalled()
+				expect(mockedSocket.makeRequest.calls.length).toBe 2
+
+		it 'should have callback called after some delay', () ->
+			inject (rpc) ->
+				fakeCallback = jasmine.createSpy 'fakeCallback'
+
+				rpc.makeRequest 'users', 'update', 'login', id: 9001, fakeCallback
+				expect(mockedSocket.makeRequest).toHaveBeenCalled()
+				expect(mockedSocket.makeRequest.calls.length).toBe 1
+				expect(fakeCallback).not.toHaveBeenCalled()
+				jasmine.Clock.tick 101
+				expect(fakeCallback).toHaveBeenCalled()
