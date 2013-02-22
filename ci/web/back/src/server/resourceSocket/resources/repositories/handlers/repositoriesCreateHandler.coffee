@@ -25,7 +25,7 @@ class RepositoriesCreateHandler extends Handler
 			@stores.createRepositoryStore.getRepository data.name, (error, repository) =>
 				if error? then callback 500
 				else
-					@modelRpcConnection.repos.create.create_repo userId, data.name, data.forwardUrl, repository.keyPair, (error, repositoryId) =>
+					@modelRpcConnection.repositories.create.create_repo userId, data.name, data.forwardUrl, repository.keyPair, (error, repositoryId) =>
 						if error?.type is 'InvalidPermissionsError' then callback 403
 						else if error? then callback 500
 						else callback null, repositoryId

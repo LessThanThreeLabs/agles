@@ -15,7 +15,7 @@ class RepositoriesDeleteHandler extends Handler
 		else if not data?.id?
 			callback 400
 		else
-			@modelRpcConnection.repos.delete.delete_repo userId, data.id, (error) =>
+			@modelRpcConnection.repositories.delete.delete_repo userId, data.id, (error) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback()

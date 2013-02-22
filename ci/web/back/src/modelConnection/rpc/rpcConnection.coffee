@@ -15,7 +15,7 @@ class RpcConnection
 		{localName: 'users', 			rpcName: 'rpc:users'}
 		{localName: 'organizations', 	rpcName: 'rpc:organizations'}
 		{localName: 'builds', 			rpcName: 'rpc:builds'}
-		{localName: 'repos',		 	rpcName: 'rpc:repos'}
+		{localName: 'repositories',		rpcName: 'rpc:repos'}
 		{localName: 'buildConsoles', 	rpcName: 'rpc:build_consoles'} 
 		{localName: 'changes', 			rpcName: 'rpc:changes'}
 	]

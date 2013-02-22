@@ -45,5 +45,5 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			console_metadata[console_output.name] = output
 			return console_metadata
 
-	def can_hear_build_console_events(user_id, id_to_listen_to):
+	def can_hear_build_console_events(self, user_id, id_to_listen_to):
 		return True

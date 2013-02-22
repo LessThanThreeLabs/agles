@@ -23,7 +23,7 @@ class RepositoriesReadHandler extends Handler
 		if not userId?
 			callback 403
 		else
-			@modelRpcConnection.repos.read.get_repositories userId, (error, repositories) =>
+			@modelRpcConnection.repositories.read.get_repositories userId, (error, repositories) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback null, (sanitizeResult repository for repository in repositories)
