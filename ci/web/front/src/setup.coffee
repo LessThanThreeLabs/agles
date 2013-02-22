@@ -23,9 +23,12 @@ angular.module('koality.service', []).
 	]).
 	factory('integerConverter', [() ->
 		return toInteger: (integerAsString) ->
+			return null if typeof integerAsString isnt 'string'
+			return null if integerAsString.indexOf('.') isnt -1
+
 			integer = parseInt integerAsString
-			if isNaN(integer) then return null
-			else return integer
+			return null if isNaN integer
+			return integer
 	]).
 	factory('socket', ['$location', 'initialState', ($location, initialState) ->
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'

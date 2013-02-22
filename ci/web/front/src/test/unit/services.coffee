@@ -84,3 +84,24 @@ describe 'Koality services', () ->
 				expect(fileSuffixAdder.addFileSuffix('/img/apng')).toBe '/img/apng'
 				expect(fileSuffixAdder.addFileSuffix('/shorthtml')).toBe '/shorthtml'
 				expect(fileSuffixAdder.addFileSuffix('/img/longerNamefakeExtension')).toBe '/img/longerNamefakeExtension'
+
+	describe 'integer converter', () ->
+		beforeEach module 'koality.service'
+
+		it 'should return numbers given valid strings', () ->
+			inject (integerConverter) ->
+				expect(typeof integerConverter.toInteger('5')).toBe 'number'
+			
+		it 'should properly parse valid integers', () ->
+			inject (integerConverter) ->
+				expect(integerConverter.toInteger '5').toBe 5
+				expect(integerConverter.toInteger '-1').toBe -1
+				expect(integerConverter.toInteger '123456789').toBe 123456789
+
+		it 'should return null for invalid integers', () ->
+			inject (integerConverter) ->
+				expect(integerConverter.toInteger '').toBeNull()
+				expect(integerConverter.toInteger null).toBeNull()
+				expect(integerConverter.toInteger undefined).toBeNull()
+				expect(integerConverter.toInteger '1.3').toBeNull()
+				expect(integerConverter.toInteger 'five').toBeNull()
