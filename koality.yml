@@ -45,6 +45,9 @@ setup:
     - postgres:
       - name: koality
         username: lt3
+    - mysql:
+      - name: koality_mysql
+        username: lt3
   - scripts:
     - git config --global user.email "koality@getkoality.com"
     - git config --global user.name "Koality"
