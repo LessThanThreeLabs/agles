@@ -88,6 +88,18 @@ describe 'Koality services', () ->
 	describe 'integer converter', () ->
 		beforeEach module 'koality.service'
 
+		it 'should return integeres given integers', () ->
+			inject (integerConverter) ->
+				expect(integerConverter.toInteger(5)).toBe 5
+				expect(integerConverter.toInteger(-1)).toBe -1
+				expect(integerConverter.toInteger(9001)).toBe 9001
+
+		it 'should return null given floats', () ->
+			inject (integerConverter) ->
+				expect(integerConverter.toInteger(5.1)).toBeNull()
+				expect(integerConverter.toInteger(-1.7)).toBeNull()
+				expect(integerConverter.toInteger(9001.1238907)).toBeNull()
+
 		it 'should return numbers given valid strings', () ->
 			inject (integerConverter) ->
 				expect(typeof integerConverter.toInteger('5')).toBe 'number'

@@ -23,6 +23,10 @@ angular.module('koality.service', []).
 	]).
 	factory('integerConverter', [() ->
 		return toInteger: (integerAsString) ->
+			if typeof integerAsString is 'number'
+				if integerAsString isnt Math.floor(integerAsString) then return null
+				else return integerAsString
+
 			return null if typeof integerAsString isnt 'string'
 			return null if integerAsString.indexOf('.') isnt -1
 
