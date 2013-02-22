@@ -124,11 +124,11 @@ describe 'Koality services', () ->
 			inject (rpc) ->
 				rpc.makeRequest 'users', 'update', 'login', id: 9001
 				expect(mockedSocket.makeRequest).toHaveBeenCalled()
-				expect(mockedSocket.makeRequest.calls.length).toBe 1
+				expect(mockedSocket.makeRequest.callCount).toBe 1
 
 				rpc.makeRequest 'users', 'update', 'logout', id: 9001
 				expect(mockedSocket.makeRequest).toHaveBeenCalled()
-				expect(mockedSocket.makeRequest.calls.length).toBe 2
+				expect(mockedSocket.makeRequest.callCount).toBe 2
 
 		it 'should have callback called after some delay', () ->
 			inject (rpc) ->
@@ -136,7 +136,58 @@ describe 'Koality services', () ->
 
 				rpc.makeRequest 'users', 'update', 'login', id: 9001, fakeCallback
 				expect(mockedSocket.makeRequest).toHaveBeenCalled()
-				expect(mockedSocket.makeRequest.calls.length).toBe 1
+				expect(mockedSocket.makeRequest.callCount).toBe 1
 				expect(fakeCallback).not.toHaveBeenCalled()
 				jasmine.Clock.tick 101
 				expect(fakeCallback).toHaveBeenCalled()
+
+	describe 'events', () ->
+		it 'should request to listen on eventName given from the socket', () ->
+			eventToFireOn = 'aeoutnhuaensuha'
+			mockedSocket =
+				makeRequest: jasmine.createSpy('makeRequest').andCallFake (resource, requestType, methodName, data, callback) ->
+					callback null, eventToFireOn
+				respondTo: jasmine.createSpy('respondTo')
+
+			module 'koality.service', ($provide) ->
+				$provide.value 'socket', mockedSocket
+				return
+
+			inject (events) ->
+				fakeCallback = () ->
+				events.listen('users', 'basic information', 9001).setCallback(fakeCallback).subscribe()
+
+				expect(mockedSocket.respondTo.mostRecentCall.args[0]).toBe eventToFireOn
+				expect(mockedSocket.makeRequest.callCount).toBe 1
+				expect(mockedSocket.respondTo.callCount).toBe 1
+
+		it 'should handle events fired from the backend', () ->
+			jasmine.Clock.useMock()
+
+			interval = null
+			eventToFireOn = 'aeoutnhuaensuha'
+			mockedSocket =
+				makeRequest: jasmine.createSpy('makeRequest').andCallFake (resource, requestType, methodName, data, callback) ->
+					if requestType is 'subscribe' then callback null, eventToFireOn
+					if requestType is 'unsubscribe' then clearInterval interval
+				respondTo: jasmine.createSpy('respondTo').andCallFake (eventName, callback) ->
+					assert.ok eventName is eventToFireOn
+					interval = setInterval (() -> callback 'hello'), 100
+
+			module 'koality.service', ($provide) ->
+				$provide.value 'socket', mockedSocket
+				return
+
+			inject (events) ->
+				fakeCallback = jasmine.createSpy 'fakeCallback'
+				fakeEvents = events.listen('users', 'basic information', 9001).setCallback(fakeCallback).subscribe()
+
+				expect(fakeCallback.callCount).toBe 0
+				jasmine.Clock.tick 101
+				expect(fakeCallback.callCount).toBe 1
+				jasmine.Clock.tick 100
+				expect(fakeCallback.callCount).toBe 2
+
+				fakeEvents.unsubscribe()
+				jasmine.Clock.tick 500
+				expect(fakeCallback.callCount).toBe 2				
