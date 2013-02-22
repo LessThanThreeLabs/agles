@@ -131,7 +131,7 @@ end
 
 bash "setup_ssh_pushing_to_github" do
 	user "root"
-	cwd "/usr/local/etc/"
+	cwd "/etc/ssh/"
 	code <<-EOH
 		grep "github.com" ssh_config
 		if [ $? -ne 0 ]
