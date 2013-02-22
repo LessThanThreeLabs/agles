@@ -1,4 +1,5 @@
 import collections
+import fcntl
 import os
 
 from subprocess import Popen, PIPE, STDOUT
@@ -27,20 +28,40 @@ class StreamingExecutor(object):
 	@classmethod
 	def _handle_output(cls, process, line_handler):
 		cls._output_lines = list()
+		stream = process.stdout
+		fd = stream.fileno()
+		fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+		fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+		line_number = 1
+		line = ''
 		while True:
 			returncode = process.poll()  # it is important to check this before output, to prevent lost output
-			ready_read, ready_write, ready_xlist = select.select([process.stdout], [], [], 0.01)  # short timeout
+			ready_read, ready_write, ready_xlist = select.select([process.stdout], [], [], 0.05)  # short timeout
 			if ready_read:
-				line = process.stdout.readline()
-				if line == "":
+				new_output = stream.read()
+				if new_output == '':
 					break
-				line = line.rstrip()
-				cls._output_lines.append(line)
-				if line_handler:
-					line_handler.append(len(cls._output_lines), line)
+				for char in new_output:
+					if char == '\n':
+						cls._handle_line(line_handler, line_number, line)
+						line = ''
+						line_number += 1
+					else:
+						line = line + char
+				if char != '\n':
+					cls._handle_line(line_handler, line_number, line)
 			elif returncode is not None:  # backgrounding processes will cause readline to wait forever, but sets a return code
 				break
 		return cls._output_lines
+
+	@classmethod
+	def _handle_line(cls, line_handler, line_number, line):
+		if len(cls._output_lines) < line_number:
+			cls._output_lines.append(line)
+		else:
+			cls._output_lines[line_number - 1] = line
+		if line_handler:
+			line_handler.append(line_number, line)
 
 
 CommandResults = collections.namedtuple(
