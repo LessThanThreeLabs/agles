@@ -1,8 +1,6 @@
 import logging
 import time
 
-from Crypto.PublicKey import RSA
-
 import database.schema
 import repo.store
 
@@ -19,7 +17,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
-	def create_repo(self, user_id, repo_name, forward_url):
+	def create_repo(self, user_id, repo_name, forward_url, keypair):
 		if not repo_name:
 			raise RepositoryCreateError("repo_name cannot be empty")
 		if not is_admin(user_id):
@@ -31,10 +29,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			repostore_id = manager.get_least_loaded_store()
 			uri = self._transpose_to_uri(user_id, repo_name)
 
-			# Create private/public key pair
-			keypair = RSA.generate(self.KEYBITS)
-			privatekey = keypair.exportKey()
-			publickey = keypair.publickey().exportKey(format="OpenSSH")
+			privatekey = keypair["private"]
+			publickey = keypair["public"]
 
 			# Set entries in db
 			repo_id = self._create_repo_in_db(
@@ -61,7 +57,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, privatekey, publickey):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
-		query = repostore.select().where(repostore.c.id==repostore_id)
+		query = repostore.select().where(repostore.c.id == repostore_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
@@ -81,7 +77,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 	def _transpose_to_uri(self, user_id, repo_name):
 		user = database.schema.user
-		query = user.select().where(user.c.id==user_id)
+		query = user.select().where(user.c.id == user_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			email = sqlconn.execute(query).first()[user.c.email]
 
