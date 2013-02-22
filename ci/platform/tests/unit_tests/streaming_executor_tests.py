@@ -42,11 +42,24 @@ class StreamingExecutorTests(BaseUnitTest):
 
 	def test_streaming(self):
 		strings_to_print = ['hello', 'one two three', 'Herp Im a Derp']
-		output_handler = TestOutputHandler(strings_to_print)
+		expected = [(x + 1, strings_to_print[x]) for x in range(len(strings_to_print))]
+		output_handler = TestOutputHandler(expected)
 		echo_command = ';'.join(map(lambda s: 'echo %s' % s, strings_to_print))
 		results = StreamingExecutor.execute(['bash', '-c', echo_command], output_handler=output_handler)
 		assert_equal(0, results.returncode)
 		assert_equal('\n'.join(strings_to_print), results.output)
+		assert_equal(output_handler.expected_lines, output_handler.received_lines)
+
+	def test_streaming_line_updates(self):
+		strings_to_print = ['hello', 'one two three', 'Herp Im a Derp']
+		expected = []
+		for s in strings_to_print:
+			expected.append((1, (expected[len(expected) - 1][1] if expected else '') + s))
+		output_handler = TestOutputHandler(expected)
+		echo_command = ';sleep 0.01;'.join(map(lambda s: 'echo -n %s' % s, strings_to_print))
+		results = StreamingExecutor.execute(['bash', '-c', echo_command], output_handler=output_handler)
+		assert_equal(0, results.returncode)
+		assert_equal(''.join(strings_to_print), results.output)
 		assert_equal(output_handler.expected_lines, output_handler.received_lines)
 
 	def test_cwd(self):
@@ -73,10 +86,11 @@ class TestOutputHandler(object):
 	def __init__(self, expected_lines):
 		self.expected_lines = expected_lines
 		self.received_lines = []
-		for i in range(len(self.expected_lines)):
-			self.received_lines.append(None)
+		self.position = 0
 
 	def append(self, line_number, line):
 		assert_true(line_number < len(self.expected_lines) + 1)
-		assert_equal(self.expected_lines[line_number - 1], line)
-		self.received_lines[line_number - 1] = line
+		assert_equal(self.expected_lines[self.position][0], line_number)
+		assert_equal(self.expected_lines[self.position][1], line)
+		self.received_lines.append((line_number, line))
+		self.position += 1

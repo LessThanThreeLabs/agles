@@ -1,5 +1,6 @@
 import pipes
 import shlex
+import sys
 
 from util.streaming_executor import StreamingExecutor
 
@@ -49,8 +50,18 @@ class SetupCommand(object):
 
 
 class SimplePrinter(object):
+	def __init__(self):
+		self.last_line_number = 1
+		self.last_column = 0
+
 	def append(self, line_number, line):
-		print line
+		if line_number > self.last_line_number:
+			self.last_line_number = line_number
+			output = '\n' + line
+		else:
+			output = line[self.last_column:]
+		self.last_column = len(line)
+		sys.stdout.write(output)
 
 
 class InvalidConfigurationException(Exception):
