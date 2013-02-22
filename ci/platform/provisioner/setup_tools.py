@@ -1,3 +1,4 @@
+import os
 import pipes
 import shlex
 
@@ -8,7 +9,7 @@ class SetupCommand(object):
 	def __init__(self, *commands, **kwargs):
 		self.commands = commands
 		self.silent = kwargs.pop('silent', False)
-		self.ignore_failure = kwargs.pop('ignore_failures', False)
+		self.ignore_failure = kwargs.pop('ignore_failure', False)
 
 	def execute(self):
 		self.execute_script(self.to_shell_command())
@@ -49,6 +50,28 @@ class SetupCommand(object):
 	def to_subshell_command(self):
 		return '(%s)' % self.to_shell_command()
 
+	def __repr__(self):
+		return "SetupCommand(%s)" % ", ".join(
+			[repr(command) for command in self.commands] +
+			["%s=%s" % (attr, repr(getattr(self, attr))) for attr in
+				['silent', 'ignore_failure']])
+
+
+class SetupScript(object):
+	def __init__(self, *setup_steps):
+		self.setup_steps = setup_steps
+
+	def run(self):
+		script_path = '/tmp/setup-script'
+		with open(script_path, 'w') as setup_script:
+			setup_script.write(SetupCommand.to_setup_script(self.setup_steps))
+		results = SetupCommand.execute_script_file(script_path)
+		os.remove(script_path)
+		return results
+
+	def __repr__(self):
+		return "SetupScript(%s)" % ", ".join([repr(step) for step in self.setup_steps])
+
 
 class SimplePrinter(object):
 	def append(self, line_number, line):
@@ -56,4 +79,15 @@ class SimplePrinter(object):
 
 
 class InvalidConfigurationException(Exception):
-	pass
+	def __init__(self, *args, **kwargs):
+		self.args = args
+		self.exception = kwargs.get('exception')
+
+	def _indent(self, string):
+		return "\n".join(map(lambda s: "\t" + s, string.split("\n")))
+
+	def __repr__(self):
+		return str(self)
+
+	def __str__(self):
+		return super(InvalidConfigurationException, self).__str__() + "\nInternal Error:\n%s" % self.indent(str(self.exception))

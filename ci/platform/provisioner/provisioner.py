@@ -1,5 +1,4 @@
 import os
-import sys
 import yaml
 
 from database_parser import OmnibusDatabaseParser
@@ -7,7 +6,7 @@ from language_parser import LanguageParser
 from package_parser import OmnibusPackageParser
 from script_parser import ScriptParser
 from run_step_parser import CompileStepParser, TestStepParser
-from setup_tools import InvalidConfigurationException, SetupCommand
+from setup_tools import InvalidConfigurationException, SetupCommand, SetupScript
 
 
 class Provisioner(object):
@@ -20,33 +19,35 @@ class Provisioner(object):
 		}
 		self.ssh_dir = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh'))
 		self.keyfile = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa'))
-		self.keyfile_backup = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.bak'))
 		self.public_keyfile = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.pub'))
-		self.public_keyfile_backup = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.pub.bak'))
 		self.git_ssh = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa.koality'))
 
 	def provision(self, private_key=None, config_path=None, source_path=None, global_install=False):
+		config_path, source_path = self.resolve_paths(config_path, source_path)
+		config = self.read_config(self, config_path)
+		if private_key:
+			self.set_private_key(private_key)
+		steps = self.parse_config(config, source_path, global_install)
+		self._provision(*steps)
+
+	def resolve_paths(self, config_path=None, source_path=None):
+		if not config_path:
+			if not source_path:
+				source_path = os.path.join(os.environ['HOME'], 'source')
+			config_path = self._get_config_path(source_path)
+		elif not source_path:
+			source_path = os.path.dirname(config_path)
+		return os.path.abspath(config_path), os.path.abspath(source_path)
+
+	def read_config(self, config_path):
 		try:
-			if not config_path:
-				if not source_path:
-					source_path = os.path.join(os.environ['HOME'], 'source')
-				config_path = self._get_config_path(source_path)
-			elif not source_path:
-				source_path = os.path.dirname(config_path)
-			source_path = os.path.abspath(source_path)
-			config_path = os.path.abspath(config_path)
-			try:
-				with open(config_path) as config_file:
-					config = yaml.safe_load(config_file.read())
-			except:
-				raise InvalidConfigurationException("Unable to parse configuration file: %s\nPlease verify that this is a valid YAML file using a tool such as http://yamllint.com/." % os.path.basename(config_path))
-			if private_key:
-				self.set_private_key(private_key)
-			self.handle_config(config, source_path, global_install)
-			self.reset_private_key()
+			with open(config_path) as config_file:
+				config_text = config_file.read()
+				return yaml.safe_load(config_text)
 		except Exception as e:
-			print "%s: %s" % (type(e).__name__, e)
-			sys.exit(1)
+			raise InvalidConfigurationException("Unable to parse configuration file: %s\n" % os.path.basename(config_path) +
+				"Please verify that this is a valid YAML file using a tool such as http://yamllint.com/.",
+				exception=e)
 
 	def _get_config_path(self, source_path):
 		possible_file_names = ['koality.yml', '.koality.yml']
@@ -73,34 +74,30 @@ class Provisioner(object):
 			git_ssh.write('#!/bin/bash\n' +
 				'ssh -oStrictHostKeyChecking=no -i %s $*' % self.keyfile)
 
-	def reset_private_key(self):
-		if os.access(self.keyfile_backup, os.F_OK):
-			os.rename(self.keyfile_backup, self.keyfile)
-		if os.access(self.public_keyfile_backup, os.F_OK):
-			os.rename(self.public_keyfile_backup, self.public_keyfile)
-		if os.access(self.git_ssh, os.F_OK):
-			os.remove(self.git_ssh)
-
-	def handle_config(self, config, source_path, global_install):
+	def parse_config(self, config, source_path, global_install=False):
 		language_steps, setup_steps = self.parse_languages(config, global_install)
-		setup_steps = [SetupCommand("pkill -9 -u rabbitmq beam; service rabbitmq-server start", silent=True, ignore_failure=True)] + setup_steps
+		setup_steps = [SetupCommand("pkill -9 -u rabbitmq beam; service rabbitmq-server start", silent=True, ignore_failure=True),
+			SetupCommand("echo \"export GIT_SSH=%s\" >> ~/.bash_profile" % self.git_ssh, silent=True)] + setup_steps
 		setup_steps += self.parse_setup(config, source_path)
-		self.parse_compile(config, source_path)
-		self.parse_test(config, source_path)
-		self._provision(language_steps, setup_steps)
+		compile_steps = self.parse_compile(config, source_path)
+		test_steps = self.parse_test(config, source_path)
+		return (("Language configuration", SetupScript(*language_steps)),
+			("Setup", SetupScript(*setup_steps)),
+			("Compile configuration", compile_steps),
+			("Test configuration", test_steps))
 
-	def _provision(self, language_steps, setup_steps):
-		self.run_setup_steps(language_steps, action_name='Language configuration')
-		self.run_setup_steps(setup_steps)
+	def _provision(self, *steps):
+		for action_name in step:
+			self.run_step(action_name, step)
 
-	def run_setup_steps(self, setup_steps, action_name='Setup'):
-		script_path = '/tmp/setup-script'
-		with open(script_path, 'w') as setup_script:
-			setup_script.write(SetupCommand.to_setup_script(setup_steps))
-		results = SetupCommand.execute_script_file(script_path, env={'GIT_SSH': self.git_ssh})
-		os.remove(script_path)
-		if results.returncode != 0:
-			raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))
+	def run_step(self, action_name, setup_step):
+		if not setup_step:
+			return
+		steps = setup_step if isinstance(setup_step, list) else [setup_step]
+		for step in steps:
+			results = step.run()
+			if results.returncode != 0:
+				raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))
 
 	def parse_languages(self, config, global_install):
 		if not 'languages' in config or len(config['languages']) == 0:
@@ -141,11 +138,11 @@ class Provisioner(object):
 
 	def parse_compile(self, config, source_path):
 		if 'compile' in config:
-			CompileStepParser().parse_steps(config['compile'], source_path)
+			return CompileStepParser().parse_steps(config['compile'], source_path)
 
 	def parse_test(self, config, source_path):
 		if 'test' in config:
-			TestStepParser().parse_steps(config['test'], source_path)
+			return TestStepParser().parse_steps(config['test'], source_path)
 
 
 class ProvisionFailedException(Exception):
