@@ -36,6 +36,7 @@ class SchemaDataGenerator(object):
 			email="admin@admin.com",
 			first_name="Admin",
 			last_name="Admin",
+			admin=True,
 			password_hash=binascii.b2a_base64(hash.digest())[0:-1],
 			salt=SALT
 		)
