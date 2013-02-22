@@ -161,7 +161,7 @@ describe 'Koality services', () ->
 				expect(mockedSocket.makeRequest.callCount).toBe 1
 				expect(mockedSocket.respondTo.callCount).toBe 1
 
-		it 'should handle events fired from the backend', () ->
+		it 'should handle subscribe and unsubscribe', () ->
 			jasmine.Clock.useMock()
 
 			interval = null
@@ -190,4 +190,44 @@ describe 'Koality services', () ->
 
 				fakeEvents.unsubscribe()
 				jasmine.Clock.tick 500
-				expect(fakeCallback.callCount).toBe 2				
+				expect(fakeCallback.callCount).toBe 2	
+
+	describe 'changes rpc', () ->
+		beforeEach () ->
+			numChanges = 107
+			mockedRpc =
+				makeRequest: (resource, requestType, methodName, data, callback) ->
+					endIndex = Math.min numChanges, data.startIndex + 100
+					callback null, (num for num in [data.startIndex...endIndex])
+
+			module 'koality.service', ($provide) ->
+				$provide.value 'rpc', mockedRpc
+				return
+			
+		it 'should receive changes', () ->
+			inject (changesRpc) ->
+				fakeCallback = jasmine.createSpy 'fakeCallback'
+
+				changesRpc.queueRequest 17, 'all', [], 0, fakeCallback
+				expect(fakeCallback.callCount).toBe 1
+				expect(fakeCallback.mostRecentCall.args[1].length).toBe 100
+
+
+		it 'should stop receiving changes if no more to receive', () ->
+			inject (changesRpc) ->
+				fakeCallback = jasmine.createSpy 'fakeCallback'
+
+				changesRpc.queueRequest 17, 'all', [], 0, fakeCallback
+				expect(fakeCallback.callCount).toBe 1
+				expect(fakeCallback.mostRecentCall.args[1].length).toBe 100
+
+				changesRpc.queueRequest 17, 'all', [], 100, fakeCallback
+				expect(fakeCallback.callCount).toBe 2
+				expect(fakeCallback.mostRecentCall.args[1].length).toBe 7
+
+				changesRpc.queueRequest 17, 'all', [], 107, fakeCallback
+				expect(fakeCallback.callCount).toBe 2
+
+				changesRpc.queueRequest 17, 'all', [], 0, fakeCallback
+				expect(fakeCallback.callCount).toBe 3
+				expect(fakeCallback.mostRecentCall.args[1].length).toBe 100
