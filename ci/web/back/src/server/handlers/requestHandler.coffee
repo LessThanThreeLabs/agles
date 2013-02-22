@@ -65,7 +65,7 @@ module.exports = class Resource
 		email: user.email
 		firstName: user.first_name
 		lastName: user.last_name
-		isAdmin: user.admin		
+		isAdmin: user.admin	? false
 
 
 	pushFiles: (request, response) =>
