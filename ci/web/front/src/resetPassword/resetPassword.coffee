@@ -5,6 +5,11 @@ window.ResetPassword = ['$scope', 'rpc', ($scope, rpc) ->
 	
 	$scope.resetPassword = () ->
 		rpc.makeRequest 'users', 'update', 'resetPassword', $scope.account, (error) ->
-			$scope.$apply () ->
-				$scope.showError = true if error is 500
+			$scope.$apply () -> 
+				if error?
+					$scope.showSuccess = false
+					$scope.showError = true
+				else 
+					$scope.showSuccess = true
+					$scope.showError = false
 ]

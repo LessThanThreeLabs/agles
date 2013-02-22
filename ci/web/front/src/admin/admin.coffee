@@ -19,9 +19,7 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
-			$scope.$apply () -> 
-				if error? then console.error error
-				else $scope.repositories = $scope.repositories.concat repositories
+			$scope.$apply () -> $scope.repositories = $scope.repositories.concat repositories
 
 	handleAddedRepositoryUpdated = (data) -> $scope.$apply () ->
 		$scope.repositories.push data
@@ -54,9 +52,7 @@ window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initi
 
 	getMembers = () ->
 		rpc.makeRequest 'users', 'read', 'getAllUsers', null, (error, members) ->
-			$scope.$apply () ->
-				if error? then console.error error
-				else $scope.members = $scope.members.concat members
+			$scope.$apply () -> $scope.members = $scope.members.concat members
 
 	handleMemberAdded = (data) -> $scope.$apply () ->
 		$scope.members.push data
@@ -73,8 +69,7 @@ window.AdminMembers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initi
 	getMembers()
 
 	$scope.removeMember = (member) ->
-		rpc.makeRequest 'users', 'delete', 'deleteUser', id: member.id, (error) ->
-			console.error if error?
+		rpc.makeRequest 'users', 'delete', 'deleteUser', id: member.id
 ]
 
 
@@ -93,7 +88,6 @@ window.AdminAddMembers = ['$scope', 'rpc', ($scope, rpc) ->
 		rpc.makeRequest 'users', 'create', 'inviteUsers', users: $scope.membersToAdd, (error) ->
 			$scope.$apply () ->
 				if error?
-					console.error error
 					$scope.showError = true
 				else
 					$scope.stage = 'second'

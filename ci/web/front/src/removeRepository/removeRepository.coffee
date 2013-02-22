@@ -8,5 +8,6 @@ window.RemoveRepository = ['$scope', '$routeParams', 'rpc', ($scope, $routeParam
 	$scope.repository.name = $routeParams.name 
 
 	$scope.removeRepository = () ->
-		$scope.stage = 'second'
+		rpc.makeRequest 'repositories', 'delete', 'deleteRepository', $scope.repository, (error) ->
+			$scope.$apply () -> $scope.stage = 'second'
 ]

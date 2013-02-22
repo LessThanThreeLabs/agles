@@ -1,6 +1,6 @@
 <div id="createAccount">
 	<centered-panel panel-title="Create Account">
-		<div ng-show="errorText == null">
+		<div ng-show="!showError">
 			<styled-form name="createAccountForm" listen-for-enter-key="submit()" ignore-enter-key-if="createAccountForm.$invalid || account.password != account.confirmPassword">
 				<styled-form-field label="Email" label-padding="true">
 					<input type="email" ng-model="account.email" readonly>
@@ -36,8 +36,8 @@
 			</div>
 		</div>
 
-		<div ng-show="errorText != null">
-			<div id="createAccountErrorMessage">{{errorText}}</div>
+		<div ng-show="showError">
+			<div id="createAccountErrorMessage">Error occurred while creating user. User may already exist.</div>
 		</div>
 	</centered-panel>
 </div>

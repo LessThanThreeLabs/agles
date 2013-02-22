@@ -7,7 +7,6 @@ window.Login = ['$scope', 'rpc', ($scope, rpc) ->
 		rpc.makeRequest 'users', 'update', 'login', $scope.account, (error, result) ->
 			$scope.$apply () ->
 				if error?
-					console.log error
 					$scope.showError = true
 				else
 					# this will force a refresh, rather than do html5 pushstate

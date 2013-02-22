@@ -49,7 +49,7 @@ class UsersCreateHandler extends Handler
 			else
 				@modelRpcConnection.users.create.create_user account.email, account.firstName, account.lastName, 
 					passwordHashResult.passwordHash, passwordHashResult.salt, (error, userId) =>
-						if error?.type is 'UserAlreadyExistsError' then callback 'User already exists'
+						if error?.type is 'UserAlreadyExistsError' then callback 'user already exists'
 						else if error? then callback 500
 						else
 							session.userId = userId
@@ -63,10 +63,8 @@ class UsersCreateHandler extends Handler
 			callback 400
 		else
 			@stores.createAccountStore.getAccount data.token, (error, account) =>
-				console.log error
 				if error? then callback 500
 				else callback null, account.email
-
 
 
 	inviteUsers: (socket, data, callback) =>
@@ -89,7 +87,7 @@ class UsersCreateHandler extends Handler
 
 			for email in emails
 				if not @accountInformationValidator.isValidEmail email
-					callback 400
+					callback 'bad email'
 					return
 
 			@_getUnusedEmails emails, (error, unusedEmails) =>

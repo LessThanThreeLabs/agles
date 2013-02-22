@@ -75,7 +75,7 @@ class UsersUpdateHandler extends Handler
 			callback 400
 		else
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
-				if error? then callback 500
+				if error? then callback 'user does not exist'
 				else
 					crypto.randomBytes 8, (error, randomBuffer) =>
 						if error? then callback 500
@@ -95,11 +95,11 @@ class UsersUpdateHandler extends Handler
 			callback 400
 		else
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
-				if error? then callback 401
+				if error? then callback 'bad login'
 				else
 					passwordHash = @passwordHasher.hashPasswordWithSalt data.password, user.salt
 					if passwordHash isnt user.password_hash
-						callback 401
+						callback 'bad login'
 					else
 						socket.session.userId = user.id
 						socket.session.save()

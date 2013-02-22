@@ -6,7 +6,7 @@ window.Repository = ['$scope', ($scope) ->
 ]
 
 
-window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, changesRpc, events, integerConverter) ->
+window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, changesRpc, events, integerConverter) ->
 	$scope.changes = []
 	$scope.group = 'all'
 	$scope.namesQuery = ''
@@ -15,14 +15,11 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'rpc', 'chang
 		return $scope.namesQuery.toLowerCase().split ' '
 
 	handleInitialChanges = (error, changes) -> $scope.$apply () -> 
-		if error? then console.error error
-		else
-			$scope.changes = $scope.changes.concat changes
-			$scope.currentChangeId ?= $scope.changes[0].id
+		$scope.changes = $scope.changes.concat changes
+		$scope.currentChangeId ?= $scope.changes[0].id
 
 	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
-		if error? then console.error error
-		else $scope.changes = $scope.changes.concat changes
+		$scope.changes = $scope.changes.concat changes
 
 	doesChangeMatchQuery = (change) ->
 		return true if $scope.namesQuery is ''
@@ -78,9 +75,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 		return if not $scope.currentChangeId?
 
 		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, metadata) ->
-			$scope.$apply () ->
-				if error? then console.error error
-				else $scope.metadata = metadata
+			$scope.$apply () -> $scope.metadata = metadata
 
 	retrieveStages = () ->
 		$scope.stages = null
@@ -89,8 +84,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
 			$scope.$apply () ->
-				if error? then console.error error
-				else $scope.stages = buildConsoles
+				$scope.stages = buildConsoles
 
 				if isStageIdInStages $scope.currentStageId
 					retrieveLines()
@@ -105,11 +99,8 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
 			$scope.$apply () ->
-				if error?
-					console.error error
-				else
-					for lineNumber, lineText of lines
-						addLine lineNumber, lineText
+				for lineNumber, lineText of lines
+					addLine lineNumber, lineText
 
 	addLine = (lineNumber, lineText) ->
 		$scope.lines[lineNumber-1] = crazyAnsiText.makeCrazy lineText

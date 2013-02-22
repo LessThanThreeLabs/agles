@@ -33,7 +33,11 @@ angular.module('koality.service', []).
 		makeRequest: (resource, requestType, methodName, data, callback) ->
 			assert.ok typeof resource is 'string' and typeof requestType is 'string' and typeof methodName is 'string'
 			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
-			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, callback
+			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, (error, response) ->
+				switch error
+					when 400, 404, 500 then $location.path('/unexpectedError').search {}
+					when 403 then $location.path('/invalidPermissions').search {}
+					else callback error, response if callback?
 
 		respondTo: (eventName, callback) ->
 			socket.on eventName, callback

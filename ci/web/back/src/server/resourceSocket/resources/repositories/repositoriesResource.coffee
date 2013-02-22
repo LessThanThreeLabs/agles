@@ -5,6 +5,7 @@ SshKeyPairGenerator = require './sshKeyPairGenerator'
 Resource = require '../resource'
 RepositoriesCreateHandler = require './handlers/repositoriesCreateHandler'
 RepositoriesReadHandler = require './handlers/repositoriesReadHandler'
+RepositoriesDeleteHandler = require './handlers/repositoriesDeleteHandler'
 
 
 exports.create = (configurationParams, stores, modelConnection) ->
@@ -12,14 +13,16 @@ exports.create = (configurationParams, stores, modelConnection) ->
 
 	createHandler = RepositoriesCreateHandler.create stores, modelConnection.rpcConnection, sshKeyPairGenerator
 	readHandler = RepositoriesReadHandler.create configurationParams, modelConnection.rpcConnection
-	return new RepositoriesResource configurationParams, stores, modelConnection, createHandler, readHandler
+	deleteHandler = RepositoriesDeleteHandler.create modelConnection
+	return new RepositoriesResource configurationParams, stores, modelConnection, createHandler, readHandler, deleteHandler
 
 
 class RepositoriesResource extends Resource
-	constructor: (configurationParams, stores, modelConnection, @createHandler, @readHandler) ->
+	constructor: (configurationParams, stores, modelConnection, @createHandler, @readHandler, @deleteHandler) ->
 		super configurationParams, stores, modelConnection
-		assert.ok @createHandler
-		assert.ok @readHandler
+		assert.ok @createHandler?
+		assert.ok @readHandler?
+		assert.ok @deleteHandler?
 
 
 	create: (socket, data, callback) =>
@@ -28,6 +31,10 @@ class RepositoriesResource extends Resource
 
 	read: (socket, data, callback) =>
 		@_call @readHandler, socket, data, callback
+
+
+	delete: (socket, data, callback) =>
+		@_call @deleteHandler, socket, data, callback
 
 
 	subscribe: (socket, data, callback) =>
