@@ -1,3 +1,5 @@
+from sqlalchemy import and_
+
 from model_server.rpc_handler import ModelServerRpcHandler
 
 import database.schema
@@ -34,7 +36,12 @@ class UsersReadHandler(ModelServerRpcHandler):
 	def get_user(self, email):
 		user = database.schema.user
 
-		query = user.select().where(user.c.email == email)
+		query = user.select().where(
+			and_(
+				user.c.email == email,
+				user.c.deleted == 0
+			)
+		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		if row:

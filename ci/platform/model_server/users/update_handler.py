@@ -92,6 +92,12 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
 
+	def delete_user(self, user_id):
+		user = schema.user
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			update = user.update().where(user.c.id == user_id).values(deleted=user_id)
+			sqlconn.execute(update)
+
 
 class NoSuchUserError(Exception):
 	pass
