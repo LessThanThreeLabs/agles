@@ -44,3 +44,6 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			console_metadata = to_dict(sqlconn.execute(metadata_query).first(), build_console.columns)
 			console_metadata[console_output.name] = output
 			return console_metadata
+
+	def can_hear_build_console_events(user_id, id_to_listen_to):
+		return True

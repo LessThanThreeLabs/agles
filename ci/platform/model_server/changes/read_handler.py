@@ -5,6 +5,7 @@ from sqlalchemy import and_, or_
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from util.sql import to_dict
+from util.permissions import InvalidPermissionsError
 
 
 class ChangesReadHandler(ModelServerRpcHandler):
@@ -102,6 +103,5 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				tablename=change.name), sqlconn.execute(query))
 			return changes
 
-
-class InvalidPermissionsError(Exception):
-	pass
+	def can_hear_change_events(self, user_id, id_to_listen_to):
+		return True

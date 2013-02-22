@@ -68,6 +68,12 @@ class UsersReadHandler(ModelServerRpcHandler):
 			keys = [to_dict(row, ssh_pubkey.columns) for row in sqlconn.execute(query)]
 		return keys
 
+	def can_hear_user_events(self, user_id, id_to_listen_to):
+		user = self.get_user_from_id(user_id)
+		if user["deleted"] != 0:
+			return False
+		return True
+
 
 class NoSuchUserError(Exception):
 	pass

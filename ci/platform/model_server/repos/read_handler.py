@@ -83,6 +83,9 @@ class ReposReadHandler(ModelServerRpcHandler):
 		assert row is not None
 		return to_dict(row, repo.columns)
 
+	def can_hear_repository_events(self, user_id, id_to_listen_to):
+		return True
+
 #########################
 # Host Repo Integration #
 #########################
