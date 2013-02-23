@@ -74,28 +74,25 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			)
 
 			self.build_ids = []
-			for i in xrange(10):
+			for i in xrange(3):
 				self.build_ids.append(sqlconn.execute(ins_build).inserted_primary_key[0])
 
 	def console_append_test(self):
 		self._initialize()
 		update_handler = BuildConsolesUpdateHandler()
 
-		compile_line_dict = {}
-		test_line_dict = {}
-		build_general = []
-		build_setup = []
 		for i in self.build_ids:
+			update_handler.add_subtypes(i, ConsoleType.Setup, ["setup"])
 			update_handler.add_subtypes(i, ConsoleType.Compile, ["compile"])
 			update_handler.add_subtypes(i, ConsoleType.Test, ["unittest"])
 
-			line_compile = "build:1, line:%s, console:compile" % i
-			build_general.append(line_compile)
-			line_test = "build:1, line:%s, console:test" % i
-			build_setup.append(line_test)
-			update_handler.append_console_line(1, i, line_compile,
-				type=ConsoleType.Compile, subtype="compile")
-			compile_line_dict[str(i)] = line_compile
-			update_handler.append_console_line(1, i, line_test,
+			test_lines = {}
+			for line_num in range(1, 3):
+				update_handler.append_console_lines(i, {1: "build:%s, line:1, console:setup, (%s)" % (i, line_num)},
+					type=ConsoleType.Setup, subtype="setup")
+				compile_line = "build:%s, line:%s, console:compile" % (i, line_num)
+				update_handler.append_console_lines(i, {line_num: compile_line},
+					type=ConsoleType.Compile, subtype="compile")
+				test_lines[line_num] = "build:%s, line:%s, console:test" % (i, line_num)
+			update_handler.append_console_lines(i, test_lines,
 				type=ConsoleType.Test, subtype="unittest")
-			test_line_dict[str(i)] = line_test

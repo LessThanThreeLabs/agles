@@ -54,14 +54,15 @@ class SimplePrinter(object):
 		self.last_line_number = 1
 		self.last_column = 0
 
-	def append(self, line_number, line):
-		if line_number > self.last_line_number:
-			self.last_line_number = line_number
-			output = '\n' + line
-		else:
-			output = line[self.last_column:]
-		self.last_column = len(line)
-		sys.stdout.write(output)
+	def append(self, read_lines):
+		for line_number, line in sorted(read_lines.items()):
+			if line_number > self.last_line_number:
+				self.last_line_number = line_number
+				output = '\n' + line
+			else:
+				output = line[self.last_column:]
+			self.last_column = len(line)
+			sys.stdout.write(output)
 
 
 class InvalidConfigurationException(Exception):

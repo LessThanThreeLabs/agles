@@ -58,11 +58,10 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 				# TODO: This is firing to changes as a hack for the front end. Needs to go back to builds in the future
 				self.publish_event("changes", change_id, "new build console", id=console_id, type=type, subtype=subtype, return_code=None)
 
-	def append_console_line(self, build_id, line_num, line, type, subtype):
+	def append_console_lines(self, build_id, read_lines, type, subtype):
 		"""
 		:param build_id: The build id this console is relevant to.
-		:param line_num: The line number we're appending
-		:param line: The line to append and store.
+		:param read_lines: A map from line numbers to lines
 		:param type: The console type we are appending to.
 		:param subtype: The console subtype we are appending to.
 		"""
@@ -82,24 +81,26 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			assert row is not None
 
 			build_console_id = row[build_console.c.id]
-			try:
-				sqlconn.execute(
-					console_output.insert().values(
-						build_console_id=build_console_id,
-						line_number=line_num,
-						line=line
-					)
-				)
-			except IntegrityError:
-				sqlconn.execute(
-					build_console.update().where(
-						and_(
-							console_output.c.build_console_id == build_console_id,
-							console_output.c.line_number == line_num
+			for line_number, line in sorted(read_lines.items()):
+				try:
+					sqlconn.execute(
+						console_output.insert().values(
+							build_console_id=build_console_id,
+							line_number=line_number,
+							line=line
 						)
-					).values(line=line)
-				)
-			self.publish_event("build_consoles", build_console_id, "new output", **{str(line_num): line})
+					)
+				except IntegrityError:
+					sqlconn.execute(
+						console_output.update().where(
+							and_(
+								console_output.c.build_console_id == build_console_id,
+								console_output.c.line_number == line_number
+							)
+						).values(line=line)
+					)
+			self.publish_event("build_consoles", build_console_id, "new output",
+				**{str(line_number): line for line_number, line in read_lines.items()})
 
 	def set_return_code(self, build_id, return_code, type, subtype):
 		build_console = schema.build_console

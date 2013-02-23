@@ -88,9 +88,10 @@ class TestOutputHandler(object):
 		self.received_lines = []
 		self.position = 0
 
-	def append(self, line_number, line):
-		assert_true(line_number < len(self.expected_lines) + 1)
-		assert_equal(self.expected_lines[self.position][0], line_number)
-		assert_equal(self.expected_lines[self.position][1], line)
-		self.received_lines.append((line_number, line))
-		self.position += 1
+	def append(self, read_lines):
+		for line_number, line in sorted(read_lines.items()):
+			assert_true(line_number < len(self.expected_lines) + 1)
+			assert_equal(self.expected_lines[self.position][0], line_number)
+			assert_equal(self.expected_lines[self.position][1], line)
+			self.received_lines.append((line_number, line))
+			self.position += 1

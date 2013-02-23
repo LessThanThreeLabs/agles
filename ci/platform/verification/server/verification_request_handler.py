@@ -117,8 +117,8 @@ class VerificationRequestHandler(InfiniteWorker):
 			def declare_commands(self, commands):
 				self.build_consoles_update_rpc.add_subtypes(self.build_id, self.type, commands)
 
-			def append(self, line_num, line):
-				self.build_consoles_update_rpc.append_console_line(self.build_id, line_num, line, self.type, self.subtype)
+			def append(self, read_lines):
+				self.build_consoles_update_rpc.append_console_line(self.build_id, read_lines, self.type, self.subtype)
 
 			def set_return_code(self, return_code):
 				self.build_consoles_update_rpc.set_return_code(self.build_id, return_code, self.type, self.subtype)

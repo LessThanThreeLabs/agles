@@ -25,7 +25,7 @@ class VirtualMachine(object):
 		generate_key = "mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa"
 		pubkey_results = self.ssh_call("(%s) > /dev/null 2>&1; cat .ssh/id_rsa.pub" % generate_key, timeout=20)
 		if pubkey_results.returncode != 0:
-			output_handler.append("Failed to connect to the testing instance. Please try again.")
+			output_handler.append({1: "Failed to connect to the testing instance. Please try again."})
 			return pubkey_results
 		pubkey = pubkey_results.output
 		alias = '__vm_' + str(uuid.uuid1())
