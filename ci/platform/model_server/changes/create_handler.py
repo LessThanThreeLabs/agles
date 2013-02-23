@@ -33,7 +33,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			change_id = result.inserted_primary_key[0]
 			repo_id_query = repo.select().where(repo.c.id == repo_id)
 			repo_id = sqlconn.execute(repo_id_query).first()[repo.c.id]
-		self.publish_event("repos", repo_id, "change added", change_id=change_id, change_number=change_number,
+		self.publish_event("repos", repo_id, "change added", user_id=user_id, change_id=change_id, change_number=change_number,
 			change_status="queued", commit_id=commit_id, merge_target=merge_target)
 		return {"change_id": change_id, "commit_id": commit_id}
 
