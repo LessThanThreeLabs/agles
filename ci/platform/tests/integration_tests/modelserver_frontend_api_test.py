@@ -75,10 +75,11 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 	def _create_user(self):
 		self.password_hash = binascii.b2a_base64(sha512().digest())[0:-1]
 		self.user_info = {'email': self.EMAIL, 'first_name': 'bob', 'last_name': 'barker',
-			'password_hash': self.password_hash, 'salt': 'Sodium Chloride.'}
+			'password_hash': self.password_hash, 'salt': 'Sodium Chloride.', 'admin': True}
 		with ModelServer.rpc_connect("users", "create") as conn:
 			self.user_id = conn.create_user(self.user_info['email'], self.user_info['first_name'],
-				self.user_info['last_name'], self.user_info['password_hash'], self.user_info['salt'])
+				self.user_info['last_name'], self.user_info['password_hash'], self.user_info['salt'],
+				self.user_info['admin'])
 
 	def _assert_dict_subset(self, expected, actual):
 		for key in expected.iterkeys():
@@ -137,3 +138,10 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		assert_equal(self.repo_id, repo["id"])
 		assert_equal(self.REPO_NAME, repo["name"])
 		assert_equal(self.repostore_id, repo["repostore_id"])
+
+	def test_get_deleted_repo(self):
+		with ModelServer.rpc_connect("repos", "delete") as conn:
+			conn.delete_repo(self.user_id, self.repo_id)
+		with ModelServer.rpc_connect("repos", "read") as conn:
+			repos = conn.get_repositories(self.user_id)
+		assert_true(len(repos) == 0)

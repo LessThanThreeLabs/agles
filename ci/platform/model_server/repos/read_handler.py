@@ -69,7 +69,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 	def get_repositories(self, user_id):
 		repo = database.schema.repo
 
-		query = repo.select().apply_labels()
+		query = repo.select().apply_labels().where(repo.c.deleted == 0)  # Check to make sure its not deleted
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			rows = sqlconn.execute(query)
 		return map(lambda row: to_dict(row, repo.columns, tablename=repo.name), rows)

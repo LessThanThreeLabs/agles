@@ -19,6 +19,7 @@ from changes.update_handler import ChangesUpdateHandler
 from repos.create_handler import ReposCreateHandler
 from repos.read_handler import ReposReadHandler
 from repos.update_handler import ReposUpdateHandler
+from repos.delete_handler import ReposDeleteHandler
 from settings.rabbit import RabbitSettings
 from users.create_handler import UsersCreateHandler
 from users.read_handler import UsersReadHandler
@@ -45,6 +46,7 @@ class ModelServer(object):
 		ReposCreateHandler,
 		ReposReadHandler,
 		ReposUpdateHandler,
+		ReposDeleteHandler,
 		UsersCreateHandler,
 		UsersReadHandler,
 		UsersUpdateHandler

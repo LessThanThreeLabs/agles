@@ -1,7 +1,5 @@
 import database.schema
 
-from sqlalchemy import and_, or_
-
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from util.sql import to_dict
