@@ -41,15 +41,29 @@ window.HeaderLogin = ['$scope', '$location', ($scope, $location) ->
 ]
 
 
-window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', ($scope, $location, initialState, rpc) ->
+window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', 'events', ($scope, $location, initialState, rpc, events) ->
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
-			$scope.$apply () -> $scope.repositoryDropdownOptions = (createDropdownOptionFromRepository repository for repository in repositories)
+			$scope.$apply () -> 
+				$scope.repositoryDropdownOptions = $scope.repositoryDropdownOptions.concat (createDropdownOptionFromRepository repository for repository in repositories)
 
 	createDropdownOptionFromRepository = (repository) ->
 		title: repository.name
 		name: repository.id
+
+	handleRepositoryAdded = (data) -> $scope.$apply () ->
+		$scope.repositoryDropdownOptions.push createDropdownOptionFromRepository data
+
+	handleRepositoryRemoved = (data) -> $scope.$apply () ->
+		repositoryToRemoveIndex = (index for repository, index in $scope.repositoryDropdownOptions when repository.name is data.id)[0]
+		$scope.repositoryDropdownOptions.splice repositoryToRemoveIndex, 1 if repositoryToRemoveIndex?
+
+	addRepositoryEvents = events.listen('users', 'repository added', initialState.user.id).setCallback(handleRepositoryAdded).subscribe()
+	removeRepositoryEvents = events.listen('users', 'repository removed', initialState.user.id).setCallback(handleRepositoryRemoved).subscribe()
+	$scope.$on '$destroy', addRepositoryEvents.unsubscribe
+	$scope.$on '$destroy', removeRepositoryEvents.unsubscribe
 	
+	$scope.repositoryDropdownOptions = []
 	getRepositories() if $scope.loggedIn
 
 	$scope.repositoryDropdownOptionClick = (repositoryId) ->
