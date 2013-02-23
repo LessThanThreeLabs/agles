@@ -31,22 +31,6 @@ class RepositoryEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					id: data.contents.change_id
 					status: data.contents.status
-				# do nothing
-			# when 'member added', 'member removed', 'member permissions changed'
-			# 	@sockets.in(roomName).emit eventName,
-			# 		type: data.type
-			# 		contents: @_sanitizeUser data.contents
-			# when 'forward url updated'
-			# 	@sockets.in(roomName).emit eventName,
-			# 		type: data.type
-			# 		contents = @_sanitizeForwardUrlContents data.contents
 			else
 				throw new Error 'Unexpected event type: ' + data.type
-
-
-	# _toPermissionString: (permissions) =>
-	# 	switch permissions
-	# 		when 1 then "r"
-	# 		when 3 then "r/w"
-	# 		when 7 then "r/w/a"
-	# 		else ""
+				

@@ -26,5 +26,9 @@ class UserEventHandler extends EventHandler
 					id: data.contents.id
 					alias: data.contents.alias
 					timestamp: data.contents.timestamp
+			when 'user added', 'user removed'
+				console.error 'NEED TO HANDLE USER ADDED/REMOVED EVENTS'
+			when 'repository added', 'repository removed'
+				console.error 'NEED TO HANDLE REPOSITORY ADDED/REMOVED EVENTS'
 			else
 				throw new Error 'Unexpected event type: ' + data.type

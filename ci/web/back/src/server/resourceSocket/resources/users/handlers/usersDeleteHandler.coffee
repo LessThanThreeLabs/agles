@@ -14,3 +14,4 @@ class UsersDeleteHandler extends Handler
 		else
 			console.log 'need to delete user...'
 			callback()
+			
