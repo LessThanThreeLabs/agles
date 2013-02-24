@@ -321,9 +321,18 @@ angular.module('koality.directive', []).
 		replace: true
 		transclude: true
 		template: '<div class="prettyOption">
-				<div class="prettyOptionContents" ng-transclude></div>
+				<div class="prettyOptionContents">
+					<span class="prettyOptionText">{{text}}</span>
+					<span class="prettyOptionSubtext">{{subtext}}</span>
+					<div class="prettyOptionArrow"></div>
+				</div>
 				<div class="prettyOptionTooth"></div>
 			</div>'
+		link: (scope, element, attributes) ->
+			attributes.$observe 'optionText', (text) ->
+				scope.text = text
+			attributes.$observe 'optionSubtext', (subtext) ->
+				scope.subtext = subtext
 	)
 
 
