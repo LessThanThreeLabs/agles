@@ -1,8 +1,8 @@
 @import '../constants';
 
 .prettyOption {
-	@height: 35px;
-	@toothWidth: @height * .75;
+	@height: 40px;
+	@toothWidth: @height * .35;
 
 	cursor: hand; cursor: pointer;
 
@@ -11,6 +11,12 @@
 	height: @height;
 
 	.prettyOptionContents {
+		@transitionTime: 0.25s;
+		transition: all @transitionTime ease-in-out;
+		-moz-transition: all @transitionTime ease-in-out;
+		-webkit-transition: all @transitionTime ease-in-out;
+		-o-transition: all @transitionTime ease-in-out;
+
 		position: absolute;
 		top: 0px;
 		left: 0px;
@@ -19,12 +25,10 @@
 		color: #D0D0D0;
 		text-align: center;
 		font-size: 14px;
-		line-height: 35px;
+		line-height: @height;
 		font-weight: bold;
-		
-		background-color: #404040;
-
-		border-bottom: 1px solid black;
+		background-color: @panelColor;
+		border-bottom: 1px solid @backgroundColor;
 	}
 
 	.prettyOptionTooth {
@@ -41,9 +45,13 @@
 		width: 0px;
 		height: 0px;
 
-		border-left: 0px solid #404040;
+		border-left: 0px solid @panelColor;
 		border-top: @height/2 solid transparent;
 		border-bottom: @height/2 solid transparent;
+	}
+
+	&.failed {
+		.prettyOptionContents {	color: @koalityRed; }
 	}
 
 	&:hover {
@@ -51,9 +59,68 @@
 		.prettyOptionTooth {
 			right: 0px;
 
-			border-left: @toothWidth solid #404040;
+			border-left: @toothWidth solid @panelColor;
 			border-top: @height/2 solid transparent;
 			border-bottom: @height/2 solid transparent;
+		}
+
+		&.passed {
+
+			.prettyOptionContents {
+				color: @koalityGreen;
+				background-color: @hoverColor;
+			}
+
+			.prettyOptionTooth {
+				border-left-color: @hoverColor;
+			}		
+		}
+
+		&.failed {
+
+			.prettyOptionContents {
+				color: @koalityRed;
+				background-color: @hoverColor;
+			}
+
+			.prettyOptionTooth {
+				border-left-color: @hoverColor;
+			}		
+		}
+	}
+
+	&.selected {
+
+		.prettyOptionTooth {
+			right: 0px;
+
+			border-left: @toothWidth solid @panelColor;
+			border-top: @height/2 solid transparent;
+			border-bottom: @height/2 solid transparent;
+		}
+
+		&.passed {
+
+			.prettyOptionContents {
+				color: @textColor;
+				background-color: @koalityGreen;
+			}
+
+			.prettyOptionTooth {
+				border-left-color: @koalityGreen;
+			}
+		}
+
+		&.failed {
+
+			.prettyOptionContents {
+				color: @textColor;
+				background-color: @koalityRed;
+			}
+
+			.prettyOptionTooth {
+				border-left-color: @koalityRed;
+			}
 		}
 	}
 }
