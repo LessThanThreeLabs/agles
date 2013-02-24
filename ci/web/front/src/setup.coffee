@@ -315,6 +315,15 @@ angular.module('koality.directive', []).
 				<div class="prettyFormValue" ng-transclude>
 				</div>
 			</div>'
+	).
+	directive('option', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<div class="prettyOption">
+				<div class="prettyOptionContents" ng-transclude></div>
+				<div class="prettyOptionTooth"></div>
+			</div>'
 	)
 
 

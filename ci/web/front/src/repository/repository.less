@@ -75,7 +75,7 @@
 		top: 56px;
 		left: 8px;
 		bottom: 10px;
-		width: 175px;
+		width: 250px;
 
 		#repositoryChangesSearch {
 			position: absolute;
@@ -117,59 +117,59 @@
 			bottom: 0px;
 
 			.repositoryChange {
-				cursor: hand; cursor: pointer;
+				// cursor: hand; cursor: pointer;
 
-				height: 35px;
-				color: #D0D0D0;
-				text-align: center;
-				font-size: 14px;
-				line-height: 35px;
-				font-weight: bold;
-				border-bottom: 1px solid @bottomBorderColor;
+				// height: 35px;
+				// color: #D0D0D0;
+				// text-align: center;
+				// font-size: 14px;
+				// line-height: 35px;
+				// font-weight: bold;
+				// border-bottom: 1px solid @bottomBorderColor;
 
-				@backgroundColorTransitionTime: 0.5s;
-				transition: background-color @backgroundColorTransitionTime ease-out;
-				-moz-transition: background-color @backgroundColorTransitionTime ease-out;
-				-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
-				-o-transition: background-color @backgroundColorTransitionTime ease-out;
+				// @backgroundColorTransitionTime: 0.5s;
+				// transition: background-color @backgroundColorTransitionTime ease-out;
+				// -moz-transition: background-color @backgroundColorTransitionTime ease-out;
+				// -webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+				// -o-transition: background-color @backgroundColorTransitionTime ease-out;
 
-				&:hover {
-					background-color: rgba(20, 20, 20, 0.75);
-				}
+				// &:hover {
+				// 	background-color: rgba(20, 20, 20, 0.75);
+				// }
 
-				&.selected {
-					background-color: rgba(20, 20, 20, 0.75);
-				}
+				// &.selected {
+				// 	background-color: rgba(20, 20, 20, 0.75);
+				// }
 
-				&.queued {
-					color: @heartbeatStartColor;
+				// &.queued {
+				// 	color: @heartbeatStartColor;
 
-					@heartbeatSpeed: 3.0s;
-					@heartbeatDelay: 0.0s;
-					animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-					-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-					-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-					-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				}
+				// 	@heartbeatSpeed: 3.0s;
+				// 	@heartbeatDelay: 0.0s;
+				// 	animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				// 	-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				// 	-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				// 	-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				// }
 
-				&.running {
-					color: @heartbeatStartColor;
+				// &.running {
+				// 	color: @heartbeatStartColor;
 
-					@heartbeatSpeed: 1.5s;
-					@heartbeatDelay: 0.0s;
-					animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-					-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-					-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-					-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				}
+				// 	@heartbeatSpeed: 1.5s;
+				// 	@heartbeatDelay: 0.0s;
+				// 	animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				// 	-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				// 	-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				// 	-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
+				// }
 
-				&.passed {
+				// &.passed {
 					
-				}
+				// }
 
-				&.failed {
-					color: rgba(160, 0, 0, 1.0);
-				}
+				// &.failed {
+				// 	color: rgba(160, 0, 0, 1.0);
+				// }
 			}
 		}
 	}
@@ -177,7 +177,7 @@
 	#repositoryChangeDetailsPanel {
 		position: absolute;
 		top: 56px;
-		left: 193px;
+		left: 268px;
 		right: 8px;
 		bottom: 10px;
 		margin: 0px;

@@ -1,0 +1,59 @@
+@import '../constants';
+
+.prettyOption {
+	@height: 35px;
+	@toothWidth: @height * .75;
+
+	cursor: hand; cursor: pointer;
+
+	position: relative;
+	width: 100%;
+	height: @height;
+
+	.prettyOptionContents {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		right: @toothWidth;
+		bottom: 0px;
+		color: #D0D0D0;
+		text-align: center;
+		font-size: 14px;
+		line-height: 35px;
+		font-weight: bold;
+		
+		background-color: #404040;
+
+		border-bottom: 1px solid black;
+	}
+
+	.prettyOptionTooth {
+		@transitionTime: 0.25s;
+		transition: all @transitionTime ease-in-out;
+		-moz-transition: all @transitionTime ease-in-out;
+		-webkit-transition: all @transitionTime ease-in-out;
+		-o-transition: all @transitionTime ease-in-out;
+
+		position: absolute;
+		top: 0px;
+		right: @toothWidth;
+		bottom: 0px;
+		width: 0px;
+		height: 0px;
+
+		border-left: 0px solid #404040;
+		border-top: @height/2 solid transparent;
+		border-bottom: @height/2 solid transparent;
+	}
+
+	&:hover {
+
+		.prettyOptionTooth {
+			right: 0px;
+
+			border-left: @toothWidth solid #404040;
+			border-top: @height/2 solid transparent;
+			border-bottom: @height/2 solid transparent;
+		}
+	}
+}
