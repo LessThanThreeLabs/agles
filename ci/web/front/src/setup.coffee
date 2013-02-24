@@ -162,6 +162,36 @@ angular.module('koality.directive', []).
 		return (scope, element, attributes) ->
 			element.focus()
 	).
+	directive('scrollbarWrapper', () ->
+		restrict: 'A'
+		replace: true
+		transclude: true
+		template: '<div class="hideScrollbarOuter">
+				<div class="hideScrollbarInner">
+					<div class="hideScrollbarContent" ng-transclude></div>
+				</div>
+			</div>'
+		link: (scope, element, attributes) ->
+			setWidths = () ->
+				element.css 'overflow', 'hidden'
+
+				element.find('.hideScrollbarInner').width element.width() + 25
+				element.find('.hideScrollbarInner').height element.height()
+				element.find('.hideScrollbarInner').css 'overflow-y', 'auto'
+
+				element.find('.hideScrollbarContent').width element.width()
+
+			listenForBottomScroll = () ->
+				return if not attributes.scrollbarWrapperNotifyOnBottomScroll?
+
+				innerElement = element.find('.hideScrollbarInner')
+				innerElement.bind 'scroll', () ->
+					if innerElement[0].scrollTop + innerElement[0].offsetHeight >= innerElement[0].scrollHeight
+						scope.$apply attributes.scrollbarWrapperNotifyOnBottomScroll
+
+			setWidths()
+			listenForBottomScroll()
+	).
 	directive('centeredPanel', () ->
 		restrict: 'E'
 		replace: true
@@ -222,13 +252,6 @@ angular.module('koality.directive', []).
 			scope.internalClickHandler = (option) ->
 				scope.currentOptionName = option.name
 
-	).
-	directive('notifyOnBottomScroll', () ->
-		restrict: 'A'
-		link: (scope, element, attributes) ->
-			element.bind 'scroll', () ->
-				if element[0].scrollTop + element[0].offsetHeight >= element[0].scrollHeight
-					scope.$apply attributes.notifyOnBottomScroll
 	).
 	directive('autoScrollToBottom', () ->
 		restrict: 'A'
