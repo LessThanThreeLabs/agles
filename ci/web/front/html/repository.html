@@ -13,8 +13,7 @@
 			<input ng-model="namesQuery">
 		</div>
 		<div id="repositoryChanges" scrollbar-wrapper scrollbar-wrapper-notify-on-bottom-scroll="scrolledToBottom()">
-			<!-- <option class="repositoryChange" ng-repeat="change in changes | orderBy:'number':true" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}">{{change.number}}</option> -->
-			<option class="repositoryChange" ng-repeat="change in changes | orderBy:'number':true" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}"><span class="prettyOptionText">{{change.number}}</span><span class="prettyOptionSubtext">{{change.status}}</span></option>
+			<option class="repositoryChange" ng-repeat="change in changes | orderBy:'number':true" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}"><span class="prettyOptionText">{{change.number}}</span><span class="prettyOptionSubtext">{{change.status}}</span><span class="prettyOptionArrow"></span></option>
 		</div>
 	</div>
 

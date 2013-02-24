@@ -39,6 +39,34 @@
 			padding-left: 5px;
 			font-size: 12px;
 		}
+
+		.prettyOptionArrow {
+			@marginRightTransitionTime: 0.25s;
+			@borderColorTransitionTime: 0.25s;
+			transition: margin-right @marginRightTransitionTime ease-in-out,
+				border-color @borderColorTransitionTime ease-in-out;
+			-moz-transition: margin-right @marginRightTransitionTime ease-in-out,
+				border-color @borderColorTransitionTime ease-in-out;
+			-webkit-transition: margin-right @marginRightTransitionTime ease-in-out,
+				border-color @borderColorTransitionTime ease-in-out;
+			-o-transition: margin-right @marginRightTransitionTime ease-in-out,
+				border-color @borderColorTransitionTime ease-in-out;
+
+			margin-top: 17px;
+			margin-right: 5px;
+			float: right;
+			display: block;
+			width: 5px;
+			height: 5px;
+			border-top: 2px solid @koalityGray;
+			border-right: 2px solid @koalityGray;
+
+			transform: rotate(45deg);
+			-moz-transform: rotate(45deg);
+			-webkit-transform: rotate(45deg);
+			-ms-transform: rotate(45deg);
+			-o-transform: rotate(45deg);
+		}
 	}
 
 	.prettyOptionTooth {
@@ -61,50 +89,73 @@
 	}
 
 	&.failed {
-		.prettyOptionContents {	color: @koalityRed; }
+		.prettyOptionContents {
+			color: @koalityRed;
+
+			.prettyOptionArrow {
+				border-color: @koalityRed;
+			}			
+		}
 	}
 
 	&:hover {
 
+		.prettyOptionContents {
+			color: @koalityWhite;
+			background-color: @hoverColor;
+
+			.prettyOptionArrow {
+				margin-right: -5px;
+				border-color: @koalityWhite;
+			}
+		}
+
 		.prettyOptionTooth {
 			right: 0px;
 
-			border-left: @toothWidth solid @panelColor;
+			border-left: @toothWidth solid @hoverColor;
 			border-top: @height/2 solid transparent;
 			border-bottom: @height/2 solid transparent;
 		}
 
 		&.passed {
-
 			.prettyOptionContents {
 				color: @koalityGreen;
-				background-color: @hoverColor;
-			}
 
-			.prettyOptionTooth {
-				border-left-color: @hoverColor;
-			}		
+				.prettyOptionArrow {
+					border-color: @koalityGreen;
+				}
+			}
 		}
 
 		&.failed {
 
 			.prettyOptionContents {
 				color: @koalityRed;
-				background-color: @hoverColor;
-			}
 
-			.prettyOptionTooth {
-				border-left-color: @hoverColor;
-			}		
+				.prettyOptionArrow {
+					border-color: @koalityRed;
+				}			
+			}
 		}
 	}
 
 	&.selected {
 
+		.prettyOptionContents {
+			color: @koalityWhite;
+			background-color: @hoverColor;
+
+			.prettyOptionArrow {
+				margin-right: -5px;
+				border-color: @koalityWhite;
+			}
+		}
+
 		.prettyOptionTooth {
 			right: 0px;
 
-			border-left: @toothWidth solid @panelColor;
+			border-left: @toothWidth solid @hoverColor;
 			border-top: @height/2 solid transparent;
 			border-bottom: @height/2 solid transparent;
 		}
@@ -114,9 +165,13 @@
 			.prettyOptionContents {
 				color: @koalityWhite;
 				background-color: @koalityGreen;
+
+				.prettyOptionArrow {
+					border-color: @koalityWhite;
+				}
 			}
 
-			.prettyOptionTooth {
+			.prettyOptionTooth { 
 				border-left-color: @koalityGreen;
 			}
 		}
@@ -126,6 +181,10 @@
 			.prettyOptionContents {
 				color: @koalityWhite;
 				background-color: @koalityRed;
+
+				.prettyOptionArrow {
+					border-color: @koalityWhite;
+				}
 			}
 
 			.prettyOptionTooth {
