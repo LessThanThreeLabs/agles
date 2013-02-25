@@ -107,27 +107,28 @@
 						}
 
 						.spinnerContainer {
-							float: right;
+							position: absolute;
+							top: 0px;
+							right: 20px;
 							width: @optionHeight;
 							height: @optionHeight;
 						}
 
 						.prettyMenuOptionArrow {
-							@marginRightTransitionTime: 0.25s;
+							@rightTransitionTime: 0.25s;
 							@borderColorTransitionTime: 0.25s;
-							transition: margin-right @marginRightTransitionTime ease-in-out,
+							transition: right @rightTransitionTime ease-in-out,
 								border-color @borderColorTransitionTime ease-in-out;
-							-moz-transition: margin-right @marginRightTransitionTime ease-in-out,
+							-moz-transition: right @rightTransitionTime ease-in-out,
 								border-color @borderColorTransitionTime ease-in-out;
-							-webkit-transition: margin-right @marginRightTransitionTime ease-in-out,
+							-webkit-transition: right @rightTransitionTime ease-in-out,
 								border-color @borderColorTransitionTime ease-in-out;
-							-o-transition: margin-right @marginRightTransitionTime ease-in-out,
+							-o-transition: right @rightTransitionTime ease-in-out,
 								border-color @borderColorTransitionTime ease-in-out;
 
-							margin-top: 17px;
-							margin-right: 5px;
-							float: right;
-							display: block;
+							position: absolute;
+							top: 17px;
+							right: 10px;
 							width: 5px;
 							height: 5px;
 							border-top: 2px solid @koalityGray;
@@ -177,7 +178,7 @@
 							background-color: @hoverColor;
 
 							.prettyMenuOptionArrow {
-								margin-right: -5px;
+								right: 0px;
 								border-color: @koalityWhite;
 							}
 						}
@@ -219,7 +220,7 @@
 							background-color: @hoverColor;
 
 							.prettyMenuOptionArrow {
-								margin-right: -5px;
+								right: 0px;
 								border-color: @koalityWhite;
 							}
 						}
