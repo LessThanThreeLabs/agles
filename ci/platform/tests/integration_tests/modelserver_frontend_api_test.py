@@ -43,6 +43,7 @@ from hashlib import sha512
 
 from nose.tools import *
 
+from bunnyrpc.exceptions import RPCRequestError
 from database.engine import ConnectionFactory
 from model_server import ModelServer
 from util.pathgen import to_clone_path
@@ -99,6 +100,14 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with ModelServer.rpc_connect("users", "read") as conn:
 			user = conn.get_user_from_id(self.user_id)
 		self._assert_dict_subset(self.user_info, user)
+
+	def test_basic_set_admin(self):
+		with ModelServer.rpc_connect("users", "create") as conn:
+			created_user_id = conn.create_user('email', 'user_first', 'user_last', self.password_hash, 'Sodium Chloride.', False)
+		with ModelServer.rpc_connect("users", "update") as conn:
+			conn.set_admin(self.user_id, created_user_id, True)
+			conn.set_admin(created_user_id, self.user_id, False)
+			assert_raises(RPCRequestError, conn.set_admin, self.user_id, created_user_id, True)
 
 #####################
 #	REPOS

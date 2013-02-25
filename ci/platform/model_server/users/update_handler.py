@@ -63,10 +63,12 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 	def set_admin(self, user_id, user_id_to_change, admin):
 		user = schema.user
 
+		if user_id == user_id_to_change:
+			raise InvalidPermissionsError(user_id, user_id_to_change)
 		if not is_admin(user_id):
 			raise InvalidPermissionsError(user_id)
 
-		update = user.update.where(user.c.id == user_id_to_change).values(admin=admin)
+		update = user.update().where(user.c.id == user_id_to_change).values(admin=admin)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
 		self.publish_event("users", user_id, "user updated", user_id=user_id_to_change, admin=admin)
