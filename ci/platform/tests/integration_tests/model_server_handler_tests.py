@@ -98,6 +98,12 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			update_handler.append_console_lines(i, test_lines,
 				type=ConsoleType.Test, subtype="unittest")
 
+	def query_changes_empty_input_test(self):
+		self._initialize()
+		read_handler = ChangesReadHandler()
+		results = read_handler.query_changes(self.user_id, self.repo_id, "all", [], 0, 100)
+		assert_equal(len(results), 0)
+
 	def query_all_changes_test(self):
 		self._initialize()
 		read_handler = ChangesReadHandler()

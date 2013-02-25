@@ -19,7 +19,8 @@ def load_temp_strings(strings):
 	ins_list = [{'string': string} for string in strings]
 	with ConnectionFactory.get_sql_connection() as sqlconn:
 		sqlconn.execute(delete)
-		sqlconn.execute(ins, ins_list)
+		if ins_list:
+			sqlconn.execute(ins, ins_list)
 
 
 class InconsistentDataError(Exception):
