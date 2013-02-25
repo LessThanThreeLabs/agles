@@ -1,5 +1,6 @@
 from sqlalchemy import or_, and_
 
+import collections
 import database.schema
 
 from database.engine import ConnectionFactory
@@ -91,6 +92,9 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 	# TODO (jchu): This query is SLOW AS BALLS
 	def query_changes(self, user_id, repo_id, group, names, start_index_inclusive, num_results):
+		assert isinstance(names, collections.Iterable)
+		assert not isinstance(names, str)
+
 		return self.query_dispatch[group](user_id, repo_id, names, start_index_inclusive, num_results)
 
 	def _query_all_changes(self, user_id, repo_id, names, start_index_inclusive, num_results):
