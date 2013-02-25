@@ -50,3 +50,13 @@ class ModelServerRpcHandler(object):
 		for row in rows:
 			admin_id = row[user.c.id]
 			self.publish_event(_resource, admin_id, _event_type, **_contents)
+
+	def publish_event_to_all(self, _resource, _event_type, **_contents):
+		user = database.schema.user
+
+		query = user.select().where(user.c.deleted == 0)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			rows = sqlconn.execute(query)
+		for row in rows:
+			user_id = row[user.c.id]
+			self.publish_event(_resource, user_id, _event_type, **_contents)
