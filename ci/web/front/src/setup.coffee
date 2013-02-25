@@ -345,12 +345,12 @@ angular.module('koality.directive', []).
 	directive('menuOption', () ->
 		restrict: 'E'
 		replace: true
-		transclude: true
 		template: '<div class="prettyMenuOption">
 				<div class="prettyMenuOptionContents">
 					<span class="prettyMenuOptionText">{{text}}</span>
 					<span class="prettyMenuOptionSubtext">{{subtext}}</span>
 					<div class="prettyMenuOptionArrow"></div>
+					<spinner spinner-running="{{spinning}}"></spinner>
 				</div>
 				<div class="prettyMenuOptionTooth"></div>
 			</div>'
@@ -359,6 +359,43 @@ angular.module('koality.directive', []).
 				scope.text = text
 			attributes.$observe 'menuOptionSubtext', (subtext) ->
 				scope.subtext = subtext
+			attributes.$observe 'menuOptionSpinning', (spinning) ->
+				scope.spinning = if typeof spinning is 'boolean' then spinning else spinning is 'true'
+	).
+	directive('spinner', () ->
+		restrict: 'E'
+		replace: true
+		template: '<div class="spinnerContainer"></div>'
+		link: (scope, element, attributes) ->
+			spinner = null
+
+			spinnerOptions =
+				lines: 7
+				length: 3
+				width: 3
+				radius: 5
+				corners: 1
+				rotate: 14
+				color: '#000000'
+				speed: 1.2
+				trail: 30
+				shadow: false
+				hwaccel: true
+				className: 'spinner'
+				zIndex: 2e9
+				top: 'auto'
+				left: 'auto'
+
+			attributes.$observe 'spinnerRunning', (running) ->
+				running = if typeof running is 'boolean' then running else running is 'true'
+				if running then startSpinner() else stopSpinner()
+
+			startSpinner = () ->
+				if spinner? then spinner.spin()
+				else spinner = new Spinner(spinnerOptions).spin(element[0])
+
+			stopSpinner = () ->
+				spinner.stop() if spinner?
 	)
 
 
