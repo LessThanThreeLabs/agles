@@ -7,14 +7,13 @@
 		</div>
 	</div>
 
-	<div id="repositoryChangesPanel" unselectable ng-controller="RepositoryChanges">
-		<div id="repositoryChangesSearch">
-			<img ng-src="{{'/img/icons/search.png' | fileSuffix}}">
-			<input ng-model="namesQuery">
-		</div>
-		<div id="repositoryChanges" scrollbar-wrapper scrollbar-wrapper-notify-on-bottom-scroll="scrolledToBottom()">
-			<option class="repositoryChange" ng-repeat="change in changes | orderBy:'number':true" option-text="{{change.number}}" option-subtext="{{change.status}}" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}">
-		</div>
+	<div id="repositoryChanges" unselectable ng-controller="RepositoryChanges">
+		<menu>
+			<menu-header>Hello</menu-header>
+			<menu-options>
+				<menu-option class="repositoryChange" ng-repeat="change in changes | orderBy:'number':true" menu-option-text="{{change.number}}" menu-option-subtext="{{change.status}}" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}">
+			</menu-options>
+		</menu>
 	</div>
 
 	<div id="repositoryChangeDetailsPanel" ng-controller="RepositoryDetails">

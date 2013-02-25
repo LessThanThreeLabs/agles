@@ -63,7 +63,17 @@
 				vertical-align: top;
 			}
 		}
-	}	
+	}
+
+	#repositoryChanges {
+		position: absolute;
+		top: 56px;
+		left: 8px;
+		bottom: 10px;
+		width: 225px;		
+
+		border: 1px solid #222222;
+	}
 
 	#repositoryChangesPanel {
 		@bottomBorderColor: rgba(109, 113, 131, 0.14);
@@ -82,28 +92,28 @@
 			height: 35px;
 			border-bottom: 1px solid @bottomBorderColor;
 
-			img {
-				position: absolute;
-				top: 6px;
-				left: 5px;
-				width: 22px;
-			}
+			// img {
+			// 	position: absolute;
+			// 	top: 6px;
+			// 	left: 5px;
+			// 	width: 22px;
+			// }
 
-			input {
-				position: absolute;
-				top: 0px;
-				left: 30px;
-				right: 0px;
-				bottom: 0px;
-				color: #D0D0D0;
-				font-size: 18px;
-				border: none;
-				background-color: rgba(0, 0, 0, 0.0);
+			// input {
+			// 	position: absolute;
+			// 	top: 0px;
+			// 	left: 30px;
+			// 	right: 0px;
+			// 	bottom: 0px;
+			// 	color: #D0D0D0;
+			// 	font-size: 18px;
+			// 	border: none;
+			// 	background-color: rgba(0, 0, 0, 0.0);
 
-				&:focus {
-					outline: none;
-				}
-			}
+			// 	&:focus {
+			// 		outline: none;
+			// 	}
+			// }
 		}
 
 		#repositoryChanges {
@@ -112,62 +122,6 @@
 			left: 0px;
 			right: 0px;
 			bottom: 0px;
-
-			.repositoryChange {
-				// cursor: hand; cursor: pointer;
-
-				// height: 35px;
-				// color: #D0D0D0;
-				// text-align: center;
-				// font-size: 14px;
-				// line-height: 35px;
-				// font-weight: bold;
-				// border-bottom: 1px solid @bottomBorderColor;
-
-				// @backgroundColorTransitionTime: 0.5s;
-				// transition: background-color @backgroundColorTransitionTime ease-out;
-				// -moz-transition: background-color @backgroundColorTransitionTime ease-out;
-				// -webkit-transition: background-color @backgroundColorTransitionTime ease-out;
-				// -o-transition: background-color @backgroundColorTransitionTime ease-out;
-
-				// &:hover {
-				// 	background-color: rgba(20, 20, 20, 0.75);
-				// }
-
-				// &.selected {
-				// 	background-color: rgba(20, 20, 20, 0.75);
-				// }
-
-				// &.queued {
-				// 	color: @heartbeatStartColor;
-
-				// 	@heartbeatSpeed: 3.0s;
-				// 	@heartbeatDelay: 0.0s;
-				// 	animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				// 	-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				// 	-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				// 	-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				// }
-
-				// &.running {
-				// 	color: @heartbeatStartColor;
-
-				// 	@heartbeatSpeed: 1.5s;
-				// 	@heartbeatDelay: 0.0s;
-				// 	animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				// 	-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				// 	-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				// 	-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-				// }
-
-				// &.passed {
-					
-				// }
-
-				// &.failed {
-				// 	color: rgba(160, 0, 0, 1.0);
-				// }
-			}
 		}
 	}
 

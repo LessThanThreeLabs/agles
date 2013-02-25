@@ -1,48 +1,257 @@
 @import '../constants';
 
 .prettyMenu {
-	@menuOptionsWidth: 150px;
+	@menuHeaderHeight: 40px;
+	@menuFooterHeight: 8px;
+	@optionHeight: 40px;
+	@toothWidth: @optionHeight * .35;
+	@borderRadius: 5px;
+
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+
+	.prettyMenuHeader {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		right: @toothWidth;
+		height: @menuHeaderHeight;
+		padding: 0px 15px 0px 15px;
+		background-color: @panelHeaderColor;
+		border-bottom: 1px solid @backgroundColor;
+		border-top-left-radius: @borderRadius;
+		border-top-right-radius: @borderRadius;
+		color: @koalityWhite;
+		font-size: 16px;
+		line-height: @menuHeaderHeight;
+	}
 
 	.prettyMenuOptions {
-		float: left;
-		width: @menuOptionsWidth;
-		text-align: right;
-		padding-top: 0px;
+		position: absolute;
+		top: @menuHeaderHeight + 1;
+		left: 0px;
+		right: 0px;
+		bottom: @menuFooterHeight;
+		overflow: hidden;
 
-		.prettyMenuOption {
-			display: block;
-			padding: 10px 15px 10px 0px;
-			font-size: 1.2em;
-			border-radius: 4px;
+		.prettyMenuOptionsScrollOuterWrapper {
+			@scrollbarHideWidth: 50px;
 
-			@backgroundColorTransitionTime: 0.25s;
-			transition: background-color @backgroundColorTransitionTime ease-out;
-			-moz-transition: background-color @backgroundColorTransitionTime ease-out;
-			-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
-			-o-transition: background-color @backgroundColorTransitionTime ease-out;
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: -@scrollbarHideWidth;
+			bottom: 0px;
+			overflow-y: auto;
 
-			&.selected {
-				background-color: rgba(0, 94, 131, 1.0);
-			}
+			.prettyMenuOptionsScrollInnerWrapper {
+				padding-right: @scrollbarHideWidth;
 
-			&:hover {
-				background-color: rgba(0, 94, 131, 1.0);
+				.prettyMenuOption {
+					cursor: hand; cursor: pointer;
+
+					display: block;
+					position: relative;
+					width: 100%;
+					height: @optionHeight;
+
+					.prettyMenuOptionContents {
+						@transitionTime: 0.25s;
+						transition: all @transitionTime ease-in-out;
+						-moz-transition: all @transitionTime ease-in-out;
+						-webkit-transition: all @transitionTime ease-in-out;
+						-o-transition: all @transitionTime ease-in-out;
+
+						position: absolute;
+						top: 0px;
+						left: 0px;
+						right: @toothWidth;
+						bottom: 0px;
+						padding: 0px 12px 0px 12px;
+						color: @koalityGray;
+						line-height: @optionHeight;
+						background-color: @panelColor;
+						border-bottom: 1px solid @backgroundColor;
+
+						.prettyMenuOptionText {
+							display: inline;
+							font-size: 18px;
+						}
+
+						.prettyMenuOptionSubtext {
+							display: inline;
+							padding-left: 5px;
+							font-size: 12px;
+						}
+
+						.prettyMenuOptionArrow {
+							@marginRightTransitionTime: 0.25s;
+							@borderColorTransitionTime: 0.25s;
+							transition: margin-right @marginRightTransitionTime ease-in-out,
+								border-color @borderColorTransitionTime ease-in-out;
+							-moz-transition: margin-right @marginRightTransitionTime ease-in-out,
+								border-color @borderColorTransitionTime ease-in-out;
+							-webkit-transition: margin-right @marginRightTransitionTime ease-in-out,
+								border-color @borderColorTransitionTime ease-in-out;
+							-o-transition: margin-right @marginRightTransitionTime ease-in-out,
+								border-color @borderColorTransitionTime ease-in-out;
+
+							margin-top: 17px;
+							margin-right: 5px;
+							float: right;
+							display: block;
+							width: 5px;
+							height: 5px;
+							border-top: 2px solid @koalityGray;
+							border-right: 2px solid @koalityGray;
+
+							transform: rotate(45deg);
+							-moz-transform: rotate(45deg);
+							-webkit-transform: rotate(45deg);
+							-ms-transform: rotate(45deg);
+							-o-transform: rotate(45deg);
+						}
+					}
+
+					.prettyMenuOptionTooth {
+						@transitionTime: 0.25s;
+						transition: all @transitionTime ease-in-out;
+						-moz-transition: all @transitionTime ease-in-out;
+						-webkit-transition: all @transitionTime ease-in-out;
+						-o-transition: all @transitionTime ease-in-out;
+
+						position: absolute;
+						top: 0px;
+						right: @toothWidth;
+						bottom: 0px;
+						width: 0px;
+						height: 0px;
+
+						border-left: 0px solid @panelColor;
+						border-top: @optionHeight/2 solid transparent;
+						border-bottom: @optionHeight/2 solid transparent;
+					}
+
+					&.failed {
+						.prettyMenuOptionContents {
+							color: @koalityRed;
+
+							.prettyMenuOptionArrow {
+								border-color: @koalityRed;
+							}			
+						}
+					}
+
+					&:hover {
+
+						.prettyMenuOptionContents {
+							color: @koalityWhite;
+							background-color: @hoverColor;
+
+							.prettyMenuOptionArrow {
+								margin-right: -5px;
+								border-color: @koalityWhite;
+							}
+						}
+
+						.prettyMenuOptionTooth {
+							right: 0px;
+
+							border-left: @toothWidth solid @hoverColor;
+							border-top: @optionHeight/2 solid transparent;
+							border-bottom: @optionHeight/2 solid transparent;
+						}
+
+						&.passed {
+							.prettyMenuOptionContents {
+								color: @koalityGreen;
+
+								.prettyMenuOptionArrow {
+									border-color: @koalityGreen;
+								}
+							}
+						}
+
+						&.failed {
+
+							.prettyMenuOptionContents {
+								color: @koalityRed;
+
+								.prettyMenuOptionArrow {
+									border-color: @koalityRed;
+								}			
+							}
+						}
+					}
+
+					&.selected {
+
+						.prettyMenuOptionContents {
+							color: @koalityWhite;
+							background-color: @hoverColor;
+
+							.prettyMenuOptionArrow {
+								margin-right: -5px;
+								border-color: @koalityWhite;
+							}
+						}
+
+						.prettyMenuOptionTooth {
+							right: 0px;
+
+							border-left: @toothWidth solid @hoverColor;
+							border-top: @optionHeight/2 solid transparent;
+							border-bottom: @optionHeight/2 solid transparent;
+						}
+
+						&.passed {
+
+							.prettyMenuOptionContents {
+								color: @koalityWhite;
+								background-color: @koalityGreen;
+
+								.prettyMenuOptionArrow {
+									border-color: @koalityWhite;
+								}
+							}
+
+							.prettyMenuOptionTooth { 
+								border-left-color: @koalityGreen;
+							}
+						}
+
+						&.failed {
+
+							.prettyMenuOptionContents {
+								color: @koalityWhite;
+								background-color: @koalityRed;
+
+								.prettyMenuOptionArrow {
+									border-color: @koalityWhite;
+								}
+							}
+
+							.prettyMenuOptionTooth {
+								border-left-color: @koalityRed;
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 
-	.prettyMenuContents {
-		display: block;
-		margin-left: @menuOptionsWidth + 30px;
-		min-width: 200px;
-		text-align: left;
-
-		.prettyMenuContent {
-			display: none;
-
-			&.selected {
-				display: block;
-			}
-		}
+	.prettyMenuFooter {
+		position: absolute;
+		left: 0px;
+		right: @toothWidth;
+		bottom: 0px;
+		height: @menuFooterHeight;
+		background-color: @panelHeaderColor;
+		border-bottom-left-radius: @borderRadius;
+		border-bottom-right-radius: @borderRadius;
 	}
 }

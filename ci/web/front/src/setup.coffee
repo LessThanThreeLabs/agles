@@ -230,29 +230,29 @@ angular.module('koality.directive', []).
 				event.preventDefault()
 				event.stopPropagation()
 	]).
-	directive('menu', () ->
-		restrict: 'E'
-		replace: true
-		transclude: true
-		scope: 
-			options: '=options'
-			currentOptionName: '=currentOptionName'
-			clickHandler: '&optionClick'
-		template: '<div class="prettyMenu">
-				<div class="prettyMenuOptions">
-					<div class="prettyMenuOption" ng-repeat="option in options" ng-class="{selected: option.name == currentOptionName}" ng-click="clickHandler({optionName: option.name}); internalClickHandler(option)">{{option.title}}</div>
-				</div>
-				<div class="prettyMenuContents" ng-transclude></div>
-			</div>'
-		link: (scope, element, attributes) ->
-			scope.$watch 'currentOptionName', () ->
-				element.find('.prettyMenuContent').removeClass 'selected'
-				element.find(".prettyMenuContent[optionName='#{scope.currentOptionName}']").addClass 'selected'
+	# directive('menu', () ->
+	# 	restrict: 'E'
+	# 	replace: true
+	# 	transclude: true
+	# 	scope: 
+	# 		options: '=options'
+	# 		currentOptionName: '=currentOptionName'
+	# 		clickHandler: '&optionClick'
+	# 	template: '<div class="prettyMenu">
+	# 			<div class="prettyMenuOptions">
+	# 				<div class="prettyMenuOption" ng-repeat="option in options" ng-class="{selected: option.name == currentOptionName}" ng-click="clickHandler({optionName: option.name}); internalClickHandler(option)">{{option.title}}</div>
+	# 			</div>
+	# 			<div class="prettyMenuContents" ng-transclude></div>
+	# 		</div>'
+	# 	link: (scope, element, attributes) ->
+	# 		scope.$watch 'currentOptionName', () ->
+	# 			element.find('.prettyMenuContent').removeClass 'selected'
+	# 			element.find(".prettyMenuContent[optionName='#{scope.currentOptionName}']").addClass 'selected'
 
-			scope.internalClickHandler = (option) ->
-				scope.currentOptionName = option.name
+	# 		scope.internalClickHandler = (option) ->
+	# 			scope.currentOptionName = option.name
 
-	).
+	# ).
 	directive('autoScrollToBottom', () ->
 		restrict: 'A'
 		link: (scope, element, attributes) ->
@@ -316,22 +316,46 @@ angular.module('koality.directive', []).
 				</div>
 			</div>'
 	).
-	directive('option', () ->
+	directive('menu', () ->
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyOption">
-				<div class="prettyOptionContents">
-					<span class="prettyOptionText">{{text}}</span>
-					<span class="prettyOptionSubtext">{{subtext}}</span>
-					<div class="prettyOptionArrow"></div>
+		template: '<div class="prettyMenu" ng-transclude>
+				<div class="prettyMenuFooter"></div>
+			</div>'
+	).
+	directive('menuHeader', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<div class="prettyMenuHeader" ng-transclude></div>'
+	).
+	directive('menuOptions', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<div class="prettyMenuOptions">
+				<div class="prettyMenuOptionsScrollOuterWrapper">
+					<div class="prettyMenuOptionsScrollInnerWrapper" ng-transclude></div>
 				</div>
-				<div class="prettyOptionTooth"></div>
+			</div>'
+	).
+	directive('menuOption', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<div class="prettyMenuOption">
+				<div class="prettyMenuOptionContents">
+					<span class="prettyMenuOptionText">{{text}}</span>
+					<span class="prettyMenuOptionSubtext">{{subtext}}</span>
+					<div class="prettyMenuOptionArrow"></div>
+				</div>
+				<div class="prettyMenuOptionTooth"></div>
 			</div>'
 		link: (scope, element, attributes) ->
-			attributes.$observe 'optionText', (text) ->
+			attributes.$observe 'menuOptionText', (text) ->
 				scope.text = text
-			attributes.$observe 'optionSubtext', (subtext) ->
+			attributes.$observe 'menuOptionSubtext', (subtext) ->
 				scope.subtext = subtext
 	)
 
