@@ -92,7 +92,7 @@ class Provisioner(object):
 		steps = setup_step if isinstance(setup_step, list) else [setup_step]
 		for step in steps:
 			results = step.run()
-			if results.returncode != 0:
+			if results and results.returncode != 0:
 				raise ProvisionFailedException("%s failed with return code %d" % (action_name, results.returncode))
 
 	def parse_languages(self, config, global_install):
