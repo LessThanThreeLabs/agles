@@ -88,10 +88,8 @@ angular.module('koality.service', []).
 			else names = null
 
 			repositoryId: repositoryId
-			# group: group
-			group: 'all'
-			# names: names
-			names: ['hello']
+			group: group
+			names: names
 			startIndex: startIndex
 			numToRetrieve: NUM_CHANGES_TO_REQUEST
 
