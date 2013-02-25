@@ -1,4 +1,9 @@
+import database.schema
+
+from sqlalchemy import and_
+
 from bunnyrpc.server import Server
+from database.engine import ConnectionFactory
 from events_broker import EventsBroker
 from kombu.connection import Connection
 from settings.rabbit import RabbitSettings
@@ -22,11 +27,26 @@ class ModelServerRpcHandler(object):
 	def start(self):
 		self.get_server().run()
 
-	def publish_event(self, _resource, _id, _event_type, **contents):
+	def publish_event(self, _resource, _id, _event_type, **_contents):
 		"""A simple method for publishing a single event with the default
 		rabbit connection info.
 		Not recommended for use with multiple events.
 		"""
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
 			broker = EventsBroker(connection)
-			broker.publish(_resource, _id, _event_type, **contents)
+			broker.publish(_resource, _id, _event_type, **_contents)
+
+	def publish_event_to_admins(self, _resource, _event_type, **_contents):
+		user = database.schema.user
+
+		query = user.select().where(
+			and_(
+				user.c.admin == True,
+				user.c.deleted == 0
+			)
+		)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			rows = sqlconn.execute(query)
+		for row in rows:
+			admin_id = row[user.c.id]
+			self.publish_event(_resource, admin_id, _event_type, _contents)

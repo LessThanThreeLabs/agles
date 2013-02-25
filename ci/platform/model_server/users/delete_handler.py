@@ -20,3 +20,4 @@ class UsersDeleteHandler(ModelServerRpcHandler):
 		update = user.update().where(user.c.id == user_to_delete_id).values(deleted=user_to_delete_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
+		self.publish_event_to_admins("users", "user removed", removed_id=user_to_delete_id)
