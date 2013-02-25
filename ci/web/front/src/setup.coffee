@@ -74,7 +74,7 @@ angular.module('koality.service', []).
 					console.error if error?	
 				return @
 	]).
-	factory('changesRpc', ['rpc', (rpc) ->
+	factory('changesRpc', ['rpc', 'integerConverter', (rpc, integerConverter) ->
 		NUM_CHANGES_TO_REQUEST = 100
 		noMoreChangesToRequest = false
 		
@@ -84,9 +84,14 @@ angular.module('koality.service', []).
 		nextCallback = null
 
 		createChangesQuery = (repositoryId, group, names, startIndex) ->
+			if names.length > 0 then group = null
+			else names = null
+
 			repositoryId: repositoryId
-			group: if names.length > 0 then 'all' else group
-			names: names
+			# group: group
+			group: 'all'
+			# names: names
+			names: ['hello']
 			startIndex: startIndex
 			numToRetrieve: NUM_CHANGES_TO_REQUEST
 
@@ -117,6 +122,14 @@ angular.module('koality.service', []).
 					shiftChangesRequest()
 
 		return queueRequest: (repositoryId, group, names, startIndex, callback) ->
+			repositoryId = integerConverter.toInteger repositoryId
+
+			assert.ok typeof repositoryId is 'number'
+			assert.ok typeof group is 'string'
+			assert.ok typeof names is 'object'
+			assert.ok typeof startIndex is 'number'
+			assert.ok typeof callback is 'function'
+
 			if currentNameQuery?
 				nextNameQuery = createChangesQuery repositoryId, group, names, startIndex
 				nextCallback = callback

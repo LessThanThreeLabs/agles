@@ -10,10 +10,10 @@
 	<div id="repositoryChanges" unselectable ng-controller="RepositoryChanges">
 		<menu>
 			<menu-header>
-				<div id="repositoryChangesSearch">
+				<div id="repositoryChangesSearch" ng-class="{searchOn: searchOn}">
 					<div id="repositoryChangesSearchAll">All</div>
 					<div id="repositoryChangesSearchMe">Me</div>
-					<div id="repositoryChangesSearchNames">User</div>
+					<div id="repositoryChangesSearchNames" ng-click="searchOn = !searchOn">User</div>
 				</div>
 			</menu-header>
 			<menu-options>

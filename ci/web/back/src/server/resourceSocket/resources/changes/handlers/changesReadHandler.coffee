@@ -9,22 +9,46 @@ exports.create = (modelRpcConnection) ->
 
 class ChangesReadHandler extends Handler
 	getChanges: (socket, data, callback) =>
-		sanitizeResult = (change) ->
-			id: change.id
-			number: change.number
-			status: change.status
- 		
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data?.repositoryId? or not data.group? or not data.names? or not data.startIndex? or not data.numToRetrieve?
+		else if not data?.repositoryId? or not data?.startIndex? or not data?.numToRetrieve?
 			callback 400
 		else
-			@modelRpcConnection.changes.read.query_changes userId, data.repositoryId, 
-				data.group, data.names, data.startIndex, data.numToRetrieve, (error, changes) =>
-					if error?.type is 'InvalidPermissionsError' then callback 403
-					else if error? then callback 500
-					else callback null, (sanitizeResult change for change in changes)
+			if data?.group? and data?.names?
+				callback 400
+			else if data?.group?
+				@_getGroupChanges userId, data, callback
+			else if data?.names?
+				@_getNameSearchChanges userId, data, callback
+			else
+				callback 400
+
+
+	_sanitizeChange = (change) =>
+		id: change.id
+		number: change.number
+		status: change.status
+
+
+	_getGroupChanges: (userId, data, callback) =>
+		if not data.group? or typeof data.group isnt 'string'
+			callback 400
+		else
+			@modelRpcConnection.changes.read.query_changes_group userId, data.repositoryId, data.group, data.startIndex, data.numToRetrieve, (error, changes) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback null, (@_sanitizeChange change for change in changes)
+
+
+	_getNameSearchChanges: (userId, data, callback) =>
+		if not data.names? or typeof data.names isnt 'object'
+			callback 400
+		else
+			@modelRpcConnection.changes.read.query_changes_names userId, data.repositoryId, data.names, data.startIndex, data.numToRetrieve, (error, changes) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback null, (@_sanitizeChange change for change in changes)
 
 
 	getMetadata: (socket, data, callback) =>
