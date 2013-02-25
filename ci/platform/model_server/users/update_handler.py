@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from util.permissions import is_admin, InvalidPermissionsError
 
 
 class UsersUpdateHandler(ModelServerRpcHandler):
@@ -59,6 +60,17 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 			sqlconn.execute(delete)
 		return True
 
+	def set_admin(self, user_id, user_id_to_change, admin):
+		user = schema.user
+
+		if not is_admin(user_id):
+			raise InvalidPermissionsError(user_id)
+
+		update = user.update.where(user.c.id == user_id_to_change).values(admin=admin)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(update)
+		self.publish_event("users", user_id, "user updated", user_id=user_id_to_change, admin=admin)
+
 	def change_basic_information(self, user_id, first_name, last_name):
 		user = schema.user
 		update = user.update().where(user.c.id == user_id).values(first_name=first_name, last_name=last_name)
@@ -90,12 +102,6 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 		update = user.update().where(user.c.email == email).values(
 			password_hash=hashlib.sha512(salt.encode('latin-1') + new_password.encode('utf8')).hexdigest())
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(update)
-
-	def delete_user(self, user_id):
-		user = schema.user
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			update = user.update().where(user.c.id == user_id).values(deleted=user_id)
 			sqlconn.execute(update)
 
 
