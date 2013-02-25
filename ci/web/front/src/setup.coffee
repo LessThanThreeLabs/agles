@@ -376,7 +376,7 @@ angular.module('koality.directive', []).
 				radius: 5
 				corners: 1
 				rotate: 14
-				color: '#000000'
+				color: '#FFFFFF'
 				speed: 1.2
 				trail: 30
 				shadow: false
