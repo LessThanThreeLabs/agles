@@ -60,10 +60,6 @@ class Provisioner(object):
 		raise InvalidConfigurationException(error_message)
 
 	def set_private_key(self, private_key):
-		if os.access(self.keyfile, os.F_OK):
-			os.rename(self.keyfile, self.keyfile_backup)
-		if os.access(self.public_keyfile, os.F_OK):
-			os.rename(self.public_keyfile, self.public_keyfile_backup)
 		if not os.access(self.ssh_dir, os.F_OK):
 			os.mkdir(self.ssh_dir)
 		with open(self.keyfile, 'w') as keyfile:
