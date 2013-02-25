@@ -49,4 +49,4 @@ class ModelServerRpcHandler(object):
 			rows = sqlconn.execute(query)
 		for row in rows:
 			admin_id = row[user.c.id]
-			self.publish_event(_resource, admin_id, _event_type, _contents)
+			self.publish_event(_resource, admin_id, _event_type, **_contents)

@@ -36,7 +36,7 @@ class UsersCreateHandler(ModelServerRpcHandler):
 				raise UserAlreadyExistsError(email)
 
 		user_id = result.inserted_primary_key[0]
-		self.publish_event("global", None, "user created", user_id=user_id, email=email, first_name=first_name, last_name=last_name,
+		self.publish_event_to_admins("users", "user created", user_id=user_id, email=email, first_name=first_name, last_name=last_name,
 			password_hash=password_hash, salt=salt, admin=admin)
 		return user_id
 
