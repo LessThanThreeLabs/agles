@@ -83,5 +83,14 @@
 			"/html/unexpectedError.html",
 			"/html/invalidPermissions.html"
 		]
+	},
+
+	"font": {
+		"application/x-font-opentype": [
+			"/font/din/bold.otf",
+			"/font/din/light.otf",
+			"/font/din/medium.otf",
+			"/font/din/regular.otf"
+		]
 	}
 }

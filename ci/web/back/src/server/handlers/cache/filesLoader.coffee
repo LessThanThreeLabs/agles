@@ -28,7 +28,7 @@ class FilesLoader
 
 			for contentType, fileNames of contentTypes
 				for fileName in fileNames
-					fileNameWithSuffix = @_getFileNameWithSuffix fileName, fileType
+					fileNameWithSuffix = if @_shouldAddFileSuffix fileType then @_getFileNameWithSuffix fileName, fileType else fileName
 					files[fileType][fileNameWithSuffix] = {}
 					files[fileType][fileNameWithSuffix].contentType = contentType
 					files[fileType][fileNameWithSuffix].location = @_getFileLocation fileName
@@ -62,3 +62,7 @@ class FilesLoader
 	_getFileNameWithSuffix: (fileName, fileType) =>
 		lastPeriodIndex = fileName.lastIndexOf '.'
 		return fileName.substr(0, lastPeriodIndex) + @filesSuffix + fileName.substr(lastPeriodIndex)
+
+
+	_shouldAddFileSuffix: (fileType) =>
+		return fileType isnt 'font'
