@@ -92,7 +92,7 @@ class BuildOutputsUpdateHandler(ModelServerRpcHandler):
 				)
 			except IntegrityError:
 				sqlconn.execute(
-					build_console.update().where(
+					console_output.update().where(
 						and_(
 							console_output.c.build_console_id==build_console_id,
 							console_output.c.line_number==line_num
