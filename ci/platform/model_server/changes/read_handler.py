@@ -1,4 +1,4 @@
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 import database.schema
 
@@ -10,6 +10,10 @@ from util.permissions import InvalidPermissionsError
 
 class ChangesReadHandler(ModelServerRpcHandler):
 	def __init__(self):
+		self.query_dispatch = {
+			"all": self._query_all_changes,
+			"me": self._query_user_changes
+		}
 		super(ChangesReadHandler, self).__init__("changes", "read")
 
 	def get_change_attributes(self, change_id):
@@ -87,6 +91,35 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 	# TODO (jchu): This query is SLOW AS BALLS
 	def query_changes(self, user_id, repo_id, group, names, start_index_inclusive, num_results):
+		return self.query_dispatch[group](user_id, repo_id, names, start_index_inclusive, num_results)
+
+	def _query_all_changes(self, user_id, repo_id, names, start_index_inclusive, num_results):
+		change = database.schema.change
+
+		query = self._changes_query_base_query(repo_id, names)
+		query = query.select().apply_labels().where(change.c.repo_id == repo_id).distinct(change.c.number)
+		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
+			start_index_inclusive)
+
+		return self._process_changes_query(query, names)
+
+	def _query_user_changes(self, user_id, repo_id, names, start_index_inclusive, num_results):
+		user = database.schema.user
+		change = database.schema.change
+
+		query = self._changes_query_base_query(repo_id, names)
+		query = query.select().apply_labels().where(
+			and_(
+				change.c.repo_id == repo_id,
+				user.c.id == user_id
+			)
+		).distinct(change.c.number)
+		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
+			start_index_inclusive)
+
+		return self._process_changes_query(query, names)
+
+	def _changes_query_base_query(self, repo_id, names):
 		user = database.schema.user
 		change = database.schema.change
 		commit = database.schema.commit
@@ -99,9 +132,11 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				temp_string.c.string == user.c.first_name,
 				temp_string.c.string == user.c.last_name
 			)
-		).select().apply_labels().where(change.c.repo_id == repo_id).distinct(change.c.number)
-		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
-			start_index_inclusive)
+		)
+		return query
+
+	def _process_changes_query(self, query, names):
+		change = database.schema.change
 
 		with ConnectionFactory.transaction_context() as sqlconn:
 			load_temp_strings(names)
