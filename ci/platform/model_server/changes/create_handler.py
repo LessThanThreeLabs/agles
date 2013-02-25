@@ -7,6 +7,7 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from sqlalchemy import select
 from sqlalchemy.sql import func
+from util.sql import to_dict
 
 
 class ChangesCreateHandler(ModelServerRpcHandler):
@@ -18,6 +19,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		change = database.schema.change
 		repo = database.schema.repo
+		user = database.schema.user
 
 		prev_change_number = 0
 
@@ -33,7 +35,12 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			change_id = result.inserted_primary_key[0]
 			repo_id_query = repo.select().where(repo.c.id == repo_id)
 			repo_id = sqlconn.execute(repo_id_query).first()[repo.c.id]
-		self.publish_event("repos", repo_id, "change added", user_id=user_id, change_id=change_id, change_number=change_number,
+
+			query = user.select().where(user.c.id == user_id)
+			user_row = sqlconn.execute(query).first()
+
+		user = to_dict(user_row, user.columns)
+		self.publish_event("repos", repo_id, "change added", user=user, change_id=change_id, change_number=change_number,
 			change_status="queued", commit_id=commit_id, merge_target=merge_target)
 		return {"change_id": change_id, "commit_id": commit_id}
 
