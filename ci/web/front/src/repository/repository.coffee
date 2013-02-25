@@ -12,7 +12,8 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 	$scope.namesQuery = ''
 
 	getNamesFromNamesQuery = () ->
-		return $scope.namesQuery.toLowerCase().split ' '
+		names = $scope.namesQuery.toLowerCase().split ' '
+		return names.filter (name) -> name.length > 0
 
 	handleInitialChanges = (error, changes) -> $scope.$apply () -> 
 		$scope.changes = $scope.changes.concat changes
