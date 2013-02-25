@@ -6,6 +6,7 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from util.sql import to_dict
+from util.permissions import is_admin, InvalidPermissionsError
 
 
 class UsersReadHandler(ModelServerRpcHandler):
@@ -29,6 +30,16 @@ class UsersReadHandler(ModelServerRpcHandler):
 			return True
 		except NoSuchUserError:
 			return False
+
+	def get_all_users(self, user_id):
+		user = database.schema.user
+
+		if not is_admin(user_id):
+			raise InvalidPermissionsError(user_id)
+		query = user.select().where(user.c.deleted == 0)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			rows = sqlconn.execute(query)
+		return [to_dict(row, user.columns) for row in rows]
 
 	def get_user_id(self, email):
 		return self.get_user(email)['id']
