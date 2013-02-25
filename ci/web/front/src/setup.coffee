@@ -328,7 +328,9 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenuHeader" ng-transclude></div>'
+		template: '<div class="prettyMenuHeader" ng-transclude>
+				<div class="prettyMenuHeaderBuffer"></div>
+			</div>'
 	).
 	directive('menuOptions', () ->
 		restrict: 'E'

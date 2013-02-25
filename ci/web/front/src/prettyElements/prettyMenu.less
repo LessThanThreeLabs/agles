@@ -15,6 +15,7 @@
 
 	.prettyMenuHeader {
 		position: absolute;
+		z-index: 100;
 		top: 0px;
 		left: 0px;
 		right: @toothWidth;
@@ -27,18 +28,34 @@
 		color: @koalityWhite;
 		font-size: 16px;
 		line-height: @menuHeaderHeight;
+
+		.prettyMenuHeaderBuffer {
+			position: absolute;
+			z-index: 100;
+			top: 0px;
+			right: -@toothWidth;
+			width: @toothWidth;
+			height: @menuHeaderHeight + 1;
+
+			background: linear-gradient(to bottom, fade(@backgroundColor, 100%) 0%, fade(@backgroundColor, 0%) 100%);
+			background: -moz-linear-gradient(top, fade(@backgroundColor, 100%) 0%, fade(@backgroundColor, 0%) 100%);
+			background: -webkit-linear-gradient(top, fade(@backgroundColor, 100%) 0%, fade(@backgroundColor, 0%) 100%);
+			background: -o-linear-gradient(top, fade(@backgroundColor, 100%) 0%, fade(@backgroundColor, 0%) 100%);
+			background: -ms-linear-gradient(top, fade(@backgroundColor, 100%) 0%, fade(@backgroundColor, 0%) 100%);
+		}
 	}
 
 	.prettyMenuOptions {
 		position: absolute;
-		top: @menuHeaderHeight + 1;
+		z-index: 99;
+		top: @borderRadius;
 		left: 0px;
 		right: 0px;
-		bottom: @menuFooterHeight;
+		bottom: @borderRadius;
 		overflow: hidden;
 
 		.prettyMenuOptionsScrollOuterWrapper {
-			@scrollbarHideWidth: 50px;
+			@scrollbarHideWidth: 25px;
 
 			position: absolute;
 			top: 0px;
@@ -48,7 +65,9 @@
 			overflow-y: auto;
 
 			.prettyMenuOptionsScrollInnerWrapper {
+				padding-top: @menuHeaderHeight - @borderRadius;
 				padding-right: @scrollbarHideWidth;
+				padding-bottom: @menuFooterHeight - @borderRadius;
 
 				.prettyMenuOption {
 					cursor: hand; cursor: pointer;
@@ -246,6 +265,7 @@
 
 	.prettyMenuFooter {
 		position: absolute;
+		z-index: 100;
 		left: 0px;
 		right: @toothWidth;
 		bottom: 0px;
