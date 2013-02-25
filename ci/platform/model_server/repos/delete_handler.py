@@ -6,7 +6,6 @@ from util.permissions import is_admin, InvalidPermissionsError
 
 
 class ReposDeleteHandler(ModelServerRpcHandler):
-
 	def __init__(self):
 		super(ReposDeleteHandler, self).__init__("repos", "delete")
 

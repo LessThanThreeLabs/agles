@@ -24,6 +24,7 @@ from settings.rabbit import RabbitSettings
 from users.create_handler import UsersCreateHandler
 from users.read_handler import UsersReadHandler
 from users.update_handler import UsersUpdateHandler
+from users.delete_handler import UsersDeleteHandler
 
 
 class ModelServer(object):
@@ -49,7 +50,8 @@ class ModelServer(object):
 		ReposDeleteHandler,
 		UsersCreateHandler,
 		UsersReadHandler,
-		UsersUpdateHandler
+		UsersUpdateHandler,
+		UsersDeleteHandler
 	]
 
 	@classmethod
