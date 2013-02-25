@@ -22,6 +22,10 @@ class ConnectionFactory(object):
 		return cls.get_sql_engine().connect()
 
 	@classmethod
+	def transaction_context(cls):
+		return cls.get_sql_engine().begin()
+
+	@classmethod
 	def get_redis_connection(cls):
 		return StrictRedis(**DatabaseSettings.redis_connection_params)
 

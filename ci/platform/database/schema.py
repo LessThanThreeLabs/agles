@@ -122,6 +122,11 @@ ssh_pubkey = Table('ssh_pubkey', metadata,
 	UniqueConstraint('user_id', 'alias')
 )
 
+temp_string = Table('temp', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('string', String, nullable=False)
+)
+
 
 def _create_and_initialize(engine):
 	metadata.create_all(engine)

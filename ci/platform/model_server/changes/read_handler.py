@@ -1,8 +1,10 @@
+from sqlalchemy import or_
+
 import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from util.sql import to_dict
+from util.sql import to_dict, load_temp_strings
 from util.permissions import InvalidPermissionsError
 
 
@@ -84,22 +86,28 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		return {}
 
 	# TODO (jchu): This query is SLOW AS BALLS
-	def query_changes(self, user_id, repo_id, group, names,
-						start_index_inclusive, num_results):
+	def query_changes(self, user_id, repo_id, group, names, start_index_inclusive, num_results):
 		user = database.schema.user
 		change = database.schema.change
 		commit = database.schema.commit
+		temp_string = database.schema.temp_string
 
-		query = change.join(commit).join(user).select().apply_labels().where(
-			change.c.repo_id == repo_id
-		)
+		query = change.join(commit).join(user)
+		query = query.join(
+			temp_string,
+			or_(
+				temp_string.c.string == user.c.first_name,
+				temp_string.c.string == user.c.last_name
+			)
+		).select().apply_labels().where(change.c.repo_id == repo_id).distinct(change.c.number)
 		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
 			start_index_inclusive)
 
-		with ConnectionFactory.get_sql_connection() as sqlconn:
+		with ConnectionFactory.transaction_context() as sqlconn:
+			load_temp_strings(names)
 			changes = map(lambda row: to_dict(row, change.columns,
 				tablename=change.name), sqlconn.execute(query))
-			return changes
+		return changes
 
 	def can_hear_change_events(self, user_id, id_to_listen_to):
 		return True

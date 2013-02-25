@@ -4,6 +4,7 @@ from database.engine import ConnectionFactory
 from database.schema import *
 from model_server.build_consoles import ConsoleType
 from model_server.build_consoles.update_handler import BuildConsolesUpdateHandler
+from model_server.changes.read_handler import ChangesReadHandler
 from util.test import BaseIntegrationTest
 
 
@@ -18,13 +19,13 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			ins_user = user.insert().values(
 				email='a',
-				first_name='a',
-				last_name='a',
+				first_name='first',
+				last_name='last',
 				password_hash='a',
 				salt='a' * 16
 			)
 
-			user_id = sqlconn.execute(ins_user).inserted_primary_key[0]
+			self.user_id = sqlconn.execute(ins_user).inserted_primary_key[0]
 
 			ins_repostore = repostore.insert().values(
 				host_name='a', repositories_path='a')
@@ -41,11 +42,11 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				created=1234
 			)
 
-			repo_id = sqlconn.execute(ins_repo).inserted_primary_key[0]
+			self.repo_id = sqlconn.execute(ins_repo).inserted_primary_key[0]
 
 			ins_commit = commit.insert().values(
-				repo_id=repo_id,
-				user_id=user_id,
+				repo_id=self.repo_id,
+				user_id=self.user_id,
 				message='a',
 				timestamp=1,
 			)
@@ -54,7 +55,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 
 			ins_change = change.insert().values(
 				commit_id=commit_id,
-				repo_id=repo_id,
+				repo_id=self.repo_id,
 				merge_target='a',
 				number=1,
 				status='a',
@@ -66,7 +67,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 
 			ins_build = build.insert().values(
 				change_id=change_id,
-				repo_id=repo_id,
+				repo_id=self.repo_id,
 				is_primary=True,
 				status='a',
 				start_time=1,
@@ -96,3 +97,19 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				test_lines[line_num] = "build:%s, line:%s, console:test" % (i, line_num)
 			update_handler.append_console_lines(i, test_lines,
 				type=ConsoleType.Test, subtype="unittest")
+
+	def query_changes_test(self):
+		self._initialize()
+		read_handler = ChangesReadHandler()
+		results = read_handler.query_changes(self.user_id, self.repo_id, "group", ["first"], 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes(self.user_id, self.repo_id, "group", ["last"], 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes(self.user_id, self.repo_id, "group", ["first", "last"], 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes(self.user_id, self.repo_id, "group", ["no match"], 0, 100)
+		assert_equal(len(results), 0)
+
+
+
+
