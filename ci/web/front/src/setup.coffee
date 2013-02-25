@@ -85,7 +85,7 @@ angular.module('koality.service', []).
 
 		createChangesQuery = (repositoryId, group, names, startIndex) ->
 			repositoryId: repositoryId
-			group: group
+			group: if names.length > 0 then 'all' else group
 			names: names
 			startIndex: startIndex
 			numToRetrieve: NUM_CHANGES_TO_REQUEST
