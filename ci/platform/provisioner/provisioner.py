@@ -24,7 +24,7 @@ class Provisioner(object):
 
 	def provision(self, private_key=None, config_path=None, source_path=None, global_install=False):
 		config_path, source_path = self.resolve_paths(config_path, source_path)
-		config = self.read_config(self, config_path)
+		config = self.read_config(config_path)
 		if private_key:
 			self.set_private_key(private_key)
 		steps = self.parse_config(config, source_path, global_install)
@@ -87,7 +87,7 @@ class Provisioner(object):
 			("Test configuration", test_steps))
 
 	def _provision(self, *steps):
-		for action_name in step:
+		for action_name, step in steps:
 			self.run_step(action_name, step)
 
 	def run_step(self, action_name, setup_step):
