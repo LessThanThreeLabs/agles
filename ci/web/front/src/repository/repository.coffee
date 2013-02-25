@@ -16,7 +16,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 
 	handleInitialChanges = (error, changes) -> $scope.$apply () -> 
 		$scope.changes = $scope.changes.concat changes
-		$scope.currentChangeId ?= $scope.changes[0].id
+		$scope.currentChangeId ?= $scope.changes[0].id if $scope.changes[0]?
 
 	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
 		$scope.changes = $scope.changes.concat changes
