@@ -220,7 +220,7 @@ describe 'Koality services', () ->
 			inject (changesRpc) ->
 				fakeCallback = jasmine.createSpy 'fakeCallback'
 
-				changesRpc.queueRequest 17, 'all', [], 0, fakeCallback
+				changesRpc.queueRequest 17, 'all', null, 0, fakeCallback
 				expect(fakeCallback.callCount).toBe 1
 				expect(fakeCallback.mostRecentCall.args[1].length).toBe 100
 
@@ -229,17 +229,17 @@ describe 'Koality services', () ->
 			inject (changesRpc) ->
 				fakeCallback = jasmine.createSpy 'fakeCallback'
 
-				changesRpc.queueRequest 17, 'all', [], 0, fakeCallback
+				changesRpc.queueRequest 17, 'all', null, 0, fakeCallback
 				expect(fakeCallback.callCount).toBe 1
 				expect(fakeCallback.mostRecentCall.args[1].length).toBe 100
 
-				changesRpc.queueRequest 17, 'all', [], 100, fakeCallback
+				changesRpc.queueRequest 17, 'all', null, 100, fakeCallback
 				expect(fakeCallback.callCount).toBe 2
 				expect(fakeCallback.mostRecentCall.args[1].length).toBe 7
 
-				changesRpc.queueRequest 17, 'all', [], 107, fakeCallback
+				changesRpc.queueRequest 17, 'all', null, 107, fakeCallback
 				expect(fakeCallback.callCount).toBe 2
 
-				changesRpc.queueRequest 17, 'all', [], 0, fakeCallback
+				changesRpc.queueRequest 17, 'all', null, 0, fakeCallback
 				expect(fakeCallback.callCount).toBe 3
 				expect(fakeCallback.mostRecentCall.args[1].length).toBe 100
