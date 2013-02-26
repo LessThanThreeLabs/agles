@@ -8,6 +8,8 @@
 			"port": 443
 		},
 
+		"developmentAddedLatency": 250,
+
 		"staticFiles": {
 			"rootDirectory": "front"
 		},
