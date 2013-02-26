@@ -20,19 +20,10 @@
 }
 
 #repository {
+	@panelSpacing: 20px;
+
 	width: 100%;
 	height: 100%;
-
-	#repositoryHeaderPanel, #repositoryChangesPanel, #repositoryChangeDetailsPanel {
-		// border-radius: 4px;
-
-		// @boxShadowBlur: 2px;
-		// @boxShadowSpread: 2px;
-		// @boxShadowColor: #101010;
-		// box-shadow: 0 2px @boxShadowBlur @boxShadowSpread @boxShadowColor;
-		// -moz-box-shadow: 0 2px @boxShadowBlur @boxShadowSpread @boxShadowColor;
-		// -webkit-box-shadow: 0 2px @boxShadowBlur @boxShadowSpread @boxShadowColor;
-	}
 
 	#repositoryHeaderPanel {
 		position: absolute;
@@ -76,16 +67,12 @@
 	}
 
 	#repositoryChanges {
-		@bottomBorderColor: rgba(109, 113, 131, 0.14);
-
 		position: absolute;
 		top: 56px;
 		left: 8px;
 		bottom: 10px;
 		width: @menuWidth;
 
-		// needed for firefox
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=579776
 		#repositoryChangesSearchContainer {
 			position: absolute;
 			top: 8px;
@@ -190,10 +177,22 @@
 		}
 	}
 
+	#repositoryStages {
+		position: absolute;
+		top: 56px;
+		left: 8px + @menuWidth + @panelSpacing;
+		bottom: 10px;
+		width: @menuWidth;
+
+		#repositoryStagesHeader {
+			margin-left: 8px;
+		}	
+	}
+
 	#repositoryChangeDetailsPanel {
 		position: absolute;
 		top: 56px;
-		left: 268px;
+		left: 568px;
 		right: 8px;
 		bottom: 10px;
 		margin: 0px;

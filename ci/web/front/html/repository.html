@@ -28,6 +28,17 @@
 		</menu>
 	</div>
 
+	<div id="repositoryStages" unselectable ng-controller="RepositoryChanges">
+		<menu>
+			<menu-header>
+				<span id="repositoryStagesHeader">Hello</span>
+			</menu-header>
+			<menu-options>
+				<menu-option class="repositoryChange" ng-repeat="change in changes | orderBy:'number':true" menu-option-text="{{change.number}}" menu-option-subtext="{{change.status}}" menu-option-spinning="{{change.status == 'running'}}" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}"></menu-option>
+			</menu-options>
+		</menu>
+	</div>
+
 	<div id="repositoryChangeDetailsPanel" ng-controller="RepositoryDetails">
 		<div id="repositoryChangeDetails">
 			<div id="repositoryChangeDetailsStages" unselectable>
