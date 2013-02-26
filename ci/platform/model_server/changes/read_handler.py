@@ -115,13 +115,14 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		temp_string = database.schema.temp_string
 
 		query = change.join(commit).join(user)
-		query = query.join(
-			temp_string,
-			or_(
-				temp_string.c.string == user.c.first_name,
-				temp_string.c.string == user.c.last_name
+		if names_filter:
+			query = query.join(
+				temp_string,
+				or_(
+					temp_string.c.string == user.c.first_name,
+					temp_string.c.string == user.c.last_name
+				)
 			)
-		)
 
 		query = query.select().apply_labels().where(change.c.repo_id == repo_id).distinct(change.c.number)
 		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
