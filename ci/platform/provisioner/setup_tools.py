@@ -32,11 +32,6 @@ class SetupCommand(object):
 		else:
 			return "sudo -E %s" % command
 
-	@classmethod
-	def to_setup_script(cls, commands):
-		return cls._and(*map(lambda command: command.to_subshell_command(), commands))
-
-	@classmethod
 	def _and(cls, *commands):
 		return ' &&\n'.join(commands)
 
@@ -65,10 +60,16 @@ class SetupScript(object):
 	def run(self):
 		script_path = '/tmp/setup-script'
 		with open(script_path, 'w') as setup_script:
-			setup_script.write(SetupCommand.to_setup_script(self.setup_steps))
+			setup_script.write(self.get_script_contents())
 		results = SetupCommand.execute_script_file(script_path)
 		os.remove(script_path)
 		return results
+
+	def _and(self, *commands):
+		return ' &&\n'.join(commands)
+
+	def get_script_contents(self):
+		return self._and(*map(lambda step: step.to_subshell_command(), self.setup_steps))
 
 	def __repr__(self):
 		return "SetupScript(%s)" % ", ".join([repr(step) for step in self.setup_steps])

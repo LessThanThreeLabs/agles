@@ -61,7 +61,7 @@ class PostgresDatabaseParser(DatabaseParser):
 			"grant all privileges on database %s to %s" % (database_name, username))
 
 	def postgres_command(self, *commands):
-		return SetupCommand(["psql -U postgres -c %s" % pipes.quote(command) for command in commands])
+		return SetupCommand(*("psql -U postgres -c %s" % pipes.quote(command) for command in commands))
 
 
 class MysqlDatabaseParser(DatabaseParser):
@@ -77,4 +77,4 @@ class MysqlDatabaseParser(DatabaseParser):
 		return self.mysql_command("grant all privileges on %s.* to '%s'@localhost" % (database_name, username))
 
 	def mysql_command(self, *commands):
-		return SetupCommand(["mysql -u root -e %s" % pipes.quote(command) for command in commands])
+		return SetupCommand(*("mysql -u root -e %s" % pipes.quote(command) for command in commands))
