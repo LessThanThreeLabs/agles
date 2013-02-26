@@ -11,10 +11,6 @@ from util.permissions import InvalidPermissionsError
 
 class ChangesReadHandler(ModelServerRpcHandler):
 	def __init__(self):
-		self.query_dispatch = {
-			"all": self._query_all_changes,
-			"me": self._query_user_changes
-		}
 		super(ChangesReadHandler, self).__init__("changes", "read")
 
 	def get_change_attributes(self, change_id):
@@ -90,40 +86,29 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			return self.get_builds_from_change_id(change_id)
 		return {}
 
+	VALID_GROUPS = ["all", "me"]
+
 	# TODO (jchu): This query is SLOW AS BALLS
-	def query_changes(self, user_id, repo_id, group, names, start_index_inclusive, num_results):
-		assert isinstance(names, collections.Iterable)
-		assert not isinstance(names, str)
+	def query_changes_group(self, user_id, repo_id, group, start_index_inclusive, num_results):
+		assert group in self.VALID_GROUPS
 
-		return self.query_dispatch[group](user_id, repo_id, names, start_index_inclusive, num_results)
-
-	def _query_all_changes(self, user_id, repo_id, names, start_index_inclusive, num_results):
-		change = database.schema.change
-
-		query = self._changes_query_base_query(repo_id, names)
-		query = query.select().apply_labels().where(change.c.repo_id == repo_id).distinct(change.c.number)
-		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
-			start_index_inclusive)
-
-		return self._process_changes_query(query, names)
-
-	def _query_user_changes(self, user_id, repo_id, names, start_index_inclusive, num_results):
 		user = database.schema.user
 		change = database.schema.change
+		commit = database.schema.commit
 
-		query = self._changes_query_base_query(repo_id, names)
-		query = query.select().apply_labels().where(
-			and_(
-				change.c.repo_id == repo_id,
-				user.c.id == user_id
-			)
-		).distinct(change.c.number)
-		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
-			start_index_inclusive)
+		query = change.join(commit).join(user).select()
+		query = query.apply_labels().where(change.c.repo_id == repo_id)
+		if group == "me":
+			query = query.where(user.c.id == user_id)
+		query = query.order_by(change.c.number.desc()).limit(num_results).offset(start_index_inclusive)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			changes = map(lambda row: to_dict(row, change.columns, tablename=change.name), sqlconn.execute(query))
+		return changes
 
-		return self._process_changes_query(query, names)
+	def query_changes_filter(self, user_id, repo_id, names_filter, start_index_inclusive, num_results):
+		assert isinstance(names_filter, collections.Iterable)
+		assert not isinstance(names_filter, str)
 
-	def _changes_query_base_query(self, repo_id, names):
 		user = database.schema.user
 		change = database.schema.change
 		commit = database.schema.commit
@@ -137,13 +122,13 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				temp_string.c.string == user.c.last_name
 			)
 		)
-		return query
 
-	def _process_changes_query(self, query, names):
-		change = database.schema.change
+		query = query.select().apply_labels().where(change.c.repo_id == repo_id).distinct(change.c.number)
+		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
+			start_index_inclusive)
 
 		with ConnectionFactory.transaction_context() as sqlconn:
-			load_temp_strings(names)
+			load_temp_strings(names_filter)
 			changes = map(lambda row: to_dict(row, change.columns,
 				tablename=change.name), sqlconn.execute(query))
 		return changes

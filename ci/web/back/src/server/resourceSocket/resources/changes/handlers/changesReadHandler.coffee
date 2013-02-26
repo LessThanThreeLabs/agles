@@ -45,7 +45,7 @@ class ChangesReadHandler extends Handler
 		if not data.names? or typeof data.names isnt 'object'
 			callback 400
 		else
-			@modelRpcConnection.changes.read.query_changes_names userId, data.repositoryId, data.names, data.startIndex, data.numToRetrieve, (error, changes) =>
+			@modelRpcConnection.changes.read.query_changes_filter userId, data.repositoryId, data.names, data.startIndex, data.numToRetrieve, (error, changes) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback null, (@_sanitizeChange change for change in changes)

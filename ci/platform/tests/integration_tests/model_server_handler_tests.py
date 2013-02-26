@@ -98,40 +98,32 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			update_handler.append_console_lines(i, test_lines,
 				type=ConsoleType.Test, subtype="unittest")
 
-	def query_changes_empty_input_test(self):
+	def query_changes_group_test(self):
 		self._initialize()
 		read_handler = ChangesReadHandler()
-		results = read_handler.query_changes(self.user_id, self.repo_id, "all", [], 0, 100)
-		assert_equal(len(results), 0)
-
-	def query_all_changes_test(self):
-		self._initialize()
-		read_handler = ChangesReadHandler()
-		results = read_handler.query_changes(self.user_id, self.repo_id, "all", ["first"], 0, 100)
+		results = read_handler.query_changes_group(self.user_id, self.repo_id, "all", 0, 100)
 		assert_equal(len(results), 1)
-		results = read_handler.query_changes(self.user_id, self.repo_id, "all", ["last"], 0, 100)
+		results = read_handler.query_changes_group(self.user_id, self.repo_id, "me", 0, 100)
 		assert_equal(len(results), 1)
-		results = read_handler.query_changes(self.user_id, self.repo_id, "all", ["first", "last"], 0, 100)
-		assert_equal(len(results), 1)
-		results = read_handler.query_changes(self.user_id, self.repo_id, "all", ["no match"], 0, 100)
-		assert_equal(len(results), 0)
-
-	def query_user_changes_test(self):
-		self._initialize()
-		read_handler = ChangesReadHandler()
-		results = read_handler.query_changes(self.user_id, self.repo_id, "me", ["first"], 0, 100)
-		assert_equal(len(results), 1)
-		results = read_handler.query_changes(self.user_id, self.repo_id, "me", ["last"], 0, 100)
-		assert_equal(len(results), 1)
-		results = read_handler.query_changes(self.user_id, self.repo_id, "me", ["first", "last"], 0, 100)
-		assert_equal(len(results), 1)
-		results = read_handler.query_changes(self.user_id, self.repo_id, "me", ["no match"], 0, 100)
-		assert_equal(len(results), 0)
 
 		fake_user_id = self.user_id + 1
-		results = read_handler.query_changes(fake_user_id, self.repo_id, "me", ["first"], 0, 100)
+		results = read_handler.query_changes_group(fake_user_id, self.repo_id, "me", 0, 100)
 		assert_equal(len(results), 0)
-		results = read_handler.query_changes(fake_user_id, self.repo_id, "me", ["last"], 0, 100)
+
+	def query_changes_filter_empty_input_test(self):
+		self._initialize()
+		read_handler = ChangesReadHandler()
+		results = read_handler.query_changes_filter(self.user_id, self.repo_id, [], 0, 100)
 		assert_equal(len(results), 0)
-		results = read_handler.query_changes(fake_user_id, self.repo_id, "me", ["first", "last"], 0, 100)
+
+	def query_changes_filter_test(self):
+		self._initialize()
+		read_handler = ChangesReadHandler()
+		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["first"], 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["last"], 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["first", "last"], 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["no match"], 0, 100)
 		assert_equal(len(results), 0)
