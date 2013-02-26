@@ -50,18 +50,18 @@ class PostgresDatabaseParser(DatabaseParser):
 		super(PostgresDatabaseParser, self).__init__('postgres')
 
 	def create_database_command(self, name):
-		return self.postgres_command(";\n".join((
+		return self.postgres_command(
 			"drop database if exists %s" % name,
-			"create database %s" % name)))
+			"create database %s" % name)
 
 	def create_user_command(self, username, database_name):
-		return self.postgres_command(";\n".join((
+		return self.postgres_command(
 			"drop user if exists %s" % username,
 			"create user %s with password ''" % username,
-			"grant all privileges on database %s to %s" % (database_name, username))))
+			"grant all privileges on database %s to %s" % (database_name, username))
 
-	def postgres_command(self, command):
-		return SetupCommand("psql -U postgres -c %s" % pipes.quote(command))
+	def postgres_command(self, *commands):
+		return SetupCommand(["psql -U postgres -c %s" % pipes.quote(command) for command in commands])
 
 
 class MysqlDatabaseParser(DatabaseParser):
@@ -69,12 +69,12 @@ class MysqlDatabaseParser(DatabaseParser):
 		super(MysqlDatabaseParser, self).__init__('mysql')
 
 	def create_database_command(self, name):
-		return self.mysql_command(";\n".join((
+		return self.mysql_command(
 			"drop database if exists %s" % name,
-			"create database %s" % name)))
+			"create database %s" % name)
 
 	def create_user_command(self, username, database_name):
 		return self.mysql_command("grant all privileges on %s.* to '%s'@localhost" % (database_name, username))
 
-	def mysql_command(self, command):
-		return SetupCommand("mysql -u root -e %s" % pipes.quote(command))
+	def mysql_command(self, *commands):
+		return SetupCommand(["mysql -u root -e %s" % pipes.quote(command) for command in commands])
