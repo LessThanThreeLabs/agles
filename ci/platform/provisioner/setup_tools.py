@@ -1,3 +1,4 @@
+import os
 import pipes
 import shlex
 import sys
@@ -6,13 +7,10 @@ from util.streaming_executor import StreamingExecutor
 
 
 class SetupCommand(object):
-	def __init__(self, commands):
-		if isinstance(commands, str):
-			self.commands = [commands]
-		elif isinstance(commands, list):
-			self.commands = commands
-		else:
-			raise InvalidConfigurationException("Invalid setup command: %s" % commands)
+	def __init__(self, *commands, **kwargs):
+		self.commands = commands
+		self.silent = kwargs.pop('silent', False)
+		self.ignore_failure = kwargs.pop('ignore_failure', False)
 
 	def execute(self):
 		self.execute_script(self.to_shell_command())
@@ -34,19 +32,47 @@ class SetupCommand(object):
 		else:
 			return "sudo -E %s" % command
 
+	def _and(cls, *commands):
+		return ' &&\n'.join(commands)
+
 	def to_shell_command(self):
-		script = ''
-		for command in self.commands:
-			script = script + "echo -e $ %s\n" % pipes.quote(command)
-			script = script + "%s\n" % command
-			script = script + self._check_return_code()
-		return script
+		return self._and(*map(self._to_command, self.commands))
+
+	def _to_command(self, command):
+		if self.silent:
+			return '(%s) > /dev/null' % command
+		return self._and("echo -e $ %s" % pipes.quote(command), command)
 
 	def to_subshell_command(self):
-		return "(%s)\n" % self.to_shell_command() + self._check_return_code()
+		return '(%s)' % self.to_shell_command()
 
-	def _check_return_code(self):
-		return "_r=$?; if [ $_r -ne 0 ]; then exit $_r; fi\n"
+	def __repr__(self):
+		return "SetupCommand(%s)" % ", ".join(
+			[repr(command) for command in self.commands] +
+			["%s=%s" % (attr, repr(getattr(self, attr))) for attr in
+				['silent', 'ignore_failure']])
+
+
+class SetupScript(object):
+	def __init__(self, *setup_steps):
+		self.setup_steps = setup_steps
+
+	def run(self):
+		script_path = '/tmp/setup-script'
+		with open(script_path, 'w') as setup_script:
+			setup_script.write(self.get_script_contents())
+		results = SetupCommand.execute_script_file(script_path)
+		os.remove(script_path)
+		return results
+
+	def _and(self, *commands):
+		return ' &&\n'.join(commands)
+
+	def get_script_contents(self):
+		return self._and(*map(lambda step: step.to_subshell_command(), self.setup_steps))
+
+	def __repr__(self):
+		return "SetupScript(%s)" % ", ".join([repr(step) for step in self.setup_steps])
 
 
 class SimplePrinter(object):
@@ -54,16 +80,26 @@ class SimplePrinter(object):
 		self.last_line_number = 1
 		self.last_column = 0
 
-	def append(self, read_lines):
-		for line_number, line in sorted(read_lines.items()):
-			if line_number > self.last_line_number:
-				self.last_line_number = line_number
-				output = '\n' + line
-			else:
-				output = line[self.last_column:]
-			self.last_column = len(line)
-			sys.stdout.write(output)
+	def append(self, line_number, line):
+		if line_number > self.last_line_number:
+			self.last_line_number = line_number
+			output = '\n' + line
+		else:
+			output = line[self.last_column:]
+		self.last_column = len(line)
+		sys.stdout.write(output)
 
 
 class InvalidConfigurationException(Exception):
-	pass
+	def __init__(self, *args, **kwargs):
+		self.args = args
+		self.exception = kwargs.get('exception')
+
+	def _indent(self, string):
+		return "\n".join(map(lambda s: "\t" + s, string.split("\n")))
+
+	def __repr__(self):
+		return str(self)
+
+	def __str__(self):
+		return super(InvalidConfigurationException, self).__str__() + "\nInternal Error:\n%s" % self.indent(str(self.exception))

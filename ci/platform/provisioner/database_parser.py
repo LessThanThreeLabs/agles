@@ -18,20 +18,16 @@ class DatabaseParser(object):
 			if not (len(database.items()) and 'name' in database and 'username' in database):
 				raise InvalidConfigurationException("Could not parse %s database: %s" % (self.database_type, database))
 			create_database_command = self.create_database_command(database['name'])
-			create_user_command = self.create_user_command(database['username'])
-			extra_setup_commands = self.extra_setup_commands(database['name'], database['username'])
+			create_user_command = self.create_user_command(database['username'], database['name'])
 		else:
 			raise InvalidConfigurationException("Could not parse %s database: %s" % (self.database_type, database))
-		return [create_database_command] + [create_user_command] + extra_setup_commands
+		return [create_database_command, create_user_command]
 
 	def create_database_command(self, name):
 		raise NotImplementedError()
 
 	def create_user_command(self, username):
 		raise NotImplementedError()
-
-	def extra_setup_commands(self, database_name, username):
-		return []
 
 
 class OmnibusDatabaseParser(object):
@@ -45,7 +41,7 @@ class OmnibusDatabaseParser(object):
 		try:
 			parser = self.database_dispatcher[database_type]
 		except KeyError:
-			raise InvalidConfigurationException("Unknown database type: %s" % database_type)
+			raise InvalidConfigurationException("Unsupported database type: %s" % database_type)
 		return parser.parse_databases(databases)
 
 
@@ -54,16 +50,18 @@ class PostgresDatabaseParser(DatabaseParser):
 		super(PostgresDatabaseParser, self).__init__('postgres')
 
 	def create_database_command(self, name):
-		return self.postgres_command("create database %s" % name)
+		return self.postgres_command(
+			"drop database if exists %s" % name,
+			"create database %s" % name)
 
-	def create_user_command(self, username):
-		return self.postgres_command("create user %s with password ''" % username)
+	def create_user_command(self, username, database_name):
+		return self.postgres_command(
+			"drop user if exists %s" % username,
+			"create user %s with password ''" % username,
+			"grant all privileges on database %s to %s" % (database_name, username))
 
-	def extra_setup_commands(self, database_name, username):
-		return [self.postgres_command("grant all privileges on database %s to %s" % (database_name, username))]
-
-	def postgres_command(self, command):
-		return SetupCommand("psql -U postgres -c %s" % pipes.quote(command))
+	def postgres_command(self, *commands):
+		return SetupCommand(*("psql -U postgres -c %s" % pipes.quote(command) for command in commands))
 
 
 class MysqlDatabaseParser(DatabaseParser):
@@ -71,13 +69,12 @@ class MysqlDatabaseParser(DatabaseParser):
 		super(MysqlDatabaseParser, self).__init__('mysql')
 
 	def create_database_command(self, name):
-		return self.mysql_command("create database %s" % name)
+		return self.mysql_command(
+			"drop database if exists %s" % name,
+			"create database %s" % name)
 
-	def create_user_command(self, username):
-		return self.mysql_command("create user '%s'@'localhost' identified by ''" % username)
+	def create_user_command(self, username, database_name):
+		return self.mysql_command("grant all privileges on %s.* to '%s'@localhost" % (database_name, username))
 
-	def extra_setup_commands(self, database_name, username):
-		return [self.mysql_command("grant all privileges on %s.* to '%s'@localhost" % (database_name, username))]
-
-	def mysql_command(self, command):
-		return SetupCommand("mysql -u root -e %s" % pipes.quote(command))
+	def mysql_command(self, *commands):
+		return SetupCommand(*("mysql -u root -e %s" % pipes.quote(command) for command in commands))
