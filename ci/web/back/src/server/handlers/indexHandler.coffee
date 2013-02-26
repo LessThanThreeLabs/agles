@@ -13,7 +13,7 @@ exports.create = (configurationParams, stores, modelRpcConnection, filesSuffix) 
 class IndexHandler extends RequestHandler
 	handleRequest: (request, response) =>
 		@getTemplateValues request.session, (error, templateValues) =>
-			if error? then response.render 'internal server error'
+			if error? then response.end 'internal server error'
 			else 
 				@pushFiles request, response
 				response.render 'index', templateValues
