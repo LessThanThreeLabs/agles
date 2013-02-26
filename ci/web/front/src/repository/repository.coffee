@@ -32,6 +32,13 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
 		$scope.changes = $scope.changes.concat changes
 
+	getInitialChanges = () ->
+		$scope.changes = []
+		changesRpc.queueRequest $routeParams.repositoryId, getGroupFromMode(), getNamesFromNamesQuery(), 0, handleInitialChanges
+
+	getMoreChanges = () ->
+		changesRpc.queueRequest $routeParams.repositoryId, getGroupFromMode(), getNamesFromNamesQuery(), $scope.changes.length, handleMoreChanges
+
 	doesChangeMatchQuery = (change) ->
 		return true if $scope.namesQuery is ''
 		return (change.submitter.firstName.toLowerCase() in getNamesFromNamesQuery()) or
@@ -68,14 +75,18 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 		$scope.currentChangeId = change.id
 
 	$scope.scrolledToBottom = () ->
-		changesRpc.queueRequest $routeParams.repositoryId, getGroupFromMode(), getNamesFromNamesQuery(), $scope.changes.length, handleMoreChanges
+		getMoreChanges()
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'change', newValue
 
+	$scope.$watch 'search.mode', (newValue, oldValue) ->
+		getInitialChanges() if newValue isnt oldValue
+
 	$scope.$watch 'search.namesQuery', (newValue, oldValue) ->
-		$scope.changes = []
-		changesRpc.queueRequest $routeParams.repositoryId, getGroupFromMode(), getNamesFromNamesQuery(), 0, handleInitialChanges
+		getInitialChanges() if newValue isnt oldValue
+
+	getInitialChanges()
 ]
 
 
