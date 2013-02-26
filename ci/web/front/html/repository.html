@@ -10,10 +10,12 @@
 	<div id="repositoryChanges" unselectable ng-controller="RepositoryChanges">
 		<menu>
 			<menu-header>
-				<div id="repositoryChangesSearch" ng-class="{searchOn: searchState == 'search'}">
-					<div id="repositoryChangesSearchAll" ng-class="{selected: searchState == 'all'}" ng-click="searchState = 'me'">All</div>
-					<div id="repositoryChangesSearchMe" ng-class="{selected: searchState == 'me'}" ng-click="searchState = 'me'">Me</div>
-					<div id="repositoryChangesSearchNames" ng-class="{selected: searchState == 'search'}" ng-click="searchState = 'search'">User</div>
+				<div id="repositoryChangesSearch" ng-class="{searchOn: search.mode == 'search'}">
+					<div id="repositoryChangesSearchAll" ng-class="{selected: search.mode == 'all'}" ng-click="searchModeClicked('all')">All</div>
+					<div id="repositoryChangesSearchMe" ng-class="{selected: search.mode == 'me'}" ng-click="searchModeClicked('me')">Me</div>
+					<div id="repositoryChangesSearchNames" ng-class="{selected: search.mode == 'search'}" ng-click="searchModeClicked('search')">
+						<img ng-src="{{'/img/icons/search.png' | fileSuffix}}"><input type="text" ng-model="search.namesQuery" placeholder="User">
+					</div>
 				</div>
 			</menu-header>
 			<menu-options>

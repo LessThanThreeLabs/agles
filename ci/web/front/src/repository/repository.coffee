@@ -8,12 +8,22 @@ window.Repository = ['$scope', ($scope) ->
 
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, changesRpc, events, integerConverter) ->
 	$scope.changes = []
-	$scope.group = 'all'
-	$scope.namesQuery = ''
+
+	$scope.search = {}
+	$scope.search.mode = 'all'
+	$scope.search.namesQuery = ''
+
+	getGroupFromMode = () ->
+		if $scope.search.mode is 'all' or $scope.search.mode is 'me'
+			return $scope.search.mode
+		if $scope.search.namesQuery is ''
+			return 'all'
+		return null
 
 	getNamesFromNamesQuery = () ->
-		names = $scope.namesQuery.toLowerCase().split ' '
-		return names.filter (name) -> name.length > 0
+		names = $scope.search.namesQuery.toLowerCase().split ' '
+		names = names.filter (name) -> name.length > 0
+		return if names.length > 0 then names else null
 
 	handleInitialChanges = (error, changes) -> $scope.$apply () -> 
 		$scope.changes = $scope.changes.concat changes
@@ -50,18 +60,22 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
 	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
 
+	$scope.searchModeClicked = (mode) ->
+		$scope.search.mode = mode
+		$scope.search.namesQuery = '' if mode isnt 'search'
+
 	$scope.changeClick = (change) ->
 		$scope.currentChangeId = change.id
 
 	$scope.scrolledToBottom = () ->
-		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, getNamesFromNamesQuery(), $scope.changes.length, handleMoreChanges
+		changesRpc.queueRequest $routeParams.repositoryId, getGroupFromMode(), getNamesFromNamesQuery(), $scope.changes.length, handleMoreChanges
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'change', newValue
 
-	$scope.$watch 'namesQuery', (newValue, oldValue) ->
+	$scope.$watch 'search.namesQuery', (newValue, oldValue) ->
 		$scope.changes = []
-		changesRpc.queueRequest $routeParams.repositoryId, $scope.group, getNamesFromNamesQuery(), 0, handleInitialChanges
+		changesRpc.queueRequest $routeParams.repositoryId, getGroupFromMode(), getNamesFromNamesQuery(), 0, handleInitialChanges
 ]
 
 

@@ -84,9 +84,6 @@ angular.module('koality.service', []).
 		nextCallback = null
 
 		createChangesQuery = (repositoryId, group, names, startIndex) ->
-			if names.length > 0 then group = null
-			else names = null
-
 			repositoryId: repositoryId
 			group: group
 			names: names
@@ -123,8 +120,9 @@ angular.module('koality.service', []).
 			repositoryId = integerConverter.toInteger repositoryId
 
 			assert.ok typeof repositoryId is 'number'
-			assert.ok typeof group is 'string'
-			assert.ok typeof names is 'object'
+			assert.ok not group? or (typeof group is 'string' and (group is 'all' or group is 'me'))
+			assert.ok not names? or (typeof names is 'object')
+			assert.ok (group? and not names?) or (not group? and names?)
 			assert.ok typeof startIndex is 'number'
 			assert.ok typeof callback is 'function'
 
@@ -241,29 +239,6 @@ angular.module('koality.directive', []).
 				event.preventDefault()
 				event.stopPropagation()
 	]).
-	# directive('menu', () ->
-	# 	restrict: 'E'
-	# 	replace: true
-	# 	transclude: true
-	# 	scope: 
-	# 		options: '=options'
-	# 		currentOptionName: '=currentOptionName'
-	# 		clickHandler: '&optionClick'
-	# 	template: '<div class="prettyMenu">
-	# 			<div class="prettyMenuOptions">
-	# 				<div class="prettyMenuOption" ng-repeat="option in options" ng-class="{selected: option.name == currentOptionName}" ng-click="clickHandler({optionName: option.name}); internalClickHandler(option)">{{option.title}}</div>
-	# 			</div>
-	# 			<div class="prettyMenuContents" ng-transclude></div>
-	# 		</div>'
-	# 	link: (scope, element, attributes) ->
-	# 		scope.$watch 'currentOptionName', () ->
-	# 			element.find('.prettyMenuContent').removeClass 'selected'
-	# 			element.find(".prettyMenuContent[optionName='#{scope.currentOptionName}']").addClass 'selected'
-
-	# 		scope.internalClickHandler = (option) ->
-	# 			scope.currentOptionName = option.name
-
-	# ).
 	directive('autoScrollToBottom', () ->
 		restrict: 'A'
 		link: (scope, element, attributes) ->
@@ -329,6 +304,7 @@ angular.module('koality.directive', []).
 	).
 	directive('menu', () ->
 		restrict: 'E'
+		require: 'ngModel'
 		replace: true
 		transclude: true
 		template: '<div class="prettyMenu" ng-transclude>
