@@ -22,7 +22,7 @@ function add_user () {
 function bootstrap () {
 	check_sudo
 	add_user lt3
-	sudo su lt3 -c "$0 setup"
+	sudo su lt3 -c "$0 _$1_setup"
 }
 
 function makedir () {
@@ -83,7 +83,7 @@ function setup_python () {
 function setup_ruby () {
 	which rvm > /dev/null
 	if [ $? -ne "0" ]; then
-		curl -L https://get.rvm.io | bash -s head --ruby
+		curl -L https://get.rvm.io | bash -s stable --ruby
 	fi
 	cat ~/.bash_profile | grep "export rvmsudo_secure_path=1" > /dev/null
 	if [ $? -ne "0" ]; then
@@ -103,28 +103,41 @@ function provision () {
 	pushd ~/source/ci/platform
 	sudo python setup.py install
 	popd
-	python -u -c "from provisioner.provisioner import Provisioner; Provisioner().provision(global_install=True)"
+	sudo python -u -c "from provisioner.provisioner import Provisioner; Provisioner().provision(global_install=True)"
+	rm -rf source scripts
 }
 
-function main_setup () {
+function shared_setup () {
+	# Install dependencies
+	sudo apt-get install -y python-pip make postgresql python-software-properties git
+	setup_rabbitmq
+	setup_redis
+
+	setup_ruby
+	setup_nodejs
+}
+
+function vm_setup () {
 	check_sudo
 
 	keygen
 
-	# Install dependencies
-	sudo apt-get install -y python-pip make postgresql mysql-server python-software-properties git
-	setup_rabbitmq
-	setup_redis
+	shared_setup
+
+	# mysql must be explicitly installed noninteractively
+	DEBIAN_FRONTEND=noninteractive sudo apt-get install -y mysql-server
 	setup_postgres
 
 	setup_python
-	setup_ruby
-	setup_nodejs
 
 	provision
 }
 
 function host_setup () {
+	check_sudo
+
+	shared_setup
+
 	# Java
 	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
 		mkdir /tmp/src
@@ -132,7 +145,7 @@ function host_setup () {
         git clone https://github.com/flexiondotorg/oab-java6.git
         cd /tmp/src/oab-java6
         sudo ./oab-java.sh
-        sudo add-apt-repository ppa:flexiondotorg/java
+        sudo add-apt-repository -y ppa:flexiondotorg/java
         sudo apt-get update
         sudo apt-get install -y sun-java6-jdk maven
     fi
@@ -145,7 +158,7 @@ function host_setup () {
 		gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg > /dev/null
 		sudo apt-get update
 		sudo apt-get install -y opscode-keyring
-		echo "chef chef/chef_server_url string" | sudo debconf-set-selections && sudo apt-get install chef -y
+		echo "chef chef/chef_server_url string" | sudo debconf-set-selections && sudo apt-get install -y chef
 	fi
 
 	mkdir ~/code
@@ -156,10 +169,15 @@ function host_setup () {
 }
 
 case "$1" in
-	setup )
-		main_setup ;;
-	host )
+	_vm_setup )
+		vm_setup ;;
+	_host_setup )
 		host_setup ;;
+	vm )
+		bootstrap vm ;;
+	host )
+		bootstrap host ;;
 	* )
-		bootstrap ;;
+		echo 'Must be run with either "vm" or "host" as the first argument'
+		exit 1
 esac
