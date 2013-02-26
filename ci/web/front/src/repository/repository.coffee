@@ -25,8 +25,8 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 		names = names.filter (name) -> name.length > 0
 		return if names.length > 0 then names else null
 
-	handleInitialChanges = (error, changes) -> $scope.$apply () -> 
-		$scope.changes = $scope.changes.concat changes
+	handleInitialChanges = (error, changes) -> $scope.$apply () ->
+		$scope.changes = changes
 		$scope.currentChangeId ?= $scope.changes[0].id if $scope.changes[0]?
 
 	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
@@ -80,13 +80,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		$location.search 'change', newValue
 
-	$scope.$watch 'search.mode', (newValue, oldValue) ->
-		getInitialChanges() if newValue isnt oldValue
-
-	$scope.$watch 'search.namesQuery', (newValue, oldValue) ->
-		getInitialChanges() if newValue isnt oldValue
-
-	getInitialChanges()
+	$scope.$watch 'search', ((newValue, oldValue) -> getInitialChanges()), true
 ]
 
 
