@@ -171,35 +171,10 @@ angular.module('koality.directive', []).
 		return (scope, element, attributes) ->
 			element.focus()
 	).
-	directive('scrollbarWrapper', () ->
-		restrict: 'A'
-		replace: true
-		transclude: true
-		template: '<div class="hideScrollbarOuter">
-				<div class="hideScrollbarInner">
-					<div class="hideScrollbarContent" ng-transclude></div>
-				</div>
-			</div>'
-		link: (scope, element, attributes) ->
-			setWidths = () ->
-				element.css 'overflow', 'hidden'
-
-				element.find('.hideScrollbarInner').width element.width() + 25
-				element.find('.hideScrollbarInner').height element.height()
-				element.find('.hideScrollbarInner').css 'overflow-y', 'auto'
-
-				element.find('.hideScrollbarContent').width element.width()
-
-			listenForBottomScroll = () ->
-				return if not attributes.scrollbarWrapperNotifyOnBottomScroll?
-
-				innerElement = element.find('.hideScrollbarInner')
-				innerElement.bind 'scroll', () ->
-					if innerElement[0].scrollTop + innerElement[0].offsetHeight >= innerElement[0].scrollHeight
-						scope.$apply attributes.scrollbarWrapperNotifyOnBottomScroll
-
-			setWidths()
-			listenForBottomScroll()
+	directive('inputFocusOnClick', () ->
+		return (scope, element, attributes) ->
+			element.bind 'click', (event) ->
+				element.find('input').focus()
 	).
 	directive('centeredPanel', () ->
 		restrict: 'E'
