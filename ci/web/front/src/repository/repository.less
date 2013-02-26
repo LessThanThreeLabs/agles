@@ -92,19 +92,52 @@
 			-webkit-box-orient: horizontal;
 			box-orient: horizontal;
 
-			width: 100%;
-			height: 100%;
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			padding: 8px 8px 0px 8px;
 
 			#repositoryChangesSearchAll, #repositoryChangesSearchMe, #repositoryChangesSearchNames {
-				@transitionTime: 0.5s;
-				transition: all @transitionTime ease-in-out;
-				-moz-transition: all @transitionTime ease-in-out;
-				-webkit-transition: all @transitionTime ease-in-out;
-				-o-transition: all @transitionTime ease-in-out;
+				@height: 25px;
+
+				@colorTransitionTime: 0.25s;
+				@backgroundColorTransitionTime: 0.25s;
+				@widthTransitionTime: 0.5s;
+				transition: color @colorTransitionTime ease-in-out,
+					background-color @backgroundColorTransitionTime ease-in-out,
+					width @widthTransitionTime ease-in-out;
+				-moz-transition: color @colorTransitionTime ease-in-out,
+					background-color @backgroundColorTransitionTime ease-in-out,
+					width @widthTransitionTime ease-in-out;
+				-webkit-transition: color @colorTransitionTime ease-in-out,
+					background-color @backgroundColorTransitionTime ease-in-out,
+					width @widthTransitionTime ease-in-out;
+				-o-transition: color @colorTransitionTime ease-in-out,
+					background-color @backgroundColorTransitionTime ease-in-out,
+					width @widthTransitionTime ease-in-out;
 
 				-moz-box-flex: 1;
 				-webkit-box-flex: 1;
 				box-flex: 1;
+
+				height: @height;
+				font-size: 14px;
+				line-height: @height;
+				vertical-align: text-center;
+				border-radius: 5px;
+				background-color: @backgroundColor;
+
+				&:hover {
+					color: @koalityBlack;
+					background-color: @koalityWhite;
+				}
+
+				&.selected {
+					color: @koalityBlack;
+					background-color: @koalityWhite;
+				}
 			}
 
 			&.searchOn {
@@ -114,18 +147,17 @@
 			}
 
 			#repositoryChangesSearchAll {
+				margin-right: 4px;
 				text-align: center;
-				background-color: red
 			}
 
 			#repositoryChangesSearchMe {
+				margin-right: 4px;
 				text-align: center;
-				background-color: green;
 			}
 
 			#repositoryChangesSearchNames {
 				text-align: left;
-				background-color: blue;
 			}
 		}
 	}

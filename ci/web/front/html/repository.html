@@ -10,10 +10,10 @@
 	<div id="repositoryChanges" unselectable ng-controller="RepositoryChanges">
 		<menu>
 			<menu-header>
-				<div id="repositoryChangesSearch" ng-class="{searchOn: searchOn}">
-					<div id="repositoryChangesSearchAll">All</div>
-					<div id="repositoryChangesSearchMe">Me</div>
-					<div id="repositoryChangesSearchNames" ng-click="searchOn = !searchOn">User</div>
+				<div id="repositoryChangesSearch" ng-class="{searchOn: searchState == 'search'}">
+					<div id="repositoryChangesSearchAll" ng-class="{selected: searchState == 'all'}" ng-click="searchState = 'me'">All</div>
+					<div id="repositoryChangesSearchMe" ng-class="{selected: searchState == 'me'}" ng-click="searchState = 'me'">Me</div>
+					<div id="repositoryChangesSearchNames" ng-class="{selected: searchState == 'search'}" ng-click="searchState = 'search'">User</div>
 				</div>
 			</menu-header>
 			<menu-options>
