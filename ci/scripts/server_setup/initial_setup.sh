@@ -38,6 +38,7 @@ function keygen () {
 }
 
 function setup_rabbitmq () {
+	sudo apt-get install -y rabbitmq-server
 	wget http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.7/rabbitmq-server_2.8.7-1_all.deb
 	sudo dpkg -i rabbitmq-server_2.8.7-1_all.deb
 	rm rabbitmq-server_2.8.7-1_all.deb
@@ -83,6 +84,10 @@ function setup_ruby () {
 	which rvm > /dev/null
 	if [ $? -ne "0" ]; then
 		curl -L https://get.rvm.io | bash -s head --ruby
+	fi
+	cat ~/.bash_profile | grep "export rvmsudo_secure_path=1" > /dev/null
+	if [ $? -ne "0" ]; then
+		echo "export rvmsudo_secure_path=1" >> ~/.bash_profile
 	fi
 }
 

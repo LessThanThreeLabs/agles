@@ -40,9 +40,18 @@ class OpenstackVm(VirtualMachine):
 		if not image:
 			image = cls.get_newest_image()
 		if not flavor:
+			flavor = cls._default_flavor()
 			flavor = OpenstackClient.get_client().flavors.find(ram=2048)
 		server = OpenstackClient.get_client().servers.create(name, image, flavor, files=cls._default_files(vm_username))
 		return OpenstackVm(vm_directory, server)
+
+	@classmethod
+	def _default_flavor(cls):
+		flavors = OpenstackClient.get_client().flavors.findall(ram=2048, vcpus=2)
+		for flavor in flavors:
+			if 'blimp' in flavor.name:
+				return flavor
+		return flavors[0]
 
 	@classmethod
 	def _default_files(cls, vm_username=VM_USERNAME):
