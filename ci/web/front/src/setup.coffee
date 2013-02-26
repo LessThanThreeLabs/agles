@@ -303,6 +303,14 @@ angular.module('koality.directive', []).
 					<div class="prettyMenuOptionsScrollInnerWrapper" ng-transclude></div>
 				</div>
 			</div>'
+		link: (scope, element, attributes) ->
+			addScrollListener = () ->
+				outerElement = element.find('.prettyMenuOptionsScrollOuterWrapper')
+				outerElement.bind 'scroll', (event) ->
+					scrolledToBottom = outerElement[0].scrollTop + outerElement[0].offsetHeight >= outerElement[0].scrollHeight
+					scope.$apply attributes.onScrollToBottom if scrolledToBottom
+
+			addScrollListener() if attributes.onScrollToBottom?
 	).
 	directive('menuOption', () ->
 		restrict: 'E'

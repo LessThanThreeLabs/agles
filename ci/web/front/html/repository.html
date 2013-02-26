@@ -22,7 +22,7 @@
 					</div>
 				</div>
 			</menu-header>
-			<menu-options>
+			<menu-options on-scroll-to-bottom="scrolledToBottom()">
 				<menu-option class="repositoryChange" ng-repeat="change in changes | orderBy:'number':true" menu-option-text="{{change.number}}" menu-option-subtext="{{change.status}}" menu-option-spinning="{{change.status == 'running'}}" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}"></menu-option>
 			</menu-options>
 		</menu>
