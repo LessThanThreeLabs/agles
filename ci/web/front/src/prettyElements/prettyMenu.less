@@ -7,11 +7,9 @@
 	@toothWidth: @optionHeight * .35;
 	@borderRadius: 5px;
 
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	right: 0px;
-	bottom: 0px;
+	position: relative;
+	width: @menuWidth;
+	height: 100%;
 
 	.prettyMenuHeader {
 		position: absolute;
@@ -65,8 +63,8 @@
 
 			.prettyMenuOptionsScrollInnerWrapper {
 				padding-top: @menuHeaderHeight - @borderRadius;
-				padding-right: @scrollbarHideWidth;
 				padding-bottom: @menuFooterHeight - @borderRadius;
+				width: @menuWidth;
 
 				.prettyMenuOption {
 					cursor: hand; cursor: pointer;
