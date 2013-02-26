@@ -25,7 +25,7 @@ class ChangesReadHandler extends Handler
 				callback 400
 
 
-	_sanitizeChange = (change) =>
+	_sanitizeChange: (change) =>
 		id: change.id
 		number: change.number
 		status: change.status
