@@ -109,20 +109,21 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		assert isinstance(names_filter, collections.Iterable)
 		assert not isinstance(names_filter, str)
 
+		if not names_filter:
+			return self.query_changes_group(user_id, repo_id, "all", start_index_inclusive, num_results)
+
 		user = database.schema.user
 		change = database.schema.change
 		commit = database.schema.commit
 		temp_string = database.schema.temp_string
 
-		query = change.join(commit).join(user)
-		if names_filter:
-			query = query.join(
-				temp_string,
-				or_(
-					temp_string.c.string == user.c.first_name,
-					temp_string.c.string == user.c.last_name
-				)
+		query = change.join(commit).join(user).join(
+			temp_string,
+			or_(
+				temp_string.c.string == user.c.first_name,
+				temp_string.c.string == user.c.last_name
 			)
+		)
 
 		query = query.select().apply_labels().where(change.c.repo_id == repo_id).distinct(change.c.number)
 		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
