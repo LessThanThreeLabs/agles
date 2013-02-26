@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import subprocess
@@ -7,15 +8,16 @@ import yaml
 from git import Repo
 
 from model_server.build_consoles import ConsoleType
+from shared.constants import BuildStatus
 from virtual_machine.remote_command import SimpleRemoteCheckoutCommand, SimpleRemoteProvisionCommand
 from verification_config import VerificationConfig
-from verification_result import VerificationResult
 
 
 class BuildCore(object):
 	def __init__(self, uri_translator=None):
+		self.logger = logging.getLogger("BuildCore")
 		self.uri_translator = uri_translator
-		self.source_dir = os.path.join(os.getcwd(), "source")
+		self.source_dir = os.path.join("/tmp", "source")
 
 	def setup_build(self, repo_uri, refs, console_appender=None):
 		self._checkout_refs(repo_uri, refs)
@@ -46,13 +48,23 @@ class BuildCore(object):
 	def _get_verification_configuration_from_file(self):
 		"""Reads in the yaml config file contained in the checked
 		out user repository which this server is verifying"""
-		config_path = os.path.join(self.source_dir, "koality.yml")
-		if os.access(config_path, os.F_OK):
+		config_path = self._get_config_path()
+		if config_path:
 			with open(config_path) as config_file:
-				config = yaml.load(config_file.read())
+				try:
+					config = yaml.safe_load(config_file.read())
+				except:
+					config = dict()
 		else:
 			config = dict()
 		return self._get_verification_configuration(config)
+
+	def _get_config_path(self):
+		possible_file_names = ['koality.yml', '.koality.yml']
+		for file_name in possible_file_names:
+			config_path = os.path.join(self.source_dir, file_name)
+			if os.access(config_path, os.F_OK):
+				return config_path
 
 	def _get_verification_configuration(self, config_dict):
 		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"))
@@ -81,9 +93,7 @@ class VirtualMachineBuildCore(BuildCore):
 		raise NotImplementedError()
 
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
-		verification_config = super(VirtualMachineBuildCore, self).setup_build(repo_uri, refs)
 		self.setup_virtual_machine(private_key, console_appender)
-		return verification_config
 
 	def _get_output_handler(self, console_appender, type, subtype=""):
 		return console_appender(type, subtype) if console_appender else None
@@ -138,14 +148,10 @@ class VirtualMachineBuildCore(BuildCore):
 			self.run_test_command(test_command, console_appender)
 
 	def mark_success(self, callback):
-		"""Calls the callback function with a success code"""
-		print "Completed verification request"
-		callback(VerificationResult.SUCCESS, self.rollback_virtual_machine)
+		callback(BuildStatus.PASSED, self.rollback_virtual_machine)
 
 	def mark_failure(self, callback):
-		"""Calls the callback function with a failure code"""
-		print "Failed verification request"
-		callback(VerificationResult.FAILURE, self.rollback_virtual_machine)
+		callback(BuildStatus.FAILED, self.rollback_virtual_machine)
 
 
 class VagrantBuildCore(VirtualMachineBuildCore):
@@ -167,18 +173,28 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 		super(OpenstackBuildCore, self).__init__(openstack_vm, uri_translator)
 
 	def setup(self):
-		self.virtual_machine.wait_until_ready()
+		while True:
+			try:
+				self.virtual_machine.wait_until_ready()
+			except:
+				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id), exc_info=True)
+			else:
+				break
 
 	def teardown(self):
 		self.virtual_machine.delete()
 
 	def rollback_virtual_machine(self):
-		self.virtual_machine.rebuild()
+		while True:
+			try:
+				self.virtual_machine.rebuild()
+			except:
+				self.logger.warn("Failed to roll back virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id), exc_info=True)
+			else:
+				break
 
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
-		verification_config = super(VirtualMachineBuildCore, self).setup_build(repo_uri, refs)
 		self.setup_virtual_machine(repo_uri, refs, private_key, console_appender)
-		return verification_config
 
 	def setup_virtual_machine(self, repo_uri, refs, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)

@@ -1,4 +1,8 @@
 ---
+languages:
+  python: 2.7  # This would put pip packages in a virtualenv
+  ruby: 1.9.3
+  nodejs: v0.8.9
 setup:
   - packages:
     - system:
@@ -19,6 +23,7 @@ setup:
       - amqp
       - pika: 0.9.5
       - kombu: 2.5.3
+      - pycrypto: 2.6
       - librabbitmq
       - sqlalchemy
       - pyyaml
@@ -37,16 +42,11 @@ setup:
       - boto
       - rackspace-novaclient
       - requests
-    - gem:
-      - vagrant
     - npm:
       - iced-coffee-script
       - less
       - directory: ci/web/back
   - scripts:
-    - script: ./install_virtualbox.sh
-      directory: ci/scripts
-    - script: vagrant gem install sahara
     - script:
         - if [ ! -d "/usr/lib/jvm/java-6-sun" ]
         - then mkdir /tmp/src
@@ -64,7 +64,3 @@ setup:
       - postgres:
         - name: koality
           username: lt3
-languages:
-  # python: 2.7 # This would put pip packages in a virtualenv
-  ruby: 1.9.3
-  nodejs: v0.8.9

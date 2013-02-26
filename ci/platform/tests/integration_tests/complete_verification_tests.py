@@ -115,7 +115,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		commit_id = 0
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id,
-				user_id=self.user_id, message="commit message", timestamp=int(time.time()))
+				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()))
 			conn.execute(ins_commit)
 			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master",
 				number=1, status=BuildStatus.QUEUED)
@@ -143,7 +143,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		commit_id = self._insert_commit_info()
 
 		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
-			yaml.dump({'test': self._test_commands()}),
+			yaml.safe_dump({'test': self._test_commands()}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
@@ -184,4 +184,4 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 		self._modify_commit_push(work_repo, "conflict.txt", "c2")
 		self._repo_roundtrip("conflict.txt", "conflict")
-		assert_equal(BuildStatus.FAILED, self.change_status)
+		assert_equal(BuildStatus.FAILED_TO_MERGE, self.change_status)

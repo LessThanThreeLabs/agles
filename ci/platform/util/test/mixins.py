@@ -60,12 +60,13 @@ class ModelServerTestMixin(BaseTestMixin):
 
 class RabbitMixin(BaseTestMixin):
 	def _purge_queues(self):
-		command = """rabbitmqadmin -f tsv -q list queues name messages|
+		command = """rabbitmqadmin -u %s -p %s -f tsv -q list queues name messages|
 			while read queue count;
 			do if [ ${count} -gt "0" ];
-				then rabbitmqadmin -q purge queue name=${queue};
+				then rabbitmqadmin -u %s -p %s -q purge queue name=${queue};
 			fi;
-			done"""
+			done""" % (RabbitSettings.rabbit_username, RabbitSettings.rabbit_password,
+				RabbitSettings.rabbit_username, RabbitSettings.rabbit_password)
 		subprocess.call(command, shell=True)
 
 
@@ -88,6 +89,9 @@ class RedisTestMixin(BaseTestMixin):
 
 		while True:
 			self._redis_process.poll()
+			if self._redis_process.returncode is not None:
+				print self._redis_process.communicate()
+				assert False
 			assert self._redis_process.returncode is None
 			line = self._redis_process.stdout.readline()
 			if line.find("The server is now ready to accept connections") != -1:

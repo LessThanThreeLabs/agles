@@ -77,7 +77,7 @@ class MysqlDatabaseParser(DatabaseParser):
 		return self.mysql_command("create user '%s'@'localhost' identified by ''" % username)
 
 	def extra_setup_commands(self, database_name, username):
-		return [self.mysql_command("grant all privileges on %s.* to '%s'@localhost") % (database_name, username)]
+		return [self.mysql_command("grant all privileges on %s.* to '%s'@localhost" % (database_name, username))]
 
 	def mysql_command(self, command):
 		return SetupCommand("mysql -u root -e %s" % pipes.quote(command))

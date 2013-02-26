@@ -1,3 +1,4 @@
+import logging
 import os
 import socket
 
@@ -19,6 +20,7 @@ class OpenstackClient(object):
 class OpenstackVm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
+	logger = logging.getLogger("OpenstackVm")
 
 	def __init__(self, vm_directory, server, vm_username=VM_USERNAME):
 		super(OpenstackVm, self).__init__(vm_directory)
@@ -36,9 +38,9 @@ class OpenstackVm(VirtualMachine):
 		if not name:
 			name = "%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(os.getcwd())))
 		if not image:
-			image = cls._get_newest_image()
+			image = cls.get_newest_image()
 		if not flavor:
-			flavor = OpenstackClient.get_client().flavors.find(ram=1024)
+			flavor = OpenstackClient.get_client().flavors.find(ram=2048)
 		server = OpenstackClient.get_client().servers.create(name, image, flavor, files=cls._default_files(vm_username))
 		return OpenstackVm(vm_directory, server)
 
@@ -50,7 +52,7 @@ class OpenstackVm(VirtualMachine):
 	def from_directory(cls, vm_directory):
 		try:
 			with open(os.path.join(vm_directory, OpenstackVm.VM_INFO_FILE)) as vm_info_file:
-				config = yaml.load(vm_info_file.read())
+				config = yaml.safe_load(vm_info_file.read())
 				vm_id = config['server_id']
 				vm_username = config['username']
 		except:
@@ -63,6 +65,7 @@ class OpenstackVm(VirtualMachine):
 		try:
 			vm = OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
 			if vm.server.status == 'ERROR':
+				OpenstackVm.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, vm_id))
 				vm.delete()
 				return None
 			elif vm.server.status == 'DELETED':
@@ -75,24 +78,34 @@ class OpenstackVm(VirtualMachine):
 			return None
 
 	def _write_vm_info(self):
-		config = yaml.dump({'server_id': self.server.id, 'username': self.vm_username})
+		config = yaml.safe_dump({'server_id': self.server.id, 'username': self.vm_username})
 		if not os.access(self.vm_directory, os.F_OK):
 			os.makedirs(self.vm_directory)
 		with open(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE), "w") as vm_info_file:
 			vm_info_file.write(config)
 
 	def wait_until_ready(self):
-		while not (self.server.accessIPv4 and self.server.status == 'ACTIVE'):
-			eventlet.sleep(1)
+		while not ('private' in self.server.addresses and self.server.status == 'ACTIVE'):
+			eventlet.sleep(3)
 			self.server = self.nova_client.servers.get(self.server.id)
 			if self.server.status == 'ERROR':
+				OpenstackVm.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.server.id))
 				self.rebuild()
+		for remaining_attempts in range(24, 0, -1):
+			if remaining_attempts <= 3:
+				OpenstackVm.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.server.id, remaining_attempts))
+			if self.ssh_call("true").returncode == 0:
+				return
+			eventlet.sleep(5)
+		# Failed to ssh into machine, try again
+		OpenstackVm.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.server.id))
+		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("virtualenvs/2.7/bin/python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key, timeout=1200, output_handler=output_handler)
+		return self.ssh_call("python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key, timeout=1200, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.server.accessIPv4)
+		login = "%s@%s" % (self.vm_username, self.server.accessIPv4 or self.server.addresses['private'][0]['addr'])
 		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
@@ -105,7 +118,10 @@ class OpenstackVm(VirtualMachine):
 				server.delete()
 			except:
 				pass
-		os.remove(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE))
+		try:
+			os.remove(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE))
+		except:
+			pass
 
 	def save_snapshot(self, image_name):
 		image_id = self.server.create_image(image_name)
@@ -113,7 +129,7 @@ class OpenstackVm(VirtualMachine):
 
 	def rebuild(self, image=None):
 		if not image:
-			image = self._get_newest_image()
+			image = self.get_newest_image()
 		name = self.server.name
 		flavor = self.server.flavor['id']
 		self.delete()
@@ -122,7 +138,7 @@ class OpenstackVm(VirtualMachine):
 		self.wait_until_ready()
 
 	@classmethod
-	def _get_newest_image(cls):
+	def get_newest_image(cls):
 		images = OpenstackClient.get_client().images.list()
 		images = [image for image in images if OpenstackSettings.image_filter(image) and image.status == 'ACTIVE']
 		return max(images, key=lambda image: int(image.name[image.name.rfind('_') + 1:]))  # get image with greatest suffix number

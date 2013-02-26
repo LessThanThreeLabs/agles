@@ -22,3 +22,6 @@ default[:koality][:languages] = {
 override['mysql']['server_root_password'] = ''
 override['mysql']['server_repl_password'] = ''
 override['mysql']['server_debian_password'] = ''
+
+override[:rabbitmq][:default_user] = 'lt3'
+override[:rabbitmq][:default_pass] = '42f6e8eacf66b9ee7c7b0a5b6a0e1498f7c0d42f'

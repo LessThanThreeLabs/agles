@@ -6,7 +6,6 @@ from settings import Settings
 class VerificationServerSettings(Settings):
 	def __init__(self):
 		super(VerificationServerSettings, self).__init__(
-			__file__,
 			exchange=Exchange("verification", "direct", durable=True),
 			local_box_name="precise64_verification")
 		self.add_values(

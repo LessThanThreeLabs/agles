@@ -76,7 +76,7 @@ class PipPackageParser(PackageParser):
 		return "%s==%s" % (name, version)
 
 	def to_install_string(self, package_string):
-		return "pip install %s" % package_string
+		return "pip install %s --upgrade" % package_string
 
 
 class GemPackageParser(PackageParser):
@@ -102,7 +102,7 @@ class NpmPackageParser(PackageParser):
 				raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
 			package_info = package.items()[0]
 			if package_info[0] == 'directory':
-				return SetupCommand(["cd %s" % os.path.join(source_path, package_info[1]), "npm install"])
+				return SetupCommand("cd %s" % os.path.join(source_path, package_info[1]), "npm install")
 			package_string = self.to_package_string(*package_info)
 		else:
 			raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))

@@ -8,12 +8,12 @@ from shutil import rmtree
 from testconfig import config
 
 from settings.verification_server import VerificationServerSettings
+from shared.constants import BuildStatus
 from util.test import BaseIntegrationTest
 from util.test.fake_build_verifier import FakeBuildVerifier
 from util.test.mixins import *
 from virtual_machine.vagrant import Vagrant
 from verification.server.build_verifier import BuildVerifier
-from verification.shared.verification_result import VerificationResult
 
 VM_DIRECTORY = '/tmp/verification'
 
@@ -57,11 +57,11 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
 		self._modify_commit_push(work_repo, "koality.yml",
-			yaml.dump({'test': [{'hello_world': {'script': 'echo Hello World!'}}]}),
+			yaml.safe_dump({'test': [{'hello_world': {'script': 'echo Hello World!'}}]}),
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
-			lambda retval, cleanup=None: assert_equal(VerificationResult.SUCCESS, retval))
+			lambda retval, cleanup=None: assert_equal(BuildStatus.PASSED, retval))
 
 	def test_bad_repo(self):
 		if not self.use_vagrant:
@@ -69,8 +69,8 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin,
 		repo = Repo.init(self.repo_dir, bare=True)
 		work_repo = repo.clone(self.work_repo_dir)
 		self._modify_commit_push(work_repo, "koality.yml",
-			yaml.dump({'test': [{'fail': {'script': 'exit 42'}}]}),
+			yaml.safe_dump({'test': [{'fail': {'script': 'exit 42'}}]}),
 			refspec="HEAD:refs/pending/1")
 
 		self.verifier.verify(self.repo_dir, ["refs/pending/1"],
-			lambda retval, cleanup=None: assert_equal(VerificationResult.FAILURE, retval))
+			lambda retval, cleanup=None: assert_equal(BuildStatus.FAILED, retval))

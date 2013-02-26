@@ -15,18 +15,20 @@ class ScriptParser(object):
 	def parse_dict(self, script_info, source_path):
 		if not 'script' in script_info:
 			raise InvalidConfigurationException("Scripts must be a string or dictionary containing \"script\". Error at: %s" % script_info)
-		directory = source_path
+		directory = None
 		for key, value in script_info.items():
 			if key == 'script':
-				if isinstance(script_info['script'], str):
-					script = script_info['script']
-				elif isinstance(script_info['script'], list):
-					script = "\n".join(script_info['script'])
-			elif key == 'directory':
-				directory = os.path.join(source_path, script_info['directory'])
+				if isinstance(value, str):
+					script = value
+				elif isinstance(value, list):
+					script = "\n".join(value)
+			elif key in ['path', 'directory']:
+				if directory:
+					raise InvalidConfigurationException("Script must contain at most one of the modifiers [\"path\", \"directory\"]")
+				directory = os.path.join(source_path, value)
 			else:
 				raise InvalidConfigurationException("Invalid script modifier: (%s: %s)" % (key, value))
-		return self.script_command(script, directory)
+		return self.script_command(script, directory if directory else source_path)
 
 	def script_command(self, command, directory):
-		return SetupCommand(["cd %s" % directory, command])
+		return SetupCommand("cd %s" % directory, command)

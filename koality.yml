@@ -21,7 +21,7 @@ setup:
       - kombu: 2.5.3
       - pycrypto: 2.6
       - librabbitmq
-      - sqlalchemy
+      - sqlalchemy: 0.7.8
       - pyyaml
       - msgpack-python
       - nose
@@ -35,6 +35,7 @@ setup:
       - nose-testconfig
       - boto
       - rackspace-novaclient
+      - python-novaclient
       - requests
     - npm:
       - iced-coffee-script
@@ -45,10 +46,14 @@ setup:
     - postgres:
       - name: koality
         username: lt3
+    - mysql:
+      - name: koality_mysql
+        username: lt3
   - scripts:
     - git config --global user.email "koality@getkoality.com"
     - git config --global user.name "Koality"
-
+    - directory: ci/scripts
+      script: ./rabbitmq_setup.sh
 compile:
   - compile_platform:
       path: ci/platform
@@ -66,4 +71,4 @@ test:
         - nosetests -sv
         - cd ../web/back
         - npm test
-      timeout: 120
+      timeout: 300

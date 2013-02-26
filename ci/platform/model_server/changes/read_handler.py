@@ -1,4 +1,4 @@
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 
 import collections
 import database.schema
@@ -20,9 +20,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		if row:
-			return (row[change.c.commit_id], row[change.c.merge_target],
-				row[change.c.number], row[change.c.status],
-				row[change.c.start_time], row[change.c.end_time])
+			return to_dict(row, change.columns)
 
 	def get_builds_from_change_id(self, change_id):
 		build = database.schema.build

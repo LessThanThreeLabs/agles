@@ -48,6 +48,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				repo_id=self.repo_id,
 				user_id=self.user_id,
 				message='a',
+				sha="sha",
 				timestamp=1,
 			)
 
@@ -78,7 +79,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			for i in xrange(3):
 				self.build_ids.append(sqlconn.execute(ins_build).inserted_primary_key[0])
 
-	def console_append_test(self):
+	def test_console_append(self):
 		self._initialize()
 		update_handler = BuildConsolesUpdateHandler()
 

@@ -1,4 +1,6 @@
 { "run_list": [
+	"recipe[supervisor]",
+	"recipe[redisio::install]",
 	"role[model_server]",
 	"role[webserver]",
 	"role[repostore]",

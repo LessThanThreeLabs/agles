@@ -1,9 +1,10 @@
+import inspect
 import os
 import yaml
 
 
 class Settings(object):
-	SETTINGS_DIRECTORIES = [os.path.join(os.environ['HOME'], 'koality')]
+	SETTINGS_DIRECTORIES = [os.path.join(os.environ.get('HOME', '/'), 'koality')]
 	SETTINGS_FILE_EXTENSIONS = ['yml']
 	SETTINGS_EXTENSION_TO_HANDLER = {'yml': yaml.safe_load}
 	_is_initialized = False
@@ -18,8 +19,8 @@ class Settings(object):
 	def reinitialize(cls):
 		cls()
 
-	def __init__(self, filename, **kwargs):
-		self.filename = os.path.basename(filename)
+	def __init__(self, **kwargs):
+		self.filename = os.path.basename(inspect.getfile(inspect.currentframe().f_back))
 		self.settings_dict = {}
 		self._init_from_files()
 		self.add_values(**kwargs)
@@ -49,7 +50,10 @@ class Settings(object):
 
 	def _value(self, name, default_value):
 		value = self._load_value(name, default_value)
-		setattr(type(self), name, value)
+		if inspect.isfunction(value):
+			setattr(type(self), name, classmethod(value))
+		else:
+			setattr(type(self), name, value)
 
 	def _load_value(self, name, default_value):
 		return self.settings_dict.get(name, default_value)
