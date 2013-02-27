@@ -263,6 +263,9 @@ angular.module('koality.directive', []).
 		transclude: true
 		template: '<form class="prettyForm" novalidate ng-transclude>
 			</form>'
+		link: (scope, element, attributes) ->
+			if attributes.styledFormAlignment is 'center'
+				element.addClass 'center'
 	).
 	directive('styledFormField', () ->
 		restrict: 'E'

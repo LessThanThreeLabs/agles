@@ -156,27 +156,22 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 	$scope.$on '$destroy', () -> buildConsoleStatusUpdateEvents.unsubscribe() if buildConsoleStatusUpdateEvents?
 
 	$scope.stageClick = (stage) ->
-		$scope.currentStageId = stage.id
+		$scope.currentStageId = if stage? then stage.id else null
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		retrieveStages()
 		updateBuildConsoleAddedListener()
 		updateBuildConsoleStatusListener()
+
+	$scope.$watch 'currentStageId', (newValue, oldValue) ->
+		$location.search 'stage', newValue
 ]
 
 
 window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, crazyAnsiText, rpc, events, integerConverter) ->
-	retrieveMetadata = () ->
-		$scope.metadata = {}
-		return if not $scope.currentChangeId?
-
-		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, metadata) ->
-			$scope.$apply () -> $scope.metadata = metadata
-
 	retrieveLines = () ->
 		$scope.lines = []
 		return if not $scope.currentStageId?
-		return if not isStageIdInStages $scope.currentStageId
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
 			$scope.$apply () ->
@@ -201,21 +196,7 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 			addedLineEvents = events.listen('buildConsoles', 'new output', $scope.currentStageId).setCallback(handleLinesAdded).subscribe()
 	$scope.$on '$destroy', () -> addedLineEvents.unsubscribe() if addedLineEvents?
 
-	$scope.$on '$routeUpdate', () ->
-		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
-		$scope.currentStageId = integerConverter.toInteger $routeParams.stage
-	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
-	$scope.currentStageId = integerConverter.toInteger $routeParams.stage
-
-	$scope.stageClick = (stage) ->
-		$scope.currentStageId = if stage? then stage.id else null
-
-	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
-		retrieveMetadata()
-
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
-		if isStageIdInStages($scope.currentStageId) or not $scope.currentStageId?
-			retrieveLines()
-			updateAddedLineListener()
-		$location.search 'stage', newValue
+		retrieveLines()
+		updateAddedLineListener()
 ]

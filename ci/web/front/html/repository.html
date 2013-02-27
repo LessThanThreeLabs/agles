@@ -40,25 +40,21 @@
 	</div>
 
 	<div id="repositoryChangeDetails" ng-controller="RepositoryDetails">
-		<div id="repositoryChangeDetailsHeader"></div>
-		<div id="repositoryChangeDetailsContent">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>
+		<div id="repositoryChangeDetailsHeader">Hello</div>
+		<div id="repositoryChangeDetailsContent">
+			<div id="repositoryChangeDetailsSummary" ng-show="currentChangeId != null && currentStageId == null">
+				<styled-form>
+					<styled-form-field label="User"><span ng-bind-template="{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}"></span></styled-form-field>
+					<styled-form-field label="Message"><span ng-bind="currentChangeInformation.message"></span></styled-form-field>
+					<styled-form-field label="Target"><span ng-bind="currentChangeInformation.target"></span></styled-form-field>
+					<styled-form-field label="Commit time"><span ng-bind="currentChangeInformation.commitTime | date:'medium'"></span></styled-form-field>
+				</styled-form>
+			</div>
+		</div>
 		<div id="repositoryChangeDetailsFooter"></div>
 
 		<!-- <div id="repositoryChangeDetails">
-			<div id="repositoryChangeDetailsStages" unselectable>
-				<span class="repositoryChangeStage" ng-click="stageClick(null)" ng-class="{selected: currentStageId == null}">Home</span>
-				<span class="repositoryChangeStage" ng-repeat="stage in stages" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, queued: stage.status == 'queued', running: stage.status == 'running', passed: stage.status == 'passed', failed: stage.status == 'failed'}">{{stage.name}}</span>
-			</div>
-
 			<div id="repositoryChangeDetailsOutput">
-				<div id="changeDetailsHome" ng-show="currentChangeId != null && currentStageId == null">
-					<styled-form>
-						<styled-form-field label="User"><span ng-bind-template="{{metadata.user.firstName}} {{metadata.user.lastName}}"></span></styled-form-field>
-						<styled-form-field label="Message"><span ng-bind="metadata.message"></span></styled-form-field>
-						<styled-form-field label="Target"><span ng-bind="metadata.target"></span></styled-form-field>
-						<styled-form-field label="Commit time"><span ng-bind="metadata.commitTime | date:'medium'"></span></styled-form-field>
-					</styled-form>
-				</div>
 
 				<div id="changeConsoleText" auto-scroll-to-bottom="lines" ng-show="currentChangeId != null && currentStageId != null">
 					<div class="consoleTextLine" ng-repeat="line in lines">

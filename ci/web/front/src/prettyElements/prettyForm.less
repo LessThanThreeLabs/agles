@@ -2,8 +2,11 @@
 
 .prettyForm {
 	display: table;
-	margin-left: auto;
-	margin-right: auto;
+
+	&.center {
+		margin-left: auto;
+		margin-right: auto;
+	}
 
 	.prettyFormRow {
 		@bottomPadding: 15px;
@@ -20,8 +23,8 @@
 			display: table-cell;
 			padding-right: 15px;
 			vertical-align: top;
-			text-align: right;
-			font-weight: bold;
+			color: @koalityGray;
+			text-align: left;
 			padding-bottom: @bottomPadding;
 
 			&.labelPadding {
