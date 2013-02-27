@@ -6,6 +6,12 @@ window.Repository = ['$scope', ($scope) ->
 ]
 
 
+
+
+window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, changesRpc, events, integerConverter) ->
+
+
+]
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, changesRpc, events, integerConverter) ->
 	$scope.changes = []
 
@@ -84,59 +90,40 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 ]
 
 
-window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, crazyAnsiText, rpc, events, integerConverter) ->
+
+getRandomStatus = () ->
+	random = Math.random()
+	if random > .5 then return 'passed'
+	else if random > .25 then return 'failed'
+	else return 'running'
+
+
+window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, events, integerConverter) ->
+	$scope.stages = []
+
 	isStageIdInStages = (stageId) ->
-		return false if not $scope.stages?
 		stage = (stage for stage in $scope.stages when stage.id is stageId)[0]
 		return stage?
 
-	retrieveMetadata = () ->
-		$scope.metadata = {}
-		return if not $scope.currentChangeId?
-
-		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, metadata) ->
-			$scope.$apply () -> $scope.metadata = metadata
-
 	retrieveStages = () ->
-		$scope.stages = null
-		$scope.lines = null
+		$scope.stages = []
 		return if not $scope.currentChangeId?
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
+			buildConsoles = buildConsoles.map (buildConsole) -> 
+				buildConsole.status = getRandomStatus()
+				return buildConsole
+
 			$scope.$apply () ->
 				$scope.stages = buildConsoles
-
-				if isStageIdInStages $scope.currentStageId
-					retrieveLines()
-					updateAddedLineListener()
-				else
-					$scope.currentStageId = null
-
-	retrieveLines = () ->
-		$scope.lines = []
-		return if not $scope.currentStageId?
-		return if not isStageIdInStages $scope.currentStageId
-
-		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
-			$scope.$apply () ->
-				for lineNumber, lineText of lines
-					addLine lineNumber, lineText
-
-	addLine = (lineNumber, lineText) ->
-		$scope.lines[lineNumber-1] = crazyAnsiText.makeCrazy lineText
+				$scope.currentStageId = null if not isStageIdInStages $scope.currentStageId
 
 	handleBuildConsoleAdded = (data) -> $scope.$apply () ->
-		$scope.stages ?= []
 		$scope.stages.push data
 
 	handleBuildConsoleStatusUpdate = (data) -> $scope.$apply () ->
 		stage = (stage for stage in $scope.stages when stage.id is data.id)[0]
 		stage.status = data.status if stage?
-
-	handleLinesAdded = (data) -> $scope.$apply () ->
-		$scope.lines ?= []
-		for lineNumber, lineText of data
-			addLine lineNumber, lineText
 
 	buildConsoleAddedEvents = null
 	updateBuildConsoleAddedListener = () ->
@@ -157,6 +144,48 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 		if $scope.currentChangeId?
 			buildConsoleStatusUpdateEvents = events.listen('changes', 'return code added', $scope.currentChangeId).setCallback(handleBuildConsoleStatusUpdate).subscribe()
 	$scope.$on '$destroy', () -> buildConsoleStatusUpdateEvents.unsubscribe() if buildConsoleStatusUpdateEvents?
+
+	$scope.stageClick = (stage) ->
+		$scope.currentStageId = stage.id
+
+	$scope.$on '$routeUpdate', () ->
+		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
+		$scope.currentStageId = integerConverter.toInteger $routeParams.stage
+	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
+	$scope.currentStageId = integerConverter.toInteger $routeParams.stage
+
+	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
+		retrieveStages()
+		updateBuildConsoleAddedListener()
+		updateBuildConsoleStatusListener()
+]
+
+
+window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, crazyAnsiText, rpc, events, integerConverter) ->
+	retrieveMetadata = () ->
+		$scope.metadata = {}
+		return if not $scope.currentChangeId?
+
+		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, metadata) ->
+			$scope.$apply () -> $scope.metadata = metadata
+
+	retrieveLines = () ->
+		$scope.lines = []
+		return if not $scope.currentStageId?
+		return if not isStageIdInStages $scope.currentStageId
+
+		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
+			$scope.$apply () ->
+				for lineNumber, lineText of lines
+					addLine lineNumber, lineText
+
+	addLine = (lineNumber, lineText) ->
+		$scope.lines[lineNumber-1] = crazyAnsiText.makeCrazy lineText
+
+	handleLinesAdded = (data) -> $scope.$apply () ->
+		$scope.lines ?= []
+		for lineNumber, lineText of data
+			addLine lineNumber, lineText
 
 	addedLineEvents = null
 	updateAddedLineListener = () ->
@@ -179,9 +208,6 @@ window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiTex
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		retrieveMetadata()
-		retrieveStages()
-		updateBuildConsoleAddedListener()
-		updateBuildConsoleStatusListener()
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
 		if isStageIdInStages($scope.currentStageId) or not $scope.currentStageId?
