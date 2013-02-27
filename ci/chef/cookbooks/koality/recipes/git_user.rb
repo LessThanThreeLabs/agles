@@ -21,3 +21,11 @@ bash "register own ssh key" do
 		EOH
 	not_if {File.exists?("/home/git/.ssh/id_rsa")}
 end
+
+bash "setup git user information" do
+	user "git"
+	code <<-EOH
+		git config --global user.email "koality@koalitycode.com"
+		git config --global user.name "Koality"
+		EOH
+end
