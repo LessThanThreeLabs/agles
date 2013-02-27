@@ -14,14 +14,14 @@ class BuildsReadHandler(ModelServerRpcHandler):
 	def get_build_from_id(self, build_id):
 		build = database.schema.build
 
-		query = build.select().where(build.c.id==build_id)
+		query = build.select().where(build.c.id == build_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		return to_dict(row, build.columns)
 
 	def get_commit_list(self, build_id):
 		build_commits_map = database.schema.build_commits_map
-		query = build_commits_map.select().where(build_commits_map.c.build_id==build_id)
+		query = build_commits_map.select().where(build_commits_map.c.build_id == build_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return [row[build_commits_map.c.commit_id] for row in sqlconn.execute(query)]
 
@@ -33,18 +33,16 @@ class BuildsReadHandler(ModelServerRpcHandler):
 		build = database.schema.build
 		repo = database.schema.repo
 
-		query = build.join(repo).select().apply_labels().where(build.c.id==build_id)
+		query = build.join(repo).select().apply_labels().where(build.c.id == build_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
 		if row:
-			repo_id = row[repo.c.id]
 			return to_dict(row, build.columns, tablename=build.name)
 		return {}
 
 	# TODO (jchu): This query is SLOW AS BALLS
-	def query_builds(self, user_id, repo_id, query_string, start_index_inclusive,
-							num_results):
+	def query_builds(self, user_id, repo_id, query_string, start_index_inclusive, num_results):
 		user = database.schema.user
 		build = database.schema.build
 		change = database.schema.change
@@ -55,7 +53,7 @@ class BuildsReadHandler(ModelServerRpcHandler):
 
 		query = build.join(change).join(commit).join(repo).join(user).select().apply_labels().where(
 			and_(
-				repo.c.id==repo_id,
+				repo.c.id == repo_id,
 				or_(
 					commit.c.message.like(query_string),
 					user.c.email.like(query_string)
