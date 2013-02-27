@@ -168,7 +168,7 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 ]
 
 
-window.RepositoryDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, crazyAnsiText, rpc, events, integerConverter) ->
+window.RepositoryStageDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, crazyAnsiText, rpc, events, integerConverter) ->
 	retrieveLines = () ->
 		$scope.lines = []
 		return if not $scope.currentStageId?

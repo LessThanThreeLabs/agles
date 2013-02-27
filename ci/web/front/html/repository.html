@@ -7,7 +7,7 @@
 		</div>
 	</div>
 
-	<div id="repositoryChanges" unselectable ng-controller="RepositoryChanges">
+	<div id="repositoryChanges" ng-controller="RepositoryChanges" unselectable>
 		<menu>
 			<menu-header>
 				<div id="repositoryChangesSearchContainer">
@@ -28,7 +28,7 @@
 		</menu>
 	</div>
 
-	<div id="repositoryStages" unselectable ng-controller="RepositoryStages">
+	<div id="repositoryStages" ng-controller="RepositoryStages" unselectable>
 		<menu>
 			<menu-header>
 				<span id="repositoryStagesHeader">Change {{currentChangeInformation.number}}</span>
@@ -39,10 +39,10 @@
 		</menu>
 	</div>
 
-	<div id="repositoryChangeDetails" ng-controller="RepositoryDetails">
-		<div id="repositoryChangeDetailsHeader">Hello</div>
-		<div id="repositoryChangeDetailsContent">
-			<div id="repositoryChangeDetailsSummary" ng-show="currentChangeId != null && currentStageId == null">
+	<div id="repositoryStageDetails" ng-controller="RepositoryStageDetails" unselectable>
+		<div id="repositoryStageDetailsHeader">Hello</div>
+		<div id="repositoryStageDetailsContent">
+			<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null">
 				<styled-form>
 					<styled-form-field label="User"><span ng-bind-template="{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}"></span></styled-form-field>
 					<styled-form-field label="Message"><span ng-bind="currentChangeInformation.message"></span></styled-form-field>
@@ -51,14 +51,14 @@
 				</styled-form>
 			</div>
 
-			<div id="repositoryChangeDetailsOutput" auto-scroll-to-bottom="lines" ng-show="currentChangeId != null && currentStageId != null">
+			<div id="repositoryStageDetailsOutput" auto-scroll-to-bottom="lines" ng-show="currentChangeId != null && currentStageId != null">
 				<div class="consoleText">
 					<div class="consoleTextLine" ng-repeat="line in lines">
-						<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse"></span>
+						<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse" text-selectable></span>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div id="repositoryChangeDetailsFooter"></div>
+		<div id="repositoryStageDetailsFooter"></div>
 	</div>
 </div>
