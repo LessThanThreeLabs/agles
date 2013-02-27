@@ -1,11 +1,9 @@
 #main {
-	@width: 1000px;
+	@contentWidth: 1000px;
 	@headerHeight: 35px;
 
 	position: fixed;
-	left: 50%;
-	margin-left: -@width/2;
-	width: @width;
+	width: 100%;
 	height: 100%;
 
 	#headerContanier {
@@ -15,6 +13,14 @@
 		left: 0px;
 		right: 0px;
 		height: @headerHeight;
+
+		#headerCenterContainer {
+			position: relative;
+			margin-left: auto;
+			margin-right: auto;
+			width: @contentWidth;
+			height: 100%;
+		}
 	}	
 
 	#contentContainer {
@@ -24,5 +30,13 @@
 		left: 0px;
 		right: 0px;
 		bottom: 0px;
+
+		#contentCenterContainer {
+			position: relative;
+			margin-left: auto;
+			margin-right: auto;
+			width: @contentWidth;
+			height: 100%;
+		}
 	}
 }
