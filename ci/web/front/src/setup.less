@@ -1,11 +1,17 @@
 @import 'constants';
 
+@font-face { font-family: 'Din'; font-style: normal; font-weight: 200; src: local('Din Light'), url('/font/din/light.woff') format('woff'); }
+@font-face { font-family: 'Din'; font-style: normal; font-weight: 400; src: local('Din'), local('Din Regular'), url('/font/din/regular.woff') format('woff'); }
+@font-face { font-family: 'Din'; font-style: normal; font-weight: 500; src: local('Din Medium'), url('/font/din/medium.woff') format('woff'); }
+@font-face { font-family: 'Din'; font-style: normal; font-weight: 700; src: local('Din Bold'), url('/font/din/bold.woff') format('woff'); }
+
 body {
 	margin: 0px;
 	padding: 0px;
 	background-color: @backgroundColor;
 	color: @koalityWhite;
-	font-family: 'Roboto', sans-serif;
+	font-family: 'Din', sans-serif;
+	font-weight: normal;
 	font-size: 12px;
 
 	@linkColor: rgb(0, 184, 255);

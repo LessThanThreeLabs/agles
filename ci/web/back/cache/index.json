@@ -86,11 +86,11 @@
 	},
 
 	"font": {
-		"application/x-font-opentype": [
-			"/font/din/bold.otf",
-			"/font/din/light.otf",
-			"/font/din/medium.otf",
-			"/font/din/regular.otf"
+		"application/x-font-woff": [
+			"/font/din/bold.woff",
+			"/font/din/light.woff",
+			"/font/din/medium.woff",
+			"/font/din/regular.woff"
 		]
 	}
 }

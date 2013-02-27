@@ -31,9 +31,9 @@ class FilesCompressor
 
 	_shouldGzip: (contentType) =>
 		switch contentType
-			when 'text/html', 'text/css', 'application/javascript', 'image/svg+xml', 'application/x-font-opentype'
+			when 'text/html', 'text/css', 'application/javascript', 'image/svg+xml'
 				return true
-			when 'image/png', 'image/jpeg'
+			when 'image/png', 'image/jpeg', 'application/x-font-woff'
 				return false
 			else
 				throw new Error 'Unaccounted for content type'
