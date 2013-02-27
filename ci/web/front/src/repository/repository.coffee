@@ -1,17 +1,26 @@
 'use strict'
 
-window.Repository = ['$scope', ($scope) ->
+window.Repository = ['$scope', '$routeParams', 'rpc', 'integerConverter', ($scope, $routeParams, rpc, integerConverter) ->
 	$scope.name = 'awesome.git'
 	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
+
+	retrieveCurrentChangeMetadata = () ->
+		$scope.currentChangeInformation = {}
+		return if not $scope.currentChangeId?
+
+		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, changeMetadata) ->
+			$scope.$apply () -> $scope.currentChangeInformation = changeMetadata
+
+	$scope.$on '$routeUpdate', () ->
+		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
+		$scope.currentStageId = integerConverter.toInteger $routeParams.stage
+	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
+	$scope.currentStageId = integerConverter.toInteger $routeParams.stage
+
+	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
+		retrieveCurrentChangeMetadata()
 ]
 
-
-
-
-window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, changesRpc, events, integerConverter) ->
-
-
-]
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, changesRpc, events, integerConverter) ->
 	$scope.changes = []
 
@@ -68,10 +77,6 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 	$scope.$on '$destroy', changeAddedEvents.unsubscribe
 	$scope.$on '$destroy', changeStartedEvents.unsubscribe
 	$scope.$on '$destroy', changeFinishedEvents.unsubscribe
-
-	$scope.$on '$routeUpdate', () ->
-		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
-	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
 
 	$scope.searchModeClicked = (mode) ->
 		$scope.search.mode = mode
@@ -147,12 +152,6 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 
 	$scope.stageClick = (stage) ->
 		$scope.currentStageId = stage.id
-
-	$scope.$on '$routeUpdate', () ->
-		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
-		$scope.currentStageId = integerConverter.toInteger $routeParams.stage
-	$scope.currentChangeId = integerConverter.toInteger $routeParams.change
-	$scope.currentStageId = integerConverter.toInteger $routeParams.stage
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		retrieveStages()
