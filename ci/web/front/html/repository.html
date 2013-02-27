@@ -23,7 +23,7 @@
 				</div>
 			</menu-header>
 			<menu-options on-scroll-to-bottom="scrolledToBottom()">
-				<menu-option ng-repeat="change in changes | orderBy:'number':true" menu-option-text="{{change.number}}" menu-option-subtext="{{change.status}}" menu-option-spinning="{{change.status == 'running'}}" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}"></menu-option>
+				<menu-option ng-repeat="change in changes | orderBy:'number':true" menu-option-identifier="{{change.number}}" menu-option-text="{{change.status}}" menu-option-spinning="{{change.status == 'running'}}" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, queued: change.status == 'queued', running: change.status == 'running', passed: change.status == 'passed', failed: change.status == 'failed'}"></menu-option>
 			</menu-options>
 		</menu>
 	</div>
@@ -34,7 +34,7 @@
 				<span id="repositoryStagesHeader">Id: {{currentChangeId}}</span>
 			</menu-header>
 			<menu-options>
-				<menu-option ng-repeat="stage in stages" menu-option-subtext="{{stage.name}}" menu-option-spinning="{{stage.status == 'running'}}" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, queued: stage.status == 'queued', running: stage.status == 'running', passed: stage.status == 'passed', failed: stage.status == 'failed'}"></menu-option>
+				<menu-option ng-repeat="stage in stages" menu-option-text="{{stage.name}}" menu-option-spinning="{{stage.status == 'running'}}" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, queued: stage.status == 'queued', running: stage.status == 'running', passed: stage.status == 'passed', failed: stage.status == 'failed'}"></menu-option>
 			</menu-options>
 		</menu>
 	</div>
