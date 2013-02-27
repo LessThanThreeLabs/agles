@@ -77,8 +77,6 @@ function setup_python () {
 		sudo apt-get install -y "python$p-dev"
 		virtualenv "$HOME/virtualenvs/$p" -p "python$p"
 	done
-
-	sudo pip install pyyaml eventlet
 }
 
 function setup_ruby () {
@@ -126,6 +124,8 @@ function shared_setup () {
 
 	setup_ruby
 	setup_nodejs
+
+	sudo pip install pyyaml eventlet
 
 	provision
 }
@@ -178,6 +178,9 @@ function host_setup () {
 	mv ~/source ~/code/agles
 
 	rvm use system
+
+	psql -U postgres -c 'create user lt3'
+	psql -U lt3 -c 'create database koality'
 	python ~/code/agles/ci/platform/database/schema.py
 	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
 }

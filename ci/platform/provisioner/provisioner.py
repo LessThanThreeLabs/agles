@@ -13,9 +13,9 @@ class Provisioner(object):
 
 	def __init__(self, packages=True, scripts=True, databases=True):
 		self.setup_dispatcher = {
-			'packages': self.parse_packages if packages else lambda *args: None,
-			'scripts': self.parse_scripts if scripts else lambda *args: None,
-			'databases': self.parse_databases if databases else lambda *args: None
+			'packages': self.parse_packages if packages else lambda *args: [],
+			'scripts': self.parse_scripts if scripts else lambda *args: [],
+			'databases': self.parse_databases if databases else lambda *args: []
 		}
 		self.ssh_dir = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh'))
 		self.keyfile = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa'))
