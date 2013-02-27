@@ -65,7 +65,9 @@ change = Table('change', metadata,
 	Column('number', Integer, nullable=False),
 	Column('status', String, nullable=False),
 	Column('start_time', Integer, nullable=True),
-	Column('end_time', Integer, nullable=True)
+	Column('end_time', Integer, nullable=True),
+
+	UniqueConstraint('repo_id', 'number')
 )
 
 build = Table('build', metadata,

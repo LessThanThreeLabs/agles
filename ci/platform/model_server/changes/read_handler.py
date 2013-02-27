@@ -42,7 +42,6 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 
 		if row:
-			repo_id = row[repo.c.id]
 			return to_dict(row, change.columns, tablename=change.name)
 		return {}
 
@@ -56,7 +55,6 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 
 		if row:
-			repo_id = row[change.c.repo_id]
 			user_dict = to_dict(row, user.columns, tablename=user.name)
 			change_dict = to_dict(row, change.columns, tablename=change.name)
 			commit_dict = to_dict(row, commit.columns, tablename=commit.name)
@@ -80,7 +78,6 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 
 		if row:
-			repo_id = row[repo.c.id]
 			return self.get_builds_from_change_id(change_id)
 		return {}
 
