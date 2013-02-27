@@ -43,7 +43,7 @@
 	<div id="repositoryStageDetails" ng-controller="RepositoryStageDetails" unselectable>
 		<div id="repositoryStageDetailsHeader">Hello</div>
 		<div id="repositoryStageDetailsContent">
-			<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null">
+			<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
 				<styled-form>
 					<styled-form-field label="User"><span ng-bind-template="{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}"></span></styled-form-field>
 					<styled-form-field label="Message"><span ng-bind="currentChangeInformation.message"></span></styled-form-field>
