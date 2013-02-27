@@ -28,17 +28,14 @@ class StreamingExecutor(object):
 	@classmethod
 	def _handle_output(cls, process, line_handler):
 		cls._output_lines = list()
-		stream = process.stdout
-		fd = stream.fileno()
-		fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-		fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+		cls._unbuffer_stream(process.stdout)
 		line_number = 1
 		line = ''
 		while True:
 			returncode = process.poll()  # it is important to check this before output, to prevent lost output
 			ready_read, ready_write, ready_xlist = select.select([process.stdout], [], [], 0.05)  # short timeout
 			if ready_read:
-				new_output = stream.read()
+				new_output = process.stdout.read()
 				if new_output == '':
 					break
 				for char in new_output:
@@ -53,6 +50,12 @@ class StreamingExecutor(object):
 			elif returncode is not None:  # backgrounding processes will cause readline to wait forever, but sets a return code
 				break
 		return cls._output_lines
+
+	@classmethod
+	def _unbuffer_stream(cls, stream):
+		fd = stream.fileno()
+		fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+		fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
 	@classmethod
 	def _handle_line(cls, line_handler, line_number, line):

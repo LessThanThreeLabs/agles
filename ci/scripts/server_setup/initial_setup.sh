@@ -43,6 +43,7 @@ function setup_rabbitmq () {
 	wget http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.7/rabbitmq-server_2.8.7-1_all.deb
 	sudo dpkg -i rabbitmq-server_2.8.7-1_all.deb
 	rm rabbitmq-server_2.8.7-1_all.deb
+	sudo mkdir /etc/rabbitmq/rabbitmq.conf.d
 	sudo rabbitmq-plugins enable rabbitmq_management
 	sudo service rabbitmq-server restart
 	wget --http-user=guest --http-password=guest localhost:55672/cli/rabbitmqadmin
@@ -116,6 +117,13 @@ function provision () {
 	python -u -c "from provisioner.provisioner import Provisioner; Provisioner(scripts=False, databases=False).provision(global_install=True)"
 }
 
+function setup_openstack () {
+	git clone https://github.com/Randominator/openstackgeek.git
+	pushd openstackgeek/essex
+	sudo ./openstack.sh
+	popd
+}
+
 function shared_setup () {
 	# Install dependencies
 	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential
@@ -125,6 +133,7 @@ function shared_setup () {
 	setup_ruby
 	setup_nodejs
 
+	sudo apt-get install -y python-dev
 	sudo pip install pyyaml eventlet
 
 	provision
@@ -151,6 +160,9 @@ function host_setup () {
 
 	shared_setup
 
+	mkdir ~/code
+	mv ~/source ~/code/agles
+
 	# Java
 	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
 		mkdir /tmp/src
@@ -174,10 +186,9 @@ function host_setup () {
 		echo "chef chef/chef_server_url string" | sudo debconf-set-selections && sudo apt-get install -y chef
 	fi
 
-	mkdir ~/code
-	mv ~/source ~/code/agles
-
 	rvm use system
+
+	setup_openstack
 
 	psql -U postgres -c 'create user lt3'
 	psql -U lt3 -c 'create database koality'
