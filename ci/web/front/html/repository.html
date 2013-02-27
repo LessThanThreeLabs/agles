@@ -50,18 +50,13 @@
 					<styled-form-field label="Commit time"><span ng-bind="currentChangeInformation.commitTime | date:'medium'"></span></styled-form-field>
 				</styled-form>
 			</div>
-		</div>
-		<div id="repositoryChangeDetailsFooter"></div>
 
-		<!-- <div id="repositoryChangeDetails">
-			<div id="repositoryChangeDetailsOutput">
-
-				<div id="changeConsoleText" auto-scroll-to-bottom="lines" ng-show="currentChangeId != null && currentStageId != null">
-					<div class="consoleTextLine" ng-repeat="line in lines">
-						<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse"></span>
-					</div>
+			<div id="repositoryChangeDetailsOutput" auto-scroll-to-bottom="lines" ng-show="currentChangeId != null && currentStageId != null">
+				<div class="consoleTextLine" ng-repeat="line in lines">
+					<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse"></span>
 				</div>
 			</div>
-		</div> -->
+		</div>
+		<div id="repositoryChangeDetailsFooter"></div>
 	</div>
 </div>
