@@ -2,7 +2,7 @@
 languages:
   python: 2.7
   ruby: 1.9.3
-  nodejs: 0.8.9
+  nodejs: 0.8.12
 setup:
   - packages:
     - system:
@@ -40,13 +40,14 @@ setup:
     - npm:
       - iced-coffee-script
       - less
+      - testacular
       - directory: ci/web/back
   - databases:
     - postgres:
       - name: koality
         username: lt3
     - mysql:
-      - name: koality_mysql
+      - name: koality
         username: lt3
   - scripts:
     - git config --global user.email "koality@getkoality.com"

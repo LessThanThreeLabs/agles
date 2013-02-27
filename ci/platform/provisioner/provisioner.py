@@ -11,11 +11,11 @@ from setup_tools import InvalidConfigurationException, SetupCommand, SetupScript
 
 class Provisioner(object):
 
-	def __init__(self):
+	def __init__(self, packages=True, scripts=True, databases=True):
 		self.setup_dispatcher = {
-			'packages': self.parse_packages,
-			'scripts': self.parse_scripts,
-			'databases': self.parse_databases
+			'packages': self.parse_packages if packages else lambda *args: None,
+			'scripts': self.parse_scripts if scripts else lambda *args: None,
+			'databases': self.parse_databases if databases else lambda *args: None
 		}
 		self.ssh_dir = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh'))
 		self.keyfile = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa'))

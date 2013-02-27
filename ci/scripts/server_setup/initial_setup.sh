@@ -22,7 +22,8 @@ function add_user () {
 function bootstrap () {
 	check_sudo
 	add_user lt3
-	sudo su lt3 -c "$0 _$1_setup"
+	this_script=$(pwd)/$0
+	sudo su lt3 -c "cd; $this_script _$1_setup"
 }
 
 function makedir () {
@@ -83,8 +84,11 @@ function setup_python () {
 function setup_ruby () {
 	which rvm > /dev/null
 	if [ $? -ne "0" ]; then
-		curl -L https://get.rvm.io | bash -s stable --ruby
+		curl -L https://get.rvm.io | bash -s stable
+		source .bash_profile
 	fi
+	rvm install 1.9.3
+	rvm --default use 1.9.3
 	cat ~/.bash_profile | grep "export rvmsudo_secure_path=1" > /dev/null
 	if [ $? -ne "0" ]; then
 		echo "export rvmsudo_secure_path=1" >> ~/.bash_profile
@@ -96,25 +100,34 @@ function setup_nodejs () {
 	wget -P ~/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
 }
 
+function clone () {
+	if [ -z $GITHUB_USERNAME ]; then
+		read -p "Github username: " GITHUB_USERNAME
+	fi
+	if [ -z $GITHUB_PASSWORD ]; then
+		read -s -p "Github password: " GITHUB_PASSWORD
+	fi
+	git clone https://"$GITHUB_USERNAME":"$GITHUB_PASSWORD"@github.com/Randominator/agles.git source
+}
+
 function provision () {
-	read -p "Github username: " username
-	read -s -p "Github password: " password
-	git clone https://"$username":"$password"@github.com/Randominator/agles.git ~/source
+	clone
 	pushd ~/source/ci/platform
 	sudo python setup.py install
 	popd
-	sudo python -u -c "from provisioner.provisioner import Provisioner; Provisioner().provision(global_install=True)"
-	rm -rf source scripts
+	python -u -c "from provisioner.provisioner import Provisioner; Provisioner(scripts=False, databases=False).provision(global_install=True)"
 }
 
 function shared_setup () {
 	# Install dependencies
-	sudo apt-get install -y python-pip make postgresql python-software-properties git
+	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential
 	setup_rabbitmq
 	setup_redis
 
 	setup_ruby
 	setup_nodejs
+
+	provision
 }
 
 function vm_setup () {
@@ -125,12 +138,12 @@ function vm_setup () {
 	shared_setup
 
 	# mysql must be explicitly installed noninteractively
-	DEBIAN_FRONTEND=noninteractive sudo apt-get install -y mysql-server
+	sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
 	setup_postgres
 
 	setup_python
 
-	provision
+	rm -rf source
 }
 
 function host_setup () {
@@ -163,8 +176,9 @@ function host_setup () {
 
 	mkdir ~/code
 	mv ~/source ~/code/agles
-	deactivate
+
 	rvm use system
+	python ~/code/agles/ci/platform/database/schema.py
 	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
 }
 
