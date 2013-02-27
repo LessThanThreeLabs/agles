@@ -118,6 +118,8 @@ function provision () {
 }
 
 function setup_openstack () {
+	# This is a hack because of dependency collision
+	sudo pip install --upgrade anyjson==0.3.1
 	git clone https://github.com/Randominator/openstackgeek.git
 	pushd openstackgeek/essex
 	sudo ./openstack.sh
