@@ -65,10 +65,12 @@ compile:
       path: ci/web/front
       script: ./compile.sh
 test:
-  - all_tests:
+  - platform_tests:
       path: ci/platform
       script:
         - nosetests -sv
-        - cd ../web/back
+      timeout: 120
+  - npm_tests:
+      path: ci/web/back
+      script:
         - npm test
-      timeout: 300
