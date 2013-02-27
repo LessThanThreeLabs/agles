@@ -31,7 +31,7 @@
 	<div id="repositoryStages" ng-controller="RepositoryStages" unselectable>
 		<menu>
 			<menu-header>
-				<span id="repositoryStagesHeader">Change {{currentChangeInformation.number}}</span>
+				<span id="repositoryStagesHeader" ng-show="currentChangeInformation != null">Change {{currentChangeInformation.number}}</span>
 			</menu-header>
 			<menu-options>
 				<menu-option menu-option-text="Summary" ng-show="currentChangeInformation != null" ng-click="stageClick(null)" ng-class="{selected: currentStageId == null}"></menu-option>
