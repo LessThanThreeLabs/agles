@@ -8,7 +8,7 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'integerConverter', ($scop
 				$scope.uri = repositoryInformation.uri
 
 	retrieveCurrentChangeInformation = () ->
-		$scope.currentChangeInformation = {}
+		$scope.currentChangeInformation = null
 		return if not $scope.currentChangeId?
 
 		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, changeInformation) ->
