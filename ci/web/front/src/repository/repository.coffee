@@ -1,15 +1,18 @@
 'use strict'
 
 window.Repository = ['$scope', '$routeParams', 'rpc', 'integerConverter', ($scope, $routeParams, rpc, integerConverter) ->
-	$scope.name = 'awesome.git'
-	$scope.link = 'git@getkoality.com:bblandATlessthanthreelabsDOTcom/koality.git'
+	retrieveRepositoryInformation = () ->
+		rpc.makeRequest 'repositories', 'read', 'getMetadata', id: $routeParams.repositoryId, (error, repositoryInformation) ->
+			$scope.$apply () ->
+				$scope.name = repositoryInformation.name
+				$scope.uri = repositoryInformation.uri
 
-	retrieveCurrentChangeMetadata = () ->
+	retrieveCurrentChangeInformation = () ->
 		$scope.currentChangeInformation = {}
 		return if not $scope.currentChangeId?
 
-		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, changeMetadata) ->
-			$scope.$apply () -> $scope.currentChangeInformation = changeMetadata
+		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, changeInformation) ->
+			$scope.$apply () -> $scope.currentChangeInformation = changeInformation
 
 	$scope.$on '$routeUpdate', () ->
 		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
@@ -18,7 +21,9 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'integerConverter', ($scop
 	$scope.currentStageId = integerConverter.toInteger $routeParams.stage
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
-		retrieveCurrentChangeMetadata()
+		retrieveCurrentChangeInformation()
+
+	retrieveRepositoryInformation()
 ]
 
 window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, changesRpc, events, integerConverter) ->

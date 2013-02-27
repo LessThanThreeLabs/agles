@@ -17,7 +17,7 @@ class RepositoriesReadHandler extends Handler
 		sanitizeResult = (repository) ->
 			id: repository.id
 			name: repository.name
-			timestamp: 0
+			timestamp: repository.created
 
 		userId = socket.session.userId
 		if not userId?
@@ -27,3 +27,21 @@ class RepositoriesReadHandler extends Handler
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback null, (sanitizeResult repository for repository in repositories)
+
+
+	getMetadata: (socket, data, callback) =>
+		sanitizeResult = (repository) ->
+			id: repository.id
+			name: repository.name
+			uri: repository.uri
+
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		else if not data?.id?
+			callback 400
+		else
+			@modelRpcConnection.repositories.read.get_repo_from_id userId, data.id, (error, repository) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback null, sanitizeResult repository
