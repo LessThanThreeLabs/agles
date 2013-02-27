@@ -45,10 +45,12 @@
 		<div id="repositoryStageDetailsContent">
 			<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
 				<styled-form>
-					<styled-form-field label="User"><span ng-bind-template="{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}"></span></styled-form-field>
-					<styled-form-field label="Message"><span ng-bind="currentChangeInformation.message"></span></styled-form-field>
-					<styled-form-field label="Target"><span ng-bind="currentChangeInformation.target"></span></styled-form-field>
+					<styled-form-field label="Commiter"><span ng-bind-template="{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}"></span></styled-form-field>
+					<styled-form-field label="Email"><span ng-bind-template="{{currentChangeInformation.user.email}}"></span></styled-form-field>
 					<styled-form-field label="Commit time"><span ng-bind="currentChangeInformation.commitTime | date:'medium'"></span></styled-form-field>
+					<styled-form-field label="Commit message"><span ng-bind="currentChangeInformation.message"></span></styled-form-field>
+					<styled-form-field label="Commit target"><span ng-bind="currentChangeInformation.target"></span></styled-form-field>
+					<styled-form-field label="Commit sha"><span ng-bind="currentChangeInformation.sha"></span></styled-form-field>
 				</styled-form>
 			</div>
 

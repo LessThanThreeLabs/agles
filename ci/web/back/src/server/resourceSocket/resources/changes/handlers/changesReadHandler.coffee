@@ -63,6 +63,7 @@ class ChangesReadHandler extends Handler
 			startTime: metadata.change.start_time
 			endTime: metadata.change.end_time
 			target: metadata.change.merge_target
+			sha: metadata.commit.sha
 
 		userId = socket.session.userId
 		if not userId?
