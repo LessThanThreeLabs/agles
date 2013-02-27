@@ -1,10 +1,11 @@
 #main {
+	@width: 1000px;
 	@headerHeight: 35px;
 
 	position: fixed;
 	left: 50%;
-	margin-left: -500px;
-	width: 1000px;
+	margin-left: -@width/2;
+	width: @width;
 	height: 100%;
 
 	#headerContanier {
