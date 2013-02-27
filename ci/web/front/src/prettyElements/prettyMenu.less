@@ -18,7 +18,7 @@
 		left: 0px;
 		right: @toothWidth;
 		bottom: @menuFooterHeight;
-		background-color: @panelColor;
+		background-color: @panelBackground;
 	}
 
 	.prettyMenuHeader {
@@ -28,8 +28,8 @@
 		left: 0px;
 		right: @toothWidth;
 		height: @menuHeaderHeight;
-		background-color: @panelHeaderColor;
-		border-bottom: 1px solid @backgroundColor;
+		background-color: @panelHeaderBackground;
+		border-bottom: 1px solid @platformBackground;
 		border-top-left-radius: @borderRadius;
 		border-top-right-radius: @borderRadius;
 		color: @koalityWhite;
@@ -99,8 +99,8 @@
 						padding: 0px 12px 0px 12px;
 						color: @koalityGray;
 						line-height: @optionHeight;
-						background-color: @panelColor;
-						border-bottom: 1px solid @backgroundColor;
+						background-color: @panelBackground;
+						border-bottom: 1px solid @platformBackground;
 
 						.prettyMenuOptionIdentifier {
 							display: inline;
@@ -163,7 +163,7 @@
 						width: 0px;
 						height: 0px;
 
-						border-left: 0px solid @panelColor;
+						border-left: 0px solid @panelBackground;
 						border-top: @optionHeight/2 solid transparent;
 						border-bottom: @optionHeight/2 solid transparent;
 					}
@@ -182,7 +182,7 @@
 
 						.prettyMenuOptionContents {
 							color: @koalityWhite;
-							background-color: @hoverColor;
+							background-color: @changeHover;
 
 							.prettyMenuOptionArrow {
 								right: 2px;
@@ -193,7 +193,7 @@
 						.prettyMenuOptionTooth {
 							right: 0px;
 
-							border-left: @toothWidth solid @hoverColor;
+							border-left: @toothWidth solid @changeHover;
 							border-top: @optionHeight/2 solid transparent;
 							border-bottom: @optionHeight/2 solid transparent;
 						}
@@ -224,7 +224,7 @@
 
 						.prettyMenuOptionContents {
 							color: @koalityWhite;
-							background-color: @hoverColor;
+							background-color: @changeHover;
 
 							.prettyMenuOptionArrow {
 								right: 2px;
@@ -235,7 +235,7 @@
 						.prettyMenuOptionTooth {
 							right: 0px;
 
-							border-left: @toothWidth solid @hoverColor;
+							border-left: @toothWidth solid @changeHover;
 							border-top: @optionHeight/2 solid transparent;
 							border-bottom: @optionHeight/2 solid transparent;
 						}
@@ -284,7 +284,7 @@
 		right: @toothWidth;
 		bottom: 0px;
 		height: @menuFooterHeight;
-		background-color: @panelHeaderColor;
+		background-color: @panelHeaderBackground;
 		border-bottom-left-radius: @borderRadius;
 		border-bottom-right-radius: @borderRadius;
 	}
