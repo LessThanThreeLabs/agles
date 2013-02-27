@@ -90,7 +90,9 @@
 			"/font/din/bold.woff",
 			"/font/din/light.woff",
 			"/font/din/medium.woff",
-			"/font/din/regular.woff"
+			"/font/din/regular.woff",
+
+			"/font/ptMono/regular.woff"
 		]
 	}
 }
