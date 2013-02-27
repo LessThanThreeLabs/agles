@@ -1,7 +1,9 @@
 @import 'constants';
 
 #main {
-	@contentWidth: 1000px;
+	@contentMinWidth: 1100px;
+	@contentWidth: 90%;
+	@contentMaxWidth: 1400px;
 	@headerHeight: 35px;
 
 	position: fixed;
@@ -21,7 +23,9 @@
 			position: relative;
 			margin-left: auto;
 			margin-right: auto;
+			min-width: @contentMinWidth;
 			width: @contentWidth;
+			max-width: @contentMaxWidth;
 			height: 100%;
 		}
 	}	
@@ -38,7 +42,9 @@
 			position: relative;
 			margin-left: auto;
 			margin-right: auto;
+			min-width: @contentMinWidth;
 			width: @contentWidth;
+			max-width: @contentMaxWidth;
 			height: 100%;
 		}
 	}

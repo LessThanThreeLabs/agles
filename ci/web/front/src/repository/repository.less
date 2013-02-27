@@ -20,7 +20,7 @@
 }
 
 #repository {
-	@panelSpacing: 20px;
+	@panelSpacing: 15px;
 
 	width: 100%;
 	height: 100%;
@@ -189,153 +189,42 @@
 		}	
 	}
 
-	#repositoryChangeDetailsPanel {
+	#repositoryChangeDetails {
+		@headerHeight: 40px;
+		@footerHeight: 8px;
+
 		position: absolute;
 		top: 56px;
-		left: 568px;
+		left: 8px + (@menuWidth + @panelSpacing) * 2;
 		right: 8px;
 		bottom: 10px;
-		margin: 0px;
-		padding: 0px;
+		background-color: @panelBackground;
+		border-radius: 5px;
 
-		// needed for firefox
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=579776
-		#repositoryChangeDetails {
-			display: -moz-box;
-			display: -webkit-box;
-			display: box;
-			-moz-box-orient: vertical;
-			-webkit-box-orient: vertical;
-			box-orient: vertical;
+		#repositoryChangeDetailsHeader {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			height: @headerHeight;
+			background-color: @panelHeaderBackground;
+		}
 
-			width: 100%;
-			height: 100%;
+		#repositoryChangeDetailsContent {
+			position: absolute;
+			top: @headerHeight;
+			left: 0px;
+			right: 0px;
+			bottom: @footerHeight;
+		}
 
-			#repositoryChangeDetailsStages {
-				padding: 10px 10px 0px 10px;
-				min-height: 48px;
-
-				-moz-box-flex: 0;
-				-webkit-box-flex: 0;
-				box-flex: 0;
-
-				.repositoryChangeStage {
-					cursor: hand; cursor: pointer;
-
-					display: inline-block;
-					margin: 0px 10px 10px 0px;
-					min-width: 100px;
-					height: 32px;
-					line-height: 32px;
-					text-align: center;
-					white-space: nowrap;
-					font-size: 1.1em;
-					font-weight: bold;
-					border-radius: 4px;
-					border: 3px solid rgb(45, 45, 45);
-
-					@transitionTime: 0.5s;
-					transition: all @transitionTime ease-out;
-					-moz-transition: all @transitionTime ease-out;
-					-webkit-transition: all @transitionTime ease-out;
-					-o-transition: all @transitionTime ease-out;
-
-					&:hover {
-						background-color: rgba(20, 20, 20, 0.75);
-						border-color: rgb(20, 20, 20);
-					}
-
-					&.selected {
-						background-color: rgba(20, 20, 20, 0.75);
-						border-color: rgb(20, 20, 20);
-					}
-
-					&.queued {
-						color: @heartbeatStartColor;
-
-						@heartbeatSpeed: 3.0s;
-						@heartbeatDelay: 0.0s;
-						animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-						-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-						-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-						-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-					}
-
-					&.running {
-						color: @heartbeatStartColor;
-
-						@heartbeatSpeed: 1.5s;
-						@heartbeatDelay: 0.0s;
-						animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-						-moz-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-						-webkit-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-						-o-animation: heartbeat @heartbeatSpeed ease-out @heartbeatDelay infinite alternate;
-					}
-
-					&.passed {
-						
-					}
-
-					&.failed {
-						color: rgba(160, 0, 0, 1.0);
-					}
-				}
-			}
-
-			#repositoryChangeDetailsOutput {
-				position: relative;
-
-				-moz-box-flex: 1;
-				-webkit-box-flex: 1;
-				box-flex: 1;
-
-				#changeDetailsHome {
-					position: absolute;
-					top: 30px;
-					left: 50px;
-					font-size: 1.1em;
-				}
-
-				#changeConsoleText {
-					position: absolute;
-					top: 0px;
-					left: 0px;
-					right: 0px;
-					bottom: 0px;
-					overflow: auto;
-
-					padding: 0px 10px 20px 5px;
-
-					.consoleTextLine {
-						font-family: 'Source Code Pro', sans-serif;
-						white-space: nowrap;
-
-						&:hover {
-							background-color: rgba(20, 20, 20, 0.75);
-							
-							.consoleTextLineNumber {
-								background-color: rgba(20, 20, 20, 0.75);
-							}
-
-							.consoleTextLineText {
-								background-color: rgba(20, 20, 20, 0.75);
-							}
-						}
-
-						.consoleTextLineNumber {
-							display: inline-block;
-							padding-right: 5px;
-							color: #999999;
-							width: 40px;
-							text-align: right;
-						}
-
-						.consoleTextLineText {
-							padding-left: 15px;
-						}
-					}
-				}
-			}
+		#repositoryChangeDetailsFooter {
+			position: absolute;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			height: @footerHeight;
+			background-color: @panelHeaderBackground;
 		}
 	}
 }

@@ -39,8 +39,12 @@
 		</menu>
 	</div>
 
-	<!-- <div id="repositoryChangeDetailsPanel" ng-controller="RepositoryDetails">
-		<div id="repositoryChangeDetails">
+	<div id="repositoryChangeDetails" ng-controller="RepositoryDetails">
+		<div id="repositoryChangeDetailsHeader"></div>
+		<div id="repositoryChangeDetailsContent">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>
+		<div id="repositoryChangeDetailsFooter"></div>
+
+		<!-- <div id="repositoryChangeDetails">
 			<div id="repositoryChangeDetailsStages" unselectable>
 				<span class="repositoryChangeStage" ng-click="stageClick(null)" ng-class="{selected: currentStageId == null}">Home</span>
 				<span class="repositoryChangeStage" ng-repeat="stage in stages" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, queued: stage.status == 'queued', running: stage.status == 'running', passed: stage.status == 'passed', failed: stage.status == 'failed'}">{{stage.name}}</span>
@@ -62,6 +66,6 @@
 					</div>
 				</div>
 			</div>
-		</div>
-	</div> -->
+		</div> -->
+	</div>
 </div>
