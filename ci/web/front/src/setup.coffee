@@ -283,6 +283,7 @@ angular.module('koality.directive', []).
 		replace: true
 		transclude: true
 		template: '<div class="prettyMenu" ng-transclude>
+				<div class="prettyMenuBackgroundPanel"></div>
 				<div class="prettyMenuFooter"></div>
 			</div>'
 	).

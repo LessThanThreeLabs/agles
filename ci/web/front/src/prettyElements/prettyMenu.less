@@ -11,6 +11,16 @@
 	width: @menuWidth;
 	height: 100%;
 
+	.prettyMenuBackgroundPanel {
+		position: absolute;
+		z-index: 1;
+		top: @menuHeaderHeight;
+		left: 0px;
+		right: @toothWidth;
+		bottom: @menuFooterHeight;
+		background-color: @panelColor;
+	}
+
 	.prettyMenuHeader {
 		position: absolute;
 		z-index: 100;
