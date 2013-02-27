@@ -100,14 +100,6 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 ]
 
 
-
-getRandomStatus = () ->
-	random = Math.random()
-	if random > .5 then return 'passed'
-	else if random > .25 then return 'failed'
-	else return 'running'
-
-
 window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, events, integerConverter) ->
 	$scope.stages = []
 
@@ -116,6 +108,12 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 		return stage?
 
 	retrieveStages = () ->
+		getRandomStatus = () ->
+			random = Math.random()
+			if random > .5 then return 'passed'
+			else if random > .25 then return 'failed'
+			else return 'running'
+			
 		$scope.stages = []
 		return if not $scope.currentChangeId?
 

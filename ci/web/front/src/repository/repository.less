@@ -217,37 +217,81 @@
 			}
 
 			#repositoryStageDetailsOutput {
+				@bufferHeight: 20px;
+				@consoleTextWidth: 95%;
+
 				position: absolute;
-				top: 30px;
+				top: 20px;
 				left: 10px;
 				right: 15px;
 				bottom: 30px;
-				overflow-x: hidden;
-				overflow-y: auto;
 
-				.consoleText {
-					display: table;
-					table-layout: fixed;
-					width: 95%;
+				.consoleTextContainer {
+					position: absolute;
+					top: 0px;
+					left: 0px;
+					right: 0px;
+					bottom: 0px;
+					overflow-x: hidden;
+					overflow-y: auto;
 
-					.consoleTextLine {
-						display: table-row;
-						font-family: 'PT Mono', monospace;
-						font-size: 12px;
+					.consoleText {
+						display: table;
+						margin-top: @bufferHeight;
+						margin-bottom: @bufferHeight;
+						table-layout: fixed;
+						width: @consoleTextWidth;
 
-						.consoleTextLineNumber {
-							display: table-cell;
-							padding-right: 18px;
-							width: 40px;
-							color: @koalityGray;
-							text-align: right;
+						.consoleTextLine {
+							display: table-row;
+							font-family: 'PT Mono', monospace;
+							font-size: 12px;
+
+							.consoleTextLineNumber {
+								display: table-cell;
+								padding-right: 18px;
+								width: 40px;
+								color: @koalityGray;
+								text-align: right;
+							}
+
+							.consoleTextLineText {
+								display: table-cell;
+								word-wrap: break-word;
+							}
 						}
 
-						.consoleTextLineText {
-							display: table-cell;
-							word-wrap: break-word;
-						}
 					}
+				}
+
+				.consoleTextTopBuffer {
+					position: absolute;
+					z-index: 100;
+					top: 0px;
+					left: 0px;
+					width: @consoleTextWidth;
+					height: @bufferHeight;
+
+					background: linear-gradient(to bottom, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+					background: -moz-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+					background: -webkit-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+					background: -o-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+					background: -ms-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+				}
+
+				.consoleTextBottomBuffer {
+					position: absolute;
+					z-index: 100;
+					left: 0px;
+					bottom: 0px;
+					width: @consoleTextWidth;
+					height: @bufferHeight;
+
+					background: linear-gradient(to bottom, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+					background: -moz-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+					background: -webkit-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+					background: -o-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+					background: -ms-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
 				}
 			}
 		}
