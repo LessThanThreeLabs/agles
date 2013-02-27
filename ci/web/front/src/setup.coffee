@@ -318,8 +318,8 @@ angular.module('koality.directive', []).
 		replace: true
 		template: '<div class="prettyMenuOption">
 				<div class="prettyMenuOptionContents">
-					<span class="prettyMenuOptionText">{{identifier}}</span>
-					<span class="prettyMenuOptionSubtext">{{text}}</span>
+					<span class="prettyMenuOptionIdentifier">{{identifier}}</span>
+					<span class="prettyMenuOptionText">{{text}}</span>
 					<div class="prettyMenuOptionArrow"></div>
 					<spinner spinner-running="{{spinning}}"></spinner>
 				</div>
