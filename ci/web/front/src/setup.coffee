@@ -405,7 +405,7 @@ angular.module('koality.filter', ['koality.service']).
 	]).
 	filter('newLine', [() ->
 		(input) ->
-			return input if not input?
+			return null if not input? or typeof input isnt 'string'
 			return input.replace '\n', '<br>'
 	])
 
