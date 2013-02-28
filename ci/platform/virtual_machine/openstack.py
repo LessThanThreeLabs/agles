@@ -41,7 +41,6 @@ class OpenstackVm(VirtualMachine):
 			image = cls.get_newest_image()
 		if not flavor:
 			flavor = cls._default_flavor()
-			flavor = OpenstackClient.get_client().flavors.find(ram=2048)
 		server = OpenstackClient.get_client().servers.create(name, image, flavor, files=cls._default_files(vm_username))
 		return OpenstackVm(vm_directory, server)
 
