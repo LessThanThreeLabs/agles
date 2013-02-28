@@ -22,7 +22,7 @@ supervisor_service "verification_master" do
 	action [:enable, :start]
 	environment({"HOME" => "/home/verification"})
 	directory "/verification/master"
-	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py"
+	command "bash -c 'source /etc/koality/koalityrc && python #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_master.py'"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/verification_master_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/verification_master_stderr.log"
 	user "verification"

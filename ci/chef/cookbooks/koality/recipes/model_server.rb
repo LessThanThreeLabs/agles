@@ -13,7 +13,7 @@ end
 supervisor_service "model_server" do
 	action [:enable, :start]
 	directory "/tmp/model_server"
-	command "#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_model_server.py"
+	command "bash -c 'source /etc/koality/koalityrc && #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_model_server.py'"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/model_server_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/model_server_stderr.log"
 	user node[:koality][:user]

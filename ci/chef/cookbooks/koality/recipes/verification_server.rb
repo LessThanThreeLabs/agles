@@ -22,7 +22,8 @@ node[:koality][:verification][:server_count].to_i.times do |server_num|
 		code <<-EOH
 			mkdir -p #{server_path}
 			cd #{server_path}
-			#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{server_path} -c >> #{server_path}/server.log 2>&1 &
+			source /etc/koality/koalityrc
+			python #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{server_path} -c >> #{server_path}/server.log 2>&1 &
 			EOH
 	end
 end

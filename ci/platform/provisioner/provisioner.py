@@ -98,7 +98,7 @@ class Provisioner(object):
 	def parse_languages(self, config, global_install):
 		if not 'languages' in config or len(config['languages']) == 0:
 			raise InvalidConfigurationException("No languages specified")
-		return LanguageParser().parse_languages(config['languages'], global_install)
+		return LanguageParser(global_install).parse_languages(config['languages'])
 
 	def parse_setup(self, config, source_path):
 		setup_steps = []
