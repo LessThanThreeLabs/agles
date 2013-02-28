@@ -214,15 +214,15 @@ angular.module('koality.directive', []).
 				event.preventDefault()
 				event.stopPropagation()
 	]).
-	directive('autoScrollToBottom', () ->
+	directive('autoScrollToBottom', ['integerConverter', (integerConverter) ->
 		restrict: 'A'
 		link: (scope, element, attributes) ->
-			scrollBottomBuffer = 20
+			scrollBottomBuffer = integerConverter.toInteger(attributes.autoScrollToBottomBuffer) ? 20
 			scope.$watch attributes.autoScrollToBottom, (() ->
 				isScrolledToBottomIsh = element[0].scrollTop + element[0].offsetHeight + scrollBottomBuffer >= element[0].scrollHeight
 				element[0].scrollTop = element[0].scrollHeight if isScrolledToBottomIsh
 				), true
-	).
+	]).
 	directive('modal', ['$document', ($document) ->
 		restrict: 'E'
 		replace: true

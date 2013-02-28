@@ -60,7 +60,7 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 		changesRpc.queueRequest $routeParams.repositoryId, getGroupFromMode(), getNamesFromNamesQuery(), $scope.changes.length, handleMoreChanges
 
 	doesChangeMatchQuery = (change) ->
-		return true if $scope.namesQuery is ''
+		return true if not getNamesFromNamesQuery()?
 		return (change.submitter.firstName.toLowerCase() in getNamesFromNamesQuery()) or
 			(change.submitter.lastName.toLowerCase() in getNamesFromNamesQuery())
 
@@ -113,7 +113,7 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 			if random > .5 then return 'passed'
 			else if random > .25 then return 'failed'
 			else return 'running'
-			
+
 		$scope.stages = []
 		return if not $scope.currentChangeId?
 
