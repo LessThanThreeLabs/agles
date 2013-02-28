@@ -21,8 +21,8 @@ class LanguageParser(object):
 
 	def parse_languages(self, language_config):
 		if self.global_install:
-			language_steps = [SetupCommand("mkdir %s", self._base_directory),
-				SetupCommand("touch %s", self._rc_path),
+			language_steps = [SetupCommand("mkdir %s" % self._base_directory),
+				SetupCommand("touch %s" % self._rc_path),
 				SetupCommand("echo \"source %s\" >> ~/.bash_profile" % self._rc_path)]
 		else:
 			language_steps = []
