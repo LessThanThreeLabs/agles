@@ -13,7 +13,7 @@
     "express":  "3.0.5",
     "iced-coffee-script": "1.4.0a",
     "mailgun": "0.4.2",
-    "msgpack": "0.1.7",
+    "msgpack": "0.1.8",
     "redis": "0.8.2",
     "rsa-json": "0.0.1",
     "socket.io": "git://github.com/jchonphoenix/socket.io.git",
