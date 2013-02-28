@@ -96,6 +96,11 @@ function setup_ruby () {
 }
 
 function setup_nodejs () {
+	makedir /etc/koality/nvm
+	wget -P /etc/koality/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
+}
+
+function setup_nodejs_vm () {
 	makedir ~/nvm
 	wget -P ~/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
 }
@@ -164,6 +169,7 @@ function vm_setup () {
 	setup_postgres
 
 	setup_python
+	setup_nodejs_vm
 
 	rm -rf source
 }

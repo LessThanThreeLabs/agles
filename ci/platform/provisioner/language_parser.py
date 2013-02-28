@@ -80,8 +80,9 @@ class LanguageParser(object):
 		return "bash --login -c %s" % pipes.quote(shell_command)
 
 	def validate_nodejs(self, version):
-		language_steps = [SetupCommand("source ~/nvm/nvm.sh", "nvm install %s" % version, "nvm use %s" % version, "npm install -g npm")]
-		language_steps.append(self._rc_append_command("source ~/nvm/nvm.sh > /dev/null"))
+		nvm_path = os.path.join(self._base_directory, 'nvm', 'nvm.sh')
+		language_steps = [SetupCommand("source %s" % nvm_path, "nvm install %s" % version, "nvm use %s" % version, "npm install -g npm")]
+		language_steps.append(self._rc_append_command("source %s > /dev/null" % nvm_path))
 		language_steps.append(self._rc_append_command("nvm use %s > /dev/null" % version))
 		if self.global_install:
 			return language_steps, []
