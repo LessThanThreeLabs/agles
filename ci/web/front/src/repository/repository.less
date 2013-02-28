@@ -36,7 +36,7 @@
 		#repositoryHeaderTitle {
 			display: inline-block;
 			margin-top: 14px;
-			margin-left: 5 px;
+			margin-left: 5px;
 			font-size: 1.8em;
 			font-weight: 100;
 		}
@@ -108,7 +108,7 @@
 					text-align: center;
 					background-color: @platformBackground;
 					vertical-align: middle;
-					border-radius: 5px;
+					border-radius: @borderRadius;
 
 					&:hover {
 						color: @platformBackground;
@@ -192,7 +192,7 @@
 		right: 8px;
 		bottom: @bottomPadding;
 		background-color: @panelBackground;
-		border-radius: 5px;
+		border-radius: @borderRadius;
 
 		#repositoryStageDetailsHeader {
 			position: absolute;
@@ -204,6 +204,8 @@
 			font-size: 18px;
 			line-height: @headerHeight;
 			background-color: @panelHeaderBackground;
+			border-top-left-radius: @borderRadius;
+			border-top-right-radius: @borderRadius;
 		}
 
 		#repositoryStageDetailsContent {
@@ -305,6 +307,8 @@
 			bottom: 0px;
 			height: @footerHeight;
 			background-color: @panelFooterBackground;
+			border-bottom-left-radius: @borderRadius;
+			border-bottom-right-radius: @borderRadius;
 		}
 	}
 }
