@@ -191,7 +191,7 @@ function host_setup () {
 		mkdir /tmp/src
         pushd /tmp/src
         clone github.com/flexiondotorg/oab-java6.git
-        pushd /tmp/src/oab-java6
+        cd /tmp/src/oab-java6
         sudo ./oab-java.sh
         sudo add-apt-repository -y ppa:flexiondotorg/java
         sudo apt-get update
