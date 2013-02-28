@@ -129,6 +129,7 @@ function setup_openstack () {
 	# This is a hack because of dependency collision
 	sudo pip install --upgrade "anyjson<0.3.2"
 	sudo pip install --upgrade "prettytable<0.6"
+	sudo pip uninstall python-novaclient
 	clone github.com/Randominator/openstackgeek.git
 	pushd openstackgeek/essex
 	sudo ./openstack.sh
