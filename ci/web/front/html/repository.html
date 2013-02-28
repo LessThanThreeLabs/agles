@@ -41,7 +41,10 @@
 	</div>
 
 	<div id="repositoryStageDetails" ng-controller="RepositoryStageDetails" unselectable>
-		<div id="repositoryStageDetailsHeader">Hello</div>
+		<div id="repositoryStageDetailsHeader">
+			<span ng-show="currentStageId == null">Summary</span>
+			<span ng-show="currentStageInformation != null">{{currentStageInformation.name}}</span>
+		</div>
 		<div id="repositoryStageDetailsContent">
 			<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
 				<styled-form>
