@@ -27,7 +27,9 @@ def main():
 
 
 def mock_change(repo_id, change_id):
-	publish_event("repos", repo_id, "change added", change_id=change_id, change_number=change_id,
+	fake_user = {'email': 'cool@awesome.com', 'first_name': 'cool', 'last_name': 'person'}
+
+	publish_event("repos", repo_id, "change added", user=fake_user, change_id=change_id, change_number=change_id,
 		change_status="queued", commit_id=change_id, merge_target="master")
 	time.sleep(random.uniform(0, 2))
 	publish_event("repos", repo_id, "change started", change_id=change_id, status=BuildStatus.RUNNING, start_time=int(time.time()))
