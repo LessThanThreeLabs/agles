@@ -327,10 +327,18 @@ angular.module('koality.directive', []).
 				<div class="prettyMenuOptionTooth"></div>
 			</div>'
 		link: (scope, element, attributes) ->
+			checkOffsetTextClass = () ->
+				if scope.identifier? and scope.text? then element.find('.prettyMenuOptionContents').addClass 'offsetText'
+				else element.find('.prettyMenuOptionContents').removeClass 'offsetText'
+
 			attributes.$observe 'menuOptionIdentifier', (identifier) ->
 				scope.identifier = identifier
+				checkOffsetTextClass()
+
 			attributes.$observe 'menuOptionText', (text) ->
 				scope.text = text
+				checkOffsetTextClass()
+
 			attributes.$observe 'menuOptionSpinning', (spinning) ->
 				scope.spinning = if typeof spinning is 'boolean' then spinning else spinning is 'true'
 	).
