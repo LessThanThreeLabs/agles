@@ -137,6 +137,10 @@ function setup_openstack () {
 function shared_setup () {
 	# Install dependencies
 	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl libyaml-dev
+
+	# Allow local users to access own postgresql accounts without a password
+	sudo sed -i.bak -r 's/(host\s+all\s+all\s+127.0.0.1\/32\s+)(\w+)/\1peer/g' /etc/postgresql/9.1/main/pg_hba.conf
+
 	setup_rabbitmq
 	setup_redis
 
@@ -174,6 +178,8 @@ function host_setup () {
 
 	shared_setup
 
+	sudo source/ci/scripts/rabbitmq_setup.sh
+
 	mkdir ~/code
 	mv ~/source ~/code/agles
 
@@ -206,8 +212,9 @@ function host_setup () {
 
 	build_vm_image
 
-	sudo -u postgres psql -c 'create user lt3'
-	psql -U lt3 -c 'create database koality'
+	sudo -u postgres psql -c "create user lt3 with password ''"
+	sudo -u postgres psql -c "create database koality"
+	sudo -u postgres psql -c "grant all privileges on database koality to lt3"
 	python ~/code/agles/ci/platform/database/schema.py
 	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
 }
