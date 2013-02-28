@@ -11,6 +11,15 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildConsolesReadHandler, self).__init__("build_consoles", "read")
 
+	def get_build_console_from_id(self, user_id, build_console_id):
+		build_console = database.schema.build_console
+
+		query = build_console.select().where(
+			build_console.c.id == build_console_id)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			return to_dict(row, build_console.columns)
+
 	def get_build_consoles(self, user_id, change_id):
 		build = database.schema.build
 		build_console = database.schema.build_console
