@@ -19,7 +19,7 @@ end
 bash "compile_webserver" do
 	cwd "#{node[:koality][:source_path][:internal]}/ci/web/back"
 	user node[:koality][:user]
-	environment 'HOME' => '/home/#{node[:koality][:user]}'
+	environment "HOME" => "/home/#{node[:koality][:user]}"
 	code <<-EOH
 		source ~/.bash_profile
 		./compile.sh
