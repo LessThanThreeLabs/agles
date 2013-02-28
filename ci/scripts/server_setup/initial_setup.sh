@@ -190,11 +190,12 @@ function host_setup () {
 		mkdir /tmp/src
         pushd /tmp/src
         clone github.com/flexiondotorg/oab-java6.git
-        cd /tmp/src/oab-java6
+        pushd /tmp/src/oab-java6
         sudo ./oab-java.sh
         sudo add-apt-repository -y ppa:flexiondotorg/java
         sudo apt-get update
         sudo apt-get install -y sun-java6-jdk maven
+        popd
         popd
     fi
 
