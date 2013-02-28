@@ -24,6 +24,7 @@ end
 
 bash "setup git user information" do
 	user "git"
+	environment "HOME" => "/home/git"
 	code <<-EOH
 		git config --global user.email "koality@koalitycode.com"
 		git config --global user.name "Koality"
