@@ -136,7 +136,7 @@ function setup_openstack () {
 
 function shared_setup () {
 	# Install dependencies
-	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl
+	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl libyaml-dev
 	setup_rabbitmq
 	setup_redis
 
@@ -206,7 +206,7 @@ function host_setup () {
 
 	build_vm_image
 
-	sudo psql -U postgres -c 'create user lt3'
+	sudo -u postgres psql -c 'create user lt3'
 	psql -U lt3 -c 'create database koality'
 	python ~/code/agles/ci/platform/database/schema.py
 	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
