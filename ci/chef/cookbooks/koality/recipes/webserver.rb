@@ -19,7 +19,9 @@ end
 bash "compile_webserver" do
 	cwd "#{node[:koality][:source_path][:internal]}/ci/web/back"
 	user node[:koality][:user]
+	environment 'HOME' => '/home/#{node[:koality][:user]}'
 	code <<-EOH
+		source ~/.bash_profile
 		./compile.sh
 		cd front
 		./compile.sh
@@ -73,7 +75,7 @@ end
 
 supervisor_service "webserver" do
 	action [:enable, :start]
-	command "/home/#{node[:koality][:user]}/nvm/v0.8.9/bin/node --harmony js/index.js --httpPort 9001 --httpsPort 10443"
+	command "bash -c 'source /home/#{node[:koality][:user]}/.bash_profile && node --harmony js/index.js --httpPort 9001 --httpsPort 10443'"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stderr.log"
 	user node[:koality][:user]
