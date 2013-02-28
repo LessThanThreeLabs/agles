@@ -1,5 +1,25 @@
-<div id="account">
-	<centered-panel panel-title="Account">
+<centered-panel id="account">
+	<div id="accountOptions">
+		<menu>
+			<menu-header menu-header-padding>{{name}}</menu-header>
+			<menu-options>
+				<menu-option menu-option-text="My Account" ng-click="menuOptionClick('My Account')" ng-class="{selected: currentView == 'My Account', green: currentView == 'My Account'}"></menu-option>
+				<menu-option menu-option-text="Password" ng-click="menuOptionClick('Password')" ng-class="{selected: currentView == 'Password', green: currentView == 'Password'}"></menu-option>
+				<menu-option menu-option-text="SSH Keys" ng-click="menuOptionClick('SSH Keys')" ng-class="{selected: currentView == 'SSH Keys', green: currentView == 'SSH Keys'}"></menu-option>
+			</menu-options>
+		</menu>
+	</div>
+
+	<div id="accountContent">
+		<menu-content>
+			<menu-content-header menu-content-header-padding>{{currentView}}</menu-content-header>
+			<menu-content-body>
+				A lot of stuff will go here one day
+			</menu-content-body>
+		</menu-content>
+</centered-panel>
+
+	<!-- <centered-panel panel-title="Account">
 		<menu options="menuOptions" current-option-name="currentView" option-click="menuOptionClick(optionName)">
 			<div id="accountBasic" class="prettyMenuContent" optionName="basic" ng-controller="AccountBasic">
 				<styled-form name="basicForm">
@@ -83,5 +103,4 @@
 				</div>
 			</div>
 		</menu>
-	</centered-panel>
-</div>
+	</centered-panel> -->

@@ -1,69 +1,88 @@
 @import '../constants';
 
 #account {
-	position: absolute;
-	top: 25%;
-	left: 0px;
-	right: 0px;
+	width: 800px;
+	height: 380px;
 
-	#accountBasic {
-
-		#accountBasicButtonContainer {
-			margin-top: 20px;
-			text-align: right;
-		}
+	#accountOptions {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		bottom: 0px;
+		width: @menuWidth;
 	}
 
-	#accountPassword {
-
-		#accountPasswordButtonContainer {
-			margin-top: 20px;
-			text-align: right;
-		}
+	#accountContent {
+		position: absolute;
+		top: 0px;
+		left: @menuWidth + @panelSpacing;
+		right: 0px;
+		bottom: 0px;
 	}
 
-	#accountSshKeys {
+	// position: absolute;
+	// top: 25%;
+	// left: 0px;
+	// right: 0px;
 
-		table {
-			width: 400px;
+	// #accountBasic {
 
-			.aliasColumn {
+	// 	#accountBasicButtonContainer {
+	// 		margin-top: 20px;
+	// 		text-align: right;
+	// 	}
+	// }
 
-			}
+	// #accountPassword {
 
-			.createdColumn {
-				text-align: center;
-			}
+	// 	#accountPasswordButtonContainer {
+	// 		margin-top: 20px;
+	// 		text-align: right;
+	// 	}
+	// }
 
-			.removeColumn {
-				text-align: center;
+	// #accountSshKeys {
 
-				.removeLink {
-					@linkBuffer: 8px;
+	// 	table {
+	// 		width: 400px;
 
-					cursor: hand; cursor: pointer;
-					padding-left: @linkBuffer;
-					padding-right: @linkBuffer;
-					font-width: bold;
-				}
-			}
-		}
+	// 		.aliasColumn {
 
-		#noSshKeysWarning {
-			margin-top: 30px;
-			margin-bottom: 25px;
-			font-size: 1.2em;
-			text-align: center;
-		}
+	// 		}
 
-		#accountAddSshKeyButtonContainer {
-			margin-top: 10px;
-			text-align: right;
-		}
+	// 		.createdColumn {
+	// 			text-align: center;
+	// 		}
 
-		#accountOpenAddSshKeyModalContainer {
-			margin-top: 15px;
-			text-align: center;
-		}
-	}
+	// 		.removeColumn {
+	// 			text-align: center;
+
+	// 			.removeLink {
+	// 				@linkBuffer: 8px;
+
+	// 				cursor: hand; cursor: pointer;
+	// 				padding-left: @linkBuffer;
+	// 				padding-right: @linkBuffer;
+	// 				font-width: bold;
+	// 			}
+	// 		}
+	// 	}
+
+	// 	#noSshKeysWarning {
+	// 		margin-top: 30px;
+	// 		margin-bottom: 25px;
+	// 		font-size: 1.2em;
+	// 		text-align: center;
+	// 	}
+
+	// 	#accountAddSshKeyButtonContainer {
+	// 		margin-top: 10px;
+	// 		text-align: right;
+	// 	}
+
+	// 	#accountOpenAddSshKeyModalContainer {
+	// 		margin-top: 15px;
+	// 		text-align: center;
+	// 	}
+	// }
 }

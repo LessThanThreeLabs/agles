@@ -180,13 +180,7 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		scope: title: '@panelTitle'
-		template: '<div class="prettyPanelContainer">
-				<div class="prettyPanel" unselectable>
-					<div class="prettyPanelTitle" ng-show="title">{{title}}</div>
-					<div ng-transclude></div>
-				</div>
-			</div>'
+		template: '<div class="prettyCenteredPanel" ng-transclude></div>'
 	).
 	directive('dropdown', ['$document', '$timeout', ($document, $timeout) ->
 		restrict: 'E'
@@ -322,6 +316,7 @@ angular.module('koality.directive', []).
 	directive('menuOption', () ->
 		restrict: 'E'
 		replace: true
+		scope: true
 		template: '<div class="prettyMenuOption">
 				<div class="prettyMenuOptionContents">
 					<span class="prettyMenuOptionIdentifier">{{identifier}}</span>
