@@ -127,7 +127,8 @@ function provision () {
 
 function setup_openstack () {
 	# This is a hack because of dependency collision
-	sudo pip install --upgrade anyjson==0.3.1
+	sudo pip install --upgrade "anyjson<0.3.2"
+	sudo pip install --upgrade "prettytable<0.6"
 	clone github.com/Randominator/openstackgeek.git
 	pushd openstackgeek/essex
 	sudo ./openstack.sh
@@ -138,8 +139,9 @@ function shared_setup () {
 	# Install dependencies
 	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl libyaml-dev
 
-	# Allow local users to access own postgresql accounts without a password
-	sudo sed -i.bak -r 's/(host\s+all\s+all\s+127.0.0.1\/32\s+)(\w+)/\1peer/g' /etc/postgresql/9.1/main/pg_hba.conf
+	# Allow local users to access postgresql without a password
+	sudo sed -i.bak -r 's/(host\s+all\s+all\s+127.0.0.1\/32\s+)(\w+)/\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf
+	sudo service postgresql reload
 
 	setup_rabbitmq
 	setup_redis
@@ -186,13 +188,14 @@ function host_setup () {
 	# Java
 	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
 		mkdir /tmp/src
-        cd /tmp/src
+        pushd /tmp/src
         clone github.com/flexiondotorg/oab-java6.git
         cd /tmp/src/oab-java6
         sudo ./oab-java.sh
         sudo add-apt-repository -y ppa:flexiondotorg/java
         sudo apt-get update
         sudo apt-get install -y sun-java6-jdk maven
+        popd
     fi
 
     #Chef
