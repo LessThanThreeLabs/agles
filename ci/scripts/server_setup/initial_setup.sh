@@ -22,8 +22,9 @@ function add_user () {
 function bootstrap () {
 	check_sudo
 	add_user lt3
+	prompt_github_credentials
 	this_script=$(pwd)/$0
-	sudo su lt3 -c "cd; $this_script _$1_setup"
+	sudo -E su lt3 -c "cd; $this_script _$1_setup"
 }
 
 function makedir () {
@@ -99,18 +100,25 @@ function setup_nodejs () {
 	wget -P ~/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
 }
 
-function clone () {
+function prompt_github_credentials () {
 	if [ -z $GITHUB_USERNAME ]; then
 		read -p "Github username: " GITHUB_USERNAME
 	fi
 	if [ -z $GITHUB_PASSWORD ]; then
 		read -s -p "Github password: " GITHUB_PASSWORD
 	fi
-	git clone https://"$GITHUB_USERNAME":"$GITHUB_PASSWORD"@github.com/Randominator/agles.git source
+}
+
+function clone () {
+	prompt_github_credentials
+	git clone https://"$GITHUB_USERNAME":"$GITHUB_PASSWORD"@"$1" $2
+	pushd $2
+	git remote set-url origin https://"$1"
+	popd
 }
 
 function provision () {
-	clone
+	clone github.com/Randominator/agles.git source
 	pushd ~/source/ci/platform
 	sudo python setup.py install
 	popd
@@ -120,7 +128,7 @@ function provision () {
 function setup_openstack () {
 	# This is a hack because of dependency collision
 	sudo pip install --upgrade anyjson==0.3.1
-	git clone https://github.com/Randominator/openstackgeek.git
+	clone github.com/Randominator/openstackgeek.git
 	pushd openstackgeek/essex
 	sudo ./openstack.sh
 	popd
@@ -128,7 +136,7 @@ function setup_openstack () {
 
 function shared_setup () {
 	# Install dependencies
-	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential
+	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl
 	setup_rabbitmq
 	setup_redis
 
@@ -157,6 +165,10 @@ function vm_setup () {
 	rm -rf source
 }
 
+function build_vm_image () {
+	read -p 'Please construct a VM image named "precise64_box_1", then press enter to continue this script'
+}
+
 function host_setup () {
 	check_sudo
 
@@ -169,7 +181,7 @@ function host_setup () {
 	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
 		mkdir /tmp/src
         cd /tmp/src
-        git clone https://github.com/flexiondotorg/oab-java6.git
+        clone github.com/flexiondotorg/oab-java6.git
         cd /tmp/src/oab-java6
         sudo ./oab-java.sh
         sudo add-apt-repository -y ppa:flexiondotorg/java
@@ -192,7 +204,9 @@ function host_setup () {
 
 	setup_openstack
 
-	psql -U postgres -c 'create user lt3'
+	build_vm_image
+
+	sudo psql -U postgres -c 'create user lt3'
 	psql -U lt3 -c 'create database koality'
 	python ~/code/agles/ci/platform/database/schema.py
 	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
