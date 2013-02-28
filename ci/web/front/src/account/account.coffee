@@ -12,22 +12,22 @@ window.Account = ['$scope', '$location', '$routeParams', 'initialState', ($scope
 ]
 
 
-# window.AccountBasic = ['$scope', 'initialState', 'rpc', ($scope, initialState, rpc) ->
-# 	$scope.account =
-# 		firstName: initialState.user.firstName
-# 		lastName: initialState.user.lastName
+window.AccountBasic = ['$scope', 'initialState', 'rpc', ($scope, initialState, rpc) ->
+	$scope.account =
+		firstName: initialState.user.firstName
+		lastName: initialState.user.lastName
 
-# 	$scope.submit = () ->
-# 		rpc.makeRequest 'users', 'update', 'changeBasicInformation', $scope.account
-# ]
+	$scope.submit = () ->
+		rpc.makeRequest 'users', 'update', 'changeBasicInformation', $scope.account
+]
 
 
-# window.AccountPassword = ['$scope', 'rpc', ($scope, rpc) ->
-# 	$scope.account = {}
+window.AccountPassword = ['$scope', 'rpc', ($scope, rpc) ->
+	$scope.account = {}
 
-# 	$scope.submit = () ->
-# 		rpc.makeRequest 'users', 'update', 'changePassword', $scope.account
-# ]
+	$scope.submit = () ->
+		rpc.makeRequest 'users', 'update', 'changePassword', $scope.account
+]
 
 
 # window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc, events, initialState) ->
