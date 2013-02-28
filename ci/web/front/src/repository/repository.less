@@ -88,6 +88,7 @@
 					@colorTransitionTime: 0.25s;
 					@backgroundColorTransitionTime: 0.25s;
 					@widthTransitionTime: 0.25s;
+
 					transition: color @colorTransitionTime ease-in-out,
 						background-color @backgroundColorTransitionTime ease-in-out,
 						width @widthTransitionTime ease-in-out;
@@ -101,9 +102,10 @@
 						background-color @backgroundColorTransitionTime ease-in-out,
 						width @widthTransitionTime ease-in-out;
 
-					cursor: hand; cursor: pointer;
+					cursor: hand;
+					cursor: pointer;
 					display: table-cell;
-					background-color: white;
+					color: #a9a9a9;
 					font-size: 12px;
 					font-weight: 900;
 					line-height: 12px;
@@ -146,6 +148,7 @@
 						text-align: left;
 
 						img {
+							margin-top: 1px;
 							padding-left: 5px;
 							width: @imageWidth;
 						}
@@ -153,7 +156,7 @@
 						input {
 							position: absolute;
 							top: 0px;
-							left: @imageWidth + 10;
+							left: @imageWidth + 8;
 							right: 0px;
 							bottom: 0px;
 
