@@ -381,6 +381,11 @@ angular.module('koality.filter', ['koality.service']).
 	filter('fileSuffix', ['fileSuffixAdder', (fileSuffixAdder) ->
 		(input) ->
 			return fileSuffixAdder.addFileSuffix input
+	]).
+	filter('newLine', [() ->
+		(input) ->
+			return input if not input?
+			return input.replace '\n', '<br>'
 	])
 
 

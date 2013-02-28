@@ -53,7 +53,7 @@
 					<styled-form-field label="Commit time">{{currentChangeInformation.commitTime | date:'medium'}}</styled-form-field>
 					<styled-form-field label="Commit target">{{currentChangeInformation.target}}</styled-form-field>
 					<styled-form-field label="Commit sha">{{currentChangeInformation.sha}}</styled-form-field>
-					<styled-form-field label="Commit message">{{currentChangeInformation.message}}</styled-form-field>
+					<styled-form-field label="Commit message"><span ng-bind-html="currentChangeInformation.message | newLine"></span></styled-form-field>
 				</styled-form>
 			</div>
 
