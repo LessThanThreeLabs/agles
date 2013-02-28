@@ -18,6 +18,9 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			build_console.c.id == build_console_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+
+		if row:
 			return to_dict(row, build_console.columns)
 
 	def get_build_consoles(self, user_id, change_id):
