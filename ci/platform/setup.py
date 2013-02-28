@@ -6,7 +6,6 @@ setup(
 	description="Production code for koality",
 	packages=find_packages(exclude=[
 		"bin",
-		"aws_t",
 		"tests",
 	]),
 )

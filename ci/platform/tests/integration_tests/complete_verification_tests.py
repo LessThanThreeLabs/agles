@@ -10,7 +10,6 @@ from kombu.entity import Queue
 from shutil import rmtree
 from nose.tools import *
 from util.permissions import RepositoryPermissions
-from virtual_machine.vagrant import Vagrant
 from util.test import BaseIntegrationTest
 from util.test.mixins import *
 from database.engine import ConnectionFactory
@@ -27,7 +26,6 @@ from settings.store import StoreSettings
 from bunnyrpc.server import Server
 from bunnyrpc.client import Client
 from git import Repo
-from testconfig import config
 from util.test.fake_build_verifier import FakeBuildVerifier
 
 TEST_ROOT = '/tmp/verification'
@@ -40,13 +38,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	def setup_class(cls):
 		cls.verifiers = []
 		cls.vs_processes = []
-		num_verifiers = int(config["numVerifiers"]) if config.get("numVerifiers") else DEFAULT_NUM_VERIFIERS
-		for x in range(num_verifiers):
-			if config.get("useVagrant"):
-				vagrant = Vagrant(os.path.join(TEST_ROOT, str(x)), box_name)
-				verifier = BuildVerifier.for_virtual_machine(vagrant)
-			else:
-				verifier = FakeBuildVerifier(passes=True)
+		for x in range(DEFAULT_NUM_VERIFIERS):
+			verifier = FakeBuildVerifier(passes=True)
 			verifier.setup()
 			cls.verifiers.append(verifier)
 
