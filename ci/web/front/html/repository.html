@@ -49,7 +49,7 @@
 			<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
 				<styled-form>
 					<styled-form-field label="Commiter">{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}</styled-form-field>
-					<styled-form-field label="Email"><a href="mailto:{{currentChangeInformation.user.email}}?subject=Koality%3A%20{{repository.name}}%20-%20change%20%23{{currentChangeInformation.number}}">{{currentChangeInformation.user.email}}</a></styled-form-field>
+					<styled-form-field label="Email"><a href="mailto:{{currentChangeInformation.user.email}}?subject=Koality%3A%20{{repository.name}}%20-%20change%20%23{{currentChangeInformation.number}}" target="_blank">{{currentChangeInformation.user.email}}</a></styled-form-field>
 					<styled-form-field label="Commit time">{{currentChangeInformation.commitTime | date:'EEEE, MM/dd hh:mm:ss a'}}</styled-form-field>
 					<styled-form-field label="Commit target">{{currentChangeInformation.target}}</styled-form-field>
 					<styled-form-field label="Commit sha">{{currentChangeInformation.sha}}</styled-form-field>
