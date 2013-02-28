@@ -297,6 +297,9 @@ angular.module('koality.directive', []).
 		template: '<div class="prettyMenuHeader" ng-transclude>
 				<div class="prettyMenuHeaderBuffer"></div>
 			</div>'
+		link: (scope, element, attributes) ->
+			if attributes.menuHeaderPadding?
+				element.addClass 'prettyMenuHeaderPadding'
 	).
 	directive('menuOptions', () ->
 		restrict: 'E'
@@ -335,6 +338,29 @@ angular.module('koality.directive', []).
 				scope.text = text
 			attributes.$observe 'menuOptionSpinning', (spinning) ->
 				scope.spinning = if typeof spinning is 'boolean' then spinning else spinning is 'true'
+	).
+	directive('menuContent', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<div class="prettyMenuContent" ng-transclude>
+				<div class="prettyMenuContentFooter"></div>
+			</div>'
+	).
+	directive('menuContentHeader', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<div class="prettyMenuContentHeader" ng-transclude></div>'
+		link: (scope, element, attributes) ->
+			if attributes.menuContentHeaderPadding?
+				element.addClass 'prettyMenuContentHeaderPadding'
+	).
+	directive('menuContentBody', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<div class="prettyMenuContentBody" ng-transclude></div>'
 	).
 	directive('spinner', () ->
 		restrict: 'E'

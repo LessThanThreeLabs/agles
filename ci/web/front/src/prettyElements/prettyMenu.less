@@ -1,8 +1,9 @@
 @import '../constants';
 
+@menuHeaderHeight: 40px;
+@menuFooterHeight: 8px;
+
 .prettyMenu {
-	@menuHeaderHeight: 40px;
-	@menuFooterHeight: 8px;
 	@optionHeight: 44px;
 	@toothWidth: @optionHeight * .35;
 
@@ -34,6 +35,10 @@
 		color: @koalityWhite;
 		font-size: 18px;
 		line-height: @menuHeaderHeight;
+
+		&.prettyMenuHeaderPadding {
+			padding-left: 8px;
+		}
 
 		.prettyMenuHeaderBuffer {
 			position: absolute;
@@ -273,6 +278,52 @@
 		z-index: 100;
 		left: 0px;
 		right: @toothWidth;
+		bottom: 0px;
+		height: @menuFooterHeight;
+		background-color: @panelFooterBackground;
+		border-bottom-left-radius: @borderRadius;
+		border-bottom-right-radius: @borderRadius;
+	}
+}
+
+.prettyMenuContent {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+
+	.prettyMenuContentHeader {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		right: 0px;
+		height: @menuHeaderHeight;
+		color: @koalityWhite;
+		font-size: 18px;
+		line-height: @menuHeaderHeight;
+		background-color: @panelHeaderBackground;
+		border-top-left-radius: @borderRadius;
+		border-top-right-radius: @borderRadius;
+
+		&.prettyMenuContentHeaderPadding {
+			padding-left: 8px;
+		}
+	}
+
+	.prettyMenuContentBody {
+		position: absolute;
+		top: @menuHeaderHeight;
+		left: 0px;
+		right: 0px;
+		bottom: @menuFooterHeight;
+		background-color: @panelBackground;
+	}
+
+	.prettyMenuContentFooter {
+		position: absolute;
+		left: 0px;
+		right: 0px;
 		bottom: 0px;
 		height: @menuFooterHeight;
 		background-color: @panelFooterBackground;

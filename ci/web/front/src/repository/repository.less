@@ -176,139 +176,101 @@
 		left: 8px + @menuWidth + @panelSpacing;
 		bottom: @bottomPadding;
 		width: @menuWidth;
-
-		#repositoryStagesHeader {
-			margin-left: 8px;
-		}	
 	}
 
 	#repositoryStageDetails {
-		@headerHeight: 40px;
-		@footerHeight: 8px;
-
 		position: absolute;
 		top: 56px;
 		left: 8px + (@menuWidth + @panelSpacing) * 2;
 		right: 8px;
 		bottom: @bottomPadding;
-		background-color: @panelBackground;
-		border-radius: @borderRadius;
 
 		#repositoryStageDetailsHeader {
-			position: absolute;
-			top: 0px;
-			left: 0px;
-			right: 0px;
 			padding-left: 8px;
-			height: @headerHeight;
-			font-size: 18px;
-			line-height: @headerHeight;
-			background-color: @panelHeaderBackground;
-			border-top-left-radius: @borderRadius;
-			border-top-right-radius: @borderRadius;
 		}
 
-		#repositoryStageDetailsContent {
+		#repositoryStageDetailsSummary {
+			margin: 30px 0px 0px 30px;			
+			font-size: 1.2em;
+		}
+
+		#repositoryStageDetailsOutput {
+			@bufferHeight: 20px;
+			@consoleTextWidth: 95%;
+
 			position: absolute;
-			top: @headerHeight;
-			left: 0px;
-			right: 0px;
-			bottom: @footerHeight;
+			top: 20px;
+			left: 10px;
+			right: 15px;
+			bottom: 30px;
 
-			#repositoryStageDetailsSummary {
-				margin: 30px 0px 0px 30px;			
-				font-size: 1.2em;
-			}
-
-			#repositoryStageDetailsOutput {
-				@bufferHeight: 20px;
-				@consoleTextWidth: 95%;
-
+			.consoleTextContainer {
 				position: absolute;
-				top: 20px;
-				left: 10px;
-				right: 15px;
-				bottom: 30px;
+				top: 0px;
+				left: 0px;
+				right: 0px;
+				bottom: 0px;
+				overflow-x: hidden;
+				overflow-y: auto;
 
-				.consoleTextContainer {
-					position: absolute;
-					top: 0px;
-					left: 0px;
-					right: 0px;
-					bottom: 0px;
-					overflow-x: hidden;
-					overflow-y: auto;
+				.consoleText {
+					display: table;
+					margin-top: @bufferHeight;
+					margin-bottom: @bufferHeight;
+					table-layout: fixed;
+					width: @consoleTextWidth;
 
-					.consoleText {
-						display: table;
-						margin-top: @bufferHeight;
-						margin-bottom: @bufferHeight;
-						table-layout: fixed;
-						width: @consoleTextWidth;
+					.consoleTextLine {
+						display: table-row;
+						font-family: 'PT Mono', monospace;
+						font-size: 12px;
 
-						.consoleTextLine {
-							display: table-row;
-							font-family: 'PT Mono', monospace;
-							font-size: 12px;
-
-							.consoleTextLineNumber {
-								display: table-cell;
-								padding-right: 18px;
-								width: 40px;
-								color: @koalityGray;
-								text-align: right;
-							}
-
-							.consoleTextLineText {
-								display: table-cell;
-								word-wrap: break-word;
-							}
+						.consoleTextLineNumber {
+							display: table-cell;
+							padding-right: 18px;
+							width: 40px;
+							color: @koalityGray;
+							text-align: right;
 						}
 
+						.consoleTextLineText {
+							display: table-cell;
+							word-wrap: break-word;
+						}
 					}
-				}
 
-				.consoleTextTopBuffer {
-					position: absolute;
-					z-index: 100;
-					top: 0px;
-					left: 0px;
-					width: @consoleTextWidth;
-					height: @bufferHeight;
-
-					background: linear-gradient(to bottom, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
-					background: -moz-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
-					background: -webkit-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
-					background: -o-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
-					background: -ms-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
-				}
-
-				.consoleTextBottomBuffer {
-					position: absolute;
-					z-index: 100;
-					left: 0px;
-					bottom: 0px;
-					width: @consoleTextWidth;
-					height: @bufferHeight;
-
-					background: linear-gradient(to bottom, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
-					background: -moz-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
-					background: -webkit-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
-					background: -o-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
-					background: -ms-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
 				}
 			}
-		}
 
-		#repositoryStageDetailsFooter {
-			position: absolute;
-			left: 0px;
-			right: 0px;
-			bottom: 0px;
-			height: @footerHeight;
-			background-color: @panelFooterBackground;
-			border-bottom-left-radius: @borderRadius;
-			border-bottom-right-radius: @borderRadius;
+			.consoleTextTopBuffer {
+				position: absolute;
+				z-index: 100;
+				top: 0px;
+				left: 0px;
+				width: @consoleTextWidth;
+				height: @bufferHeight;
+
+				background: linear-gradient(to bottom, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+				background: -moz-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+				background: -webkit-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+				background: -o-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+				background: -ms-linear-gradient(top, fade(@panelBackground, 100%) 0%, fade(@panelBackground, 0%) 100%);
+			}
+
+			.consoleTextBottomBuffer {
+				position: absolute;
+				z-index: 100;
+				left: 0px;
+				bottom: 0px;
+				width: @consoleTextWidth;
+				height: @bufferHeight;
+
+				background: linear-gradient(to bottom, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+				background: -moz-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+				background: -webkit-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+				background: -o-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+				background: -ms-linear-gradient(top, fade(@panelBackground, 0%) 0%, fade(@panelBackground, 100%) 100%);
+			}
 		}
 	}
 }

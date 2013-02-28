@@ -30,8 +30,8 @@
 
 	<div id="repositoryStages" ng-controller="RepositoryStages" unselectable>
 		<menu>
-			<menu-header>
-				<span id="repositoryStagesHeader" ng-show="currentChangeInformation != null">Change {{currentChangeInformation.number}}</span>
+			<menu-header menu-header-padding>
+				<span ng-show="currentChangeInformation != null">Change {{currentChangeInformation.number}}</span>
 			</menu-header>
 			<menu-options>
 				<menu-option menu-option-text="Summary" ng-show="currentChangeInformation != null" ng-click="stageClick(null)" ng-class="{selected: currentStageId == null}"></menu-option>
@@ -41,34 +41,35 @@
 	</div>
 
 	<div id="repositoryStageDetails" ng-controller="RepositoryStageDetails" unselectable>
-		<div id="repositoryStageDetailsHeader">
-			<span ng-show="currentStageId == null">Summary</span>
-			<span ng-show="currentStageInformation != null">{{currentStageInformation.name}}</span>
-		</div>
-		<div id="repositoryStageDetailsContent">
-			<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
-				<styled-form>
-					<styled-form-field label="Commiter">{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}</styled-form-field>
-					<styled-form-field label="Email"><a href="mailto:{{currentChangeInformation.user.email}}?subject=Koality%3A%20{{repository.name}}%20-%20change%20%23{{currentChangeInformation.number}}" target="_blank">{{currentChangeInformation.user.email}}</a></styled-form-field>
-					<styled-form-field label="Commit time">{{currentChangeInformation.commitTime | date:'EEEE, MM/dd hh:mm:ss a'}}</styled-form-field>
-					<styled-form-field label="Commit target">{{currentChangeInformation.target}}</styled-form-field>
-					<styled-form-field label="Commit sha">{{currentChangeInformation.sha}}</styled-form-field>
-					<styled-form-field label="Commit message"><span ng-bind-html="currentChangeInformation.message | newLine"></span></styled-form-field>
-				</styled-form>
-			</div>
+		<menu-content>
+			<menu-content-header menu-content-header-padding>
+				<span ng-show="currentStageId == null">Summary</span>
+				<span ng-show="currentStageInformation != null">{{currentStageInformation.name}}</span>
+			</menu-content-header>
+			<menu-content-body>
+				<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
+					<styled-form>
+						<styled-form-field label="Commiter">{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}</styled-form-field>
+						<styled-form-field label="Email"><a href="mailto:{{currentChangeInformation.user.email}}?subject=Koality%3A%20{{repository.name}}%20-%20change%20%23{{currentChangeInformation.number}}" target="_blank">{{currentChangeInformation.user.email}}</a></styled-form-field>
+						<styled-form-field label="Commit time">{{currentChangeInformation.commitTime | date:'EEEE, MM/dd hh:mm:ss a'}}</styled-form-field>
+						<styled-form-field label="Commit target">{{currentChangeInformation.target}}</styled-form-field>
+						<styled-form-field label="Commit sha">{{currentChangeInformation.sha}}</styled-form-field>
+						<styled-form-field label="Commit message"><span ng-bind-html="currentChangeInformation.message | newLine"></span></styled-form-field>
+					</styled-form>
+				</div>
 
-			<div id="repositoryStageDetailsOutput" ng-show="currentChangeId != null && currentStageId != null">
-				<div class="consoleTextTopBuffer"></div>
-				<div class="consoleTextContainer" auto-scroll-to-bottom="lines" auto-scroll-to-bottom-buffer="60">
-					<div class="consoleText">
-						<div class="consoleTextLine" ng-repeat="line in lines">
-							<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse" text-selectable></span>
+				<div id="repositoryStageDetailsOutput" ng-show="currentChangeId != null && currentStageId != null">
+					<div class="consoleTextTopBuffer"></div>
+					<div class="consoleTextContainer" auto-scroll-to-bottom="lines" auto-scroll-to-bottom-buffer="60">
+						<div class="consoleText">
+							<div class="consoleTextLine" ng-repeat="line in lines">
+								<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse" text-selectable></span>
+							</div>
 						</div>
 					</div>
+					<div class="consoleTextBottomBuffer"></div>
 				</div>
-				<div class="consoleTextBottomBuffer"></div>
-			</div>
-		</div>
-		<div id="repositoryStageDetailsFooter"></div>
+			</menu-content-body>
+		</menu-content>
 	</div>
 </div>
