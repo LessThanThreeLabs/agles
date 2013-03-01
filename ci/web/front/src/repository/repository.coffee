@@ -11,9 +11,9 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'integerConverter', ($scop
 		return if not $scope.currentChangeId?
 
 		requestData =
-			repositoryId: $routeParams.repositoryId
+			repositoryId: integerConverter.toInteger $routeParams.repositoryId
 			id: $scope.currentChangeId
-		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, changeInformation) ->
+		rpc.makeRequest 'changes', 'read', 'getMetadata', requestData, (error, changeInformation) ->
 			$scope.$apply () -> $scope.currentChangeInformation = changeInformation
 
 	retrieveCurrentStageInformation = () ->
@@ -21,7 +21,7 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'integerConverter', ($scop
 		return if not $scope.currentStageId?
 
 		requestData =
-			repositoryId: $routeParams.repositoryId
+			repositoryId: integerConverter.toInteger $routeParams.repositoryId
 			id: $scope.currentStageId
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsole', requestData, (error, stageInformation) ->
 			$scope.$apply () -> $scope.currentStageInformation = stageInformation

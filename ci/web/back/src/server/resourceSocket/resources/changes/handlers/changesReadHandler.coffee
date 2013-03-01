@@ -65,6 +65,8 @@ class ChangesReadHandler extends Handler
 			target: metadata.change.merge_target
 			sha: metadata.commit.sha
 
+		console.log data
+
 		userId = socket.session.userId
 		if not userId?
 			callback 403
