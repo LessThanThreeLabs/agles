@@ -58,10 +58,11 @@ window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', 'even
 		repositoryToRemoveIndex = (index for dropdownOption, index in $scope.repositoryDropdownOptions when dropdownOption.name is data.id)[0]
 		$scope.repositoryDropdownOptions.splice repositoryToRemoveIndex, 1 if repositoryToRemoveIndex?
 
-	addRepositoryEvents = events.listen('users', 'repository added', initialState.user.id).setCallback(handleRepositoryAdded).subscribe()
-	removeRepositoryEvents = events.listen('users', 'repository removed', initialState.user.id).setCallback(handleRepositoryRemoved).subscribe()
-	$scope.$on '$destroy', addRepositoryEvents.unsubscribe
-	$scope.$on '$destroy', removeRepositoryEvents.unsubscribe
+	if $scope.loggedIn
+		addRepositoryEvents = events.listen('users', 'repository added', initialState.user.id).setCallback(handleRepositoryAdded).subscribe()
+		removeRepositoryEvents = events.listen('users', 'repository removed', initialState.user.id).setCallback(handleRepositoryRemoved).subscribe()
+		$scope.$on '$destroy', addRepositoryEvents.unsubscribe
+		$scope.$on '$destroy', removeRepositoryEvents.unsubscribe
 	
 	$scope.repositoryDropdownOptions = []
 	getRepositories() if $scope.loggedIn
