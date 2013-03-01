@@ -152,7 +152,7 @@ function shared_setup () {
 	setup_nodejs
 
 	sudo apt-get install -y python-dev
-	sudo pip install pyyaml eventlet
+	sudo pip install pyyaml eventlet virtualenv
 
 	provision
 }
