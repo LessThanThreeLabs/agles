@@ -1,23 +1,6 @@
 @import '../constants';
 
-@heartbeatStartColor: rgba(208, 208, 208, 0.4);
-@heartbeatFinalColor: rgba(208, 208, 208, 1.0);
-@keyframes heartbeat { 
-	from { color: @heartbeatStartColor; }
-	to { color: @heartbeatFinalColor; }
-}
-@-moz-keyframes heartbeat { 
-	from { color: @heartbeatStartColor; }
-	to { color: @heartbeatFinalColor; }
-}
-@-webkit-keyframes heartbeat { 
-	from { color: @heartbeatStartColor; }
-	to { color: @heartbeatFinalColor; }
-}
-@-o-keyframes heartbeat { 
-	from { color: @heartbeatStartColor; }
-	to { color: @heartbeatFinalColor; }
-}
+@topSpacing: 80px;
 
 #repository {
 	@bottomPadding: 25px;
@@ -25,12 +8,12 @@
 	width: 100%;
 	height: 100%;
 
+
 	#repositoryHeaderPanel {
 		position: absolute;
-		top: 6px;
+		top: 20px;
 		left: 8px;
 		right: 8px;
-		height: 40px;
 
 		#repositoryHeaderTitle {
 			display: inline-block;
@@ -46,7 +29,7 @@
 			margin-right: 10px;
 
 			img {
-				width: 30px;
+				width: 20px;
 				vertical-align: top;
 			}
 
@@ -59,7 +42,7 @@
 
 	#repositoryChanges {
 		position: absolute;
-		top: 56px;
+		top: @topSpacing;
 		left: 8px;
 		bottom: @bottomPadding;
 		width: @menuWidth;
@@ -177,7 +160,7 @@
 
 	#repositoryStages {
 		position: absolute;
-		top: 56px;
+		top: @topSpacing;
 		left: 8px + @menuWidth + @panelSpacing;
 		bottom: @bottomPadding;
 		width: @menuWidth;
@@ -185,7 +168,7 @@
 
 	#repositoryStageDetails {
 		position: absolute;
-		top: 56px;
+		top: @topSpacing;
 		left: 8px + (@menuWidth + @panelSpacing) * 2;
 		right: 8px;
 		bottom: @bottomPadding;
