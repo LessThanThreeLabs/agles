@@ -79,7 +79,7 @@
 			<menu-content-header menu-content-header-padding>Manage User Accounts</menu-content-header>
 			<menu-content-body unselectable>
 				<div id="adminUsersContent">
-					<table id="adminUsersTable" class="prettyTable">
+					<table class="prettyTable">
 						<tr class="title">
 							<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
 							<td class="emailColumn" ng-click="orderByPredicate = 'email'; orderByReverse = !orderByReverse">Email</td>
@@ -99,6 +99,36 @@
 							<td class="emailColumn" text-selectable><a href="mailto:{{user.email}}?subject=Koality" target="_blank">{{user.email}}</a></td>
 							<td class="createdColumn" text-selectable>{{user.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
 							<td class="removeColumn"><span class="removeLink" ng-click="removeUser(user)">Delete</span></td>
+						</tr>
+					</table>
+				</div>
+			</menu-content-body>
+		</menu-content>
+	</div>
+
+	<div id="adminRepositories" ng-show="currentView == 'repositories'" ng-controller="AdminRepositories">
+		<menu-content>
+			<menu-content-header menu-content-header-padding>Manage Repositories</menu-content-header>
+			<menu-content-body unselectable>
+				<div id="adminRepositoriesContent">
+					<table class="prettyTable">
+						<tr class="title">
+							<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
+							<td class="createdColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Created</td>
+							<td class="removeColumn">Remove</td>
+						</tr>
+
+						<tr ng-show="repositories.length == 0">
+							<td class="nameColumn" text-selectable>There are no repositories</td>
+							<td class="emailColumn"></td>
+							<td class="createdColumn"></td>
+							<td class="removeColumn"></td>
+						</tr>
+
+						<tr ng-repeat="repository in repositories | orderBy:orderByPredicate:orderByReverse">
+							<td class="nameColumn" text-selectable>{{repository.name}}</td>
+							<td class="createdColumn" text-selectable>{{repository.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
+							<td class="removeColumn"><span class="removeLink" ng-click="removeRepository(repository)">Delete</span></td>
 						</tr>
 					</table>
 				</div>
