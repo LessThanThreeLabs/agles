@@ -12,8 +12,10 @@
 <body>
 
 	<div id="main">
-		<div id="headerContanier">
-			<div id="headerCenterContainer">
+		<div id="headerBackground"></div>
+
+		<div id="centerContainer">
+			<div id="headerContainer">
 				<div id="header" ng-controller="Header">
 					<span id="headerTitle" ng-click="visitHome()" unselectable>Koality</span>
 					<div id="headerOptions" ng-cloak>
@@ -28,10 +30,10 @@
 					</div>
 				</div>
 			</div>
-		</div>
 
-		<div id="contentContainer">
-			<div id="contentCenterContainer" ng-view></div>
+			<div id="contentContainer">
+				<div id="contentCenterContainer" ng-view></div>
+			</div>
 		</div>
 	</div>
 

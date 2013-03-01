@@ -11,42 +11,41 @@
 	overflow-x: auto;
 	overflow-y: hidden;
 
-	#headerContanier {
+	#headerBackground {
 		position: absolute;
-		z-index: 100;
+		z-index: 1;
 		top: 0px;
 		left: 0px;
 		right: 0px;
 		height: @headerHeight;
 		background-color: @headerBackground;
+	}
 
-		#headerCenterContainer {
-			position: relative;
-			margin-left: auto;
-			margin-right: auto;
-			min-width: @contentMinWidth;
-			width: @contentWidth;
-			max-width: @contentMaxWidth;
-			height: 100%;
+	#centerContainer {
+		position: relative;
+		margin-left: auto;
+		margin-right: auto;
+		min-width: @contentMinWidth;
+		width: @contentWidth;
+		max-width: @contentMaxWidth;
+		height: 100%;
+
+		#headerContainer {
+			position: absolute;
+			z-index: 100;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			height: @headerHeight;
+			background-color: @headerBackground;
 		}
-	}	
 
-	#contentContainer {
-		position: absolute;
-		z-index: 99;
-		top: @headerHeight;
-		left: 0px;
-		right: 0px;
-		bottom: 0px;
-
-		#contentCenterContainer {
-			position: relative;
-			margin-left: auto;
-			margin-right: auto;
-			min-width: @contentMinWidth;
-			width: @contentWidth;
-			max-width: @contentMaxWidth;
-			height: 100%;
+		#contentContainer {
+			position: absolute;
+			top: @headerHeight;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
 		}
 	}
 }
