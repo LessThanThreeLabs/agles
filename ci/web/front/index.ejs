@@ -21,10 +21,10 @@
 						<span class="headerOption" ng-controller="HeaderProfile" ng-show="loggedIn" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
 							<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
 						</span>
+						<span class="headerOption" ng-controller="HeaderAdmin" ng-show="isAdmin" ng-click="visitAdmin()" unselectable>Admin</span>
 						<span class="headerOption" ng-controller="HeaderRepositories" ng-show="loggedIn" ng-click="repositoryClick()" unselectable>Repositories
 							<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
 						</span>
-						<span class="headerOption" ng-controller="HeaderAdmin" ng-show="isAdmin" ng-click="visitAdmin()" unselectable>Admin</span>
 					</div>
 				</div>
 			</div>
