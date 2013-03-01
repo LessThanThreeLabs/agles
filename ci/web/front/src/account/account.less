@@ -12,14 +12,16 @@
 		width: @menuWidth;
 	}
 
-	#accountContent {
+	#accountBasic, #accountPassword, #accountSshKeys {
 		position: absolute;
 		top: 0px;
 		left: @menuWidth + @panelSpacing;
 		right: 0px;
 		bottom: 0px;
+	}
 
-		#accountBasic {
+	#accountBasic {
+		#accountBasicContent {
 			margin-top: 30px;
 			margin-left: 30px;
 
@@ -27,8 +29,10 @@
 				margin-top: 20px;
 			}
 		}
+	}
 
-		#accountPassword {
+	#accountPassword {
+		#accountPasswordContent {
 			margin-top: 30px;
 			margin-left: 30px;
 
@@ -36,10 +40,22 @@
 				margin-top: 20px;
 			}
 		}
+	}
 
-		#accountSshKeys {
+	#accountSshKeys {
+		#addSshKeyLink {
+			cursor: hand;
+			cursor: pointer;
+			position: absolute;
+			right: 24px;
+			font-size: 14px;
+			color: @koalityGreen;
+		}
+
+		#accountSshKeysContent {
 			table {
 				width: 100%;
+				table-layout: fixed;
 
 				.title {
 					.aliasColumn, .createdColumn {
@@ -57,7 +73,7 @@
 				}
 
 				.removeColumn {
-					width: 80px;
+					width: 70px;
 
 					.removeLink {
 						cursor: hand;

@@ -3,18 +3,18 @@
 		<menu>
 			<menu-header menu-header-padding>{{name}}</menu-header>
 			<menu-options>
-				<menu-option menu-option-text="My Account" ng-click="menuOptionClick('My Account')" ng-class="{selected: currentView == 'My Account', green: currentView == 'My Account'}"></menu-option>
-				<menu-option menu-option-text="Password" ng-click="menuOptionClick('Password')" ng-class="{selected: currentView == 'Password', green: currentView == 'Password'}"></menu-option>
-				<menu-option menu-option-text="SSH Keys" ng-click="menuOptionClick('SSH Keys')" ng-class="{selected: currentView == 'SSH Keys', green: currentView == 'SSH Keys'}"></menu-option>
+				<menu-option menu-option-text="My Account" ng-click="menuOptionClick('basic')" ng-class="{selected: currentView == 'basic', green: currentView == 'basic'}"></menu-option>
+				<menu-option menu-option-text="Password" ng-click="menuOptionClick('password')" ng-class="{selected: currentView == 'password', green: currentView == 'password'}"></menu-option>
+				<menu-option menu-option-text="SSH Keys" ng-click="menuOptionClick('sshKeys')" ng-class="{selected: currentView == 'sshKeys', green: currentView == 'sshKeys'}"></menu-option>
 			</menu-options>
 		</menu>
 	</div>
 
-	<div id="accountContent">
+	<div id="accountBasic" ng-show="currentView == 'basic'" ng-controller="AccountBasic">
 		<menu-content>
-			<menu-content-header menu-content-header-padding>{{currentView}}</menu-content-header>
+			<menu-content-header menu-content-header-padding>My Account</menu-content-header>
 			<menu-content-body unselectable>
-				<div id="accountBasic" ng-show="currentView == 'My Account'" ng-controller="AccountBasic">
+				<div id="accountBasicContent">
 					<styled-form name="basicForm">
 						<styled-form-field label="First name" label-padding="true">
 							<input type="text" ng-model="account.firstName" name="firstName" placeholder="First" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required focused>
@@ -34,8 +34,15 @@
 						<button ng-click="submit()" ng-disabled="basicForm.$invalid">Save Changes</button>
 					</div>
 				</div>
+			</menu-content-body>
+		</menu-content>
+	</div>
 
-				<div id="accountPassword" ng-show="currentView == 'Password'" ng-controller="AccountPassword">
+	<div id="accountPassword" ng-show="currentView == 'password'" ng-controller="AccountPassword">
+		<menu-content>
+			<menu-content-header menu-content-header-padding>Password</menu-content-header>
+			<menu-content-body unselectable>
+				<div id="accountPasswordContent">
 					<styled-form name="passwordForm">
 						<styled-form-field label="Old password" label-padding="true">
 							<input type="password" ng-model="account.oldPassword" name="oldPassword" placeholder="old p4ssW0rd" required focused>
@@ -58,8 +65,15 @@
 						<button ng-click="submit()" ng-disabled="passwordForm.$invalid">Save Changes</button>
 					</div>
 				</div>
+			</menu-content-body>
+		</menu-content>
+	</div>
 
-				<div id="accountSshKeys" ng-show="currentView == 'SSH Keys'" ng-controller="AccountSshKeys">
+	<div id="accountSshKeys" ng-show="currentView == 'sshKeys'" ng-controller="AccountSshKeys">
+		<menu-content>
+			<menu-content-header menu-content-header-padding>SSH Keys<span id="addSshKeyLink">+ Add a New SSH Key</span></menu-content-header>
+			<menu-content-body unselectable>
+				<div id="accountSshKeysContent">
 					<table id="sshKeysTable" class="prettyTable">
 						<tr class="title">
 							<td class="aliasColumn" ng-click="orderByPredicate = 'alias'; orderByReverse = !orderByReverse">Alias</td>
@@ -106,4 +120,5 @@
 				</div> 
 			</menu-content-body>
 		</menu-content>
+	</div>
 </centered-panel>
