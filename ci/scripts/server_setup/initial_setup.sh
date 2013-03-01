@@ -222,6 +222,7 @@ function host_setup () {
 	sudo -u postgres psql -c "create user lt3 with password ''"
 	sudo -u postgres psql -c "create database koality"
 	sudo -u postgres psql -c "grant all privileges on database koality to lt3"
+	source /etc/koality/koalityrc
 	python ~/code/agles/ci/platform/database/schema.py
 	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
 }
