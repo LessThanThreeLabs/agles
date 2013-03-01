@@ -38,13 +38,10 @@ window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc
 	$scope.addKey.modalVisible = false
 
 	getKeys = () ->
-		keyA =
-			alias: 'Some awesome alias'
-			timestamp: 38974124
-		keyB =
-			alias: 'Another awesome alias'
-			timestamp: 128312839018
-		$scope.keys = [keyA, keyB]
+		createFakeKey = (number) ->
+			alias: 'Alias ' + number
+			timestamp: Math.floor(Math.random() * 1000000000)
+		$scope.keys = (createFakeKey number for number in [0...1000])
 		# rpc.makeRequest 'users', 'read', 'getSshKeys', null, (error, keys) ->
 		# 	$scope.$apply () -> $scope.keys = keys
 
