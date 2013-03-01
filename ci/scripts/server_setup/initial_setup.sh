@@ -96,8 +96,8 @@ function setup_ruby () {
 }
 
 function setup_nodejs () {
-	makedir /etc/koality/nvm
-	wget -P /etc/koality/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
+	sudo mkdir -p /etc/koality/nvm
+	sudo wget -P /etc/koality/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
 }
 
 function setup_nodejs_vm () {
