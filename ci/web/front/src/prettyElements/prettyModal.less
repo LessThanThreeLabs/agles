@@ -38,7 +38,7 @@
 		left: 0;
 		z-index: 9998;
 		background-color: rgba(0, 0, 0, 0.65);
-		opacity: 1.0;
+		opacity: @finalFadeInOpacity;
 	}
 
 	.prettyModalContent {
@@ -63,20 +63,11 @@
 
 		display: inline-block;
 		position: relative;
-		top: 200px;
-		padding: 30px 40px 20px 40px;
+		top: @finalSlideInLocation;
 		min-width: 300px;
 		min-height: 100px;
 		z-index: 9999;
-		color: #202020;
 		text-align: left;
-		border-radius: 15px;
-		background: -moz-linear-gradient(#FFFFFF, #E0E0E0);
-		background: -webkit-linear-gradient(#FFFFFF, #E0E0E0);
-
-		box-shadow: 0 0 6px 6px #808080;
-		-moz-box-shadow: 0 0 6px 6px #808080;
-		-webkit-box-shadow: 0 0 6px 6px #808080;
 	}
 
 	&.visible {

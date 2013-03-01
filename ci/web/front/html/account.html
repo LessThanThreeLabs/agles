@@ -71,7 +71,7 @@
 
 	<div id="accountSshKeys" ng-show="currentView == 'sshKeys'" ng-controller="AccountSshKeys">
 		<menu-content>
-			<menu-content-header menu-content-header-padding>SSH Keys<span id="addSshKeyLink">+ Add a New SSH Key</span></menu-content-header>
+			<menu-content-header menu-content-header-padding>SSH Keys<span id="addSshKeyLink" ng-click="addKey.modalVisible=true">+ Add a New SSH Key</span></menu-content-header>
 			<menu-content-body unselectable>
 				<div id="accountSshKeysContent">
 					<table id="sshKeysTable" class="prettyTable">
@@ -94,9 +94,17 @@
 						</tr>
 					</table>
 
-					<div ng-controller="AccountAddSshKeys">
-						<modal modal-visible="modalVisible">
-							<styled-form name="addSshKeyForm">
+				</div> 
+			</menu-content-body>
+		</menu-content>
+
+		<modal modal-visible="addKey.modalVisible">
+			<div id="accountAddSshKey">
+				<menu-content>
+					<menu-content-header menu-content-header-padding>Add a New SSH Key</menu-content-header>
+					<menu-content-body unselectable>
+						<div id="accountAddSshKeyContent">
+							<styled-form name="addSshKeyForm" id="accountAddSshKeyForm">
 								<styled-form-field label="Alias" label-padding="true">
 									<input type="text" ng-model="addKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
 								</styled-form-field>
@@ -109,16 +117,12 @@
 							</styled-form>
 
 							<div id="accountAddSshKeyButtonContainer">
-								<button ng-click="submit()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
+								<button ng-click="submitKey()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
 							</div>
-						</modal>
-
-						<!-- <div id="accountOpenAddSshKeyModalContainer">
-							<button ng-click="modalVisible=true">Add a New Key</button>
-						</div> -->
-					</div>
-				</div> 
-			</menu-content-body>
-		</menu-content>
+						</div>
+					</menu-content-body>
+				</menu-content>
+			</div>
+		</modal>
 	</div>
 </centered-panel>

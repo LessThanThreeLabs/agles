@@ -2,7 +2,7 @@
 
 window.Account = ['$scope', '$location', '$routeParams', 'initialState', ($scope, $location, $routeParams, initialState) ->
 	$scope.name = initialState.user.firstName + ' ' + initialState.user.lastName
-	$scope.currentView = $routeParams.view ? 'My Account'
+	$scope.currentView = $routeParams.view ? 'basic'
 
 	$scope.menuOptionClick = (viewName) ->
 		$scope.currentView = viewName
@@ -34,6 +34,9 @@ window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc
 	$scope.orderByPredicate = 'alias'
 	$scope.orderByReverse = false
 
+	$scope.addKey = {}
+	$scope.addKey.modalVisible = false
+
 	getKeys = () ->
 		keyA =
 			alias: 'Some awesome alias'
@@ -45,6 +48,11 @@ window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc
 		# rpc.makeRequest 'users', 'read', 'getSshKeys', null, (error, keys) ->
 		# 	$scope.$apply () -> $scope.keys = keys
 
+	addKey = () ->
+		rpc.makeRequest 'users', 'update', 'addSshKey',
+			alias: $scope.addKey.alias
+			key: $scope.addKey.key
+		
 	handleAddedKeyUpdated = (data) -> $scope.$apply () ->
 		$scope.keys.push data
 
@@ -61,18 +69,9 @@ window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc
 
 	$scope.removeKey = (key) ->
 		rpc.makeRequest 'users', 'update', 'removeSshKey', id: key.id
-]
 
-
-window.AccountAddSshKeys = ['$scope', 'rpc', ($scope, rpc) ->
-	addKey = () ->
-		rpc.makeRequest 'users', 'update', 'addSshKey', $scope.addKey
-
-	$scope.addKey = {}
-	$scope.modalVisible = false
-
-	$scope.submit = () ->
-		$scope.modalVisible = false
+	$scope.submitKey = () ->
+		$scope.addKey.modalVisible = false
 		addKey()
 		$scope.addKey = {}
 ]
