@@ -40,19 +40,14 @@
 			font-size: 1.2em;
 			font-weight: bold;
 
-			@backgroundColorTransitionTime: 0.5s;
+			@backgroundColorTransitionTime: 0.25s;
 			transition: background-color @backgroundColorTransitionTime ease-out;
 			-moz-transition: background-color @backgroundColorTransitionTime ease-out;
 			-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
 			-o-transition: background-color @backgroundColorTransitionTime ease-out;
 
 			&:hover {
-				background-color: rgba(20, 20, 20, 0.75);
-			}
-
-			&:active {
-				position: relative;
-				top: 1px;
+				background-color: @koalityGreen;
 			}
 		}
 	}
