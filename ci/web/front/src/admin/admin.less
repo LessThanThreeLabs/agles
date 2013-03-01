@@ -1,134 +1,71 @@
 @import '../constants';
 
 #admin {
-	position: absolute;
-	top: 20%;
-	left: 0px;
-	right: 0px;
+	width: 800px;
+	height: 380px;
 
-	#adminRepositories {
+	#adminOptions {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		bottom: 0px;
+		width: @menuWidth;
+	}
 
-		#repositoriesTableContainer {
-			max-height: 395px;
-			overflow: auto;
+	#adminUsers, #adminRepositories {
+		position: absolute;
+		top: 0px;
+		left: @menuWidth + @panelSpacing;
+		right: 0px;
+		bottom: 0px;
+	}
+
+	#adminUsers {
+		#adminUsersContent {
+			width: 100%;
+			height: 100%;
+			overflow-y: auto;
 
 			table {
-				width: 400px;
+				width: 100%;
+				table-layout: fixed;
 
 				.title {
-
-					.nameColumn, .createdColumn {
-						cursor: hand; cursor: pointer;
+					.nameColumn, .emailColumn, .createdColumn {
+						cursor: hand;
+						cursor: pointer;
 					}
 				}
 
 				.nameColumn {
+					width: 180px;
+				}
+
+				.emailColumn {
 
 				}
 
 				.createdColumn {
-					text-align: center;
+					width: 80px;
 				}
 
 				.removeColumn {
-					text-align: center;
+					width: 70px;
 
 					.removeLink {
-						@linkBuffer: 8px;
-
-						cursor: hand; cursor: pointer;
-						padding-left: @linkBuffer;
-						padding-right: @linkBuffer;
-						font-width: bold;
+						cursor: hand;
+						cursor: pointer;
+						color: @koalityRed;
 					}
 				}
 			}
-		}
-
-		#addRepositoryButtonContainer {
-			margin-top: 15px;
-			text-align: center;
 		}
 	}
 
-	#adminMembers {
-
-		#membersTableContainer {
-			max-height: 395px;
-			overflow: auto;
-
-			table {
-				width: 600px;
-
-				.title {
-
-					.nameColumn, .emailColumn, .addedColumn {
-						cursor: hand; cursor: pointer;
-					}
-				}
-
-				.nameColumn {
-
-				}
-
-				.emailColumn {
-					text-align: center;
-				}
-
-				.addedColumn {
-					text-align: center;	
-				}
-
-				.removeColumn {
-					text-align: center;
-
-					.removeLink {
-						@linkBuffer: 8px;
-
-						cursor: hand; cursor: pointer;
-						padding-left: @linkBuffer;
-						padding-right: @linkBuffer;
-						font-width: bold;
-					}
-				}
-			}
-		}
-
-		#addMembers {
-
-			#addMembersDescription {
-				font-size: 1.1em;
-				text-align: center;
-			}
-
-			#addMembersErrorMessage {
-				margin-top: 10px;
-				color: rgb(255, 0, 0);
-				font-size: 1.1em;
-				text-align: center;
-			}
-
-			#membersToAddEmails {
-				margin-top: 20px;
-				width: 330px;
-				height: 150px;
-				resize: none;
-			}
-
-			#addMembersButtonContainer {
-				margin-top: 10px;
-				text-align: right;
-			}
-
-			#addMembersModalButtonContainer {
-				margin-top: 15px;
-				text-align: center;
-			}
-
-			#addMembersEmailSentMessage {
-				font-size: 1.1em;
-				text-align: center;
-			}
+	#adminRepositories {
+		#adminRepositoriesContent {
+			margin-top: 30px;
+			margin-left: 30px;
 		}
 	}
 }

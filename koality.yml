@@ -69,7 +69,7 @@ test:
       path: ci/platform
       script:
         - nosetests -sv
-      timeout: 120
+      timeout: 240
   - npm_tests:
       path: ci/web/back
       script:

@@ -1,4 +1,4 @@
-<div id="admin">
+<!-- <div id="admin">
 	<centered-panel panel-title="Admin">
 		<menu options="menuOptions" initial-option-name="repositories" current-option-name="currentView" option-click="menuOptionClick(optionName)">
 			<div id="adminRepositories" class="prettyMenuContent" optionName="repositories" ng-controller="AdminRepositories">
@@ -59,3 +59,50 @@
 		</menu>
 	</centered-panel>
 </div>
+ -->
+
+
+
+<centered-panel id="admin">
+	<div id="adminOptions">
+		<menu>
+			<menu-header menu-header-padding>Admin</menu-header>
+			<menu-options>
+				<menu-option menu-option-text="Manage User Accounts" ng-click="menuOptionClick('users')" ng-class="{selected: currentView == 'users', green: currentView == 'users'}"></menu-option>
+				<menu-option menu-option-text="Manage Repositories" ng-click="menuOptionClick('repositories')" ng-class="{selected: currentView == 'repositories', green: currentView == 'repositories'}"></menu-option>
+			</menu-options>
+		</menu>
+	</div>
+
+	<div id="adminUsers" ng-show="currentView == 'users'" ng-controller="AdminUsers">
+		<menu-content>
+			<menu-content-header menu-content-header-padding>Manage User Accounts</menu-content-header>
+			<menu-content-body unselectable>
+				<div id="adminUsersContent">
+					<table id="adminUsersTable" class="prettyTable">
+						<tr class="title">
+							<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
+							<td class="emailColumn" ng-click="orderByPredicate = 'email'; orderByReverse = !orderByReverse">Email</td>
+							<td class="createdColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Created</td>
+							<td class="removeColumn">Remove</td>
+						</tr>
+
+						<tr ng-show="users.length == 0">
+							<td class="nameColumn" text-selectable>There are no users</td>
+							<td class="emailColumn"></td>
+							<td class="createdColumn"></td>
+							<td class="removeColumn"></td>
+						</tr>
+
+						<tr ng-repeat="user in users | orderBy:orderByPredicate:orderByReverse">
+							<td class="nameColumn" text-selectable>{{user.firstName}} {{user.lastName}}</td>
+							<td class="emailColumn" text-selectable><a href="mailto:{{user.email}}?subject=Koality" target="_blank">{{user.email}}</a></td>
+							<td class="createdColumn" text-selectable>{{user.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
+							<td class="removeColumn"><span class="removeLink" ng-click="removeUser(user)">Delete</span></td>
+						</tr>
+					</table>
+				</div>
+			</menu-content-body>
+		</menu-content>
+	</div>
+</centered-panel>
