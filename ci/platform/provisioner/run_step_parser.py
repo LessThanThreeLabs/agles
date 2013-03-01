@@ -79,8 +79,8 @@ class RunStepFileBuilder(object):
 		script = script + "%s\n" % self._advertised_command("cd %s" % os.path.abspath(os.path.join(self.source_path, self.step_path)))
 		script = script + "timeout %d bash --login -c %s\n" % (self.timeout, pipes.quote(full_command))
 		script = script + "_r=$?\n"
-		script = script + "if [ $_r -eq 124 ]; then echo %s timed out after %s seconds;\n" % (self.step_name, self.timeout)
-		script = script + "elif [ $_r -ne 0 ]; then echo %s failed with return code $_r; fi\n" % self.step_name
+		script = script + "if [ $_r -eq 124 ]; then sleep 2; echo; echo %s timed out after %s seconds;\n" % (self.step_name, self.timeout)
+		script = script + "elif [ $_r -ne 0 ]; then echo; echo %s failed with return code $_r; fi\n" % self.step_name
 		script = script + "exit $_r"
 		if not os.access(os.path.join(os.environ['HOME'], 'scripts', self.step_type), os.F_OK):
 			os.makedirs(os.path.join(os.environ['HOME'], 'scripts', self.step_type))
