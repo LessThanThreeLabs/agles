@@ -13,7 +13,7 @@
 	<div id="accountContent">
 		<menu-content>
 			<menu-content-header menu-content-header-padding>{{currentView}}</menu-content-header>
-			<menu-content-body>
+			<menu-content-body unselectable>
 				<div id="accountBasic" ng-show="currentView == 'My Account'" ng-controller="AccountBasic">
 					<styled-form name="basicForm">
 						<styled-form-field label="First name" label-padding="true">
@@ -58,43 +58,52 @@
 						<button ng-click="submit()" ng-disabled="passwordForm.$invalid">Save Changes</button>
 					</div>
 				</div>
+
+				<div id="accountSshKeys" ng-show="currentView == 'SSH Keys'" ng-controller="AccountSshKeys">
+					<table id="sshKeysTable" class="prettyTable">
+						<tr class="title">
+							<td class="aliasColumn" ng-click="orderByPredicate = 'alias'; orderByReverse = !orderByReverse">Alias</td>
+							<td class="createdColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Created</td>
+							<td class="removeColumn">Remove</td>
+						</tr>
+
+						<tr ng-show="keys.length == 0">
+							<td class="aliasColumn" text-selectable>You don't have any SSH keys for this account</td>
+							<td class="createdColumn"></td>
+							<td class="removeColumn"></td>
+						</tr>
+
+						<tr ng-repeat="key in keys | orderBy:orderByPredicate:orderByReverse">
+							<td class="aliasColumn" text-selectable>{{key.alias}}</td>
+							<td class="createdColumn" text-selectable>{{key.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
+							<td class="removeColumn"><span class="removeLink" ng-click="removeKey(key)">Delete</span></td>
+						</tr>
+					</table>
+
+					<div ng-controller="AccountAddSshKeys">
+						<modal modal-visible="modalVisible">
+							<styled-form name="addSshKeyForm">
+								<styled-form-field label="Alias" label-padding="true">
+									<input type="text" ng-model="addKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
+								</styled-form-field>
+								<styled-form-field label="Key" label-padding="true">
+									<textarea type="text" ng-model="addKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
+									<span class="prettyFormError" tooltip="Invalid key" ng-class="{visible: addSshKeyForm.key.$dirty && addSshKeyForm.key.$invalid}">
+										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+									</span>
+								</styled-form-field>
+							</styled-form>
+
+							<div id="accountAddSshKeyButtonContainer">
+								<button ng-click="submit()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
+							</div>
+						</modal>
+
+						<!-- <div id="accountOpenAddSshKeyModalContainer">
+							<button ng-click="modalVisible=true">Add a New Key</button>
+						</div> -->
+					</div>
+				</div> 
 			</menu-content-body>
 		</menu-content>
 </centered-panel>
-
-<!--			<div id="accountSshKeys" class="prettyMenuContent" optionName="sshKeys" ng-controller="AccountSshKeys">
-				<table id="sshKeysTable" class="prettyTable">
-					<tr class="title">
-						<td class="aliasColumn">Alias</td><td class="createdColumn">Created</td><td class="removeColumn">Remove</td>
-					</tr>
-					<tr ng-repeat="key in keys">
-						<td class="aliasColumn">{{key.alias}}</td><td class="createdColumn">{{key.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeKey(key)">X</span></td>
-					</tr>
-				</table>
-
-				<div id="noSshKeysWarning">You do not have any SSH keys for this account</div>
-
-				<div ng-controller="AccountAddSshKeys">
-					<modal modal-visible="modalVisible">
-						<styled-form name="addSshKeyForm">
-							<styled-form-field label="Alias" label-padding="true">
-								<input type="text" ng-model="addKey.alias" name="alias" placeholder="Alias" ng-maxlength="64" required>
-							</styled-form-field>
-							<styled-form-field label="Key" label-padding="true">
-								<textarea type="text" ng-model="addKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
-								<span class="prettyFormError" tooltip="Invalid key" ng-class="{visible: addSshKeyForm.key.$dirty && addSshKeyForm.key.$invalid}">
-									<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-								</span>
-							</styled-form-field>
-						</styled-form>
-
-						<div id="accountAddSshKeyButtonContainer">
-							<button ng-click="submit()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
-						</div>
-					</modal>
-
-					<div id="accountOpenAddSshKeyModalContainer">
-						<button ng-click="modalVisible=true">Add a New Key</button>
-					</div>
-				</div>
-			</div> -->

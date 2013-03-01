@@ -279,7 +279,7 @@ angular.module('koality.directive', []).
 		require: 'ngModel'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenu" ng-transclude>
+		template: '<div class="prettyMenu" unselectable ng-transclude>
 				<div class="prettyMenuBackgroundPanel"></div>
 				<div class="prettyMenuFooter"></div>
 			</div>'
@@ -354,7 +354,7 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenuContentHeader" ng-transclude></div>'
+		template: '<div class="prettyMenuContentHeader" unselectable ng-transclude></div>'
 		link: (scope, element, attributes) ->
 			if attributes.menuContentHeaderPadding?
 				element.addClass 'prettyMenuContentHeaderPadding'

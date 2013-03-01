@@ -30,45 +30,49 @@ window.AccountPassword = ['$scope', 'rpc', ($scope, rpc) ->
 ]
 
 
-# window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc, events, initialState) ->
-# 	getKeys = () ->
-# 		rpc.makeRequest 'users', 'read', 'getSshKeys', null, (error, keys) ->
-# 			$scope.$apply () -> $scope.keys = keys
+window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc, events, initialState) ->
+	$scope.orderByPredicate = 'alias'
+	$scope.orderByReverse = false
 
-# 	handleAddedKeyUpdated = (data) -> $scope.$apply () ->
-# 		$scope.keys.push data
+	getKeys = () ->
+		keyA =
+			alias: 'Some awesome alias'
+			timestamp: 38974124
+		keyB =
+			alias: 'Another awesome alias'
+			timestamp: 128312839018
+		$scope.keys = [keyA, keyB]
+		# rpc.makeRequest 'users', 'read', 'getSshKeys', null, (error, keys) ->
+		# 	$scope.$apply () -> $scope.keys = keys
 
-# 	handleRemovedKeyUpdate = (data) -> $scope.$apply () ->
-# 		keyToRemoveIndex = (index for key, index in $scope.keys when key.id is data.id)[0]
-# 		$scope.keys.splice keyToRemoveIndex, 1 if keyToRemoveIndex?
+	handleAddedKeyUpdated = (data) -> $scope.$apply () ->
+		$scope.keys.push data
 
-# 	addKeyEvents = events.listen('users', 'ssh pubkey added', initialState.user.id).setCallback(handleAddedKeyUpdated).subscribe()
-# 	removeKeyEvents = events.listen('users', 'ssh pubkey removed', initialState.user.id).setCallback(handleRemovedKeyUpdate).subscribe()
-# 	$scope.$on '$destroy', addKeyEvents.unsubscribe
-# 	$scope.$on '$destroy', removeKeyEvents.unsubscribe
+	handleRemovedKeyUpdate = (data) -> $scope.$apply () ->
+		keyToRemoveIndex = (index for key, index in $scope.keys when key.id is data.id)[0]
+		$scope.keys.splice keyToRemoveIndex, 1 if keyToRemoveIndex?
 
-# 	getKeys()
+	addKeyEvents = events.listen('users', 'ssh pubkey added', initialState.user.id).setCallback(handleAddedKeyUpdated).subscribe()
+	removeKeyEvents = events.listen('users', 'ssh pubkey removed', initialState.user.id).setCallback(handleRemovedKeyUpdate).subscribe()
+	$scope.$on '$destroy', addKeyEvents.unsubscribe
+	$scope.$on '$destroy', removeKeyEvents.unsubscribe
 
-# 	$scope.removeKey = (key) ->
-# 		rpc.makeRequest 'users', 'update', 'removeSshKey', id: key.id
-# ]
+	getKeys()
+
+	$scope.removeKey = (key) ->
+		rpc.makeRequest 'users', 'update', 'removeSshKey', id: key.id
+]
 
 
-# window.AccountAddSshKeys = ['$scope', 'rpc', ($scope, rpc) ->
-# 	addKey = () ->
-# 		keyToAdd =
-# 			alias: $scope.addKey.alias
-# 			key: $scope.addKey.key
-# 		rpc.makeRequest 'users', 'update', 'addSshKey', keyToAdd
+window.AccountAddSshKeys = ['$scope', 'rpc', ($scope, rpc) ->
+	addKey = () ->
+		rpc.makeRequest 'users', 'update', 'addSshKey', $scope.addKey
 
-# 	$scope.addKey = {}
-# 	$scope.modalVisible = false
+	$scope.addKey = {}
+	$scope.modalVisible = false
 
-# 	$scope.submit = () ->
-# 		$scope.modalVisible = false
-# 		addKey()
-# 		resetValues()
-
-# 	resetValues = () ->
-# 		$scope.addKey = {}
-# ]
+	$scope.submit = () ->
+		$scope.modalVisible = false
+		addKey()
+		$scope.addKey = {}
+]
