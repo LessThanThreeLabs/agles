@@ -10,6 +10,9 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'integerConverter', ($scop
 		$scope.currentChangeInformation = null
 		return if not $scope.currentChangeId?
 
+		requestData =
+			repositoryId: $routeParams.repositoryId
+			id: $scope.currentChangeId
 		rpc.makeRequest 'changes', 'read', 'getMetadata', id: $scope.currentChangeId, (error, changeInformation) ->
 			$scope.$apply () -> $scope.currentChangeInformation = changeInformation
 
@@ -17,7 +20,10 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'integerConverter', ($scop
 		$scope.currentStageInformation = null
 		return if not $scope.currentStageId?
 
-		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsole', id: $scope.currentStageId, (error, stageInformation) ->
+		requestData =
+			repositoryId: $routeParams.repositoryId
+			id: $scope.currentStageId
+		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsole', requestData, (error, stageInformation) ->
 			$scope.$apply () -> $scope.currentStageInformation = stageInformation
 
 	$scope.$on '$routeUpdate', () ->
@@ -56,7 +62,10 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 
 	handleInitialChanges = (error, changes) -> $scope.$apply () ->
 		$scope.changes = changes
-		$scope.currentChangeId ?= $scope.changes[0].id if $scope.changes[0]?
+		if $scope.changes.length is 0
+			$scope.currentChangeId = null
+		else if $scope.changes[0]?
+			$scope.currentChangeId ?= $scope.changes[0].id
 
 	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
 		$scope.changes = $scope.changes.concat changes

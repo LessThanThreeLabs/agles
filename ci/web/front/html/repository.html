@@ -43,7 +43,7 @@
 	<div id="repositoryStageDetails" ng-controller="RepositoryStageDetails">
 		<menu-content>
 			<menu-content-header menu-content-header-padding>
-				<span ng-show="currentStageId == null">Summary</span>
+				<span ng-show="currentChangeId != null && currentStageId == null">Summary</span>
 				<span ng-show="currentStageInformation != null">{{currentStageInformation.name}}</span>
 			</menu-content-header>
 			<menu-content-body unselectable>

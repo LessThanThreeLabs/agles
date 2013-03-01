@@ -12,9 +12,10 @@ class BuildConsolesReadHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data?.id?
+		else if not data?.id? or not data?.repositoryId?
 			callback 400
 		else
+			# @modelRpcConnection.buildConsoles.read.get_build_console_from_id userId, data.repositoryId, data.id, (error, buildConsole) =>
 			@modelRpcConnection.buildConsoles.read.get_build_console_from_id userId, data.id, (error, buildConsole) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500

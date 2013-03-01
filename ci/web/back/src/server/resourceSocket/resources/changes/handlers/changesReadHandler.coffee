@@ -68,9 +68,10 @@ class ChangesReadHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data?.id?
+		else if not data?.id? or not data?.repositoryId?
 			callback 400
 		else
+			# @modelRpcConnection.changes.read.get_change_metadata userId, data.repositoryId, data.id, (error, metadata) =>
 			@modelRpcConnection.changes.read.get_change_metadata userId, data.id, (error, metadata) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
