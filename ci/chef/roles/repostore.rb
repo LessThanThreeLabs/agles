@@ -9,7 +9,7 @@ default_attributes(
 		:source_path => {
 			:internal => "/home/lt3/code/agles",
 			:platform => "/home/lt3/code/agles/ci/platform",
-			:authorized_keys_script => "/home/lt3/code/agles/ci/platform/bin/ssh/authorized_keys_script.py"
+			:authorized_keys_script => "/home/lt3/code/agles/ci/platform/bin/ssh/authorized_keys_script.sh"
 		},
 		:repositories_path => "/git/repositories"
 	}

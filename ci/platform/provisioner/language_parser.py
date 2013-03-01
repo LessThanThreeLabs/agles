@@ -46,6 +46,7 @@ class LanguageParser(object):
 
 		if self.global_install:
 			language_steps = [SetupCommand("virtualenv %s -p python%s" % (virtualenv_path, version)),
+				SetupCommand("ln -s %s %s" % (virtualenv_path, os.path.join(self._base_directory, 'python'))),
 				source_command]
 		else:
 			if not os.access(virtualenv_path, os.F_OK):

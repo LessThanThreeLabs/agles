@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ ! -d ~/.ssh ]; then
 	# Create ssh directory if nonexistent
 	mkdir ~/.ssh

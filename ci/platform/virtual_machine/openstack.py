@@ -110,7 +110,7 @@ class OpenstackVm(VirtualMachine):
 		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("source /etc/koality/koalityrc && python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key,
+		return self.ssh_call("/etc/koality/python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key,
 			timeout=1200, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """gitserve - Similar to git-shell. A custom git command execution
 environment that restricts the shell user to only git commands and
