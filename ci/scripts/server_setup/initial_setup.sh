@@ -137,6 +137,15 @@ function setup_openstack () {
 	popd
 }
 
+function setup_koality_service () {
+	sudo su -c 'cat > /etc/init.d/koality <<-EOF
+		#!/bin/bash
+		sudo chef-solo -c /home/lt3/code/agles/ci/scripts/server_setup/solo.rb -j /home/lt3/code/agles/ci/scripts/server_setup/staging.json
+	EOF'
+	sudo chmod +x /etc/init.d/koality
+	sudo update-rc.d koality defaults
+}
+
 function shared_setup () {
 	# Install dependencies
 	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl libyaml-dev
@@ -224,7 +233,9 @@ function host_setup () {
 	sudo -u postgres psql -c "grant all privileges on database koality to lt3"
 	/etc/koality/python ~/code/agles/ci/platform/database/schema.py
 	source /etc/koality/koalityrc
-	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
+	setup_koality_service
+
+	sudo service koality start
 }
 
 case "$1" in
