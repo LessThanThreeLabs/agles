@@ -140,6 +140,7 @@ function setup_openstack () {
 function setup_koality_service () {
 	sudo su -c 'cat > /etc/init.d/koality <<-EOF
 		#!/bin/bash
+		sudo service rabbitmq-server start
 		sudo chef-solo -c /home/lt3/code/agles/ci/scripts/server_setup/solo.rb -j /home/lt3/code/agles/ci/scripts/server_setup/staging.json
 	EOF'
 	sudo chmod +x /etc/init.d/koality
