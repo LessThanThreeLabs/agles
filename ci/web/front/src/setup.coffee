@@ -235,8 +235,11 @@ angular.module('koality.directive', []).
 					scope.$apply () -> scope.show = false
 
 			scope.$watch 'show', () ->
-				if scope.show then $document.bind 'keydown', escapeClickHandler
-				else $document.unbind 'keydown', escapeClickHandler
+				if scope.show
+					$document.bind 'keydown', escapeClickHandler
+					setTimeout (() -> element.find('input,textarea,select').get(0).focus()), 0
+				else
+					$document.unbind 'keydown', escapeClickHandler
 	]).
 	directive('tooltip', () ->
 		restrict: 'A'
