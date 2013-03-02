@@ -25,7 +25,6 @@ body {
 		padding: 4px;
 		font-size: 1.0em;
 		font-family: inherit;
-		border: 2px inset;
 		border-radius: 5px;
 	}
 
@@ -39,15 +38,18 @@ body {
 
 	button {
 		display: inline-block;
-		padding: 4px 6px 4px 6px;
+		padding: 6px 10px;
 		color: @koalityWhite;
 		font-weight: bold;
-		background-color: @koalityGray;
+		background-color: @koalityBlue;
 		border: 0px;
 		border-radius: @borderRadius;
 
 		&:hover {
-			background-color: @koalityBlack;
+			color: @koalityWhite;
+			background-color: @koalityDarkBlue;
+			cursor: hand;
+			cursor: pointer;
 		}
 
 		&:active {
