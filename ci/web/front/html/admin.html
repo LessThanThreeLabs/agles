@@ -76,7 +76,7 @@
 
 	<div id="adminUsers" ng-show="currentView == 'users'" ng-controller="AdminUsers">
 		<menu-content>
-			<menu-content-header menu-content-header-padding>Manage User Accounts</menu-content-header>
+			<menu-content-header menu-content-header-padding>Manage User Accounts<span id="addUsersLink" ng-click="addUsers.modalVisible=true">+ Add New Users</span></menu-content-header>
 			<menu-content-body unselectable>
 				<div id="adminUsersContent">
 					<table class="prettyTable">
@@ -104,6 +104,28 @@
 				</div>
 			</menu-content-body>
 		</menu-content>
+
+		<modal modal-visible="addUsers.modalVisible">
+			<div id="adminAddUsers">
+				<menu-content>
+					<menu-content-header menu-content-header-padding>Add New Users</menu-content-header>
+					<menu-content-body unselectable>
+						<div id="adminAddUsersContent">
+							<styled-form name="addUsersForm" id="adminAddUsersForm">
+								<styled-form-field label="Emails" label-padding="true">
+									<textarea type="text" ng-model="addUsers.emails" name="emails" placeholder="first@email.com, second@email.com, ..." required></textarea>
+								</styled-form-field>
+							</styled-form>
+
+							<div id="adminAddUsersButtonContainer">
+								<div id="adminAddUsersErrorMessage" ng-show="addUsers.showError">There was an error inviting members.<br>Check formatting.</div>
+								<button ng-click="addUsers()" ng-disabled="addUsersForm.$invalid">Add Users</button>
+							</div>
+						</div>
+					</menu-content-body>
+				</menu-content>
+			</div>
+		</modal>
 	</div>
 
 	<div id="adminRepositories" ng-show="currentView == 'repositories'" ng-controller="AdminRepositories">

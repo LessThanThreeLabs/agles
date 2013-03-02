@@ -21,6 +21,15 @@
 	}
 
 	#adminUsers {
+		#addUsersLink {
+			cursor: hand;
+			cursor: pointer;
+			position: absolute;
+			right: 24px;
+			font-size: 14px;
+			color: @koalityGreen;
+		}
+
 		#adminUsersContent {
 			width: 100%;
 			height: 100%;
@@ -56,6 +65,40 @@
 						cursor: hand;
 						cursor: pointer;
 						color: @koalityRed;
+					}
+				}
+			}
+		}
+
+		#adminAddUsers {
+			width: 500px;
+			height: 300px;
+
+			#adminAddUsersContent {
+				margin-top: 30px;
+				margin-left: 30px;
+
+				#adminAddUsersForm {
+					@inputWidth: 360px;
+
+					textarea {
+						width: @inputWidth;
+						height: 130px;
+					}
+				}
+
+				#adminAddUsersButtonContainer {
+					margin-top: 20px;
+					margin-left: 55px;
+					margin-right: 45px;
+					text-align: right;
+
+					#adminAddUsersErrorMessage {
+						float: left;
+						color: @koalityRed;
+						font-size: 1.1em;
+						font-weight: bold;
+						text-align: left;
 					}
 				}
 			}
