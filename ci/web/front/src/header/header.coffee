@@ -36,11 +36,6 @@ window.HeaderProfile = ['$scope', '$location', 'initialState', 'rpc', 'events', 
 ]
 
 
-window.HeaderLogin = ['$scope', '$location', ($scope, $location) ->
-	$scope.visitLogin = () -> $location.path('/login').search({})
-]
-
-
 window.HeaderRepositories = ['$scope', '$location', 'initialState', 'rpc', 'events', ($scope, $location, initialState, rpc, events) ->
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->

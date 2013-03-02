@@ -430,6 +430,7 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 			when('/welcome',
 				templateUrl: "/html/welcome#{fileSuffix}.html"
 				controller: Welcome
+				redirectTo: if window.accountInformation.id is '' then '/login' else null
 			).
 			when('/login',
 				templateUrl: "/html/login#{fileSuffix}.html"
@@ -440,7 +441,7 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 				templateUrl: "/html/account#{fileSuffix}.html"
 				controller: Account
 				reloadOnSearch: false
-				redirectTo: if window.accountInformation.id is '' then '/' else null
+				redirectTo: if window.accountInformation.id is '' then '/login' else null
 			).
 			when('/create/account',
 				templateUrl: "/html/createAccount#{fileSuffix}.html"
@@ -457,7 +458,7 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 				templateUrl: "/html/repository#{fileSuffix}.html"
 				controller: Repository
 				reloadOnSearch: false
-				redirectTo: if window.accountInformation.id is '' then '/' else null
+				redirectTo: if window.accountInformation.id is '' then '/login' else null
 			).
 			when('/add/repository',
 				templateUrl: "/html/addRepository#{fileSuffix}.html"

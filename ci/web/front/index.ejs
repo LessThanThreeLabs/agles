@@ -18,13 +18,12 @@
 			<div id="headerContainer">
 				<div id="header" ng-controller="Header">
 					<span id="headerTitle" ng-click="visitHome()" unselectable>Koality</span>
-					<div id="headerOptions" ng-cloak>
-						<span class="headerOption" ng-controller="HeaderLogin" ng-show="!loggedIn" ng-click="visitLogin()" unselectable>Login</span>
-						<span class="headerOption" ng-controller="HeaderProfile" ng-show="loggedIn" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
+					<div id="headerOptions" ng-show="loggedIn">
+						<span class="headerOption" ng-controller="HeaderProfile" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
 							<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
 						</span>
 						<span class="headerOption" ng-controller="HeaderAdmin" ng-show="isAdmin" ng-click="visitAdmin()" unselectable>Admin</span>
-						<span class="headerOption" ng-controller="HeaderRepositories" ng-show="loggedIn" ng-click="repositoryClick()" unselectable>Repositories
+						<span class="headerOption" ng-controller="HeaderRepositories" ng-click="repositoryClick()" unselectable>Repositories
 							<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
 						</span>
 					</div>
