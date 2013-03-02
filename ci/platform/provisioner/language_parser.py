@@ -74,7 +74,7 @@ class LanguageParser(object):
 				print "Ruby version %s not pre-installed, will attempt to install" % version
 				language_steps = [SetupCommand("rvm install %s" % version)]
 			language_steps.append(self._rc_append_command("rvm use %s > /dev/null" % version))
-			language_steps.append(self._rc_append_command("alias sudo=rvmsudo" % self._rc_path))
+			language_steps.append(self._rc_append_command("alias sudo=rvmsudo"))
 		return language_steps, [SetupCommand("ruby --version")]
 
 	def _rvm_command(self, shell_command):
