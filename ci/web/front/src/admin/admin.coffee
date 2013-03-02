@@ -85,11 +85,21 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 			name: repository.name
 
 	$scope.getSshKey = () ->
-		requestParams = 
-			name: $scope.addRepository.name
-			forwardUrl: $scope.addRepository.forwardUrl
-		rpc.makeRequest 'repositories', 'create', 'getSshPublicKey', requestParams, (error, sshPublicKey) ->
+		rpc.makeRequest 'repositories', 'create', 'getSshPublicKey', $scope.addRepository, (error, sshPublicKey) ->
 			$scope.$apply () ->
 				$scope.addRepository.publicKey = sshPublicKey
 				$scope.addRepository.stage = 'second'
+
+	$scope.createRepository = () ->
+		rpc.makeRequest 'repositories', 'create', 'createRepository', $scope.addRepository, (error, repositoryId) ->
+			$scope.$apply () -> $scope.addRepository.modalVisible = false
+
+	resetAddRepositoryValues = () ->
+		$scope.addRepository.stage = 'first'
+		$scope.addRepository.name = null
+		$scope.addRepository.forwardUrl = null
+		$scope.addRepository.publicKey = null
+
+	$scope.$watch 'addRepository.modalVisible', (newValue, oldValue) ->
+		resetAddRepositoryValues() if not newValue
 ]

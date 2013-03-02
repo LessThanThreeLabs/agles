@@ -178,14 +178,23 @@
 								</styled-form-field>
 							</styled-form>
 
-							<div id="adminAddRepositoryButtonContainer">
+							<div id="adminAddRepositoryGetPublicKeyButtonContainer">
 								<button ng-click="getSshKey()" ng-disabled="addRepositoryForm.$invalid">Add Repository</button>
 							</div>
 						</div>
 
 						<div id="adminAddRepositoryContentSecond" ng-show="addRepository.stage == 'second'">
-							hello
-						</div>
+							<div id="addRepositoryPublicKeyInformation">
+								To finish setting up your repository, Koality needs permission to connect!<br>
+								Add this ssh key to the list of allowed keys for {{addRepository.name}}.
+							</div>
+
+							<textarea ng-model="addRepository.publicKey" highlight-on-first-click readonly></textarea>
+
+							<div id="adminAddRepositorySubmitButtonContainer">
+								<button ng-click="createRepository()">Complete Creation</button>
+							</div>
+										</div>
 					</menu-content-body>
 				</menu-content>
 			</div>
