@@ -164,8 +164,17 @@
 					<menu-content-body unselectable>
 						<div id="adminAddRepositoryContent">
 							<styled-form name="addRepositoryForm" id="adminAddRepositoryForm">
-								<styled-form-field label="Emails" label-padding="true">
-									<textarea type="text" ng-model="addRepository.emails" name="emails" placeholder="blah blah blah" required></textarea>
+								<styled-form-field label="Name" label-padding="true">
+									<input type="text" ng-model="addRepository.name" name="name" placeholder="name" ng-pattern="/^[A-Za-z0-9-_]+$/" ng-maxlength="64" required focused>
+									<span class="prettyFormError" tooltip="Name contains invalid characters" ng-class="{visible: addRepositoryForm.name.$dirty && addRepositoryForm.name.$invalid}">
+										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+									</span>
+								</styled-form-field>
+								<styled-form-field label="Forward Url">
+									<input type="text" ng-model="addRepository.forwardUrl" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
+									<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: addRepositoryForm.forwardUrl.$dirty && addRepositoryForm.forwardUrl.$invalid}">
+										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+									</span>
 								</styled-form-field>
 							</styled-form>
 

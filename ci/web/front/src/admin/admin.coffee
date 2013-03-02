@@ -57,6 +57,9 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 	$scope.orderByPredicate = 'name'
 	$scope.orderByReverse = false
 
+	$scope.addRepository = {}
+	$scope.addRepository.modalVisible = false
+
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
 			$scope.$apply () -> $scope.repositories = repositories
@@ -80,6 +83,6 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 			id: repository.id
 			name: repository.name
 
-	$scope.addRepository = () ->
-		$location.path('/add/repository').search({})
+	# $scope.addRepository = () ->
+	# 	$location.path('/add/repository').search({})
 ]
