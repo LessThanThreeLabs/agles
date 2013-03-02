@@ -34,7 +34,7 @@ angular.module('koality.service', []).
 			return null if isNaN integer
 			return integer
 	]).
-	factory('socket', ['$location', 'initialState', ($location, initialState) ->
+	factory('socket', ['$window', '$location', 'initialState', ($window, $location, initialState) ->
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
 		
 		makeRequest: (resource, requestType, methodName, data, callback) ->
@@ -45,8 +45,8 @@ angular.module('koality.service', []).
 					console.log "#{resource}.#{requestType}"
 					console.error error
 				switch error
-					when 400, 404, 500 then $location.path('/unexpectedError').search {}
-					when 403 then $location.path('/invalidPermissions').search {}
+					when 400, 404, 500 then window.location.href = '/unexpectedError'
+					when 403 then window.location.href = '/invalidPermissions'
 					else callback error, response if callback?
 
 		respondTo: (eventName, callback) ->
