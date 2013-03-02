@@ -22,13 +22,14 @@ window.AdminUsers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initial
 		rpc.makeRequest 'users', 'read', 'getAllUsers', null, (error, users) ->
 			$scope.$apply () -> $scope.users = users
 
-	addUsers = () ->
-		rpc.makeRequest 'users', 'create', 'inviteUsers', users: $scope.addUsers.emails, (error) ->
-			if error? then $scope.addUsers.showError = true
-			else
-				$scope.addUsers.modalVisible = false
-				$scope.addUsers.showError = false
-				$scope.addUsers.emails = ''
+	inviteUsers = () ->
+		rpc.makeRequest 'users', 'create', 'inviteUsers', emails: $scope.addUsers.emails, (error) ->
+			$scope.$apply () ->
+				if error? then $scope.addUsers.showError = true
+				else
+					$scope.addUsers.modalVisible = false
+					$scope.addUsers.showError = false
+					$scope.addUsers.emails = ''
 
 	handleUserAdded = (data) -> $scope.$apply () ->
 		$scope.members.push data
@@ -46,6 +47,9 @@ window.AdminUsers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initial
 
 	$scope.removeUser = (user) ->
 		rpc.makeRequest 'users', 'delete', 'deleteUser', id: user.id
+
+	$scope.submitEmails = () ->
+		inviteUsers()
 ]
 
 

@@ -73,15 +73,15 @@ class UsersCreateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data?.users?.emails?
+		else if not data?.emails?
 			callback 400
 		else
-			if data.users.emails.indexOf(',') isnt -1
-				emails = data.users.emails.split ','
-			else if data.users.emails.indexOf(';') isnt -1
-				emails = data.users.emails.split ';'
+			if data.emails.indexOf(',') isnt -1
+				emails = data.emails.split ','
+			else if data.emails.indexOf(';') isnt -1
+				emails = data.emails.split ';'
 			else
-				emails = data.users.emails.split '\n'
+				emails = data.emails.split '\n'
 
 			emails = emails.map (email) -> return email.trim()
 
