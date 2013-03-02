@@ -191,15 +191,15 @@ function host_setup () {
 	# Java
 	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
 		mkdir /tmp/src
-        pushd /tmp/src
+		old_pwd=$(pwd)
+        cd /tmp/src
         clone github.com/flexiondotorg/oab-java6.git
         cd /tmp/src/oab-java6
         sudo ./oab-java.sh
         sudo add-apt-repository -y ppa:flexiondotorg/java
         sudo apt-get update
         sudo apt-get install -y sun-java6-jdk maven
-        popd
-        popd
+        cd $old_pwd
     fi
 
     #Chef
@@ -222,8 +222,8 @@ function host_setup () {
 	sudo -u postgres psql -c "create user lt3 with password ''"
 	sudo -u postgres psql -c "create database koality"
 	sudo -u postgres psql -c "grant all privileges on database koality to lt3"
+	/etc/koality/python ~/code/agles/ci/platform/database/schema.py
 	source /etc/koality/koalityrc
-	python ~/code/agles/ci/platform/database/schema.py
 	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
 }
 
