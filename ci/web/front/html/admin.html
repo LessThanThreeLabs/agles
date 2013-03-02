@@ -130,7 +130,7 @@
 
 	<div id="adminRepositories" ng-show="currentView == 'repositories'" ng-controller="AdminRepositories">
 		<menu-content>
-			<menu-content-header menu-content-header-padding>Manage Repositories</menu-content-header>
+			<menu-content-header menu-content-header-padding>Manage Repositories<span id="addRepositoryLink" ng-click="addRepository.modalVisible=true">+ Add Repository</span></menu-content-header>
 			<menu-content-body unselectable>
 				<div id="adminRepositoriesContent">
 					<table class="prettyTable">
@@ -156,5 +156,26 @@
 				</div>
 			</menu-content-body>
 		</menu-content>
+
+		<modal modal-visible="addRepository.modalVisible">
+			<div id="adminAddRepository">
+				<menu-content>
+					<menu-content-header menu-content-header-padding>Add Repository</menu-content-header>
+					<menu-content-body unselectable>
+						<div id="adminAddRepositoryContent">
+							<styled-form name="addRepositoryForm" id="adminAddRepositoryForm">
+								<styled-form-field label="Emails" label-padding="true">
+									<textarea type="text" ng-model="addRepository.emails" name="emails" placeholder="blah blah blah" required></textarea>
+								</styled-form-field>
+							</styled-form>
+
+							<div id="adminAddRepositoryButtonContainer">
+								<button ng-click="submitRepository()" ng-disabled="addRepositoryForm.$invalid">Add Repository</button>
+							</div>
+						</div>
+					</menu-content-body>
+				</menu-content>
+			</div>
+		</modal>
 	</div>
 </centered-panel>
