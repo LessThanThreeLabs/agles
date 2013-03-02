@@ -35,7 +35,7 @@ class RepositoriesCreateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data?.name?
+		else if not data?.name? or not data?.forwardUrl
 			callback 400
 		else
 			@sshKeyPairGenerator.createKeyPair (error, keyPair) =>

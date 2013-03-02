@@ -162,8 +162,8 @@
 				<menu-content>
 					<menu-content-header menu-content-header-padding>Add Repository</menu-content-header>
 					<menu-content-body unselectable>
-						<div id="adminAddRepositoryContent">
-							<styled-form name="addRepositoryForm" id="adminAddRepositoryForm">
+						<div id="adminAddRepositoryContentFirst" ng-show="addRepository.stage == 'first'">
+							<styled-form name="addRepositoryForm" id="adminAddRepositoryForm" listen-for-enter-key="getSshKey()" ignore-enter-key-if="addRepositoryForm.$invalid">
 								<styled-form-field label="Name" label-padding="true">
 									<input type="text" ng-model="addRepository.name" name="name" placeholder="name" ng-pattern="/^[A-Za-z0-9-_]+$/" ng-maxlength="64" required focused>
 									<span class="prettyFormError" tooltip="Name contains invalid characters" ng-class="{visible: addRepositoryForm.name.$dirty && addRepositoryForm.name.$invalid}">
@@ -179,8 +179,12 @@
 							</styled-form>
 
 							<div id="adminAddRepositoryButtonContainer">
-								<button ng-click="submitRepository()" ng-disabled="addRepositoryForm.$invalid">Add Repository</button>
+								<button ng-click="getSshKey()" ng-disabled="addRepositoryForm.$invalid">Add Repository</button>
 							</div>
+						</div>
+
+						<div id="adminAddRepositoryContentSecond" ng-show="addRepository.stage == 'second'">
+							hello
 						</div>
 					</menu-content-body>
 				</menu-content>

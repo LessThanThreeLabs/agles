@@ -58,6 +58,7 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 	$scope.orderByReverse = false
 
 	$scope.addRepository = {}
+	$scope.addRepository.stage = 'first'
 	$scope.addRepository.modalVisible = false
 
 	getRepositories = () ->
@@ -83,6 +84,12 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 			id: repository.id
 			name: repository.name
 
-	# $scope.addRepository = () ->
-	# 	$location.path('/add/repository').search({})
+	$scope.getSshKey = () ->
+		requestParams = 
+			name: $scope.addRepository.name
+			forwardUrl: $scope.addRepository.forwardUrl
+		rpc.makeRequest 'repositories', 'create', 'getSshPublicKey', requestParams, (error, sshPublicKey) ->
+			$scope.$apply () ->
+				$scope.addRepository.publicKey = sshPublicKey
+				$scope.addRepository.stage = 'second'
 ]
