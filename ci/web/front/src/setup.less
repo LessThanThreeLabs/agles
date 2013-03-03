@@ -13,7 +13,7 @@ body {
 	color: @koalityWhite;
 	font-family: 'Din', sans-serif;
 	font-weight: normal;
-	font-size: 12px;
+	font-size: 14px;
 
 	a:link { text-decoration: none; color: @koalityGreen; }
 	a:visited { text-decoration: none; color: @koalityGreen; }
@@ -22,10 +22,11 @@ body {
 
 	input {
 		margin: 0px;
-		padding: 4px;
+		padding: 6px;
 		font-size: 1.0em;
 		font-family: inherit;
-		border-radius: 5px;
+		border: none;
+		border-radius: @borderRadius;
 	}
 
 	textarea {
@@ -33,9 +34,13 @@ body {
 		padding: 4px;
 		font-size: 1.0em;
 		border: 2px inset;
+<<<<<<< HEAD
 		font-family: inherit;
 		border-radius: 5px;
 		resize: none;
+=======
+		border-radius: @borderRadius;
+>>>>>>> Many tweaks to styling. Padding and Spacing on Tables, underline to Add New Users page, font-size adjustments
 	}
 
 	button {
@@ -43,13 +48,13 @@ body {
 		padding: 6px 10px;
 		color: @koalityWhite;
 		font-weight: bold;
-		background-color: @koalityBlue;
+		background-color: @koalityGreen;
 		border: 0px;
 		border-radius: @borderRadius;
 
 		&:hover {
 			color: @koalityWhite;
-			background-color: @koalityDarkBlue;
+			background-color: @koalityDarkGreen;
 			cursor: hand;
 			cursor: pointer;
 		}

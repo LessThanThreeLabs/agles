@@ -179,12 +179,12 @@
 
 		#repositoryStageDetailsSummary {
 			margin: 30px 0px 0px 30px;			
-			font-size: 1.2em;
+			font-size: 1em;
 		}
 
 		#repositoryStageDetailsOutput {
 			@bufferHeight: 20px;
-			@consoleTextWidth: 95%;
+			@consoleTextWidth: 100%;
 
 			position: absolute;
 			top: 20px;
@@ -206,6 +206,7 @@
 					margin-top: @bufferHeight;
 					margin-bottom: @bufferHeight;
 					table-layout: fixed;
+					//letter-spacing: 1px;
 					width: @consoleTextWidth;
 
 					.consoleTextLine {

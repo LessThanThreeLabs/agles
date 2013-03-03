@@ -12,7 +12,9 @@
 		width: @menuWidth;
 	}
 
-	#accountBasic, #accountPassword, #accountSshKeys {
+	#accountBasic,
+	#accountPassword,
+	#accountSshKeys {
 		position: absolute;
 		top: 0px;
 		left: @menuWidth + @panelSpacing;
@@ -78,11 +80,11 @@
 				}
 
 				.createdColumn {
-					width: 80px;
+					width: @createdColumnWidth;
 				}
 
 				.removeColumn {
-					width: 70px;
+					width: @removeColumnWidth;
 
 					.removeLink {
 						cursor: hand;
