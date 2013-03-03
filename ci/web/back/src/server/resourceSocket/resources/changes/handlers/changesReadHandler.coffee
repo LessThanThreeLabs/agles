@@ -54,7 +54,7 @@ class ChangesReadHandler extends Handler
 	getMetadata: (socket, data, callback) =>
 		sanitizeResult = (metadata) ->
 			number: metadata.change.number
-			user: 
+			user:
 				email: metadata.user.email
 				firstName: metadata.user.first_name
 				lastName: metadata.user.last_name
@@ -73,8 +73,7 @@ class ChangesReadHandler extends Handler
 		else if not data?.id? or not data?.repositoryId?
 			callback 400
 		else
-			# @modelRpcConnection.changes.read.get_change_metadata userId, data.repositoryId, data.id, (error, metadata) =>
 			@modelRpcConnection.changes.read.get_change_metadata userId, data.id, (error, metadata) =>
-				if error?.type is 'InvalidPermissionsError' then callback 403
+				if error?.type is 'InvalidPermissionsError' or metadata.repo_id isnt data.repositoryId then callback 403
 				else if error? then callback 500
 				else callback null, sanitizeResult metadata
