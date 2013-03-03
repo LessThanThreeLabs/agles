@@ -65,8 +65,6 @@ class ChangesReadHandler extends Handler
 			target: metadata.change.merge_target
 			sha: metadata.commit.sha
 
-		console.log data
-
 		userId = socket.session.userId
 		if not userId?
 			callback 403
@@ -74,6 +72,7 @@ class ChangesReadHandler extends Handler
 			callback 400
 		else
 			@modelRpcConnection.changes.read.get_change_metadata userId, data.id, (error, metadata) =>
-				if error?.type is 'InvalidPermissionsError' or metadata.repo_id isnt data.repositoryId then callback 403
+				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
+				else if data.repositoryId isnt metadata?.change?.repo_id then callback 403
 				else callback null, sanitizeResult metadata

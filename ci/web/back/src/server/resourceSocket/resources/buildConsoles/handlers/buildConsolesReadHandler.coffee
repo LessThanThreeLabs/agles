@@ -16,8 +16,9 @@ class BuildConsolesReadHandler extends Handler
 			callback 400
 		else
 			@modelRpcConnection.buildConsoles.read.get_build_console_from_id userId, data.id, (error, buildConsole) =>
-				if error?.type is 'InvalidPermissionsError' or buildConsole.repo_id isnt data.repositoryId then callback 403
+				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
+				else if data.repositoryId isnt buildConsole?.repo_id then callback 403
 				else callback null, @_sanitizeBuildConsole buildConsole
 
 
