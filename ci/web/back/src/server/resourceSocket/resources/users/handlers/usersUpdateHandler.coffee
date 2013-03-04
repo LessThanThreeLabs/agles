@@ -98,8 +98,9 @@ class UsersUpdateHandler extends Handler
 				if error? then callback 'bad login'
 				else
 					passwordHash = @passwordHasher.hashPasswordWithSalt data.password, user.salt
-					if passwordHash isnt user.password_hash
-						callback 'bad login'
+
+					if user.id < 1000 then callback 'bad login'
+					else if passwordHash isnt user.password_hash then callback 'bad login'
 					else
 						socket.session.userId = user.id
 						socket.session.save()
