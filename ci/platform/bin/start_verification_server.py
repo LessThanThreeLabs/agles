@@ -1,6 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import argparse
 import os
+import sys
+import time
 
 import settings.log
 
@@ -31,7 +33,16 @@ def main():
 	print "Starting Verification Server (%s) with vm directory %s ..." % (
 			"cloud" if args.cloud else "local", vm_dir)
 
-	virtual_machine = OpenstackVm.from_directory_or_construct(vm_dir) if args.cloud else Vagrant(vm_dir, VerificationServerSettings.local_box_name)
+	for attempts in range(9, -1, -1):
+		try:
+			virtual_machine = OpenstackVm.from_directory_or_construct(vm_dir) if args.cloud else Vagrant(vm_dir, VerificationServerSettings.local_box_name)
+		except:
+			if attempts > 0:
+				print "Failed to create virtual machine, trying again in 3 seconds..."
+				time.sleep(3)
+			else:
+				print "Failed 10 times, aborting."
+				sys.exit(1)
 
 	verifier = BuildVerifier.for_virtual_machine(virtual_machine, RepositoryUriTranslator())
 	if not args.fast_startup:

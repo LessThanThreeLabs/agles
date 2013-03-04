@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import settings.log
 
 from util.uri_translator import RepositoryUriTranslator

@@ -9,9 +9,8 @@
 include_recipe "koality::setuppy_install"
 include_recipe "koality::verification_user"
 
-execute "Stop verification servers" do
-	command "killall -9 start_verification_server.py"
-	returns [0, 1]
+bash "Stop verification servers" do
+	code "pgrep -f start_verification_server.py | while read p; do kill -9 $p; done"
 end
 
 node[:koality][:verification][:server_count].to_i.times do |server_num|
@@ -22,7 +21,7 @@ node[:koality][:verification][:server_count].to_i.times do |server_num|
 		code <<-EOH
 			mkdir -p #{server_path}
 			cd #{server_path}
-			#{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{server_path} -c >> #{server_path}/server.log 2>&1 &
+			/etc/koality/python #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{server_path} -c >> #{server_path}/server.log 2>&1 &
 			EOH
 	end
 end

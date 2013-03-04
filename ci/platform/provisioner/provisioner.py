@@ -11,11 +11,11 @@ from setup_tools import InvalidConfigurationException, SetupCommand, SetupScript
 
 class Provisioner(object):
 
-	def __init__(self):
+	def __init__(self, packages=True, scripts=True, databases=True):
 		self.setup_dispatcher = {
-			'packages': self.parse_packages,
-			'scripts': self.parse_scripts,
-			'databases': self.parse_databases
+			'packages': self.parse_packages if packages else lambda *args: [],
+			'scripts': self.parse_scripts if scripts else lambda *args: [],
+			'databases': self.parse_databases if databases else lambda *args: []
 		}
 		self.ssh_dir = os.path.abspath(os.path.join(os.environ['HOME'], '.ssh'))
 		self.keyfile = os.path.abspath(os.path.join(self.ssh_dir, 'id_rsa'))
@@ -98,7 +98,7 @@ class Provisioner(object):
 	def parse_languages(self, config, global_install):
 		if not 'languages' in config or len(config['languages']) == 0:
 			raise InvalidConfigurationException("No languages specified")
-		return LanguageParser().parse_languages(config['languages'], global_install)
+		return LanguageParser(global_install).parse_languages(config['languages'])
 
 	def parse_setup(self, config, source_path):
 		setup_steps = []

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import settings.log
 
 from model_server import ModelServer

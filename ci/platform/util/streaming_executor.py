@@ -28,10 +28,7 @@ class StreamingExecutor(object):
 	@classmethod
 	def _handle_output(cls, process, line_handler):
 		cls._output_lines = list()
-		stream = process.stdout
-		fd = stream.fileno()
-		fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-		fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+		cls._unbuffer_stream(process.stdout)
 		line_number = 1
 		line = ''
 		while True:
@@ -39,7 +36,7 @@ class StreamingExecutor(object):
 			ready_read, ready_write, ready_xlist = select.select([process.stdout], [], [], 0.05)  # short timeout
 			if ready_read:
 				read_lines = {}
-				new_output = stream.read()
+				new_output = process.stdout.read()
 				if new_output == '':
 					break
 				for char in new_output:
@@ -66,6 +63,12 @@ class StreamingExecutor(object):
 				cls._output_lines[line_number - 1] = line
 		if line_handler:
 			line_handler.append(read_lines)
+
+	@classmethod
+	def _unbuffer_stream(cls, stream):
+		fd = stream.fileno()
+		fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+		fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
 
 CommandResults = collections.namedtuple(

@@ -41,7 +41,6 @@ class OpenstackVm(VirtualMachine):
 			image = cls.get_newest_image()
 		if not flavor:
 			flavor = cls._default_flavor()
-			flavor = OpenstackClient.get_client().flavors.find(ram=2048)
 		server = OpenstackClient.get_client().servers.create(name, image, flavor, files=cls._default_files(vm_username))
 		return OpenstackVm(vm_directory, server)
 
@@ -111,7 +110,8 @@ class OpenstackVm(VirtualMachine):
 		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key, timeout=1200, output_handler=output_handler)
+		return self.ssh_call("python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key,
+			timeout=1200, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		login = "%s@%s" % (self.vm_username, self.server.accessIPv4 or self.server.addresses['private'][0]['addr'])

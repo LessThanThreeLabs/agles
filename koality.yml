@@ -25,15 +25,11 @@ setup:
       - pyyaml
       - msgpack-python
       - nose
-      - beautifulsoup4
       - redis
-      - greenlet
       - eventlet
       - gitpython
       - psycopg2
       - argparse
-      - nose-testconfig
-      - boto
       - rackspace-novaclient
       - python-novaclient
       - requests
@@ -47,10 +43,10 @@ setup:
       - name: koality
         username: lt3
     - mysql:
-      - name: koality_mysql
+      - name: koality
         username: lt3
   - scripts:
-    - git config --global user.email "koality@getkoality.com"
+    - git config --global user.email "koality@koalitycode.com"
     - git config --global user.name "Koality"
     - directory: ci/scripts
       script: ./rabbitmq_setup.sh

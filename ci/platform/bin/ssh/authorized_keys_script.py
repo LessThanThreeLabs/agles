@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import os
 import re
 import sys
@@ -6,7 +6,7 @@ import sys
 from model_server import ModelServer
 
 GITSERVE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "gitserve.py")
-FORCED_COMMAND = 'command="%s %d",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty'
+FORCED_COMMAND = 'command="/etc/koality/python %s %d",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty'
 valid_key = re.compile('^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}$')
 
 try:

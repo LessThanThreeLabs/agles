@@ -22,7 +22,9 @@ function add_user () {
 function bootstrap () {
 	check_sudo
 	add_user lt3
-	sudo su lt3 -c "$0 _$1_setup"
+	prompt_github_credentials
+	this_script=$(pwd)/$0
+	sudo -E su lt3 -c "cd; $this_script _$1_setup"
 }
 
 function makedir () {
@@ -42,6 +44,7 @@ function setup_rabbitmq () {
 	wget http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.7/rabbitmq-server_2.8.7-1_all.deb
 	sudo dpkg -i rabbitmq-server_2.8.7-1_all.deb
 	rm rabbitmq-server_2.8.7-1_all.deb
+	sudo mkdir /etc/rabbitmq/rabbitmq.conf.d
 	sudo rabbitmq-plugins enable rabbitmq_management
 	sudo service rabbitmq-server restart
 	wget --http-user=guest --http-password=guest localhost:55672/cli/rabbitmqadmin
@@ -76,15 +79,16 @@ function setup_python () {
 		sudo apt-get install -y "python$p-dev"
 		virtualenv "$HOME/virtualenvs/$p" -p "python$p"
 	done
-
-	sudo pip install pyyaml eventlet
 }
 
 function setup_ruby () {
 	which rvm > /dev/null
 	if [ $? -ne "0" ]; then
-		curl -L https://get.rvm.io | bash -s stable --ruby
+		curl -L https://get.rvm.io | bash -s stable
+		source .bash_profile
 	fi
+	rvm install 1.9.3
+	rvm --default use 1.9.3
 	cat ~/.bash_profile | grep "export rvmsudo_secure_path=1" > /dev/null
 	if [ $? -ne "0" ]; then
 		echo "export rvmsudo_secure_path=1" >> ~/.bash_profile
@@ -92,29 +96,75 @@ function setup_ruby () {
 }
 
 function setup_nodejs () {
+	sudo mkdir -p /etc/koality/nvm
+	sudo wget -P /etc/koality/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
+}
+
+function setup_nodejs_vm () {
 	makedir ~/nvm
 	wget -P ~/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
 }
 
+function prompt_github_credentials () {
+	if [ -z $GITHUB_USERNAME ]; then
+		read -p "Github username: " GITHUB_USERNAME
+	fi
+	if [ -z $GITHUB_PASSWORD ]; then
+		read -s -p "Github password: " GITHUB_PASSWORD
+	fi
+}
+
+function clone () {
+	prompt_github_credentials
+	git clone https://"$GITHUB_USERNAME":"$GITHUB_PASSWORD"@"$1" $2
+	pushd $2
+	git remote set-url origin https://"$1"
+	popd
+}
+
 function provision () {
-	read -p "Github username: " username
-	read -s -p "Github password: " password
-	git clone https://"$username":"$password"@github.com/Randominator/agles.git ~/source
+	clone github.com/Randominator/agles.git source
 	pushd ~/source/ci/platform
 	sudo python setup.py install
 	popd
-	sudo python -u -c "from provisioner.provisioner import Provisioner; Provisioner().provision(global_install=True)"
-	rm -rf source scripts
+	python -u -c "from provisioner.provisioner import Provisioner; Provisioner(scripts=False, databases=False).provision(global_install=True)"
+}
+
+function setup_openstack () {
+	clone github.com/Randominator/openstackgeek.git openstackgeek
+	pushd openstackgeek/essex
+	sudo ./openstack.sh
+	popd
+}
+
+function setup_koality_service () {
+	sudo su -c 'cat > /etc/init.d/koality <<-EOF
+		#!/bin/bash
+		sudo service rabbitmq-server start
+		sudo chef-solo -c /home/lt3/code/agles/ci/scripts/server_setup/solo.rb -j /home/lt3/code/agles/ci/scripts/server_setup/staging.json
+	EOF'
+	sudo chmod +x /etc/init.d/koality
+	sudo update-rc.d koality defaults
 }
 
 function shared_setup () {
 	# Install dependencies
-	sudo apt-get install -y python-pip make postgresql python-software-properties git
+	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl libyaml-dev
+
+	# Allow local users to access postgresql without a password
+	sudo sed -i.bak -r 's/(host\s+all\s+all\s+127.0.0.1\/32\s+)(\w+)/\1trust/g' /etc/postgresql/9.1/main/pg_hba.conf
+	sudo service postgresql reload
+
 	setup_rabbitmq
 	setup_redis
 
 	setup_ruby
 	setup_nodejs
+
+	sudo apt-get install -y python-dev
+	sudo pip install pyyaml eventlet virtualenv
+
+	provision
 }
 
 function vm_setup () {
@@ -125,12 +175,17 @@ function vm_setup () {
 	shared_setup
 
 	# mysql must be explicitly installed noninteractively
-	DEBIAN_FRONTEND=noninteractive sudo apt-get install -y mysql-server
+	sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
 	setup_postgres
 
 	setup_python
+	setup_nodejs_vm
 
-	provision
+	rm -rf source
+}
+
+function build_vm_image () {
+	read -p 'Please construct a VM image named "precise64_box_1", then press enter to continue this script'
 }
 
 function host_setup () {
@@ -138,16 +193,29 @@ function host_setup () {
 
 	shared_setup
 
+	sudo source/ci/scripts/rabbitmq_setup.sh
+
+	mkdir ~/code
+	mv ~/source ~/code/agles
+
+	rvm use system
+
+	setup_openstack
+
+	build_vm_image
+
 	# Java
 	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
 		mkdir /tmp/src
+		old_pwd=$(pwd)
         cd /tmp/src
-        git clone https://github.com/flexiondotorg/oab-java6.git
+        clone github.com/flexiondotorg/oab-java6.git oab-java6
         cd /tmp/src/oab-java6
         sudo ./oab-java.sh
         sudo add-apt-repository -y ppa:flexiondotorg/java
         sudo apt-get update
         sudo apt-get install -y sun-java6-jdk maven
+        cd $old_pwd
     fi
 
     #Chef
@@ -161,11 +229,14 @@ function host_setup () {
 		echo "chef chef/chef_server_url string" | sudo debconf-set-selections && sudo apt-get install -y chef
 	fi
 
-	mkdir ~/code
-	mv ~/source ~/code/agles
-	deactivate
-	rvm use system
-	sudo chef-solo -c ~/code/agles/ci/scripts/server_setup/solo.rb -j ~/code/agles/ci/scripts/server_setup/staging.json
+	sudo -u postgres psql -c "create user lt3 with password ''"
+	sudo -u postgres psql -c "create database koality"
+	sudo -u postgres psql -c "grant all privileges on database koality to lt3"
+	/etc/koality/python ~/code/agles/ci/platform/database/schema.py
+	source /etc/koality/koalityrc
+	setup_koality_service
+
+	sudo service koality start
 }
 
 case "$1" in

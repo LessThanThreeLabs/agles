@@ -102,4 +102,4 @@ class InvalidConfigurationException(Exception):
 		return str(self)
 
 	def __str__(self):
-		return super(InvalidConfigurationException, self).__str__() + "\nInternal Error:\n%s" % self.indent(str(self.exception))
+		return super(InvalidConfigurationException, self).__str__() + "\nInternal Error:\n%s" % self._indent(str(self.exception))
