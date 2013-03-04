@@ -65,6 +65,16 @@ supervisor_service "redis-createAccount" do
 	priority 0
 end
 
+supervisor_service "redis-createRepository" do
+	action [:enable, :start]
+	command "redis-server #{node[:koality][:source_path][:internal]}/ci/web/back/conf/redis/createRepositoryRedis.conf"
+	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/redis-createRepository_stout.log"
+	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/redis-createRepository_stderr.log"
+	directory "#{node[:koality][:source_path][:internal]}/ci/production"
+	user node[:koality][:user]
+	priority 0
+end
+
 supervisor_service "haproxy" do
 	action [:enable, :start]
 	command "haproxy -f #{node[:koality][:source_path][:internal]}/ci/web/back/conf/haproxy/haproxy.conf"
@@ -75,7 +85,7 @@ end
 
 supervisor_service "webserver" do
 	action [:enable, :start]
-	command "bash -c 'source /etc/koality/koalityrc && node --harmony js/index.js --httpPort 9001 --httpsPort 10443'"
+	command "bash -c 'source /etc/koality/koalityrc && node --harmony js/index.js --httpsPort 10443'"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stderr.log"
 	user node[:koality][:user]
