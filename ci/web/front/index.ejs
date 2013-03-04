@@ -16,16 +16,43 @@
 
 		<div id="centerContainer">
 			<div id="headerContainer">
-				<div id="header" ng-controller="Header">
-					<span id="headerTitle" ng-click="visitHome()" unselectable>Koality</span>
+				<div id="header" ng-controller="Header" unselectable>
+					<span id="headerTitle" ng-click="visitHome()">Koality</span>
 					<div id="headerOptions" ng-show="loggedIn">
-						<span class="headerOption" ng-controller="HeaderProfile" ng-click="profileClick()" unselectable>{{user.firstName}} {{user.lastName}}
+						<span class="headerOption" ng-controller="HeaderProfile" ng-click="profileClick()">{{user.firstName}} {{user.lastName}}
 							<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
 						</span>
-						<span class="headerOption" ng-controller="HeaderAdmin" ng-show="isAdmin" ng-click="visitAdmin()" unselectable>Admin</span>
-						<span class="headerOption" ng-controller="HeaderRepositories" ng-click="repositoryClick()" unselectable>Repositories
+
+						<span class="headerOption" ng-controller="HeaderAdmin" ng-show="isAdmin" ng-click="visitAdmin()">Admin</span>
+
+						<span class="headerOption" ng-controller="HeaderRepositories" ng-click="repositoryClick()">Repositories
 							<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
 						</span>
+
+						<span class="headerOption" ng-click="feedback.modalVisible = true">Feedback</span>
+						<modal modal-visible="feedback.modalVisible">
+							<div id="feedbackPanel">
+								<menu-content>
+									<menu-content-header menu-content-header-padding>Send Feedback</menu-content-header>
+									<menu-content-body unselectable>
+										<div id="feedbackPanelContent" ng-show="!feedback.showSuccess">
+											<styled-form name="feedbackForm" id="feedbackPanelForm">
+												<styled-form-field label="Feedback" label-padding="true">
+													<textarea type="text" ng-model="feedback.text" name="feedback" placeholder="I found an issue with foo, where bar will baz from time to time. I was able to reproduce the baz behavior by first... and then..." ng-maxlength="8192" required></textarea>
+												</styled-form-field>
+												<styled-form-field>
+													<button id="feedbackPanelSubmitButton" ng-click="submitFeedback()" ng-disabled="feedbackForm.$invalid">Send</button>
+												</styled-form-field>
+											</styled-form>
+										</div>
+										<div id="feedbackPanelSuccessMessage" ng-show="feedback.showSuccess">
+											Thank you for your feedback!
+										</div>
+									</menu-content-body>
+								</menu-content>
+							</div>
+						</modal>
+
 					</div>
 				</div>
 			</div>

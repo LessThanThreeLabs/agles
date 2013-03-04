@@ -50,5 +50,32 @@
 				background-color: @koalityGreen;
 			}
 		}
+
+		#feedbackPanel {
+			width: 500px;
+			height: 255px;
+
+			#feedbackPanelContent {
+				margin-top: 30px;
+				margin-left: 30px;
+
+				#feedbackPanelForm {
+					textarea {
+						width: 335px;
+					}
+				}
+
+				#feedbackPanelSubmitButton {
+					float: right;
+				}
+			}
+
+			#feedbackPanelSuccessMessage {
+				margin-top: 80px;
+				text-align: center;
+				color: @koalityGreen;
+				font-size: 1.2em;
+			}
+		}
 	}
 }

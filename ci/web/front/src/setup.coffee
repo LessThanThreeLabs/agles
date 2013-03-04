@@ -237,7 +237,10 @@ angular.module('koality.directive', []).
 			scope.$watch 'show', () ->
 				if scope.show
 					$document.bind 'keydown', escapeClickHandler
-					setTimeout (() -> element.find('input,textarea,select').get(0).focus()), 0
+					setTimeout (() -> 
+						firstInput = element.find('input,textarea,select').get(0)
+						firstInput.focus() if firstInput?
+					), 0
 				else
 					$document.unbind 'keydown', escapeClickHandler
 	]).

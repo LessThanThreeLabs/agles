@@ -4,7 +4,20 @@ window.Header = ['$scope', '$location', 'initialState', ($scope, $location, init
 	$scope.loggedIn = initialState.loggedIn
 	$scope.isAdmin = initialState.user.isAdmin
 
+	$scope.feedback = {}
+	$scope.feedback.modalVisible = false
+	$scope.feedback.showSuccess = false
+
 	$scope.visitHome = () -> $location.path('/').search({})
+
+	$scope.submitFeedback = () ->
+		console.log $scope.feedback.text
+		$scope.feedback.showSuccess = true
+
+	$scope.$watch 'feedback.modalVisible', (newValue, oldValue) ->
+		if not newValue
+			$scope.feedback.text = ''
+			$scope.feedback.showSuccess = false
 ]
 
 
