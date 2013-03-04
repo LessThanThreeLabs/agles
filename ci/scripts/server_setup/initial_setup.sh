@@ -131,7 +131,7 @@ function provision () {
 }
 
 function setup_openstack () {
-	clone github.com/Randominator/openstackgeek.git
+	clone github.com/Randominator/openstackgeek.git openstackgeek
 	pushd openstackgeek/essex
 	sudo ./openstack.sh
 	popd
@@ -198,12 +198,18 @@ function host_setup () {
 	mkdir ~/code
 	mv ~/source ~/code/agles
 
+	rvm use system
+
+	setup_openstack
+
+	build_vm_image
+
 	# Java
 	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
 		mkdir /tmp/src
 		old_pwd=$(pwd)
         cd /tmp/src
-        clone github.com/flexiondotorg/oab-java6.git
+        clone github.com/flexiondotorg/oab-java6.git oab-java6
         cd /tmp/src/oab-java6
         sudo ./oab-java.sh
         sudo add-apt-repository -y ppa:flexiondotorg/java
@@ -222,12 +228,6 @@ function host_setup () {
 		sudo apt-get install -y opscode-keyring
 		echo "chef chef/chef_server_url string" | sudo debconf-set-selections && sudo apt-get install -y chef
 	fi
-
-	rvm use system
-
-	setup_openstack
-
-	build_vm_image
 
 	sudo -u postgres psql -c "create user lt3 with password ''"
 	sudo -u postgres psql -c "create database koality"

@@ -10,7 +10,7 @@ include_recipe "koality::setuppy_install"
 include_recipe "koality::verification_user"
 
 bash "Stop verification servers" do
-	command "pgrep -f start_verification_server.py | while read p; do kill -9 $p; done"
+	code "pgrep -f start_verification_server.py | while read p; do kill -9 $p; done"
 end
 
 node[:koality][:verification][:server_count].to_i.times do |server_num|
