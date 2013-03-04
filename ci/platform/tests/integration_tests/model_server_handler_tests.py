@@ -22,7 +22,8 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				first_name='first',
 				last_name='last',
 				password_hash='a',
-				salt='a' * 16
+				salt='a' * 16,
+				created=0
 			)
 
 			self.user_id = sqlconn.execute(ins_user).inserted_primary_key[0]

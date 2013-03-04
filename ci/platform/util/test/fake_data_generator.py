@@ -37,14 +37,16 @@ class SchemaDataGenerator(object):
 			last_name="Admin",
 			admin=True,
 			password_hash=binascii.b2a_base64(hash.digest())[0:-1],
-			salt=SALT
+			salt=SALT,
+			created=int(time.time())
 		)
 		ins_user = schema.user.insert().values(
 			email="user@user.com",
 			first_name="User",
 			last_name="User",
 			password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1],
-			salt=SALT
+			salt=SALT,
+			created=int(time.time())
 		)
 
 		with ConnectionFactory.get_sql_connection() as conn:
@@ -68,7 +70,7 @@ class SchemaDataGenerator(object):
 
 			for user in range(NUM_USERS):
 				ins_user = schema.user.insert().values(first_name="firstname_%d" % user, last_name="lastname_%d" % user, email="%d@b.com" % user,
-					password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1], salt=SALT)
+					password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1], salt=SALT, created=int(time.time()))
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 				repo_id = random.choice(repo_ids)

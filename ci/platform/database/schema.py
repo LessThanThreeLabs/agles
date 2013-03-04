@@ -15,6 +15,7 @@ user = Table('user', metadata,
 	Column('password_hash', String(88), nullable=False),
 	Column('salt', String(24), nullable=False),
 	Column('admin', Boolean, nullable=False, default=False),
+	Column('created', Integer, nullable=False),
 	Column('deleted', Integer, nullable=False, default=0),  # when deleted, set this column to the id
 
 	UniqueConstraint('email', 'deleted'),
@@ -139,7 +140,7 @@ def _create_and_initialize(engine):
 def _insert_admin_user():
 	ins = user.insert().values(id=1, email="lt3@getkoality.com", first_name="Admin", last_name="Admin",
 		password_hash="mooonIJXsb0zgz2V0LXvN/N4N4zbZE9FadrFl/YBJvzh3Z8O3VT/FH1q6OzWplbrX99D++PO6mpez7QdoIUQ6A==",
-		salt="GMZhGiZU4/JYE3NlmCZgGA==")
+		salt="GMZhGiZU4/JYE3NlmCZgGA==", created=0)
 	with ConnectionFactory.get_sql_connection() as sqlconn:
 		sqlconn.execute(ins)
 

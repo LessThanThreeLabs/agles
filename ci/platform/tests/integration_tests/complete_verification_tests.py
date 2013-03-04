@@ -17,7 +17,6 @@ from database import schema
 from model_server.events_broker import EventsBroker
 from verification.master import *
 from verification.server import *
-from verification.server.build_verifier import BuildVerifier
 from settings.rabbit import RabbitSettings
 from shared.constants import BuildStatus
 from repo.store import FileSystemRepositoryStore, RepositoryStore
@@ -82,7 +81,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.vm_process = TestProcess(target=verification_master.run)
 		self.vm_process.start()
 		with ConnectionFactory.get_sql_connection() as conn:
-			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=binascii.b2a_base64(sha512("").digest())[0:-1], salt="1234567890123456")
+			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=binascii.b2a_base64(sha512("").digest())[0:-1], salt="1234567890123456", created=0)
 			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 	def tearDown(self):

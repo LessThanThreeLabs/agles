@@ -14,18 +14,22 @@ class UsersReadHandler extends Handler
 
 
 	getAllUsers: (socket, data, callback) =>
-		createFakeUser = (number) ->
-			id: number
-			email: "#{number}@email.com"
-			firstName: "hello#{number}"
-			lastName: "there#{number}"
-			timestamp: Math.floor(Math.random() * 1000000000000)
+		sanitizeResult = (user) ->
+			id: user.id
+			email: user.email
+			firstName: user.first_name
+			lastName: user.last_name
+			isAdmin: user.admin
+			timestamp: user.created
 
 		userId = socket.session.userId
 		if not userId?
 			callback 403
 		else
-			callback null, (createFakeUser number for number in [0..100])
+			@modelRpcConnection.users.read.get_all_users userId, (error, users) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback null, (sanitizeResult user for user in users)
 
 
 	getSshKeys: (socket, data, callback) =>
