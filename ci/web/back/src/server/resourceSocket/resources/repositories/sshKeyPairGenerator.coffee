@@ -17,7 +17,7 @@ class SshKeyPairGenerator
 		crypto.randomBytes 8, (error, randomBuffer) =>
 			filename = '/tmp/node-ssh-keygen-' + randomBuffer.toString 'hex'
 
-			exec "ssh-keygen -N '' -f #{filename}", (error, stdout, stderr) =>
+			exec "ssh-keygen -C '' -N '' -f #{filename}", (error, stdout, stderr) =>
 				if error? then callback error
 				else @_getKeysAndDeleteFiles filename, callback
 
