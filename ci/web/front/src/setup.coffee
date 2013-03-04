@@ -495,5 +495,5 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 		$locationProvider.html5Mode true
 	]).
 	run(() ->
-		console.log 'initialization happens here'
+		# initialization happens here
 	)
