@@ -1,7 +1,7 @@
 <centered-panel id="login">
 	<div id="loginPanel">
 		<menu-content>
-			<menu-content-header menu-content-header-padding>Login<span id="loginError" ng-show="showError">YOU'RE BAD AND YOU SHOULD FEEL BAD</span></menu-content-header>
+			<menu-content-header menu-content-header-padding ng-class="{red: showError}">Login<span id="loginError" ng-show="showError">Login attempt failed</span></menu-content-header>
 			<menu-content-body unselectable>
 				<div id="loginContent">
 					<styled-form name="loginForm" listen-for-enter-key="login()" ignore-enter-key-if="loginForm.$invalid">
@@ -16,7 +16,6 @@
 							<button id="loginButton" ng-click="login()" ng-disabled="loginForm.$invalid">Login</button>
 						</styled-form-field>
 					</styled-form>
-
 				</div>
 			</menu-content-body>
 		</menu-content>
