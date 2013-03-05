@@ -126,20 +126,10 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 		return stage?
 
 	retrieveStages = () ->
-		getRandomStatus = () ->
-			random = Math.random()
-			if random > .5 then return 'passed'
-			else if random > .25 then return 'failed'
-			else return 'running'
-
 		$scope.stages = []
 		return if not $scope.currentChangeId?
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
-			buildConsoles = buildConsoles.map (buildConsole) -> 
-				buildConsole.status = getRandomStatus()
-				return buildConsole
-
 			$scope.$apply () ->
 				$scope.stages = buildConsoles
 				$scope.currentStageId = null if not isStageIdInStages $scope.currentStageId
