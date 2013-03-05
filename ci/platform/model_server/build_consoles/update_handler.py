@@ -104,6 +104,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 
 	def set_return_code(self, build_id, return_code, type, subtype):
 		build_console = schema.build_console
+		build = schema.build
 
 		query = build_console.select().where(
 			and_(
