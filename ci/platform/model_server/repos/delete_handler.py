@@ -19,4 +19,4 @@ class ReposDeleteHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
-		self.publish_event_to_all("repos", "repo removed", repo_id=repo_id)
+		self.publish_event_to_all("repos", "repository removed", repo_id=repo_id)

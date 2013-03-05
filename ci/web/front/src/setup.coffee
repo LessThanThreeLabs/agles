@@ -51,7 +51,7 @@ angular.module('koality.service', []).
 			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
 			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, (error, response) ->
 				if error?
-					console.log "#{resource}.#{requestType}"
+					console.log "#{resource}.#{requestType} - #{methodName}"
 					console.error error
 				switch error
 					when 400, 404, 500 then window.location.href = '/unexpectedError'
