@@ -34,6 +34,15 @@ angular.module('koality.service', []).
 			return null if isNaN integer
 			return integer
 	]).
+	factory('cookieExtender', ['$http', ($http) ->
+		return extendCookie: (callback) ->
+			successHandler = (data, status, headers, config) ->
+				callback()
+			errorHandler = (data, status, headers, config) ->
+				callback 'unable to extend cookie expiration'
+
+			$http.post('/extendCookieExpiration').success(successHandler).error(errorHandler)
+	]).
 	factory('socket', ['$window', '$location', 'initialState', ($window, $location, initialState) ->
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
 		

@@ -4,7 +4,7 @@
 			<menu-content-header menu-content-header-padding ng-class="{red: showError}">Login<span id="loginError" ng-show="showError">Your login attempt failed</span></menu-content-header>
 			<menu-content-body unselectable>
 				<div id="loginContent">
-					<styled-form name="loginForm" listen-for-enter-key="login()" ignore-enter-key-if="loginForm.$invalid">
+					<styled-form name="loginForm">
 						<styled-form-field label="Email" label-padding="true">
 							<input type="email" ng-model="account.email" name="email" placeholder="email@address.com" ng-maxlength="256" autocomplete="on" required focused>
 						</styled-form-field>

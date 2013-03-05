@@ -94,7 +94,7 @@ class Server
 
 		expressServer.get '*', @staticServer.handleRequest		
 
-		expressServer.post '/fixCookieExpiration', @_handleFixCookieExpiration
+		expressServer.post '/extendCookieExpiration', @_handleExtendCookieExpiration
 
 		server = spdy.createServer @httpsOptions, expressServer
 		server.listen @configurationParams.https.port
@@ -125,7 +125,7 @@ class Server
 		expressServer.locals.layout = false
 
 
-	_handleFixCookieExpiration: (request, response) =>
+	_handleExtendCookieExpiration: (request, response) =>
 		if not request.session.userId?
 			response.end '403'
 		else

@@ -1,68 +1,3 @@
-<!-- <div id="admin">
-	<centered-panel panel-title="Admin">
-		<menu options="menuOptions" initial-option-name="repositories" current-option-name="currentView" option-click="menuOptionClick(optionName)">
-			<div id="adminRepositories" class="prettyMenuContent" optionName="repositories" ng-controller="AdminRepositories">
-				<div id="repositoriesTableContainer">
-					<table id="repositoriesTable" class="prettyTable">
-						<tr class="title">
-							<td class="nameColumn" ng-click="orderByPredicate = 'name'; orderByReverse = !orderByReverse">Name</td>
-							<td class="createdColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Created</td>
-							<td class="removeColumn">Remove</td>
-						</tr>
-						<tr ng-repeat="repository in repositories | orderBy:orderByPredicate:orderByReverse">
-							<td class="nameColumn">{{repository.name}}</td><td class="createdColumn">{{repository.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeRepository(repository)">X</span></td>
-						</tr>
-					</table>
-				</div>
-
-				<div id="addRepositoryButtonContainer">
-					<button ng-click="addRepository()">Add Repository</button>
-				</div>
-			</div>
-
-			<div id="adminMembers" class="prettyMenuContent" optionName="members" ng-controller="AdminMembers">
-				<div id="membersTableContainer">
-					<table id="membersTable" class="prettyTable">
-						<tr class="title">
-							<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
-							<td class="emailColumn" ng-click="orderByPredicate = 'email'; orderByReverse = !orderByReverse">Email</td>
-							<td class="addedColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Added Date</td>
-							<td class="removeColumn">Remove</td>
-						</tr>
-						<tr ng-repeat="member in members | orderBy:orderByPredicate:orderByReverse">
-							<td class="nameColumn">{{member.firstName}} {{member.lastName}}</td><td class="emailColumn">{{member.email}}</td><td class="addedColumn">{{member.timestamp*1000 | date:'medium'}}</td><td class="removeColumn"><span class="removeLink" ng-click="removeMember(member)">X</span></td>
-						</tr>
-					</table>
-				</div>
-
-				<div id="addMembers" ng-controller="AdminAddMembers">
-					<modal modal-visible="modalVisible">
-						<div ng-show="stage == 'first'">
-							<div id="addMembersDescription">Enter a list of email addresses</div>
-							<div id="addMembersErrorMessage" ng-show="showError">There was an error inviting members. Check formatting.</div>
-							<textarea id="membersToAddEmails" ng-model="membersToAdd.emails"></textarea>
-							<div id="addMembersButtonContainer">
-								<button ng-click="submit()">Add</button>
-							</div>
-						</div>
-
-						<div ng-show="stage == 'second'">
-							<div id="addMembersEmailSentMessage">Invites have been sent</div>
-						</div>
-					</modal>
-
-					<div id="addMembersModalButtonContainer">
-						<button ng-click="modalVisible=true">Add Members</button>
-					</div>
-				</div>
-			</div>
-		</menu>
-	</centered-panel>
-</div>
- -->
-
-
-
 <centered-panel id="admin">
 	<div id="adminOptions">
 		<menu>
@@ -115,12 +50,11 @@
 								<styled-form-field label="Emails" label-padding="true">
 									<textarea type="text" ng-model="addUsers.emails" name="emails" placeholder="first@email.com, second@email.com, ..." required></textarea>
 								</styled-form-field>
+								<styled-form-field label="">
+									<div id="adminAddUsersErrorMessage" ng-show="addUsers.showError">There was an error inviting members.<br>Check formatting.</div>
+									<button id="adminAddUsersButton" ng-click="submitEmails()" ng-disabled="addUsersForm.$invalid">Add Users</button>
+								</styled-form-field>
 							</styled-form>
-
-							<div id="adminAddUsersButtonContainer">
-								<div id="adminAddUsersErrorMessage" ng-show="addUsers.showError">There was an error inviting members.<br>Check formatting.</div>
-								<button ng-click="submitEmails()" ng-disabled="addUsersForm.$invalid">Add Users</button>
-							</div>
 						</div>
 					</menu-content-body>
 				</menu-content>
@@ -176,11 +110,10 @@
 										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 									</span>
 								</styled-form-field>
+								<styled-form-field label="">
+									<button id="adminAddRepositoryGetPublicKeyButton" ng-click="getSshKey()" ng-disabled="addRepositoryForm.$invalid">Add Repository</button>
+								</styled-form-field>
 							</styled-form>
-
-							<div id="adminAddRepositoryGetPublicKeyButtonContainer">
-								<button ng-click="getSshKey()" ng-disabled="addRepositoryForm.$invalid">Add Repository</button>
-							</div>
 						</div>
 
 						<div id="adminAddRepositoryContentSecond" ng-show="addRepository.stage == 'second'">

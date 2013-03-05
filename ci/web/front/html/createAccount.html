@@ -1,7 +1,7 @@
 <div id="createAccount">
 	<centered-panel panel-title="Create Account">
 		<div ng-show="!showError">
-			<styled-form name="createAccountForm" listen-for-enter-key="submit()" ignore-enter-key-if="createAccountForm.$invalid || account.password != account.confirmPassword">
+			<styled-form name="createAccountForm">
 				<styled-form-field label="Email" label-padding="true">
 					<input type="email" ng-model="account.email" readonly>
 				</styled-form-field>
@@ -29,11 +29,10 @@
 						<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 					</span>
 				</styled-form-field>
+				<styled-form-field label="">
+					<button id="createAccountButton" ng-click="submit()" ng-disabled="createAccountForm.$invalid || account.password != account.confirmPassword">Create</button>	
+				</styled-form-field>
 			</styled-form>
-
-			<div id="createAccountButtonContainer">
-				<button ng-click="submit()" ng-disabled="createAccountForm.$invalid || account.password != account.confirmPassword">Create</button>
-			</div>
 		</div>
 
 		<div ng-show="showError">

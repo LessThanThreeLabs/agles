@@ -68,8 +68,6 @@ class UsersCreateHandler extends Handler
 
 
 	inviteUsers: (socket, data, callback) =>
-		console.log data
-
 		userId = socket.session.userId
 		if not userId?
 			callback 403

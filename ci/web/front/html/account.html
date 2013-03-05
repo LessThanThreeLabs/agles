@@ -28,11 +28,10 @@
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>
+						<styled-form-field label="">
+							<button id="accountBasicButton" ng-click="submit()" ng-disabled="basicForm.$invalid">Save Changes</button>
+						</styled-form-field>
 					</styled-form>
-
-					<div id="accountBasicButtonContainer">
-						<button ng-click="submit()" ng-disabled="basicForm.$invalid">Save Changes</button>
-					</div>
 				</div>
 			</menu-content-body>
 		</menu-content>
@@ -59,11 +58,10 @@
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>
+						<styled-form-field label="">
+							<button id="accountPasswordButton" ng-click="submit()" ng-disabled="passwordForm.$invalid">Save Changes</button>
+						</styled-form-field>
 					</styled-form>
-
-					<div id="accountPasswordButtonContainer">
-						<button ng-click="submit()" ng-disabled="passwordForm.$invalid">Save Changes</button>
-					</div>
 				</div>
 			</menu-content-body>
 		</menu-content>
@@ -113,11 +111,10 @@
 										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 									</span>
 								</styled-form-field>
+								<styled-form-field label="">
+									<button id="accountAddSshKeyButton" ng-click="submitKey()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
+								</styled-form-field>
 							</styled-form>
-
-							<div id="accountAddSshKeyButtonContainer">
-								<button ng-click="submitKey()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
-							</div>
 						</div>
 					</menu-content-body>
 				</menu-content>
