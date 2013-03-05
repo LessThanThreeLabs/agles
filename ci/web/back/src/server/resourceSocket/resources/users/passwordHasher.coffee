@@ -15,8 +15,9 @@ class PasswordHasher
 			if error
 				callback error
 			else
+				salt = salt.toString 'base64'
 				callback null,
-					salt: salt.toString 'base64'
+					salt: salt
 					passwordHash: @hashPasswordWithSalt password, salt
 
 
