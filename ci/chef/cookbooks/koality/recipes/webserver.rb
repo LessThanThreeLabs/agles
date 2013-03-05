@@ -37,6 +37,10 @@ supervisor_service "redis-createAccount" do
 	action [:stop]
 end
 
+supervisor_service "redis-createRepository" do
+	action [:stop]
+end
+
 supervisor_service "haproxy" do
 	action [:stop]
 end
