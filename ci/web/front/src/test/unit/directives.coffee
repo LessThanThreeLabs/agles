@@ -2,32 +2,6 @@
 
 describe 'Koality directives', () ->
 
-	describe 'listen for enter key directive', () ->
-		element = null
-		scope = null
-
-		beforeEach module 'koality.directive'
-
-		beforeEach () ->
-			inject ($rootScope, $compile) ->
-				scope = $rootScope.$new()
-				element = angular.element '<input listen-for-enter-key="enterPressed()">'
-				$compile(element)(scope)
-				scope.$digest()
-
-		it 'should call function on enter key', () ->
-			scope.enterPressed = jasmine.createSpy 'enterPressed'
-
-			event = $.Event 'keypress'
-			event.which = 13
-			event.keyCode = 13
-
-			expect(scope.enterPressed.callCount).toBe 0
-			element.trigger event
-			expect(scope.enterPressed.callCount).toBe 1
-			element.trigger event
-			expect(scope.enterPressed.callCount).toBe 2
-
 	describe 'dropdown directive', () ->
 		element = null
 		scope = null
