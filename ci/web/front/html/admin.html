@@ -1,18 +1,18 @@
 <centered-panel id="admin">
 	<div id="adminOptions">
-		<menu>
-			<menu-header menu-header-padding>Admin</menu-header>
-			<menu-options>
-				<menu-option menu-option-text="Manage User Accounts" ng-click="menuOptionClick('users')" ng-class="{selected: currentView == 'users', green: currentView == 'users'}"></menu-option>
-				<menu-option menu-option-text="Manage Repositories" ng-click="menuOptionClick('repositories')" ng-class="{selected: currentView == 'repositories', green: currentView == 'repositories'}"></menu-option>
-			</menu-options>
+		<content-menu>
+			<content-menu-header menu-header-padding>Admin</content-menu-header>
+			<content-menu-options>
+				<content-menu-option menu-option-text="Manage User Accounts" ng-click="menuOptionClick('users')" ng-class="{selected: currentView == 'users', green: currentView == 'users'}"></content-menu-option>
+				<content-menu-option menu-option-text="Manage Repositories" ng-click="menuOptionClick('repositories')" ng-class="{selected: currentView == 'repositories', green: currentView == 'repositories'}"></content-menu-option>
+			</content-menu-options>
 		</menu>
 	</div>
 
 	<div id="adminUsers" ng-show="currentView == 'users'" ng-controller="AdminUsers">
-		<menu-content>
-			<menu-content-header menu-content-header-padding>Manage User Accounts<span id="addUsersLink" ng-click="addUsers.modalVisible=true">+ Add New Users</span></menu-content-header>
-			<menu-content-body unselectable>
+		<content>
+			<content-header content-header-padding>Manage User Accounts<span id="addUsersLink" ng-click="addUsers.modalVisible=true">+ Add New Users</span></content-header>
+			<content-body unselectable>
 				<div id="adminUsersContent">
 					<table class="prettyTable">
 						<tr class="title">
@@ -37,14 +37,14 @@
 						</tr>
 					</table>
 				</div>
-			</menu-content-body>
-		</menu-content>
+			</content-body>
+		</content>
 
 		<modal modal-visible="addUsers.modalVisible">
 			<div id="adminAddUsers">
-				<menu-content>
-					<menu-content-header menu-content-header-padding>Add New Users</menu-content-header>
-					<menu-content-body unselectable>
+				<content>
+					<content-header content-header-padding>Add New Users</content-header>
+					<content-body unselectable>
 						<div id="adminAddUsersContent">
 							<styled-form name="addUsersForm" id="adminAddUsersForm">
 								<styled-form-field label="Emails" label-padding="true">
@@ -56,16 +56,16 @@
 								</styled-form-field>
 							</styled-form>
 						</div>
-					</menu-content-body>
-				</menu-content>
+					</content-body>
+				</content>
 			</div>
 		</modal>
 	</div>
 
 	<div id="adminRepositories" ng-show="currentView == 'repositories'" ng-controller="AdminRepositories">
-		<menu-content>
-			<menu-content-header menu-content-header-padding>Manage Repositories<span id="addRepositoryLink" ng-click="addRepository.modalVisible=true">+ Add Repository</span></menu-content-header>
-			<menu-content-body unselectable>
+		<content>
+			<content-header content-header-padding>Manage Repositories<span id="addRepositoryLink" ng-click="addRepository.modalVisible=true">+ Add Repository</span></content-header>
+			<content-body unselectable>
 				<div id="adminRepositoriesContent">
 					<table class="prettyTable">
 						<tr class="title">
@@ -88,14 +88,14 @@
 						</tr>
 					</table>
 				</div>
-			</menu-content-body>
-		</menu-content>
+			</content-body>
+		</content>
 
 		<modal modal-visible="addRepository.modalVisible">
 			<div id="adminAddRepository">
-				<menu-content>
-					<menu-content-header menu-content-header-padding>Add Repository</menu-content-header>
-					<menu-content-body unselectable>
+				<content>
+					<content-header content-header-padding>Add Repository</content-header>
+					<content-body unselectable>
 						<div id="adminAddRepositoryContentFirst" ng-show="addRepository.stage == 'first'">
 							<styled-form name="addRepositoryForm" id="adminAddRepositoryForm" listen-for-enter-key="getSshKey()" ignore-enter-key-if="addRepositoryForm.$invalid">
 								<styled-form-field label="Name" label-padding="true">
@@ -128,8 +128,8 @@
 								<button ng-click="createRepository()">Complete Creation</button>
 							</div>
 										</div>
-					</menu-content-body>
-				</menu-content>
+					</content-body>
+				</content>
 			</div>
 		</modal>
 	</div>

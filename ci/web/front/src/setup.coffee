@@ -292,62 +292,62 @@ angular.module('koality.directive', []).
 				</div>
 			</div>'
 	).
-	directive('menu', () ->
+	directive('contentMenu', () ->
 		restrict: 'E'
 		require: 'ngModel'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenu" unselectable ng-transclude>
-				<div class="prettyMenuBackgroundPanel"></div>
-				<div class="prettyMenuFooter"></div>
+		template: '<div class="prettyContentMenu" unselectable ng-transclude>
+				<div class="prettyContentMenuBackgroundPanel"></div>
+				<div class="prettyContentMenuFooter"></div>
 			</div>'
 	).
-	directive('menuHeader', () ->
+	directive('contentMenuHeader', () ->
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenuHeader" ng-transclude>
-				<div class="prettyMenuHeaderBuffer"></div>
+		template: '<div class="prettyContentMenuHeader" ng-transclude>
+				<div class="prettyContentMenuHeaderBuffer"></div>
 			</div>'
 		link: (scope, element, attributes) ->
 			if attributes.menuHeaderPadding?
-				element.addClass 'prettyMenuHeaderPadding'
+				element.addClass 'prettyContentMenuHeaderPadding'
 	).
-	directive('menuOptions', () ->
+	directive('contentMenuOptions', () ->
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenuOptions">
-				<div class="prettyMenuOptionsScrollOuterWrapper">
-					<div class="prettyMenuOptionsScrollInnerWrapper" ng-transclude></div>
+		template: '<div class="prettyContentMenuOptions">
+				<div class="prettyContentMenuOptionsScrollOuterWrapper">
+					<div class="prettyContentMenuOptionsScrollInnerWrapper" ng-transclude></div>
 				</div>
 			</div>'
 		link: (scope, element, attributes) ->
 			addScrollListener = () ->
-				outerElement = element.find('.prettyMenuOptionsScrollOuterWrapper')
+				outerElement = element.find('.prettyContentMenuOptionsScrollOuterWrapper')
 				outerElement.bind 'scroll', (event) ->
 					scrolledToBottom = outerElement[0].scrollTop + outerElement[0].offsetHeight >= outerElement[0].scrollHeight
 					scope.$apply attributes.onScrollToBottom if scrolledToBottom
 
 			addScrollListener() if attributes.onScrollToBottom?
 	).
-	directive('menuOption', () ->
+	directive('contentMenuOption', () ->
 		restrict: 'E'
 		replace: true
 		scope: true
-		template: '<div class="prettyMenuOption">
-				<div class="prettyMenuOptionContents">
-					<span class="prettyMenuOptionIdentifier">{{identifier}}</span>
-					<span class="prettyMenuOptionText">{{text}}</span>
-					<div class="prettyMenuOptionArrow"></div>
+		template: '<div class="prettyContentMenuOption">
+				<div class="prettyContentMenuOptionContents">
+					<span class="prettyContentMenuOptionIdentifier">{{identifier}}</span>
+					<span class="prettyContentMenuOptionText">{{text}}</span>
+					<div class="prettyContentMenuOptionArrow"></div>
 					<spinner spinner-running="{{spinning}}"></spinner>
 				</div>
-				<div class="prettyMenuOptionTooth"></div>
+				<div class="prettyContentMenuOptionTooth"></div>
 			</div>'
 		link: (scope, element, attributes) ->
 			checkOffsetTextClass = () ->
-				if scope.identifier? and scope.text? then element.find('.prettyMenuOptionContents').addClass 'offsetText'
-				else element.find('.prettyMenuOptionContents').removeClass 'offsetText'
+				if scope.identifier? and scope.text? then element.find('.prettyContentMenuOptionContents').addClass 'offsetText'
+				else element.find('.prettyContentMenuOptionContents').removeClass 'offsetText'
 
 			attributes.$observe 'menuOptionIdentifier', (identifier) ->
 				scope.identifier = identifier
@@ -360,28 +360,28 @@ angular.module('koality.directive', []).
 			attributes.$observe 'menuOptionSpinning', (spinning) ->
 				scope.spinning = if typeof spinning is 'boolean' then spinning else spinning is 'true'
 	).
-	directive('menuContent', () ->
+	directive('content', () ->
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenuContent" ng-transclude>
-				<div class="prettyMenuContentFooter"></div>
+		template: '<div class="prettyContent" ng-transclude>
+				<div class="prettyContentFooter"></div>
 			</div>'
 	).
-	directive('menuContentHeader', () ->
+	directive('contentHeader', () ->
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenuContentHeader" unselectable ng-transclude></div>'
+		template: '<div class="prettyContentHeader" unselectable ng-transclude></div>'
 		link: (scope, element, attributes) ->
-			if attributes.menuContentHeaderPadding?
-				element.addClass 'prettyMenuContentHeaderPadding'
+			if attributes.contentHeaderPadding?
+				element.addClass 'prettyContentHeaderPadding'
 	).
-	directive('menuContentBody', () ->
+	directive('contentBody', () ->
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyMenuContentBody" ng-transclude></div>'
+		template: '<div class="prettyContentBody" ng-transclude></div>'
 	).
 	directive('spinner', () ->
 		restrict: 'E'

@@ -8,8 +8,8 @@
 	</div>
 
 	<div id="repositoryChanges" ng-controller="RepositoryChanges">
-		<menu>
-			<menu-header>
+		<content-menu>
+			<content-menu-header>
 				<div id="repositoryChangesSearchContainer">
 					<div id="repositoryChangesSearch" ng-class="{searchOn: search.mode == 'search'}">
 						<div id="repositoryChangesSearchAll" ng-class="{selected: search.mode == 'all'}" ng-click="searchModeClicked('all')">All</div>
@@ -21,32 +21,32 @@
 						</div>
 					</div>
 				</div>
-			</menu-header>
-			<menu-options on-scroll-to-bottom="scrolledToBottom()">
-				<menu-option ng-repeat="change in changes | orderBy:'number':true" menu-option-identifier="{{change.number}}" menu-option-text="{{change.status}}" menu-option-spinning="{{change.status == 'running'}}" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, green: change.status == 'passed', red: change.status == 'failed'}"></menu-option>
-			</menu-options>
+			</content-menu-header>
+			<content-menu-options on-scroll-to-bottom="scrolledToBottom()">
+				<content-menu-option ng-repeat="change in changes | orderBy:'number':true" menu-option-identifier="{{change.number}}" menu-option-text="{{change.status}}" menu-option-spinning="{{change.status == 'running'}}" ng-click="changeClick(change)" ng-class="{selected: change.id == currentChangeId, green: change.status == 'passed', red: change.status == 'failed'}"></content-menu-option>
+			</content-menu-options>
 		</menu>
 	</div>
 
 	<div id="repositoryStages" ng-controller="RepositoryStages">
-		<menu>
-			<menu-header menu-header-padding>
+		<content-menu>
+			<content-menu-header menu-header-padding>
 				<span ng-show="currentChangeInformation != null">Change {{currentChangeInformation.number}}</span>
-			</menu-header>
-			<menu-options>
-				<menu-option menu-option-text="Summary" ng-show="currentChangeInformation != null" ng-click="stageClick(null)" ng-class="{selected: currentStageId == null}"></menu-option>
-				<menu-option ng-repeat="stage in stages" menu-option-text="{{stage.name}}" menu-option-spinning="{{stage.status == 'running'}}" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, green: stage.status == 'passed', red: stage.status == 'failed'}"></menu-option>
-			</menu-options>
+			</content-menu-header>
+			<content-menu-options>
+				<content-menu-option menu-option-text="Summary" ng-show="currentChangeInformation != null" ng-click="stageClick(null)" ng-class="{selected: currentStageId == null}"></content-menu-option>
+				<content-menu-option ng-repeat="stage in stages" menu-option-text="{{stage.name}}" menu-option-spinning="{{stage.status == 'running'}}" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, green: stage.status == 'passed', red: stage.status == 'failed'}"></content-menuoption>
+			</content-menu-options>
 		</menu>
 	</div>
 
 	<div id="repositoryStageDetails" ng-controller="RepositoryStageDetails">
-		<menu-content>
-			<menu-content-header menu-content-header-padding>
+		<content>
+			<content-header content-header-padding>
 				<span ng-show="currentChangeId != null && currentStageId == null">Summary</span>
 				<span ng-show="currentStageInformation != null">{{currentStageInformation.name}}</span>
-			</menu-content-header>
-			<menu-content-body unselectable>
+			</content-header>
+			<content-body unselectable>
 				<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
 					<styled-form text-selectable>
 						<styled-form-field label="Commiter">{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}</styled-form-field>
@@ -69,7 +69,7 @@
 					</div>
 					<div class="consoleTextBottomBuffer"></div>
 				</div>
-			</menu-content-body>
-		</menu-content>
+			</content-body>
+		</content>
 	</div>
 </div>

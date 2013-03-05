@@ -3,7 +3,7 @@
 @menuHeaderHeight: 40px;
 @menuFooterHeight: 8px;
 
-.prettyMenu {
+.prettyContentMenu {
 	@optionHeight: 44px;
 	@toothWidth: @optionHeight * .35;
 
@@ -11,7 +11,7 @@
 	width: @menuWidth;
 	height: 100%;
 
-	.prettyMenuBackgroundPanel {
+	.prettyContentMenuBackgroundPanel {
 		position: absolute;
 		z-index: 1;
 		top: @menuHeaderHeight;
@@ -21,7 +21,7 @@
 		background-color: @panelBackground;
 	}
 
-	.prettyMenuHeader {
+	.prettyContentMenuHeader {
 		position: absolute;
 		z-index: 100;
 		top: 0px;
@@ -36,11 +36,11 @@
 		font-size: 18px;
 		line-height: @menuHeaderHeight;
 
-		&.prettyMenuHeaderPadding {
+		&.prettyContentMenuHeaderPadding {
 			padding-left: 8px;
 		}
 
-		.prettyMenuHeaderBuffer {
+		.prettyContentMenuHeaderBuffer {
 			position: absolute;
 			z-index: 100;
 			top: 0px;
@@ -56,7 +56,7 @@
 		}
 	}
 
-	.prettyMenuOptions {
+	.prettyContentMenuOptions {
 		position: absolute;
 		z-index: 99;
 		top: @borderRadius;
@@ -65,7 +65,7 @@
 		bottom: @borderRadius;
 		overflow: hidden;
 
-		.prettyMenuOptionsScrollOuterWrapper {
+		.prettyContentMenuOptionsScrollOuterWrapper {
 			@scrollbarHideWidth: 25px;
 
 			position: absolute;
@@ -75,12 +75,12 @@
 			bottom: 0px;
 			overflow-y: auto;
 
-			.prettyMenuOptionsScrollInnerWrapper {
+			.prettyContentMenuOptionsScrollInnerWrapper {
 				padding-top: @menuHeaderHeight - @borderRadius;
 				padding-bottom: @menuFooterHeight - @borderRadius;
 				width: @menuWidth;
 
-				.prettyMenuOption {
+				.prettyContentMenuOption {
 					cursor: hand; cursor: pointer;
 
 					display: block;
@@ -88,7 +88,7 @@
 					width: 100%;
 					height: @optionHeight;
 
-					.prettyMenuOptionContents {
+					.prettyContentMenuOptionContents {
 						@transitionTime: 0.25s;
 						transition: all @transitionTime ease-in-out;
 						-moz-transition: all @transitionTime ease-in-out;
@@ -110,12 +110,12 @@
 							line-height: 40px;
 						}
 
-						.prettyMenuOptionIdentifier {
+						.prettyContentMenuOptionIdentifier {
 							display: inline;
 							font-size: 18px;
 						}
 
-						.prettyMenuOptionText {
+						.prettyContentMenuOptionText {
 							display: inline;
 							padding-left: 2px;
 							font-size: 14px;
@@ -129,7 +129,7 @@
 							height: @optionHeight;
 						}
 
-						.prettyMenuOptionArrow {
+						.prettyContentMenuOptionArrow {
 							@rightTransitionTime: 0.25s;
 							@borderColorTransitionTime: 0.25s;
 							transition: right @rightTransitionTime ease-in-out,
@@ -157,7 +157,7 @@
 						}
 					}
 
-					.prettyMenuOptionTooth {
+					.prettyContentMenuOptionTooth {
 						@transitionTime: 0.25s;
 						transition: all @transitionTime ease-in-out;
 						-moz-transition: all @transitionTime ease-in-out;
@@ -177,10 +177,10 @@
 					}
 
 					&.red {
-						.prettyMenuOptionContents {
+						.prettyContentMenuOptionContents {
 							color: @koalityRed;
 
-							.prettyMenuOptionArrow {
+							.prettyContentMenuOptionArrow {
 								border-color: @koalityRed;
 							}			
 						}
@@ -188,25 +188,25 @@
 
 					&:hover {
 
-						.prettyMenuOptionContents {
+						.prettyContentMenuOptionContents {
 							color: @koalityWhite;
 							background-color: @changeHover;
 
-							.prettyMenuOptionArrow {
+							.prettyContentMenuOptionArrow {
 								right: 2px;
 								border-color: @koalityWhite;
 							}
 						}
 
-						.prettyMenuOptionTooth {
+						.prettyContentMenuOptionTooth {
 							border-left: @toothWidth solid @changeHover;
 						}
 
 						&.green {
-							.prettyMenuOptionContents {
+							.prettyContentMenuOptionContents {
 								color: @koalityGreen;
 
-								.prettyMenuOptionArrow {
+								.prettyContentMenuOptionArrow {
 									border-color: @koalityGreen;
 								}
 							}
@@ -214,10 +214,10 @@
 
 						&.red {
 
-							.prettyMenuOptionContents {
+							.prettyContentMenuOptionContents {
 								color: @koalityRed;
 
-								.prettyMenuOptionArrow {
+								.prettyContentMenuOptionArrow {
 									border-color: @koalityRed;
 								}			
 							}
@@ -226,48 +226,48 @@
 
 					&.selected {
 
-						.prettyMenuOptionContents {
+						.prettyContentMenuOptionContents {
 							color: @koalityWhite;
 							background-color: @changeHover;
 
-							.prettyMenuOptionArrow {
+							.prettyContentMenuOptionArrow {
 								right: 2px;
 								border-color: @koalityWhite;
 							}
 						}
 
-						.prettyMenuOptionTooth {
+						.prettyContentMenuOptionTooth {
 							border-left: @toothWidth solid @changeHover;
 						}
 
 						&.green {
 
-							.prettyMenuOptionContents {
+							.prettyContentMenuOptionContents {
 								color: @koalityWhite;
 								background-color: @koalityGreen;
 
-								.prettyMenuOptionArrow {
+								.prettyContentMenuOptionArrow {
 									border-color: @koalityWhite;
 								}
 							}
 
-							.prettyMenuOptionTooth {
+							.prettyContentMenuOptionTooth {
 								border-left-color: @koalityGreen;
 							}
 						}
 
 						&.red {
 
-							.prettyMenuOptionContents {
+							.prettyContentMenuOptionContents {
 								color: @koalityWhite;
 								background-color: @koalityRed;
 
-								.prettyMenuOptionArrow {
+								.prettyContentMenuOptionArrow {
 									border-color: @koalityWhite;
 								}
 							}
 
-							.prettyMenuOptionTooth {
+							.prettyContentMenuOptionTooth {
 								border-left-color: @koalityRed;
 							}
 						}
@@ -277,7 +277,7 @@
 		}
 	}
 
-	.prettyMenuFooter {
+	.prettyContentMenuFooter {
 		position: absolute;
 		z-index: 100;
 		left: 0px;
@@ -290,14 +290,14 @@
 	}
 }
 
-.prettyMenuContent {
+.prettyContent {
 	position: absolute;
 	top: 0px;
 	left: 0px;
 	right: 0px;
 	bottom: 0px;
 
-	.prettyMenuContentHeader {
+	.prettyContentHeader {
 		position: absolute;
 		top: 0px;
 		left: 0px; 
@@ -312,7 +312,7 @@
 		border-top-left-radius: @borderRadius;
 		border-top-right-radius: @borderRadius;
 
-		&.prettyMenuContentHeaderPadding {
+		&.prettyContentHeaderPadding {
 			padding-left: 8px;
 		}
 
@@ -322,7 +322,7 @@
 		}
 	}
 
-	.prettyMenuContentBody {
+	.prettyContentBody {
 		position: absolute;
 		top: @menuHeaderHeight;
 		left: 0px;
@@ -331,7 +331,7 @@
 		background-color: @panelBackground;
 	}
 
-	.prettyMenuContentFooter {
+	.prettyContentFooter {
 		position: absolute;
 		left: 0px;
 		right: 0px;

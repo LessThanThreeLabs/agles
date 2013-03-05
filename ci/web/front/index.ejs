@@ -32,9 +32,9 @@
 						<span class="headerOption" ng-click="feedback.modalVisible = true">Feedback</span>
 						<modal modal-visible="feedback.modalVisible">
 							<div id="feedbackPanel">
-								<menu-content>
-									<menu-content-header menu-content-header-padding>Send Feedback</menu-content-header>
-									<menu-content-body unselectable>
+								<content>
+									<content-header content-header-padding>Send Feedback</content-header>
+									<content-body unselectable>
 										<div id="feedbackPanelContent" ng-show="!feedback.showSuccess">
 											<styled-form name="feedbackForm" id="feedbackPanelForm">
 												<styled-form-field label="Feedback" label-padding="true">
@@ -48,8 +48,8 @@
 										<div id="feedbackPanelSuccessMessage" ng-show="feedback.showSuccess">
 											Thank you for your feedback!
 										</div>
-									</menu-content-body>
-								</menu-content>
+									</content-body>
+								</content>
 							</div>
 						</modal>
 

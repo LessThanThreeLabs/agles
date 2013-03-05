@@ -1,19 +1,19 @@
 <centered-panel id="account">
 	<div id="accountOptions">
-		<menu>
-			<menu-header menu-header-padding>{{name}}</menu-header>
-			<menu-options>
-				<menu-option menu-option-text="My Account" ng-click="menuOptionClick('basic')" ng-class="{selected: currentView == 'basic', green: currentView == 'basic'}"></menu-option>
-				<menu-option menu-option-text="Password" ng-click="menuOptionClick('password')" ng-class="{selected: currentView == 'password', green: currentView == 'password'}"></menu-option>
-				<menu-option menu-option-text="SSH Keys" ng-click="menuOptionClick('sshKeys')" ng-class="{selected: currentView == 'sshKeys', green: currentView == 'sshKeys'}"></menu-option>
-			</menu-options>
+		<content-menu>
+			<content-menu-header menu-header-padding>{{name}}</content-menu-header>
+			<content-menu-options>
+				<content-menu-option menu-option-text="My Account" ng-click="menuOptionClick('basic')" ng-class="{selected: currentView == 'basic', green: currentView == 'basic'}"></content-menu-option>
+				<content-menu-option menu-option-text="Password" ng-click="menuOptionClick('password')" ng-class="{selected: currentView == 'password', green: currentView == 'password'}"></content-menu-option>
+				<content-menu-option menu-option-text="SSH Keys" ng-click="menuOptionClick('sshKeys')" ng-class="{selected: currentView == 'sshKeys', green: currentView == 'sshKeys'}"></content-menu-option>
+			</content-menu-options>
 		</menu>
 	</div>
 
 	<div id="accountBasic" ng-show="currentView == 'basic'" ng-controller="AccountBasic">
-		<menu-content>
-			<menu-content-header menu-content-header-padding>My Account</menu-content-header>
-			<menu-content-body unselectable>
+		<content>
+			<content-header content-header-padding>My Account</content-header>
+			<content-body unselectable>
 				<div id="accountBasicContent">
 					<styled-form name="basicForm">
 						<styled-form-field label="First name" label-padding="true">
@@ -33,14 +33,14 @@
 						</styled-form-field>
 					</styled-form>
 				</div>
-			</menu-content-body>
-		</menu-content>
+			</content-body>
+		</content>
 	</div>
 
 	<div id="accountPassword" ng-show="currentView == 'password'" ng-controller="AccountPassword">
-		<menu-content>
-			<menu-content-header menu-content-header-padding>Password</menu-content-header>
-			<menu-content-body unselectable>
+		<content>
+			<content-header content-header-padding>Password</content-header>
+			<content-body unselectable>
 				<div id="accountPasswordContent">
 					<styled-form name="passwordForm">
 						<styled-form-field label="Old password" label-padding="true">
@@ -63,14 +63,14 @@
 						</styled-form-field>
 					</styled-form>
 				</div>
-			</menu-content-body>
-		</menu-content>
+			</content-body>
+		</content>
 	</div>
 
 	<div id="accountSshKeys" ng-show="currentView == 'sshKeys'" ng-controller="AccountSshKeys">
-		<menu-content>
-			<menu-content-header menu-content-header-padding>SSH Keys<span id="addSshKeyLink" ng-click="addKey.modalVisible=true">+ Add a New SSH Key</span></menu-content-header>
-			<menu-content-body unselectable>
+		<content>
+			<content-header content-header-padding>SSH Keys<span id="addSshKeyLink" ng-click="addKey.modalVisible=true">+ Add a New SSH Key</span></content-header>
+			<content-body unselectable>
 				<div id="accountSshKeysContent">
 					<table class="prettyTable">
 						<tr class="title">
@@ -92,14 +92,14 @@
 						</tr>
 					</table>
 				</div> 
-			</menu-content-body>
-		</menu-content>
+			</content-body>
+		</content>
 
 		<modal modal-visible="addKey.modalVisible">
 			<div id="accountAddSshKey">
-				<menu-content>
-					<menu-content-header menu-content-header-padding>Add a New SSH Key</menu-content-header>
-					<menu-content-body unselectable>
+				<content>
+					<content-header content-header-padding>Add a New SSH Key</content-header>
+					<content-body unselectable>
 						<div id="accountAddSshKeyContent">
 							<styled-form name="addSshKeyForm" id="accountAddSshKeyForm">
 								<styled-form-field label="Alias" label-padding="true">
@@ -116,8 +116,8 @@
 								</styled-form-field>
 							</styled-form>
 						</div>
-					</menu-content-body>
-				</menu-content>
+					</content-body>
+				</content>
 			</div>
 		</modal>
 	</div>
