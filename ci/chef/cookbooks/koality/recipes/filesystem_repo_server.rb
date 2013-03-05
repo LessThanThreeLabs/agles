@@ -33,5 +33,6 @@ supervisor_service "filesystem_repo_server" do
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/filesystem_repo_server_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/filesystem_repo_server_stderr.log"
 	user "git"
+	environment "HOME" => "/home/git"
 	priority 1
 end
