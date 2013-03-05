@@ -73,6 +73,13 @@
 				"url": "127.0.0.1",
 				"port": 6392
 			}	
+		},
+
+		"feedback": {
+			"email": {
+				"from": "Koality <no-reply@koalitycode.com>",
+				"to": "Feedback <feedback@koalitycode.com>"
+			}	
 		}
 	},
 

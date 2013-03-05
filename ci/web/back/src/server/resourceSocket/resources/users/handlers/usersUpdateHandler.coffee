@@ -4,16 +4,17 @@ crypto = require 'crypto'
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer) ->
-	return new UsersUpdateHandler modelRpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer
+exports.create = (modelRpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer, feedbackEmailer) ->
+	return new UsersUpdateHandler modelRpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer, feedbackEmailer
 
 
 class UsersUpdateHandler extends Handler
-	constructor: (modelRpcConnection, @passwordHasher, @accountInformationValidator, @resetPasswordEmailer) ->
+	constructor: (modelRpcConnection, @passwordHasher, @accountInformationValidator, @resetPasswordEmailer, @feedbackEmailer) ->
 		super modelRpcConnection
 		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
-		assert.ok @resetPasswordEmailer
+		assert.ok @resetPasswordEmailer?
+		assert.ok @feedbackEmailer?
 
 
 	changeBasicInformation: (socket, data, callback) =>
@@ -156,4 +157,4 @@ class UsersUpdateHandler extends Handler
 		else if not data?.feedback? or not data?.userAgent? or not data?.screen?
 			callback 400
 		else
-			console.log data	
+			@feedbackEmailer.sendEmail data.feedback, data.userAgent, data.screen
