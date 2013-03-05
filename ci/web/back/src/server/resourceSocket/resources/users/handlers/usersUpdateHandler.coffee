@@ -83,7 +83,7 @@ class UsersUpdateHandler extends Handler
 						else
 							newPassword = randomBuffer.toString 'base64'
 							newPasswordHash = @passwordHasher.hashPasswordWithSalt newPassword, user.salt
-							@modelRpcConnection.users.update.change_password userId, newPasswordHash, (error, result) =>
+							@modelRpcConnection.users.update.change_password user.id, newPasswordHash, user.salt, (error, result) =>
 								if error? then callback 500
 								else
 									@resetPasswordEmailer.sendEmailToUser data.email, newPassword, (error) =>
