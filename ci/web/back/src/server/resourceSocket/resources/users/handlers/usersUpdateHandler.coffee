@@ -147,3 +147,13 @@ class UsersUpdateHandler extends Handler
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback()
+
+
+	submitFeedback: (socket, data, callback) =>
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		else if not data?.feedback? or not data?.userAgent? or not data?.screen?
+			callback 400
+		else
+			console.log data	

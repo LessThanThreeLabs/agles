@@ -1,6 +1,6 @@
 'use strict'
 
-window.Header = ['$scope', '$location', 'initialState', ($scope, $location, initialState) ->
+window.Header = ['$scope', '$location', 'initialState', 'rpc', ($scope, $location, initialState, rpc) ->
 	$scope.loggedIn = initialState.loggedIn
 	$scope.isAdmin = initialState.user.isAdmin
 
@@ -11,7 +11,12 @@ window.Header = ['$scope', '$location', 'initialState', ($scope, $location, init
 	$scope.visitHome = () -> $location.path('/').search({})
 
 	$scope.submitFeedback = () ->
-		console.log $scope.feedback.text
+		requestParams =
+			feedback: $scope.feedback.text
+			userAgent: navigator.userAgent
+			screen: window.screen
+		rpc.makeRequest 'users', 'update', 'submitFeedback', requestParams
+
 		$scope.feedback.showSuccess = true
 
 	$scope.$watch 'feedback.modalVisible', (newValue, oldValue) ->
