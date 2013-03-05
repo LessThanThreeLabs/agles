@@ -44,7 +44,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			# make filesystem changes
 			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name, privatekey)
 
-			self.publish_event_to_all("repos", "repository added", repo_id=repo_id, repo_name=repo_name)
+			self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name)
 			return repo_id
 		except Exception as e:
 			error_msg = "failed to create repo: [user_id: %d, repo_name: %s]" % (user_id, repo_name)

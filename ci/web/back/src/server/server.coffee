@@ -82,12 +82,9 @@ class Server
 		expressServer.get '/welcome', @handlers.indexHandler.handleRequest
 		expressServer.get '/login', @handlers.indexHandler.handleRequest
 		expressServer.get '/account', @handlers.indexHandler.handleRequest
-		expressServer.get '/account/:menuOption', @handlers.indexHandler.handleRequest
 		expressServer.get '/create/account', @handlers.indexHandler.handleRequest
 		expressServer.get '/resetPassword', @handlers.indexHandler.handleRequest
 		expressServer.get '/repository/:repositoryId', @handlers.indexHandler.handleRequest
-		expressServer.get '/add/repository', @handlers.indexHandler.handleRequest
-		expressServer.get '/remove/repository', @handlers.indexHandler.handleRequest
 		expressServer.get '/admin', @handlers.indexHandler.handleRequest
 		expressServer.get '/unexpectedError', @handlers.indexHandler.handleRequest
 		expressServer.get '/invalidPermissions', @handlers.indexHandler.handleRequest

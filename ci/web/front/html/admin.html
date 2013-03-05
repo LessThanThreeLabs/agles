@@ -84,7 +84,7 @@
 						<tr ng-repeat="repository in repositories | orderBy:orderByPredicate:orderByReverse">
 							<td class="nameColumn" text-selectable>{{repository.name}}</td>
 							<td class="createdColumn" text-selectable>{{repository.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
-							<td class="removeColumn"><span class="removeLink" ng-click="removeRepository(repository)">Delete</span></td>
+							<td class="removeColumn"><span class="removeLink" ng-click="openRemoveRepository(repository)">Delete</span></td>
 						</tr>
 					</table>
 				</div>
@@ -97,7 +97,7 @@
 					<content-header content-header-padding>Add Repository</content-header>
 					<content-body unselectable>
 						<div id="adminAddRepositoryContentFirst" ng-show="addRepository.stage == 'first'">
-							<styled-form name="addRepositoryForm" id="adminAddRepositoryForm" listen-for-enter-key="getSshKey()" ignore-enter-key-if="addRepositoryForm.$invalid">
+							<styled-form name="addRepositoryForm" id="adminAddRepositoryForm">
 								<styled-form-field label="Name" label-padding="true">
 									<input type="text" ng-model="addRepository.name" name="name" placeholder="name" ng-pattern="/^[A-Za-z0-9-_]+$/" ng-maxlength="64" required focused>
 									<span class="prettyFormError" tooltip="Name contains invalid characters" ng-class="{visible: addRepositoryForm.name.$dirty && addRepositoryForm.name.$invalid}">
@@ -128,6 +128,37 @@
 								<button ng-click="createRepository()">Complete Creation</button>
 							</div>
 										</div>
+					</content-body>
+				</content>
+			</div>
+		</modal>
+
+		<modal modal-visible="removeRepository.modalVisible">
+			<div id="adminRemoveRepository">
+				<content>
+					<content-header content-header-padding>Remove Repository</content-header>
+					<content-body unselectable>
+						<div id="adminRemoveRepositoryWarning">
+							To remove {{removeRepository.name}}, you must first enter your password with the following token:
+							<span id="adminRemoveRepositoryWarningToken" text-selectable>{{removeRepository.tokenToMatch}}</span>
+						</div>
+
+						<div id="adminRemoveRepositoryContent">
+							<styled-form name="removeRepositoryForm" id="adminRemoveRepositoryForm">
+								<styled-form-field label="Password">
+									<input type="password" ng-model="removeRepository.password" name="password" placeholder="p4ssW0rd" ng-maxlength="256" required>
+								</styled-form-field>
+								<styled-form-field label="Token" label-padding="true">
+									<input type="text" ng-model="removeRepository.token" name="token" placeholder="token" ng-maxlength="64" required>
+									<span class="prettyFormError" tooltip="Token mismatch" ng-class="{visible: removeRepositoryForm.token.$dirty && removeRepository.token != removeRepository.tokenToMatch}">
+										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+									</span>
+								</styled-form-field>
+								<styled-form-field label="">
+									<button id="adminRemoveRepositoryButton" ng-click="submitRemoveRepository()" ng-disabled="removeRepositoryForm.$invalid || removeRepository.token != removeRepository.tokenToMatch">Remove Repository</button>
+								</styled-form-field>
+							</styled-form>
+						</div>
 					</content-body>
 				</content>
 			</div>

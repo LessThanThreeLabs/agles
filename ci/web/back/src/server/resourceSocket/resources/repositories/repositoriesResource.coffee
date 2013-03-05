@@ -1,5 +1,6 @@
 assert = require 'assert'
 
+PasswordHasher = require '../passwordHasher'
 SshKeyPairGenerator = require './sshKeyPairGenerator'
 
 Resource = require '../resource'
@@ -9,11 +10,12 @@ RepositoriesDeleteHandler = require './handlers/repositoriesDeleteHandler'
 
 
 exports.create = (configurationParams, stores, modelConnection) ->
+	passwordHasher = PasswordHasher.create()
 	sshKeyPairGenerator = SshKeyPairGenerator.create configurationParams
 
 	createHandler = RepositoriesCreateHandler.create stores, modelConnection.rpcConnection, sshKeyPairGenerator
 	readHandler = RepositoriesReadHandler.create configurationParams, modelConnection.rpcConnection
-	deleteHandler = RepositoriesDeleteHandler.create modelConnection
+	deleteHandler = RepositoriesDeleteHandler.create modelConnection.rpcConnection, passwordHasher
 	return new RepositoriesResource configurationParams, stores, modelConnection, createHandler, readHandler, deleteHandler
 
 

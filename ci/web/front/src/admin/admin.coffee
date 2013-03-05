@@ -61,6 +61,9 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 	$scope.addRepository.stage = 'first'
 	$scope.addRepository.modalVisible = false
 
+	$scope.removeRepository = {}
+	$scope.removeRepository.modalVisible = false
+
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
 			$scope.$apply () -> $scope.repositories = repositories
@@ -79,10 +82,19 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 
 	getRepositories()
 
-	$scope.removeRepository = (repository) ->
-		$location.path('/remove/repository').search
-			id: repository.id
-			name: repository.name
+	$scope.openRemoveRepository = (repository) ->
+		$scope.removeRepository.id = repository.id
+		$scope.removeRepository.name = repository.name
+		$scope.removeRepository.tokenToMatch = Math.random().toString(36).substr(2)
+		$scope.removeRepository.modalVisible = true
+
+	$scope.submitRemoveRepository = () ->
+		return if $scope.removeRepository.token isnt $scope.removeRepository.tokenToMatch
+
+		rpc.makeRequest 'repositories', 'delete', 'deleteRepository', 
+			id: $scope.removeRepository.id
+			password: $scope.removeRepository.password
+		$scope.removeRepository.modalVisible = false
 
 	$scope.getSshKey = () ->
 		rpc.makeRequest 'repositories', 'create', 'getSshPublicKey', $scope.addRepository, (error, sshPublicKey) ->

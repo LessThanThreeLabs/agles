@@ -1,7 +1,7 @@
 assert = require 'assert'
 
 Resource = require '../resource'
-PasswordHasher = require './passwordHasher'
+PasswordHasher = require '../passwordHasher'
 AccountInformationValidator = require './accountInformationValidator'
 InviteUserEmailer = require './inviteUserEmailer'
 ResetPasswordEmailer = require './resetPasswordEmailer'

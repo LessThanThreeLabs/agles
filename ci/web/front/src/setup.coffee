@@ -172,13 +172,6 @@ angular.module('koality.directive', []).
 
 			element.bind 'click', highlightText
 	).
-	directive('listenForEnterKey', () ->
-		return (scope, element, attributes) ->
-			element.bind 'keypress', (event) ->
-				if event.keyCode is 13
-					ignoreEnter = scope.$eval attributes.ignoreEnterKeyIf
-					scope.$apply attributes.listenForEnterKey if not ignoreEnter
-	).
 	directive('focused', () ->
 		return (scope, element, attributes) ->
 			element.focus()
@@ -471,16 +464,6 @@ angular.module('koality', ['ngSanitize', 'koality.service', 'koality.directive',
 				controller: Repository
 				reloadOnSearch: false
 				redirectTo: if window.accountInformation.id is '' then '/login' else null
-			).
-			when('/add/repository',
-				templateUrl: "/html/addRepository#{fileSuffix}.html"
-				controller: AddRepository
-				redirectTo: if window.accountInformation.isAdmin then null else '/'
-			).
-			when('/remove/repository',
-				templateUrl: "/html/removeRepository#{fileSuffix}.html"
-				controller: RemoveRepository
-				redirectTo: if window.accountInformation.isAdmin then null else '/'
 			).
 			when('/admin',
 				templateUrl: "/html/admin#{fileSuffix}.html"

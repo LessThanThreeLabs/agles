@@ -19,8 +19,6 @@
 			"/css/src/createAccount/createAccount.css",
 			"/css/src/resetPassword/resetPassword.css",
 			"/css/src/repository/repository.css",
-			"/css/src/addRepository/addRepository.css",
-			"/css/src/removeRepository/removeRepository.css",
 			"/css/src/admin/admin.css",
 			"/css/src/unexpectedError/unexpectedError.css",
 			"/css/src/invalidPermissions/invalidPermissions.css"
@@ -46,8 +44,6 @@
 			"/js/src/createAccount/createAccount.js",
 			"/js/src/resetPassword/resetPassword.js",
 			"/js/src/repository/repository.js",
-			"/js/src/addRepository/addRepository.js",
-			"/js/src/removeRepository/removeRepository.js",
 			"/js/src/admin/admin.js",
 			"/js/src/unexpectedError/unexpectedError.js",
 			"/js/src/invalidPermissions/invalidPermissions.js"
@@ -70,8 +66,6 @@
 			"/html/createAccount.html",
 			"/html/resetPassword.html",
 			"/html/repository.html",
-			"/html/addRepository.html",
-			"/html/removeRepository.html",
 			"/html/admin.html",
 			"/html/unexpectedError.html",
 			"/html/invalidPermissions.html"
