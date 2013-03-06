@@ -28,6 +28,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 			repostore_id = manager.get_least_loaded_store()
 			uri = self._transpose_to_uri(user_id, repo_name)
+			current_time = int(time.time())
 
 			privatekey = keypair["private"]
 			publickey = keypair["public"]
@@ -40,11 +41,12 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				repostore_id,
 				forward_url,
 				privatekey,
-				publickey)
+				publickey,
+				current_time)
 			# make filesystem changes
 			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name, privatekey)
 
-			self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name)
+			self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name, created=current_time)
 			return repo_id
 		except Exception as e:
 			error_msg = "failed to create repo: [user_id: %d, repo_name: %s]" % (user_id, repo_name)
@@ -54,14 +56,13 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def _create_repo_on_filesystem(self, manager, repostore_id, repo_id, repo_name, privatekey):
 		manager.create_repository(repostore_id, repo_id, repo_name, privatekey)
 
-	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, privatekey, publickey):
+	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, privatekey, publickey, current_time):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id == repostore_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
-			current_time = int(time.time())
 			ins = repo.insert().values(
 				name=repo_name,
 				uri=uri,

@@ -38,7 +38,10 @@ class UserEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName, 
 					id: data.contents.removed_id
 			when 'repository added'
-				console.error 'NEED TO HANDLE REPOSITORY ADDED/REMOVED EVENTS'
+				@sockets.in(roomName).emit eventName, 
+					id: data.contents.repo_id
+					name: data.contents.repo_name
+					timestamp: data.contents.created
 			when 'repository removed'
 				@sockets.in(roomName).emit eventName, 
 					id: data.contents.repo_id
