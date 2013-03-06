@@ -45,7 +45,7 @@ angular.module('koality.service', []).
 	]).
 	factory('socket', ['$window', '$location', 'initialState', ($window, $location, initialState) ->
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
-		
+
 		makeRequest: (resource, requestType, methodName, data, callback) ->
 			assert.ok typeof resource is 'string' and typeof requestType is 'string' and typeof methodName is 'string'
 			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
@@ -69,7 +69,7 @@ angular.module('koality.service', []).
 			_callback: null
 			id = integerConverter.toInteger id
 
-			setCallback: (callback) -> 
+			setCallback: (callback) ->
 				assert.ok callback?
 				@_callback = callback
 				return @
@@ -83,13 +83,13 @@ angular.module('koality.service', []).
 
 			unsubscribe: () ->
 				socket.makeRequest resource, 'unsubscribe', eventName, id: id, (error) ->
-					console.error if error?	
+					console.error if error?
 				return @
 	]).
 	factory('changesRpc', ['rpc', 'integerConverter', (rpc, integerConverter) ->
 		NUM_CHANGES_TO_REQUEST = 100
 		noMoreChangesToRequest = false
-		
+
 		currentNameQuery = null
 		currentCallback = null
 		nextNameQuery = null
@@ -239,7 +239,7 @@ angular.module('koality.directive', []).
 			scope.$watch 'show', () ->
 				if scope.show
 					$document.bind 'keydown', escapeClickHandler
-					setTimeout (() -> 
+					setTimeout (() ->
 						firstInput = element.find('input,textarea,select').get(0)
 						firstInput.focus() if firstInput?
 					), 0
@@ -276,7 +276,7 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		scope: 
+		scope:
 			label: '@label'
 			padding: '@labelPadding'
 		template: '<div class="prettyFormRow">
@@ -416,7 +416,7 @@ angular.module('koality.directive', []).
 angular.module('koality.filter', ['koality.service']).
 	filter('ansiparse', ['$window', ($window) ->
 		(input) ->
-			return '<span class="ansi">' + $window.ansiparse input + '</span>'
+			return '<span class="ansi">' + $window.ansiparse(input) + '</span>'
 	]).
 	filter('fileSuffix', ['fileSuffixAdder', (fileSuffixAdder) ->
 		(input) ->

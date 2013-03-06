@@ -37,6 +37,7 @@ setup:
       - iced-coffee-script
       - less
       - testacular
+      - phantomjs
       - directory: ci/web/back
   - databases:
     - postgres:

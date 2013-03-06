@@ -36,7 +36,6 @@ class ConsoleLine
                 @position++
 
     _carriage_return: () =>
-        @buffer = []
         @position = 0
 
     setStyles: (styles) =>
@@ -70,7 +69,7 @@ class ConsoleLine
                 style = char.style
                 cssStyle = @_stylesToHtml char.style.toCssStyle()
                 str += if cssStyle then cssStyle else ''
-            str += if char.character is ' ' then '&nbsp' else char.character
+            str += @_escapeChar char.character
         str += '</span>' if cssStyle
         return str
 
@@ -78,6 +77,25 @@ class ConsoleLine
         if not styles?
             return null
         '<span class="' + styles + '">'
+
+    _escapeChar: (char) =>
+        switch char
+            when '&'
+                '&amp;'
+            when '<'
+                '&lt;'
+            when '>'
+                '&gt;'
+            when '"'
+                '&quot;'
+            when '\''
+                '&#39;'
+            when '/'
+                '&#x2F;'
+            when ' '
+                '&nbsp;'
+            else
+                char
 
 
 window.ansiparse = (str) ->
