@@ -22,7 +22,9 @@ module.exports = class EventHandler
 		else
 			socket.roomCounter[roomName] = 1
 
-		console.log 'adding to room: ' + roomName
+		if process.env.NODE_ENV is 'development'
+			console.log 'adding to room: ' + roomName
+
 		socket.join roomName if socket.roomCounter[roomName] > 0
 
 		return @_getCompleteEventName id, eventName
@@ -38,8 +40,10 @@ module.exports = class EventHandler
 
 		roomName = @_getRoomName id, eventName
 
+		if process.env.NODE_ENV is 'development'
+			console.log 'removing from room: ' + roomName
+
 		socket.roomCounter[roomName] = Math.max socket.roomCounter[roomName] - 1, 0
-		console.log 'removing from room: ' + roomName
 		socket.leave roomName if socket.roomCounter[roomName] is 0
 
 		return true
@@ -58,5 +62,6 @@ module.exports = class EventHandler
 		data = msgpack.unpack message.data
 		@processEvent data
 
-		console.log 'received event:'
-		console.log data
+		if process.env.NODE_ENV is 'development'
+			console.log 'received event:'
+			console.log data

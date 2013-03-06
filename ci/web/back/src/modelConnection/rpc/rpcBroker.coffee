@@ -49,7 +49,8 @@ class RpcBroker
 			correlationId: messageId
 			mandatory: true
 
-		console.log '-- calling function: ' + route + ' > ' + methodName
+		if process.env.NODE_ENV is 'development'
+			console.log '-- calling function: ' + route + ' > ' + methodName
 
 
 	_handleResponse: (message, headers, deliveryInformation) =>
@@ -68,7 +69,7 @@ class RpcBroker
 
 
 	_handleDeadLetterResponse: (message, headers, deliveryInformation) =>
-		console.log 'received dead letter message!! ' + JSON.stringify msgpack.unpack message.data
+		console.error 'Received dead letter message!! ' + JSON.stringify msgpack.unpack message.data
 
 		responseQueueName = deliveryInformation.replyTo
 		messageId = deliveryInformation.correlationId
