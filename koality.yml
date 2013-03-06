@@ -15,6 +15,7 @@ setup:
       - libevent-dev
       - libpq-dev
       - lessc
+      - fontconfig  # for phantomjs
     - pip:
       - amqp
       - pika: 0.9.5
