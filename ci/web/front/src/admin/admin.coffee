@@ -32,11 +32,11 @@ window.AdminUsers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initial
 					$scope.addUsers.emails = ''
 
 	handleUserAdded = (data) -> $scope.$apply () ->
-		$scope.members.push data
+		$scope.users.push data
 
 	handleUserRemoved = (data) -> $scope.$apply () ->
 		userToRemoveIndex = (index for user, index in $scope.users when user.id is data.id)[0]
-		$scope.members.splice userToRemoveIndex, 1 if userToRemoveIndex?
+		$scope.users.splice userToRemoveIndex, 1 if userToRemoveIndex?
 
 	addUserEvents = events.listen('users', 'user created', initialState.user.id).setCallback(handleUserAdded).subscribe()
 	removeUserEvents = events.listen('users', 'user removed', initialState.user.id).setCallback(handleUserRemoved).subscribe()

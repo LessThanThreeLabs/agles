@@ -26,8 +26,17 @@ class UserEventHandler extends EventHandler
 					id: data.contents.id
 					alias: data.contents.alias
 					timestamp: data.contents.timestamp
-			when 'user created', 'user removed'
-				console.error 'NEED TO HANDLE USER ADDED/REMOVED EVENTS'
+			when 'user created'
+				@sockets.in(roomName).emit eventName, 
+					id: data.contents.user_id
+					email: data.contents.email
+					firstName: data.contents.first_name
+					lastName: data.contents.last_name
+					isAdmin: data.contents.admin
+					timestamp: data.contents.created
+			when 'user removed'
+				@sockets.in(roomName).emit eventName, 
+					id: data.contents.removed_id
 			when 'repository added', 'repository removed'
 				console.error 'NEED TO HANDLE REPOSITORY ADDED/REMOVED EVENTS'
 			else

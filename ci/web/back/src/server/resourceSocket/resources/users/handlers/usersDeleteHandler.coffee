@@ -9,9 +9,13 @@ exports.create = (modelRpcConnection) ->
 
 class UsersDeleteHandler extends Handler
 	deleteUser: (socket, data, callback) =>
-		if not data?.id?
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		else if not data?.id?
 			callback 400
 		else
-			console.log 'need to delete user...'
-			callback()
-			
+			@modelRpcConnection.users.delete.delete_user userId, data.id, (error, userId) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback()
