@@ -27,7 +27,7 @@ class OpenstackVm(VirtualMachine):
 		self.server = server
 		self.nova_client = OpenstackClient.get_client()
 		self.vm_username = vm_username
-		self._write_vm_info()
+		self.write_vm_info()
 
 	@classmethod
 	def from_directory_or_construct(cls, vm_directory, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
@@ -85,13 +85,6 @@ class OpenstackVm(VirtualMachine):
 		except:
 			return None
 
-	def _write_vm_info(self):
-		config = yaml.safe_dump({'server_id': self.server.id, 'username': self.vm_username})
-		if not os.access(self.vm_directory, os.F_OK):
-			os.makedirs(self.vm_directory)
-		with open(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE), "w") as vm_info_file:
-			vm_info_file.write(config)
-
 	def wait_until_ready(self):
 		while not ('private' in self.server.addresses and self.server.status == 'ACTIVE'):
 			eventlet.sleep(3)
@@ -143,7 +136,7 @@ class OpenstackVm(VirtualMachine):
 		flavor = self.server.flavor['id']
 		self.delete()
 		self.server = self.nova_client.servers.create(name, image, flavor, files=self._default_files(self.vm_username))
-		self._write_vm_info()
+		self.write_vm_info()
 		self.wait_until_ready()
 
 	@classmethod
