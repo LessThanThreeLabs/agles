@@ -71,6 +71,7 @@
 						<tr class="title">
 							<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
 							<td class="createdColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Created</td>
+							<td class="publicKeyColumn">Key</td>
 							<td class="removeColumn">Remove</td>
 						</tr>
 
@@ -78,12 +79,14 @@
 							<td class="nameColumn" text-selectable>There are no repositories</td>
 							<td class="emailColumn"></td>
 							<td class="createdColumn"></td>
+							<td class="publicKeyColumn"></td>
 							<td class="removeColumn"></td>
 						</tr>
 
 						<tr ng-repeat="repository in repositories | orderBy:orderByPredicate:orderByReverse">
 							<td class="nameColumn" text-selectable>{{repository.name}}</td>
 							<td class="createdColumn" text-selectable>{{repository.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
+							<td class="publicKeyColumn"><span class="publicKeyLink" ng-click="showPublicKey(repository)">Show</span></td>
 							<td class="removeColumn"><span class="removeLink" ng-click="openRemoveRepository(repository)">Delete</span></td>
 						</tr>
 					</table>
@@ -159,6 +162,17 @@
 								</styled-form-field>
 							</styled-form>
 						</div>
+					</content-body>
+				</content>
+			</div>
+		</modal>
+
+		<modal modal-visible="publicKey.modalVisible">
+			<div id="adminPublicKey">
+				<content>
+					<content-header content-header-padding>Public Key</content-header>
+					<content-body unselectable>
+						<textarea ng-model="publicKey.key" highlight-on-first-click readonly></textarea>
 					</content-body>
 				</content>
 			</div>
