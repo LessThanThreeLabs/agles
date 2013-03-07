@@ -137,7 +137,42 @@ function setup_openstack () {
 	popd
 }
 
+function setup_java () {
+	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
+		mkdir /tmp/src
+		old_pwd=$(pwd)
+        cd /tmp/src
+        clone github.com/flexiondotorg/oab-java6.git oab-java6
+        cd /tmp/src/oab-java6
+        sudo ./oab-java.sh
+        sudo add-apt-repository -y ppa:flexiondotorg/java
+        sudo apt-get update
+        sudo apt-get install -y sun-java6-jdk maven
+        cd $old_pwd
+    fi
+}
+
+function setup_chef () {
+    if [ ! -f "/usr/bin/chef-solo" ]; then
+	    echo "deb http://apt.opscode.com/ `lsb_release -cs`-0.10 main" | sudo tee /etc/apt/sources.list.d/opscode.list
+	    sudo mkdir -p /etc/apt/trusted.gpg.d
+		gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
+		gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg > /dev/null
+		sudo apt-get update
+		sudo apt-get install -y opscode-keyring
+		echo "chef chef/chef_server_url string" | sudo debconf-set-selections && sudo apt-get install -y chef
+	fi
+}
+
 function setup_koality_service () {
+	source /etc/koality/koalityrc
+	pushd ~/code/agles/ci/platform
+	sudo python setup.py install
+	popd
+	sudo -u postgres psql -c "create user lt3 with password ''"
+	sudo -u postgres psql -c "create database koality"
+	sudo -u postgres psql -c "grant all privileges on database koality to lt3"
+	python ~/code/agles/ci/platform/database/schema.py
 	sudo su -c 'cat > /etc/init.d/koality <<-EOF
 		#!/bin/bash
 		sudo service rabbitmq-server start
@@ -149,6 +184,7 @@ function setup_koality_service () {
 
 function shared_setup () {
 	# Install dependencies
+	sudo apt-get update
 	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl libyaml-dev
 
 	# Allow local users to access postgresql without a password
@@ -193,49 +229,39 @@ function host_setup () {
 
 	shared_setup
 
-	sudo source/ci/scripts/rabbitmq_setup.sh
-
 	mkdir ~/code
 	mv ~/source ~/code/agles
+
+	sudo ~/code/agles/ci/scripts/rabbitmq_setup.sh
 
 	rvm use system
 
 	setup_openstack
-
 	build_vm_image
 
-	# Java
-	if [ ! -d "/usr/lib/jvm/java-6-sun" ]; then
-		mkdir /tmp/src
-		old_pwd=$(pwd)
-        cd /tmp/src
-        clone github.com/flexiondotorg/oab-java6.git oab-java6
-        cd /tmp/src/oab-java6
-        sudo ./oab-java.sh
-        sudo add-apt-repository -y ppa:flexiondotorg/java
-        sudo apt-get update
-        sudo apt-get install -y sun-java6-jdk maven
-        cd $old_pwd
-    fi
+	setup_java
+	setup_chef
 
-    #Chef
-    if [ ! -f "/usr/bin/chef-solo" ]; then
-	    echo "deb http://apt.opscode.com/ `lsb_release -cs`-0.10 main" | sudo tee /etc/apt/sources.list.d/opscode.list
-	    sudo mkdir -p /etc/apt/trusted.gpg.d
-		gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
-		gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg > /dev/null
-		sudo apt-get update
-		sudo apt-get install -y opscode-keyring
-		echo "chef chef/chef_server_url string" | sudo debconf-set-selections && sudo apt-get install -y chef
-	fi
-
-	sudo -u postgres psql -c "create user lt3 with password ''"
-	sudo -u postgres psql -c "create database koality"
-	sudo -u postgres psql -c "grant all privileges on database koality to lt3"
-	/etc/koality/python ~/code/agles/ci/platform/database/schema.py
-	source /etc/koality/koalityrc
 	setup_koality_service
+	sudo service koality start
+}
 
+function service_setup () {
+	check_sudo
+
+	shared_setup
+
+	mkdir ~/code
+	mv ~/source ~/code/agles
+
+	sudo ~/code/agles/ci/scripts/rabbitmq_setup.sh
+
+	rvm use system
+
+	setup_java
+	setup_chef
+
+	setup_koality_service
 	sudo service koality start
 }
 
@@ -244,11 +270,15 @@ case "$1" in
 		vm_setup ;;
 	_host_setup )
 		host_setup ;;
+	_service_setup )
+		service_setup ;;
 	vm )
 		bootstrap vm ;;
 	host )
 		bootstrap host ;;
+	service )
+		bootstrap service ;;
 	* )
-		echo 'Must be run with either "vm" or "host" as the first argument'
+		echo 'Must be run with either "vm", "host", or "service" as the first argument'
 		exit 1
 esac
