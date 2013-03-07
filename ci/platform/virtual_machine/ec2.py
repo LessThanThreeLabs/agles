@@ -48,6 +48,37 @@ class Ec2Vm(VirtualMachine):
 		reservation = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, key_name=key_name)
 		return Ec2Vm(vm_directory, reservation)
 
+	@classmethod
+	def from_directory(cls, vm_directory):
+		try:
+			with open(os.path.join(vm_directory, Ec2Vm.VM_INFO_FILE)) as vm_info_file:
+				config = yaml.safe_load(vm_info_file.read())
+				instance_id = config['server_id']
+				vm_username = config['username']
+		except:
+			return None
+		else:
+			return cls.from_id(vm_directory, instance_id, vm_username)
+
+	# TODO: instance vs reservations?
+	@classmethod
+	def from_id(cls, vm_directory, instance_id, vm_username=VM_USERNAME):
+		try:
+			vm = Ec2Vm(vm_directory, Ec2Client.get_client().get_all_instances(instance_ids=[instance_id])[0], vm_username)
+			if vm.instance.status == 'stopping' or vm.instance.status == 'stopped':
+				Ec2Vm.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, instance_id))
+				vm.delete()
+				return None
+			elif vm.instance.status == 'shutting-down' or vm.instance.status == 'terminated':
+				return None
+			elif vm.instance.status == 'running' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
+				vm.delete()
+				return None
+			# 'pending' means we should return
+			return vm
+		except:
+			return None
+
 	def wait_until_ready(self):
 		instance = self.reservation.instances[0]
 		while True:
@@ -87,6 +118,9 @@ class Ec2Vm(VirtualMachine):
 	def get_default_key(cls):
 		pass
 
+	def save_snapshot(self, volume_id, description=None):
+		return self.ec2_client.create_snapshot(volume_id, description)
+
 	def rebuild(self, ami_image_id=None):
 		if not ami_image_id:
 			ami_image_id = self.get_newest_image()
@@ -100,7 +134,7 @@ class Ec2Vm(VirtualMachine):
 		self.wait_until_ready()
 
 	def delete(self):
-		for instance in self.ec2_client.reservation:  # Clean up rouge VMs
+		for instance in self.ec2_client.reservation:  # Clean up rogue VMs
 			try:
 				instance.terminate()
 			except:
