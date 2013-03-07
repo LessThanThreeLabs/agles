@@ -131,7 +131,8 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				self.repostore_id,
 				"forwardurl",
 				"privatekey",
-				"publickey")
+				"publickey",
+				0)
 
 	def test_get_repositories(self):
 		with ModelServer.rpc_connect("repos", "read") as conn:
