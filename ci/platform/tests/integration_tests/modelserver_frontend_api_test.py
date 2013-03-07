@@ -117,7 +117,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 	def _create_repo(self):
 		repostore = database.schema.repostore
-		repostore_ins = repostore.insert().values(host_name="localhost", repositories_path="/tmp")
+		repostore_ins = repostore.insert().values(ip_address="127.0.0.1", repositories_path="/tmp")
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			result = conn.execute(repostore_ins)

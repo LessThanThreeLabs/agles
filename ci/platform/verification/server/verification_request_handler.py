@@ -135,7 +135,7 @@ class VerificationRequestHandler(InfiniteWorker):
 
 	def _get_private_key(self, repo_uri):
 		with ModelServer.rpc_connect("repos", "read") as repos_read_rpc:
-			repostore_id, host_name, repo_path, repo_id, repo_name, private_key = repos_read_rpc.get_repo_attributes(repo_uri)
+			repostore_id, ip_address, repo_path, repo_id, repo_name, private_key = repos_read_rpc.get_repo_attributes(repo_uri)
 		return private_key
 
 	def _make_console_appender(self, build_consoles_update_rpc, build_id):

@@ -29,7 +29,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			self.user_id = sqlconn.execute(ins_user).inserted_primary_key[0]
 
 			ins_repostore = repostore.insert().values(
-				host_name='a', repositories_path='a')
+				ip_address='127.0.0.1', repositories_path='a')
 
 			repostore_id = sqlconn.execute(ins_repostore).inserted_primary_key[0]
 

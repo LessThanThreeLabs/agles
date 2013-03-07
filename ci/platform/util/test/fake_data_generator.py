@@ -57,7 +57,7 @@ class SchemaDataGenerator(object):
 			repos = dict()
 			repo_ids = []
 			for repostore in range(NUM_REPO_STORES):
-				ins_repostore = schema.repostore.insert().values(repositories_path=REPOSITORIES_PATH, host_name=hashlib.sha1(str(repostore)).hexdigest())
+				ins_repostore = schema.repostore.insert().values(repositories_path=REPOSITORIES_PATH, ip_address=hashlib.sha1(str(repostore)).hexdigest())
 				repostore_id = conn.execute(ins_repostore).inserted_primary_key[0]
 
 				for repo in range(NUM_REPOS):

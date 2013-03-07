@@ -10,13 +10,13 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposUpdateHandler, self).__init__("repos", "update")
 
-	def update_repostore(self, repostore_id, host_name, root_dir, num_repos):
+	def update_repostore(self, repostore_id, ip_address, root_dir, num_repos):
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id==repostore_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			assert row is not None
-			assert row[repostore.c.host_name] == host_name
+			assert row[repostore.c.ip_address] == ip_address
 			assert row[repostore.c.repositories_path] == root_dir
 
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())

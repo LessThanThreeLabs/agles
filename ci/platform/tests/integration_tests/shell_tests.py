@@ -29,7 +29,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._purge_queues()
 
 	def _create_repo_store(self):
-		ins = schema.repostore.insert().values(host_name="localhost", repositories_path="/tmp")
+		ins = schema.repostore.insert().values(ip_address="127.0.0.1", repositories_path="/tmp")
 		with ConnectionFactory.get_sql_connection() as conn:
 			result = conn.execute(ins)
 			return result.inserted_primary_key[0]
@@ -56,7 +56,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		assert_equal('-p', sshargs[2])
 		assert_equal('2222', sshargs[3])
 		assert_equal('-oStrictHostKeyChecking=no', sshargs[4])
-		assert_equal('git@localhost', sshargs[5])
+		assert_equal('git@127.0.0.1', sshargs[5])
 		assert_is_not_none(re.match("git-receive-pack '.+/.+/.+/repo.git' 1", sshargs[6]),
 			msg='Created ssh command: "%s" is not well formed.' % sshargs[6])
 
