@@ -83,9 +83,9 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 		return to_clone_path(email, repo_name)
 
-	def register_repostore(self, host_name, root_dir):
+	def register_repostore(self, ip_address, root_dir):
 		repostore = database.schema.repostore
-		ins = repostore.insert().values(host_name=host_name, repositories_path=root_dir)
+		ins = repostore.insert().values(ip_address=ip_address, repositories_path=root_dir)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 			repostore_id = result.inserted_primary_key[0]

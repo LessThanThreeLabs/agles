@@ -9,9 +9,9 @@ import logging
 import os
 import re
 import shutil
-import socket
 import sys
 import time
+import urllib2
 import yaml
 
 import model_server
@@ -188,23 +188,19 @@ class RepositoryStore(object):
 
 	@classmethod
 	def initialize_store(cls, root_dir):
-		host_name = cls._get_host_name()
+		ip_address = cls._get_ip_address()
 		with model_server.ModelServer.rpc_connect("repos", "create") as conn:
-			return conn.register_repostore(host_name, root_dir)
+			return conn.register_repostore(ip_address, root_dir)
 
 	@classmethod
 	def update_store(cls, repostore_id, root_dir, num_repos):
-		host_name = cls._get_host_name()
+		ip_address = cls._get_ip_address()
 		with model_server.ModelServer.rpc_connect("repos", "update") as conn:
-			conn.update_repostore(repostore_id, host_name, root_dir, num_repos)
+			conn.update_repostore(repostore_id, ip_address, root_dir, num_repos)
 
 	@classmethod
-	def _get_host_name(cls):  # relies on Google DNS to capture own outbound ip
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		sock.connect(("8.8.8.8", 80))
-		host_name = sock.getsockname()[0]
-		sock.close()
-		return host_name
+	def _get_ip_address(cls):  # TODO: find a more legit service for this
+		return urllib2.urlopen('http://ip.42.pl/raw').read()
 
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")

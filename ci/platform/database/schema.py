@@ -110,10 +110,10 @@ console_output = Table('console_output', metadata,
 
 repostore = Table('repostore', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('host_name', String, nullable=False),
+	Column('ip_address', String, nullable=False),
 	Column('repositories_path', String, nullable=False),
 
-	UniqueConstraint('host_name', 'repositories_path')
+	UniqueConstraint('ip_address', 'repositories_path')
 )
 
 ssh_pubkey = Table('ssh_pubkey', metadata,
