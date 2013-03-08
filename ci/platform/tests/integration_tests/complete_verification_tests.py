@@ -115,9 +115,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			return commit_id
 
 	def _on_response(self, body, message):
+		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		if body["type"] == "change finished":
 			self.change_status = body["contents"]["status"]
-		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 
 	def _test_commands(self):
 		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(30)]
