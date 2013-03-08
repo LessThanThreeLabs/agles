@@ -333,7 +333,7 @@ angular.module('koality.directive', []).
 					<span class="prettyContentMenuOptionIdentifier">{{identifier}}</span>
 					<span class="prettyContentMenuOptionText">{{text}}</span>
 					<div class="prettyContentMenuOptionArrow"></div>
-					<spinner spinner-running="{{spinning}}"></spinner>
+					<spinner class="prettyContentMenuOptionSpinner" spinner-running="spinning"></spinner>
 				</div>
 				<div class="prettyContentMenuOptionTooth"></div>
 			</div>'
@@ -379,6 +379,7 @@ angular.module('koality.directive', []).
 	directive('spinner', () ->
 		restrict: 'E'
 		replace: true
+		scope: running: '=spinnerRunning'
 		template: '<div class="spinnerContainer"></div>'
 		link: (scope, element, attributes) ->
 			spinner = null
@@ -400,11 +401,8 @@ angular.module('koality.directive', []).
 				top: 'auto'
 				left: 'auto'
 
-			attributes.$observe 'spinnerRunning', (running) ->
-				# running = scope.$eval running
-				running = if typeof running is 'boolean' then running else running is 'true'
-				console.log 'value changed ' + running
-				if running then startSpinner() else stopSpinner()
+			scope.$watch 'running', (newValue, oldValue) ->
+				if newValue then startSpinner() else stopSpinner()
 
 			startSpinner = () ->
 				spinner = new Spinner(spinnerOptions).spin(element[0])

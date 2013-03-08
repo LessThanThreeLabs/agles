@@ -47,6 +47,8 @@
 				<span ng-show="currentStageInformation != null">{{currentStageInformation.name}}</span>
 			</content-header>
 			<content-body unselectable>
+				<spinner id="repositoryStageDetailsLoadingSpinner" spinner-running="spinnerOn"></spinner>
+
 				<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
 					<styled-form text-selectable>
 						<styled-form-field label="Commiter">{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}</styled-form-field>
@@ -59,8 +61,6 @@
 				</div>
 
 				<div id="repositoryStageDetailsOutput" ng-show="currentChangeId != null && currentStageId != null">
-					<spinner spinner-running="{{spinnerOn}}"></spinner>
-
 					<div class="consoleTextTopBuffer"></div>
 					<div class="consoleTextContainer" auto-scroll-to-bottom="lines" auto-scroll-to-bottom-buffer="60">
 						<div class="consoleText">
