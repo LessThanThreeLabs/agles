@@ -210,8 +210,6 @@ function shared_setup () {
 
 	sudo apt-get install -y python-dev
 	sudo pip install pyyaml eventlet virtualenv
-
-	provision
 }
 
 function vm_setup () {
@@ -241,6 +239,8 @@ function host_setup () {
 	check_sudo
 
 	shared_setup
+
+	provision
 
 	mkdir ~/code
 	mv ~/source ~/code/agles
