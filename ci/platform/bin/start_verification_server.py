@@ -6,12 +6,11 @@ import time
 
 import settings.log
 
-from settings.verification_server import VerificationServerSettings
 from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer
 from verification.server.build_verifier import BuildVerifier
+from virtual_machine.ec2 import Ec2Vm
 from virtual_machine.openstack import OpenstackVm
-from virtual_machine.vagrant import Vagrant
 
 DEFAULT_VM_DIRECTORY = "/tmp/verification"
 
@@ -24,18 +23,26 @@ def main():
 		help="The root directory for the virtual machine")
 	parser.add_argument("-f", "--fast_startup", action='store_true',
 		help="Skips cycling of virtual machine, assumes it is already running")
-	parser.add_argument("-c", "--cloud", action='store_true',
-		help="Uses cloud-based virtual machine instead of a local vm")
+	parser.add_argument("-a", "--aws", action='store_true',
+		help="Uses an AWS virtual machine")
+	parser.add_argument("-o", "--openstack", action='store_true',
+		help="Uses an Openstack virtual machine")
 	parser.set_defaults(vm_dir=DEFAULT_VM_DIRECTORY, fast_startup=False)
 	args = parser.parse_args()
 
+	if not args.aws and not args.openstack:
+		print "Must supply either --aws or --openstack to specify the VM type"
+		sys.exit(1)
+
 	vm_dir = os.path.realpath(args.vm_dir)
 	print "Starting Verification Server (%s) with vm directory %s ..." % (
-			"cloud" if args.cloud else "local", vm_dir)
+			"openstack" if args.openstack else "aws", vm_dir)
+
+	vm_class = OpenstackVm if args.openstack else Ec2Vm
 
 	for attempts in range(9, -1, -1):
 		try:
-			virtual_machine = OpenstackVm.from_directory_or_construct(vm_dir) if args.cloud else Vagrant(vm_dir, VerificationServerSettings.local_box_name)
+			virtual_machine = vm_class.from_directory_or_construct(vm_dir)
 		except:
 			if attempts > 0:
 				print "Failed to create virtual machine, trying again in 3 seconds..."

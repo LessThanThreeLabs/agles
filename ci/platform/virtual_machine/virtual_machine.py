@@ -24,7 +24,7 @@ class VirtualMachine(object):
 		return StreamingExecutor.execute(command, output_handler, cwd=self.vm_directory, env=env, timeout=timeout, **kwargs)
 
 	def write_vm_info(self):
-		config = yaml.safe_dump({'server_id': self.server.id, 'username': self.vm_username})
+		config = yaml.safe_dump({'instance_id': self.instance.id, 'username': self.vm_username})
 		if not os.access(self.vm_directory, os.F_OK):
 			os.makedirs(self.vm_directory)
 		with open(os.path.join(self.vm_directory, self.VM_INFO_FILE), "w") as vm_info_file:

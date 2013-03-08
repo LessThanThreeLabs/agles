@@ -1,5 +1,13 @@
 class RemoteCommand(object):
 	def run(self, virtual_machine, output_handler):
+		if output_handler:
+			output_handler.declare_command()
+		results = self._run(virtual_machine, output_handler)
+		if output_handler:
+			output_handler.set_return_code(results.returncode)
+		return results.returncode
+
+	def _run(self, virtual_machine, output_handler=None):
 		raise NotImplementedError("Subclasses should override this!")
 
 
@@ -7,7 +15,7 @@ class NullRemoteCommand(RemoteCommand):
 	def __init__(self, name=None):
 		self.name = name
 
-	def run(self, virtual_machine, output_handler=None):
+	def _run(self, virtual_machine, output_handler=None):
 		return 0
 
 
@@ -20,11 +28,8 @@ class SimpleRemoteCommand(RemoteCommand):
 	def _get_command(self):
 		return "bash --login scripts/%s/%s" % (self.type, self.name)
 
-	def run(self, virtual_machine, output_handler=None):
-		results = virtual_machine.ssh_call(self._get_command(), output_handler)
-		if output_handler:
-			output_handler.set_return_code(results.returncode)
-		return results.returncode
+	def _run(self, virtual_machine, output_handler=None):
+		return virtual_machine.ssh_call(self._get_command(), output_handler)
 
 
 class SimpleRemoteCompileCommand(SimpleRemoteCommand):
@@ -49,11 +54,8 @@ class SimpleRemoteCheckoutCommand(SimpleRemoteSetupCommand):
 		self.git_url = git_url
 		self.refs = refs
 
-	def run(self, virtual_machine, output_handler=None):
-		results = virtual_machine.remote_checkout(self.git_url, self.refs, output_handler=output_handler)
-		if output_handler:
-			output_handler.set_return_code(results.returncode)
-		return results.returncode
+	def _run(self, virtual_machine, output_handler=None):
+		return virtual_machine.remote_checkout(self.git_url, self.refs, output_handler=output_handler)
 
 
 class SimpleRemoteProvisionCommand(SimpleRemoteSetupCommand):
@@ -61,8 +63,5 @@ class SimpleRemoteProvisionCommand(SimpleRemoteSetupCommand):
 		super(SimpleRemoteProvisionCommand, self).__init__("provision")
 		self.private_key = private_key
 
-	def run(self, virtual_machine, output_handler=None):
-		results = virtual_machine.provision(self.private_key, output_handler=output_handler)
-		if output_handler:
-			output_handler.set_return_code(results.returncode)
-		return results.returncode
+	def _run(self, virtual_machine, output_handler=None):
+		return virtual_machine.provision(self.private_key, output_handler=output_handler)

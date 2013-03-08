@@ -9,7 +9,8 @@ default_attributes(
 			:internal => "/home/lt3/code/agles",
 		},
 		:verification => {
-			:server_count => 8
+			:server_count => 8,
+			:server_type => :openstack
 		}
 	}
 )

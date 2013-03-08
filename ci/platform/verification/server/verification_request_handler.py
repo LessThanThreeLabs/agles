@@ -146,8 +146,8 @@ class VerificationRequestHandler(InfiniteWorker):
 				self.type = type
 				self.subtype = subtype
 
-			def declare_commands(self, commands):
-				self.build_consoles_update_rpc.add_subtypes(self.build_id, self.type, commands)
+			def declare_command(self):
+				self.build_consoles_update_rpc.add_subtypes(self.build_id, self.type, self.subtype)
 
 			def append(self, read_lines):
 				self.build_consoles_update_rpc.append_console_lines(self.build_id, read_lines, self.type, self.subtype)

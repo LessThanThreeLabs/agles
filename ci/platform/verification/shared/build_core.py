@@ -98,17 +98,10 @@ class VirtualMachineBuildCore(BuildCore):
 	def _get_output_handler(self, console_appender, type, subtype=""):
 		return console_appender(type, subtype) if console_appender else None
 
-	def declare_commands(self, console_appender, console_type, commands):
-		command_names = [command.name for command in commands]
-		output_handler = self._get_output_handler(console_appender, console_type)
-		if output_handler:
-			output_handler.declare_commands(command_names)
-
 	def setup_virtual_machine(self, private_key, console_appender, setup_commands=[]):
 		"""Provisions the contained virtual machine for analysis and test running"""
 		provision_command = SimpleRemoteProvisionCommand(private_key)
 		setup_commands = setup_commands + [provision_command]
-		self.declare_commands(console_appender, ConsoleType.Setup, setup_commands)
 		for setup_command in setup_commands:
 			self.run_setup_command(setup_command, console_appender)
 
@@ -168,16 +161,16 @@ class VagrantBuildCore(VirtualMachineBuildCore):
 		self.virtual_machine.sandbox_rollback()
 
 
-class OpenstackBuildCore(VirtualMachineBuildCore):
-	def __init__(self, openstack_vm, uri_translator):
-		super(OpenstackBuildCore, self).__init__(openstack_vm, uri_translator)
+class CloudBuildCore(VirtualMachineBuildCore):
+	def __init__(self, cloud_vm, uri_translator):
+		super(CloudBuildCore, self).__init__(cloud_vm, uri_translator)
 
 	def setup(self):
 		while True:
 			try:
 				self.virtual_machine.wait_until_ready()
 			except:
-				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id), exc_info=True)
+				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.instance.id), exc_info=True)
 			else:
 				break
 
@@ -189,7 +182,7 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 			try:
 				self.virtual_machine.rebuild()
 			except:
-				self.logger.warn("Failed to roll back virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.server.id), exc_info=True)
+				self.logger.warn("Failed to roll back virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.instance.id), exc_info=True)
 			else:
 				break
 
@@ -199,7 +192,7 @@ class OpenstackBuildCore(VirtualMachineBuildCore):
 	def setup_virtual_machine(self, repo_uri, refs, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
 		checkout_command = SimpleRemoteCheckoutCommand(checkout_url, refs)
-		super(OpenstackBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
+		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
 
 
 class VerificationException(Exception):

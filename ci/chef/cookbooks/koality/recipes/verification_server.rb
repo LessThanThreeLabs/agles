@@ -15,13 +15,13 @@ end
 
 node[:koality][:verification][:server_count].to_i.times do |server_num|
 	server_path = "/verification/server/#{server_num}"
-	bash "Start cloud verification server #{server_num}}" do
+	bash "Start #{node[:koality][:verification][:server_type].to_s} verification server #{server_num}}" do
 		user "verification"
 		environment({"HOME" => "/home/verification"})
 		code <<-EOH
 			mkdir -p #{server_path}
 			cd #{server_path}
-			/etc/koality/python #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{server_path} -c >> #{server_path}/server.log 2>&1 &
+			/etc/koality/python #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_verification_server.py -v #{server_path} --#{node[:koality][:verification][:server_type].to_s} >> #{server_path}/server.log 2>&1 &
 			EOH
 	end
 end

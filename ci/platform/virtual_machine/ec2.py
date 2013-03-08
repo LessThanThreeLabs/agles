@@ -14,7 +14,8 @@ from virtual_machine import VirtualMachine
 class Ec2Client(object):
 	@classmethod
 	def get_client(cls):
-		return boto.ec2.connect_to_region(*AwsSettings.credentials[0], **AwsSettings.credentials[1])
+		return boto.ec2.connect_to_region(AwsSettings.region,
+			**AwsSettings.credentials)
 
 
 class Ec2Vm(VirtualMachine):
@@ -23,9 +24,9 @@ class Ec2Vm(VirtualMachine):
 	DEFAULT_INSTANCE_TYPE = "m1.small"
 	logger = logging.getLogger("Ec2Vm")
 
-	def __init__(self, vm_directory, reservation, vm_username=VM_USERNAME):
+	def __init__(self, vm_directory, instance, vm_username=VM_USERNAME):
 		super(Ec2Vm, self).__init__(vm_directory)
-		self.reservation = reservation
+		self.instance = instance
 		self.ec2_client = Ec2Client.get_client()
 		self.vm_username = vm_username
 		self.write_vm_info()
@@ -35,43 +36,48 @@ class Ec2Vm(VirtualMachine):
 		return cls.from_directory(vm_directory) or cls.construct(vm_directory, name, ami_image_id, instance_type, vm_username)
 
 	@classmethod
-	def construct(cls, vm_directory, name=None, ami_image_id=None, instance_type=None, key_name=None, vm_username=VM_USERNAME):
+	def construct(cls, vm_directory, name=None, ami_image_id=None, instance_type=None, vm_username=VM_USERNAME):
 		if not name:
-			name = "%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(os.getcwd())))
+			name = "%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(vm_directory)))
 		if not ami_image_id:
-			ami_image_id = cls.get_newest_image()
+			ami_image_id = cls.get_newest_image().id
 		if not instance_type:
 			instance_type = cls.DEFAULT_INSTANCE_TYPE
-		if not key_name:
-			key_name = cls._get_default_key()
 
-		reservation = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, key_name=key_name)
-		return Ec2Vm(vm_directory, reservation)
+		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=cls._default_user_data(vm_username)).instances[0]
+		return Ec2Vm(vm_directory, instance)
+
+	@classmethod
+	def _default_user_data(cls, vm_username=VM_USERNAME):
+		return '\n'.join(("#!/bin/sh",
+			"mkdir /home/%s/.ssh" % vm_username,
+			"echo '%s' >> /home/%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
+			"chown -R %s:%s /home/%s/.ssh" % (vm_username, vm_username, vm_username)))
 
 	@classmethod
 	def from_directory(cls, vm_directory):
 		try:
 			with open(os.path.join(vm_directory, Ec2Vm.VM_INFO_FILE)) as vm_info_file:
 				config = yaml.safe_load(vm_info_file.read())
-				instance_id = config['server_id']
+				instance_id = config['instance_id']
 				vm_username = config['username']
 		except:
 			return None
 		else:
 			return cls.from_id(vm_directory, instance_id, vm_username)
 
-	# TODO: instance vs reservations?
+	# TODO: instance vs instances?
 	@classmethod
 	def from_id(cls, vm_directory, instance_id, vm_username=VM_USERNAME):
 		try:
-			vm = Ec2Vm(vm_directory, Ec2Client.get_client().get_all_instances(instance_ids=[instance_id])[0], vm_username)
-			if vm.instance.status == 'stopping' or vm.instance.status == 'stopped':
+			vm = Ec2Vm(vm_directory, Ec2Client.get_client().get_all_instances([instance_id])[0].instances[0], vm_username)
+			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
 				Ec2Vm.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, instance_id))
 				vm.delete()
 				return None
-			elif vm.instance.status == 'shutting-down' or vm.instance.status == 'terminated':
+			elif vm.instance.state == 'shutting-down' or vm.instance.state == 'terminated':
 				return None
-			elif vm.instance.status == 'running' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
+			elif vm.instance.state == 'running' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
 				vm.delete()
 				return None
 			# 'pending' means we should return
@@ -80,21 +86,20 @@ class Ec2Vm(VirtualMachine):
 			return None
 
 	def wait_until_ready(self):
-		instance = self.reservation.instances[0]
-		while True:
+		while not self.instance.state == 'running':
 			eventlet.sleep(3)
-			instance.update()
-			if instance.state == 'terminated' or instance.state == 'stopped':
-				Ec2Vm.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, instance.id))
+			self.instance.update()
+			if self.instance.state == 'terminated' or self.instance.state == 'stopped':
+				Ec2Vm.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.instance.id))
 				self.rebuild()
 		for remaining_attempts in range(24, 0, -1):
 			if remaining_attempts <= 3:
-				Ec2Vm.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, instance.id, remaining_attempts))
+				Ec2Vm.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.instance.id, remaining_attempts))
 			if self.ssh_call("true").returncode == 0:
 				return
 			eventlet.sleep(5)
 		# Failed to ssh into machine, try again
-		Ec2Vm.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, instance.id))
+		Ec2Vm.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.instance.id))
 		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
@@ -102,43 +107,36 @@ class Ec2Vm(VirtualMachine):
 			timeout=1200, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.reservation.accessIPv4 or self.reservation.addresses['private'][0]['addr'])
+		login = "%s@%s" % (self.vm_username, self.instance.ip_address)
 		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
-		self.reservation[0].reboot()
+		self.instance.reboot()
 
 	@classmethod
 	def get_newest_image(cls):
-		images = Ec2Client.get_all_images()
+		images = Ec2Client.get_client().get_all_images(owners=['600991114254'])
 		images = [image for image in images if AwsSettings.image_filter(image)]  # TODO: Verify this doesn't need to check for ACTIVE (seems to be the case)
-		return max(images, key=lambda image: str(image)[str(image).rfind('-') + 1:])  # get image with greatest suffix number
-
-	@classmethod
-	def get_default_key(cls):
-		pass
+		return max(images, key=lambda image: str(image)[str(image).rfind('_') + 1:])  # get image with greatest suffix number
 
 	def save_snapshot(self, volume_id, description=None):
 		return self.ec2_client.create_snapshot(volume_id, description)
 
 	def rebuild(self, ami_image_id=None):
 		if not ami_image_id:
-			ami_image_id = self.get_newest_image()
-		instance = self.reservation.instances[0]
-		instance_type = instance.instance_type
-		key_name = instance.key_name
+			ami_image_id = self.get_newest_image().id
+		instance_type = self.instance.instance_type
 		self.delete()
-		self.reservation = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, key_name=key_name)
+		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=self._default_user_data(self.vm_username)).instances[0]
 
 		self.write_vm_info()
 		self.wait_until_ready()
 
 	def delete(self):
-		for instance in self.ec2_client.reservation:  # Clean up rogue VMs
-			try:
-				instance.terminate()
-			except:
-				pass
+		try:
+			self.instance.terminate()
+		except:
+			pass
 		try:
 			os.remove(os.path.join(self.vm_directory, Ec2Vm.VM_INFO_FILE))
 		except:
