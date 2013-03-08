@@ -66,32 +66,3 @@ module.exports = class Resource
 		firstName: user.first_name
 		lastName: user.last_name
 		isAdmin: user.admin	? false
-
-
-	pushFiles: (request, response) =>
-		if not request.isSpdy
-			console.log 'spdy not supported!'
-			return
-
-		for files in [@getFiles().js, @getFiles().css, @getFiles().html]
-			for fileName, file of files
-				@_pushFile request, response, fileName, file
-
-
-	_pushFile: (request, response, fileName, file) =>
-		useGzip = request.gzipAllowed and file.gzip?
-
-		headers = 
-			'content-type': file.contentType
-			'content-length': if useGzip then file.gzip.length else file.plain.length
-			'cache-control': 'max-age=2592000'
-		headers['content-encoding'] = 'gzip' if useGzip
-
-		response.push fileName, headers, (error, stream) =>
-			if error?
-				console.error error
-			else
-				data = if useGzip then file.gzip else file.plain
-				assert.ok data?
-				stream.end data, 'binary'
-				

@@ -17,5 +17,4 @@ class IndexHandler extends RequestHandler
 				request.session.destroy()
 				response.end 'internal server error'
 			else 
-				@pushFiles request, response
 				response.render 'index', templateValues

@@ -1,6 +1,6 @@
 fs = require 'fs'
 assert = require 'assert'
-spdy = require 'spdy'
+https = require 'https'
 express = require 'express'
 csrf = require './csrf'
 gzip = require './gzip'
@@ -88,12 +88,11 @@ class Server
 		expressServer.get '/admin', @handlers.indexHandler.handleRequest
 		expressServer.get '/unexpectedError', @handlers.indexHandler.handleRequest
 		expressServer.get '/invalidPermissions', @handlers.indexHandler.handleRequest
-
 		expressServer.get '*', @staticServer.handleRequest		
 
 		expressServer.post '/extendCookieExpiration', @_handleExtendCookieExpiration
 
-		server = spdy.createServer @httpsOptions, expressServer
+		server = https.createServer @httpsOptions, expressServer
 		server.listen @configurationParams.https.port
 
 		@resourceSocket.start server
