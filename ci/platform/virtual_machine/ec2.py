@@ -45,9 +45,9 @@ class Ec2Vm(VirtualMachine):
 			instance_type = cls.DEFAULT_INSTANCE_TYPE
 
 		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=cls._default_user_data(vm_username)).instances[0]
-		while 'Name' not in instance.tags:
+		while not instance.tags.get('Name'):
 			instance.add_tag('Name', name)
-			eventlet.sleep(1)
+			eventlet.sleep(2)
 			instance.update()
 		return Ec2Vm(vm_directory, instance)
 
