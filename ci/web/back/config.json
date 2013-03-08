@@ -1,5 +1,5 @@
 {
-	"mode": "production",
+	"mode": "development",
 
 	"server": {
 		"domain": "127.0.0.1",
