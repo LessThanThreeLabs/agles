@@ -45,13 +45,14 @@ angular.module('koality.service', []).
 	]).
 	factory('socket', ['$window', '$location', 'initialState', ($window, $location, initialState) ->
 		socket = io.connect "//#{$location.host()}?csrfToken=#{initialState.csrfToken}", resource: 'socket'
+		previousEventToCallbacks = {}
 
 		makeRequest: (resource, requestType, methodName, data, callback) ->
 			assert.ok typeof resource is 'string' and typeof requestType is 'string' and typeof methodName is 'string'
 			assert.ok resource.indexOf('.') is -1 and requestType.indexOf('.') is -1
 			socket.emit "#{resource}.#{requestType}", {method: methodName, args: data}, (error, response) ->
 				if error?
-					console.log "#{resource}.#{requestType} - #{methodName}"
+					console.error "#{resource}.#{requestType} - #{methodName}"
 					console.error error
 				switch error
 					when 400, 404, 500 then window.location.href = '/unexpectedError'
@@ -59,7 +60,13 @@ angular.module('koality.service', []).
 					else callback error, response if callback?
 
 		respondTo: (eventName, callback) ->
-			socket.on eventName, callback
+			if not previousEventToCallbacks[eventName]?
+				socket.on eventName, callback
+				previousEventToCallbacks[eventName] = [callback]
+			else if not callback in previousEventToCallbacks[eventName]
+				socket.on eventName, callback
+				previousEventToCallbacks[eventName].push callback
+
 	]).
 	factory('rpc', ['socket', (socket) ->
 		makeRequest: socket.makeRequest
