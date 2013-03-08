@@ -18,7 +18,7 @@ USER_PASSWORD = 'user123'
 NUM_REPOS = 1
 NUM_REPO_STORES = 1
 NUM_USERS = 1
-NUM_COMMITS = 40
+NUM_COMMITS = 20
 REPOSITORIES_PATH = 'repos'
 
 
@@ -114,7 +114,7 @@ class SchemaDataGenerator(object):
 	def generate_console_output(self, sqlconn, console_id):
 		console_output = schema.console_output
 
-		for line_num in range(1, random.randint(20, 200)):
+		for line_num in range(1, random.randint(20, 2000)):
 			output = ''.join(random.choice(string.ascii_letters + string.digits + ' ') for x in range(random.randint(1, 100)))
 			ins = console_output.insert().values(
 				build_console_id=console_id,

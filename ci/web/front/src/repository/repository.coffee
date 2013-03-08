@@ -187,7 +187,7 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 ]
 
 
-window.RepositoryStageDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, crazyAnsiText, rpc, events, integerConverter) ->
+window.RepositoryStageDetails = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, events, integerConverter) ->
 	retrieveLines = () ->
 		$scope.lines = []
 		return if not $scope.currentStageId?
@@ -200,7 +200,7 @@ window.RepositoryStageDetails = ['$scope', '$location', '$routeParams', 'crazyAn
 					addLine lineNumber, lineText
 
 	addLine = (lineNumber, lineText) ->
-		$scope.lines[lineNumber-1] = crazyAnsiText.makeCrazy lineText
+		$scope.lines[lineNumber-1] = lineText
 
 	handleLinesAdded = (data) -> $scope.$apply () ->
 		$scope.lines ?= []
