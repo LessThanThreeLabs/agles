@@ -35,7 +35,7 @@
 			</content-menu-header>
 			<content-menu-options>
 				<content-menu-option menu-option-text="Summary" ng-show="currentChangeInformation != null" ng-click="stageClick(null)" ng-class="{selected: currentStageId == null}"></content-menu-option>
-				<content-menu-option ng-repeat="stage in stages | orderBy:[stageSort, 'name']" menu-option-text="{{stage.type}}" menu-option-spinning="{{stage.status == 'running'}}" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, green: stage.status == 'passed', red: stage.status == 'failed'}"></content-menu-option>
+				<content-menu-option ng-repeat="stage in stages | orderBy:[stageSort, 'name']" menu-option-text="{{stage.name}}" menu-option-spinning="{{stage.status == 'running'}}" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, green: stage.status == 'passed', red: stage.status == 'failed'}"></content-menu-option>
 			</content-menu-options>
 		</menu>
 	</div>
