@@ -45,10 +45,7 @@ class Ec2Vm(VirtualMachine):
 			instance_type = cls.DEFAULT_INSTANCE_TYPE
 
 		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=cls._default_user_data(vm_username)).instances[0]
-		while not instance.tags.get('Name'):
-			instance.add_tag('Name', name)
-			eventlet.sleep(2)
-			instance.update()
+		cls._name_instance(instance, name)
 		return Ec2Vm(vm_directory, instance)
 
 	@classmethod
@@ -92,6 +89,13 @@ class Ec2Vm(VirtualMachine):
 		except:
 			return None
 
+	@classmethod
+	def _name_instance(cls, instance, name):
+		while not 'Name' in instance.tags:
+			instance.add_tag('Name', name)
+			eventlet.sleep(2)
+			instance.update()
+
 	def wait_until_ready(self):
 		while not self.instance.state == 'running':
 			eventlet.sleep(3)
@@ -134,7 +138,9 @@ class Ec2Vm(VirtualMachine):
 			ami_image_id = self.get_newest_image().id
 		instance_type = self.instance.instance_type
 		self.delete()
+		instance_name = self.instance.tags.get('Name')
 		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=self._default_user_data(self.vm_username)).instances[0]
+		self._name_instance(self.instance, instance_name)
 
 		self.write_vm_info()
 		self.wait_until_ready()
