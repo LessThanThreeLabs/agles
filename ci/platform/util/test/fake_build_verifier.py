@@ -26,9 +26,6 @@ class FakeBuildVerifier(object):
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
 		return VerificationConfig(None, None)
 
-	def declare_commands(self, console_appender, console_type, commands):
-		pass
-
 	def run_compile_step(self, compile_commands, console_appender=None):
 		pass
 

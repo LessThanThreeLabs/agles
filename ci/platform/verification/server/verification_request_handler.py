@@ -71,7 +71,6 @@ class VerificationRequestHandler(InfiniteWorker):
 		with ModelServer.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, self.build_id)
 			self.verifier.setup_build(repo_uri, refs, private_key, console_appender)
-			self.verifier.declare_commands(console_appender, ConsoleType.Compile, verification_config.compile_commands)
 			self.verifier.run_compile_step(verification_config.compile_commands, console_appender)
 
 	def do_cleanup(self, results):
@@ -89,7 +88,6 @@ class VerificationRequestHandler(InfiniteWorker):
 			test_command = SimpleRemoteTestCommand(task["test_command"])
 			with ModelServer.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 				console_appender = self._make_console_appender(build_consoles_update_rpc, self.build_id)
-				self.verifier.declare_commands(console_appender, ConsoleType.Test, [test_command])
 				return self.verifier.run_test_command(test_command, console_appender)
 		except Exception as e:
 			self.logger.debug("Worker %s failed task %s" % (self.worker_id, task["test_command"]), exc_info=True)
