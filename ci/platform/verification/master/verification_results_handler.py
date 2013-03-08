@@ -2,7 +2,7 @@ import logging
 
 from kombu.messaging import Producer
 
-from shared.constants import BuildStatus
+from shared.constants import BuildStatus, MergeStatus
 from database.engine import ConnectionFactory
 from shared.handler import QueueListener
 from model_server import ModelServer
@@ -50,7 +50,7 @@ class VerificationResultsHandler(QueueListener):
 		merge_success = self.send_merge_request(change_id)
 		if merge_success:
 			with ModelServer.rpc_connect("changes", "update") as client:
-				client.mark_change_finished(change_id, BuildStatus.PASSED)
+				client.mark_change_finished(change_id, BuildStatus.PASSED, MergeStatus.PASSED)
 
 	def _mark_change_failed(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
@@ -58,11 +58,11 @@ class VerificationResultsHandler(QueueListener):
 
 	def _mark_change_merge_failure(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
-			client.mark_change_finished(change_id, BuildStatus.FAILED_TO_MERGE)
+			client.mark_change_finished(change_id, BuildStatus.FAILED, MergeStatus.FAILED)
 
 	def _mark_change_pushforward_failure(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
-			client.mark_change_finished(change_id, BuildStatus.FAILED_TO_MERGE)
+			client.mark_change_finished(change_id, BuildStatus.FAILED, MergeStatus.FAILED)
 
 	def send_merge_request(self, change_id):
 		self.logger.info("Sending merge request for change %s" % change_id)

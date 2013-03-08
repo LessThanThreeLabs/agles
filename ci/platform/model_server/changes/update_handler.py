@@ -25,9 +25,9 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		self._update_change_status(change_id, BuildStatus.RUNNING,
 			"change started", start_time=int(time.time()))
 
-	def mark_change_finished(self, change_id, status):
+	def mark_change_finished(self, change_id, status, merge_status=None):
 		self._update_change_status(change_id, status,
-			"change finished", end_time=int(time.time()))
+			"change finished", end_time=int(time.time()), merge_status=merge_status)
 		if status == BuildStatus.FAILED:
 			self._notify_failure(change_id)
 
@@ -42,6 +42,8 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 		repository_id = row[change.c.repo_id]
 
+		if "merge_status" in kwargs:
+			self.publish_event("change", change_id, "merge completed", merge_status=kwargs["merge_status"])
 		self.publish_event("repos", repository_id, event_name, change_id=change_id, status=status, **kwargs)
 
 	def _notify_failure(self, change_id):
@@ -57,9 +59,9 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		last_name = row[user.c.last_name]
 		repo_id = row[change.c.repo_id]
 		change_number = row[change.c.number]
-		change_link = "https://getkoality.com/repository/%d/changes/%d/home" % (repo_id, change_id)
+		change_link = "https://koalitycode.com/repository/%d/changes/%d/home" % (repo_id, change_id)
 
 		subject = "There was an issue with your change (#%d)" % change_number
 		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link)
 
-		return sendmail("buildbuddy@getkoality.com", [email], subject, text)
+		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)

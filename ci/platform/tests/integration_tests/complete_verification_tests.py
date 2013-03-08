@@ -176,4 +176,4 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 		self._modify_commit_push(work_repo, "conflict.txt", "c2")
 		self._repo_roundtrip("conflict.txt", "conflict")
-		assert_equal(BuildStatus.FAILED_TO_MERGE, self.change_status)
+		assert_equal(BuildStatus.FAILED, self.change_status)

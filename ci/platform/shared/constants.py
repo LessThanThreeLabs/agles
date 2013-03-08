@@ -7,4 +7,8 @@ class BuildStatus(object):
 	RUNNING = 'running'
 	PASSED = 'passed'
 	FAILED = 'failed'
-	FAILED_TO_MERGE = 'failed to merge'
+
+
+class MergeStatus(object):
+	PASSED = 'passed'
+	FAILED = 'failed'

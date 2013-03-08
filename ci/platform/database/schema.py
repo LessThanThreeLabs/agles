@@ -65,6 +65,7 @@ change = Table('change', metadata,
 	Column('merge_target', String, nullable=False),
 	Column('number', Integer, nullable=False),
 	Column('status', String, nullable=False),
+	Column('merge_status', String, nullable=True),
 	Column('start_time', Integer, nullable=True),
 	Column('end_time', Integer, nullable=True),
 
