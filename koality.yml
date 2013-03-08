@@ -34,6 +34,7 @@ setup:
       - rackspace-novaclient
       - python-novaclient
       - requests
+      - boto
     - npm:
       - iced-coffee-script
       - less
