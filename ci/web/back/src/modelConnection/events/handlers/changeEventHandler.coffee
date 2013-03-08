@@ -28,8 +28,6 @@ class ChangeEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					id: data.contents.build_console_id
 					status: @_returnCodeToStatus data.contents.return_code
-			when 'build added'
-				# do nothing
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 
