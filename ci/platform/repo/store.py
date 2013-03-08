@@ -226,6 +226,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	NUM_RETRIES = 10
 	PRIVATE_KEY_SCRIPT = 'koality-get-private-key'
+	if hasattr(sys, 'real_prefix'):  # We're in a virtualenv python, so point at the locally-installed script
+		PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', PRIVATE_KEY_SCRIPT)
 
 	logger = logging.getLogger("FileSystemRepositoryStore")
 
