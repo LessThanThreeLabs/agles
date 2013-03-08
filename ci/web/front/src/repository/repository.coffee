@@ -190,10 +190,12 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 window.RepositoryStageDetails = ['$scope', '$location', '$routeParams', 'crazyAnsiText', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, crazyAnsiText, rpc, events, integerConverter) ->
 	retrieveLines = () ->
 		$scope.lines = []
+		$scope.spinnerOn = true
 		return if not $scope.currentStageId?
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
 			$scope.$apply () ->
+				$scope.spinnerOn = false
 				for lineNumber, lineText of lines
 					addLine lineNumber, lineText
 

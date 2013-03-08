@@ -401,12 +401,13 @@ angular.module('koality.directive', []).
 				left: 'auto'
 
 			attributes.$observe 'spinnerRunning', (running) ->
+				# running = scope.$eval running
 				running = if typeof running is 'boolean' then running else running is 'true'
+				console.log 'value changed ' + running
 				if running then startSpinner() else stopSpinner()
 
 			startSpinner = () ->
-				if spinner? then spinner.spin()
-				else spinner = new Spinner(spinnerOptions).spin(element[0])
+				spinner = new Spinner(spinnerOptions).spin(element[0])
 
 			stopSpinner = () ->
 				spinner.stop() if spinner?
