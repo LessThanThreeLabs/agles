@@ -53,6 +53,10 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _default_user_data(cls, vm_username=VM_USERNAME):
+		'''This utilizes Ubuntu cloud-init, which runs this script at "rc.local-like" time
+		when it finishes first boot.
+		This will fail if we use an image which doesn't utilitize EC2 user_data
+		'''
 		return '\n'.join(("#!/bin/sh",
 			"mkdir /home/%s/.ssh" % vm_username,
 			"echo '%s' >> /home/%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
@@ -70,7 +74,6 @@ class Ec2Vm(VirtualMachine):
 		else:
 			return cls.from_id(vm_directory, instance_id, vm_username)
 
-	# TODO: instance vs instances?
 	@classmethod
 	def from_id(cls, vm_directory, instance_id, vm_username=VM_USERNAME):
 		try:
