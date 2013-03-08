@@ -15,3 +15,4 @@ argparse
 rackspace-novaclient
 python-novaclient
 requests
+boto==2.6.0
