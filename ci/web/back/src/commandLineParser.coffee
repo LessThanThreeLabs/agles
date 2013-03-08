@@ -9,8 +9,6 @@ exports.create = () ->
 
 
 class CommandLineParser
-	constructor: () ->
-
 	initialize: () =>
 		commander.version('0.1.0')
 			.option('--mode <development/production>', 'The mode to use')

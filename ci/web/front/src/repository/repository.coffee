@@ -164,6 +164,19 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 	$scope.stageClick = (stage) ->
 		$scope.currentStageId = if stage? then stage.id else null
 
+	$scope.stageSort = (stage) ->
+		if stage.type is 'setup' and stage.name is 'git'
+			return 100
+		else if stage.type is 'setup' and stage.name is 'provision'
+			return 101
+		else if stage.type is 'compile'
+			return 200
+		else if stage.type is 'test'
+			return 300
+		else
+			console.error 'Cannot sort stage'
+			return 400
+
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		retrieveStages()
 		updateBuildConsoleAddedListener()
