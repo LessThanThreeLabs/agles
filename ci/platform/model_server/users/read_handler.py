@@ -36,7 +36,9 @@ class UsersReadHandler(ModelServerRpcHandler):
 
 		if not is_admin(user_id):
 			raise InvalidPermissionsError(user_id)
-		query = user.select().where(user.c.deleted == 0)
+		query = user.select().where(and_(
+			user.c.deleted == 0,
+			user.c.id >= 1000))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			rows = sqlconn.execute(query)
 		return [to_dict(row, user.columns) for row in rows]
