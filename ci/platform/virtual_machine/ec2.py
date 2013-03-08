@@ -45,6 +45,7 @@ class Ec2Vm(VirtualMachine):
 			instance_type = cls.DEFAULT_INSTANCE_TYPE
 
 		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=cls._default_user_data(vm_username)).instances[0]
+		instance.add_tag('Name', name)
 		return Ec2Vm(vm_directory, instance)
 
 	@classmethod
@@ -133,10 +134,13 @@ class Ec2Vm(VirtualMachine):
 		self.wait_until_ready()
 
 	def delete(self):
-		try:
-			self.instance.terminate()
-		except:
-			pass
+		own_name = self.instance.tags['Name']
+		for instance in [reservation.instances[0] for reservation in self.ec2_client.get_all_instances()]:  # Clean up rogue VMs
+			if instance.tags['Name'] == own_name:
+				try:
+					self.instance.terminate()
+				except:
+					pass
 		try:
 			os.remove(os.path.join(self.vm_directory, Ec2Vm.VM_INFO_FILE))
 		except:
