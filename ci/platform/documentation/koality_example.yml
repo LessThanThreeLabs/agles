@@ -1,0 +1,117 @@
+--- #Koality: 0.0.1
+
+# All configuration is done in a koality.yml or .koality.yml file placed in the root directory of your repository.
+# Yaml is human readable format that represents JSON (dictionaries)
+# The following is an example configuration file from one of the repositories for the Koality product itself.
+
+# The first section is the language definition. Define which languages your project uses and what version is needed.
+# If a version number is omitted, Koality will revert to sane defaults (latest version)
+languages:
+  python: 2.7
+  ruby: 1.9.3
+  nodejs: 0.8.12
+
+# The setup section allows you to define and describe your production environment. We use it to exactly replicate 
+# prod so your tests mirror that of production.
+setup:
+  # The packages section defines dependencies your project needs.
+  - packages:
+    # Define system packages dependencies here. These packages are installed through apt.
+    - system:
+      - zlib1g
+      - gcc
+      - g++
+      - curl
+      - libssl-dev
+      - apache2-utils
+      - libevent-dev
+      - libpq-dev
+      - lessc
+    # Here's an example of language specific dependencies. Pip is utilized for python
+    # You can define versions of packages or just grab the default pip package.
+    # For python, you can also define a requirements.txt file.
+    - pip:
+      - amqp
+      - pika: 0.9.5
+      - kombu: 2.5.3
+      - pycrypto: 2.6
+      - librabbitmq
+      - sqlalchemy: 0.7.8
+      - pyyaml
+      - msgpack-python
+      - nose
+      - redis
+      - eventlet
+      - gitpython
+      - psycopg2
+      - argparse
+      - rackspace-novaclient
+      - python-novaclient
+      - requests
+    # This example is for nodejs. Npm is used to resolve packages.
+    - npm:
+      # Packages defined directly under npm are install globally
+      - iced-coffee-script
+      - less
+      - testacular
+      # If a directory section is defined, "npm install" is run from that directory, installing all dependencies under package.json
+      - directory: ci/web/back
+  # Defines databases used in a production environment. Databases for tests are local to a particular VM running tests.
+  # Currently, only postgres and mysql are supported
+  - databases:
+    # an example postgres configuration
+    - postgres:
+      - name: koality
+        username: lt3
+    # an example mysql configuration
+    - mysql:
+      - name: koality
+        username: lt3
+  # Arbitrary scripts can be run at any point in time to do specific configuration and provisioning of the box not handled
+  # by our default sections. In this example, a .gitconfig is being created as part of provisioning and rabbitmq is started.
+  - scripts:
+    # Each of these lines is run as if it was typed into a shell.
+    - git config --global user.email "koality@koalitycode.com"
+    - git config --global user.name "Koality"
+    # When "directory" section is defined, the following command under "script" is run in that directory.
+    - directory: ci/scripts
+      script: ./rabbitmq_setup.sh
+
+# The following sections are relevant to the building and testing of your code.
+
+# Any script definitions under compile are run pre-testing. These can be used to build your code, create artifacts,
+# or run static analysis checks.
+compile:
+  # Each section under compile can be given an arbitrary name, which will appear in the web ui. We've named the following
+  # sections install_platform, compile_webserver, compile_website, but these names can be arbitrary. The script that is run
+  # must return an error code. If it returns 0, we assume it ran successfully. Any other code means that this build has failed, and
+  # we will prevent the code from merging and notify the committer.
+  - build_platform:
+      # The path definition defines the directory from which the script will be run.
+      path: ci/platform
+      # A script which runs to build your code. This should return 0 or 1.
+      script: python setup.py install
+  - compile_webserver:
+      path: ci/web/back
+      script: ./compile.sh
+  - compile_website:
+      path: ci/web/front
+      script: ./compile.sh
+# The test section defines the running of unit tests to check the correctness of your change. Multiple sections under test allow for
+# multiple levels of parallelization. Each section is placed on a different VM and run in parallel. In this example, 
+# platform_tests and npm_tests will run in parallel on separate VMs.
+test:
+  - platform_tests:
+      # The path at which the following testing scripts will run
+      path: ci/platform
+      # The scripts or list of commands we'll be running to test the code. The return value of the list of commands determines
+      # whether we consider this run a successful test run or a failure. A returncode of 0 means success, otherwise its failure.
+      script:
+        - nosetests -sv
+      # You can define a timeout in case your tests may hang or run infinitely.
+      # The default timeout if one is not defined is 300 seconds.
+      timeout: 240
+  - npm_tests:
+      path: ci/web/back
+      script:
+        - npm test

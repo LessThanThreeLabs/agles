@@ -22,7 +22,6 @@ function add_user () {
 function bootstrap () {
 	check_sudo
 	add_user lt3
-	prompt_github_credentials
 	this_script=$(pwd)/$0
 	sudo -E su lt3 -c "cd; $this_script _$1_setup"
 }
@@ -106,12 +105,23 @@ function setup_nodejs_vm () {
 }
 
 function prompt_github_credentials () {
+	if [ -f ~/.gh ]; then
+		{ read gh_username; read gh_password; } < ~/.gh
+		# Use environment variable or fall back on file
+		GITHUB_USERNAME=$(([ $GITHUB_USERNAME ] && echo $GITHUB_USERNAME) || ([ "$gh_username" ] && echo $gh_username))
+		GITHUB_PASSWORD=$(([ $GITHUB_PASSWORD ] && echo $GITHUB_PASSWORD) || ([ $gh_password ] && echo $gh_password))
+	fi
 	if [ -z $GITHUB_USERNAME ]; then
 		read -p "Github username: " GITHUB_USERNAME
 	fi
 	if [ -z $GITHUB_PASSWORD ]; then
 		read -s -p "Github password: " GITHUB_PASSWORD
 	fi
+	echo -e "$GITHUB_USERNAME\n$GITHUB_PASSWORD" > ~/.gh
+}
+
+function remove_github_credentials () {
+	rm ~/.gh
 }
 
 function clone () {
@@ -183,6 +193,7 @@ function setup_koality_service () {
 }
 
 function shared_setup () {
+	prompt_github_credentials
 	# Install dependencies
 	sudo apt-get update
 	sudo apt-get install -y python-pip make postgresql python-software-properties git build-essential curl libyaml-dev
@@ -217,7 +228,9 @@ function vm_setup () {
 	setup_python
 	setup_nodejs_vm
 
-	rm -rf source
+	rm -rf source scripts
+
+	remove_github_credentials
 }
 
 function build_vm_image () {
@@ -244,6 +257,8 @@ function host_setup () {
 
 	setup_koality_service
 	sudo service koality start
+
+	remove_github_credentials
 }
 
 function service_setup () {
@@ -263,6 +278,8 @@ function service_setup () {
 
 	setup_koality_service
 	sudo service koality start
+
+	remove_github_credentials
 }
 
 case "$1" in

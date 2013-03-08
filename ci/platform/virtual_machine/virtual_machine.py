@@ -1,4 +1,7 @@
+import os
 import uuid
+
+import yaml
 
 from shared.constants import VerificationUser
 from util import greenlets
@@ -19,6 +22,13 @@ class VirtualMachine(object):
 
 	def call(self, command, output_handler=None, env={}, timeout=None, **kwargs):
 		return StreamingExecutor.execute(command, output_handler, cwd=self.vm_directory, env=env, timeout=timeout, **kwargs)
+
+	def write_vm_info(self):
+		config = yaml.safe_dump({'instance_id': self.instance.id, 'username': self.vm_username})
+		if not os.access(self.vm_directory, os.F_OK):
+			os.makedirs(self.vm_directory)
+		with open(os.path.join(self.vm_directory, self.VM_INFO_FILE), "w") as vm_info_file:
+			vm_info_file.write(config)
 
 	def remote_checkout(self, git_url, refs, output_handler=None):
 		host_url = git_url[:git_url.find(":")]
