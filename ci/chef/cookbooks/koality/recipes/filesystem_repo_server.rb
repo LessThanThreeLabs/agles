@@ -29,7 +29,7 @@ end
 supervisor_service "filesystem_repo_server" do
 	action [:enable, :start]
 	directory "/tmp/repo_server"
-	command "/etc/koality/python #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_filesystem_repo_server.py -r #{node[:koality][:repositories_path]}"
+	command "bash -c 'source /etc/koality/koalityrc && #{node[:koality][:source_path][:internal]}/ci/platform/bin/start_filesystem_repo_server.py -r #{node[:koality][:repositories_path]}'"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/filesystem_repo_server_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/filesystem_repo_server_stderr.log"
 	user "git"
