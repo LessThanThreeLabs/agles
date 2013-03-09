@@ -45,7 +45,8 @@ def main():
 		for attempts in range(9, -1, -1):
 			try:
 				virtual_machine = vm_class.from_directory_or_construct(os.path.join(vm_dir, str(i)))
-			except:
+			except Exception as e:
+				print e
 				if attempts > 0:
 					print "Failed to create virtual machine, trying again in 3 seconds..."
 					time.sleep(3)
