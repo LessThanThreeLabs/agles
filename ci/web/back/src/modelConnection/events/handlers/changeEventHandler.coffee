@@ -23,6 +23,7 @@ class ChangeEventHandler extends EventHandler
 					id: data.contents.id
 					type: data.contents.type
 					name: data.contents.subtype
+					orderNumber: data.contents.subtype_priority
 					status: @_returnCodeToStatus data.contents.return_code
 			when 'return code added'
 				@sockets.in(roomName).emit eventName,

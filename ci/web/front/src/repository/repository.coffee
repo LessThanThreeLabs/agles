@@ -190,17 +190,15 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 		$scope.currentStageId = if stage? then stage.id else null
 
 	$scope.stageSort = (stage) ->
-		if stage.type is 'setup' and stage.name is 'git'
-			return 100
-		else if stage.type is 'setup' and stage.name is 'provision'
-			return 101
+		if stage.type is 'setup'
+			return 1000 + stage.orderNumber
 		else if stage.type is 'compile'
-			return 200
+			return 2000 + stage.orderNumber
 		else if stage.type is 'test'
-			return 300
+			return 3000 + stage.orderNumber
 		else
 			console.error 'Cannot sort stage'
-			return 400
+			return 4000
 
 	$scope.shouldStageBeVisible = (stage) ->
 		return true if stage.id is $scope.currentStageId

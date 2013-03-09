@@ -57,4 +57,5 @@ class BuildConsolesReadHandler extends Handler
 		id: buildConsole.id
 		type: buildConsole.type
 		name: buildConsole.subtype
+		orderNumber: buildConsole.subtype_priority
 		status: returnCodeToStatus buildConsole.return_code
