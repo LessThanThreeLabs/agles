@@ -7,6 +7,9 @@ listener thread should respond to events by running and verifying builds on
 a spawned virtual machine.
 """
 
+import eventlet
+
+from util.greenlets import spawn_wrap
 from verification.server.verification_request_handler import VerificationRequestHandler
 
 
@@ -17,8 +20,10 @@ class VerificationServer(object):
 	lint, and run tests against commits.
 	"""
 
-	def __init__(self, verifier):
-		self.handler = VerificationRequestHandler(verifier)
+	def __init__(self, *verifiers):
+		self.handlers = [VerificationRequestHandler(verifier) for verifier in verifiers]
 
 	def run(self):
-		self.handler.run()
+		[spawn_wrap(handler.run)() for handler in self.handlers]
+		while True:
+			eventlet.sleep()

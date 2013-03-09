@@ -40,24 +40,33 @@ def main():
 
 	vm_class = OpenstackVm if args.openstack else Ec2Vm
 
-	for attempts in range(9, -1, -1):
-		try:
-			virtual_machine = vm_class.from_directory_or_construct(vm_dir)
-		except:
-			if attempts > 0:
-				print "Failed to create virtual machine, trying again in 3 seconds..."
-				time.sleep(3)
+	verifiers = []
+	for i in range(4):
+		for attempts in range(9, -1, -1):
+			try:
+				virtual_machine = vm_class.from_directory_or_construct(os.path.join(vm_dir, str(i)))
+			except:
+				if attempts > 0:
+					print "Failed to create virtual machine, trying again in 3 seconds..."
+					time.sleep(3)
+				else:
+					print "Failed 10 times, aborting."
+					sys.exit(1)
 			else:
-				print "Failed 10 times, aborting."
-				sys.exit(1)
+				break
 
-	verifier = BuildVerifier.for_virtual_machine(virtual_machine, RepositoryUriTranslator())
+		verifier = BuildVerifier.for_virtual_machine(virtual_machine, RepositoryUriTranslator())
+		verifiers.append(verifier)
+
+		print "Verifier %d ready" % i
+
 	if not args.fast_startup:
-		verifier.setup()
+		for verifier in verifiers:
+			verifier.setup()
 
-	print "Verifier ready"
+	print "Run time..."
 
-	vs = VerificationServer(verifier)
+	vs = VerificationServer(*verifiers)
 	vs.run()
 
 
