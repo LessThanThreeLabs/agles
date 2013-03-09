@@ -125,6 +125,28 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 		stage = (stage for stage in $scope.stages when stage.id is stageId)[0]
 		return stage?
 
+	getMostImportantStageWithTypeAndName = (type, name) ->
+		mostImportantStage = null
+
+		for potentialStage in $scope.stages
+			continue if potentialStage.type isnt type or potentialStage.name isnt name
+
+			if not mostImportantStage?
+				mostImportantStage = potentialStage
+			else
+				if potentialStage.status is 'failed' and mostImportantStage.status is 'failed'
+					mostImportantStage = potentialStage if potentialStage.id < mostImportantStage.id
+				else if potentialStage.status is 'failed' and mostImportantStage.status isnt 'failed'
+					mostImportantStage = potentialStage
+				else if potentialStage.status isnt 'failed' and mostImportantStage.status isnt 'failed'
+					mostImportantStage = potentialStage if potentialStage.id < mostImportantStage.id
+
+		return mostImportantStage
+
+	isMirrorStage = (stage1, stage2) ->
+		return false if not stage1? or not stage2?
+		return stage1.type is stage2.type and stage1.name is stage2.name
+
 	retrieveStages = () ->
 		$scope.stages = []
 		return if not $scope.currentChangeId?
@@ -140,6 +162,9 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 	handleBuildConsoleStatusUpdate = (data) -> $scope.$apply () ->
 		stage = (stage for stage in $scope.stages when stage.id is data.id)[0]
 		stage.status = data.status if stage?
+
+		if stage.status is 'failed' and isMirrorStage stage, $scope.currentStageInformation
+			$scope.currentStageId = stage.id
 
 	buildConsoleAddedEvents = null
 	updateBuildConsoleAddedListener = () ->
@@ -176,6 +201,12 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 		else
 			console.error 'Cannot sort stage'
 			return 400
+
+	$scope.shouldStageBeVisible = (stage) ->
+		return true if stage.id is $scope.currentStageId
+		return false if isMirrorStage stage, $scope.currentStageInformation
+		return true if stage.id is getMostImportantStageWithTypeAndName(stage.type, stage.name).id
+		return false
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		retrieveStages()
