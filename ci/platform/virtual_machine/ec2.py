@@ -92,9 +92,12 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _name_instance(cls, instance, name):
 		while not 'Name' in instance.tags:
-			instance.add_tag('Name', name)
-			eventlet.sleep(2)
-			instance.update()
+			try:
+				instance.add_tag('Name', name)
+				eventlet.sleep(2)
+				instance.update()
+			except:
+				eventlet.sleep(2)  # Sometimes EC2 doesn't recognize that an instance exists yet
 
 	def wait_until_ready(self):
 		while not self.instance.state == 'running':
