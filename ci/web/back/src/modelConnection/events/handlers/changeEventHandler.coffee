@@ -10,7 +10,7 @@ exports.create = (sockets) ->
 class ChangeEventHandler extends EventHandler
 	ROOM_PREFIX: 'change-'
 	EVENT_PREFIX: 'change-'
-	EVENT_NAMES: ['new build console', 'return code added']
+	EVENT_NAMES: ['new build console', 'return code added', 'build added']
 
 
 	processEvent: (data) =>
@@ -29,6 +29,8 @@ class ChangeEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					id: data.contents.build_console_id
 					status: @_returnCodeToStatus data.contents.return_code
+			when 'build added'
+				# do nothing
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 
