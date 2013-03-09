@@ -18,12 +18,12 @@ class SetupCommand(object):
 	@classmethod
 	def execute_script(cls, script, env={}, login=True):
 		command = "bash -c %s" % pipes.quote(script)
-		return StreamingExecutor.execute(shlex.split(cls.wrap_command(command, login)), output_handler=SimplePrinter(), env=env)
+		return StreamingExecutor().execute(shlex.split(cls.wrap_command(command, login)), output_handler=SimplePrinter(), env=env)
 
 	@classmethod
 	def execute_script_file(cls, script_file, env={}, login=True):
 		command = "bash %s" % script_file
-		return StreamingExecutor.execute(shlex.split(cls.wrap_command(command, login)), output_handler=SimplePrinter(), env=env)
+		return StreamingExecutor().execute(shlex.split(cls.wrap_command(command, login)), output_handler=SimplePrinter(), env=env)
 
 	@classmethod
 	def wrap_command(cls, command, login):

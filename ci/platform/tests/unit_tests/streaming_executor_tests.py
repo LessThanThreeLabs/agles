@@ -14,28 +14,28 @@ class StreamingExecutorTests(BaseUnitTest):
 
 	def test_execute_command(self):
 		start_time = time.time()
-		results = StreamingExecutor.execute(['echo', 'hi'])
+		results = StreamingExecutor().execute(['echo', 'hi'])
 		assert_equal(0, results.returncode)
 		assert_equal('hi', results.output)
 		assert_true(time.time() - start_time < 1)
 
 	def test_execute_two_commands(self):
 		start_time = time.time()
-		results = StreamingExecutor.execute(['bash', '-c', 'echo hi; echo bye'])
+		results = StreamingExecutor().execute(['bash', '-c', 'echo hi; echo bye'])
 		assert_equal(0, results.returncode)
 		assert_equal('hi\nbye', results.output)
 		assert_true(time.time() - start_time < 1)
 
 	def test_execute_bad(self):
 		start_time = time.time()
-		results = StreamingExecutor.execute(['cat', '/'])
+		results = StreamingExecutor().execute(['cat', '/'])
 		assert_equal(1, results.returncode)
 		assert_equal('cat: /: Is a directory', results.output)
 		assert_true(time.time() - start_time < 1)
 
 	def test_execute_background(self):
 		start_time = time.time()
-		results = StreamingExecutor.execute(['bash', '-c', '(sleep 2)& echo hi'])
+		results = StreamingExecutor().execute(['bash', '-c', '(sleep 2)& echo hi'])
 		assert_equal(0, results.returncode)
 		assert_equal('hi', results.output)
 		assert_true(time.time() - start_time < 1)
@@ -45,7 +45,7 @@ class StreamingExecutorTests(BaseUnitTest):
 		expected = [(x + 1, strings_to_print[x]) for x in range(len(strings_to_print))]
 		output_handler = TestOutputHandler(expected)
 		echo_command = ';'.join(map(lambda s: 'echo %s' % s, strings_to_print))
-		results = StreamingExecutor.execute(['bash', '-c', echo_command], output_handler=output_handler)
+		results = StreamingExecutor().execute(['bash', '-c', echo_command], output_handler=output_handler)
 		assert_equal(0, results.returncode)
 		assert_equal('\n'.join(strings_to_print), results.output)
 		assert_equal(output_handler.expected_lines, output_handler.received_lines)
@@ -57,27 +57,27 @@ class StreamingExecutorTests(BaseUnitTest):
 			expected.append((1, (expected[len(expected) - 1][1] if expected else '') + s))
 		output_handler = TestOutputHandler(expected)
 		echo_command = ';sleep 0.01;'.join(map(lambda s: 'echo -n %s' % s, strings_to_print))
-		results = StreamingExecutor.execute(['bash', '-c', echo_command], output_handler=output_handler)
+		results = StreamingExecutor().execute(['bash', '-c', echo_command], output_handler=output_handler)
 		assert_equal(0, results.returncode)
 		assert_equal(''.join(strings_to_print), results.output)
 		assert_equal(output_handler.expected_lines, output_handler.received_lines)
 
 	def test_cwd(self):
-		results = StreamingExecutor.execute(['pwd'], cwd='/')
+		results = StreamingExecutor().execute(['pwd'], cwd='/')
 		assert_equal(0, results.returncode)
 		assert_equal('/', results.output)
 
-		results = StreamingExecutor.execute(['pwd'], cwd='/bin')
+		results = StreamingExecutor().execute(['pwd'], cwd='/bin')
 		assert_equal(0, results.returncode)
 		assert_equal('/bin', results.output)
 
 	def test_env(self):
-		results = StreamingExecutor.execute(['bash', '-c', 'echo $test_var_1; echo $test_var_2'], env={'test_var_1': 'one', 'test_var_2': 'two'})
+		results = StreamingExecutor().execute(['bash', '-c', 'echo $test_var_1; echo $test_var_2'], env={'test_var_1': 'one', 'test_var_2': 'two'})
 		assert_equal(0, results.returncode)
 		assert_equal('one\ntwo', results.output)
 
 	def test_timeout(self):
-		results = StreamingExecutor.execute(['sleep', '1'], timeout=0.1)
+		results = StreamingExecutor().execute(['sleep', '1'], timeout=0.1)
 		assert_equal(127, results.returncode)
 		assert_equal('', results.output)
 

@@ -21,7 +21,7 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	def call(self, command, output_handler=None, env={}, timeout=None, **kwargs):
-		return StreamingExecutor.execute(command, output_handler, cwd=self.vm_directory, env=env, timeout=timeout, **kwargs)
+		return StreamingExecutor().execute(command, output_handler, cwd=self.vm_directory, env=env, timeout=timeout, **kwargs)
 
 	def write_vm_info(self):
 		config = yaml.safe_dump({'instance_id': self.instance.id, 'username': self.vm_username})
