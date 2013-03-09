@@ -54,7 +54,7 @@ class StreamingExecutor(object):
 				break
 		if hasattr(line_handler, 'close'):
 			line_handler.close()
-		return self._output_lines
+		return cls._output_lines
 
 	@classmethod
 	def _handle_lines(cls, line_handler, read_lines):

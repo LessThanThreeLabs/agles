@@ -146,14 +146,20 @@ class Ec2Vm(VirtualMachine):
 		self.wait_until_ready()
 
 	def delete(self):
-		instances = [reservation.instances[0] for reservation in self.ec2_client.get_all_instances(
-			filters={'tag:Name': self.instance.tags['Name']})]
-		for instance in instances:  # Clean up rogue VMs
-			try:
-				self.instance.terminate()
-			except:
-				pass
+		if 'Name' in self.instance.tags:
+			instances = [reservation.instances[0] for reservation in self.ec2_client.get_all_instances(
+				filters={'tag:Name': self.instance.tags['Name']})]
+			for instance in instances:  # Clean up rogue VMs
+				self._safe_terminate(instance)
+		else:
+			self._safe_terminate(self.instance)
 		try:
 			os.remove(os.path.join(self.vm_directory, Ec2Vm.VM_INFO_FILE))
+		except:
+			pass
+
+	def _safe_terminate(self, instance):
+		try:
+			instance.terminate()
 		except:
 			pass
