@@ -34,8 +34,9 @@
 				<span ng-show="currentChangeInformation != null">Change {{currentChangeInformation.number}}</span>
 			</content-menu-header>
 			<content-menu-options>
-				<content-menu-option menu-option-text="Summary" ng-show="currentChangeInformation != null" ng-click="stageClick(null)" ng-class="{selected: currentStageId == null}"></content-menu-option>
+				<content-menu-option menu-option-text="Summary" ng-show="currentChangeInformation != null" ng-click="summaryClick()" ng-class="{selected: currentStageId == null && showSummary}"></content-menu-option>
 				<content-menu-option ng-repeat="stage in stages | filter:shouldStageBeVisible | orderBy:[stageSort, 'name']" menu-option-text="{{stage.name}}" menu-option-spinning="{{stage.status == 'running'}}" ng-click="stageClick(stage)" ng-class="{selected: stage.id == currentStageId, green: stage.status == 'passed', red: stage.status == 'failed'}"></content-menu-option>
+				<content-menu-option menu-option-text="Merge" ng-show="currentChangeInformation.mergeStatus != null" ng-click="mergeClick()" ng-class="{selected: currentStageId == null && showMerge, green: currentChangeInformation.mergeStatus == 'passed', red: currentChangeInformation.mergeStatus == 'failed'}"></content-menu-option>
 			</content-menu-options>
 		</menu>
 	</div>
@@ -49,7 +50,7 @@
 			<content-body unselectable>
 				<spinner id="repositoryStageDetailsLoadingSpinner" spinner-running="spinnerOn"></spinner>
 
-				<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentStageId == null && currentChangeInformation != null">
+				<div id="repositoryStageDetailsSummary" ng-show="currentChangeId != null && currentChangeInformation != null && showSummary">
 					<styled-form text-selectable>
 						<styled-form-field label="Commiter">{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}</styled-form-field>
 						<styled-form-field label="Email"><a href="mailto:{{currentChangeInformation.user.email}}?subject=Koality%3A%20{{repository.name}}%20-%20change%20%23{{currentChangeInformation.number}}" target="_blank">{{currentChangeInformation.user.email}}</a></styled-form-field>
@@ -70,6 +71,15 @@
 						</div>
 					</div>
 					<div class="consoleTextBottomBuffer"></div>
+				</div>
+
+				<div id="repositoryStageDetailsMerge" ng-show="currentChangeId != null && currentChangeInformation != null && showMerge">
+					<div ng-show="currentChangeInformation.mergeStatus == 'passed'">
+						Change has been successfully merged.
+					</div>
+					<div ng-show="currentChangeInformation.mergeStatus == 'failed'">
+						Failed to merge. Try pulling before pushing again.
+					</div>
 				</div>
 			</content-body>
 		</content>

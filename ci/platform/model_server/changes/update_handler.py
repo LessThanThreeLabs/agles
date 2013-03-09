@@ -43,7 +43,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		repository_id = row[change.c.repo_id]
 
 		if "merge_status" in kwargs:
-			self.publish_event("change", change_id, "merge completed", merge_status=kwargs["merge_status"])
+			self.publish_event("changes", change_id, "merge completed", merge_status=kwargs["merge_status"])
 		self.publish_event("repos", repository_id, event_name, change_id=change_id, status=status, **kwargs)
 
 	def _notify_failure(self, change_id):

@@ -10,7 +10,7 @@ exports.create = (sockets) ->
 class ChangeEventHandler extends EventHandler
 	ROOM_PREFIX: 'change-'
 	EVENT_PREFIX: 'change-'
-	EVENT_NAMES: ['new build console', 'return code added', 'build added']
+	EVENT_NAMES: ['new build console', 'return code added', 'build added', 'merge completed']
 
 
 	processEvent: (data) =>
@@ -29,6 +29,9 @@ class ChangeEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					id: data.contents.build_console_id
 					status: @_returnCodeToStatus data.contents.return_code
+			when 'merge completed'
+				@sockets.in(roomName).emit eventName,
+					mergeStatus: data.contents.merge_status
 			when 'build added'
 				# do nothing
 			else
