@@ -52,7 +52,9 @@ class StreamingExecutor(object):
 					cls._handle_lines(line_handler, read_lines)
 			elif returncode is not None:  # backgrounding processes will cause readline to wait forever, but sets a return code
 				break
-		return cls._output_lines
+		if hasattr(line_handler, 'close'):
+			line_handler.close()
+		return self._output_lines
 
 	@classmethod
 	def _handle_lines(cls, line_handler, read_lines):

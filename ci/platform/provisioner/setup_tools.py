@@ -91,6 +91,9 @@ class SimplePrinter(object):
 		self.last_column = len(line)
 		sys.stdout.write(output)
 
+	def close(self):
+		sys.stdout.write('\n')
+
 
 class InvalidConfigurationException(Exception):
 	def __init__(self, *args, **kwargs):
