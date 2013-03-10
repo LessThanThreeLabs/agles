@@ -1,6 +1,6 @@
 'use strict'
 
-window.Repository = ['$scope', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $routeParams, rpc, events, integerConverter) ->
+window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, events, integerConverter) ->
 	retrieveRepositoryInformation = () ->
 		rpc.makeRequest 'repositories', 'read', 'getMetadata', id: $routeParams.repositoryId, (error, repositoryInformation) ->
 			$scope.$apply () ->
@@ -13,8 +13,11 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'events', 'integerConverte
 		requestData =
 			repositoryId: integerConverter.toInteger $routeParams.repositoryId
 			id: $scope.currentChangeId
+
 		rpc.makeRequest 'changes', 'read', 'getMetadata', requestData, (error, changeInformation) ->
-			$scope.$apply () -> $scope.currentChangeInformation = changeInformation
+			$scope.$apply () ->
+				$scope.currentChangeInformation = changeInformation
+				$scope.showMerge = false if not $scope.currentChangeInformation.mergeStatus?
 
 	retrieveCurrentStageInformation = () ->
 		$scope.currentStageInformation = null
@@ -23,10 +26,12 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'events', 'integerConverte
 		requestData =
 			repositoryId: integerConverter.toInteger $routeParams.repositoryId
 			id: $scope.currentStageId
-		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsole', requestData, (error, stageInformation) ->
-			$scope.$apply () -> $scope.currentStageInformation = stageInformation
 
-	handleBuildConsoleStatusUpdate = (data) -> $scope.$apply () ->
+		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsole', requestData, (error, stageInformation) ->
+			$scope.$apply () -> 
+				$scope.currentStageInformation = stageInformation
+
+	handleMergeStatusUpdate = (data) -> $scope.$apply () ->
 		$scope.currentChangeInformation.mergeStatus = data.mergeStatus
 
 	changeMergeStatusUpdateEvents = null
@@ -36,27 +41,45 @@ window.Repository = ['$scope', '$routeParams', 'rpc', 'events', 'integerConverte
 			changeMergeStatusUpdateEvents = null
 
 		if $scope.currentChangeId?
-			changeMergeStatusUpdateEvents = events.listen('changes', 'merge completed', $scope.currentChangeId).setCallback(handleBuildConsoleStatusUpdate).subscribe()
+			changeMergeStatusUpdateEvents = events.listen('changes', 'merge completed', $scope.currentChangeId).setCallback(handleMergeStatusUpdate).subscribe()
 	$scope.$on '$destroy', () -> changeMergeStatusUpdateEvents.unsubscribe() if changeMergeStatusUpdateEvents?
 
-	$scope.$on '$routeUpdate', () ->
+	syncToRouteParams = () ->
 		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
 		$scope.currentStageId = integerConverter.toInteger $routeParams.stage
 		$scope.showMerge = $routeParams.merge?
-		$scope.showSummary = $routeParams.summary?
-		$scope.showSummary = true if not $scope.currentStageId? and not $scope.showMerge
+	$scope.$on '$routeUpdate', syncToRouteParams
+	syncToRouteParams()
+
+	$scope.selectChange = (change) ->
+		$scope.currentChangeId = change.id
+		$scope.currentStageId = null
+		$scope.showMerge = false
+
+	$scope.selectStage = (stage) ->
+		$scope.currentStageId = stage?.id
+		$scope.showMerge = false
+
+	$scope.selectMerge = (merge) ->
+		$scope.currentStageId = null
+		$scope.showMerge = true
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		updateMergeStatusListener()
 		retrieveCurrentChangeInformation()
+		$location.search 'change', newValue ? null
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
 		retrieveCurrentStageInformation()
+		$location.search 'stage', newValue ? null
+
+	$scope.$watch 'showMerge', (newValue, oldValue) ->
+		$location.search 'merge', if newValue then true else null
 
 	retrieveRepositoryInformation()
 ]
 
-window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc', 'events', 'integerConverter', ($scope, $location, $routeParams, changesRpc, events, integerConverter) ->
+window.RepositoryChanges = ['$scope', '$routeParams', 'changesRpc', 'events', ($scope, $routeParams, changesRpc, events) ->
 	$scope.changes = []
 
 	$scope.search = {}
@@ -78,9 +101,9 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 	handleInitialChanges = (error, changes) -> $scope.$apply () ->
 		$scope.changes = changes
 		if $scope.changes.length is 0
-			$scope.currentChangeId = null
+			$scope.selectChange null
 		else if $scope.changes[0]?
-			$scope.currentChangeId ?= $scope.changes[0].id
+			$scope.selectChange changes[0] if not $scope.currentChangeId?
 
 	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
 		$scope.changes = $scope.changes.concat changes
@@ -120,20 +143,14 @@ window.RepositoryChanges = ['$scope', '$location', '$routeParams', 'changesRpc',
 		$scope.search.mode = mode
 		$scope.search.namesQuery = '' if mode isnt 'search'
 
-	$scope.changeClick = (change) ->
-		$scope.currentChangeId = change.id
-
 	$scope.scrolledToBottom = () ->
 		getMoreChanges()
-
-	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
-		$location.search 'change', newValue
 
 	$scope.$watch 'search', ((newValue, oldValue) -> getInitialChanges()), true
 ]
 
 
-window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, events, integerConverter) ->
+window.RepositoryStages = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 	$scope.stages = []
 
 	isStageIdInStages = (stageId) ->
@@ -169,7 +186,8 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
 			$scope.$apply () ->
 				$scope.stages = buildConsoles
-				$scope.currentStageId = null if not isStageIdInStages $scope.currentStageId
+				if $scope.currentStageId? and not isStageIdInStages $scope.currentStageId
+					$scope.selectStage null
 
 	handleBuildConsoleAdded = (data) -> $scope.$apply () ->
 		$scope.stages.push data
@@ -179,7 +197,7 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 		stage.status = data.status if stage?
 
 		if stage.status is 'failed' and isMirrorStage stage, $scope.currentStageInformation
-			$scope.currentStageId = stage.id
+			$scope.selectStage stage
 
 	buildConsoleAddedEvents = null
 	updateBuildConsoleAddedListener = () ->
@@ -201,31 +219,16 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 			buildConsoleStatusUpdateEvents = events.listen('changes', 'return code added', $scope.currentChangeId).setCallback(handleBuildConsoleStatusUpdate).subscribe()
 	$scope.$on '$destroy', () -> buildConsoleStatusUpdateEvents.unsubscribe() if buildConsoleStatusUpdateEvents?
 
-	$scope.stageClick = (stage) ->
-		$scope.currentStageId = if stage? then stage.id else null
-		$scope.showSummary = false
-		$scope.showMerge = false
-
-	$scope.summaryClick = () ->
-		$scope.currentStageId = null
-		$scope.showSummary = true
-		$scope.showMerge = false
-
-	$scope.mergeClick = () ->
-		$scope.currentStageId = null
-		$scope.showSummary = false
-		$scope.showMerge = true
-
 	$scope.stageSort = (stage) ->
 		if stage.type is 'setup'
-			return 1000 + stage.orderNumber
+			return 10000 + stage.orderNumber
 		else if stage.type is 'compile'
-			return 2000 + stage.orderNumber
+			return 20000 + stage.orderNumber
 		else if stage.type is 'test'
-			return 3000 + stage.orderNumber
+			return 30000 + stage.orderNumber
 		else
 			console.error 'Cannot sort stage'
-			return 4000
+			return 40000
 
 	$scope.shouldStageBeVisible = (stage) ->
 		return true if stage.id is $scope.currentStageId
@@ -237,19 +240,10 @@ window.RepositoryStages = ['$scope', '$location', '$routeParams', 'rpc', 'events
 		updateBuildConsoleAddedListener()
 		updateBuildConsoleStatusListener()
 		retrieveStages()
-
-	$scope.$watch 'currentStageId', (newValue, oldValue) ->
-		$location.search 'stage', newValue
-
-	$scope.$watch 'showSummary', (newValue, oldValue) ->
-		$location.search 'summary', if newValue then true else null
-
-	$scope.$watch 'showMerge', (newValue, oldValue) ->
-		$location.search 'merge', if newValue then true else null
 ]
 
 
-window.RepositoryStageDetails = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'integerConverter', ($scope, $location, $routeParams, rpc, events, integerConverter) ->
+window.RepositoryStageDetails = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 	retrieveLines = () ->
 		$scope.lines = []
 		return if not $scope.currentStageId?
