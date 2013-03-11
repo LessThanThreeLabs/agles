@@ -14,7 +14,7 @@ files = [
   'js/libs/jquery.js',
   'js/libs/angular.js',
   'js/libs/angularMock.js',
-  'js/src/setup.js',
+  'js/src/**/*.js',
   'js/src/test/unit/*.js',
   'js/src/util/**/*.js'
 ];

@@ -37,6 +37,10 @@
 
 			"/js/src/util/ansiparse.js",
 
+			"/js/src/services.js",
+			"/js/src/directives.js",
+			"/js/src/filters.js",
+
 			"/js/src/setup.js",
 			"/js/src/header/header.js",
 			"/js/src/welcome/welcome.js",
