@@ -113,7 +113,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 				build_console.c.subtype == subtype,
 			)
 		)
-		change_id_query = build.select().where(build_id == build_id)
+		change_id_query = build.select().where(build.c.id == build_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
