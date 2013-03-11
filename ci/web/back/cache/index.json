@@ -5,6 +5,7 @@
 
 			"/css/src/setup.css",
 			"/css/src/prettyElements/prettyCenteredPanel.css",
+			"/css/src/prettyElements/prettyConsoleText.css",
 			"/css/src/prettyElements/prettyDropdown.css",
 			"/css/src/prettyElements/prettyForm.css",
 			"/css/src/prettyElements/prettyMenu.css",

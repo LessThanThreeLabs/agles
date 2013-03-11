@@ -1,0 +1,25 @@
+@import '../constants';
+
+.prettyConsoleText {
+	display: table;
+	table-layout: fixed;
+
+	.prettyConsoleTextLine {
+		display: table-row;
+		font-family: 'PT Mono', monospace;
+		font-size: 12px;
+
+		.prettyConsoleTextLineNumber {
+			display: table-cell;
+			padding-right: 18px;
+			width: 40px;
+			color: @koalityGray;
+			text-align: right;
+		}
+
+		.prettyConsoleTextLineText {
+			display: table-cell;
+			word-wrap: break-word;
+		}
+	}
+}

@@ -221,32 +221,9 @@
 				overflow-y: auto;
 
 				.consoleText {
-					display: table;
 					margin-top: @bufferHeight;
 					margin-bottom: @bufferHeight;
-					table-layout: fixed;
-					//letter-spacing: 1px;
 					width: @consoleTextWidth;
-
-					.consoleTextLine {
-						display: table-row;
-						font-family: 'PT Mono', monospace;
-						font-size: 12px;
-
-						.consoleTextLineNumber {
-							display: table-cell;
-							padding-right: 18px;
-							width: 40px;
-							color: @koalityGray;
-							text-align: right;
-						}
-
-						.consoleTextLineText {
-							display: table-cell;
-							word-wrap: break-word;
-						}
-					}
-
 				}
 			}
 
