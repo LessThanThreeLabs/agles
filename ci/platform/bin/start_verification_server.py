@@ -8,43 +8,53 @@ import settings.log
 
 from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer
-from verification.server.build_verifier import BuildVerifier
+from verification.server.verifier_pool import VerifierPool
+from verification.shared.build_core import CloudBuildCore
 from virtual_machine.ec2 import Ec2Vm
 from virtual_machine.openstack import OpenstackVm
 
-DEFAULT_VM_DIRECTORY = "/tmp/verification"
+
+DEFAULT_VM_COUNT = 4
 
 
 def main():
 	settings.log.configure()
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument("-v", "--vm_dir",
-		help="The root directory for the virtual machine")
-	parser.add_argument("-f", "--fast_startup", action='store_true',
-		help="Skips cycling of virtual machine, assumes it is already running")
-	parser.add_argument("-a", "--aws", action='store_true',
-		help="Uses an AWS virtual machine")
-	parser.add_argument("-o", "--openstack", action='store_true',
-		help="Uses an Openstack virtual machine")
-	parser.set_defaults(vm_dir=DEFAULT_VM_DIRECTORY, fast_startup=False)
+	parser.add_argument("-d", "--dir",
+		help="The root directory for the virtual machine pool")
+	parser.add_argument("-t", "--type",
+		help="Selects the VM type. Supported options are \"aws\" and \"openstack\"")
+	parser.add_argument("-c", "--count",
+		help="The number of virtual machines for this verification server to manage")
+	parser.set_defaults(dir=".", count=DEFAULT_VM_COUNT)
 	args = parser.parse_args()
 
-	if not args.aws and not args.openstack:
-		print "Must supply either --aws or --openstack to specify the VM type"
+	try:
+		vm_class = {
+			'aws': Ec2Vm,
+			'openstack': OpenstackVm
+			}[args.type]
+	except:
+		print "Must supply either \"aws\" or \"openstack\" as a VM type"
+		parser.print_usage()
 		sys.exit(1)
 
-	vm_dir = os.path.realpath(args.vm_dir)
-	print "Starting Verification Server (%s) with vm directory %s ..." % (
-			"openstack" if args.openstack else "aws", vm_dir)
+	try:
+		vm_count = int(args.count)
+	except:
+		print "Must supply an integer for VM count"
+		parser.print_usage()
+		sys.exit(1)
 
-	vm_class = OpenstackVm if args.openstack else Ec2Vm
+	vm_dir = os.path.realpath(args.dir)
+	print "Starting Verification Server (%d*%s) with directory %s ..." % (
+			vm_count, args.type, vm_dir)
 
-	verifiers = []
-	for i in range(4):
+	def spawn_vm(verifier_number):
 		for attempts in range(9, -1, -1):
 			try:
-				virtual_machine = vm_class.from_directory_or_construct(os.path.join(vm_dir, str(i)))
+				return vm_class.from_directory_or_construct(os.path.join(vm_dir, str(verifier_number)))
 			except Exception as e:
 				print e
 				if attempts > 0:
@@ -56,18 +66,11 @@ def main():
 			else:
 				break
 
-		verifier = BuildVerifier.for_virtual_machine(virtual_machine, RepositoryUriTranslator())
-		verifiers.append(verifier)
+	def spawn_verifier(verifier_number, uri_translator):
+		return CloudBuildCore(spawn_vm(verifier_number), uri_translator)
 
-		print "Verifier %d ready" % i
-
-	if not args.fast_startup:
-		for verifier in verifiers:
-			verifier.setup()
-
-	print "Run time..."
-
-	vs = VerificationServer(*verifiers)
+	verifier_pool = VerifierPool(spawn_verifier, vm_count, RepositoryUriTranslator())
+	vs = VerificationServer(verifier_pool)
 	vs.run()
 
 

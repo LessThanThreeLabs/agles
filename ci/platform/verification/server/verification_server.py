@@ -20,10 +20,11 @@ class VerificationServer(object):
 	lint, and run tests against commits.
 	"""
 
-	def __init__(self, *verifiers):
-		self.handlers = [VerificationRequestHandler(verifier) for verifier in verifiers]
+	def __init__(self, verifier_pool):
+		self.verifier_pool = verifier_pool
 
 	def run(self):
+		self.handlers = [VerificationRequestHandler(verifier) for verifier in self.verifier_pool.spawn_all().values()]
 		[spawn_wrap(handler.run)() for handler in self.handlers]
 		while True:
 			eventlet.sleep()

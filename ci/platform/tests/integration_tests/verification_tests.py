@@ -11,7 +11,6 @@ from shared.constants import BuildStatus
 from util.test import BaseIntegrationTest
 from util.test.fake_build_verifier import FakeBuildVerifier
 from util.test.mixins import *
-from verification.server.build_verifier import BuildVerifier
 
 VM_DIRECTORY = '/tmp/verification'
 

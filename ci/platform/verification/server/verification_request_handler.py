@@ -26,6 +26,10 @@ class VerificationRequestHandler(InfiniteWorker):
 		self._check_for_interrupted_build()
 		self._register_pubkey()
 
+	def run(self):
+		self.verifier.setup()
+		super(VerificationRequestHandler, self).run()
+
 	def _register_pubkey(self):
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, self.worker_id)
 

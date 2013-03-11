@@ -26,21 +26,17 @@ from bunnyrpc.server import Server
 from bunnyrpc.client import Client
 from git import Repo
 from util.test.fake_build_verifier import FakeBuildVerifier
+from verification.server.verifier_pool import VerifierPool
 
-TEST_ROOT = '/tmp/verification'
 DEFAULT_NUM_VERIFIERS = 2
+TEST_ROOT = "/tmp/verification"
 
 
 class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	RabbitMixin, RepoStoreTestMixin, RedisTestMixin):
 	@classmethod
 	def setup_class(cls):
-		cls.verifiers = []
-		cls.vs_processes = []
-		for x in range(DEFAULT_NUM_VERIFIERS):
-			verifier = FakeBuildVerifier(passes=True)
-			verifier.setup()
-			cls.verifiers.append(verifier)
+		cls.verifier_pool = VerifierPool(lambda num, uri_translator: FakeBuildVerifier(passes=True), DEFAULT_NUM_VERIFIERS)
 
 		cls.repostore_id = 1
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
@@ -52,10 +48,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	@classmethod
 	def teardown_class(cls):
-		[verifier.teardown() for verifier in cls.verifiers]
-		rmtree(TEST_ROOT, ignore_errors=True)
+		cls.verifier_pool.teardown()
 		cls.repo_store_process.terminate()
 		cls.repo_store_process.join()
+		rmtree(TEST_ROOT, ignore_errors=True)
 
 	def setUp(self):
 		super(VerificationRoundTripTest, self).setUp()
@@ -70,12 +66,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.forward_repo_url = os.path.join(self.repo_dir, "forwardrepo.git")
 		Repo.init(self.forward_repo_url, bare=True)
 		self._start_redis()
-		self.vs_processes = []
-		for verifier in self.verifiers:
-			verification_server = VerificationServer(verifier)
-			vs_process = TestProcess(target=verification_server.run)
-			vs_process.start()
-			self.vs_processes.append(vs_process)
+		verification_server = VerificationServer(self.verifier_pool)
+		self.vs_process = TestProcess(target=verification_server.run)
+		self.vs_process.start()
 
 		verification_master = VerificationMaster()
 		self.vm_process = TestProcess(target=verification_master.run)
@@ -90,7 +83,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._stop_model_server()
 		self.vm_process.terminate()
 		self.vm_process.join()
-		[(vs_process.terminate(), vs_process.join()) for vs_process in self.vs_processes]
+		self.vs_process.terminate()
+		self.vs_process.join()
 		self._stop_redis()
 		self._purge_queues()
 
