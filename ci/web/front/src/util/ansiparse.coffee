@@ -81,7 +81,9 @@ class ConsoleLine
 
 window.ansiparse = (str) ->
     return str if not str?
-    return _escapeString str if not _stringContainsAnsiCodes str
+
+    if not _stringContainsAnsiCodes str
+        return '<span class="foregroundDefault backgroundDefault">' + _escapeString(str) + '</span>'
 
     consoleLine = new ConsoleLine()
     mode = 'text'
@@ -121,13 +123,13 @@ _stringContainsAnsiCodes = (string) ->
 
 
 _escapeString = (string) ->
-    return string.replace('&', '&amp;')
-        .replace('<', '&lt;')
-        .replace('>', '&gt;')
-        .replace('"', '&quot;')
-        .replace('\'', '&#39;')
-        .replace('/', '&#x2F;')
-        .replace(' ', '&nbsp;')
+    return string.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\//g, '&#x2F;')
+        .replace(/\ /g, '&nbsp;')
 
 
 _ansiToStyles = (controlCodes) ->
