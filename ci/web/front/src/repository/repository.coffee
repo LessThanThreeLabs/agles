@@ -52,7 +52,7 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 	syncToRouteParams()
 
 	$scope.selectChange = (change) ->
-		$scope.currentChangeId = change.id
+		$scope.currentChangeId = change?.id
 		$scope.currentStageId = null
 		$scope.showMerge = false
 
