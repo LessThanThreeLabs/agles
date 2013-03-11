@@ -64,14 +64,7 @@
 				<div id="repositoryStageDetailsOutput" ng-show="currentChangeId != null && currentStageId != null">
 					<div class="consoleTextTopBuffer"></div>
 					<div class="consoleTextContainer" auto-scroll-to-bottom="lines" auto-scroll-to-bottom-buffer="60">
-						<console-text class="consoleText" console-text-lines="lines">
-						</console-text>
-
-						<!-- <div class="consoleText">
-							<div class="consoleTextLine" ng-repeat="line in lines">
-								<span class="consoleTextLineNumber">{{$index + 1}}</span><span class="consoleTextLineText" ng-bind-html="line | ansiparse" text-selectable></span>
-							</div>
-						</div> -->
+						<console-text class="consoleText" console-text-lines="lines"></console-text>
 					</div>
 					<div class="consoleTextBottomBuffer"></div>
 				</div>
