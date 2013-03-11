@@ -118,6 +118,47 @@ describe 'Koality services', () ->
 				expect(integerConverter.toInteger '1.3').toBeNull()
 				expect(integerConverter.toInteger 'five').toBeNull()
 
+	describe 'ansiparse service', () ->
+		beforeEach module 'koality.service'
+
+		it 'should wrap plaintext in default styling', () -> 
+			inject (ansiparse) ->
+				expect(ansiparse.parse 'thisIsATest').toBe '<span class="ansi"><span class="foregroundDefault backgroundDefault">thisIsATest</span></span>'
+
+		it 'should escape spaces', () ->
+			inject (ansiparse) ->
+				expect(ansiparse.parse 'this is  A   test').toBe '<span class="ansi"><span class="foregroundDefault backgroundDefault">this&nbsp;is&nbsp;&nbsp;A&nbsp;&nbsp;&nbsp;test</span></span>'
+
+		it 'should handle changing columns', () ->
+			inject (ansiparse) ->
+				expect(ansiparse.parse 'one\x1b[5Gtwo').toBe '<span class="ansi"><span class="foregroundDefault backgroundDefault">one&nbsp;&nbsp;two</span></span>'
+				expect(ansiparse.parse 'one\x1b[0Gtwo').toBe '<span class="ansi"><span class="foregroundDefault backgroundDefault">two</span></span>'
+
+		it 'should handle colors, bold, and clearing', () ->
+			inject (ansiparse) ->
+				expect(ansiparse.parse '\x1b[33;45;1mbright yellow on magenta, \x1b[0mdefault').toBe '<span class="ansi"><span class="foregroundYellow backgroundMagenta bright">bright&nbsp;yellow&nbsp;on&nbsp;magenta,&nbsp;</span>' +
+					'<span class="foregroundDefault backgroundDefault">default</span></span>'
+
+		it 'should persist colors and bold through other styles', () ->
+			inject (ansiparse) ->
+				expect(ansiparse.parse 'default, \x1b[31;1mbright red, \x1b[34;46mbright blue on cyan, \x1b[22mblue on cyan')
+					.toBe '<span class="ansi"><span class="foregroundDefault backgroundDefault">default,&nbsp;</span>' +
+						'<span class="foregroundRed backgroundDefault bright">bright&nbsp;red,&nbsp;</span>' +
+						'<span class="foregroundBlue backgroundCyan bright">bright&nbsp;blue&nbsp;on&nbsp;cyan,&nbsp;</span>' +
+						'<span class="foregroundBlue backgroundCyan">blue&nbsp;on&nbsp;cyan</span></span>'
+
+		it 'should overwrite old characters with new styles', () ->
+			inject (ansiparse) ->
+				expect(ansiparse.parse 'plain\x1b[0G\x1b[32mgreen').toBe '<span class="ansi"><span class="foregroundGreen backgroundDefault">green</span></span>'
+
+		it 'should handle carriage returns', () ->
+			inject (ansiparse) ->
+				expect(ansiparse.parse '123456789\r9876').toBe '<span class="ansi"><span class="foregroundDefault backgroundDefault">987656789</span></span>'
+
+		it 'should escape dangerous characters', () ->
+			inject (ansiparse) ->
+				expect(ansiparse.parse '&<>"\'/').toBe '<span class="ansi"><span class="foregroundDefault backgroundDefault">&amp;&lt;&gt;&quot;&#39;&#x2F;</span></span>'
+
 	describe 'rpc', () ->
 		mockedSocket = null
 

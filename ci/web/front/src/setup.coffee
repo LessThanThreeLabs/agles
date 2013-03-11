@@ -33,6 +33,10 @@ angular.module('koality.service', []).
 			return null if isNaN integer
 			return integer
 	]).
+	factory('ansiparse', ['$window', ($window) ->
+		return parse: (text) ->
+			return '<span class="ansi">' + $window.ansiparse(text) + '</span>'
+	]).
 	factory('cookieExtender', ['$http', ($http) ->
 		return extendCookie: (callback) ->
 			successHandler = (data, status, headers, config) ->
@@ -408,14 +412,34 @@ angular.module('koality.directive', []).
 
 			stopSpinner = () ->
 				spinner.stop() if spinner?
-	)
+	).
+	directive('consoleText', ['ansiparse', (ansiparse) ->
+		restrict: 'E'
+		replace: true
+		scope: lines: '=consoleTextLines'
+		template: '<div class="consoleText"></div>'
+		link: (scope, element, attributes) ->
+			addLine = (number, line="", linePreviouslyExisted) ->
+				ansiParsedLine = ansiparse.parse line
+				html = "<span class='consoleTextLineNumber'>#{number}</span><span class='consoleTextLineText' text-selectable>#{ansiParsedLine}</span>"
+
+				if linePreviouslyExisted
+					element.find(".consoleTextLine:nth-child(#{number})").html html
+				else
+					element.append '<span class="consoleTextLine">' + html + '</span>'
+
+			scope.$watch 'lines', ((newValue, oldValue) ->
+				if not newValue? or newValue.length is 0
+					element.empty()
+				else
+					for line, index in newValue
+						if newValue[index] isnt oldValue[index] or index >= oldValue.length
+							addLine index+1, line, oldValue[index]?
+			), true
+	])
 
 
 angular.module('koality.filter', ['koality.service']).
-	filter('ansiparse', ['$window', ($window) ->
-		(input) ->
-			return '<span class="ansi">' + $window.ansiparse(input) + '</span>'
-	]).
 	filter('fileSuffix', ['fileSuffixAdder', (fileSuffixAdder) ->
 		(input) ->
 			return fileSuffixAdder.addFileSuffix input

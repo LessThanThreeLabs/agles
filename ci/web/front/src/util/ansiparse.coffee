@@ -69,7 +69,7 @@ class ConsoleLine
                 style = char.style
                 cssStyle = @_stylesToHtml char.style.toCssStyle()
                 str += if cssStyle then cssStyle else ''
-            str += @_escapeChar char.character
+            str += _escapeString char.character
         str += '</span>' if cssStyle
         return str
 
@@ -78,29 +78,11 @@ class ConsoleLine
             return null
         '<span class="' + styles + '">'
 
-    _escapeChar: (char) =>
-        switch char
-            when '&'
-                '&amp;'
-            when '<'
-                '&lt;'
-            when '>'
-                '&gt;'
-            when '"'
-                '&quot;'
-            when '\''
-                '&#39;'
-            when '/'
-                '&#x2F;'
-            when ' '
-                '&nbsp;'
-            else
-                char
-
 
 window.ansiparse = (str) ->
-    if not str?
-        return
+    return str if not str?
+    return _escapeString str if not _stringContainsAnsiCodes str
+
     consoleLine = new ConsoleLine()
     mode = 'text'
     index = 0
@@ -132,6 +114,20 @@ window.ansiparse = (str) ->
             consoleLine.write str[index]
         index++
     return consoleLine.toString()
+
+
+_stringContainsAnsiCodes = (string) ->
+    string.indexOf('\x1b[') isnt -1 or string.indexOf('\r') isnt -1
+
+
+_escapeString = (string) ->
+    return string.replace('&', '&amp;')
+        .replace('<', '&lt;')
+        .replace('>', '&gt;')
+        .replace('"', '&quot;')
+        .replace('\'', '&#39;')
+        .replace('/', '&#x2F;')
+        .replace(' ', '&nbsp;')
 
 
 _ansiToStyles = (controlCodes) ->
