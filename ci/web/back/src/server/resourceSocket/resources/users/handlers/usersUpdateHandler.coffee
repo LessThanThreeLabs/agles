@@ -151,10 +151,21 @@ class UsersUpdateHandler extends Handler
 
 
 	submitFeedback: (socket, data, callback) =>
+		sanitizeResult = (user) ->
+			id: user.id
+			email: user.email
+			firstName: user.first_name
+			lastName: user.last_name
+			isAdmin: user.admin
+			timestamp: user.created
+
 		userId = socket.session.userId
 		if not userId?
 			callback 403
 		else if not data?.feedback? or not data?.userAgent? or not data?.screen?
 			callback 400
 		else
-			@feedbackEmailer.sendEmail data.feedback, data.userAgent, data.screen
+			@modelRpcConnection.users.read.get_user_from_id userId, (error, user) =>
+				if error then callback 500
+				else
+					@feedbackEmailer.sendEmail sanitizeResult(user), data.feedback, data.userAgent, data.screen
