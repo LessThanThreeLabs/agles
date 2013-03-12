@@ -28,11 +28,12 @@
 
 	"js": {
 		"application/javascript": [
+			"/js/libs/assert.js",
 			"/js/libs/jquery.js",
 			"/js/libs/angular.js",
 			"/js/libs/angularSanitize.js",
 			"/js/libs/socket.io.js",
-			"/js/libs/assert.js",
+			"/js/libs/d3.js",
 			"/js/libs/spinner.js",
 
 			"/js/src/util/ansiparse.js",
