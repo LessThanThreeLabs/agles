@@ -22,6 +22,8 @@ class RunStepParser(object):
 				raise InvalidConfigurationException("Could not parse %s step: %s" % (self.step_type, step))
 			name = step.keys()[0]
 			path, commands, timeout = self.parse_step_info(step.values()[0])
+			if not commands:
+				commands = [name]
 		else:
 			raise InvalidConfigurationException("Could not parse %s step: %s" % (self.step_type, step))
 		return name, path, commands, timeout
