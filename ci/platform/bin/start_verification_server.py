@@ -6,15 +6,14 @@ import time
 
 import settings.log
 
+from settings.verification_server import virtual_machine_count
 from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer
 from verification.server.verifier_pool import VerifierPool
+from verification.server.virtual_machine_cleanup_tool import VirtualMachineCleanupTool
 from verification.shared.build_core import CloudBuildCore
 from virtual_machine.ec2 import Ec2Vm
 from virtual_machine.openstack import OpenstackVm
-
-
-DEFAULT_VM_COUNT = 4
 
 
 def main():
@@ -27,14 +26,16 @@ def main():
 		help="Selects the VM type. Supported options are \"aws\" and \"openstack\"")
 	parser.add_argument("-c", "--count",
 		help="The number of virtual machines for this verification server to manage")
-	parser.set_defaults(dir=".", count=DEFAULT_VM_COUNT)
+	parser.add_argument("-C", "--cleanup", action="store_true",
+		help="Cleans up all virtual machines from previous runs on startup")
+	parser.set_defaults(dir=".", count=virtual_machine_count)
 	args = parser.parse_args()
 
 	try:
 		vm_class = {
 			'aws': Ec2Vm,
 			'openstack': OpenstackVm
-			}[args.type]
+		}[args.type]
 	except:
 		print "Must supply either \"aws\" or \"openstack\" as a VM type"
 		parser.print_usage()
@@ -48,21 +49,21 @@ def main():
 		sys.exit(1)
 
 	vm_dir = os.path.realpath(args.dir)
+
+	if args.cleanup:
+		print "Cleaning up Verification Server directory %s ..." % vm_dir
+		VirtualMachineCleanupTool(vm_dir, vm_class).cleanup()
+
 	print "Starting Verification Server (%d*%s) with directory %s ..." % (
 			vm_count, args.type, vm_dir)
 
 	def spawn_vm(verifier_number):
-		for attempts in range(9, -1, -1):
+		while True:
 			try:
 				return vm_class.from_directory_or_construct(os.path.join(vm_dir, str(verifier_number)))
-			except Exception as e:
-				print e
-				if attempts > 0:
-					print "Failed to create virtual machine, trying again in 3 seconds..."
-					time.sleep(3)
-				else:
-					print "Failed 10 times, aborting."
-					sys.exit(1)
+			except:
+				print "Failed to create virtual machine, trying again in 3 seconds..."
+				time.sleep(3)
 			else:
 				break
 

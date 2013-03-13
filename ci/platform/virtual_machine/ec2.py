@@ -21,7 +21,6 @@ class Ec2Client(object):
 class Ec2Vm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
-	DEFAULT_INSTANCE_TYPE = "m1.small"
 	logger = logging.getLogger("Ec2Vm")
 
 	def __init__(self, vm_directory, instance, vm_username=VM_USERNAME):
@@ -42,7 +41,7 @@ class Ec2Vm(VirtualMachine):
 		if not ami_image_id:
 			ami_image_id = cls.get_newest_image().id
 		if not instance_type:
-			instance_type = cls.DEFAULT_INSTANCE_TYPE
+			instance_type = AwsSettings.instance_type
 
 		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=cls._default_user_data(vm_username)).instances[0]
 		cls._name_instance(instance, name)
