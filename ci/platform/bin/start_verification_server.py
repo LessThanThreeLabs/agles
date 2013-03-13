@@ -6,7 +6,7 @@ import time
 
 import settings.log
 
-from settings.verification_server import virtual_machine_count
+from settings.verification_server import VerificationServerSettings
 from util.uri_translator import RepositoryUriTranslator
 from verification.server import VerificationServer
 from verification.server.verifier_pool import VerifierPool
@@ -28,7 +28,7 @@ def main():
 		help="The number of virtual machines for this verification server to manage")
 	parser.add_argument("-C", "--cleanup", action="store_true",
 		help="Cleans up all virtual machines from previous runs on startup")
-	parser.set_defaults(dir=".", count=virtual_machine_count)
+	parser.set_defaults(dir=".", count=VerificationServerSettings.virtual_machine_count)
 	args = parser.parse_args()
 
 	try:
