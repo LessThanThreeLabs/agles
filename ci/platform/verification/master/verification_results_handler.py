@@ -36,15 +36,18 @@ class VerificationResultsHandler(QueueListener):
 		with ModelServer.rpc_connect("builds", "read") as client:
 			build = client.get_build_from_id(build_id)
 		with ModelServer.rpc_connect("changes", "read") as client:
+			change_status = client.get_change_attributes(build["change_id"])["status"]
 			builds = client.get_builds_from_change_id(build["change_id"])
 		success = all(map(lambda build: build["status"] == BuildStatus.PASSED, builds))
 		failure = any(map(lambda build: build["status"] == BuildStatus.FAILED, builds))
-		if success:
+		if success and not change_status == BuildStatus.PASSED:
 			self._mark_change_finished(build["change_id"])
-		elif failure:
+		elif failure and not change_status == BuildStatus.FAILED:
 			self._mark_change_failed(build["change_id"])
-		else:
+		elif not success and not failure:
 			self.logger.debug("Still waiting for more results to finish build %s" % build_id)
+		else:
+			pass  # Duplicate results, do nothing
 
 	def _mark_change_finished(self, change_id):
 		merge_success = self.send_merge_request(change_id)
