@@ -40,20 +40,9 @@ class SchemaDataGenerator(object):
 			salt=SALT,
 			created=int(time.time())
 		)
-		ins_user = schema.user.insert().values(
-			email="user@user.com",
-			first_name="User",
-			last_name="User",
-			password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1],
-			salt=SALT,
-			created=int(time.time())
-		)
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			self.admin_id = conn.execute(ins_admin).inserted_primary_key[0]
-			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
-
-		with ConnectionFactory.get_sql_connection() as conn:
 			repos = dict()
 			repo_ids = []
 			for repostore in range(NUM_REPO_STORES):
@@ -114,7 +103,7 @@ class SchemaDataGenerator(object):
 	def generate_console_output(self, sqlconn, console_id):
 		console_output = schema.console_output
 
-		for line_num in range(1, random.randint(20, 2000)):
+		for line_num in range(1, random.randint(20, 500)):
 			output = ''.join(random.choice(string.ascii_letters + string.digits + ' ') for x in range(random.randint(1, 100)))
 			ins = console_output.insert().values(
 				build_console_id=console_id,
