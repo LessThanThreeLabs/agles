@@ -11,7 +11,10 @@ class VerificationConfig(object):
 		self._test_commands = test_commands
 
 	def _get_command_name(self, command):
-		return command.iterkeys().next()
+		if isinstance(command, str):
+			return command
+		elif isinstance(command, dict):
+			return command.iterkeys().next()
 
 	def to_dict(self):
 		return {'compile_commands': self._compile_commands,
