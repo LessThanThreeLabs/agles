@@ -40,6 +40,7 @@
 
 			"/js/src/services.js",
 			"/js/src/directives.js",
+			"/js/src/d3Directives.js",
 			"/js/src/filters.js",
 
 			"/js/src/setup.js",

@@ -280,3 +280,4 @@ angular.module('koality.directive', []).
 
 			scope.$watch 'lines', handleLinesUpdate, true
 	])
+	
