@@ -34,8 +34,6 @@ class RunStepParser(object):
 		if isinstance(step_info, str):
 			commands = [step_info]
 		elif isinstance(step_info, dict):
-			if not 'script' in step_info:
-				raise InvalidConfigurationException("Could not parse %s step: %s" % (self.step_type, step_info))
 			for key, value in step_info.items():
 				if key == 'script':
 					commands = self.parse_script(value)
