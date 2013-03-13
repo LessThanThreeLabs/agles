@@ -27,7 +27,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			repo_name += ".git"
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 			repostore_id = manager.get_least_loaded_store()
-			uri = self._transpose_to_uri(user_id, repo_name)
+			uri = repo_name  # email addresses in uri don't make sense anymore
 			current_time = int(time.time())
 
 			privatekey = keypair["private"]
