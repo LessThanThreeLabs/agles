@@ -13,7 +13,7 @@ class RunStepParser(object):
 
 	def parse_step(self, step):
 		path = '.'
-		timeout = 120
+		timeout = 600
 		if isinstance(step, str):
 			name = step
 			commands = [step]
@@ -30,7 +30,8 @@ class RunStepParser(object):
 
 	def parse_step_info(self, step_info):
 		path = '.'
-		timeout = 120
+		commands = None
+		timeout = 600
 		if isinstance(step_info, str):
 			commands = [step_info]
 		elif isinstance(step_info, dict):
