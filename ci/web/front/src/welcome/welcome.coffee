@@ -25,4 +25,28 @@ window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
 		{timestamp: 1371083366846, status: 'passed'},
 		{timestamp: 1371083366856, status: 'passed'}
 	]
+
+	setTimeout (() -> $scope.$apply () ->
+		$scope.changes.push
+			timestamp: 1371083366876
+			status: 'failed'
+		), 1000
+
+	setTimeout (() -> $scope.$apply () ->
+		$scope.changes.push
+			timestamp: 1371083366886
+			status: 'failed'
+		), 2000
+
+	setTimeout (() -> $scope.$apply () ->
+		$scope.changes.push
+			timestamp: 1371083366896
+			status: 'passed'
+		), 3000
+
+	setTimeout (() -> $scope.$apply () ->
+		$scope.changes.push
+			timestamp: 1371083366996
+			status: 'passed'
+		), 4000
 ]

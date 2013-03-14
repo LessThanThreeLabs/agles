@@ -1,7 +1,7 @@
 @import '../constants';
 
 #welcome {
-	width: 500px;
+	width: 800px;
 
 	.welcomeText {
 		text-align: center;
@@ -10,15 +10,17 @@
 
 	svg {
 		margin-top: 20px;
-		width: 500px;
+		width: 800px;
 		height: 500px;
-		border: 1px solid pink;
 
-		.line {
+		.allLine, .passedLine, .failedLine {
 			fill: none;
-			stroke: red;
-			stroke-width: 1.5px;
+			stroke-width: 3px;
 		}
+
+		.allLine { stroke: @koalityGray; }
+		.passedLine { stroke: @koalityGreen; }
+		.failedLine { stroke: @koalityRed; }
 
 		.xAxis, .yAxis {
 			fill: @koalityWhite;
