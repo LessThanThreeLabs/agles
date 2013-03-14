@@ -30,10 +30,10 @@ class RepositoriesReadHandler extends Handler
 
 
 	getMetadata: (socket, data, callback) =>
-		sanitizeResult = (repository) ->
+		sanitizeResult = (repository) =>
 			id: repository.id
 			name: repository.name
-			uri: repository.uri
+			uri: 'git@' + @configurationParams.domain + ':' + repository.uri
 
 		userId = socket.session.userId
 		if not userId?
