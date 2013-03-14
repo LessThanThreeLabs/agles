@@ -1,5 +1,9 @@
 include_recipe "koality::setuppy_install"
 
+bash "rabbitmq_setup" do
+	code "#{node[:koality][:source_path][:internal]}/ci/scripts/rabbitmq_setup.sh"
+end
+
 supervisor_service "model_server" do
 	action [:stop]
 	directory "/tmp/model_server"
