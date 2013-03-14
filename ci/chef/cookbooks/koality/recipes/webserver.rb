@@ -89,11 +89,10 @@ end
 
 supervisor_service "webserver" do
 	action [:enable, :start]
-	command "bash -c 'source /etc/koality/koalityrc && node --harmony js/index.js --httpsPort 10443 --mode production'"
+	command "/etc/koality/node --harmony js/index.js --httpsPort 10443 --mode production"
 	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stdout.log"
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stderr.log"
 	user node[:koality][:user]
 	directory "#{node[:koality][:source_path][:internal]}/ci/web/back"
-	stopsignal :KILL
 	priority 2
 end
