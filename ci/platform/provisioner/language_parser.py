@@ -95,8 +95,8 @@ class LanguageParser(object):
 	def validate_java(self, version):
 		version = str(version).lower()
 		version_aliases = {
-			'5': ['1.5', '1.5.0', '1.5.0.22', '1.5.0_22'],
-			'6': ['1.6', '1.6.0', '1.6.0.24', '1.6.0_24'],
+			'5': ['1.5', '1.5.0'],
+			'6': ['1.6', '1.6.0'],
 			'openjdk6': ['openjdk-6']
 		}
 		version_map = {
