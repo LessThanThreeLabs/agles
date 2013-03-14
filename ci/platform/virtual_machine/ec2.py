@@ -130,7 +130,7 @@ class Ec2Vm(VirtualMachine):
 	def get_newest_image(cls):
 		images = Ec2Client.get_client().get_all_images(owners=['600991114254'])
 		images = [image for image in images if AwsSettings.image_filter(image)]  # TODO: Verify this doesn't need to check for ACTIVE (seems to be the case)
-		return max(images, key=lambda image: str(image)[str(image).rfind('_') + 1:])  # get image with greatest suffix number
+		return max(images, key=lambda image: image.name[image.name.rfind('_') + 1:])  # get image with greatest suffix number
 
 	def save_snapshot(self, volume_id, description=None):
 		return self.ec2_client.create_snapshot(volume_id, description)
