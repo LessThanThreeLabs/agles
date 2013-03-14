@@ -1,6 +1,36 @@
 'use strict'
 
 window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
+	$scope.filterOptions = [
+		{id: 'pastSeven', name: 'Past 7 days'},
+		{id: 'pastFourteen', name: 'Past 14 days'},
+		{id: 'pastMonth', name: 'Past month'},
+		{id: 'pastThreeMonths', name: 'Past 3 months'},
+		{id: 'pastSixMonths', name: 'Past 6 months'},
+		{id: 'pastYear', name: 'Past year'}
+	]
+
+	$scope.filterSelected = (filterOption) ->
+		timeInDay = 24 * 60 * 60 * 1000
+		startTime = null
+		currentTime = (new Date()).getTime()
+
+		switch filterOption.selected
+			when 'pastSeven' then startTime = currentTime - 7 * timeInDay
+			when 'pastFourteen' then startTime = currentTime - 14 * timeInDay
+			when 'pastMonth' then startTime = currentTime - 30 * timeInDay
+			when 'pastThreeMonths' then startTime = currentTime - 90 * timeInDay
+			when 'pastSixMonths' then startTime = currentTime - 180 * timeInDay
+			when 'pastYear' then startTime = currentTime - 365 * timeInDay
+			else throw new Error 'Unexpected filter option: ' + filterOption
+
+		console.log new Date startTime
+		# requestParams =
+		# 	repositories: [0, 1]
+		# 	startTime: startTime
+		# rpc.makeRequest 'changes', 'read', 'getChangesFromTime', requestParams, (error, changes) ->
+		# 	$scope.changes = changes
+
 	$scope.changes = [
 		{timestamp: 1358040566846, status: 'passed'}, 
 		{timestamp: 1358040566886, status: 'passed'}, 
