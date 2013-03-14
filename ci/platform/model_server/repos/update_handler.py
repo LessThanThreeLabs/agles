@@ -13,11 +13,12 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 	def update_repostore(self, repostore_id, ip_address, root_dir, num_repos):
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id == repostore_id)
+		update = repostore.update().where(repostore.c.id == repostore_id).values(ip_address=ip_address)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			assert row is not None
-			assert row[repostore.c.ip_address] == ip_address
 			assert row[repostore.c.repositories_path] == root_dir
+			sqlconn.execute(update)
 
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 		manager.register_remote_store(repostore_id, num_repos=num_repos)
