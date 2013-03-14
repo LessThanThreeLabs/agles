@@ -2,32 +2,30 @@
 
 #welcome {
 	width: 800px;
+	height: 500px;
 
-	.welcomeText {
-		text-align: center;
-		font-size: 3.0em;
-	}
-
-	svg {
-		margin-top: 20px;
-		width: 800px;
-		height: 500px;
+	#welcomeChangeAnalytics {
+		position: absolute;
+		top: 50px;
+		left: 20px;
+		width: 500px;
+		height: 300px;
 
 		.allLine, .passedLine, .failedLine {
 			fill: none;
 			stroke-width: 3px;
 		}
 
-		.allLine { stroke: @koalityGray; }
+		.allLine { stroke: @koalityWhite; }
 		.passedLine { stroke: @koalityGreen; }
 		.failedLine { stroke: @koalityRed; }
 
 		.xAxis, .yAxis {
-			fill: @koalityWhite;
+			fill: @koalityGray;
 
 			path, line {
 				fill: none;
-				stroke: @koalityWhite;
+				stroke: @koalityGray;
 				shape-rendering: crispEdges;
 			}
 		}
