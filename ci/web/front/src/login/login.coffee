@@ -20,4 +20,6 @@ window.Login = ['$scope', 'rpc', 'cookieExtender', ($scope, rpc, cookieExtender)
 							redirectToHome()
 					else
 						redirectToHome()
+
+	$scope.$watch 'account', (() -> $scope.showError = false), true
 ]
