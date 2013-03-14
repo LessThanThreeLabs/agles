@@ -58,12 +58,12 @@ class ChangesReadHandler extends Handler
 				email: metadata.user.email
 				firstName: metadata.user.first_name
 				lastName: metadata.user.last_name
-			message: metadata.commit.message
-			commitTime: metadata.commit.timestamp
+			headCommit:
+				message: metadata.commit.message
+				sha: metadata.commit.sha
 			startTime: metadata.change.start_time
 			endTime: metadata.change.end_time
 			target: metadata.change.merge_target
-			sha: metadata.commit.sha
 			mergeStatus: metadata.change.merge_status
 
 		userId = socket.session.userId
