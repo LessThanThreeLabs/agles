@@ -1,3 +1,5 @@
+from sqlalchemy import and_
+
 import database.schema
 
 from database.engine import ConnectionFactory
@@ -37,7 +39,12 @@ class ReposReadHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 
-		query = repo.join(repostore).select().apply_labels().where(repo.c.uri == requested_repo_uri)
+		query = repo.join(repostore).select().apply_labels().where(
+			and_(
+				repo.c.uri == requested_repo_uri,
+				repo.c.deleted == 0
+			)
+		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row_result = sqlconn.execute(query).first()
 		if not row_result:
