@@ -94,6 +94,6 @@ class VerificationResultsHandler(QueueListener):
 			self._mark_change_pushforward_failure(change_id)
 			self.logger.warn("Failed to forward push change %s" % change_id, exc_info=True)
 		except:
-			self._mark_change_failed(change_id)
+			self._mark_change_merge_failure(change_id)
 			self.logger.error("Failed to merge/push change %s" % change_id, exc_info=True)
 		return False
