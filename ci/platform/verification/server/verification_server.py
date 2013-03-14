@@ -27,4 +27,4 @@ class VerificationServer(object):
 		self.handlers = [VerificationRequestHandler(verifier) for verifier in self.verifier_pool.spawn_all().values()]
 		[spawn_wrap(handler.run)() for handler in self.handlers]
 		while True:
-			eventlet.sleep()
+			eventlet.sleep(1)
