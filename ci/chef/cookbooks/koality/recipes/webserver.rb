@@ -94,5 +94,6 @@ supervisor_service "webserver" do
 	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/webserver_stderr.log"
 	user node[:koality][:user]
 	directory "#{node[:koality][:source_path][:internal]}/ci/web/back"
+	stopsignal :INT
 	priority 2
 end
