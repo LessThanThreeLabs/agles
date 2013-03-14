@@ -5,7 +5,6 @@ import yaml
 from kombu.connection import Connection
 
 from model_server import ModelServer
-from model_server.build_consoles import ConsoleType
 from settings.rabbit import RabbitSettings
 from settings.verification_server import VerificationServerSettings
 from shared.constants import BuildStatus, VerificationUser

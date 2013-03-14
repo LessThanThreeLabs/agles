@@ -11,7 +11,7 @@ class VerificationConfig(object):
 		self._test_commands = test_commands
 
 	def _get_command_name(self, command):
-		if isinstance(command, str):
+		if isinstance(command, (str, unicode)):
 			return command
 		elif isinstance(command, dict):
 			return command.iterkeys().next()
