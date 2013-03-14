@@ -11,6 +11,7 @@ angular.module('koality.d3.directive', []).
 			width = element.width()
 			height = element.height()
 			axisBuffer = 10
+			lineTransitionTime = 1500
 
 			svg = d3.select(element[0]).append 'g'
 
@@ -59,9 +60,9 @@ angular.module('koality.d3.directive', []).
 				xAxis = d3.svg.axis().scale(x).orient 'bottom'
 				yAxis = d3.svg.axis().scale(y).orient 'left'
 
-				allPath.datum(allHistogram).attr('d', computeChangeLine x, y, allIntervals)
-				passedPath.datum(passedHistogram).attr('d', computeChangeLine x, y, allIntervals)
-				failedPath.datum(failedHistogram).attr('d', computeChangeLine x, y, allIntervals)
+				allPath.datum(allHistogram).transition().duration(lineTransitionTime).attr('d', computeChangeLine x, y, allIntervals)
+				passedPath.datum(passedHistogram).transition().duration(lineTransitionTime).attr('d', computeChangeLine x, y, allIntervals)
+				failedPath.datum(failedHistogram).transition().duration(lineTransitionTime).attr('d', computeChangeLine x, y, allIntervals)
 
 				xAxisLabel.call xAxis
 				yAxisLabel.call yAxis
