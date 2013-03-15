@@ -20,7 +20,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			ins_user = user.insert().values(
 				email='a',
 				first_name='first',
-				last_name='last',
+				last_name='LaSt',
 				password_hash='a',
 				salt='a' * 16,
 				created=0
@@ -124,6 +124,8 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["first"], 0, 100)
 		assert_equal(len(results), 1)
 		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["last"], 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["laST"], 0, 100)
 		assert_equal(len(results), 1)
 		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["first", "last"], 0, 100)
 		assert_equal(len(results), 1)

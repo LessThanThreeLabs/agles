@@ -1,4 +1,4 @@
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 
 import collections
 import database.schema
@@ -115,8 +115,8 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		query = change.join(commit).join(user).join(
 			temp_string,
 			or_(
-				temp_string.c.string == user.c.first_name,
-				temp_string.c.string == user.c.last_name
+				func.lower(temp_string.c.string) == func.lower(user.c.first_name),
+				func.lower(temp_string.c.string) == func.lower(user.c.last_name)
 			)
 		)
 
