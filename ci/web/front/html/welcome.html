@@ -4,7 +4,14 @@
 		<content-body unselectable>
 			<change-status id="welcomeChangeAnalytics" changes="changes"></change-status>
 			<div id="welcomeChangeAnalyticsOptions">
-				<select ng-model="filterOption.selected" ng-options="filterOption.id as filterOption.name for filterOption in filterOptions" ng-change="filterSelected(filterOption)"></select>
+				<div id="welcomeChangeAnalyticsRepositoryOption">
+					<div id="welcomeChangeAnalyticsRepositoryOptionTitle">Repository</div>
+					<select ng-model="currentRepositoryOption" ng-options="repository.id as repository.name for repository in repositories" ng-change="repositorySelected(currentRepositoryOption)"></select>
+				</div>
+				<div id="welcomeChangeAnalyticsDurationOption">
+					<div id="welcomeChangeAnalyticsDurationTitle">Duration</div>
+					<select ng-model="currentFilterOption" ng-options="filterOption.id as filterOption.name for filterOption in filterOptions" ng-change="filterSelected(currentFilterOption)"></select>
+				</div>
 			</div>
 		</content-body>
 	</content>

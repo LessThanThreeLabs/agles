@@ -1,6 +1,15 @@
 'use strict'
 
 window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
+	getRepositories = () ->
+		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
+			$scope.$apply () -> 
+				$scope.repositories = [allRepositories].concat repositories
+
+	allRepositories = {id: -1, name: 'All'}
+	$scope.repositories = [allRepositories]
+	$scope.currentRepositoryOption = $scope.repositories[0].id
+
 	$scope.filterOptions = [
 		{id: 'pastSeven', name: 'Past 7 days'},
 		{id: 'pastFourteen', name: 'Past 14 days'},
@@ -10,12 +19,14 @@ window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
 		{id: 'pastYear', name: 'Past year'}
 	]
 
+	$scope.currentFilterOption = $scope.filterOptions[0].id
+
 	$scope.filterSelected = (filterOption) ->
 		timeInDay = 24 * 60 * 60 * 1000
 		startTime = null
 		currentTime = (new Date()).getTime()
 
-		switch filterOption.selected
+		switch filterOption
 			when 'pastSeven' then startTime = currentTime - 7 * timeInDay
 			when 'pastFourteen' then startTime = currentTime - 14 * timeInDay
 			when 'pastMonth' then startTime = currentTime - 30 * timeInDay
@@ -79,4 +90,10 @@ window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
 			timestamp: 1371083366996
 			status: 'passed'
 		), 4000
+
+
+
+
+
+	getRepositories()
 ]
