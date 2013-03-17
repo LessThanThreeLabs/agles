@@ -130,5 +130,24 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				tablename=change.name), sqlconn.execute(query))
 		return changes
 
+	def get_changes_from_timestamp(self, repo_ids, timestamp):
+		assert isinstance(repo_ids, collections.Iterable)
+		assert not isinstance(repo_ids, str)
+
+		change = database.schema.change
+		temp_string = database.schema.temp_string
+
+		query = change.join(
+			temp_string,
+			temp_string.c.string == change.c.repo_id
+		)
+		query = query.select().apply_labels().where(change.c.start_time > timestamp)
+
+		with ConnectionFactory.transaction_context() as sqlconn:
+			load_temp_strings(repo_ids)
+			changes = map(lambda row: to_dict(row, change.columns,
+				tablename=change.name), sqlconn.execute(query))
+		return changes
+
 	def can_hear_change_events(self, user_id, id_to_listen_to):
 		return True
