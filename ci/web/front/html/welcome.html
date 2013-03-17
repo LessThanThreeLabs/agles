@@ -1,18 +1,29 @@
 <centered-panel id="welcome">
-	<content>
-		<content-header content-header-padding>Dashboard</content-header>
-		<content-body unselectable>
-			<change-status id="welcomeChangeAnalytics" changes="changes"></change-status>
-			<div id="welcomeChangeAnalyticsOptions">
-				<div id="welcomeChangeAnalyticsRepositoryOption">
-					<div id="welcomeChangeAnalyticsRepositoryOptionTitle">Repository</div>
-					<select ng-model="currentRepositoryOption" ng-options="repository.id as repository.name for repository in repositories" ng-change="repositorySelected(currentRepositoryOption)"></select>
+	<div id="welcomeAnalytics">
+		<content>
+			<content-header content-header-padding>Dashboard</content-header>
+			<content-body unselectable>
+				<change-status id="welcomeChangeAnalytics" changes="changes"></change-status>
+				<div id="welcomeChangeAnalyticsOptions">
+					<div id="welcomeChangeAnalyticsRepositoryOption">
+						<div id="welcomeChangeAnalyticsRepositoryOptionTitle">Repository</div>
+						<select ng-model="currentRepositoryOption" ng-options="repository.id as repository.name for repository in repositories" ng-change="repositorySelected(currentRepositoryOption)"></select>
+					</div>
+					<div id="welcomeChangeAnalyticsDurationOption">
+						<div id="welcomeChangeAnalyticsDurationTitle">Duration</div>
+						<select ng-model="currentFilterOption" ng-options="filterOption.id as filterOption.name for filterOption in filterOptions" ng-change="filterSelected(currentFilterOption)"></select>
+					</div>
 				</div>
-				<div id="welcomeChangeAnalyticsDurationOption">
-					<div id="welcomeChangeAnalyticsDurationTitle">Duration</div>
-					<select ng-model="currentFilterOption" ng-options="filterOption.id as filterOption.name for filterOption in filterOptions" ng-change="filterSelected(currentFilterOption)"></select>
-				</div>
-			</div>
-		</content-body>
-	</content>
+			</content-body>
+		</content>
+	</div>
+	
+	<div id="welcomeCurrentChanges">
+		<content>
+			<content-header content-header-padding>Currently Running</content-header>
+			<content-body unselectable>
+				hello
+			</content-body>
+		</content>
+	</div>
 </centered-panel>

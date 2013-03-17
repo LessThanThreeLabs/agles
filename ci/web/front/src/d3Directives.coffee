@@ -39,7 +39,7 @@ angular.module('koality.d3.directive', []).
 			handleChangesUpdate = (newChanges, oldChanges) ->
 				dateRange = d3.extent newChanges, (change) -> return new Date change.timestamp
 
-				interval = d3.time.month
+				interval = d3.time.day
 				allIntervals = interval.range interval.floor(dateRange[0]), interval.ceil(dateRange[1])
 
 				binner = d3.time.scale()

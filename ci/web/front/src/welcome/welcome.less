@@ -1,62 +1,78 @@
 @import '../constants';
 
 #welcome {
-	width: 800px;
-	height: 500px;
+	width: 850px;
+	height: 400px;
 
-	#welcomeChangeAnalytics {
+	#welcomeAnalytics {
 		position: absolute;
-		top: 50px;
-		left: 20px;
-		width: 500px;
-		height: 300px;
+		top: 0px;
+		left: 0px;
+		right: @menuWidth + @panelSpacing;
+		bottom: 0px;
 
-		.allLine, .passedLine, .failedLine {
-			fill: none;
-			stroke-width: 3px;
+		#welcomeChangeAnalytics {
+			position: absolute;
+			top: 30px;
+			left: 10px;
+			width: 450px;
+			height: 250px;
+
+			.allLine, .passedLine, .failedLine {
+				fill: none;
+				stroke-width: 3px;
+			}
+
+			.allLine { stroke: @koalityWhite; }
+			.passedLine { stroke: @koalityGreen; }
+			.failedLine { stroke: @koalityRed; }
+
+			.xAxis, .yAxis {
+				fill: @koalityGray;
+
+				path, line {
+					fill: none;
+					stroke: @koalityGray;
+					shape-rendering: crispEdges;
+				}
+			}
 		}
 
-		.allLine { stroke: @koalityWhite; }
-		.passedLine { stroke: @koalityGreen; }
-		.failedLine { stroke: @koalityRed; }
+		#welcomeChangeAnalyticsOptions {
+			position: absolute;
+			top: 30px;
+			right: 30px;
+			width: 140px;
 
-		.xAxis, .yAxis {
-			fill: @koalityGray;
+			select {
+				width: 100%;
+				font-size: 1.2em;
+			}
 
-			path, line {
-				fill: none;
-				stroke: @koalityGray;
-				shape-rendering: crispEdges;
+			#welcomeChangeAnalyticsRepositoryOption {
+
+				#welcomeChangeAnalyticsRepositoryOptionTitle {
+					margin-bottom: 4px;
+					color: @koalityGray;
+				}
+			}
+
+			#welcomeChangeAnalyticsDurationOption {
+				margin-top: 10px;
+
+				#welcomeChangeAnalyticsDurationTitle {
+					margin-bottom: 4px;
+					color: @koalityGray;
+				}
 			}
 		}
 	}
 
-	#welcomeChangeAnalyticsOptions {
+	#welcomeCurrentChanges {
 		position: absolute;
-		top: 30px;
-		right: 30px;
-		width: 150px;
-
-		select {
-			width: 100%;
-			font-size: 1.2em;
-		}
-
-		#welcomeChangeAnalyticsRepositoryOption {
-
-			#welcomeChangeAnalyticsRepositoryOptionTitle {
-				margin-bottom: 4px;
-				color: @koalityGray;
-			}
-		}
-
-		#welcomeChangeAnalyticsDurationOption {
-			margin-top: 10px;
-
-			#welcomeChangeAnalyticsDurationTitle {
-				margin-bottom: 4px;
-				color: @koalityGray;
-			}
-		}
+		top: 0px;
+		right: 0px;
+		bottom: 0px;
+		width: @menuWidth;
 	}
 }
