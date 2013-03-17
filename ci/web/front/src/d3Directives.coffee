@@ -24,6 +24,7 @@ angular.module('koality.d3.directive', []).
 
 			computeChangeLine = (x, y, allIntervals) ->
 				return d3.svg.line()
+					.interpolate('cardinal')
 					.x((d, index) -> return x allIntervals[index])
 					.y((d) -> return y d)
 
