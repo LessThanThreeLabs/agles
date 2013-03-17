@@ -71,14 +71,14 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 		update = user.update().where(user.c.id == user_id_to_change).values(admin=admin)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
-		self.publish_event("users", user_id, "user updated", user_id=user_id_to_change, admin=admin)
+		self.publish_event("users", user_id, "user admin status", user_id=user_id_to_change, admin=admin)
 
 	def change_basic_information(self, user_id, first_name, last_name):
 		user = schema.user
 		update = user.update().where(user.c.id == user_id).values(first_name=first_name, last_name=last_name)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
-		self.publish_event("users", user_id, "user updated", user_id=user_id,
+		self.publish_event("users", user_id, "user name updated", user_id=user_id,
 			first_name=first_name, last_name=last_name)
 		return True
 
@@ -87,7 +87,7 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 		update = user.update().where(user.c.id == user_id).values(password_hash=password_hash, salt=salt)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
-		self.publish_event("users", user_id, "user updated", user_id=user_id,
+		self.publish_event("users", user_id, "user password updated", user_id=user_id,
 			password_hash=password_hash, salt=salt)
 		return True
 
