@@ -86,6 +86,8 @@ class LanguageParser(object):
 		language_steps.append(self._rc_append_command("source %s > /dev/null" % nvm_path))
 		language_steps.append(self._rc_append_command("nvm use %s > /dev/null" % version))
 		if self.global_install:
+			language_steps.append(SetupCommand("ln -s %s %s" % (os.path.join(self._base_directory, 'nvm', 'v' + version, 'bin', 'node'),
+				os.path.join(self._base_directory, 'node'))))
 			return language_steps, []
 		return language_steps, [SetupCommand("node --version")]
 
