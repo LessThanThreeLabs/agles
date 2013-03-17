@@ -43,7 +43,9 @@ class Ec2Vm(VirtualMachine):
 		if not instance_type:
 			instance_type = AwsSettings.instance_type
 
-		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=cls._default_user_data(vm_username)).instances[0]
+		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type,
+			security_groups=cls._validate_security_groups(AwsSettings.security_groups),
+			user_data=cls._default_user_data(vm_username)).instances[0]
 		cls._name_instance(instance, name)
 		return Ec2Vm(vm_directory, instance)
 
@@ -57,6 +59,14 @@ class Ec2Vm(VirtualMachine):
 			"mkdir /home/%s/.ssh" % vm_username,
 			"echo '%s' >> /home/%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
 			"chown -R %s:%s /home/%s/.ssh" % (vm_username, vm_username, vm_username)))
+
+	@classmethod
+	def _validate_security_groups(cls, security_groups):
+		try:
+			groups = Ec2Client.get_client().get_all_security_groups(security_groups)
+			return [group.name for group in groups]
+		except:
+			return None
 
 	@classmethod
 	def from_directory(cls, vm_directory):
