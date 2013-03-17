@@ -26,7 +26,19 @@ window.AccountPassword = ['$scope', 'rpc', ($scope, rpc) ->
 	$scope.account = {}
 
 	$scope.submit = () ->
-		rpc.makeRequest 'users', 'update', 'changePassword', $scope.account
+		rpc.makeRequest 'users', 'update', 'changePassword', $scope.account, (error) ->
+			$scope.$apply () ->
+				if error?
+					$scope.showSuccess = false
+					$scope.showError = true
+				else
+					$scope.showSuccess = true
+					$scope.showError = false
+
+	$scope.$watch 'account', (() -> 
+		$scope.showSuccess = false
+		$scope.showError = false
+	), true
 ]
 
 

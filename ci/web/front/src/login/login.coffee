@@ -8,8 +8,6 @@ window.Login = ['$scope', 'rpc', 'cookieExtender', ($scope, rpc, cookieExtender)
 		window.location.href = '/'
 
 	$scope.login = () ->
-		console.log $scope.account
-
 		rpc.makeRequest 'users', 'update', 'login', $scope.account, (error, result) ->
 			$scope.$apply () ->
 				if error? then $scope.showError = true
