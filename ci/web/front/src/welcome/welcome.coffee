@@ -1,108 +1,129 @@
 'use strict'
 
 window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
+	setupFilterOptions = () ->
+		$scope.filterOptions = [
+			{id: 'pastSeven', name: 'Past 7 days'},
+			{id: 'pastFourteen', name: 'Past 14 days'},
+			{id: 'pastMonth', name: 'Past month'},
+			{id: 'pastThreeMonths', name: 'Past 3 months'},
+			{id: 'pastSixMonths', name: 'Past 6 months'},
+			{id: 'pastYear', name: 'Past year'}
+		]
+		$scope.currentFilterOptionId = $scope.filterOptions[0].id
+
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
 			$scope.$apply () -> 
+				allRepositories = {id: -1, name: 'All'}
 				$scope.repositories = [allRepositories].concat repositories
+				$scope.currentRepositoryOptionId = $scope.repositories[0].id
 
-	allRepositories = {id: -1, name: 'All'}
-	$scope.repositories = [allRepositories]
-	$scope.currentRepositoryOption = $scope.repositories[0].id
+				setupFilterOptions()
+				retrieveChanges()
 
-	$scope.filterOptions = [
-		{id: 'pastSeven', name: 'Past 7 days'},
-		{id: 'pastFourteen', name: 'Past 14 days'},
-		{id: 'pastMonth', name: 'Past month'},
-		{id: 'pastThreeMonths', name: 'Past 3 months'},
-		{id: 'pastSixMonths', name: 'Past 6 months'},
-		{id: 'pastYear', name: 'Past year'}
-	]
-
-	$scope.currentFilterOption = $scope.filterOptions[0].id
-
-
-	$scope.timeInterval =
-		start: 0
-		end: (new Date()).getTime()
-	$scope.numChanges =
-		passed: 500
-		failed: 300
-
-
-	$scope.filterSelected = (filterOption) ->
+	getStartTimeFromFilterOption = () ->
 		timeInDay = 24 * 60 * 60 * 1000
-		startTime = null
 		currentTime = (new Date()).getTime()
 
-		switch filterOption
-			when 'pastSeven' then startTime = currentTime - 7 * timeInDay
-			when 'pastFourteen' then startTime = currentTime - 14 * timeInDay
-			when 'pastMonth' then startTime = currentTime - 30 * timeInDay
-			when 'pastThreeMonths' then startTime = currentTime - 90 * timeInDay
-			when 'pastSixMonths' then startTime = currentTime - 180 * timeInDay
-			when 'pastYear' then startTime = currentTime - 365 * timeInDay
-			else throw new Error 'Unexpected filter option: ' + filterOption
+		switch $scope.currentFilterOptionId
+			when 'pastSeven' then return currentTime - 7 * timeInDay
+			when 'pastFourteen' then return currentTime - 14 * timeInDay
+			when 'pastMonth' then return currentTime - 30 * timeInDay
+			when 'pastThreeMonths' then return currentTime - 90 * timeInDay
+			when 'pastSixMonths' then return currentTime - 180 * timeInDay
+			when 'pastYear' then return currentTime - 365 * timeInDay
+			else throw new Error 'Unexpected filter option: ' + $scope.currentFilterOptionId
 
-		console.log new Date startTime
-		# requestParams =
-		# 	repositories: [0, 1]
-		# 	startTime: startTime
-		# rpc.makeRequest 'changes', 'read', 'getChangesFromTime', requestParams, (error, changes) ->
-		# 	$scope.changes = changes
+	updateChangesSummary = () ->
+		$scope.timeInterval =
+			start: getStartTimeFromFilterOption()
+			end: (new Date()).getTime()
 
-	$scope.changes = [
-		{timestamp: 1358040566846, status: 'passed'}, 
-		{timestamp: 1358040566886, status: 'passed'}, 
-		{timestamp: 1358040566946, status: 'failed'}, 
+		$scope.numChanges = 
+			passed: 0
+			failed: 0
 
-		{timestamp: 1360718966846, status: 'passed'},
-		{timestamp: 1360718966856, status: 'failed'},
+		for change in $scope.changes
+			if change.status is 'passed' then $scope.numChanges.passed++
+			if change.status is 'failed' then $scope.numChanges.failed++
 
-		{timestamp: 1363134566846, status: 'passed'},
-		{timestamp: 1363134566856, status: 'passed'},
-		{timestamp: 1363134566876, status: 'passed'},
+	retrieveChanges = () ->
+		return if not $scope.repositories? or $scope.repositories.length is 0
 
-		{timestamp: 1365812966846, status: 'failed'},
-		{timestamp: 1365812966856, status: 'failed'},
-		{timestamp: 1365812966866, status: 'passed'},
+		repositories = null
+		if $scope.currentRepositoryOptionId is -1
+			repositories = $scope.repositories
+				.map((repository) -> return repository.id)
+				.filter((repositoryId) -> repositoryId >= 0)
+		else
+			repositories = [$scope.currentRepositoryOptionId]
 
-		{timestamp: 1368404966846, status: 'passed'},
-		{timestamp: 1368404966856, status: 'passed'},
-		{timestamp: 1368404966866, status: 'failed'},
-		{timestamp: 1368404966876, status: 'passed'},
+		requestParams =
+			repositories: repositories
+			timestamp: getStartTimeFromFilterOption() / 1000  # backend is in unix time
+		rpc.makeRequest 'changes', 'read', 'getChangesFromTimestamp', requestParams, (error, changes) ->
+			$scope.$apply () ->
+				$scope.changes = changes.filter (change) -> return change.status is 'passed' or change.status is 'failed'
+				console.log $scope.changes
+				updateChangesSummary()
 
-		{timestamp: 1371083366846, status: 'passed'},
-		{timestamp: 1371083366856, status: 'passed'}
-	]
+	$scope.filterSelected = (filterOptionId) ->
+		$scope.currentFilterOptionId = filterOptionId
+		retrieveChanges()
 
-	setTimeout (() -> $scope.$apply () ->
-		$scope.changes.push
-			timestamp: 1371083366876
-			status: 'failed'
-		), 1000
-
-	setTimeout (() -> $scope.$apply () ->
-		$scope.changes.push
-			timestamp: 1371083366886
-			status: 'failed'
-		), 2000
-
-	setTimeout (() -> $scope.$apply () ->
-		$scope.changes.push
-			timestamp: 1371083366896
-			status: 'passed'
-		), 3000
-
-	setTimeout (() -> $scope.$apply () ->
-		$scope.changes.push
-			timestamp: 1371083366996
-			status: 'passed'
-		), 4000
-
-
-
-
+	$scope.repositorySelected = (repositoryId) ->
+		$scope.currentRepositoryOptionId = repositoryId
+		retrieveChanges()
 
 	getRepositories()
 ]
+
+	# $scope.changes = [
+	# 	{timestamp: 1358040566846, status: 'passed'}, 
+	# 	{timestamp: 1358040566886, status: 'passed'}, 
+	# 	{timestamp: 1358040566946, status: 'failed'}, 
+
+	# 	{timestamp: 1360718966846, status: 'passed'},
+	# 	{timestamp: 1360718966856, status: 'failed'},
+
+	# 	{timestamp: 1363134566846, status: 'passed'},
+	# 	{timestamp: 1363134566856, status: 'passed'},
+	# 	{timestamp: 1363134566876, status: 'passed'},
+
+	# 	{timestamp: 1365812966846, status: 'failed'},
+	# 	{timestamp: 1365812966856, status: 'failed'},
+	# 	{timestamp: 1365812966866, status: 'passed'},
+
+	# 	{timestamp: 1368404966846, status: 'passed'},
+	# 	{timestamp: 1368404966856, status: 'passed'},
+	# 	{timestamp: 1368404966866, status: 'failed'},
+	# 	{timestamp: 1368404966876, status: 'passed'},
+
+	# 	{timestamp: 1371083366846, status: 'passed'},
+	# 	{timestamp: 1371083366856, status: 'passed'}
+	# ]
+
+	# setTimeout (() -> $scope.$apply () ->
+	# 	$scope.changes.push
+	# 		timestamp: 1371083366876
+	# 		status: 'failed'
+	# 	), 1000
+
+	# setTimeout (() -> $scope.$apply () ->
+	# 	$scope.changes.push
+	# 		timestamp: 1371083366886
+	# 		status: 'failed'
+	# 	), 2000
+
+	# setTimeout (() -> $scope.$apply () ->
+	# 	$scope.changes.push
+	# 		timestamp: 1371083366896
+	# 		status: 'passed'
+	# 	), 3000
+
+	# setTimeout (() -> $scope.$apply () ->
+	# 	$scope.changes.push
+	# 		timestamp: 1371083366996
+	# 		status: 'passed'
+	# 	), 4000

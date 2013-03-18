@@ -30,16 +30,19 @@ angular.module('koality.d3.directive', []).
 
 			createHistogramForStatus = (changes, binner, interval, allIntervals, status='all') ->
 				histogram = (0 for index in [0...allIntervals.length])
+
 				for change in changes
 					continue if status isnt 'all' and change.status isnt status
-					index = binner interval.floor new Date change.timestamp
+					index = binner interval.floor new Date(change.endTime * 1000)
 					histogram[index]++
+
 				return histogram
 
-			handleChangesUpdate = (newChanges, oldChanges) ->
-				dateRange = d3.extent newChanges, (change) -> return new Date change.timestamp
+			drawGraph = (changes) ->
+				console.log 'date range should start at duration.start...'
+				dateRange = d3.extent changes, (change) -> return new Date(change.endTime * 1000)
 
-				interval = d3.time.day
+				interval = d3.time.hour
 				allIntervals = interval.range interval.floor(dateRange[0]), interval.ceil(dateRange[1])
 
 				binner = d3.time.scale()
@@ -47,9 +50,9 @@ angular.module('koality.d3.directive', []).
 					.range([0, allIntervals.length - 1])
 					.interpolate(d3.interpolateRound)
 
-				allHistogram = createHistogramForStatus newChanges, binner, interval, allIntervals
-				passedHistogram = createHistogramForStatus newChanges, binner, interval, allIntervals, 'passed'
-				failedHistogram = createHistogramForStatus newChanges, binner, interval, allIntervals, 'failed'
+				allHistogram = createHistogramForStatus changes, binner, interval, allIntervals
+				passedHistogram = createHistogramForStatus changes, binner, interval, allIntervals, 'passed'
+				failedHistogram = createHistogramForStatus changes, binner, interval, allIntervals, 'failed'
 
 				x = d3.time.scale()
 					.domain([allIntervals[0], allIntervals[allIntervals.length-1]])
@@ -68,6 +71,14 @@ angular.module('koality.d3.directive', []).
 				xAxisLabel.call xAxis
 				yAxisLabel.call yAxis
 
+			clearGraph = () ->
+				allPath.datum []
+				passedPath.datum []
+				failedPath.datum []
+
+			handleChangesUpdate = (newChanges, oldChanges) ->
+				if not newChanges? or newChanges.length is 0 then clearGraph()
+				else drawGraph newChanges
+
 			scope.$watch 'changes', handleChangesUpdate, true
 	])
-

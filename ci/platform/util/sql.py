@@ -16,7 +16,7 @@ def load_temp_strings(strings):
 	delete = temp_string.delete()
 	ins = temp_string.insert()
 
-	ins_list = [{'string': string} for string in strings]
+	ins_list = [{'string': str(string)} for string in strings]
 	with ConnectionFactory.get_sql_connection() as sqlconn:
 		sqlconn.execute(delete)
 		if ins_list:

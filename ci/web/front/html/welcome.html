@@ -4,16 +4,18 @@
 			<content-header content-header-padding>Dashboard</content-header>
 			<content-body unselectable>
 				<change-status id="welcomeChangeAnalytics" changes="changes"></change-status>
+
 				<div id="welcomeChangeAnalyticsOptions">
 					<div id="welcomeChangeAnalyticsRepositoryOption">
 						<div id="welcomeChangeAnalyticsRepositoryOptionTitle">Repository</div>
-						<select ng-model="currentRepositoryOption" ng-options="repository.id as repository.name for repository in repositories" ng-change="repositorySelected(currentRepositoryOption)"></select>
+						<select ng-model="currentRepositoryOptionId" ng-options="repository.id as repository.name for repository in repositories" ng-change="repositorySelected(currentRepositoryOptionId)"></select>
 					</div>
 					<div id="welcomeChangeAnalyticsDurationOption">
 						<div id="welcomeChangeAnalyticsDurationTitle">Duration</div>
-						<select ng-model="currentFilterOption" ng-options="filterOption.id as filterOption.name for filterOption in filterOptions" ng-change="filterSelected(currentFilterOption)"></select>
+						<select ng-model="currentFilterOptionId" ng-options="filterOption.id as filterOption.name for filterOption in filterOptions" ng-change="filterSelected(currentFilterOptionId)"></select>
 					</div>
 				</div>
+
 				<div id="welcomeChangeAnalyticsSummary">
 					<div class="welcomeChangeAnalyticsSummaryItem">
 						<div class="summaryItemTitle">DATE RANGE</div>

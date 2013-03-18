@@ -29,6 +29,9 @@ class ChangesReadHandler extends Handler
 		id: change.id
 		number: change.number
 		status: change.status
+		mergeStatus: change.merge_status
+		startTime: change.start_time
+		endTime: change.end_time
 
 
 	_getGroupChanges: (userId, data, callback) =>
@@ -77,3 +80,16 @@ class ChangesReadHandler extends Handler
 				else if error? then callback 500
 				else if data.repositoryId isnt metadata?.change?.repo_id then callback 403
 				else callback null, sanitizeResult metadata
+
+
+	getChangesFromTimestamp: (socket, data, callback) =>
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		else if not data?.repositories? or not data?.timestamp?
+			callback 400
+		else
+			@modelRpcConnection.changes.read.get_changes_from_timestamp userId, data.repositories, data.timestamp, (error, changes) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback null, (@_sanitizeChange change for change in changes)

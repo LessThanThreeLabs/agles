@@ -1,4 +1,4 @@
-from sqlalchemy import func, or_
+from sqlalchemy import cast, func, or_, Integer
 
 import collections
 import database.schema
@@ -130,7 +130,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				tablename=change.name), sqlconn.execute(query))
 		return changes
 
-	def get_changes_from_timestamp(self, repo_ids, timestamp):
+	def get_changes_from_timestamp(self, user_id, repo_ids, timestamp):
 		assert isinstance(repo_ids, collections.Iterable)
 		assert not isinstance(repo_ids, str)
 
@@ -139,7 +139,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		query = change.join(
 			temp_string,
-			temp_string.c.string == change.c.repo_id
+			cast(temp_string.c.string, Integer) == change.c.repo_id
 		)
 		query = query.select().apply_labels().where(change.c.start_time > timestamp)
 
