@@ -17,19 +17,23 @@
 				<div id="welcomeChangeAnalyticsSummary">
 					<div class="welcomeChangeAnalyticsSummaryItem">
 						<div class="summaryItemTitle">DATE RANGE</div>
-						<div class="summaryItemValue">blah</div>
+						<div class="summaryItemValue">{{timeInterval.start | date:'MMM dd'}} - {{timeInterval.end | date:'MMM dd'}}</div>
 					</div>
 					<div class="welcomeChangeAnalyticsSummaryItem">
 						<div class="summaryItemTitle">TOTAL PUSHES</div>
-						<div class="summaryItemValue">blah</div>
+						<div class="summaryItemValue">{{numChanges.passed + numChanges.failed}}</div>
 					</div>
 					<div class="welcomeChangeAnalyticsSummaryItem">
 						<div class="summaryItemTitle">PASSED PUSHES</div>
-						<div class="summaryItemValue green">blah</div>
+						<div class="summaryItemValue green">{{numChanges.passed}}
+							<span class="summaryItemValuePercentage">({{100 * numChanges.passed / (numChanges.passed + numChanges.failed) | number:0}}%)</span>
+						</div>
 					</div>
 					<div class="welcomeChangeAnalyticsSummaryItem">
 						<div class="summaryItemTitle">FAILED PUSHES</div>
-						<div class="summaryItemValue red">blah</div>
+						<div class="summaryItemValue red">{{numChanges.failed}}
+							<span class="summaryItemValuePercentage">({{100 * numChanges.failed / (numChanges.passed + numChanges.failed) | number:0}}%)</span>
+						</div>
 					</div>
 				</div>
 			</content-body>

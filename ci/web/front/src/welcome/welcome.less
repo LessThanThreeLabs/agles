@@ -78,10 +78,17 @@
 
 			.welcomeChangeAnalyticsSummaryItem {
 				display: inline-block;
-				margin: 15px 10px 0px 10px;
-				width: 100px;
+				margin-top: 15px;
+				padding-left: 20px;
+				padding-right: 20px;
 				height: 30px;
 				text-align: center;
+				vertical-align: top;
+				border-left: 1px solid @koalityGray;
+
+				&:first-child {
+					border-left-width: 0px;
+				}
 
 				.summaryItemTitle {
 					color: @koalityGray;
@@ -89,10 +96,16 @@
 				}
 
 				.summaryItemValue {
+					margin-top: 5px;
 					font-size: 1.2em;
+					font-weight: 500;
 
 					&.green { color: @koalityGreen; }
 					&.red { color: @koalityRed; }
+
+					.summaryItemValuePercentage {
+						font-size: 0.8em;
+					}
 				}
 			}
 		}

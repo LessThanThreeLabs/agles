@@ -21,6 +21,15 @@ window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
 
 	$scope.currentFilterOption = $scope.filterOptions[0].id
 
+
+	$scope.timeInterval =
+		start: 0
+		end: (new Date()).getTime()
+	$scope.numChanges =
+		passed: 500
+		failed: 300
+
+
 	$scope.filterSelected = (filterOption) ->
 		timeInDay = 24 * 60 * 60 * 1000
 		startTime = null
