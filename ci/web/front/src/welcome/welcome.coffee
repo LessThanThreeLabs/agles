@@ -1,6 +1,6 @@
 'use strict'
 
-window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
+window.Welcome = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 	setupFilterOptions = () ->
 		$scope.filterOptions = [
 			{id: 'pastSeven', name: 'Past 7 days'},
@@ -20,6 +20,7 @@ window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
 				$scope.currentRepositoryOptionId = $scope.repositories[0].id
 
 				setupFilterOptions()
+				updateChangeFinishedListener()
 				retrieveChanges()
 
 	getStartTimeFromFilterOption = () ->
@@ -34,6 +35,14 @@ window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
 			when 'pastSixMonths' then return currentTime - 180 * timeInDay
 			when 'pastYear' then return currentTime - 365 * timeInDay
 			else throw new Error 'Unexpected filter option: ' + $scope.currentFilterOptionId
+
+	getRepositoryIdsToDisplay = () ->
+		if $scope.currentRepositoryOptionId is -1
+			return $scope.repositories
+				.map((repository) -> return repository.id)
+				.filter((repositoryId) -> repositoryId >= 0)
+		else
+			return [$scope.currentRepositoryOptionId]
 
 	updateChangesSummary = () ->
 		$scope.timeInterval =
@@ -51,21 +60,26 @@ window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
 	retrieveChanges = () ->
 		return if not $scope.repositories? or $scope.repositories.length is 0
 
-		repositories = null
-		if $scope.currentRepositoryOptionId is -1
-			repositories = $scope.repositories
-				.map((repository) -> return repository.id)
-				.filter((repositoryId) -> repositoryId >= 0)
-		else
-			repositories = [$scope.currentRepositoryOptionId]
-
 		requestParams =
-			repositories: repositories
+			repositories: getRepositoryIdsToDisplay()
 			timestamp: getStartTimeFromFilterOption() / 1000  # backend is in unix time
 		rpc.makeRequest 'changes', 'read', 'getChangesFromTimestamp', requestParams, (error, changes) ->
 			$scope.$apply () ->
 				$scope.changes = changes.filter (change) -> return change.endTime?
 				updateChangesSummary()
+
+	handleChangeFinished = (data) -> $scope.$apply () ->
+		$scope.changes.push data
+
+	changeFinishedListeners = []
+	updateChangeFinishedListener = () ->
+		changeFinishedListener.unsubscribe() for changeFinishedListener in changeFinishedListeners
+		changeFinishedListeners = []
+
+		for repositoryId in getRepositoryIdsToDisplay()
+			changeFinishedListener = events.listen('repositories', 'change finished', repositoryId).setCallback(handleChangeFinished).subscribe()
+			changeFinishedListeners.push changeFinishedListener
+	$scope.$on '$destroy', () -> changeFinishedListener.unsubscribe() for changeFinishedListener in changeFinishedListeners
 
 	$scope.filterSelected = (filterOptionId) ->
 		$scope.currentFilterOptionId = filterOptionId
@@ -73,6 +87,7 @@ window.Welcome = ['$scope', 'rpc', ($scope, rpc) ->
 
 	$scope.repositorySelected = (repositoryId) ->
 		$scope.currentRepositoryOptionId = repositoryId
+		updateChangeFinishedListener()
 		retrieveChanges()
 
 	getRepositories()

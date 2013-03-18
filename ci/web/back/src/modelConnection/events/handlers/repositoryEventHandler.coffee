@@ -31,6 +31,8 @@ class RepositoryEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					id: data.contents.change_id
 					status: data.contents.status
+					startTime: data.contents.start_time
+					endTime: data.contents.end_time
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 				
