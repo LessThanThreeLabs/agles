@@ -4,7 +4,9 @@ angular.module('koality.d3.directive', []).
 	directive('changeStatus', ['$window', ($window) ->
 		restrict: 'E'
 		replace: true
-		scope: changes: '=changes'
+		scope: 
+			changes: '=changes'
+			timeInterval: '=timeInterval'
 		template: '<svg class="changeStatuses" xmlns="http://www.w3.org/2000/svg" version="1.1"></svg>'
 		link: (scope, element, attributes) ->
 			padding = {top: 10, left: 50, right: 20, bottom: 50}
@@ -24,25 +26,23 @@ angular.module('koality.d3.directive', []).
 
 			computeChangeLine = (x, y, allIntervals) ->
 				return d3.svg.line()
-					.interpolate('cardinal')
 					.x((d, index) -> return x allIntervals[index])
 					.y((d) -> return y d)
 
-			createHistogramForStatus = (changes, binner, interval, allIntervals, status='all') ->
+			createHistogramForStatus = (binner, interval, allIntervals, status='all') ->
 				histogram = (0 for index in [0...allIntervals.length])
 
-				for change in changes
+				for change in scope.changes
 					continue if status isnt 'all' and change.status isnt status
 					index = binner interval.floor new Date(change.endTime * 1000)
 					histogram[index]++
 
 				return histogram
 
-			drawGraph = (changes) ->
-				console.log 'date range should start at duration.start...'
-				dateRange = d3.extent changes, (change) -> return new Date(change.endTime * 1000)
+			drawGraph = () ->
+				dateRange = [new Date(scope.timeInterval.start), new Date(scope.timeInterval.end)]
 
-				interval = d3.time.hour
+				interval = d3.time.day
 				allIntervals = interval.range interval.floor(dateRange[0]), interval.ceil(dateRange[1])
 
 				binner = d3.time.scale()
@@ -50,9 +50,9 @@ angular.module('koality.d3.directive', []).
 					.range([0, allIntervals.length - 1])
 					.interpolate(d3.interpolateRound)
 
-				allHistogram = createHistogramForStatus changes, binner, interval, allIntervals
-				passedHistogram = createHistogramForStatus changes, binner, interval, allIntervals, 'passed'
-				failedHistogram = createHistogramForStatus changes, binner, interval, allIntervals, 'failed'
+				allHistogram = createHistogramForStatus binner, interval, allIntervals
+				passedHistogram = createHistogramForStatus binner, interval, allIntervals, 'passed'
+				failedHistogram = createHistogramForStatus binner, interval, allIntervals, 'failed'
 
 				x = d3.time.scale()
 					.domain([allIntervals[0], allIntervals[allIntervals.length-1]])
@@ -61,12 +61,12 @@ angular.module('koality.d3.directive', []).
 					.domain([0, d3.max [d3.max(allHistogram), d3.max(passedHistogram), d3.max(failedHistogram)]])
 					.range([height-padding.bottom-axisBuffer, padding.top])
 
-				xAxis = d3.svg.axis().scale(x).orient 'bottom'
-				yAxis = d3.svg.axis().scale(y).orient 'left'
+				xAxis = d3.svg.axis().scale(x).ticks(5).tickFormat(d3.time.format '%m/%d').orient 'bottom'
+				yAxis = d3.svg.axis().scale(y).ticks(5).orient 'left'
 
-				allPath.datum(allHistogram).transition().duration(lineTransitionTime).attr('d', computeChangeLine x, y, allIntervals)
-				passedPath.datum(passedHistogram).transition().duration(lineTransitionTime).attr('d', computeChangeLine x, y, allIntervals)
-				failedPath.datum(failedHistogram).transition().duration(lineTransitionTime).attr('d', computeChangeLine x, y, allIntervals)
+				allPath.datum(allHistogram).attr('d', computeChangeLine x, y, allIntervals)
+				passedPath.datum(passedHistogram).attr('d', computeChangeLine x, y, allIntervals)
+				failedPath.datum(failedHistogram).attr('d', computeChangeLine x, y, allIntervals)
 
 				xAxisLabel.call xAxis
 				yAxisLabel.call yAxis
@@ -76,9 +76,12 @@ angular.module('koality.d3.directive', []).
 				passedPath.datum []
 				failedPath.datum []
 
-			handleChangesUpdate = (newChanges, oldChanges) ->
-				if not newChanges? or newChanges.length is 0 then clearGraph()
-				else drawGraph newChanges
+			handleUpdate = (newValue, oldValue) ->
+				if not scope.changes? or scope.changes.length is 0 or not scope.timeInterval?
+					clearGraph()
+				else 
+					drawGraph()
 
-			scope.$watch 'changes', handleChangesUpdate, true
+			scope.$watch 'changes', handleUpdate, true
+			scope.$watch 'timeInterval', handleUpdate, true
 	])
