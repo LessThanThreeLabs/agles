@@ -63,7 +63,10 @@ class RpcBroker
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
 
-			console.error data.error if data.error?
+			if data.error?
+				console.error data.error.type
+				console.error data.error.message
+				console.error data.error.traceback
 
 			callback data.error, data.value
 
