@@ -66,10 +66,12 @@ angular.module('koality.service', []).
 			if not previousEventToCallbacks[eventName]?
 				socket.on eventName, callback
 				previousEventToCallbacks[eventName] = [callback]
-			else if not callback in previousEventToCallbacks[eventName]
+			else
+				for otherCallback in previousEventToCallbacks[eventName]
+					return if callback is otherCallback
+
 				socket.on eventName, callback
 				previousEventToCallbacks[eventName].push callback
-
 	]).
 	factory('rpc', ['socket', (socket) ->
 		makeRequest: socket.makeRequest
@@ -85,10 +87,11 @@ angular.module('koality.service', []).
 				return @
 
 			subscribe: () ->
+				assert.ok @_callback?
+
 				socket.makeRequest resource, 'subscribe', eventName, id: id, (error, eventToListenFor) =>
 					if error? then console.error error
-					else socket.respondTo eventToListenFor, (data) =>
-						@_callback data if @_callback?
+					else socket.respondTo eventToListenFor, @_callback
 				return @
 
 			unsubscribe: () ->

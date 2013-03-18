@@ -71,14 +71,14 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
 			$scope.$apply () -> $scope.repositories = repositories
 
-	handleAddedRepositoryUpdated = (data) -> $scope.$apply () ->
+	handleAddedRepositoryUpdate = (data) -> $scope.$apply () ->
 		$scope.repositories.push data
 
 	handleRemovedRepositoryUpdate = (data) -> $scope.$apply () ->
 		repositoryToRemoveIndex = (index for repository, index in $scope.repositories when repository.id is data.id)[0]
 		$scope.repositories.splice repositoryToRemoveIndex, 1 if repositoryToRemoveIndex?
 
-	addRepositoryEvents = events.listen('users', 'repository added', initialState.user.id).setCallback(handleAddedRepositoryUpdated).subscribe()
+	addRepositoryEvents = events.listen('users', 'repository added', initialState.user.id).setCallback(handleAddedRepositoryUpdate).subscribe()
 	removeRepositoryEvents = events.listen('users', 'repository removed', initialState.user.id).setCallback(handleRemovedRepositoryUpdate).subscribe()
 	$scope.$on '$destroy', addRepositoryEvents.unsubscribe
 	$scope.$on '$destroy', removeRepositoryEvents.unsubscribe
