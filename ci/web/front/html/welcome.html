@@ -14,10 +14,28 @@
 						<select ng-model="currentFilterOption" ng-options="filterOption.id as filterOption.name for filterOption in filterOptions" ng-change="filterSelected(currentFilterOption)"></select>
 					</div>
 				</div>
+				<div id="welcomeChangeAnalyticsSummary">
+					<div class="welcomeChangeAnalyticsSummaryItem">
+						<div class="summaryItemTitle">DATE RANGE</div>
+						<div class="summaryItemValue">blah</div>
+					</div>
+					<div class="welcomeChangeAnalyticsSummaryItem">
+						<div class="summaryItemTitle">TOTAL PUSHES</div>
+						<div class="summaryItemValue">blah</div>
+					</div>
+					<div class="welcomeChangeAnalyticsSummaryItem">
+						<div class="summaryItemTitle">PASSED PUSHES</div>
+						<div class="summaryItemValue green">blah</div>
+					</div>
+					<div class="welcomeChangeAnalyticsSummaryItem">
+						<div class="summaryItemTitle">FAILED PUSHES</div>
+						<div class="summaryItemValue red">blah</div>
+					</div>
+				</div>
 			</content-body>
 		</content>
 	</div>
-	
+
 	<div id="welcomeCurrentChanges">
 		<content>
 			<content-header content-header-padding>Currently Running</content-header>

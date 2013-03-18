@@ -16,7 +16,7 @@
 			top: 30px;
 			left: 10px;
 			width: 450px;
-			height: 250px;
+			height: 225px;
 
 			.allLine, .passedLine, .failedLine {
 				fill: none;
@@ -63,6 +63,36 @@
 				#welcomeChangeAnalyticsDurationTitle {
 					margin-bottom: 4px;
 					color: @koalityGray;
+				}
+			}
+		}
+
+		#welcomeChangeAnalyticsSummary {
+			position: absolute;
+			left: 30px;
+			right: 30px;
+			bottom: 30px;
+			height: 60px;
+			background-color: @platformBackground;
+			border-radius: @borderRadius;
+
+			.welcomeChangeAnalyticsSummaryItem {
+				display: inline-block;
+				margin: 15px 10px 0px 10px;
+				width: 100px;
+				height: 30px;
+				text-align: center;
+
+				.summaryItemTitle {
+					color: @koalityGray;
+					font-size: 0.8em;
+				}
+
+				.summaryItemValue {
+					font-size: 1.2em;
+
+					&.green { color: @koalityGreen; }
+					&.red { color: @koalityRed; }
 				}
 			}
 		}
