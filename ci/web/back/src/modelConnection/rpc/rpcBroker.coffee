@@ -81,5 +81,7 @@ class RpcBroker
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
 
-			error = 'Timed out'
+			error = 
+				type: 'TimedOutError'
+				message: 'Message was dead-lettered: ' + JSON.stringify msgpack.unpack message.data
 			callback error, null

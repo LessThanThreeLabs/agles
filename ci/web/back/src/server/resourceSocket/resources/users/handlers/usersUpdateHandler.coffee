@@ -96,7 +96,8 @@ class UsersUpdateHandler extends Handler
 			callback 400
 		else
 			@modelRpcConnection.users.read.get_user data.email, (error, user) =>
-				if error? then callback 'bad login'
+				if error?.type is 'TimedOutError' then callback 500
+				else if error? then callback 'bad login'
 				else
 					passwordHash = @passwordHasher.hashPasswordWithSalt data.password, user.salt
 

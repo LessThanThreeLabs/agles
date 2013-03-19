@@ -55,7 +55,7 @@ class Server(object):
 		self.queue_names = None
 		self.chan = None
 
-	def bind(self, exchange_name, queue_names, channel=None, message_ttl=30000, auto_delete=False):
+	def bind(self, exchange_name, queue_names, channel=None, message_ttl=10000, auto_delete=False):
 		""" Binds this RPC server to listen for calls from <exchange_name>
 		routed to <queue_names>.
 
