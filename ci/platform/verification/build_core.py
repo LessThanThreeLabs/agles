@@ -109,6 +109,10 @@ class VirtualMachineBuildCore(BuildCore):
 			self._get_output_handler(console_appender, ConsoleType.Setup, setup_command.name)):
 			raise VerificationException("Setup: %s" % setup_command.name)
 
+	def run_compile_step(self, compile_commands, console_appender):
+		for compile_command in compile_commands:
+			self.run_compile_command(compile_command, console_appender)
+
 	def run_compile_command(self, compile_command, console_appender):
 		if compile_command.run(self.virtual_machine,
 			self._get_output_handler(console_appender, ConsoleType.Compile, compile_command.name)):

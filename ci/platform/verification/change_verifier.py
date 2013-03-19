@@ -65,12 +65,12 @@ class ChangeVerifier(EventSubscriber):
 			if change_done.ready():  # We got a verifier after the change is already done
 				self.verifier_pool.put(verifier)  # Just return this verifier to the pool
 				return
+			if not change_started.ready():
+				start_change()
 			workers_alive.append(1)
 			build_id = self._create_build(change_id, commit_list)
 			worker_greenlet = spawn(verifier.verify_build(build_id, verification_config, task_queue))
 			worker_greenlet.link(cleanup_greenlet, verifier)
-			if not change_started.ready():
-				start_change()
 
 		for worker in range(num_workers):
 			spawn_n(setup_worker)
