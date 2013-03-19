@@ -37,7 +37,7 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def construct(cls, vm_directory, name=None, ami_image_id=None, instance_type=None, vm_username=VM_USERNAME):
 		if not name:
-			name = "%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(vm_directory)))
+			name = "koality:%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(vm_directory)))
 		if not ami_image_id:
 			ami_image_id = cls.get_newest_image().id
 		if not instance_type:
