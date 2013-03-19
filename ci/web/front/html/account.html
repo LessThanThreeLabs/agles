@@ -87,7 +87,7 @@
 
 						<tr ng-repeat="key in keys | orderBy:orderByPredicate:orderByReverse">
 							<td class="aliasColumn" text-selectable>{{key.alias}}</td>
-							<td class="createdColumn" text-selectable>{{key.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
+							<td class="createdColumn" text-selectable>{{key.timestamp | date:'MM/dd/yyyy'}}</td>
 							<td class="removeColumn"><span class="removeLink" ng-click="removeKey(key)">Delete</span></td>
 						</tr>
 					</table>

@@ -30,8 +30,8 @@ class ChangesReadHandler extends Handler
 		number: change.number
 		status: change.status
 		mergeStatus: change.merge_status
-		startTime: change.start_time
-		endTime: change.end_time
+		startTime: change.start_time * 1000
+		endTime: change.end_time * 1000
 
 
 	_getGroupChanges: (userId, data, callback) =>
@@ -64,8 +64,8 @@ class ChangesReadHandler extends Handler
 			headCommit:
 				message: metadata.commit.message
 				sha: metadata.commit.sha
-			startTime: metadata.change.start_time
-			endTime: metadata.change.end_time
+			startTime: metadata.change.start_time * 1000
+			endTime: metadata.change.end_time * 1000
 			target: metadata.change.merge_target
 			mergeStatus: metadata.change.merge_status
 
@@ -89,7 +89,7 @@ class ChangesReadHandler extends Handler
 		else if not data?.repositories? or not data?.timestamp?
 			callback 400
 		else
-			@modelRpcConnection.changes.read.get_changes_from_timestamp userId, data.repositories, data.timestamp, (error, changes) =>
+			@modelRpcConnection.changes.read.get_changes_from_timestamp userId, data.repositories, Math.floor(data.timestamp/1000), (error, changes) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback null, (@_sanitizeChange change for change in changes)

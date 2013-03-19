@@ -32,7 +32,7 @@
 						<tr ng-repeat="user in users | orderBy:orderByPredicate:orderByReverse">
 							<td class="nameColumn" text-selectable>{{user.firstName}} {{user.lastName}}</td>
 							<td class="emailColumn" text-selectable><a href="mailto:{{user.email}}?subject=Koality" target="_blank">{{user.email}}</a></td>
-							<td class="createdColumn" text-selectable>{{user.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
+							<td class="createdColumn" text-selectable>{{user.timestamp | date:'MM/dd/yyyy'}}</td>
 							<td class="removeColumn"><span class="removeLink" ng-click="removeUser(user)">Delete</span></td>
 						</tr>
 					</table>
@@ -85,7 +85,7 @@
 
 						<tr ng-repeat="repository in repositories | orderBy:orderByPredicate:orderByReverse">
 							<td class="nameColumn" text-selectable>{{repository.name}}</td>
-							<td class="createdColumn" text-selectable>{{repository.timestamp*1000 | date:'MM/dd/yyyy'}}</td>
+							<td class="createdColumn" text-selectable>{{repository.timestamp | date:'MM/dd/yyyy'}}</td>
 							<td class="publicKeyColumn"><span class="publicKeyLink" ng-click="showPublicKey(repository)">Show</span></td>
 							<td class="removeColumn"><span class="removeLink" ng-click="openRemoveRepository(repository)">Delete</span></td>
 						</tr>

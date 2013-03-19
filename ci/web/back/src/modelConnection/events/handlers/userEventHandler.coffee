@@ -33,7 +33,7 @@ class UserEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName,
 					id: data.contents.id
 					alias: data.contents.alias
-					timestamp: data.contents.timestamp
+					timestamp: data.contents.timestamp * 1000
 			when 'user created'
 				@sockets.in(roomName).emit eventName, 
 					id: data.contents.user_id
@@ -41,7 +41,7 @@ class UserEventHandler extends EventHandler
 					firstName: data.contents.first_name
 					lastName: data.contents.last_name
 					isAdmin: data.contents.admin
-					timestamp: data.contents.created
+					timestamp: data.contents.created * 1000
 			when 'user removed'
 				@sockets.in(roomName).emit eventName, 
 					id: data.contents.removed_id
@@ -49,7 +49,7 @@ class UserEventHandler extends EventHandler
 				@sockets.in(roomName).emit eventName, 
 					id: data.contents.repo_id
 					name: data.contents.repo_name
-					timestamp: data.contents.created
+					timestamp: data.contents.created * 1000
 			when 'repository removed'
 				@sockets.in(roomName).emit eventName, 
 					id: data.contents.repo_id

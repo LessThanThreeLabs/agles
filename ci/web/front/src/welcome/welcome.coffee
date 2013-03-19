@@ -62,7 +62,7 @@ window.Welcome = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 
 		requestParams =
 			repositories: getRepositoryIdsToDisplay()
-			timestamp: getStartTimeFromFilterOption() / 1000  # backend is in unix time
+			timestamp: getStartTimeFromFilterOption()
 		rpc.makeRequest 'changes', 'read', 'getChangesFromTimestamp', requestParams, (error, changes) ->
 			$scope.$apply () ->
 				$scope.changes = changes.filter (change) -> return change.endTime?

@@ -157,7 +157,7 @@ class UsersUpdateHandler extends Handler
 			firstName: user.first_name
 			lastName: user.last_name
 			isAdmin: user.admin
-			timestamp: user.created
+			timestamp: user.created * 1000
 
 		userId = socket.session.userId
 		if not userId?

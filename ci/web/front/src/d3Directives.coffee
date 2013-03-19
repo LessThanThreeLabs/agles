@@ -34,7 +34,7 @@ angular.module('koality.d3.directive', []).
 
 				for change in scope.changes
 					continue if status isnt 'all' and change.status isnt status
-					index = binner interval.floor new Date(change.endTime * 1000)
+					index = binner interval.floor new Date(change.endTime)
 					histogram[index]++
 
 				return histogram
@@ -42,7 +42,7 @@ angular.module('koality.d3.directive', []).
 			drawGraph = () ->
 				startTime = new Date(scope.timeInterval.start)
 				endTime = d3.max [new Date(scope.timeInterval.end),
-					d3.max(scope.changes, (change) -> return new Date(change.endTime*1000))]
+					d3.max(scope.changes, (change) -> return new Date(change.endTime))]
 
 				interval = d3.time.day
 				allIntervals = interval.range interval.floor(startTime), interval.ceil(endTime)
