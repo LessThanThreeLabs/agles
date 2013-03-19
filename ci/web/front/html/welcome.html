@@ -16,7 +16,7 @@
 					</div>
 				</div>
 
-				<div id="welcomeChangeAnalyticsSummary">
+				<div id="welcomeChangeAnalyticsSummary" ng-show="timeInterval != null && numChanges != null">
 					<div class="welcomeChangeAnalyticsSummaryItem">
 						<div class="summaryItemTitle">DATE RANGE</div>
 						<div class="summaryItemValue">{{timeInterval.start | date:'MMM dd'}} - {{timeInterval.end | date:'MMM dd'}}</div>
