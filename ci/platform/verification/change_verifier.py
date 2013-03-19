@@ -33,11 +33,11 @@ class ChangeVerifier(EventSubscriber):
 		commit_list = self._get_commit_permutations(change_id)[0]
 		verification_config = self._get_verification_config(commit_list)
 
-		change_started = event.Event()
-		spawn_n(self.verify_change, verification_config, change_id, commit_list, change_started)
-		change_started.wait()
+		workers_spawned = event.Event()
+		spawn_n(self.verify_change, verification_config, change_id, commit_list, workers_spawned)
+		workers_spawned.wait()
 
-	def verify_change(self, verification_config, change_id, commit_list, change_started):
+	def verify_change(self, verification_config, change_id, commit_list, workers_spawned):
 		task_queue = TaskQueue()
 		num_workers = max(1, min(64, len(verification_config.test_commands)))
 
@@ -46,6 +46,7 @@ class ChangeVerifier(EventSubscriber):
 		task_queue.finish_populating_tasks()
 
 		workers_alive = []
+		change_started = event.Event()
 		change_done = event.Event()
 
 		def cleanup_greenlet(greenlet, verifier):
@@ -74,6 +75,8 @@ class ChangeVerifier(EventSubscriber):
 
 		for worker in range(num_workers):
 			spawn_n(setup_worker)
+
+		workers_spawned.send(True)
 
 		task_queue.wait_for_tasks_populated()
 
@@ -152,10 +155,12 @@ class TaskQueue(object):
 			else:
 				break
 
-	def add_result(self, result):
+	def add_task_result(self, result):
 		self.results_queue.put(result)
-		if self.task_queue.unfinished_tasks:
-			self.task_queue.task_done()
+		self.task_queue.task_done()
+
+	def add_other_result(self, result):
+		self.results_queue.put(result)
 
 	def get_result(self):
 		return self.results_queue.get()
@@ -165,6 +170,6 @@ class TaskQueue(object):
 
 	def clear_remaining_tasks(self):
 		for task in self.task_iterator():
-			self.add_result(None)
+			self.add_task_result(None)
 		for x in range(self.task_queue.unfinished_tasks):
-			self.add_result(None)
+			self.add_task_result(None)

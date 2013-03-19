@@ -66,7 +66,7 @@ class BuildVerifier(object):
 		results = []
 		setup_result = self._setup(build_id, verification_config)
 		results.append(setup_result)
-		test_queue.add_result(setup_result)
+		test_queue.add_other_result(setup_result)
 		if isinstance(setup_result, Exception):
 			self._cleanup(build_id, results)
 			return
@@ -79,7 +79,7 @@ class BuildVerifier(object):
 		for test in test_queue.task_iterator():
 			test_result = self._do_test(build_id, test)
 			results.append(test_result)
-			test_queue.add_result(test_result)
+			test_queue.add_task_result(test_result)
 
 		self._cleanup(build_id, results)
 
