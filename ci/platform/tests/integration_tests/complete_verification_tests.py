@@ -15,8 +15,7 @@ from util.test.mixins import *
 from database.engine import ConnectionFactory
 from database import schema
 from model_server.events_broker import EventsBroker
-from verification.master import *
-from verification.server import *
+from verification.verification_server import VerificationServer
 from settings.rabbit import RabbitSettings
 from shared.constants import BuildStatus
 from repo.store import FileSystemRepositoryStore, RepositoryStore
@@ -26,17 +25,24 @@ from bunnyrpc.server import Server
 from bunnyrpc.client import Client
 from git import Repo
 from util.test.fake_build_verifier import FakeBuildVerifier
-from verification.server.verifier_pool import VerifierPool
+from verification.verifier_pool import VerifierPool, VirtualMachineVerifierPool
+from virtual_machine.ec2 import Ec2Vm
 
-DEFAULT_NUM_VERIFIERS = 2
+DEFAULT_NUM_VERIFIERS = 10
 TEST_ROOT = "/tmp/verification"
 
 
 class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 	RabbitMixin, RepoStoreTestMixin, RedisTestMixin):
+
+	class FakeBuildVerifierPool(VerifierPool):
+		def spawn_verifier(self, verifier_number):
+			return FakeBuildVerifier(passes=True)
+
 	@classmethod
 	def setup_class(cls):
-		cls.verifier_pool = VerifierPool(lambda num, uri_translator: FakeBuildVerifier(passes=True), DEFAULT_NUM_VERIFIERS)
+		#cls.verifier_pool = VirtualMachineVerifierPool(Ec2Vm, "/tmp/verification", 1)
+		cls.verifier_pool = VerificationRoundTripTest.FakeBuildVerifierPool(DEFAULT_NUM_VERIFIERS)
 
 		cls.repostore_id = 1
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
@@ -70,9 +76,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self.vs_process = TestProcess(target=verification_server.run)
 		self.vs_process.start()
 
-		verification_master = VerificationMaster()
-		self.vm_process = TestProcess(target=verification_master.run)
-		self.vm_process.start()
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=binascii.b2a_base64(sha512("").digest())[0:-1], salt="1234567890123456", created=0)
 			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
@@ -81,8 +84,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		super(VerificationRoundTripTest, self).setUp()
 		rmtree(self.repo_dir)
 		self._stop_model_server()
-		self.vm_process.terminate()
-		self.vm_process.join()
 		self.vs_process.terminate()
 		self.vs_process.join()
 		self._stop_redis()
@@ -133,7 +134,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
-			Queue("verification_master:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
+			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
 			events_broker = EventsBroker(connection)
 			events_broker.publish("repos", repo_id, "change added",
 				change_id=commit_id, merge_target="master")

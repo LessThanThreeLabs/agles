@@ -1,61 +1,25 @@
 import logging
 
-from kombu.messaging import Producer
-
-from shared.constants import BuildStatus, MergeStatus
 from database.engine import ConnectionFactory
-from shared.handler import QueueListener
 from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError, PushForwardError
-from settings.verification_server import VerificationServerSettings
+from shared.constants import BuildStatus, MergeStatus
 from util import pathgen
 
 
-class VerificationResultsHandler(QueueListener):
-	logger = logging.getLogger("FileSystemRepositoryStore")
+class VerificationResultsHandler(object):
+	logger = logging.getLogger("VerificationResultsHandler")
 
 	def __init__(self):
-		super(VerificationResultsHandler, self).__init__(VerificationServerSettings.verification_results_queue)
 		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 
-	def bind(self, channel):
-		self.producer = Producer(channel, serializer='msgpack')
-		super(VerificationResultsHandler, self).bind(channel)
-
-	def handle_message(self, body, message):
-		build_id, status = body['build_id'], body['status']
-		try:
-			self.handle_results(build_id, status)
-		except:
-			self.logger.error("Failed to handle verification results %s" % body, exc_info=True)
-		finally:
-			message.channel.basic_ack(delivery_tag=message.delivery_tag)
-
-	def handle_results(self, build_id, status):
-		# TODO (bbland): do something more useful than this trivial case
-		with ModelServer.rpc_connect("builds", "read") as client:
-			build = client.get_build_from_id(build_id)
-		with ModelServer.rpc_connect("changes", "read") as client:
-			change_status = client.get_change_attributes(build["change_id"])["status"]
-			builds = client.get_builds_from_change_id(build["change_id"])
-		success = all(map(lambda build: build["status"] == BuildStatus.PASSED, builds))
-		failure = any(map(lambda build: build["status"] == BuildStatus.FAILED, builds))
-		if success and not change_status == BuildStatus.PASSED:
-			self._mark_change_finished(build["change_id"])
-		elif failure and not change_status == BuildStatus.FAILED:
-			self._mark_change_failed(build["change_id"])
-		elif not success and not failure:
-			self.logger.debug("Still waiting for more results to finish build %s" % build_id)
-		else:
-			pass  # Duplicate results, do nothing
-
-	def _mark_change_finished(self, change_id):
-		merge_success = self.send_merge_request(change_id)
+	def pass_change(self, change_id):
+		merge_success = self._send_merge_request(change_id)
 		if merge_success:
 			with ModelServer.rpc_connect("changes", "update") as client:
 				client.mark_change_finished(change_id, BuildStatus.PASSED, MergeStatus.PASSED)
 
-	def _mark_change_failed(self, change_id):
+	def fail_change(self, change_id):
 		with ModelServer.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.FAILED)
 
@@ -67,12 +31,10 @@ class VerificationResultsHandler(QueueListener):
 		with ModelServer.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.FAILED, MergeStatus.FAILED)
 
-	def send_merge_request(self, change_id):
+	def _send_merge_request(self, change_id):
 		self.logger.info("Sending merge request for change %s" % change_id)
 		with ModelServer.rpc_connect("changes", "read") as client:
 			change_attributes = client.get_change_attributes(change_id)
-		if change_attributes['status'] == BuildStatus.PASSED:
-			return True  # Already merged, don't waste our time
 
 		commit_id = change_attributes['commit_id']
 		merge_target = change_attributes['merge_target']

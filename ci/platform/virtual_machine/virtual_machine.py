@@ -6,7 +6,7 @@ import yaml
 from shared.constants import VerificationUser
 from util import greenlets
 from util.streaming_executor import StreamingExecutor
-from verification.shared.pubkey_registrar import PubkeyRegistrar
+from verification.pubkey_registrar import PubkeyRegistrar
 
 
 class VirtualMachine(object):

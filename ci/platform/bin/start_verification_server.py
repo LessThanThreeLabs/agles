@@ -2,16 +2,14 @@
 import argparse
 import os
 import sys
-import time
 
 import settings.log
 
 from settings.verification_server import VerificationServerSettings
 from util.uri_translator import RepositoryUriTranslator
-from verification.server import VerificationServer
-from verification.server.verifier_pool import VerifierPool
-from verification.server.virtual_machine_cleanup_tool import VirtualMachineCleanupTool
-from verification.shared.build_core import CloudBuildCore
+from verification.verification_server import VerificationServer
+from verification.verifier_pool import VirtualMachineVerifierPool
+from verification.virtual_machine_cleanup_tool import VirtualMachineCleanupTool
 from virtual_machine.ec2 import Ec2Vm
 from virtual_machine.openstack import OpenstackVm
 
@@ -57,21 +55,8 @@ def main():
 	print "Starting Verification Server (%d*%s) with directory %s ..." % (
 			vm_count, args.type, vm_dir)
 
-	def spawn_vm(verifier_number):
-		while True:
-			try:
-				return vm_class.from_directory_or_construct(os.path.join(vm_dir, str(verifier_number)))
-			except:
-				print "Failed to create virtual machine, trying again in 3 seconds..."
-				time.sleep(3)
-			else:
-				break
-
-	def spawn_verifier(verifier_number, uri_translator):
-		return CloudBuildCore(spawn_vm(verifier_number), uri_translator)
-
-	verifier_pool = VerifierPool(spawn_verifier, vm_count, RepositoryUriTranslator())
-	vs = VerificationServer(verifier_pool)
+	verifier_pool = VirtualMachineVerifierPool(vm_class, vm_dir, vm_count, RepositoryUriTranslator())
+	vs = VerificationServer(verifier_pool, RepositoryUriTranslator())
 	vs.run()
 
 

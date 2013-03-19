@@ -7,7 +7,7 @@ import eventlet
 import yaml
 
 from settings.aws import AwsSettings
-from verification.shared.pubkey_registrar import PubkeyRegistrar
+from verification.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
 
 

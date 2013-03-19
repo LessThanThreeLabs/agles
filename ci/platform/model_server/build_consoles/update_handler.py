@@ -1,4 +1,5 @@
 import collections
+import time
 
 from sqlalchemy import and_
 from sqlalchemy import select
@@ -15,8 +16,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildConsolesUpdateHandler, self).__init__("build_consoles", "update")
 
-	def add_subtypes(self, build_id, type, ordered_subtypes):
-		assert isinstance(ordered_subtypes, collections.Iterable)
+	def add_subtype(self, build_id, type, subtype):
 		assert type in ['setup', 'compile', 'test']
 
 		build_console = schema.build_console
@@ -44,19 +44,22 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		else:
 			starting_priority = 0
 
-		for index, subtype in enumerate(ordered_subtypes):
-			with ConnectionFactory.get_sql_connection() as sqlconn:
-				priority = index + starting_priority
-				ins = build_console.insert().values(
-					build_id=build_id,
-					repo_id=repo_id,
-					type=type,
-					subtype=subtype,
-					subtype_priority=priority,
-				)
-				console_id = sqlconn.execute(ins).inserted_primary_key[0]
-				# TODO: This is firing to changes as a hack for the front end. Needs to go back to builds in the future
-				self.publish_event("changes", change_id, "new build console", id=console_id, type=type, subtype=subtype, subtype_priority=priority, return_code=None)
+		start_time = time.time()
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			priority = starting_priority
+			ins = build_console.insert().values(
+				build_id=build_id,
+				repo_id=repo_id,
+				type=type,
+				subtype=subtype,
+				subtype_priority=priority,
+				start_time=start_time
+			)
+			console_id = sqlconn.execute(ins).inserted_primary_key[0]
+			# TODO: This is firing to changes as a hack for the front end. Needs to go back to builds in the future
+			self.publish_event("changes", change_id, "new build console", id=console_id, type=type, subtype=subtype,
+				subtype_priority=priority, start_time=start_time, return_code=None)
 
 	def append_console_lines(self, build_id, read_lines, type, subtype):
 		"""
@@ -106,6 +109,8 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		build_console = schema.build_console
 		build = schema.build
 
+		end_time = time.time()
+
 		query = build_console.select().where(
 			and_(
 				build_console.c.build_id == build_id,
@@ -123,10 +128,13 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			sqlconn.execute(
 				build_console.update().where(
 					build_console.c.id == build_console_id
-				).values(return_code=return_code)
+				).values(
+					return_code=return_code,
+					end_time=end_time
+				)
 			)
 
 			change_id = sqlconn.execute(change_id_query).first()[build.c.change_id]
 
 		self.publish_event("changes", change_id, "return code added",
-			build_console_id=build_console_id, return_code=return_code)
+			build_console_id=build_console_id, return_code=return_code, end_time=end_time)

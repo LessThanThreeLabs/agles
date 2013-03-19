@@ -9,16 +9,16 @@ class BuildsCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildsCreateHandler, self).__init__("builds", "create")
 
-	def create_build(self, change_id, commit_list, is_primary=False):
+	def create_build(self, change_id, commit_list):
 		build = database.schema.build
 		change = database.schema.change
 
-		query = change.select().where(change.c.id==change_id)
+		query = change.select().where(change.c.id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			change_row = sqlconn.execute(query).first()
 			assert change_row is not None
 			ins = build.insert().values(change_id=change_id, repo_id=change_row[change.c.repo_id],
-				is_primary=is_primary, status=BuildStatus.QUEUED)
+				status=BuildStatus.QUEUED)
 			result = sqlconn.execute(ins)
 			build_id = result.inserted_primary_key[0]
 

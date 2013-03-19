@@ -7,7 +7,7 @@ import novaclient.client
 import yaml
 
 from settings.openstack import OpenstackSettings
-from verification.shared.pubkey_registrar import PubkeyRegistrar
+from verification.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
 
 
