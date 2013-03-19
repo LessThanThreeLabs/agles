@@ -15,9 +15,9 @@ ADMIN_PASSWORD = 'admin123'
 USER_EMAIL = 'user@user.com'
 USER_PASSWORD = 'user123'
 
-NUM_REPOS = 1
+NUM_REPOS = 2
 NUM_REPO_STORES = 1
-NUM_USERS = 1
+NUM_USERS = 2
 NUM_COMMITS = 20
 REPOSITORIES_PATH = 'repos'
 
@@ -50,7 +50,7 @@ class SchemaDataGenerator(object):
 				repostore_id = conn.execute(ins_repostore).inserted_primary_key[0]
 
 				for repo in range(NUM_REPOS):
-					ins_repo = schema.repo.insert().values(name="repo_%d" % repo, uri="koality_%d_%d.git" % (repostore, repo),
+					ins_repo = schema.repo.insert().values(name="repo-%d" % repo, uri="koality-%d-%d.git" % (repostore, repo),
 						repostore_id=repostore_id, forward_url="bogusurl", publickey="somepublickey",
 						privatekey="someprivatekey", created=int(time.time()))
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
@@ -58,7 +58,8 @@ class SchemaDataGenerator(object):
 					repo_ids.append(repo_id)
 
 			for user in range(NUM_USERS):
-				ins_user = schema.user.insert().values(first_name="firstname_%d" % user, last_name="lastname_%d" % user, email="%d@b.com" % user,
+				ins_user = schema.user.insert().values(first_name="Firstname-%s" % chr(65 + user), last_name="Lastname-%s" % chr(65 + user), 
+					email="email-%s@address.com" % chr(65 + user),
 					password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1], salt=SALT, created=int(time.time()))
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
@@ -69,9 +70,9 @@ class SchemaDataGenerator(object):
 					repo_id = conn.execute(repo_id_query).first()[schema.repo.c.id]
 					repos[repo_id] += 1
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
-						message="message_%d" % commit, timestamp=random.randint(1, int(time.time())), sha="thisissha")
+						message="message-%d" % commit, timestamp=random.randint(1, int(time.time())), sha="thisissha")
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
-					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target_%d" % commit,
+					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target-%d" % commit,
 						number=repos[repo_id], status=self.get_random_commit_status(),
 						start_time=int(time.time()) + random.randint(-10000, 10000),
 						end_time=int(time.time()) + random.randint(10000, 12000))
@@ -103,7 +104,7 @@ class SchemaDataGenerator(object):
 	def generate_console_output(self, sqlconn, console_id):
 		console_output = schema.console_output
 
-		for line_num in range(1, random.randint(20, 500)):
+		for line_num in range(1, random.randint(100, 200)):
 			output = ''.join(random.choice(string.ascii_letters + string.digits + ' ') for x in range(random.randint(1, 100)))
 			ins = console_output.insert().values(
 				build_console_id=console_id,
