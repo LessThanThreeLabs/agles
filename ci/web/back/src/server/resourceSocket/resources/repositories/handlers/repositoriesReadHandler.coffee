@@ -13,10 +13,15 @@ class RepositoriesReadHandler extends Handler
 		super modelRpcConnection
 
 
+	_constructForwardUrl: (uri) =>
+		return 'git@' + @configurationParams.domain + ':' + uri
+
+
 	getRepositories: (socket, data, callback) =>
-		sanitizeResult = (repository) ->
+		sanitizeResult = (repository) =>
 			id: repository.id
 			name: repository.name
+			forwardUrl: @_constructForwardUrl repository.uri
 			timestamp: repository.created * 1000
 
 		userId = socket.session.userId
@@ -33,7 +38,7 @@ class RepositoriesReadHandler extends Handler
 		sanitizeResult = (repository) =>
 			id: repository.id
 			name: repository.name
-			uri: 'git@' + @configurationParams.domain + ':' + repository.uri
+			uri: @_constructForwardUrl repository.uri
 
 		userId = socket.session.userId
 		if not userId?
