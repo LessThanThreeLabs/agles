@@ -40,10 +40,12 @@ angular.module('koality.d3.directive', []).
 				return histogram
 
 			drawGraph = () ->
-				dateRange = [new Date(scope.timeInterval.start), new Date(scope.timeInterval.end)]
+				startTime = new Date(scope.timeInterval.start)
+				endTime = d3.max [new Date(scope.timeInterval.end),
+					d3.max(scope.changes, (change) -> return new Date(change.endTime*1000))]
 
 				interval = d3.time.day
-				allIntervals = interval.range interval.floor(dateRange[0]), interval.ceil(dateRange[1])
+				allIntervals = interval.range interval.floor(startTime), interval.ceil(endTime)
 
 				binner = d3.time.scale()
 					.domain([allIntervals[0], allIntervals[allIntervals.length - 1]])
