@@ -17,7 +17,7 @@ setup:
       - lessc
       - fontconfig  # for phantomjs
     - pip:
-      - install requirements
+      - install requirements: ci/platform/requirements.txt
     - npm:
       - iced-coffee-script
       - less
