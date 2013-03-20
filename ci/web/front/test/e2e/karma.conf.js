@@ -14,15 +14,13 @@ files = [
   'js/libs/jquery.js',
   'js/libs/angular.js',
   'js/libs/angularMock.js',
-  'js/src/**/*.js',
-  'js/src/test/unit/*.js',
-  'js/src/util/**/*.js'
+  'js/src/**/*.js'
 ];
 
 
 // list of files to exclude
 exclude = [
-
+	'js/src/test/unit/*.js'
 ];
 
 
@@ -69,4 +67,4 @@ captureTimeout = 5000;
 
 // Continuous Integration mode
 // if true, it capture browsers, run tests and exit
-singleRun = false;
+singleRun = true;
