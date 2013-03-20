@@ -66,7 +66,10 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 	$scope.removeRepository.modalVisible = false
 
 	$scope.publicKey = {}
-	$scope.publicKeyVisible = false
+	$scope.publicKey.modalVisible = false
+
+	$scope.forwardUrl = {}
+	$scope.forwardUrl.modalVisible = false
 
 	getRepositories = () ->
 		rpc.makeRequest 'repositories', 'read', 'getRepositories', null, (error, repositories) ->
@@ -121,6 +124,16 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 			$scope.$apply () ->
 				$scope.publicKey.key = publicKey
 				$scope.publicKey.modalVisible = true
+
+	$scope.showForwardUrl = (repository) ->
+		rpc.makeRequest 'repositories', 'read', 'getForwardUrl', id: repository.id, (error, forwardUrl) ->
+			$scope.$apply () ->
+				$scope.forwardUrl.url = forwardUrl
+				$scope.forwardUrl.modalVisible = true
+
+	$scope.editForwardUrl = () ->
+		console.log $scope.forwardUrl.url
+		$scope.forwardUrl.modalVisible = false
 
 	$scope.$watch 'addRepository.modalVisible', (newValue, oldValue) ->
 		resetAddRepositoryValues() if not newValue

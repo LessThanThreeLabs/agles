@@ -13,15 +13,10 @@ class RepositoriesReadHandler extends Handler
 		super modelRpcConnection
 
 
-	_constructForwardUrl: (uri) =>
-		return 'git@' + @configurationParams.domain + ':' + uri
-
-
 	getRepositories: (socket, data, callback) =>
 		sanitizeResult = (repository) =>
 			id: repository.id
 			name: repository.name
-			forwardUrl: @_constructForwardUrl repository.uri
 			timestamp: repository.created * 1000
 
 		userId = socket.session.userId
@@ -38,7 +33,7 @@ class RepositoriesReadHandler extends Handler
 		sanitizeResult = (repository) =>
 			id: repository.id
 			name: repository.name
-			uri: @_constructForwardUrl repository.uri
+			uri: 'git@' + @configurationParams.domain + ':' + repository.uri
 
 		userId = socket.session.userId
 		if not userId?
@@ -63,3 +58,16 @@ class RepositoriesReadHandler extends Handler
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback null, repository.publickey
+
+
+	getForwardUrl: (socket, data, callback) =>
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		else if not data?.id?
+			callback 400
+		else
+			@modelRpcConnection.repositories.read.get_repo_from_id userId, data.id, (error, repository) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback null, repository.forward_url

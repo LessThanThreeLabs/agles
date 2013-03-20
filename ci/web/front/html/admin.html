@@ -109,7 +109,7 @@
 										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 									</span>
 								</styled-form-field>
-								<styled-form-field label="Forward Url">
+								<styled-form-field label="Forward Url" label-padding="true">
 									<input type="text" ng-model="addRepository.forwardUrl" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
 									<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: addRepositoryForm.forwardUrl.$dirty && addRepositoryForm.forwardUrl.$invalid}">
 										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
@@ -172,9 +172,30 @@
 		<modal modal-visible="publicKey.modalVisible">
 			<div id="adminPublicKey">
 				<content>
-					<content-header content-header-padding>Public Key</content-header>
+					<content-header content-header-padding>Show SSH</content-header>
 					<content-body unselectable>
 						<textarea ng-model="publicKey.key" highlight-on-first-click readonly></textarea>
+					</content-body>
+				</content>
+			</div>
+		</modal>
+
+		<modal modal-visible="forwardUrl.modalVisible">
+			<div id="adminForwardUrl">
+				<content>
+					<content-header content-header-padding>Edit Url</content-header>
+					<content-body unselectable>
+						<styled-form name="editForwardUrlForm" id="adminForwardUrlForm">
+							<styled-form-field label="Forward Url" label-padding="true">
+								<input type="text" ng-model="forwardUrl.url" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
+								<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: editForwardUrlForm.forwardUrl.$dirty && editForwardUrlForm.forwardUrl.$invalid}">
+									<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+								</span>
+							</styled-form-field>
+							<styled-form-field label="">
+								<button id="adminForwardUrlButton" ng-click="editForwardUrl()" ng-disabled="editForwardUrlForm.$invalid">Save</button>
+							</styled-form-field>
+						</styled-form>
 					</content-body>
 				</content>
 			</div>
