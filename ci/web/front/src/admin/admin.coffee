@@ -128,12 +128,17 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 	$scope.showForwardUrl = (repository) ->
 		rpc.makeRequest 'repositories', 'read', 'getForwardUrl', id: repository.id, (error, forwardUrl) ->
 			$scope.$apply () ->
+				$scope.forwardUrl.id = repository.id
 				$scope.forwardUrl.url = forwardUrl
 				$scope.forwardUrl.modalVisible = true
 
 	$scope.editForwardUrl = () ->
-		console.log $scope.forwardUrl.url
-		$scope.forwardUrl.modalVisible = false
+		requestParams =
+			id: $scope.forwardUrl.id
+			forwardUrl: $scope.forwardUrl.url
+		rpc.makeRequest 'repositories', 'update', 'setForwardUrl', requestParams, (error, forwardUrl) ->
+			$scope.$apply () ->
+				$scope.forwardUrl.modalVisible = false
 
 	$scope.$watch 'addRepository.modalVisible', (newValue, oldValue) ->
 		resetAddRepositoryValues() if not newValue

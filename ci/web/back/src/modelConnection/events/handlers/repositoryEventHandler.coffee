@@ -10,7 +10,7 @@ exports.create = (sockets) ->
 class RepositoryEventHandler extends EventHandler
 	ROOM_PREFIX: 'repository-'
 	EVENT_PREFIX: 'repository-'
-	EVENT_NAMES: ['change added', 'change started', 'change finished']
+	EVENT_NAMES: ['change added', 'change started', 'change finished', 'forward url updated']
 
 
 	processEvent: (data) =>
@@ -33,6 +33,8 @@ class RepositoryEventHandler extends EventHandler
 					status: data.contents.status
 					startTime: data.contents.start_time * 1000
 					endTime: data.contents.end_time * 1000
+			when 'forward url updated'
+				true # do nothing
 			else
 				throw new Error 'Unexpected event type: ' + data.type
 				
