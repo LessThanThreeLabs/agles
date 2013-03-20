@@ -7,15 +7,12 @@ from build_verifier import BuildVerifier
 
 
 class VerifierPool(object):
-	ALLOCATED = True
-	UNALLOCATED = False
-
 	def __init__(self, max_verifiers, uri_translator=None):
 		self.max_verifiers = max_verifiers
 		self.uri_translator = uri_translator
 		self.free_slots = queue.Queue()
-		for x in range(max_verifiers):
-			self.free_slots.put(x)
+		for i in range(max_verifiers):
+			self.free_slots.put(i)
 		self.unallocated_slots = []
 		self.allocated_slots = []
 		self.verifiers = {}
@@ -51,10 +48,12 @@ class VerifierPool(object):
 		for slot, v in self.verifiers.items():
 			if v == verifier:
 				return slot
+		return None
 
 	def get_first_unallocated(self):
 		if self.unallocated_slots:
 			return self.unallocated_slots.pop()
+		return None
 
 	def get_first_free(self):
 		return self.free_slots.get()
