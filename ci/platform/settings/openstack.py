@@ -11,7 +11,7 @@ class OpenstackSettings(Settings):
 			auth_url="",
 			auth_system="",
 			region_name="",
-			vm_image_name_prefix="precise64_box_")
+			vm_image_name_prefix="koality_verification_")
 		self.add_values(
 			credentials=([str(self.version), str(self.username), str(self.api_key), str(self.project_name)], dict(
 				auth_url=str(self.auth_url), auth_system=str(self.auth_system),

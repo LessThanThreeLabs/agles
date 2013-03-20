@@ -56,3 +56,21 @@ class VirtualMachine(object):
 		finally:
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 		return results
+
+	@classmethod
+	def get_newest_image(cls):
+		images = cls.get_all_images()
+		return max(images, key=cls.get_image_version)  # get image with greatest version
+
+	@classmethod
+	def get_all_images(cls):
+		raise NotImplementedError()
+
+	@classmethod
+	def get_image_version(cls, image):
+		name_parts = image.name.split('_')
+		try:
+			major_version, minor_version = int(name_parts[-2]), int(name_parts[-1])
+		except (IndexError, ValueError):
+			major_version, minor_version = int(name_parts[-1]), -1
+		return major_version, minor_version

@@ -137,13 +137,16 @@ class Ec2Vm(VirtualMachine):
 		self.instance.reboot()
 
 	@classmethod
-	def get_newest_image(cls):
-		images = Ec2Client.get_client().get_all_images(owners=['600991114254'])
-		images = [image for image in images if AwsSettings.image_filter(image)]  # TODO: Verify this doesn't need to check for ACTIVE (seems to be the case)
-		return max(images, key=lambda image: image.name[image.name.rfind('_') + 1:])  # get image with greatest suffix number
+	def get_all_images(cls):
+		return Ec2Client.get_client().get_all_images(
+			filters={
+				'name': AwsSettings.vm_image_name_prefix + '*',
+				'state': 'available'
+			}
+		)
 
-	def save_snapshot(self, volume_id, description=None):
-		return self.ec2_client.create_snapshot(volume_id, description)
+	def create_image(self, name, description=None):
+		return self.ec2_client.create_image(self.instance.id, name, description)
 
 	def rebuild(self, ami_image_id=None):
 		if not ami_image_id:

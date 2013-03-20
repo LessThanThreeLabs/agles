@@ -125,7 +125,7 @@ class OpenstackVm(VirtualMachine):
 		except:
 			pass
 
-	def save_snapshot(self, image_name):
+	def create_image(self, image_name):
 		image_id = self.instance.create_image(image_name)
 		return self.nova_client.images.get(image_id)
 
@@ -140,7 +140,6 @@ class OpenstackVm(VirtualMachine):
 		self.wait_until_ready()
 
 	@classmethod
-	def get_newest_image(cls):
+	def get_all_images(cls):
 		images = OpenstackClient.get_client().images.list()
-		images = [image for image in images if OpenstackSettings.image_filter(image) and image.status == 'ACTIVE']
-		return max(images, key=lambda image: int(image.name[image.name.rfind('_') + 1:]))  # get image with greatest suffix number
+		return [image for image in images if OpenstackSettings.image_filter(image) and image.status == 'ACTIVE']
