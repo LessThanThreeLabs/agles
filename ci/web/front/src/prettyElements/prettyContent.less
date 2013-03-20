@@ -101,7 +101,6 @@
 						left: 0px;
 						right: @toothWidth;
 						bottom: 0px;
-						padding: 2px 12px 0px 12px;
 						color: @koalityGray;
 						line-height: 36px;
 						background-color: @panelBackground;
@@ -111,15 +110,25 @@
 							line-height: 40px;
 						}
 
-						.prettyContentMenuOptionIdentifier {
-							display: inline;
-							font-size: 18px;
-						}
+						.prettyContentMenuOptionTextContainer {
+							position: absolute;
+							top: 2px;
+							left: 12px;
+							right: 22px;
+							bottom: 0px;
+							text-overflow: ellipsis;
+							overflow: hidden;
 
-						.prettyContentMenuOptionText {
-							display: inline;
-							padding-left: 2px;
-							font-size: 14px;
+							.prettyContentMenuOptionIdentifier {
+								display: inline;
+								font-size: 18px;
+							}
+
+							.prettyContentMenuOptionText {
+								display: inline;
+								padding-left: 2px;
+								font-size: 14px;
+							}
 						}
 
 						.prettyContentMenuOptionSpinner {

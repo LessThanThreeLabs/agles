@@ -180,8 +180,10 @@ angular.module('koality.directive', []).
 		scope: true
 		template: '<div class="prettyContentMenuOption">
 				<div class="prettyContentMenuOptionContents">
-					<span class="prettyContentMenuOptionIdentifier">{{identifier}}</span>
-					<span class="prettyContentMenuOptionText">{{text}}</span>
+					<div class="prettyContentMenuOptionTextContainer">
+						<span class="prettyContentMenuOptionIdentifier">{{identifier}}</span>
+						<span class="prettyContentMenuOptionText">{{text}}</span>
+					</div>
 					<div class="prettyContentMenuOptionArrow"></div>
 					<spinner class="prettyContentMenuOptionSpinner" spinner-running="spinning"></spinner>
 				</div>
