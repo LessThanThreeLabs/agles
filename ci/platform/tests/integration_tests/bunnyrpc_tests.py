@@ -4,6 +4,9 @@ from nose.tools import *
 
 from bunnyrpc.client import Client, RPCRequestError
 from bunnyrpc.server import Server
+from kombu.connection import Connection
+from kombu.entity import Queue
+from settings.rabbit import RabbitSettings
 from util.test import BaseIntegrationTest
 from util.test.mixins import RabbitMixin, TestProcess
 
@@ -12,37 +15,40 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 	def setUp(self):
 		super(BunnyRPCTest, self).setUp()
 		self._purge_queues()
+
+		ttl_event = Event()
+		self.ttl_process = TestProcess(target=self._runserver,
+			args=[self._TestRPCServer(), "ttl_exchange", ["stale_queue"], ttl_event],
+			kwargs=dict(ttl=1, auto_delete=False))
+		self.ttl_process.start()
+
 		server_event = Event()
 		self.server_process = TestProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "exchange", ["queue0", "queue1"], server_event])
 		self.server_process.start()
-
-		ttl_event = Event()
-		self.ttl_process = TestProcess(target=self._runserver,
-			args=[self._TestRPCServer(), "ttl_exchange", ["queue"], ttl_event],
-					kwargs=dict(ttl=0))
-		self.ttl_process.start()
 
 		return_event = Event()
 		self.returned_msg_process = TestProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "returned_exchange", [], return_event])
 		self.returned_msg_process.start()
 
-		server_event.wait()
 		ttl_event.wait()
-		return_event.wait()
 		self.ttl_process.terminate()
+		server_event.wait()
+		return_event.wait()
 
 	def tearDown(self):
 		super(BunnyRPCTest, self).tearDown()
 		self.server_process.terminate()
 		self.returned_msg_process.terminate()
 		self._purge_queues()
+		with Connection(RabbitSettings.kombu_connection_info) as connection:
+			Queue("stale_queue")(connection).delete()
 
 	def _runserver(self, base_instance, exchange,
-					queue_names, event, ttl=30000):
+					queue_names, event, ttl=1000, auto_delete=True):
 		server = Server(base_instance)
-		server.bind(exchange, queue_names, message_ttl=ttl, auto_delete=True)
+		server.bind(exchange, queue_names, message_ttl=ttl, auto_delete=auto_delete)
 		event.set()
 		server.run()
 
@@ -78,8 +84,12 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		client1 = Client("exchange", "queue1")
 		self._run_multiclients_in_tandem(client0, client1)
 
-	def test_deadlettering(self):
-		with Client("ttl_exchange", "queue") as client:
+	def test_deadlettering_nonexistent_queue(self):
+		with Client("ttl_exchange", "nonexistent_queue") as client:
+			assert_raises(RPCRequestError, client.incr)
+
+	def test_deadlettering_stale_queue(self):
+		with Client("ttl_exchange", "stale_queue") as client:
 			assert_raises(RPCRequestError, client.incr)
 
 	def test_returned_message(self):
