@@ -74,7 +74,6 @@ test:
       script:
         - nosetests -sv
       timeout: 240
-  - npm_tests:
-      path: ci/web/back
+  - website_unit_tests:
       script:
-        - npm test
+        - testacular start ci/web/front/test/unit/testacular.conf.js --browsers PhantomJS --single-run
