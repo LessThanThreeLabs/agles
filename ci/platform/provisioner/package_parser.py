@@ -13,15 +13,19 @@ class PackageParser(object):
 			package_steps.append(self.parse_package(package, source_path))
 		return package_steps
 
-	def parse_package(self, package, source_path):
+	def parse_package(self, package, source_path, dict_commands=None):
 		if isinstance(package, str):
-			package_string = package
+			package_info = (package, None)
 		elif isinstance(package, dict):
 			if len(package.items()) > 1:
 				raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
-			package_string = self.to_package_string(*package.items()[0])
+			package_info = package.items()[0]
 		else:
 			raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
+		return self.to_install_command(source_path, *package_info)
+
+	def to_install_command(self, source_path, name, value):
+		package_string = self.to_package_string(name, value) if value else name
 		return SetupCommand(self.to_install_string(package_string))
 
 	def to_package_string(self, name, version):
@@ -72,6 +76,13 @@ class PipPackageParser(PackageParser):
 	def __init__(self):
 		super(PipPackageParser, self).__init__('pip')
 
+	def to_install_command(self, source_path, name, value):
+		if name == 'install requirements':
+			if value:
+				return SetupCommand("pip install --upgrade -r %s" % os.path.join(source_path, value))
+			return SetupCommand("pip install --upgrade -r requirements.txt")
+		return super(PipPackageParser, self).to_install_command(source_path, name, value)
+
 	def to_package_string(self, name, version):
 		return "%s==%s" % (name, version)
 
@@ -82,6 +93,13 @@ class PipPackageParser(PackageParser):
 class GemPackageParser(PackageParser):
 	def __init__(self):
 		super(GemPackageParser, self).__init__('gem')
+
+	def to_install_command(self, source_path, name, value):
+		if name == 'bundle install':
+			if value:
+				return SetupCommand("bundle install --gemfile %s" % os.path.join(source_path, value))
+			return SetupCommand("bundle install")
+		return super(GemPackageParser, self).to_install_command(source_path, name, value)
 
 	def to_package_string(self, name, version):
 		return "%s -v %s" % (name, version)
@@ -95,18 +113,16 @@ class NpmPackageParser(PackageParser):
 		super(NpmPackageParser, self).__init__('npm')
 
 	def parse_package(self, package, source_path):
-		if isinstance(package, str):
-			package_string = package
-		elif isinstance(package, dict):
-			if len(package.items()) > 1:
-				raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
-			package_info = package.items()[0]
-			if package_info[0] == 'directory':
-				return SetupCommand("cd %s" % os.path.join(source_path, package_info[1]), "npm install")
-			package_string = self.to_package_string(*package_info)
-		else:
-			raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
-		return SetupCommand(self.to_install_string(package_string))
+		return super(NpmPackageParser, self).parse_package(package, source_path, {
+			'npm install': lambda package_info: SetupCommand("cd %s" % os.path.join(source_path, package_info[1]), "npm install")
+		})
+
+	def to_install_command(self, source_path, name, value):
+		if name == 'npm install':
+			if value:
+				return SetupCommand("cd %s" % os.path.join(source_path, value), "npm install")
+			return SetupCommand("npm install")
+		return super(NpmPackageParser, self).to_install_command(source_path, name, value)
 
 	def to_package_string(self, name, version):
 		return "%s@%s" % (name, version)
