@@ -17,6 +17,9 @@ class FakeBuildVerifier(BuildVerifier):
 	def _teardown(self):
 		self.build_core.teardown()
 
+	def teardown(self):
+		self._teardown()
+
 
 class FakeBuildCore(object):
 	def __init__(self, passes):
@@ -34,7 +37,7 @@ class FakeBuildCore(object):
 			raise Exception()
 
 	def teardown(self):
-		shutil.rmtree(self.virtual_machine.vm_directory)
+		shutil.rmtree(self.virtual_machine.vm_directory, ignore_errors=True)
 
 
 class FakeVirtualMachine(object):

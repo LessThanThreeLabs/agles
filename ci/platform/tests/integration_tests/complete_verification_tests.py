@@ -25,15 +25,13 @@ from bunnyrpc.server import Server
 from bunnyrpc.client import Client
 from git import Repo
 from util.test.fake_build_verifier import FakeBuildVerifier
-from verification.verifier_pool import VerifierPool, VirtualMachineVerifierPool
-from virtual_machine.ec2 import Ec2Vm
+from verification.verifier_pool import VerifierPool
 
 DEFAULT_NUM_VERIFIERS = 10
 TEST_ROOT = "/tmp/verification"
 
 
-class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
-	RabbitMixin, RepoStoreTestMixin, RedisTestMixin):
+class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, RepoStoreTestMixin, RedisTestMixin):
 
 	class FakeBuildVerifierPool(VerifierPool):
 		def spawn_verifier(self, verifier_number):
@@ -41,9 +39,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	@classmethod
 	def setup_class(cls):
-		#cls.verifier_pool = VirtualMachineVerifierPool(Ec2Vm, "/tmp/verification", 1)
-		cls.verifier_pool = VerificationRoundTripTest.FakeBuildVerifierPool(DEFAULT_NUM_VERIFIERS)
-
 		cls.repostore_id = 1
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
 		repo_store = Server(FileSystemRepositoryStore(cls.repo_dir))
@@ -54,7 +49,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 
 	@classmethod
 	def teardown_class(cls):
-		cls.verifier_pool.teardown()
 		cls.repo_store_process.terminate()
 		cls.repo_store_process.join()
 		rmtree(TEST_ROOT, ignore_errors=True)
@@ -66,6 +60,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.makedirs(self.repo_dir)
 		self._start_model_server()
+		self.verifier_pool = VerificationRoundTripTest.FakeBuildVerifierPool(DEFAULT_NUM_VERIFIERS)
 		self.repo_path = os.path.join(
 			self.repo_dir,
 			to_path(self.repo_id, "repo.git"))
@@ -86,6 +81,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin,
 		self._stop_model_server()
 		self.vs_process.terminate()
 		self.vs_process.join()
+		self.verifier_pool.teardown()
 		self._stop_redis()
 		self._purge_queues()
 

@@ -55,7 +55,7 @@ def main():
 	print "Starting Verification Server (%d*%s) with directory %s ..." % (
 			vm_count, args.type, vm_dir)
 
-	verifier_pool = VirtualMachineVerifierPool(vm_class, vm_dir, vm_count, RepositoryUriTranslator())
+	verifier_pool = VirtualMachineVerifierPool(vm_class, vm_dir, vm_count, uri_translator=RepositoryUriTranslator())
 	vs = VerificationServer(verifier_pool, RepositoryUriTranslator())
 	vs.run()
 
