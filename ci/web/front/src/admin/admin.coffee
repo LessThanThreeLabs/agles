@@ -1,6 +1,7 @@
 'use strict'
 
-window.Admin = ['$scope', '$location', '$routeParams', 'fileSuffixAdder', ($scope, $location, $routeParams, fileSuffixAdder) ->
+window.Admin = ['$scope', '$location', '$routeParams', 'initialState', 'fileSuffixAdder', ($scope, $location, $routeParams, initialState, fileSuffixAdder) ->
+	$scope.userId = initialState.user.id
 	$scope.currentView = $routeParams.view ? 'users'
 
 	$scope.menuOptionClick = (viewName) ->

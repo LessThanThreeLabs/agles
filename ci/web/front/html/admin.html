@@ -11,7 +11,7 @@
 
 	<div id="adminUsers" ng-show="currentView == 'users'" ng-controller="AdminUsers">
 		<content>
-			<content-header content-header-padding>Manage User Accounts<span id="addUsersLink" ng-click="addUsers.modalVisible=true">+ Add New Users</span></content-header>
+			<content-header content-header-padding>Manage User Accounts<a id="addUsersLink" ng-click="addUsers.modalVisible=true">+ Add New Users</a></content-header>
 			<content-body unselectable>
 				<div id="adminUsersContent">
 					<table class="prettyTable">
@@ -33,7 +33,7 @@
 							<td class="nameColumn" text-selectable>{{user.firstName}} {{user.lastName}}</td>
 							<td class="emailColumn" text-selectable><a href="mailto:{{user.email}}?subject=Koality" target="_blank">{{user.email}}</a></td>
 							<td class="createdColumn" text-selectable>{{user.timestamp | date:'MM/dd/yyyy'}}</td>
-							<td class="removeColumn"><span class="removeLink" ng-click="removeUser(user)">Delete</span></td>
+							<td class="removeColumn"><a class="removeLink" ng-click="removeUser(user)" ng-class="{disabled: user.id == userId}">Delete</a></td>
 						</tr>
 					</table>
 				</div>
@@ -64,30 +64,32 @@
 
 	<div id="adminRepositories" ng-show="currentView == 'repositories'" ng-controller="AdminRepositories">
 		<content>
-			<content-header content-header-padding>Manage Repositories<span id="addRepositoryLink" ng-click="addRepository.modalVisible=true">+ Add Repository</span></content-header>
+			<content-header content-header-padding>Manage Repositories<a id="addRepositoryLink" ng-click="addRepository.modalVisible=true">+ Add Repository</a></content-header>
 			<content-body unselectable>
 				<div id="adminRepositoriesContent">
 					<table class="prettyTable">
 						<tr class="title">
 							<td class="nameColumn" ng-click="orderByPredicate = 'lastName'; orderByReverse = !orderByReverse">Name</td>
 							<td class="createdColumn" ng-click="orderByPredicate = 'timestamp'; orderByReverse = !orderByReverse">Created</td>
-							<td class="publicKeyColumn">Key</td>
-							<td class="removeColumn">Remove</td>
+							<td class="publicKeyColumn">Actions</td>
+							<td class="forwardUrlColumn"></td>
+							<td class="removeColumn"></td>
 						</tr>
 
 						<tr ng-show="repositories.length == 0">
 							<td class="nameColumn" text-selectable>There are no repositories</td>
-							<td class="emailColumn"></td>
 							<td class="createdColumn"></td>
 							<td class="publicKeyColumn"></td>
+							<td class="forwardUrlColumn"></td>
 							<td class="removeColumn"></td>
 						</tr>
 
 						<tr ng-repeat="repository in repositories | orderBy:orderByPredicate:orderByReverse">
 							<td class="nameColumn" text-selectable>{{repository.name}}</td>
 							<td class="createdColumn" text-selectable>{{repository.timestamp | date:'MM/dd/yyyy'}}</td>
-							<td class="publicKeyColumn"><span class="publicKeyLink" ng-click="showPublicKey(repository)">Show</span></td>
-							<td class="removeColumn"><span class="removeLink" ng-click="openRemoveRepository(repository)">Delete</span></td>
+							<td class="publicKeyColumn"><a ng-click="showPublicKey(repository)">Show SSH</a></td>
+							<td class="forwardUrlColumn"><a ng-click="showForwardUrl(repository)">Edit URL</a></td>
+							<td class="removeColumn"><a class="removeLink" ng-click="openRemoveRepository(repository)">Delete</a></td>
 						</tr>
 					</table>
 				</div>

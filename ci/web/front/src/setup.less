@@ -15,10 +15,20 @@ body {
 	font-weight: normal;
 	font-size: @baseFont;
 
-	a:link { text-decoration: none; color: @koalityGreen; }
-	a:visited { text-decoration: none; color: @koalityGreen; }
-	a:hover { text-decoration: underline; color: @koalityGreen; }
-	a:active { text-decoration: underline; color: @koalityGreen; }
+	a {
+		color: @koalityGreen;
+
+		&:link { text-decoration: none; }
+		&:visited { text-decoration: none; }
+		&:hover { text-decoration: underline; }
+		&:active { text-decoration: underline; }
+
+		&.disabled {
+			cursor: default;
+			pointer-events: none;
+			color: @koalityGray !important;
+		}
+	}
 
 	input {
 		margin: 0px;
@@ -69,7 +79,7 @@ body {
 		}
 
 		&:disabled {
-			cursor: not-allowed;
+			cursor: default;
 			color: #909090;
 
 			&:active {
