@@ -243,7 +243,12 @@ window.RepositoryStages = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 ]
 
 
-window.RepositoryStageDetails = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
+window.RepositoryStageDetails = ['$scope', '$location', 'rpc', 'events', ($scope, $location, rpc, events) ->
+	updateUrl = () ->
+		$scope.currentUrl = $location.absUrl()
+	$scope.$on '$routeUpdate', updateUrl
+	updateUrl()
+
 	retrieveLines = () ->
 		$scope.lines = []
 		return if not $scope.currentStageId?
