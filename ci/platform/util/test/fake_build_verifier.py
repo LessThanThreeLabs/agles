@@ -2,26 +2,26 @@ import os
 import random
 import shutil
 
-from shared.constants import BuildStatus
-from verification.shared.verification_config import VerificationConfig
+from verification.build_verifier import BuildVerifier
+from verification.verification_config import VerificationConfig
 
 
-class FakeBuildVerifier(object):
+class FakeBuildVerifier(BuildVerifier):
 	def __init__(self, passes):
-		self.passes = passes
+		super(FakeBuildVerifier, self).__init__(FakeBuildCore(passes))
+
+	def _setup(self, build_id, verification_config):
+		os.makedirs(self.build_core.virtual_machine.vm_directory)
+		super(FakeBuildVerifier, self)._setup(build_id, verification_config)
+
+	def _teardown(self):
+		self.build_core.teardown()
+
+
+class FakeBuildCore(object):
+	def __init__(self, passes):
 		self.virtual_machine = FakeVirtualMachine()
-
-	def setup(self):
-		os.makedirs(self.virtual_machine.vm_directory)
-
-	def teardown(self):
-		shutil.rmtree(self.virtual_machine.vm_directory)
-
-	def verify(self, repo_uri, refs, callback, console_appender=None):
-		if self.passes:
-			callback(BuildStatus.PASSED)
-		else:
-			callback(BuildStatus.FAILED)
+		self.passes = passes
 
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
 		return VerificationConfig(None, None)
@@ -33,11 +33,8 @@ class FakeBuildVerifier(object):
 		if not self.passes:
 			raise Exception()
 
-	def mark_success(self, callback):
-		callback(BuildStatus.PASSED)
-
-	def mark_failure(self, callback):
-		callback(BuildStatus.FAILED)
+	def teardown(self):
+		shutil.rmtree(self.virtual_machine.vm_directory)
 
 
 class FakeVirtualMachine(object):

@@ -64,7 +64,7 @@ class SystemPackageParser(PackageParser):
 		package_steps = super(SystemPackageParser, self).parse_packages(packages, source_path)
 		if SystemPackageParser.first_run:
 			SystemPackageParser.first_run = False
-			package_steps = [SetupCommand("apt-get update -y")] + package_steps
+			package_steps = [SetupCommand("apt-get update -y", ignore_failure=True)] + package_steps
 		return package_steps
 
 

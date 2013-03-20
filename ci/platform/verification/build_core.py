@@ -8,7 +8,6 @@ import yaml
 from git import Repo
 
 from model_server.build_consoles import ConsoleType
-from shared.constants import BuildStatus
 from virtual_machine.remote_command import SimpleRemoteCheckoutCommand, SimpleRemoteProvisionCommand
 from verification_config import VerificationConfig
 
@@ -110,6 +109,10 @@ class VirtualMachineBuildCore(BuildCore):
 			self._get_output_handler(console_appender, ConsoleType.Setup, setup_command.name)):
 			raise VerificationException("Setup: %s" % setup_command.name)
 
+	def run_compile_step(self, compile_commands, console_appender):
+		for compile_command in compile_commands:
+			self.run_compile_command(compile_command, console_appender)
+
 	def run_compile_command(self, compile_command, console_appender):
 		if compile_command.run(self.virtual_machine,
 			self._get_output_handler(console_appender, ConsoleType.Compile, compile_command.name)):
@@ -119,32 +122,6 @@ class VirtualMachineBuildCore(BuildCore):
 		if test_command.run(self.virtual_machine,
 			self._get_output_handler(console_appender, ConsoleType.Test, test_command.name)):
 			raise VerificationException("Testing: %s" % test_command.name)
-
-	def verify(self, repo_uri, refs, private_key, callback, console_appender=None):
-		"""Runs verification on a desired git commit"""
-		try:
-			verification_config = self.setup_build(repo_uri, refs, private_key, console_appender)
-			self.run_compile_step(verification_config.compile_commands, console_appender)
-			self.run_test_step(verification_config.test_commands, console_appender)
-		except Exception as e:
-			print e
-			self.mark_failure(callback)
-		else:
-			self.mark_success(callback)
-
-	def run_compile_step(self, compile_commands, console_appender):
-		for compile_command in compile_commands:
-			self.run_compile_command(compile_command, console_appender)
-
-	def run_test_step(self, test_commands, console_appender):
-		for test_command in test_commands:
-			self.run_test_command(test_command, console_appender)
-
-	def mark_success(self, callback):
-		callback(BuildStatus.PASSED, self.rollback_virtual_machine)
-
-	def mark_failure(self, callback):
-		callback(BuildStatus.FAILED, self.rollback_virtual_machine)
 
 
 class VagrantBuildCore(VirtualMachineBuildCore):

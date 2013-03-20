@@ -76,7 +76,6 @@ build = Table('build', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
 	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
-	Column('is_primary', Boolean, nullable=False),
 	Column('status', String, nullable=False),
 	Column('start_time', Integer, nullable=True),
 	Column('end_time', Integer, nullable=True)
@@ -95,6 +94,8 @@ build_console = Table('build_console', metadata,
 	Column('type', String, nullable=False),
 	Column('subtype', String, nullable=False),
 	Column('subtype_priority', Integer, nullable=False),
+	Column('start_time', Integer, nullable=False),
+	Column('end_time', Integer, nullable=True),
 	Column('return_code', Integer, nullable=True),
 
 	UniqueConstraint('build_id', 'type', 'subtype')

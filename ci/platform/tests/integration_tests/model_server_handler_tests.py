@@ -70,7 +70,6 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 			ins_build = build.insert().values(
 				change_id=change_id,
 				repo_id=self.repo_id,
-				is_primary=True,
 				status='a',
 				start_time=1,
 				end_time=1
@@ -85,9 +84,9 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 		update_handler = BuildConsolesUpdateHandler()
 
 		for i in self.build_ids:
-			update_handler.add_subtypes(i, ConsoleType.Setup, ["setup"])
-			update_handler.add_subtypes(i, ConsoleType.Compile, ["compile"])
-			update_handler.add_subtypes(i, ConsoleType.Test, ["unittest"])
+			update_handler.add_subtype(i, ConsoleType.Setup, "setup")
+			update_handler.add_subtype(i, ConsoleType.Compile, "compile")
+			update_handler.add_subtype(i, ConsoleType.Test, "unittest")
 
 			test_lines = {}
 			for line_num in range(1, 3):

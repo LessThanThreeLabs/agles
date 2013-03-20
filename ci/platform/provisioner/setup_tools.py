@@ -35,8 +35,14 @@ class SetupCommand(object):
 	def _and(cls, *commands):
 		return ' &&\n'.join(commands)
 
+	def _or(cls, *commands):
+		return ' ||\n'.join(commands)
+
 	def to_shell_command(self):
-		return self._and(*map(self._to_command, self.commands))
+		shell_command = self._and(*map(self._to_command, self.commands))
+		if self.ignore_failure:
+			return self._or(shell_command, "true")
+		return shell_command
 
 	def _to_command(self, command):
 		if self.silent:

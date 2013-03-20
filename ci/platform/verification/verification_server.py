@@ -7,24 +7,17 @@ listener thread should respond to events by running and verifying builds on
 a spawned virtual machine.
 """
 
-import eventlet
-
-from util.greenlets import spawn_wrap
-from verification.server.verification_request_handler import VerificationRequestHandler
+from change_verifier import ChangeVerifier
+from shared.message_driven_server import MessageDrivenServer
 
 
-class VerificationServer(object):
+class VerificationServer(MessageDrivenServer):
 	"""Verifies correctness of builds.
 
 	Contains and controls a virtual machine, which is used to check out,
 	lint, and run tests against commits.
 	"""
 
-	def __init__(self, verifier_pool):
-		self.verifier_pool = verifier_pool
-
-	def run(self):
-		self.handlers = [VerificationRequestHandler(verifier) for verifier in self.verifier_pool.spawn_all().values()]
-		[spawn_wrap(handler.run)() for handler in self.handlers]
-		while True:
-			eventlet.sleep(1)
+	def __init__(self, verifier_pool, uri_translator=None):
+		handlers = [ChangeVerifier(verifier_pool, uri_translator)]
+		super(VerificationServer, self).__init__(handlers)
