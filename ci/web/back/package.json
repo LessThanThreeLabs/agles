@@ -26,6 +26,6 @@
   },
 
   "scripts": {
-    "test": "cd front; testacular start testacular.conf.js --browsers PhantomJS --single-run"
+    "test": "testacular start front/test/unit/testacular.conf.js --browsers PhantomJS --single-run"
   }
 }
