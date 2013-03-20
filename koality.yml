@@ -21,7 +21,7 @@ setup:
     - npm:
       - iced-coffee-script
       - less
-      - testacular
+      - karma
       - npm install: ci/web/back
   - databases:
     - postgres:
