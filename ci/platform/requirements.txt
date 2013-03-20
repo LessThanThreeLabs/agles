@@ -16,3 +16,4 @@ rackspace-novaclient
 python-novaclient
 requests
 boto==2.6.0
+alembic==0.4.2
