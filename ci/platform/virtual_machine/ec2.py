@@ -127,7 +127,7 @@ class Ec2Vm(VirtualMachine):
 
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("python -u -c \"from provisioner.provisioner import Provisioner; Provisioner().provision('''%s''')\"" % private_key,
-			timeout=1200, output_handler=output_handler)
+			timeout=3600, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		login = "%s@%s" % (self.vm_username, self.instance.ip_address)
