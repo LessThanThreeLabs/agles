@@ -19,6 +19,7 @@ class RestrictedGitShell(object):
 		self._git_command_handlers = {
 			"git-receive-pack": self.handle_receive_pack,
 			"git-upload-pack": self.handle_upload_pack,
+			"git-show": self.handle_git_show,
 		}
 
 	def _create_ssh_exec_args(self, route, command, path, user_id):
@@ -73,6 +74,9 @@ class RestrictedGitShell(object):
 			args = self._up_pullthrough_args(private_key, forward_url, user_id)
 		os.execlp(*args)
 
+	def handle_git_show(self, requested_repo_uri, show_ref_file, user_id):
+		pass
+
 	def _up_pullthrough_args(self, private_key, forward_url, user_id):
 		uri, path = forward_url.split(':')
 		command_parts = ["git-upload-pack", path]
@@ -89,15 +93,13 @@ class RestrictedGitShell(object):
 		if not len(command_parts) == self.GIT_COMMAND_ARGS:
 			raise InvalidCommandError(full_ssh_command)
 
-		command, repo_path, user_id = command_parts
-		repo_path = repo_path.strip("'")
+		if not command_parts[0] in self.valid_commands:
+			raise InvalidCommandError(command_parts[0])
 
-		if command in self.valid_commands:
-			self._validate(repo_path)
-			requested_repo_uri = self._get_requested_repo_uri(repo_path)
-			self._git_command_handlers[command](requested_repo_uri, user_id)
-		else:
-			raise InvalidCommandError(command)
+		repo_path = command_parts[1].strip("'")  # command_parts[1] should always be a repo path in any command
+		self._validate(repo_path)
+		command_parts[1] = self._get_requested_repo_uri(repo_path)
+		self._git_command_handlers[command_parts[0]](*command_parts[1:])
 
 
 class InvalidCommandError(Exception):

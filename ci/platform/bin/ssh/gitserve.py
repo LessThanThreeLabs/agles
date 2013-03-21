@@ -16,7 +16,7 @@ valid_commands = [
 	"git-receive-pack",
 	"git-upload-pack",
 	"git-upload-archive",
-	"true"
+	"git-show"
 ]
 
 user_id_commands = ["git-receive-pack"]
