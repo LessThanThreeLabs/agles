@@ -71,10 +71,6 @@ class BuildCore(object):
 
 class LightWeightBuildCore(BuildCore):
 	def setup_build(self, repo_uri, refs, console_appender=None):
-		verification_config = super(LightWeightBuildCore, self).setup_build(repo_uri, refs, console_appender)
-		return verification_config
-
-	def setup_build(self, repo_uri, refs, console_appender=None):
 		ref = refs[-1]  # only get config from last ref
 		if self.uri_translator:
 			checkout_url = self.uri_translator.translate(repo_uri)
