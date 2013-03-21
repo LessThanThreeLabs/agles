@@ -95,9 +95,9 @@ class VerifierPool(object):
 
 class VirtualMachineVerifierPool(VerifierPool):
 	def __init__(self, virtual_machine_class, directory, max_verifiers, min_unallocated=1, uri_translator=None):
-		super(VirtualMachineVerifierPool, self).__init__(max_verifiers, min_unallocated, uri_translator)
 		self.virtual_machine_class = virtual_machine_class
 		self.directory = directory
+		super(VirtualMachineVerifierPool, self).__init__(max_verifiers, min_unallocated, uri_translator)
 
 	def spawn_verifier(self, verifier_number):
 		virtual_machine = self.spawn_virtual_machine(verifier_number)
