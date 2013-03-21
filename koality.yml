@@ -42,13 +42,12 @@ setup:
       - ln -s /usr/local/share/phantomjs-1.8.2-linux-x86_64 /usr/local/share/phantomjs
       - ln -s /usr/local/share/phantomjs/bin/phantomjs /usr/local/bin/phantomjs
 compile:
-  - compile_platform:
+  - python setup.py install:
       path: ci/platform
-      script: python setup.py install
-  - compile_webserver:
+  - compile webserver:
       path: ci/web/back
       script: ./compile.sh
-  - compile_website:
+  - compile website:
       path: ci/web/front
       script: ./compile.sh
 test:
