@@ -1,6 +1,9 @@
 'use strict'
 
 angular.module('koality.service', []).
+	factory('localStorage', ['$window', ($window) ->
+		return window.localStorage
+	]).
 	factory('initialState', ['$window', ($window) ->
 		toReturn =
 			fileSuffix: if $window.fileSuffix is '' then null else $window.fileSuffix

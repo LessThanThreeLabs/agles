@@ -79,11 +79,11 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 	retrieveRepositoryInformation()
 ]
 
-window.RepositoryChanges = ['$scope', '$routeParams', 'changesRpc', 'events', ($scope, $routeParams, changesRpc, events) ->
+window.RepositoryChanges = ['$scope', '$routeParams', 'changesRpc', 'events', 'localStorage', ($scope, $routeParams, changesRpc, events, localStorage) ->
 	$scope.changes = []
 
 	$scope.search = {}
-	$scope.search.mode = 'all'
+	$scope.search.mode = localStorage.searchMode ? 'all'
 	$scope.search.namesQuery = ''
 
 	getGroupFromMode = () ->
@@ -146,7 +146,10 @@ window.RepositoryChanges = ['$scope', '$routeParams', 'changesRpc', 'events', ($
 	$scope.scrolledToBottom = () ->
 		getMoreChanges()
 
-	$scope.$watch 'search', ((newValue, oldValue) -> getInitialChanges()), true
+	$scope.$watch 'search', ((newValue, oldValue) -> 
+		getInitialChanges()
+		localStorage.searchMode = $scope.search.mode
+	), true
 ]
 
 
