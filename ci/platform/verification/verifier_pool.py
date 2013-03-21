@@ -4,10 +4,14 @@ from eventlet import queue
 
 from build_core import CloudBuildCore
 from build_verifier import BuildVerifier
+from settings.verification_server import VerificationServerSettings
 
 
 class VerifierPool(object):
-	def __init__(self, max_verifiers, min_unallocated=1, uri_translator=None):
+	def __init__(self, max_verifiers, min_unallocated=None, uri_translator=None):
+		if min_unallocated is None:
+			min_unallocated = VerificationServerSettings.static_pool_size
+
 		assert max_verifiers >= min_unallocated
 
 		self.max_verifiers = max_verifiers
@@ -94,7 +98,7 @@ class VerifierPool(object):
 
 
 class VirtualMachineVerifierPool(VerifierPool):
-	def __init__(self, virtual_machine_class, directory, max_verifiers, min_unallocated=1, uri_translator=None):
+	def __init__(self, virtual_machine_class, directory, max_verifiers, min_unallocated=None, uri_translator=None):
 		self.virtual_machine_class = virtual_machine_class
 		self.directory = directory
 		super(VirtualMachineVerifierPool, self).__init__(max_verifiers, min_unallocated, uri_translator)
