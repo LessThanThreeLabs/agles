@@ -79,9 +79,7 @@ class VerifierPool(object):
 		num_to_fill = self.min_unallocated - len(self.unallocated_slots)
 		for i in range(num_to_fill):
 			try:
-				print "getting free slot"
 				free = self.get_first_free(block=False)
-				print "got free slot %d" % free
 			except queue.Empty:
 				pass
 			else:
