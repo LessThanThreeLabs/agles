@@ -16,5 +16,5 @@ elif [ $icedRc -ne 0 ]; then
 	printf "\x1b[31;1mFailed to compile coffeescript\x1b[39;22m\n"
 	exit $icedRc
 else
-	printf "\x1b[32;1mSuccessfully compiled\x1b[39;22m\n"
+	printf "\x1b[35;1mSuccessfully compiled\x1b[39;22m\n"
 fi
