@@ -26,6 +26,9 @@ class FakeBuildCore(object):
 		self.virtual_machine = FakeVirtualMachine()
 		self.passes = passes
 
+	def setup(self):
+		pass
+
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
 		return VerificationConfig(None, None)
 

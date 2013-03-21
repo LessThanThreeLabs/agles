@@ -101,8 +101,8 @@ class VirtualMachineVerifierPool(VerifierPool):
 
 	def spawn_verifier(self, verifier_number):
 		virtual_machine = self.spawn_virtual_machine(verifier_number)
-		virtual_machine.wait_until_ready()
 		return BuildVerifier(CloudBuildCore(virtual_machine, self.uri_translator))
 
 	def spawn_virtual_machine(self, virtual_machine_number):
-		return self.virtual_machine_class.from_directory_or_construct(os.path.join(self.directory, str(virtual_machine_number)))
+		vm_directory = os.path.join(self.directory, str(virtual_machine_number))
+		return self.virtual_machine_class.from_directory_or_construct(vm_directory)
