@@ -1,0 +1,19 @@
+{
+  "name": "Promoting",
+  "version": "0.1.0",
+
+  "dependencies" : {
+    "colors": "0.6.0",
+    "express":  "3.0.5",
+    "iced-coffee-script": "1.4.0a"
+  },
+
+  "engines": {
+    "node": "x.x.x",
+    "npm":  "x.x.x"
+  },
+
+  "scripts": {
+    "test": "echo should do something here..."
+  }
+}

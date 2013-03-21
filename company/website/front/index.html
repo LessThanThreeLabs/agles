@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" ng-app>
+<head>
+	<meta charset="utf-8">
+	<title>BAMF Party</title>
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans|Black+Ops+One' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="/css/src/setup.css">
+	<link rel="stylesheet" href="/css/src/prettyForm.css">
+	<link rel="stylesheet" href="/css/src/prettyModal.css">
+	<link rel="stylesheet" href="/css/src/main.css">
+</head>
+<body>
+	<div id="main">
+		<div id="header">
+			<span class="title">BAMF Party</span>
+		</div>
+
+		<div id="events" ng-controller="Events">
+			<div class="prettyModal" ng-class="{visible: errorText != null}">
+				<div class="prettyModalBackdrop"></div>
+				<div class="prettyModalContent">{{errorText}}</div>
+			</div>
+
+			<div id="userInformation">
+				<div class="title">RSVP</div>
+				<form name="userInformation" class="prettyForm" novalidate>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">First name</div>
+						<div class="prettyFormValue">
+							<input ng-model="user.firstName" type="text" placeholder="first" maxlength=32 required>
+						</div>
+					</div>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">Last name</div>
+						<div class="prettyFormValue">
+							<input ng-model="user.lastName" type="text" placeholder="last" maxlength=32 required>
+						</div>
+					</div>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">Email</div>
+						<div class="prettyFormValue">
+							<input ng-model="user.email" type="email" placeholder="email@awesome.com" maxlength=128 required>
+						</div>
+					</div>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">Number</div>
+						<div class="prettyFormValue">
+							<input ng-model="user.phoneNumber" type="tel" placeholder="123-456-7890" maxlength=12 required>
+						</div>
+					</div>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">Gender</div>
+						<div class="prettyFormValue">
+							<select ng-model="user.gender" required>
+								<option value="male">Broski</option>
+								<option value="female">Princess</option>
+							</select>
+						</div>
+					</div>
+					<div class="prettyFormRow">
+						<div class="prettyFormLabel labelPadding">Password</div>
+						<div class="prettyFormValue">
+							<input ng-model="user.password" type="password" required>
+						</div>
+					</div>
+				</form>
+				<div id="rsvpButtonContainer">
+					<button id="rsvpButton" ng-click="rsvp()">RSVP</button>
+				</div>
+			</div>	
+
+			<div id="eventsList">
+				<div class="event" ng-repeat="event in events" ng-click="select(event)" ng-class="{selected: event.selected}">
+					<img class="eventImage" ng-src="{{event.imageUrl}}">
+					<div class="eventDate">{{event.date}}</div>
+					<div class="eventName">{{event.name}}</div>
+					<div class="eventDescription">{{event.description}}</div>
+				</div>
+			</div>
+<!-- 			<div id="rsvpButton" ng-click="rsvp()">
+				Count me in!
+			</div> -->
+		</div>
+	</div>
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js"></script>
+	<script src="/js/src/controllers.js"></script>
+</body>
+</html>
