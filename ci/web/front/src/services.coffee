@@ -77,27 +77,32 @@ angular.module('koality.service', []).
 		makeRequest: socket.makeRequest
 	]).
 	factory('events', ['socket', 'integerConverter', (socket, integerConverter) ->
-		listen: (resource, eventName, id) ->
-			_callback: null
-			id = integerConverter.toInteger id
+		class EventListener
+			constructor: (@resource, @eventName, id) ->
+				@_callback = null
+				@id = integerConverter.toInteger id
 
-			setCallback: (callback) ->
+			setCallback: (callback) =>
 				assert.ok callback?
 				@_callback = callback
 				return @
 
-			subscribe: () ->
+			subscribe: () =>
 				assert.ok @_callback?
-
-				socket.makeRequest resource, 'subscribe', eventName, id: id, (error, eventToListenFor) =>
+				socket.makeRequest @resource, 'subscribe', @eventName, id: @id, (error, eventToListenFor) =>
 					if error? then console.error error
-					else socket.respondTo eventToListenFor, @_callback
+					else socket.respondTo eventToListenFor, (data) =>
+						@_callback data if @_callback?
 				return @
 
-			unsubscribe: () ->
-				socket.makeRequest resource, 'unsubscribe', eventName, id: id, (error) ->
+			unsubscribe: () =>
+				@_callback = null
+				socket.makeRequest @resource, 'unsubscribe', @eventName, id: @id, (error) ->
 					console.error if error?
 				return @
+
+		listen: (resource, eventName, id) ->
+			return new EventListener resource, eventName, id
 	]).
 	factory('changesRpc', ['rpc', 'integerConverter', (rpc, integerConverter) ->
 		NUM_CHANGES_TO_REQUEST = 100
