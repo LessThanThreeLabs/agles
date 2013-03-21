@@ -1,10 +1,8 @@
 <div id="repository">
 	<div id="repositoryHeaderPanel" unselectable>
 		<span id="repositoryHeaderTitle">{{repository.name}}</span>
-		<div id="repositoryHeaderLink">
-			<img ng-src="{{'/img/icons/link.png' | fileSuffix}}">
-			<input ng-model="repository.uri" highlight-on-first-click readonly>
-		</div>
+		<!-- <input id="repositoryHeaderUri" ng-model="repository.uri" highlight-on-first-click> -->
+		<span id="repositoryHeaderUri" text-selectable>{{repository.uri}}</span>
 	</div>
 
 	<div id="repositoryChanges" ng-controller="RepositoryChanges">
