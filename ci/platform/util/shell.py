@@ -75,7 +75,15 @@ class RestrictedGitShell(object):
 		os.execlp(*args)
 
 	def handle_git_show(self, requested_repo_uri, show_ref_file, user_id):
-		pass
+		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
+			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+
+		self.verify_user_exists("git-show", user_id, repo_id)
+		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
+
+		uri = "git@%s" % route
+		full_command = "sh -c 'cd %s && git show %s'" % (remote_filesystem_path, show_ref_file)
+		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
 	def _up_pullthrough_args(self, private_key, forward_url, user_id):
 		uri, path = forward_url.split(':')
