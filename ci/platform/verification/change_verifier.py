@@ -63,6 +63,7 @@ class ChangeVerifier(EventSubscriber):
 
 		def setup_worker():
 			verifier = self.verifier_pool.get()
+			verifier.setup()
 			if change_done.ready():  # We got a verifier after the change is already done
 				self.verifier_pool.put(verifier)  # Just return this verifier to the pool
 				return

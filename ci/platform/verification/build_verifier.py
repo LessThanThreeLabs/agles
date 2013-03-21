@@ -62,8 +62,10 @@ class BuildVerifier(object):
 	# 		os.remove(self._get_build_info_file())
 	# 	self.logger.debug("Failed interrupted build %s, resuming initialization" % build_id)
 
-	def verify_build(self, build_id, verification_config, test_queue):
+	def setup(self):
 		self.build_core.setup()
+
+	def verify_build(self, build_id, verification_config, test_queue):
 		results = []
 		setup_result = self._setup(build_id, verification_config)
 		results.append(setup_result)
