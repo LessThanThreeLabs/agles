@@ -40,12 +40,17 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	@classmethod
 	def setup_class(cls):
 		cls.repostore_id = 1
+		print "1"
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
+		print "2"
 		repo_store = Server(FileSystemRepositoryStore(cls.repo_dir))
+		print "3"
 		repo_store.bind(StoreSettings.rpc_exchange_name, [RepositoryStore.queue_name(cls.repostore_id)], auto_delete=True)
-
+		print "4"
 		cls.repo_store_process = TestProcess(target=repo_store.run)
+		print "5"
 		cls.repo_store_process.start()
+		print "6"
 
 	@classmethod
 	def teardown_class(cls):
@@ -54,13 +59,21 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		rmtree(TEST_ROOT, ignore_errors=True)
 
 	def setUp(self):
+		print "7"
 		super(VerificationRoundTripTest, self).setUp()
+		print "8"
 		self._purge_queues()
+		print "9"
 		self.repo_id = 1
+		print "10"
 		rmtree(self.repo_dir, ignore_errors=True)
+		print "11"
 		os.makedirs(self.repo_dir)
+		print "12"
 		self._start_model_server()
+		print "13"
 		self.verifier_pool = VerificationRoundTripTest.FakeBuildVerifierPool(DEFAULT_NUM_VERIFIERS)
+		print "14"
 		self.repo_path = os.path.join(
 			self.repo_dir,
 			to_path(self.repo_id, "repo.git"))
