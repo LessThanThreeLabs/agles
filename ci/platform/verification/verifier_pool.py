@@ -29,7 +29,7 @@ class VerifierPool(object):
 	def get(self):
 		unallocated = self.get_first_unallocated()
 
-		if unallocated:
+		if unallocated is not None:
 			self.allocated_slots.append(unallocated)
 			return self.verifiers[unallocated]
 		free = self.get_first_free()
