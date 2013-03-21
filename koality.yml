@@ -59,4 +59,4 @@ test:
       timeout: 240
   - website_unit_tests:
       script:
-        - karma start ci/web/front/test/unit/testacular.conf.js --browsers PhantomJS --single-run
+        - karma start ci/web/front/test/unit/karma.conf.js --browsers PhantomJS --single-run

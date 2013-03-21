@@ -254,7 +254,9 @@ window.RepositoryStageDetails = ['$scope', '$location', 'rpc', 'events', ($scope
 		return if not $scope.currentStageId?
 		$scope.spinnerOn = true
 
-		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: $scope.currentStageId, (error, lines) ->
+		stageIdToLoad = $scope.currentStageId
+		rpc.makeRequest 'buildConsoles', 'read', 'getLines', id: stageIdToLoad, (error, lines) ->
+			return if stageIdToLoad isnt $scope.currentStageId
 			$scope.$apply () ->
 				$scope.spinnerOn = false
 				for lineNumber, lineText of lines
@@ -263,10 +265,12 @@ window.RepositoryStageDetails = ['$scope', '$location', 'rpc', 'events', ($scope
 	addLine = (lineNumber, lineText) ->
 		$scope.lines[lineNumber-1] = lineText
 
-	handleLinesAdded = (data) -> $scope.$apply () ->
-		$scope.lines ?= []
-		for lineNumber, lineText of data
-			addLine lineNumber, lineText
+	handleLinesAdded = (stageId) ->
+		return (data) -> $scope.$apply () ->
+			return if stageId isnt $scope.currentStageId
+			$scope.lines ?= []
+			for lineNumber, lineText of data
+				addLine lineNumber, lineText
 
 	addedLineEvents = null
 	updateAddedLineListener = () ->
@@ -275,7 +279,8 @@ window.RepositoryStageDetails = ['$scope', '$location', 'rpc', 'events', ($scope
 			addedLineEvents = null
 
 		if $scope.currentStageId?
-			addedLineEvents = events.listen('buildConsoles', 'new output', $scope.currentStageId).setCallback(handleLinesAdded).subscribe()
+			handleLinesAddedCallback = handleLinesAdded $scope.currentStageId
+			addedLineEvents = events.listen('buildConsoles', 'new output', $scope.currentStageId).setCallback(handleLinesAddedCallback).subscribe()
 	$scope.$on '$destroy', () -> addedLineEvents.unsubscribe() if addedLineEvents?
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
