@@ -10,8 +10,6 @@ REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"
 
 
 class RestrictedGitShell(object):
-	GIT_COMMAND_ARGS = 3
-
 	def __init__(self, valid_commands, user_id_commands):
 		self.valid_commands = valid_commands
 		self.user_id_commands = user_id_commands
@@ -19,6 +17,13 @@ class RestrictedGitShell(object):
 		self._git_command_handlers = {
 			"git-receive-pack": self.handle_receive_pack,
 			"git-upload-pack": self.handle_upload_pack,
+			"git-show": self.handle_git_show,
+		}
+
+		self._git_command_args = {
+			"git-receive-pack": 3,
+			"git-upload-pack": 3,
+			"git-show": 4
 		}
 
 	def _create_ssh_exec_args(self, route, command, path, user_id):
@@ -73,6 +78,17 @@ class RestrictedGitShell(object):
 			args = self._up_pullthrough_args(private_key, forward_url, user_id)
 		os.execlp(*args)
 
+	def handle_git_show(self, requested_repo_uri, show_ref_file, user_id):
+		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
+			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+
+		self.verify_user_exists("git-show", user_id, repo_id)
+		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
+
+		uri = "git@%s" % route
+		full_command = "sh -c 'cd %s && git show %s'" % (remote_filesystem_path, show_ref_file)
+		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
+
 	def _up_pullthrough_args(self, private_key, forward_url, user_id):
 		uri, path = forward_url.split(':')
 		command_parts = ["git-upload-pack", path]
@@ -86,18 +102,15 @@ class RestrictedGitShell(object):
 
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
-		if not len(command_parts) == self.GIT_COMMAND_ARGS:
+		if not command_parts[0] in self.valid_commands:
+			raise InvalidCommandError(command_parts[0])
+		if not len(command_parts) == self._git_command_args[command_parts[0]]:
 			raise InvalidCommandError(full_ssh_command)
 
-		command, repo_path, user_id = command_parts
-		repo_path = repo_path.strip("'")
-
-		if command in self.valid_commands:
-			self._validate(repo_path)
-			requested_repo_uri = self._get_requested_repo_uri(repo_path)
-			self._git_command_handlers[command](requested_repo_uri, user_id)
-		else:
-			raise InvalidCommandError(command)
+		repo_path = command_parts[1].strip("'")  # command_parts[1] should always be a repo path in any command
+		self._validate(repo_path)
+		command_parts[1] = self._get_requested_repo_uri(repo_path)
+		self._git_command_handlers[command_parts[0]](*command_parts[1:])
 
 
 class InvalidCommandError(Exception):

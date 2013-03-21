@@ -71,16 +71,12 @@ class BuildCore(object):
 
 class LightWeightBuildCore(BuildCore):
 	def setup_build(self, repo_uri, refs, console_appender=None):
-		verification_config = super(LightWeightBuildCore, self).setup_build(repo_uri, refs, console_appender)
-		return verification_config
-
-	def setup_build(self, repo_uri, refs, console_appender=None):
 		ref = refs[-1]  # only get config from last ref
 		if self.uri_translator:
 			checkout_url = self.uri_translator.translate(repo_uri)
 			host_url = checkout_url[:checkout_url.find(":")]
 			repo_path = checkout_url[checkout_url.find(":") + 1:]
-			show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", "git@%s" % host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
+			show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
 		else:
 			show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
 		return self._get_verification_configuration(self._show_config(show_command))
