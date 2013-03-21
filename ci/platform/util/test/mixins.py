@@ -46,11 +46,17 @@ class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	def _start_model_server(self):
+		print "a"
 		connection = Connection(RabbitSettings.kombu_connection_info)
+		print "b"
 		self.model_server_channel = connection.channel()
+		print "c"
 		self.model_server_process = TestProcess(target=ModelServer(self.model_server_channel).start)
+		print "d"
 		self.model_server_process.start()
+		print "e"
 		ConnectionFactory.recreate_engine()
+		print "f"
 
 	def _stop_model_server(self):
 		self.model_server_process.terminate()
