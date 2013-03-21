@@ -1,9 +1,9 @@
 {
 	"mode": "development",
 
-	"server": {
-		"domain": "127.0.0.1",
+	"domain": "127.0.0.1",
 
+	"server": {
 		"https": {
 			"port": 443
 		},
@@ -52,19 +52,9 @@
 		},
 
 		"createAccount": {
-			"email": {
-				"from": "Koality <koality@koalitycode.com>"
-			},
-
 			"redisStore": {
 				"url": "127.0.0.1",
 				"port": 6391
-			}
-		},
-
-		"resetPassword": {
-			"email": {
-				"from": "Reset Password <reset-password@koalitycode.com>"
 			}
 		},
 
@@ -72,13 +62,6 @@
 			"redisStore": {
 				"url": "127.0.0.1",
 				"port": 6392
-			}	
-		},
-
-		"feedback": {
-			"email": {
-				"from": "Koality <no-reply@koalitycode.com>",
-				"to": "Feedback <feedback@koalitycode.com>"
 			}	
 		}
 	},
@@ -103,6 +86,41 @@
 		"events": {
 			"exchange": "model:events",
 			"queueNamePrefix": "webserver_queue_name_prefix"
+		}
+	},
+
+	"mailer": {
+		"mailgun": {
+			"hostname": "api.mailgun.net",
+			"port": "443",
+			"path": "/v2/getkoality.com/messages",
+			"method": "POST",
+			"key": "key-9e06ajco0xurqnioji-egwuwajg4jrn2",
+			"testMode": true
+		},
+
+		"inviteUser": {
+			"from": {
+				"name": "Koality",
+				"email": "koality"
+			}
+		},
+
+		"resetPassword": {
+			"from": {
+				"name": "Reset Password",
+				"email": "reset-password"
+			}
+		},
+
+		"feedback": {
+			"from": {
+				"name": "Feedback",
+				"email": "feedback"
+			},
+			"to": {
+				"email": "feedback@koalitycode.com"
+			}
 		}
 	}
 }

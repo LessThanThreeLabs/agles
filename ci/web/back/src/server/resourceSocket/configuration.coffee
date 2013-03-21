@@ -13,7 +13,9 @@ exports.create = (configurationParams, modelConnection, sessionStore) ->
 
 class ResourceSocketConfigurer
 	constructor: (@configurationParams, @modelConnection, @sessionStore) ->
-		assert.ok @configurationParams? and @modelConnection? and @sessionStore?
+		assert.ok @configurationParams?
+		assert.ok @modelConnection?
+		assert.ok @sessionStore?
 
 
 	configure: (socket) ->

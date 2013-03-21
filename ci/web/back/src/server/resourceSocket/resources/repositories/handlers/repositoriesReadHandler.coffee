@@ -3,13 +3,14 @@ assert = require 'assert'
 Handler = require '../../handler'
 
 
-exports.create = (configurationParams, modelRpcConnection) ->
-	return new RepositoriesReadHandler configurationParams, modelRpcConnection
+exports.create = (configurationParams, domainName, modelRpcConnection) ->
+	return new RepositoriesReadHandler configurationParams, domainName, modelRpcConnection
 
 
 class RepositoriesReadHandler extends Handler
-	constructor: (@configurationParams, modelRpcConnection) ->
+	constructor: (@configurationParams, @domainName, modelRpcConnection) ->
 		assert.ok @configurationParams?
+		assert.ok @domainName?
 		super modelRpcConnection
 
 
@@ -33,7 +34,7 @@ class RepositoriesReadHandler extends Handler
 		sanitizeResult = (repository) =>
 			id: repository.id
 			name: repository.name
-			uri: 'git@' + @configurationParams.domain + ':' + repository.uri
+			uri: 'git@' + @domainName + ':' + repository.uri
 
 		userId = socket.session.userId
 		if not userId?

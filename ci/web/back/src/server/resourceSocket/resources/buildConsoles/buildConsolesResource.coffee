@@ -4,7 +4,7 @@ Resource = require '../resource'
 BuildConsolesReadHandler = require './handlers/buildConsolesReadHandler'
 
 
-exports.create = (configurationParams, stores, modelConnection) ->
+exports.create = (configurationParams, stores, modelConnection, mailer) ->
 	readHandler = BuildConsolesReadHandler.create modelConnection.rpcConnection
 	return new BuildConsolesResource configurationParams, stores, modelConnection, readHandler
 

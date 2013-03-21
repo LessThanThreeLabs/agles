@@ -3,9 +3,6 @@ assert = require 'assert'
 Resource = require '../resource'
 PasswordHasher = require '../passwordHasher'
 AccountInformationValidator = require './accountInformationValidator'
-InviteUserEmailer = require './inviteUserEmailer'
-ResetPasswordEmailer = require './resetPasswordEmailer'
-FeedbackEmailer = require './feedbackEmailer'
 
 UsersCreateHandler = require './handlers/usersCreateHandler'
 UsersReadHandler = require './handlers/usersReadHandler'
@@ -13,16 +10,13 @@ UsersUpdateHandler = require './handlers/usersUpdateHandler'
 UsersDeleteHandler = require './handlers/usersDeleteHandler'
 
 
-exports.create = (configurationParams, stores, modelConnection) ->
+exports.create = (configurationParams, stores, modelConnection, mailer) ->
 	passwordHasher = PasswordHasher.create()
 	accountInformationValidator = AccountInformationValidator.create()
-	inviteUserEmailer = InviteUserEmailer.create configurationParams
-	resetPasswordEmailer = ResetPasswordEmailer.create configurationParams
-	feedbackEmailer = FeedbackEmailer.create configurationParams
 
-	createHandler = UsersCreateHandler.create stores, modelConnection.rpcConnection, passwordHasher, accountInformationValidator, inviteUserEmailer
+	createHandler = UsersCreateHandler.create stores, modelConnection.rpcConnection, passwordHasher, accountInformationValidator, mailer
 	readHandler = UsersReadHandler.create stores, modelConnection.rpcConnection
-	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer, feedbackEmailer
+	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, passwordHasher, accountInformationValidator, mailer, mailer
 	deleteHandler = UsersDeleteHandler.create modelConnection.rpcConnection
 	return new UsersResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler, deleteHandler
 

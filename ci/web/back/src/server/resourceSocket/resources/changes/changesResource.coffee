@@ -4,7 +4,7 @@ Resource = require '../resource'
 ChangesReadHandler = require './handlers/changesReadHandler'
 
 
-exports.create = (configurationParams, stores, modelConnection) ->
+exports.create = (configurationParams, stores, modelConnection, mailer) ->
 	readHandler = ChangesReadHandler.create modelConnection.rpcConnection
 	return new ChangesResource configurationParams, stores, modelConnection, readHandler
 

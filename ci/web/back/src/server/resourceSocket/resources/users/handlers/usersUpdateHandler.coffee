@@ -4,17 +4,16 @@ crypto = require 'crypto'
 Handler = require '../../handler'
 
 
-exports.create = (modelRpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer, feedbackEmailer) ->
-	return new UsersUpdateHandler modelRpcConnection, passwordHasher, accountInformationValidator, resetPasswordEmailer, feedbackEmailer
+exports.create = (modelRpcConnection, passwordHasher, accountInformationValidator, mailer) ->
+	return new UsersUpdateHandler modelRpcConnection, passwordHasher, accountInformationValidator, mailer
 
 
 class UsersUpdateHandler extends Handler
-	constructor: (modelRpcConnection, @passwordHasher, @accountInformationValidator, @resetPasswordEmailer, @feedbackEmailer) ->
+	constructor: (modelRpcConnection, @passwordHasher, @accountInformationValidator, @mailer) ->
 		super modelRpcConnection
 		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
-		assert.ok @resetPasswordEmailer?
-		assert.ok @feedbackEmailer?
+		assert.ok @mailer?
 
 
 	changeBasicInformation: (socket, data, callback) =>
@@ -86,7 +85,7 @@ class UsersUpdateHandler extends Handler
 							@modelRpcConnection.users.update.change_password user.id, newPasswordHash, user.salt, (error, result) =>
 								if error? then callback 500
 								else
-									@resetPasswordEmailer.sendEmailToUser data.email, newPassword, (error) =>
+									@mailer.resetPassword.email data.email, newPassword, (error) =>
 										if error? then callback 500
 										else callback()
 
@@ -169,4 +168,4 @@ class UsersUpdateHandler extends Handler
 			@modelRpcConnection.users.read.get_user_from_id userId, (error, user) =>
 				if error then callback 500
 				else
-					@feedbackEmailer.sendEmail sanitizeResult(user), data.feedback, data.userAgent, data.screen
+					@mailer.feedback.email sanitizeResult(user), data.feedback, data.userAgent, data.screen

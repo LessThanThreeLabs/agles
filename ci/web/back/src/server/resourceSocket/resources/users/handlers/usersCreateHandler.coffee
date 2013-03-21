@@ -4,17 +4,17 @@ crypto = require 'crypto'
 Handler = require '../../handler'
 
 
-exports.create = (stores, modelRpcConnection, passwordHasher, accountInformationValidator, inviteUserEmailer) ->
-	return new UsersCreateHandler stores, modelRpcConnection, passwordHasher, accountInformationValidator, inviteUserEmailer
+exports.create = (stores, modelRpcConnection, passwordHasher, accountInformationValidator, mailer) ->
+	return new UsersCreateHandler stores, modelRpcConnection, passwordHasher, accountInformationValidator, mailer
 
 
 class UsersCreateHandler extends Handler
-	constructor: (@stores, modelRpcConnection, @passwordHasher, @accountInformationValidator, @inviteUserEmailer) ->
+	constructor: (@stores, modelRpcConnection, @passwordHasher, @accountInformationValidator, @mailer) ->
 		super modelRpcConnection
 		assert.ok @stores?
 		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
-		assert.ok @inviteUserEmailer?
+		assert.ok @mailer?
 
 
 	createUser: (socket, data, callback) =>
@@ -138,4 +138,4 @@ class UsersCreateHandler extends Handler
 			else
 				key = keyBuffer.toString 'hex'
 				@stores.createAccountStore.addAccount key, email: email
-				@inviteUserEmailer.inviteUser email, key, callback
+				@mailer.inviteUser.email email, key, callback

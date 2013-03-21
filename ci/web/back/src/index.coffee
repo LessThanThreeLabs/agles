@@ -4,6 +4,7 @@ colors = require 'colors'
 environment = require './environment'
 
 CommandLineParser = require './commandLineParser'
+Mailer = require './mailer/mailer'
 ModelConnection = require './modelConnection/modelConnection'
 Server = require './server/server'
 
@@ -18,10 +19,12 @@ startEverything = () ->
 
 	environment.setEnvironmentMode configurationParams.mode
 
+	mailer = Mailer.create configurationParams.mailer, configurationParams.domain
+
 	modelConnection = ModelConnection.create configurationParams.modelConnection
 	modelConnection.connect (error) =>
 		throw error if error?
-		createServers configurationParams.server, modelConnection
+		createServer configurationParams.server, configurationParams.domain, modelConnection, mailer
 
 	if process.env.NODE_ENV is 'production'
 		process.on 'uncaughtException', (error) =>
@@ -35,13 +38,11 @@ getConfiguration = (configFileLocation = './config.json', mode, httpsPort) =>
 	return Object.freeze config
 
 
-createServers = (serverConfigurationParams, modelConnection) =>
-	server = Server.create serverConfigurationParams, modelConnection
+createServer = (serverConfigurationParams, domainName, modelConnection, mailer) =>
+	server = Server.create serverConfigurationParams, domainName, modelConnection, mailer
 	server.initialize (error) =>
-		if error?
-			console.error error
-		else
-			server.start()
+		throw error if error?
+		server.start()
 
 
 startEverything()
