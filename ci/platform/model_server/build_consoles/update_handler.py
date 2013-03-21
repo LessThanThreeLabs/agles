@@ -39,15 +39,14 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			repo_id = build_row[build.c.repo_id]
 			change_id = build_row[build.c.change_id]  # TODO: This is a hack for the front end
 
-		if max_priority_result and max_priority_result[0]:
-			starting_priority = max_priority_result[0] + 1
+		if max_priority_result and max_priority_result[0] is not None:
+			priority = max_priority_result[0] + 1
 		else:
-			starting_priority = 0
+			priority = 0
 
 		start_time = time.time()
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			priority = starting_priority
 			ins = build_console.insert().values(
 				build_id=build_id,
 				repo_id=repo_id,
