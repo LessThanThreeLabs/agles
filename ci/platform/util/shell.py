@@ -10,8 +10,6 @@ REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"
 
 
 class RestrictedGitShell(object):
-	GIT_COMMAND_ARGS = 3
-
 	def __init__(self, valid_commands, user_id_commands):
 		self.valid_commands = valid_commands
 		self.user_id_commands = user_id_commands
@@ -20,6 +18,12 @@ class RestrictedGitShell(object):
 			"git-receive-pack": self.handle_receive_pack,
 			"git-upload-pack": self.handle_upload_pack,
 			"git-show": self.handle_git_show,
+		}
+
+		self._git_command_args = {
+			"git-receive-pack": 3,
+			"git-upload-pack": 3,
+			"git-show": 4
 		}
 
 	def _create_ssh_exec_args(self, route, command, path, user_id):
@@ -98,11 +102,10 @@ class RestrictedGitShell(object):
 
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
-		if not len(command_parts) == self.GIT_COMMAND_ARGS:
-			raise InvalidCommandError(full_ssh_command)
-
 		if not command_parts[0] in self.valid_commands:
 			raise InvalidCommandError(command_parts[0])
+		if not len(command_parts) == self._git_command_args[command_parts[0]]:
+			raise InvalidCommandError(full_ssh_command)
 
 		repo_path = command_parts[1].strip("'")  # command_parts[1] should always be a repo path in any command
 		self._validate(repo_path)
