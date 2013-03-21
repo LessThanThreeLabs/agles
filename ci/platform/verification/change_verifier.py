@@ -3,7 +3,7 @@ import logging
 from eventlet import event, spawn, spawn_n, queue
 from kombu.messaging import Producer
 
-from build_core import SelfCleaningBuildCore
+from build_core import LightWeightBuildCore
 from model_server import ModelServer
 from shared.handler import EventSubscriber
 from util import greenlets, pathgen
@@ -108,7 +108,7 @@ class ChangeVerifier(EventSubscriber):
 		with ModelServer.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_list[0])
 		refs = [pathgen.hidden_ref(commit) for commit in commit_list]
-		build_core = SelfCleaningBuildCore(self.uri_translator)
+		build_core = LightWeightBuildCore(self.uri_translator)
 		verification_config = build_core.setup_build(repo_uri, refs)
 		return verification_config
 
