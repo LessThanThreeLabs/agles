@@ -9,7 +9,7 @@ consequences/side effects.
 import os
 import subprocess
 
-from multiprocessing import Process
+import eventlet
 
 from kombu.connection import Connection
 
@@ -26,13 +26,23 @@ class BaseTestMixin(object):
 	pass
 
 
-class TestProcess(Process):
+class GreenProcess(object):
 	def __init__(self, group=None, target=None, name=None, args=(), kwargs={}):
-		super(TestProcess, self).__init__(group, TestProcess._with_new_engine(target), name, args, kwargs)
+		self.target = target
+		self.args = args
+		self.kwargs = kwargs
 
 	def start(self):
-		super(TestProcess, self).start()
-		ConnectionFactory.recreate_engine()
+		self.greenlet = eventlet.spawn(self.target, *self.args, **self.kwargs)
+
+	def terminate(self):
+		self.greenlet.kill()
+
+	def join(self):
+		try:
+			self.greenlet.wait()
+		except:
+			pass
 
 	@classmethod
 	def _with_new_engine(cls, method):
@@ -46,17 +56,10 @@ class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	def _start_model_server(self):
-		print "a"
 		connection = Connection(RabbitSettings.kombu_connection_info)
-		print "b"
 		self.model_server_channel = connection.channel()
-		print "c"
-		self.model_server_process = TestProcess(target=ModelServer(self.model_server_channel).start)
-		print "d"
+		self.model_server_process = GreenProcess(target=ModelServer(self.model_server_channel).start)
 		self.model_server_process.start()
-		print "e"
-		ConnectionFactory.recreate_engine()
-		print "f"
 
 	def _stop_model_server(self):
 		self.model_server_process.terminate()

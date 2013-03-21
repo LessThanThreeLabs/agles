@@ -17,5 +17,9 @@ class MessageDrivenServer(object):
 			with connection.channel() as channel:
 				for handler in self.handlers:
 					handler.bind(channel)
-				while True:
-					connection.drain_events()
+				try:
+					while True:
+						connection.drain_events()
+				except:
+					connection.close()
+					raise

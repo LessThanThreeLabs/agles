@@ -1,4 +1,4 @@
-from multiprocessing import Event
+from eventlet.event import Event
 
 from nose.tools import *
 
@@ -8,7 +8,7 @@ from kombu.connection import Connection
 from kombu.entity import Queue
 from settings.rabbit import RabbitSettings
 from util.test import BaseIntegrationTest
-from util.test.mixins import RabbitMixin, TestProcess
+from util.test.mixins import RabbitMixin, GreenProcess
 
 
 class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
@@ -17,18 +17,18 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		self._purge_queues()
 
 		ttl_event = Event()
-		self.ttl_process = TestProcess(target=self._runserver,
+		self.ttl_process = GreenProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "ttl_exchange", ["stale_queue"], ttl_event],
 			kwargs=dict(ttl=1, auto_delete=False))
 		self.ttl_process.start()
 
 		server_event = Event()
-		self.server_process = TestProcess(target=self._runserver,
+		self.server_process = GreenProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "exchange", ["queue0", "queue1"], server_event])
 		self.server_process.start()
 
 		return_event = Event()
-		self.returned_msg_process = TestProcess(target=self._runserver,
+		self.returned_msg_process = GreenProcess(target=self._runserver,
 			args=[self._TestRPCServer(), "returned_exchange", [], return_event])
 		self.returned_msg_process.start()
 
@@ -49,7 +49,7 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 					queue_names, event, ttl=1000, auto_delete=True):
 		server = Server(base_instance)
 		server.bind(exchange, queue_names, message_ttl=ttl, auto_delete=auto_delete)
-		event.set()
+		event.send()
 		server.run()
 
 	def test_basic_clientserver_rpc(self):

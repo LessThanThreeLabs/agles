@@ -13,16 +13,12 @@ class VerifierPool(object):
 		self.max_verifiers = max_verifiers
 		self.min_unallocated = min_unallocated
 		self.uri_translator = uri_translator
-		print "making a queue"
 		self.free_slots = queue.Queue()
 		for i in range(max_verifiers):
-			print "puttin %d in queue" % i
 			self.free_slots.put(i)
 		self.unallocated_slots = []
 		self.allocated_slots = []
 		self.verifiers = {}
-
-		print "fill 'er up"
 
 		self._fill_to_min_unallocated()
 

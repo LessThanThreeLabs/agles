@@ -120,5 +120,9 @@ class Server(object):
 		return proto
 
 	def run(self):
-		while True:
-			self.channel.connection.drain_events()
+		try:
+			while True:
+				self.channel.connection.drain_events()
+		except:
+			self.channel.connection.close()
+			raise
