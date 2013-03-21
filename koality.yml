@@ -51,11 +51,11 @@ compile:
       path: ci/web/front
       script: ./compile.sh
 test:
-  - platform_tests:
+  - platform tests:
       path: ci/platform
       script:
         - nosetests -sv
       timeout: 240
-  - website_unit_tests:
+  - website unit tests:
       script:
         - karma start ci/web/front/test/unit/karma.conf.js --browsers PhantomJS --single-run
