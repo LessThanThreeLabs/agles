@@ -12,4 +12,4 @@ class DbSanityCheck(BaseIntegrationTest):
 
 	def test_data_generator(self):
 		generator = fake_data_generator.SchemaDataGenerator()
-		generator.generate()
+		generator.generate(num_repos=1, num_repo_stores=1, num_users=1, num_commits=1)
