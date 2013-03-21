@@ -4,7 +4,6 @@
 	"role[model_server]",
 	"role[webserver]",
 	"role[repostore]",
-	"role[verification_master]",
 	"role[verification_server]"
 	]
 }
