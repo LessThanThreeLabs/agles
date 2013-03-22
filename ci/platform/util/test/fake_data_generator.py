@@ -54,7 +54,7 @@ class SchemaDataGenerator(object):
 					repo_ids.append(repo_id)
 
 			for user in range(num_users):
-				ins_user = schema.user.insert().values(first_name="Firstname-%s" % chr(65 + user), last_name="Lastname-%s" % chr(65 + user), 
+				ins_user = schema.user.insert().values(first_name="Firstname-%s" % chr(65 + user), last_name="Lastname-%s" % chr(65 + user),
 					email="email-%s@address.com" % chr(65 + user),
 					password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1], salt=SALT, created=int(time.time()))
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
