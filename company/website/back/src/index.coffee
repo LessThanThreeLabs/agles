@@ -24,11 +24,11 @@ startServer = () ->
 		response.sendfile 'front/index.html'
 
 	expressServer.post '/reachOut', (request, response) ->
-		fromEmail = 'Reach Out <reach-out@koalitycode.com>'
+		fromEmail = 'Koality <koality@koalitycode.com>'
 		toEmail = 'jpotter@koalitycode.com'
 		subject = 'Reach Out'
-		body = 'blah blah'
-		
+		body = "Name: #{request.body.name}\n\nEmail: #{request.body.email}"
+
 		emailer.sendText fromEmail, toEmail, subject, body, (error) ->
 			if error? then response.end 'bad'
 			else response.end 'ok'

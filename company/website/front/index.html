@@ -185,7 +185,7 @@
 
 
 	<!-- SIGN UP -->
-    <div class="section gray" id="contact">
+    <div class="section gray" id="contact" ng-controller="SignUp">
     	<div class="container">
         	<h1>Make your build unbreakable</h1>
             <h2>Get in touch for more information about Koality's private beta</h2>
@@ -193,14 +193,14 @@
             <div id="form">
                 <form>
                     <p>Name</p>
-                    <input type="text" />
+                    <input type="text" ng-model="user.name">
                 
                     <p>Email</p>
-                    <input type="text" />
+                    <input type="email" ng-model="user.email">
                 </form>
 			</div><!-- End of Contact Form -->
             
-			<a href="" class="button">Send</a>            
+			<a href="" class="button" ng-click="submit()">Send</a>            
         </div><!-- End of Container -->
     </div><!-- End of Section -->
 
