@@ -14,7 +14,7 @@ startServer = () ->
 	expressServer.use '/js', express.static 'front/js'
 	expressServer.use '/css', express.static 'front/css'
 	expressServer.use '/img', express.static 'front/img', maxAge: 86400000
-	expressServer.use '/json', express.static 'front/json'
+	expressServer.use '/font', express.static 'front/font', maxAge: 86400000
 
 	expressServer.get '/', (request, response) ->
 		response.sendfile 'front/index.html'
