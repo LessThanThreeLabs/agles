@@ -1,0 +1,99 @@
+@charset "UTF-8";
+/* CSS Document */
+
+
+body {
+	font-family: 'Din', sans-serif;
+	color: #212122;
+	font-size: 16px;
+	font-weight: 100;
+	line-height: 21px;		
+	margin:0;
+	padding:0; }
+
+
+
+/*--- TYPOGRAPHY ---*/
+
+h1, h2, h3, h4, h5, h6, p , table, th, tr, td {
+	margin: 0;
+	padding: 0; }
+
+
+h1 {
+	color: #8ec63f;
+	font-size: 2.125em;
+	font-weight: 300;
+	margin-bottom: .75em; }
+
+h2 {
+	color: #929497;
+	font-size: 1.25em;
+	font-weight: 100;
+	margin-bottom: 4em; }
+
+h3 {
+	font-size: 1.125em;
+	font-weight: 500;
+	margin-bottom: .5em; }
+
+h4 {
+	color: #8ec63f;
+	font-size: 1.125em;
+	font-weight: 300;
+	text-transform: uppercase; }
+
+
+
+/*--- BUTTONS ---*/
+
+a {
+	color: #8ec63f;
+	text-decoration: none; }
+
+a:hover {
+	color: #6cb33e;
+	text-decoration: underline; }
+
+a.button {
+	background-color: #8ec63f;
+	color: #fff;
+	font-size: 1.125em;
+	display: inline-block;
+	padding: 12px 25px 8px;
+	-moz-border-radius: 3px;
+		 border-radius: 3px; }
+
+a.button:hover {
+	color: #fff;
+	background-color: #6cb33e;
+    -webkit-transition: background-color 250ms linear;
+       -moz-transition: background-color 250ms linear;
+		-ms-transition: background-color 250ms linear;
+    	 -o-transition: background-color 250ms linear;
+    		transition: background-color 250ms linear;
+	text-decoration: none; }
+
+
+
+/*--- CLASSES ---*/
+
+div.green {
+	background-color: #8ec63f;
+	color: #fff; }
+	
+	div.green h1,
+	div.green h2 { color: #fff; }
+	
+
+div.gray {
+	background-color: #212122;
+	color: #fff; }
+
+	div.gray h2 { color: #fff; }
+
+
+.green { color: #8ec63f; }
+.white { color: #fff; }
+
+
