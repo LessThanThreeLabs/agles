@@ -5,7 +5,8 @@
   "dependencies" : {
     "colors": "0.6.0",
     "express":  "3.0.5",
-    "iced-coffee-script": "1.4.0a"
+    "iced-coffee-script": "1.4.0a",
+    "mailgun": "0.4.2"
   },
 
   "engines": {

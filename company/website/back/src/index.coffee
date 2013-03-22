@@ -3,8 +3,12 @@ colors = require 'colors'
 assert = require 'assert'
 express = require 'express'
 
+Mailgun = require('mailgun').Mailgun
+
 
 startServer = () ->
+	emailer = new Mailgun 'key-9e06ajco0xurqnioji-egwuwajg4jrn2'
+
 	expressServer = express()
 
 	expressServer.use express.favicon 'front/favicon.ico'
@@ -18,14 +22,21 @@ startServer = () ->
 
 	expressServer.get '/', (request, response) ->
 		response.sendfile 'front/index.html'
-	expressServer.post '/reachOut', reachOut
+
+	expressServer.post '/reachOut', (request, response) ->
+		fromEmail = 'Reach Out <reach-out@koalitycode.com>'
+		toEmail = 'jpotter@koalitycode.com'
+		subject = 'Reach Out'
+		body = 'blah blah'
+		
+		emailer.sendText fromEmail, toEmail, subject, body, (error) ->
+			if error? then response.end 'bad'
+			else response.end 'ok'
+
 	expressServer.listen 9000
 
 	console.log 'Server started'.bold.magenta
 
-
-reachOut = (request, response) ->
-	response.end 'cool'
 
 
 startServer()
