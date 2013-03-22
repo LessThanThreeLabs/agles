@@ -1,8 +1,6 @@
 --- #Koality: 0.1.5
 languages:
   python: 2.7
-  ruby: 1.9.3
-  nodejs: 0.8.12
 setup:
   - packages:
     - system:
@@ -20,9 +18,6 @@ setup:
     - postgres:
       - name: koality
         username: lt3
-    - mysql:
-      - name: koality
-        username: lt3
   - scripts:
     - git config --global user.email "koality@koalitycode.com"
     - git config --global user.name "Koality"
@@ -33,7 +28,7 @@ compile:
     - python setup.py install:
         path: ci/platform
 test:
-  machines: 2
+  machines: 6
   scripts:
     - platform unit tests:
         path: ci/platform
