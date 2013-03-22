@@ -9,7 +9,7 @@ startServer = () ->
 
 	expressServer.use express.favicon 'front/favicon.ico'
 	expressServer.use express.bodyParser()
-	expressServer.use gzip()
+	expressServer.use express.compress()
 
 	expressServer.use '/js', express.static 'front/js'
 	expressServer.use '/css', express.static 'front/css'
