@@ -38,5 +38,4 @@ startServer = () ->
 	console.log 'Server started'.bold.magenta
 
 
-
 startServer()
