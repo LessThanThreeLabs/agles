@@ -6,7 +6,7 @@ from language_parser import LanguageParser
 from package_parser import OmnibusPackageParser
 from script_parser import ScriptParser
 from run_step_parser import CompileStepParser, TestStepParser
-from setup_tools import InvalidConfigurationException, SetupCommand, SetupScript
+from setup_tools import InvalidConfigurationException, SetupCommand, SetupScript, RcUtils
 
 
 class Provisioner(object):
@@ -75,7 +75,7 @@ class Provisioner(object):
 	def parse_config(self, config, source_path, global_install=False):
 		language_steps, setup_steps = self.parse_languages(config, global_install)
 		setup_steps = [SetupCommand("pkill -9 -u rabbitmq beam; service rabbitmq-server start", silent=True, ignore_failure=True),
-			SetupCommand("echo \"export GIT_SSH=%s\" >> ~/.bash_profile" % self.git_ssh, silent=True),
+			RcUtils.rc_append_command("export GIT_SSH=%s" % self.git_ssh, global_install=global_install, silent=True),
 			SetupCommand("export GIT_SSH=%s" % self.git_ssh, silent=True)] + setup_steps
 		setup_steps += self.parse_setup(config, source_path)
 		compile_steps = self.parse_compile(config, source_path)

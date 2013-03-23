@@ -1,3 +1,4 @@
+import collections
 import os
 
 from setup_tools import InvalidConfigurationException, SetupCommand
@@ -10,7 +11,12 @@ class PackageParser(object):
 	def parse_packages(self, packages, source_path):
 		package_steps = []
 		for package in packages:
-			package_steps.append(self.parse_package(package, source_path))
+			new_package_steps = self.parse_package(package, source_path)
+			if isinstance(new_package_steps, collections.Iterable):
+				for package_step in new_package_steps:
+					package_steps.append(package_step)
+			else:
+				package_steps.append(new_package_steps)
 		return package_steps
 
 	def parse_package(self, package, source_path, dict_commands=None):
@@ -78,16 +84,16 @@ class PipPackageParser(PackageParser):
 
 	def to_install_command(self, source_path, name, value):
 		if name == 'install requirements':
-			if value:
-				return SetupCommand("pip install --upgrade -r %s" % os.path.join(source_path, value))
-			return SetupCommand("pip install --upgrade -r requirements.txt")
+			if not value:
+				value = "requirements.txt"
+			return SetupCommand("pip install --upgrade -r %s --use-mirrors" % os.path.join(source_path, value))
 		return super(PipPackageParser, self).to_install_command(source_path, name, value)
 
 	def to_package_string(self, name, version):
 		return "%s==%s" % (name, version)
 
 	def to_install_string(self, package_string):
-		return "pip install %s --upgrade" % package_string
+		return "pip install %s --upgrade --use-mirrors" % package_string
 
 
 class GemPackageParser(PackageParser):
@@ -97,8 +103,8 @@ class GemPackageParser(PackageParser):
 	def to_install_command(self, source_path, name, value):
 		if name == 'bundle install':
 			if value:
-				return SetupCommand("bundle install --gemfile %s" % os.path.join(source_path, value))
-			return SetupCommand("bundle install")
+				return SetupCommand("cd %s" % source_path, "bundle install --gemfile %s" % os.path.join(source_path, value))
+			return SetupCommand("cd %s" % source_path, "bundle install")
 		return super(GemPackageParser, self).to_install_command(source_path, name, value)
 
 	def to_package_string(self, name, version):
@@ -119,10 +125,23 @@ class NpmPackageParser(PackageParser):
 
 	def to_install_command(self, source_path, name, value):
 		if name == 'npm install':
-			if value:
-				return SetupCommand("cd %s" % os.path.join(source_path, value), "npm install")
-			return SetupCommand("npm install")
+			return self._npm_install(source_path, value)
 		return super(NpmPackageParser, self).to_install_command(source_path, name, value)
+
+	def _npm_install(self, source_path, modules_path):
+		link_command = self._link_node_modules(source_path, modules_path)
+		if modules_path:
+			install_command = SetupCommand("cd %s" % os.path.join(source_path, modules_path), "npm install")
+		else:
+			install_command = SetupCommand("npm install")
+		return (link_command, install_command,)
+
+	def _link_node_modules(self, source_path, modules_path):
+		internal_modules_path = os.path.abspath(os.path.join(source_path, modules_path, "node_modules"))
+		cached_modules_path = os.path.abspath(os.path.join(os.environ["HOME"], ".npm_cache", modules_path))
+		return SetupCommand("[[ -d %s ]] || mkdir -p %s" % (cached_modules_path, cached_modules_path),
+			"[[ -d %s ]] || ln -s %s %s" % (internal_modules_path, cached_modules_path, internal_modules_path),
+			silent=True, ignore_failure=True)
 
 	def to_package_string(self, name, version):
 		return "%s@%s" % (name, version)

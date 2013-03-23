@@ -81,6 +81,20 @@ class SetupScript(object):
 		return "SetupScript(%s)" % ", ".join([repr(step) for step in self.setup_steps])
 
 
+class RcUtils(object):
+	@classmethod
+	def rc_append_command(cls, contents, global_install=False, silent=False):
+		return SetupCommand("echo \"%s\" >> %s" % (contents, cls.rc_path(global_install)), silent=silent)
+
+	@classmethod
+	def rc_path(cls, global_install=False):
+		return os.path.join(cls.base_directory(global_install), '.koalityrc')
+
+	@classmethod
+	def base_directory(cls, global_install=False):
+		return os.path.join('/', 'etc', 'koality') if global_install else os.environ['HOME']
+
+
 class SimplePrinter(object):
 	def __init__(self):
 		self.last_line_number = 1
