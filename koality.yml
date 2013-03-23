@@ -34,13 +34,9 @@ setup:
     - git config --global user.email "koality@koalitycode.com"
     - git config --global user.name "Koality"
     - directory: ci/scripts
+      script: ./install_phantomjs.sh
+    - directory: ci/scripts
       script: ./rabbitmq_setup.sh
-    - script:
-      - cd /usr/local/share/
-      - wget http://phantomjs.googlecode.com/files/phantomjs-1.8.2-linux-x86_64.tar.bz2
-      - tar xjf phantomjs-1.8.2-linux-x86_64.tar.bz2
-      - ln -s /usr/local/share/phantomjs-1.8.2-linux-x86_64 /usr/local/share/phantomjs
-      - ln -s /usr/local/share/phantomjs/bin/phantomjs /usr/local/bin/phantomjs
 compile:
   - python setup.py install:
       path: ci/platform
