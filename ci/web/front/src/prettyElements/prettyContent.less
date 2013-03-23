@@ -26,27 +26,34 @@
 		z-index: 100;
 		top: 0px;
 		left: 0px;
-		right: @toothWidth;
+		right: 0px;
 		height: @menuHeaderHeight;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		background-color: @panelHeaderBackground;
-		border-bottom: 1px solid @platformBackground;
-		border-top-left-radius: @borderRadius;
-		border-top-right-radius: @borderRadius;
-		color: @koalityWhite;
-		font-size: 18px;
-		line-height: @menuHeaderHeight;
 
-		&.prettyContentMenuHeaderPadding {
-			padding-left: 8px;
+		.prettyContentMenuHeaderContent {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: @toothWidth;
+			height: @menuHeaderHeight;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			background-color: @panelHeaderBackground;
+			border-bottom: 1px solid @platformBackground;
+			border-top-left-radius: @borderRadius;
+			border-top-right-radius: @borderRadius;
+			color: @koalityWhite;
+			font-size: 18px;
+			line-height: @menuHeaderHeight;
+
+			&.prettyContentMenuHeaderPadding {
+				padding-left: 8px;
+			}
 		}
 
 		.prettyContentMenuHeaderBuffer {
 			position: absolute;
-			z-index: 100;
 			top: 0px;
-			right: -@toothWidth;
+			right: 0px;
 			width: @toothWidth;
 			height: @menuHeaderHeight + 1;
 

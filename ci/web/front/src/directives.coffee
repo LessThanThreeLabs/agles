@@ -149,7 +149,8 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		template: '<div class="prettyContentMenuHeader" ng-transclude>
+		template: '<div class="prettyContentMenuHeader">
+				<div class="prettyContentMenuHeaderContent" ng-transclude></div>
 				<div class="prettyContentMenuHeaderBuffer"></div>
 			</div>'
 		link: (scope, element, attributes) ->
