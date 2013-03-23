@@ -71,7 +71,18 @@ class SystemPackageParser(PackageParser):
 		return "apt-get install %s -y --force-yes" % package_string
 
 	def parse_packages(self, packages, source_path):
-		package_steps = super(SystemPackageParser, self).parse_packages(packages, source_path)
+		package_strings = []
+		for package in packages:
+			if isinstance(package, str):
+				package_info = (package, None)
+			elif isinstance(package, dict):
+				if len(package.items()) > 1:
+					raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
+				package_info = package.items()[0]
+			else:
+				raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
+			package_strings.append(self.to_package_string(*package_info) if package_info[1] else package_info[0])
+		package_steps = [SetupCommand(self.to_install_string(" ".join(package_strings)))]
 		if SystemPackageParser.first_run:
 			SystemPackageParser.first_run = False
 			package_steps = [SetupCommand("apt-get update -y", ignore_failure=True)] + package_steps
@@ -86,14 +97,14 @@ class PipPackageParser(PackageParser):
 		if name == 'install requirements':
 			if not value:
 				value = "requirements.txt"
-			return SetupCommand("pip install --upgrade -r %s --use-mirrors" % os.path.join(source_path, value))
+			return SetupCommand("pip install -r %s --use-mirrors" % os.path.join(source_path, value))
 		return super(PipPackageParser, self).to_install_command(source_path, name, value)
 
 	def to_package_string(self, name, version):
 		return "%s==%s" % (name, version)
 
 	def to_install_string(self, package_string):
-		return "pip install %s --upgrade --use-mirrors" % package_string
+		return "pip install %s --use-mirrors" % package_string
 
 
 class GemPackageParser(PackageParser):
