@@ -65,8 +65,8 @@ class Provisioner(object):
 		with open(self.keyfile, 'w') as keyfile:
 			os.chmod(self.keyfile, 0600)
 			keyfile.write(private_key)
-		if os.access(self.public_keyfile, os.F_OK):
-			os.remove(self.public_keyfile)
+		# Generate a proper public key
+		SetupCommand.execute_script("ssh-keygen -y -f %s > %s" % self.keyfile, self.public_keyfile)
 		with open(self.git_ssh, 'w') as git_ssh:
 			os.chmod(self.git_ssh, 0777)
 			git_ssh.write('#!/bin/bash\n' +
