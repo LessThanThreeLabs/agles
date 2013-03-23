@@ -25,8 +25,8 @@ startServer = () ->
 
 	expressServer.post '/reachOut', (request, response) ->
 		fromEmail = 'Koality <koality@koalitycode.com>'
-		toEmail = 'jpotter@koalitycode.com'
-		subject = 'Reach Out'
+		toEmail = 'koalas@koalitycode.com'
+		subject = 'Beta Reach Out'
 		body = "Name: #{request.body.name}\n\nEmail: #{request.body.email}"
 
 		emailer.sendText fromEmail, toEmail, subject, body, (error) ->
@@ -39,3 +39,4 @@ startServer = () ->
 
 
 startServer()
+
