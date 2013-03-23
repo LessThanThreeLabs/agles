@@ -54,4 +54,4 @@ test:
       timeout: 240
   - website unit tests:
       script:
-        - karma start ci/web/front/test/unit/karma.conf.js --browsers PhantomJS --single-run
+        - karma start ci/web/front/test/karma.unit.conf.js --browsers PhantomJS --single-run

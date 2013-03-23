@@ -26,6 +26,6 @@
   },
 
   "scripts": {
-    "test": "testacular start front/test/unit/testacular.conf.js --browsers PhantomJS --single-run"
+    "test": "karma start front/test/karma.unit.conf.js --browsers PhantomJS --single-run"
   }
 }

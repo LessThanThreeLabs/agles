@@ -3,7 +3,7 @@
 
 
 // base path, that will be used to resolve files and exclude
-basePath = '../..';
+basePath = '..';
 
 
 // list of files / patterns to load in the browser
@@ -14,13 +14,13 @@ files = [
   'js/libs/jquery.js',
   'js/libs/angular.js',
   'js/libs/angularMock.js',
-  'js/src/**/*.js'
+  'js/src/**/*.js',
+  'test/js/unit/*.js'
 ];
 
 
 // list of files to exclude
 exclude = [
-	'js/src/test/unit/*.js'
 ];
 
 
@@ -67,4 +67,4 @@ captureTimeout = 5000;
 
 // Continuous Integration mode
 // if true, it capture browsers, run tests and exit
-singleRun = true;
+singleRun = false;
