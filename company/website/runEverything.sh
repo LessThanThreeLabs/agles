@@ -5,4 +5,6 @@ back/compile.sh
 
 cd back
 npm install
-./runServer.sh
+
+killall -v node
+nohup ./runServer.sh &
