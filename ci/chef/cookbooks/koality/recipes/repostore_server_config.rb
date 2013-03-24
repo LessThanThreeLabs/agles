@@ -129,19 +129,6 @@ if not File.exists? '/usr/local/bin/ssh'
 
 end
 
-bash "setup_ssh_pushing_to_github" do
-	user "root"
-	cwd "/etc/ssh/"
-	code <<-EOH
-		grep "github.com" ssh_config
-		if [ $? -ne 0 ]
-			then echo "\nHost *github.com" >> ssh_config
-			echo "\tStrictHostKeyChecking no" >> ssh_config
-			echo "\tUserKnownHostsFile /dev/null" >> ssh_config
-		fi
-	EOH
-end
-
 bash "Move standard ssh daemon" do
 	user "root"
 	code <<-EOH
