@@ -1,5 +1,6 @@
 #!/bin/bash
 
+cd ..
 rm -rf front/js/src
 rm -rf front/css/src
 rm -rf back/js

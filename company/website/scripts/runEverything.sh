@@ -1,5 +1,6 @@
 #!/bin/bash
 
+cd ..
 front/compile.sh
 back/compile.sh
 
