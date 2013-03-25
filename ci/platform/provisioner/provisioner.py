@@ -74,9 +74,8 @@ class Provisioner(object):
 
 	def parse_config(self, config, source_path, global_install=False):
 		language_steps, setup_steps = self.parse_languages(config, global_install)
-		setup_steps = [SetupCommand("pkill -9 -u rabbitmq beam; service rabbitmq-server start", silent=True, ignore_failure=True),
-			RcUtils.rc_append_command("export GIT_SSH=%s" % self.git_ssh, global_install=global_install, silent=True),
-			SetupCommand("export GIT_SSH=%s" % self.git_ssh, silent=True)] + setup_steps
+		language_steps.append(RcUtils.rc_append_command("export GIT_SSH=%s" % self.git_ssh, global_install=global_install, silent=True))
+		setup_steps = [SetupCommand("pkill -9 -u rabbitmq beam; service rabbitmq-server start", silent=True, ignore_failure=True)] + setup_steps
 		setup_steps += self.parse_setup(config, source_path)
 		compile_steps = self.parse_compile(config, source_path)
 		test_steps = self.parse_test(config, source_path)
