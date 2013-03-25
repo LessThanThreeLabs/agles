@@ -16,16 +16,6 @@ validateLicenseKey = (key, callback) ->
 			callback null, result.rows.length > 0
 
 
-app.get '/versions', (request, response) ->
-	pg.connect connectionString, (error, client) ->
-		client.query 'SELECT version_num, release_date FROM version ORDER BY id ASC', (error, result) ->
-			if error
-				console.log error
-				response.json JSON.stringify []
-			else
-				response.json JSON.stringify result.rows
-
-
 app.post '/license_check', (request, response) ->
 	key = request.body.key
 	validateLicenseKey key, (error, result) ->

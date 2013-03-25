@@ -10,6 +10,10 @@ meta = Table('meta', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('property_name', String, nullable=False, unique=True),
 	Column('value', String),
+
+	# Defined property and types below
+	# version, int
+	# license_key, string
 )
 
 # We reserve the first 999 users as special users
