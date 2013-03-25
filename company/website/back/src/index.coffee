@@ -25,7 +25,7 @@ startServer = () ->
 
 	expressServer.post '/reachOut', (request, response) ->
 		fromEmail = 'Koality <koality@koalitycode.com>'
-		toEmail = 'koalas@koalitycode.com'
+		toEmail = 'sign-up@koalitycode.com'
 		subject = 'Beta Reach Out'
 		body = "Name: #{request.body.name}\n\nEmail: #{request.body.email}"
 
