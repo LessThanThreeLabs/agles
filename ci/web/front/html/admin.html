@@ -3,10 +3,38 @@
 		<content-menu>
 			<content-menu-header menu-header-padding>Admin</content-menu-header>
 			<content-menu-options>
+				<content-menu-option menu-option-text="Manage Website" ng-click="menuOptionClick('website')" ng-class="{selected: currentView == 'website', green: currentView == 'website'}"></content-menu-option>
 				<content-menu-option menu-option-text="Manage User Accounts" ng-click="menuOptionClick('users')" ng-class="{selected: currentView == 'users', green: currentView == 'users'}"></content-menu-option>
 				<content-menu-option menu-option-text="Manage Repositories" ng-click="menuOptionClick('repositories')" ng-class="{selected: currentView == 'repositories', green: currentView == 'repositories'}"></content-menu-option>
 			</content-menu-options>
 		</menu>
+	</div>
+
+	<div id="adminWebsite" ng-show="currentView == 'website'" ng-controller="AdminWebsite">
+		<content>
+			<content-header content-header-padding>Manage Website</content-header>
+			<content-body unselectable>
+				<div id="adminWebsiteContent">
+					<styled-form name="websiteForm">
+						<styled-form-field label="Domain" label-padding="true">
+							<input type="text" ng-model="website.domain" name="domain" placeholder="koality.company-name.com" ng-pattern="/^[-0-9a-zA-Z]+$/" ng-maxlength="256" required focused>
+							<span class="prettyFormError" tooltip="Invalid domain name" ng-class="{visible: websiteForm.domain.$dirty && websiteForm.domain.$invalid}">
+								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+							</span>
+						</styled-form-field>
+						<styled-form-field label="Cert private key" label-padding="true">
+							<textarea type="text" ng-model="webiste.privateKey" name="privateKey" placeholder="certiface private key" readonly></textarea>
+						</styled-form-field>
+						<styled-form-field label="Cert signing request" label-padding="true">
+							<textarea type="text" ng-model="webiste.csr" name="csr" placeholder="certificate signing request" readonly></textarea>
+						</styled-form-field>
+						<styled-form-field label="Signed cert" label-padding="true">
+							<textarea type="text" ng-model="webiste.certificate" name="certificate" placeholder="signed certificate" required></textarea>
+						</styled-form-field>
+					</styled-form>
+				</div>
+			</content-body>
+		</content>
 	</div>
 
 	<div id="adminUsers" ng-show="currentView == 'users'" ng-controller="AdminUsers">

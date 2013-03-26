@@ -12,6 +12,11 @@ window.Admin = ['$scope', '$location', '$routeParams', 'initialState', 'fileSuff
 ]
 
 
+window.AdminWebsite = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
+
+]
+
+
 window.AdminUsers = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
 	$scope.orderByPredicate = 'lastName'
 	$scope.orderByReverse = false

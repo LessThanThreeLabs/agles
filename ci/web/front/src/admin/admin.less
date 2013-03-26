@@ -12,12 +12,21 @@
 		width: @menuWidth;
 	}
 
-	#adminUsers, #adminRepositories {
+	#adminWebsite, #adminUsers, #adminRepositories {
 		position: absolute;
 		top: 0px;
 		left: @menuWidth + @panelSpacing;
 		right: 0px;
 		bottom: 0px;
+	}
+
+	#adminWebsite {
+
+		#adminWebsiteContent {
+			width: 100%;
+			height: 100%;
+			overflow-y: auto;
+		}
 	}
 
 	#adminUsers {
