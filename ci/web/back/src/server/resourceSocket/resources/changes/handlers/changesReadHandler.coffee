@@ -30,6 +30,7 @@ class ChangesReadHandler extends Handler
 		number: change.number
 		status: change.status
 		mergeStatus: change.merge_status
+		createTime: change.create_time * 1000
 		startTime: change.start_time * 1000
 		endTime: change.end_time * 1000
 
@@ -64,6 +65,7 @@ class ChangesReadHandler extends Handler
 			headCommit:
 				message: metadata.commit.message
 				sha: metadata.commit.sha
+			createTime: metadata.change.create_time * 1000
 			startTime: metadata.change.start_time * 1000
 			endTime: metadata.change.end_time * 1000
 			target: metadata.change.merge_target

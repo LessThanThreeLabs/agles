@@ -53,7 +53,7 @@
 					<styled-form text-selectable>
 						<styled-form-field label="Name">{{currentChangeInformation.user.firstName}} {{currentChangeInformation.user.lastName}}</styled-form-field>
 						<styled-form-field label="Email"><a href="mailto:{{currentChangeInformation.user.email}}?subject=Koality%3A%20{{repository.name}}%20-%20change%20%23{{currentChangeInformation.number}}&body=Link%20to%20change%3A%20{{currentUrl}}" target="_blank">{{currentChangeInformation.user.email}}</a></styled-form-field>
-						<styled-form-field label="Submit time">{{currentChangeInformation.startTime | date:'EEEE, MM/dd hh:mm:ss a'}}</styled-form-field>
+						<styled-form-field label="Submit time">{{currentChangeInformation.createTime | date:'EEEE, MM/dd hh:mm:ss a'}}</styled-form-field>
 						<styled-form-field label="Branch">{{currentChangeInformation.target}}</styled-form-field>
 						<styled-form-field label="Head sha">{{currentChangeInformation.headCommit.sha}}</styled-form-field>
 						<styled-form-field label="Head commit"><span ng-bind-html="currentChangeInformation.headCommit.message | newLine"></span></styled-form-field>
