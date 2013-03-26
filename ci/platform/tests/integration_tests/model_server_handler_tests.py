@@ -61,6 +61,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				merge_target='a',
 				number=1,
 				status='a',
+				create_time=1,
 				start_time=1,
 				end_time=1
 			)
@@ -71,6 +72,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				change_id=change_id,
 				repo_id=self.repo_id,
 				status='a',
+				create_time=1,
 				start_time=1,
 				end_time=1
 			)

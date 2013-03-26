@@ -66,6 +66,7 @@ change = Table('change', metadata,
 	Column('number', Integer, nullable=False),
 	Column('status', String, nullable=False),
 	Column('merge_status', String, nullable=True),
+	Column('create_time', Integer, nullable=False),
 	Column('start_time', Integer, nullable=True),
 	Column('end_time', Integer, nullable=True),
 
@@ -77,6 +78,7 @@ build = Table('build', metadata,
 	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
 	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
 	Column('status', String, nullable=False),
+	Column('create_time', Integer, nullable=False),
 	Column('start_time', Integer, nullable=True),
 	Column('end_time', Integer, nullable=True)
 )

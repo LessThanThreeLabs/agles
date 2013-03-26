@@ -122,6 +122,7 @@ class TaskQueue(object):
 		self.task_queue = queue.Queue()
 		self.results_queue = queue.Queue()
 		self.tasks_populating = event.Event()
+		self.num_results_received = 0
 
 	def can_populate_tasks(self):
 		return not self.tasks_populating.ready()
@@ -159,15 +160,17 @@ class TaskQueue(object):
 	def add_task_result(self, result):
 		self.results_queue.put(result)
 		self.task_queue.task_done()
+		self.num_results_received = self.num_results_received + 1
 
 	def add_other_result(self, result):
 		self.results_queue.put(result)
+		self.num_results_received = self.num_results_received + 1
 
 	def get_result(self):
 		return self.results_queue.get()
 
 	def has_more_results(self):
-		return self.task_queue.unfinished_tasks > 0 or not self.results_queue.empty()
+		return self.task_queue.unfinished_tasks > 0 or not self.results_queue.empty() or self.num_results_received == 0
 
 	def clear_remaining_tasks(self):
 		for task in self.task_iterator():

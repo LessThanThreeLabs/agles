@@ -23,6 +23,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		prev_change_number = 0
 
+		create_time = int(time.time())
+
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			change_number_query = select([func.max(change.c.number)], change.c.repo_id == repo_id)
 			max_change_number_result = sqlconn.execute(change_number_query).first()
@@ -30,7 +32,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				prev_change_number = max_change_number_result[0]
 			change_number = prev_change_number + 1
 			ins = change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target=merge_target,
-				number=change_number, status=BuildStatus.QUEUED)
+				number=change_number, status=BuildStatus.QUEUED, create_time=create_time)
 			result = sqlconn.execute(ins)
 			change_id = result.inserted_primary_key[0]
 			repo_id_query = repo.select().where(repo.c.id == repo_id)
@@ -41,7 +43,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		user = to_dict(user_row, user.columns)
 		self.publish_event("repos", repo_id, "change added", user=user, change_id=change_id, change_number=change_number,
-			change_status="queued", commit_id=commit_id, merge_target=merge_target)
+			change_status="queued", commit_id=commit_id, merge_target=merge_target, create_time=create_time)
 		return {"change_id": change_id, "commit_id": commit_id}
 
 	def _create_commit(self, repo_id, user_id, commit_message, sha):
