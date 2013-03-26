@@ -1,0 +1,28 @@
+#!/bin/bash
+upgrade_dir=$(dirname $0)
+(echo -e $ "source /etc/koality/.koalityrc" &&
+source /etc/koality/.koalityrc &&
+echo -e $ "cd $upgrade_dir/ci/platform" &&
+cd $upgrade_dir/ci/platform &&
+echo -e $ "sudo pip uninstall koality" &&
+sudo pip uninstall koality &&
+echo -e $ "python setup.py clean" &&
+python setup.py clean &&
+echo -e $ "python setup.py build" &&
+python setup.py build &&
+echo -e $ "sudo python setup.py install" &&
+sudo python setup.py install &&
+echo -e $ ../web/back/compile.sh &&
+../web/back/compile.sh &&
+echo -e $ ../web/front/compile.sh &&
+../web/front/compile.sh) &&
+(echo -e $ "source /etc/koality/.koalityrc" &&
+source /etc/koality/.koalityrc &&
+echo -e $ "pg_dump koality > $upgrade_dir/db_backup" &&
+pg_dump koality > $upgrade_dir/db_backup &&
+echo -e $ "cd $upgrade_dir/ci/platform" &&
+cd $upgrade_dir/ci/platform &&
+echo -e $ "alembic upgrade head" &&
+alembic upgrade head &&
+echo -e $ "sudo supervisorctl restart all" &&
+sudo supervisorctl restart all)

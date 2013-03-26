@@ -6,7 +6,7 @@ from database.engine import ConnectionFactory
 
 metadata = MetaData()
 
-meta = Table('meta', metadata,
+deployment_property = Table('deployment_property', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('property_name', String, nullable=False, unique=True),
 	Column('value', String),

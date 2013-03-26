@@ -2,7 +2,7 @@ express = require 'express'
 pg = require 'pg'
 fs = require 'fs'
 
-connectionString = "postgres:///license"
+connectionString = "postgres:///upgrade"
 
 app = express()
 app.use(express.bodyParser())
@@ -16,7 +16,7 @@ validateLicenseKey = (key, callback) ->
 			callback null, result.rows.length > 0
 
 
-app.post '/license_check', (request, response) ->
+app.post '/license/check', (request, response) ->
 	key = request.body.key
 	validateLicenseKey key, (error, result) ->
 		if error
@@ -29,7 +29,7 @@ app.post '/license_check', (request, response) ->
 				response.end 'false'
 
 
-app.post '/do_upgrade', (request, response) ->
+app.post '/upgrade', (request, response) ->
 	key = request.body.key
 	currentVersion = request.body.currentVersion
 	upgradeVersion = request.body.upgradeVersion
@@ -40,7 +40,7 @@ app.post '/do_upgrade', (request, response) ->
 			response.send 404
 		else
 			if valid
-				upgradeTarPath = "upgrades/versions/#{upgradeVersion}"
+				upgradeTarPath = "upgrade/version/#{upgradeVersion}.tar.gz"
 				if fs.existsSync upgradeTarPath
 					response.sendfile upgradeTarPath
 					return

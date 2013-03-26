@@ -1,0 +1,6 @@
+(echo -e $ 'dropdb koality' &&
+dropdb koality &&
+echo -e $ 'createdb koality' &&
+createdb koality &&
+echo -e $ 'psql koality < /tmp/db_backup' &&
+psql koality < /tmp/db_backup)
