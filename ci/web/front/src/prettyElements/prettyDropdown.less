@@ -1,41 +1,49 @@
 @import '../constants';
 
-.prettyDropdown {
-	position: absolute;
-	top: 100%;
-	z-index: 9000;
-	display: block;
-	min-width: 100%;
-	background-color: rgba(30, 30, 30, 0.75);
+.prettyDropdownContainer {
 
-	&.leftAligned {
-		left: 0px;
-		text-align: left;
+	&:hover {
+		.prettyDropdown { display: block; }
 	}
 
-	&.rightAligned {
-		right: 0px;
-		text-align: right;
-	}
+	.prettyDropdown {
+		position: absolute;
+		top: 100%;
+		z-index: 9000;
+		// display: block;
+		display: none;
+		min-width: 100%;
+		background-color: rgba(30, 30, 30, 0.75);
 
-	.prettyDropdownOption {
-		cursor: hand;
-		cursor: pointer;
+		&.leftAligned {
+			left: 0px;
+			text-align: left;
+		}
 
-		@backgroundColorTransitionTime: 0.5s;
-		transition: background-color @backgroundColorTransitionTime ease-out;
-		-moz-transition: background-color @backgroundColorTransitionTime ease-out;
-		-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
-		-o-transition: background-color @backgroundColorTransitionTime ease-out;
+		&.rightAligned {
+			right: 0px;
+			text-align: right;
+		}
 
-		@height: 30px;
-		padding: 0px 20px 0px 20px;
-		height: @height;
-		line-height: @height;
-		white-space: nowrap;
+		.prettyDropdownOption {
+			cursor: hand;
+			cursor: pointer;
 
-		&:hover {
-			background-color: rgba(20, 20, 20, 0.75);
+			@backgroundColorTransitionTime: 0.5s;
+			transition: background-color @backgroundColorTransitionTime ease-out;
+			-moz-transition: background-color @backgroundColorTransitionTime ease-out;
+			-webkit-transition: background-color @backgroundColorTransitionTime ease-out;
+			-o-transition: background-color @backgroundColorTransitionTime ease-out;
+
+			@height: 30px;
+			padding: 0px 20px 0px 20px;
+			height: @height;
+			line-height: @height;
+			white-space: nowrap;
+
+			&:hover {
+				background-color: rgba(20, 20, 20, 0.75);
+			}
 		}
 	}
 }

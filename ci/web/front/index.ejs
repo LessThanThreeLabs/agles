@@ -18,8 +18,8 @@
 				<div id="header" ng-controller="Header" unselectable>
 					<span id="headerTitle" ng-click="visitHome()">Koality</span>
 					<div id="headerOptions" ng-show="loggedIn" ng-cloak>
-						<span class="headerOption" ng-controller="HeaderProfile" ng-click="profileClick()">{{user.firstName}} {{user.lastName}}
-							<dropdown alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
+						<span dropdown-container class="headerOption" ng-controller="HeaderProfile" ng-click="profileClick()">{{user.firstName}} {{user.lastName}}
+							<dropdown dropdown-alignment="right" dropdown-options="profileDropdownOptions" dropdown-option-click="profileDropdownOptionClick(dropdownOption)" />
 						</span>
 
 						<span class="headerOption" ng-controller="HeaderAdmin" ng-show="isAdmin" ng-click="visitAdmin()">Admin</span>

@@ -36,15 +36,18 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		scope:
-			alignment: '@alignment'
+			alignment: '@dropdownAlignment'
 			options: '=dropdownOptions'
 			clickHandler: '&dropdownOptionClick'
-		template: '<div class="prettyDropdown {{alignment}}Aligned" ng-show="show">
+		# template: '<div class="prettyDropdown {{alignment}}Aligned" ng-show="show">
+		# 	<div class="prettyDropdownOption" ng-repeat="option in options | orderBy:\'title\'" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
+		# 	</div>'
+		template: '<div class="prettyDropdown {{alignment}}Aligned">
 			<div class="prettyDropdownOption" ng-repeat="option in options | orderBy:\'title\'" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
 			</div>'
 		link: (scope, element, attributes) ->
-			element.parent().bind 'click', () ->
-				scope.$apply () -> scope.show = !scope.show
+			# element.parent().bind 'click', () ->
+			# 	scope.$apply () -> scope.show = !scope.show
 
 			documentClickHandler = (event) ->
 				scope.$apply () -> scope.show = false
