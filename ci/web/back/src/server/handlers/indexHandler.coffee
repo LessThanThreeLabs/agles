@@ -12,12 +12,9 @@ exports.create = (configurationParams, stores, modelRpcConnection, filesSuffix) 
 
 class IndexHandler extends RequestHandler
 	handleRequest: (request, response) =>
-		console.log 'request made to index!!'
-		response.end 'hello'
-
-		# @getTemplateValues request.session, (error, templateValues) =>
-		# 	if error?
-		# 		request.session.destroy()
-		# 		response.end 'internal server error'
-		# 	else 
-		# 		response.render 'index', templateValues
+		@getTemplateValues request.session, (error, templateValues) =>
+			if error?
+				request.session.destroy()
+				response.end 'internal server error'
+			else 
+				response.render 'index', templateValues
