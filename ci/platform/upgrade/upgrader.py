@@ -31,6 +31,8 @@ class Upgrader(object):
 		returncode = self._install_version(self._from_version, self._to_version)
 		if returncode:
 			self.revert_upgrade()
+		else:
+			self._set_deployment_property("version", self._to_version)
 
 	def _install_version(self, from_version, to_version):
 		license_key = self._get_deployment_property("license_key")
@@ -44,6 +46,19 @@ class Upgrader(object):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			return row[deployment_property.c.value] if row else None
+
+	def _set_deployment_property(self, property_name, property_value):
+		deployment_property = schema.deployment_property
+		query = deployment_property.select().where(deployment_property.c.property_name == property_name)
+		update = deployment_property.update().where(deployment_property.c.property_name == property_name).values(value=property_value)
+		ins = deployment_property.insert().values(property_name=property_name, value=property_value)
+
+		with ConnectionFactory.transaction_context() as sqlconn:
+			row = sqlconn.execute(query).first()
+			if row:
+				sqlconn.execute(update)
+			else:
+				sqlconn.execute(ins)
 
 	def revert_upgrade(self):
 		returncode = self._get_revert_script().run().returncode
