@@ -154,6 +154,7 @@ angular.module('koality.directive', []).
 				<div class="prettyContentMenuHeaderBuffer"></div>
 			</div>'
 		link: (scope, element, attributes) ->
+			console.log attributes.menuHeaderPadding?
 			if attributes.menuHeaderPadding?
 				element.addClass 'prettyContentMenuHeaderPadding'
 	).

@@ -148,3 +148,20 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 	$scope.$watch 'addRepository.modalVisible', (newValue, oldValue) ->
 		resetAddRepositoryValues() if not newValue
 ]
+
+
+window.AdminAws = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
+	$scope.instanceSizes = ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 
+		'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge', 
+		'm3.xlarge', 'm3.2xlarge', 
+		'c1.medium', 'c1.xlarge',
+		'hi1.4xlarge', 
+		'hs1.8xlarge']
+
+	$scope.aws = {}
+	$scope.aws.instanceSize = 'm1.medium'
+	$scope.aws.numWaitingInstances = 0
+	$scope.aws.maxInstances = 20
+
+	setTimeout (() -> console.log $scope.aws), 10000
+]

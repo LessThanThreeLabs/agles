@@ -6,6 +6,7 @@
 				<content-menu-option menu-option-text="Manage Website" ng-click="menuOptionClick('website')" ng-class="{selected: currentView == 'website', green: currentView == 'website'}"></content-menu-option>
 				<content-menu-option menu-option-text="Manage User Accounts" ng-click="menuOptionClick('users')" ng-class="{selected: currentView == 'users', green: currentView == 'users'}"></content-menu-option>
 				<content-menu-option menu-option-text="Manage Repositories" ng-click="menuOptionClick('repositories')" ng-class="{selected: currentView == 'repositories', green: currentView == 'repositories'}"></content-menu-option>
+				<content-menu-option menu-option-text="Manage AWS" ng-click="menuOptionClick('aws')" ng-class="{selected: currentView == 'aws', green: currentView == 'aws'}"></content-menu-option>
 			</content-menu-options>
 		</menu>
 	</div>
@@ -17,12 +18,12 @@
 				<div id="adminWebsiteContent">
 					<styled-form name="websiteForm">
 						<styled-form-field label="Domain" label-padding="true">
-							<input type="text" ng-model="website.domain" name="domain" placeholder="koality.company-name.com" ng-pattern="/^[-0-9a-zA-Z]+$/" ng-maxlength="256" required focused>
+							<input type="text" ng-model="website.domain" name="domain" placeholder="koality.company.com" ng-pattern="/^[-0-9a-zA-Z]+$/" ng-maxlength="256" required focused>
 							<span class="prettyFormError" tooltip="Invalid domain name" ng-class="{visible: websiteForm.domain.$dirty && websiteForm.domain.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>
-						<styled-form-field label="Cert private key" label-padding="true">
+						<!-- <styled-form-field label="Cert private key" label-padding="true">
 							<textarea type="text" ng-model="webiste.privateKey" name="privateKey" placeholder="certiface private key" readonly></textarea>
 						</styled-form-field>
 						<styled-form-field label="Cert signing request" label-padding="true">
@@ -30,7 +31,7 @@
 						</styled-form-field>
 						<styled-form-field label="Signed cert" label-padding="true">
 							<textarea type="text" ng-model="webiste.certificate" name="certificate" placeholder="signed certificate" required></textarea>
-						</styled-form-field>
+						</styled-form-field> -->
 					</styled-form>
 				</div>
 			</content-body>
@@ -228,5 +229,45 @@
 				</content>
 			</div>
 		</modal>
+	</div>
+
+	<div id="adminAws" ng-show="currentView == 'aws'" ng-controller="AdminAws">
+		<content>
+			<content-header content-header-padding>Manage AWS</content-header>
+			<content-body unselectable>
+				<div id="adminAwsContent">
+					<styled-form name="awsForm">
+						<styled-form-field label="Access key" label-padding="true">
+							<input type="text" ng-model="aws.key" name="key" placeholder="aws access key id" ng-maxlength="256" required focused>
+							<span class="prettyFormError" tooltip="Invalid access key id" ng-class="{visible: awsForm.key.$dirty && awsForm.key.$invalid}">
+								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+							</span>
+						</styled-form-field>
+						<styled-form-field label="Secret key" label-padding="true">
+							<input type="text" ng-model="aws.secret" name="secret" placeholder="aws secret access key" ng-maxlength="256" required>
+							<span class="prettyFormError" tooltip="Invalid secret access key" ng-class="{visible: awsForm.secret.$dirty && awsForm.secret.$invalid}">
+								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+							</span>
+						</styled-form-field>
+						<styled-form-field label="Instance size" label-padding="true">
+							<select ng-model="aws.instanceSize" ng-options="instanceSize as instanceSize for instanceSize in instanceSizes"></select>
+						</styled-form-field>
+						<styled-form-field label="Num waiting instances" label-padding="true">
+							<input type="number" ng-model="aws.numWaitingInstances" name="numWaitingInstances" min="0" max="1000" required>
+							<span class="prettyFormError" tooltip="Invalid number of waiting instances (0-1000)" ng-class="{visible: awsForm.numWaitingInstances.$dirty && awsForm.numWaitingInstances.$invalid}">
+								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+							</span>
+						</styled-form-field>
+						<styled-form-field label="Max running instances" label-padding="true">
+							<input type="number" ng-model="aws.maxInstances" name="maxInstances" min="0" max="1000000" required>
+							<span class="prettyFormError" tooltip="Invalid number of running instances (0-1000000)" ng-class="{visible: awsForm.maxInstances.$dirty && awsForm.maxInstances.$invalid}">
+								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+							</span>
+							<br>(0 for unlimited)
+						</styled-form-field>
+					</styled-form>
+				</div>
+			</content-body>
+		</content>
 	</div>
 </centered-panel>
