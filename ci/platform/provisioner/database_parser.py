@@ -61,7 +61,8 @@ class PostgresDatabaseParser(DatabaseParser):
 				"THEN CREATE ROLE %s LOGIN PASSWORD 'my_password';" % username,
 				"END IF"))
 			),
-			"grant all privileges on database %s to %s" % (database_name, username))
+			"grant all privileges on database %s to %s" % (database_name, username),
+			"alter database %s owner to %s" % (database_name, username))
 
 	def postgres_command(self, *commands):
 		return SetupCommand(*("psql -U postgres -c %s" % pipes.quote(command) for command in commands))
