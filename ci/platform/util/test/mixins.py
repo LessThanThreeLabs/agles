@@ -55,16 +55,18 @@ class GreenProcess(object):
 class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
-	def _start_model_server(self):
+	@classmethod
+	def _start_model_server(cls):
 		connection = Connection(RabbitSettings.kombu_connection_info)
-		self.model_server_channel = connection.channel()
-		self.model_server_process = GreenProcess(target=ModelServer(self.model_server_channel).start)
-		self.model_server_process.start()
+		cls.model_server_channel = connection.channel()
+		cls.model_server_process = GreenProcess(target=ModelServer(cls.model_server_channel).start)
+		cls.model_server_process.start()
 
-	def _stop_model_server(self):
-		self.model_server_process.terminate()
-		self.model_server_process.join()
-		self.model_server_channel.close()
+	@classmethod
+	def _stop_model_server(cls):
+		cls.model_server_process.terminate()
+		cls.model_server_process.join()
+		cls.model_server_channel.close()
 
 
 class RabbitMixin(BaseTestMixin):
