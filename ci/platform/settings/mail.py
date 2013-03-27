@@ -7,5 +7,3 @@ class MailSettings(DatabaseBackedSettings):
 			api_url='https://api.mailgun.net/v2/getkoality.com/messages',
 			api_key='key-9e06ajco0xurqnioji-egwuwajg4jrn2',
 			test_mode=True)
-
-MailSettings.initialize()

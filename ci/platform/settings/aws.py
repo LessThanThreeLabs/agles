@@ -14,6 +14,3 @@ class AwsSettings(DatabaseBackedSettings):
 			credentials=dict(
 				aws_access_key_id=str(self.aws_access_key_id),
 				aws_secret_access_key=str(self.aws_secret_access_key)))
-
-
-AwsSettings.initialize()

@@ -17,5 +17,3 @@ class OpenstackSettings(DatabaseBackedSettings):
 				auth_url=str(self.auth_url), auth_system=str(self.auth_system),
 				region_name=str(self.region_name) if self.region_name else None)),
 			image_filter=lambda cls, image: image.name.startswith(OpenstackSettings.vm_image_name_prefix))
-
-OpenstackSettings.initialize()

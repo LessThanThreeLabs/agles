@@ -7,7 +7,8 @@ import model_server
 class DatabaseBackedSettings(object):
 	class __metaclass__(type):
 		def __getattr__(cls, attr):
-			if attr == '_resource':
+			cls.initialize()
+			if attr == '_resource' or attr.startswith('__'):
 				return None
 			setting = cls._retrieve_setting(attr)
 			if setting:
@@ -19,8 +20,8 @@ class DatabaseBackedSettings(object):
 	@classmethod
 	def initialize(cls):
 		if not cls._is_initialized:
-			cls.reinitialize()
 			cls._is_initialized = True
+			cls.reinitialize()
 
 	@classmethod
 	def reinitialize(cls):
