@@ -90,6 +90,10 @@ class Client(ClientBase):
 			type="direct", callback=self._on_exchange_declare)
 
 	def _on_exchange_declare(self, frame):
+		self.channel.exchange_declare(exchange=self.deadletter_exchange_name,
+			type="fanout", callback=self._on_dlx_exchange_declare)
+
+	def _on_dlx_exchange_declare(self, frame):
 		self.channel.queue_declare(
 			exclusive=True,
 			auto_delete=True,
