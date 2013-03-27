@@ -41,6 +41,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	def setup_class(cls):
 		cls.repostore_id = 1
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
+		cls._start_model_server()
+		time.sleep(1)  # model server NEEDS to be running
 		repo_store = Server(FileSystemRepositoryStore(cls.repo_dir))
 		repo_store.bind(StoreSettings.rpc_exchange_name, [RepositoryStore.queue_name(cls.repostore_id)], auto_delete=True)
 		cls.repo_store_process = GreenProcess(target=repo_store.run)
@@ -48,6 +50,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 	@classmethod
 	def teardown_class(cls):
+		cls._stop_model_server()
 		cls.repo_store_process.terminate()
 		cls.repo_store_process.join()
 		rmtree(TEST_ROOT, ignore_errors=True)
@@ -58,7 +61,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		self.repo_id = 1
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.makedirs(self.repo_dir)
-		self._start_model_server()
 		self.verifier_pool = VerificationRoundTripTest.FakeBuildVerifierPool(DEFAULT_NUM_VERIFIERS)
 		self.repo_path = os.path.join(
 			self.repo_dir,
@@ -77,7 +79,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	def tearDown(self):
 		super(VerificationRoundTripTest, self).setUp()
 		rmtree(self.repo_dir)
-		self._stop_model_server()
 		self.vs_process.terminate()
 		self.vs_process.join()
 		self.verifier_pool.teardown()
