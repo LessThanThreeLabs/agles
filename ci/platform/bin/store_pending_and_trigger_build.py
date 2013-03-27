@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 
-from model_server import ModelServer
+import model_server
+
 from util import pathgen
 
 
@@ -17,7 +18,7 @@ def main():
 
 
 def store_pending_ref_and_trigger_build(user_id, repo_id, message, sha, merge_target):
-	with ModelServer.rpc_connect("changes", "create") as client:
+	with model_server.rpc_connect("changes", "create") as client:
 		commit_id = client.create_commit_and_change(
 			repo_id,
 			user_id,

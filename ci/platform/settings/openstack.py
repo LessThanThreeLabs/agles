@@ -1,7 +1,7 @@
-from settings import Settings
+from database_backed_settings import DatabaseBackedSettings
 
 
-class OpenstackSettings(Settings):
+class OpenstackSettings(DatabaseBackedSettings):
 	def __init__(self):
 		super(OpenstackSettings, self).__init__(
 			version="2",

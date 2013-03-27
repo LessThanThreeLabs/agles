@@ -130,6 +130,15 @@ ssh_pubkey = Table('ssh_pubkey', metadata,
 	UniqueConstraint('user_id', 'alias')
 )
 
+system_setting = Table('system_setting', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('resource', String, nullable=False),
+	Column('key', String, nullable=False),
+	Column('value_yaml', String, nullable=False),
+
+	UniqueConstraint('resource', 'key')
+)
+
 temp_string = Table('temp', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('string', String, nullable=False)
@@ -142,11 +151,14 @@ def _create_and_initialize(engine):
 
 
 def _insert_admin_user():
-	ins = user.insert().values(id=1, email="lt3@getkoality.com", first_name="Admin", last_name="Admin",
+	query = user.select().where(user.c.id == 1)
+	ins = user.insert().values(id=1, email="lt3@koalitycode.com", first_name="Koality", last_name="Admin",
 		password_hash="mooonIJXsb0zgz2V0LXvN/N4N4zbZE9FadrFl/YBJvzh3Z8O3VT/FH1q6OzWplbrX99D++PO6mpez7QdoIUQ6A==",
 		salt="GMZhGiZU4/JYE3NlmCZgGA==", created=0)
 	with ConnectionFactory.get_sql_connection() as sqlconn:
-		sqlconn.execute(ins)
+		row = sqlconn.execute(query).first()
+		if not row:
+			sqlconn.execute(ins)
 
 
 def reseed_db():

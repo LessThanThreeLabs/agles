@@ -3,7 +3,9 @@ import requests
 from settings.mail import MailSettings
 
 
-def sendmail(send_from, send_to, subject, text, cc=None, bcc=None, html=None, attachment=None, testmode=MailSettings.test_mode):
+def sendmail(send_from, send_to, subject, text, cc=None, bcc=None, html=None, attachment=None, testmode=None):
+	if testmode is None:
+		testmode = MailSettings.test_mode
 	response = requests.post(
 		MailSettings.api_url,
 		auth=("api", MailSettings.api_key),

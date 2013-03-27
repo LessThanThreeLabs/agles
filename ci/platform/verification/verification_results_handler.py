@@ -1,7 +1,8 @@
 import logging
 
+import model_server
+
 from database.engine import ConnectionFactory
-from model_server import ModelServer
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError, PushForwardError
 from shared.constants import BuildStatus, MergeStatus
 from util import pathgen
@@ -16,30 +17,30 @@ class VerificationResultsHandler(object):
 	def pass_change(self, change_id):
 		merge_success = self._send_merge_request(change_id)
 		if merge_success:
-			with ModelServer.rpc_connect("changes", "update") as client:
+			with model_server.rpc_connect("changes", "update") as client:
 				client.mark_change_finished(change_id, BuildStatus.PASSED, MergeStatus.PASSED)
 
 	def fail_change(self, change_id):
-		with ModelServer.rpc_connect("changes", "update") as client:
+		with model_server.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.FAILED)
 
 	def _mark_change_merge_failure(self, change_id):
-		with ModelServer.rpc_connect("changes", "update") as client:
+		with model_server.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.FAILED, MergeStatus.FAILED)
 
 	def _mark_change_pushforward_failure(self, change_id):
-		with ModelServer.rpc_connect("changes", "update") as client:
+		with model_server.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.FAILED, MergeStatus.FAILED)
 
 	def _send_merge_request(self, change_id):
 		self.logger.info("Sending merge request for change %s" % change_id)
-		with ModelServer.rpc_connect("changes", "read") as client:
+		with model_server.rpc_connect("changes", "read") as client:
 			change_attributes = client.get_change_attributes(change_id)
 
 		commit_id = change_attributes['commit_id']
 		merge_target = change_attributes['merge_target']
 
-		with ModelServer.rpc_connect("repos", "read") as client:
+		with model_server.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)
 			repostore_id, route, repos_path, repo_id, repo_name, private_key = client.get_repo_attributes(repo_uri)
 

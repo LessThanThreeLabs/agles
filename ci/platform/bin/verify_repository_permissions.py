@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 
-from model_server import ModelServer
+import model_server
+
 from util import pathgen
 
 
@@ -13,7 +14,7 @@ def main():
 
 
 def verify_repository_permissions(user_id, repo_id):
-	with ModelServer.rpc_connect("users", "read") as client:
+	with model_server.rpc_connect("users", "read") as client:
 		user = client.get_user_from_id(user_id)
 	return _to_return_code(user)
 

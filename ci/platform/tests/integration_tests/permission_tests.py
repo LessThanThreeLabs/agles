@@ -1,6 +1,7 @@
 from nose.tools import *
 
-from model_server import ModelServer
+import model_server
+
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
 from util.permissions import is_admin
@@ -18,7 +19,7 @@ class PermissionTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._purge_queues()
 
 	def _create_user(self, email, admin):
-		with ModelServer.rpc_connect("users", "create") as rpc_conn:
+		with model_server.rpc_connect("users", "create") as rpc_conn:
 			return rpc_conn.create_user(email, "first_name", "last_name", "hash", "salt", admin)
 
 	def test_is_admin(self):

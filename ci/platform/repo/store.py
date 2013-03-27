@@ -189,13 +189,13 @@ class RepositoryStore(object):
 	@classmethod
 	def initialize_store(cls, root_dir):
 		ip_address = cls._get_ip_address()
-		with model_server.ModelServer.rpc_connect("repos", "create") as conn:
+		with model_server.rpc_connect("repos", "create") as conn:
 			return conn.register_repostore(ip_address, root_dir)
 
 	@classmethod
 	def update_store(cls, repostore_id, root_dir, num_repos):
 		ip_address = cls._get_ip_address()
-		with model_server.ModelServer.rpc_connect("repos", "update") as conn:
+		with model_server.rpc_connect("repos", "update") as conn:
 			conn.update_repostore(repostore_id, ip_address, root_dir, num_repos)
 
 	@classmethod
@@ -328,7 +328,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo = Repo(repo_path)
 		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
 
-		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+		with model_server.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
 		original_head = self.merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
 		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into, original_head)
@@ -375,7 +375,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
 
-		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+		with model_server.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
 
 		self.logger.info("Pushing branch %s:%s on %s" % (from_target, to_target, repo_path))
@@ -399,7 +399,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def _update_branch(self, repo_id, repo_name, target):
 		try:
 			self.logger.debug("updating local branch %s on repo %d" % (target, repo_id))
-			with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+			with model_server.rpc_connect("repos", "read") as conn:
 				remote_repo = conn.get_repo_forward_url(repo_id)
 			repo_path = self._resolve_path(repo_id, repo_name)
 			repo = Repo(repo_path)
@@ -421,7 +421,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			self.logger.warning("Failed to delete local branch", exc_info=True)
 
 	def _remote_branch_exists(self, repo_id, repo_name, branch):
-		with model_server.ModelServer.rpc_connect("repos", "read") as conn:
+		with model_server.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
 
 		repo_path = self._resolve_path(repo_id, repo_name)

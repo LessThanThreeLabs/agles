@@ -1,7 +1,7 @@
-from settings import Settings
+from database_backed_settings import DatabaseBackedSettings
 
 
-class MailSettings(Settings):
+class MailSettings(DatabaseBackedSettings):
 	def __init__(self):
 		super(MailSettings, self).__init__(
 			api_url='https://api.mailgun.net/v2/getkoality.com/messages',

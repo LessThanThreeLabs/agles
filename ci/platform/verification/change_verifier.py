@@ -3,8 +3,9 @@ import logging
 from eventlet import event, spawn, spawn_n, queue
 from kombu.messaging import Producer
 
+import model_server
+
 from build_core import LightWeightBuildCore
-from model_server import ModelServer
 from shared.handler import EventSubscriber
 from util import greenlets, pathgen
 from verification_results_handler import VerificationResultsHandler
@@ -58,7 +59,7 @@ class ChangeVerifier(EventSubscriber):
 
 		def start_change():
 			change_started.send(True)
-			with ModelServer.rpc_connect("changes", "update") as model_server_rpc:
+			with model_server.rpc_connect("changes", "update") as model_server_rpc:
 				model_server_rpc.mark_change_started(change_id)
 
 		def setup_worker():
@@ -98,15 +99,15 @@ class ChangeVerifier(EventSubscriber):
 		return [[self._get_commit_id(change_id)]]
 
 	def _get_commit_id(self, change_id):
-		with ModelServer.rpc_connect("changes", "read") as model_server_rpc:
+		with model_server.rpc_connect("changes", "read") as model_server_rpc:
 			return model_server_rpc.get_change_attributes(change_id)['commit_id']
 
 	def _create_build(self, change_id, commit_list):
-		with ModelServer.rpc_connect("builds", "create") as model_server_rpc:
+		with model_server.rpc_connect("builds", "create") as model_server_rpc:
 			return model_server_rpc.create_build(change_id, commit_list)
 
 	def _get_verification_config(self, commit_list):
-		with ModelServer.rpc_connect("repos", "read") as model_server_rpc:
+		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_list[0])
 		refs = [pathgen.hidden_ref(commit) for commit in commit_list]
 		build_core = LightWeightBuildCore(self.uri_translator)

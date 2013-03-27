@@ -2,7 +2,8 @@ import hashlib
 import os
 import re
 
-from model_server import ModelServer
+import model_server
+
 from shared.constants import VerificationUser
 from util import pathgen
 from util.permissions import InvalidPermissionsError
@@ -39,7 +40,7 @@ class RestrictedGitShell(object):
 		return match.group()
 
 	def verify_user_exists(self, command, user_id, repo_id):
-		with ModelServer.rpc_connect("users", "read") as client:
+		with model_server.rpc_connect("users", "read") as client:
 			try:
 				client.get_user_from_id(user_id)
 			except:
@@ -52,7 +53,7 @@ class RestrictedGitShell(object):
 			raise MalformedCommandError('repo_path: %s. Repository path cannot contain "..".' % repo_path)
 
 	def rp_new_sshargs(self, command, requested_repo_uri, user_id):
-		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
+		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
 			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
 		self.verify_user_exists(command, user_id, repo_id)
@@ -65,7 +66,7 @@ class RestrictedGitShell(object):
 		os.execlp(*args)
 
 	def handle_upload_pack(self, requested_repo_uri, user_id):
-		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
+		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
 			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 			forward_url = modelserver_rpc_conn.get_repo_forward_url(repo_id)
 
@@ -79,7 +80,7 @@ class RestrictedGitShell(object):
 		os.execlp(*args)
 
 	def handle_git_show(self, requested_repo_uri, show_ref_file, user_id):
-		with ModelServer.rpc_connect("repos", "read") as modelserver_rpc_conn:
+		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
 			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
 		self.verify_user_exists("git-show", user_id, repo_id)

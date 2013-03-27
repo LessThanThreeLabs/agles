@@ -8,7 +8,8 @@ import logging
 import os
 import sys
 
-from model_server import ModelServer
+import model_server
+
 from util.permissions import InvalidPermissionsError
 from util.shell import RestrictedGitShell, InvalidCommandError
 
@@ -30,7 +31,7 @@ def main():
 			rsh = RestrictedGitShell(valid_commands, user_id_commands)
 			rsh.handle_command(command)
 		else:
-			with ModelServer.rpc_connect("users", "read") as client:
+			with model_server.rpc_connect("users", "read") as client:
 				user_info = client.get_user_from_id(user_id)
 			print "You have been successfully authenticated as %s, but shell access is not permitted." % user_info["email"]
 	except InvalidCommandError:

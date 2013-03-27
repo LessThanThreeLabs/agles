@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import settings.log
 
-from model_server import ModelServer
+from model_server.model_server import ModelServer
 
 
 def main():

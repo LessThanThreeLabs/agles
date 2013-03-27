@@ -1,9 +1,9 @@
 import pika
 
-from settings import Settings
+from file_backed_settings import FileBackedSettings
 
 
-class RabbitSettings(Settings):
+class RabbitSettings(FileBackedSettings):
 	def __init__(self):
 		super(RabbitSettings, self).__init__(
 			rabbit_host='localhost',

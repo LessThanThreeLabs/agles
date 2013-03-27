@@ -1,6 +1,6 @@
 import os
 
-from model_server import ModelServer
+import model_server
 
 
 class PubkeyRegistrar(object):
@@ -8,14 +8,14 @@ class PubkeyRegistrar(object):
 		if not pubkey:
 			pubkey = self.get_ssh_pubkey()
 		try:
-			with ModelServer.rpc_connect("users", "update") as users_update_rpc:
+			with model_server.rpc_connect("users", "update") as users_update_rpc:
 				users_update_rpc.add_ssh_pubkey(user_id, alias, pubkey)
 		except:
 			pass
 
 	def unregister_pubkey(self, user_id, alias):
 		try:
-			with ModelServer.rpc_connect("users", "update") as users_update_rpc:
+			with model_server.rpc_connect("users", "update") as users_update_rpc:
 				users_update_rpc.remove_ssh_pubkey_by_alias(user_id, alias)
 		except:
 			pass

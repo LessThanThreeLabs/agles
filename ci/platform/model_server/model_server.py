@@ -7,7 +7,6 @@ and is the only point of interaction between clients and the model server.
 """
 from kombu.connection import Connection
 
-from bunnyrpc.client import Client
 from builds.create_handler import BuildsCreateHandler
 from builds.read_handler import BuildsReadHandler
 from builds.update_handler import BuildsUpdateHandler
@@ -21,6 +20,8 @@ from repos.read_handler import ReposReadHandler
 from repos.update_handler import ReposUpdateHandler
 from repos.delete_handler import ReposDeleteHandler
 from settings.rabbit import RabbitSettings
+from system_settings.read_handler import SystemSettingsReadHandler
+from system_settings.update_handler import SystemSettingsUpdateHandler
 from users.create_handler import UsersCreateHandler
 from users.read_handler import UsersReadHandler
 from users.update_handler import UsersUpdateHandler
@@ -48,16 +49,13 @@ class ModelServer(object):
 		ReposReadHandler,
 		ReposUpdateHandler,
 		ReposDeleteHandler,
+		SystemSettingsReadHandler,
+		SystemSettingsUpdateHandler,
 		UsersCreateHandler,
 		UsersReadHandler,
 		UsersUpdateHandler,
 		UsersDeleteHandler
 	]
-
-	@classmethod
-	def rpc_connect(cls, route_noun, route_verb):
-		route = "rpc:%s.%s" % (route_noun, route_verb)
-		return Client("model:rpc", route)
 
 	def __init__(self, channel=None):
 		if channel:

@@ -3,7 +3,8 @@ import os
 import socket
 import yaml
 
-from model_server import ModelServer
+import model_server
+
 from pubkey_registrar import PubkeyRegistrar
 from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
@@ -50,7 +51,7 @@ class BuildVerifier(object):
 	# def _handle_interrupted_build(self, build_id):
 	# 	self.logger.warn("Worker %s found interrupted build with id %s. Failing build." % (self.worker_id, build_id))
 	# 	status = BuildStatus.FAILED
-	# 	with ModelServer.rpc_connect("builds", "update") as builds_update_rpc:
+	# 	with model_server.rpc_connect("builds", "update") as builds_update_rpc:
 	# 		builds_update_rpc.mark_build_finished(build_id, status)
 	# 	with Connection(RabbitSettings.kombu_connection_info).Producer(serializer='msgpack') as producer:
 	# 		producer.publish({'build_id': build_id, 'status': status},
@@ -94,7 +95,7 @@ class BuildVerifier(object):
 		repo_uri = self._get_repo_uri(commit_list[0])
 		refs = self._get_ref_list(commit_list)
 		private_key = self._get_private_key(repo_uri)
-		with ModelServer.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
+		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 			self.build_core.setup_build(repo_uri, refs, private_key, console_appender)
 			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
@@ -105,7 +106,7 @@ class BuildVerifier(object):
 
 	@ReturnException
 	def _do_test(self, build_id, test_command):
-		with ModelServer.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
+		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 			return self.build_core.run_test_command(test_command, console_appender)
 
@@ -114,7 +115,7 @@ class BuildVerifier(object):
 		# check that no results are exceptions
 		success = not any(map(lambda result: isinstance(result, Exception), results))
 		build_status = BuildStatus.PASSED if success else BuildStatus.FAILED
-		with ModelServer.rpc_connect("builds", "update") as builds_update_rpc:
+		with model_server.rpc_connect("builds", "update") as builds_update_rpc:
 			builds_update_rpc.mark_build_finished(build_id, build_status)
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 		if os.access(self._get_build_info_file(), os.F_OK):
@@ -122,7 +123,7 @@ class BuildVerifier(object):
 		self.build_core.teardown()
 
 	def _get_commit_list(self, build_id):
-		with ModelServer.rpc_connect("builds", "read") as model_server_rpc:
+		with model_server.rpc_connect("builds", "read") as model_server_rpc:
 			return model_server_rpc.get_commit_list(build_id)
 
 	def _get_ref_list(self, commit_list):
@@ -130,7 +131,7 @@ class BuildVerifier(object):
 
 	def _start_build(self, build_id):
 		self.logger.debug("Worker %s starting build %s" % (self.worker_id, build_id))
-		with ModelServer.rpc_connect("builds", "update") as model_server_rpc:
+		with model_server.rpc_connect("builds", "update") as model_server_rpc:
 			model_server_rpc.start_build(build_id)
 		with open(self._get_build_info_file(), 'w') as build_file:
 			build_file.write(yaml.safe_dump({'build_id': build_id}))
@@ -138,11 +139,11 @@ class BuildVerifier(object):
 	def _get_repo_uri(self, commit_id):
 		"""Sends out a rpc call to the model server to retrieve
 		the uri of a repository for a commit"""
-		with ModelServer.rpc_connect("repos", "read") as model_server_rpc:
+		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			return model_server_rpc.get_repo_uri(commit_id)
 
 	def _get_private_key(self, repo_uri):
-		with ModelServer.rpc_connect("repos", "read") as repos_read_rpc:
+		with model_server.rpc_connect("repos", "read") as repos_read_rpc:
 			repostore_id, ip_address, repo_path, repo_id, repo_name, private_key = repos_read_rpc.get_repo_attributes(repo_uri)
 		return private_key
 

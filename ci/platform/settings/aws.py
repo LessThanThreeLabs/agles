@@ -1,7 +1,7 @@
-from settings import Settings
+from database_backed_settings import DatabaseBackedSettings
 
 
-class AwsSettings(Settings):
+class AwsSettings(DatabaseBackedSettings):
 	def __init__(self):
 		super(AwsSettings, self).__init__(
 			region="",

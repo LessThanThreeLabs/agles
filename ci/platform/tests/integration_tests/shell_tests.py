@@ -1,5 +1,7 @@
 from nose.tools import *
 
+import model_server
+
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
 from util.permissions import InvalidPermissionsError
@@ -37,10 +39,10 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 #TODO: FIX THIS HAX WITH CREATE REPO
 	def _setup_db_entries(self, REPO_URI):
 		repostore_id = self._create_repo_store()
-		with ModelServer.rpc_connect("repos", "create") as rpc_conn:
+		with model_server.rpc_connect("repos", "create") as rpc_conn:
 			rpc_conn._create_repo_in_db(1, "repo.git", REPO_URI, repostore_id, "forwardurl",
 				"privatekey", "publickey", 0)
-		with ModelServer.rpc_connect("users", "create") as rpc_conn:
+		with model_server.rpc_connect("users", "create") as rpc_conn:
 			self.user_id = rpc_conn.create_user("email", "first_name", "last_name", "hash", "salt")
 
 	def test_new_sshargs(self):

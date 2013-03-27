@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import sys
-from model_server import ModelServer
+
+import model_server
+
 from util import pathgen
 
 
@@ -14,7 +16,7 @@ def main():
 
 
 def force_push(user_id, repo_id, from_target, to_target):
-	with ModelServer.rpc_connect("repos", "update") as client:
+	with model_server.rpc_connect("repos", "update") as client:
 		client.force_push(repo_id, user_id, from_target, to_target)
 
 if __name__ == '__main__':

@@ -1,9 +1,9 @@
 import sqlalchemy.engine.url
 
-from settings import Settings
+from file_backed_settings import FileBackedSettings
 
 
-class DatabaseSettings(Settings):
+class DatabaseSettings(FileBackedSettings):
 	def __init__(self):
 		super(DatabaseSettings, self).__init__(
 			postgres_host='localhost',
