@@ -5,15 +5,13 @@ from database import schema
 from database.engine import ConnectionFactory
 from provisioner.setup_tools import SetupScript, SetupCommand
 
-#UPGRADE_DOWNLOAD_URL = 'http://koalitycode.com/upgrade'
-UPGRADE_DOWNLOAD_URL = 'http://localhost:9001/upgrade'
-
 
 class Upgrader(object):
-	def __init__(self, to_version):
+	def __init__(self, to_version, upgrade_download_url):
 		assert to_version
 		self._to_version = to_version
 		self._from_version = int(self._get_deployment_property("version") or 0)
+		self._upgrade_download_url = upgrade_download_url
 
 	def _get_upgrade_script(self):
 		return SetupScript(
@@ -60,7 +58,7 @@ class Upgrader(object):
 
 	def download_upgrade_files(self, license_key, from_version, to_version, to_path):
 		upgrade_data = {"key": license_key, "currentVersion": from_version, "upgradeVersion": to_version}
-		response = requests.post(UPGRADE_DOWNLOAD_URL, data=upgrade_data)
+		response = requests.post(self._upgrade_download_url, data=upgrade_data)
 		if response.status_code != requests.codes.ok:
 			raise UpgradeException("Failed to download upgrade tarball. upgrade_data: %s" % upgrade_data)
 
