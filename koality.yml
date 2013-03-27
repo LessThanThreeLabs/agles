@@ -50,7 +50,7 @@ test:
   - platform tests:
       path: ci/platform
       script:
-        - timeout -s INT -k 3 80 nosetests -sv  # Getting a stack trace
+        - nosetests -sv
       timeout: 240
   - website unit tests:
       script:
