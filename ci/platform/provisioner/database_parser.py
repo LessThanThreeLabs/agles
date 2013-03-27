@@ -56,12 +56,18 @@ class PostgresDatabaseParser(DatabaseParser):
 
 	def create_user_command(self, username, database_name):
 		return self.postgres_command(
-			"drop user if exists %s" % username,
-			"create user %s with password ''" % username,
+			self._postgres_function(" ".join((
+				"IF NOT EXISTS (SELECT * FROM pg_catalog.pg_user WHERE usename = '%s')" % username,
+				"THEN CREATE ROLE %s LOGIN PASSWORD 'my_password';" % username,
+				"END IF"))
+			),
 			"grant all privileges on database %s to %s" % (database_name, username))
 
 	def postgres_command(self, *commands):
 		return SetupCommand(*("psql -U postgres -c %s" % pipes.quote(command) for command in commands))
+
+	def _postgres_function(self, str):
+		return "DO $body$ BEGIN %s; END $body$" % str
 
 
 class MysqlDatabaseParser(DatabaseParser):
