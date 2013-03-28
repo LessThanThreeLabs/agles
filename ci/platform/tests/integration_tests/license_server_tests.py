@@ -16,8 +16,19 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._stop_model_server()
 		self._purge_queues()
 
+	def test_license_check_failed(self):
+		serve = LicenseServer()
+		DeploymentSettings.active = True
+		assert_equals(True, DeploymentSettings.active)
+		for i in range(MAX_FAILURES + 1):
+			assert_equals(i, DeploymentSettings.license_validation_failures)
+			serve.license_check_failed()
+
+		assert_equals(False, DeploymentSettings.active)
+
 	def test_reset_license_check_failures(self):
 		serve = LicenseServer()
+		DeploymentSettings.initialize()
 		for i in range(MAX_FAILURES + 1):
 			assert_equals(i, DeploymentSettings.license_validation_failures)
 			serve.license_check_failed()
@@ -28,13 +39,3 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		serve.reset_license_check_failures()
 		assert_equals(0, DeploymentSettings.license_validation_failures)
 		assert_equals(True, DeploymentSettings.active)
-
-	def test_license_check_failed(self):
-		serve = LicenseServer()
-		DeploymentSettings.active = True
-		assert_equals(True, DeploymentSettings.active)
-		for i in range(MAX_FAILURES + 1):
-			assert_equals(i, DeploymentSettings.license_validation_failures)
-			serve.license_check_failed()
-
-		assert_equals(False, DeploymentSettings.active)
