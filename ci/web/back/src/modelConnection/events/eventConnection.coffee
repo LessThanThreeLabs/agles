@@ -6,6 +6,7 @@ UserEventHandler = require './handlers/userEventHandler'
 ChangeEventHandler = require './handlers/changeEventHandler'
 BuildConsoleEventHandler = require './handlers/buildConsoleEventHandler'
 RepositoryEventHandler = require './handlers/repositoryEventHandler'
+SystemSettingEventHandler = require './handlers/systemSettingEventHandler'
 
 
 exports.create = (configurationParams, connection) ->
@@ -34,6 +35,7 @@ class EventConnection
 		@changes = ChangeEventHandler.create @sockets
 		@buildConsoles = BuildConsoleEventHandler.create @sockets
 		@repositories = RepositoryEventHandler.create @sockets
+		@systemSettings = SystemSettingEventHandler.create @sockets
 
 		@_connectHandlers callback
 
@@ -49,15 +51,18 @@ class EventConnection
 			@exchange, 'build_consoles', queueNamePrefix + '_buildConsoles', @buildConsoles
 		@repositoryEventConnection = ResourceEventConnection.create @connection, 
 			@exchange, 'repos', queueNamePrefix + '_repositories', @repositories
+		@systemSettingEventConnection = ResourceEventConnection.create @connection,
+			@exchange, 'system_settings', queueNamePrefix + '_systemSettings', @systemSettings
 
 		await
 			@userEventConnection.connect defer userEventConnectionError
 			@changeEventConnection.connect defer changeEventConnectionError
 			@buildConsoleEventConnection.connect defer buildConsoleEventConnectionError
 			@repositoryEventConnection.connect defer repositoryEventConnectionError
+			@systemSettingEventConnection.connect defer systemSettingConnectionError
 
-		connectionErrors = [userEventConnectionError, changeEventConnectionError,
-			buildConsoleEventConnectionError, repositoryEventConnectionError]
+		connectionErrors = [userEventConnectionError, changeEventConnectionError, buildConsoleEventConnectionError, 
+			repositoryEventConnectionError, systemSettingConnectionError]
 		errors = (error for error in connectionErrors when error?)
 
 		if errors.length is 0 
