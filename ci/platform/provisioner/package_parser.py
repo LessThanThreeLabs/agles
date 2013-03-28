@@ -158,4 +158,4 @@ class NpmPackageParser(PackageParser):
 		return "%s@%s" % (name, version)
 
 	def to_install_string(self, package_string):
-		return "npm install -g %s" % package_string
+		return "[ $(npm -g ls %s --parseable ) != "" ] || npm install -g %s" % (package_string, package_string)
