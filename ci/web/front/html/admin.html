@@ -23,15 +23,9 @@
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>
-						<!-- <styled-form-field label="Cert private key" label-padding="true">
-							<textarea type="text" ng-model="webiste.privateKey" name="privateKey" placeholder="certiface private key" readonly></textarea>
+						<styled-form-field label="">
+							<button id="adminWebsiteSubmitButton" ng-click="submit()" ng-disabled="websiteForm.$invalid">Save Changes</button>
 						</styled-form-field>
-						<styled-form-field label="Cert signing request" label-padding="true">
-							<textarea type="text" ng-model="webiste.csr" name="csr" placeholder="certificate signing request" readonly></textarea>
-						</styled-form-field>
-						<styled-form-field label="Signed cert" label-padding="true">
-							<textarea type="text" ng-model="webiste.certificate" name="certificate" placeholder="signed certificate" required></textarea>
-						</styled-form-field> -->
 					</styled-form>
 				</div>
 			</content-body>
@@ -257,13 +251,19 @@
 							<span class="prettyFormError" tooltip="Invalid number of waiting instances (0-1000)" ng-class="{visible: awsForm.numWaitingInstances.$dirty && awsForm.numWaitingInstances.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
-						</styled-form-field>
-						<styled-form-field label="Max running instances" label-padding="true">
-							<input type="number" ng-model="aws.maxInstances" name="maxInstances" min="0" max="1000000" required>
-							<span class="prettyFormError" tooltip="Invalid number of running instances (0-1000000)" ng-class="{visible: awsForm.maxInstances.$dirty && awsForm.maxInstances.$invalid}">
+							<span class="prettyFormError" tooltip="Must be less than max running instances" ng-class="{visible: awsForm.numWaitingInstances.$valid && awsForm.maxInstances.$valid && aws.numWaitingInstances > aws.maxInstances}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
-							<br>(0 for unlimited)
+						</styled-form-field>
+						<styled-form-field label="Max running instances" label-padding="true">
+							<input type="number" ng-model="aws.maxInstances" name="maxInstances" min="0" max="10000" required>
+							<span class="prettyFormError" tooltip="Invalid number of running instances (0-10000)" ng-class="{visible: awsForm.maxInstances.$dirty && awsForm.maxInstances.$invalid}">
+								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+							</span>
+							<div id="adminAwsContentUnlimitedNote">(0 for unlimited)</div>
+						</styled-form-field>
+						<styled-form-field label="">
+							<button id="adminAwsSubmitButton" ng-click="submit()" ng-disabled="awsForm.$invalid">Save Changes</button>
 						</styled-form-field>
 					</styled-form>
 				</div>

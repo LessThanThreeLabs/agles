@@ -2,7 +2,7 @@
 
 window.Admin = ['$scope', '$location', '$routeParams', 'initialState', 'fileSuffixAdder', ($scope, $location, $routeParams, initialState, fileSuffixAdder) ->
 	$scope.userId = initialState.user.id
-	$scope.currentView = $routeParams.view ? 'users'
+	$scope.currentView = $routeParams.view ? 'website'
 
 	$scope.menuOptionClick = (viewName) ->
 		$scope.currentView = viewName
@@ -13,7 +13,10 @@ window.Admin = ['$scope', '$location', '$routeParams', 'initialState', 'fileSuff
 
 
 window.AdminWebsite = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
+	$scope.website = {}
 
+	$scope.submit = () ->
+		console.log 'need to submit'
 ]
 
 
@@ -163,5 +166,6 @@ window.AdminAws = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialSt
 	$scope.aws.numWaitingInstances = 0
 	$scope.aws.maxInstances = 20
 
-	setTimeout (() -> console.log $scope.aws), 10000
+	$scope.submit = () ->
+		console.log 'need to submit'
 ]
