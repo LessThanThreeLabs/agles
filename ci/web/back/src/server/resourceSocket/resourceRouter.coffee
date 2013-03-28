@@ -4,6 +4,7 @@ UsersResource = require './resources/users/usersResource'
 ChangesResource = require './resources/changes/changesResource'
 BuildConsolesResource = require './resources/buildConsoles/buildConsolesResource'
 RepositoriesResource = require './resources/repositories/repositoriesResource'
+SystemSettingsResource = require './resources/systemSettings/systemSettingsResource'
 
 
 exports.create = (configurationParams, domainName, stores, modelConnection, mailer) ->
@@ -12,6 +13,7 @@ exports.create = (configurationParams, domainName, stores, modelConnection, mail
 		repositories: RepositoriesResource.create configurationParams, domainName, stores, modelConnection, mailer
 		changes: ChangesResource.create configurationParams, stores, modelConnection, mailer
 		buildConsoles: BuildConsolesResource.create configurationParams, stores, modelConnection, mailer
+		systemSettings: SystemSettingsResource.create configurationParams, stores, modelConnection, mailer
 	return new ResourceRouter configurationParams, resources
 
 
