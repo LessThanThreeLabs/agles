@@ -4,10 +4,10 @@ Handler = require '../../handler'
 
 
 exports.create = (modelRpcConnection) ->
-	return new ChangesReadHandler modelRpcConnection
+	return new SystemSettingsUpdateHandler modelRpcConnection
 
 
-class ChangesReadHandler extends Handler
+class SystemSettingsUpdateHandler extends Handler
 	setWebsiteSettings: (socket, data, callback) =>
 		userId = socket.session.userId
 		if not userId?

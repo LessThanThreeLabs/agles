@@ -12,11 +12,19 @@ window.Admin = ['$scope', '$location', '$routeParams', 'initialState', 'fileSuff
 ]
 
 
-window.AdminWebsite = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
+window.AdminWebsite = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
+	getWebsiteSettings = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getWebsiteSettings', null, (error, websiteSettings) ->
+			console.log websiteSettings
+			$scope.$apply () -> $scope.website = websiteSettings
+
 	$scope.website = {}
+
+	getWebsiteSettings()
 
 	$scope.submit = () ->
 		console.log 'need to submit'
+		rpc.makeRequest 'systemSettings', 'update', 'setWebsiteSettings', $scope.website
 ]
 
 
