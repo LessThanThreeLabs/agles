@@ -24,6 +24,7 @@ window.AdminWebsite = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 
 	$scope.submit = () ->
 		console.log 'need to submit'
+		console.log $scope.website
 		rpc.makeRequest 'systemSettings', 'update', 'setWebsiteSettings', $scope.website
 ]
 

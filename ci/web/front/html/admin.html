@@ -18,8 +18,8 @@
 				<div id="adminWebsiteContent">
 					<styled-form name="websiteForm">
 						<styled-form-field label="Domain" label-padding="true">
-							<input type="text" ng-model="website.domain" name="domain" placeholder="koality.company.com" ng-pattern="/^[-0-9a-zA-Z]+$/" ng-maxlength="256" required focused>
-							<span class="prettyFormError" tooltip="Invalid domain name" ng-class="{visible: websiteForm.domain.$dirty && websiteForm.domain.$invalid}">
+							<input type="text" ng-model="website.domainName" name="domainName" placeholder="koality.company.com" ng-maxlength="256" required focused>
+							<span class="prettyFormError" tooltip="Invalid domain name" ng-class="{visible: websiteForm.domainName.$dirty && websiteForm.domainName.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>

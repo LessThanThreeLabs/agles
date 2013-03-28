@@ -13,10 +13,10 @@ class SystemSettingsReadHandler extends Handler
 		if not userId?
 			callback 403
 		else
-			@modelRpcConnection.systemSettings.read.get_website_domain userId, (error, websiteDomain) =>
+			@modelRpcConnection.systemSettings.read.get_website_domain_name userId, (error, websiteDomain) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
-				else callback null, websiteDomain
+				else callback null, domainName: websiteDomain
 
 
 	getAwsKeys: (socket, data, callback) =>
