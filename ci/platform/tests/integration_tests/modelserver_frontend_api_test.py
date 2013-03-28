@@ -156,3 +156,60 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("repos", "read") as conn:
 			repos = conn.get_repositories(self.user_id)
 		assert_true(len(repos) == 0)
+
+#####################
+#	SYSTEM SETTINGS
+#####################
+
+	def test_domain_name(self):
+		domain_name = "Old_Domain"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_website_domain_name(self.user_id, domain_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals(domain_name, conn.get_website_domain_name(self.user_id))
+
+		domain_name = "this.IS a N3W domain N@ME"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_website_domain_name(self.user_id, domain_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals(domain_name, conn.get_website_domain_name(self.user_id))
+
+	def test_aws_keys(self):
+		access_key = "access KEY"
+		secret_key = "SUPER_secret"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_aws_keys(self.user_id, access_key, secret_key)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"access_key": access_key, "secret_key": secret_key}, conn.get_aws_keys(self.user_id))
+
+		access_key = "abc123XYZ"
+		secret_key = "#!/\\(0xf ?'"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_aws_keys(self.user_id, access_key, secret_key)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"access_key": access_key, "secret_key": secret_key}, conn.get_aws_keys(self.user_id))
+
+	def test_allowed_instance_sizes(self):
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			allowed_instance_sizes = conn.get_allowed_instance_sizes(self.user_id)
+		assert_is_instance(allowed_instance_sizes, list)
+		assert_less(0, len(allowed_instance_sizes))
+
+	def test_instance_settings(self):
+		instance_size = "m1.medium"
+		num_waiting = 42
+		max_running = 69
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_instance_settings(self.user_id, instance_size, num_waiting, max_running)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running},
+				conn.get_instance_settings(self.user_id))
+
+		instance_size = "m2.2xlarge"
+		num_waiting = 1337
+		max_running = 9001
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_instance_settings(self.user_id, instance_size, num_waiting, max_running)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running},
+				conn.get_instance_settings(self.user_id))

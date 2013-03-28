@@ -6,6 +6,7 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from util.permissions import AdminApi
 
 
 class SystemSettingsUpdateHandler(ModelServerRpcHandler):
@@ -45,3 +46,18 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			key=key,
 			value_yaml=yaml.safe_dump(value)
 		)
+
+	@AdminApi
+	def set_website_domain_name(self, user_id, domain_name):
+		self.update_setting("webserver", "domain_name", domain_name)
+
+	@AdminApi
+	def set_aws_keys(self, user_id, access_key, secret_key):
+		self.update_setting("aws", "aws_access_key_id", access_key)
+		self.update_setting("aws", "aws_secret_access_key", secret_key)
+
+	@AdminApi
+	def set_instance_settings(self, user_id, instance_size, num_waiting, max_running):
+		self.update_setting("aws", "instance_size", instance_size)
+		self.update_setting("verification_server", "static_pool_size", num_waiting)
+		self.update_setting("verification_server", "virtual_machine_count", max_running)

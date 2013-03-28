@@ -14,7 +14,8 @@ from virtual_machine import VirtualMachine
 class OpenstackClient(object):
 	@classmethod
 	def get_client(cls):
-		return novaclient.client.Client(*OpenstackSettings.credentials[0], **OpenstackSettings.credentials[1])
+		credentials = OpenstackSettings.credentials()
+		return novaclient.client.Client(*credentials[0], **credentials[1])
 
 
 class OpenstackVm(VirtualMachine):

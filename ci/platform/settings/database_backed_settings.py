@@ -8,12 +8,13 @@ class DatabaseBackedSettings(object):
 	class __metaclass__(type):
 		def __getattr__(cls, attr):
 			cls.initialize()
-			if attr == '_resource' or attr.startswith('__'):
-				return None
+			if attr == '_resource' or attr.startswith('_'):
+				attrname = attr[len('_default_'):] if attr.startswith('_default_') else attr
+				raise AttributeError("'%s' object has no attribute '%s'" % (cls.__name__, attrname))
 			setting = cls._retrieve_setting(attr)
 			if setting:
 				return setting
-			return cls.__getattribute__(cls, '_default_' + attr)
+			return getattr(cls, '_default_' + attr)
 
 	_is_initialized = False
 
@@ -30,9 +31,9 @@ class DatabaseBackedSettings(object):
 	def __init__(self, **kwargs):
 		filename = os.path.basename(inspect.getfile(inspect.currentframe().f_back))
 		setattr(type(self), '_resource', filename[:filename.rfind('.')])
-		self.add_values(**kwargs)
+		self._add_values(**kwargs)
 
-	def add_values(self, **kwargs):
+	def _add_values(self, **kwargs):
 		for name, default_value in kwargs.items():
 			self._value(name, default_value)
 

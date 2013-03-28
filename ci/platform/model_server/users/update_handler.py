@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from util.permissions import is_admin, InvalidPermissionsError
+from util.permissions import AdminApi, InvalidPermissionsError
 
 
 class UsersUpdateHandler(ModelServerRpcHandler):
@@ -60,13 +60,12 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 			sqlconn.execute(delete)
 		return True
 
+	@AdminApi
 	def set_admin(self, user_id, user_id_to_change, admin):
 		user = schema.user
 
 		if user_id == user_id_to_change:
 			raise InvalidPermissionsError(user_id, user_id_to_change)
-		if not is_admin(user_id):
-			raise InvalidPermissionsError(user_id)
 
 		update = user.update().where(user.c.id == user_id_to_change).values(admin=admin)
 		with ConnectionFactory.get_sql_connection() as sqlconn:

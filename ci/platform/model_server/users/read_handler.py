@@ -6,7 +6,7 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from util.sql import to_dict
-from util.permissions import is_admin, InvalidPermissionsError
+from util.permissions import AdminApi
 
 
 class UsersReadHandler(ModelServerRpcHandler):
@@ -31,11 +31,10 @@ class UsersReadHandler(ModelServerRpcHandler):
 		except NoSuchUserError:
 			return False
 
+	@AdminApi
 	def get_all_users(self, user_id):
 		user = database.schema.user
 
-		if not is_admin(user_id):
-			raise InvalidPermissionsError(user_id)
 		query = user.select().where(and_(
 			user.c.deleted == 0,
 			user.c.id >= 1000))

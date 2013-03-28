@@ -4,7 +4,7 @@ import model_server
 
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
-from util.permissions import is_admin
+from util.permissions import is_admin, AdminApi, InvalidPermissionsError
 
 
 class PermissionTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
@@ -28,3 +28,14 @@ class PermissionTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
 		assert_false(is_admin(non_admin_id))
 		assert_true(is_admin(admin_id))
+
+	def test_admin_api(self):
+		non_admin_id = self._create_user("user1_email", False)
+		admin_id = self._create_user("user2_email", True)
+
+		assert_raises(InvalidPermissionsError, lambda: self._admin_api_method(non_admin_id))
+		assert self._admin_api_method(admin_id)
+
+	@AdminApi
+	def _admin_api_method(self, user_id):
+		return True

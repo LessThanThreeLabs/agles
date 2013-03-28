@@ -10,6 +10,3 @@ class VerificationServerSettings(DatabaseBackedSettings):
 			virtual_machine_count=1,
 			static_pool_size=1,
 			local_box_name="precise64_verification")
-		self.add_values(
-			verification_worker_queue=Queue("verification:worker", exchange=VerificationServerSettings.exchange, routing_key="verification:request", durable=False),
-			verification_results_queue=Queue("verification:results", exchange=VerificationServerSettings.exchange, routing_key="verification:results", durable=False))

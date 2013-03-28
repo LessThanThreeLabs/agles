@@ -15,7 +15,7 @@ class Ec2Client(object):
 	@classmethod
 	def get_client(cls):
 		return boto.ec2.connect_to_region(AwsSettings.region,
-			**AwsSettings.credentials)
+			**AwsSettings.credentials())
 
 
 class Ec2Vm(VirtualMachine):

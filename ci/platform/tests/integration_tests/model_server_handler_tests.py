@@ -8,12 +8,13 @@ from model_server.changes.read_handler import ChangesReadHandler
 from util.test import BaseIntegrationTest
 
 
-class BuildsUpdateHandlerTest(BaseIntegrationTest):
+class ModelServerHandlerTest(BaseIntegrationTest):
 	def setUp(self):
-		super(BuildsUpdateHandlerTest, self).setUp()
+		super(ModelServerHandlerTest, self).setUp()
+		self._initialize()
 
 	def tearDown(self):
-		super(BuildsUpdateHandlerTest, self).tearDown()
+		super(ModelServerHandlerTest, self).tearDown()
 
 	def _initialize(self):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
@@ -23,7 +24,7 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				last_name='LaSt',
 				password_hash='a',
 				salt='a' * 16,
-				created=0
+				created=0,
 			)
 
 			self.user_id = sqlconn.execute(ins_user).inserted_primary_key[0]
@@ -82,7 +83,6 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				self.build_ids.append(sqlconn.execute(ins_build).inserted_primary_key[0])
 
 	def test_console_append(self):
-		self._initialize()
 		update_handler = BuildConsolesUpdateHandler()
 
 		for i in self.build_ids:
@@ -102,7 +102,6 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 				type=ConsoleType.Test, subtype="unittest")
 
 	def test_query_changes_group(self):
-		self._initialize()
 		read_handler = ChangesReadHandler()
 		results = read_handler.query_changes_group(self.user_id, self.repo_id, "all", 0, 100)
 		assert_equal(len(results), 1)
@@ -113,14 +112,12 @@ class BuildsUpdateHandlerTest(BaseIntegrationTest):
 		results = read_handler.query_changes_group(fake_user_id, self.repo_id, "me", 0, 100)
 		assert_equal(len(results), 0)
 
-	def test_query_changes_filter_empty_input(self):
-		self._initialize()
+	def query_changes_filter_empty_input_test(self):
 		read_handler = ChangesReadHandler()
 		results = read_handler.query_changes_filter(self.user_id, self.repo_id, [], 0, 100)
 		assert_equal(len(results), 1)
 
-	def test_query_changes_filter(self):
-		self._initialize()
+	def query_changes_filter_test(self):
 		read_handler = ChangesReadHandler()
 		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["first"], 0, 100)
 		assert_equal(len(results), 1)

@@ -9,8 +9,7 @@ class AwsSettings(DatabaseBackedSettings):
 			aws_secret_access_key="",
 			instance_type="m1.small",
 			vm_image_name_prefix="koality_verification_",
-			security_groups=[])
-		self.add_values(
-			credentials=dict(
-				aws_access_key_id=str(self.aws_access_key_id),
-				aws_secret_access_key=str(self.aws_secret_access_key)))
+			security_groups=[],
+			credentials=lambda cls: dict(
+				aws_access_key_id=str(cls.aws_access_key_id),
+				aws_secret_access_key=str(cls.aws_secret_access_key)))
