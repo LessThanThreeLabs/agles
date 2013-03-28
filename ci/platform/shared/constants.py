@@ -1,3 +1,6 @@
+VERSION = 0.1
+
+
 class VerificationUser(object):
 	id = 1
 

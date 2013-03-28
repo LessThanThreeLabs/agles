@@ -73,6 +73,33 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 		assert_equal(a_list, TestSettings.a_list)
 
+	def test_set_attr(self):
+		class TestSettings(DatabaseBackedSettings):
+			pass
+
+		alpha = "abc"
+		numeric = 123
+		a_list = [1, "two", {3: "Three"}]
+		a_dict = {"alpha": alpha, "numeric": numeric, "a_list": a_list}
+
+		TestSettings(alpha=alpha, numeric=numeric, a_list=a_list, a_dict=a_dict)
+
+		new_alpha = "zyx"
+		TestSettings.alpha = new_alpha
+
+		assert_equal(new_alpha, TestSettings.alpha)
+		assert_equal(new_alpha, self._get_setting("alpha"))
+
+		alphanumeric = "abc123XYZ"
+		TestSettings.alpha = alphanumeric
+
+		assert_equal(alphanumeric, TestSettings.alpha)
+		assert_equal(alphanumeric, self._get_setting("alpha"))
+
 	def _change_setting(self, key, value):
 		with model_server.rpc_connect("system_settings", "update") as model_server_rpc:
 			model_server_rpc.update_setting("database_backed_settings_test", key, value)
+
+	def _get_setting(self, key):
+		with model_server.rpc_connect("system_settings", "read") as model_server_rpc:
+			return model_server_rpc.get_setting("database_backed_settings_test", key)

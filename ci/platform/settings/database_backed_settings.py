@@ -16,6 +16,12 @@ class DatabaseBackedSettings(object):
 				return setting
 			return getattr(cls, '_default_' + attr)
 
+		def __setattr__(cls, attr, value):
+			if attr.startswith('_'):
+				type.__setattr__(cls, attr, value)
+				return
+			cls._update_setting(attr, value)
+
 	_is_initialized = False
 
 	@classmethod
@@ -47,3 +53,8 @@ class DatabaseBackedSettings(object):
 	def _retrieve_setting(cls, attr):
 		with model_server.rpc_connect("system_settings", "read") as model_server_rpc:
 			return model_server_rpc.get_setting(cls._resource, attr)
+
+	@classmethod
+	def _update_setting(cls, attr, value):
+		with model_server.rpc_connect("system_settings", "update") as model_server_rpc:
+			model_server_rpc.update_setting(cls._resource, attr, value)
