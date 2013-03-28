@@ -1,8 +1,11 @@
 create table company (
 	id		SERIAL PRIMARY KEY,
 	name	VARCHAR NOT NULL,
-	contact	VARCHAR NOT NULL
+	email	VARCHAR NOT NULL
 );
+
+CREATE UNIQUE INDEX company_name_unique_idx ON company (name);
+
 
 create table license (
 	id			SERIAL PRIMARY KEY,
