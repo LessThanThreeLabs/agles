@@ -112,12 +112,12 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 		results = read_handler.query_changes_group(fake_user_id, self.repo_id, "me", 0, 100)
 		assert_equal(len(results), 0)
 
-	def query_changes_filter_empty_input_test(self):
+	def test_query_changes_filter_empty_input(self):
 		read_handler = ChangesReadHandler()
 		results = read_handler.query_changes_filter(self.user_id, self.repo_id, [], 0, 100)
 		assert_equal(len(results), 1)
 
-	def query_changes_filter_test(self):
+	def test_query_changes_filter(self):
 		read_handler = ChangesReadHandler()
 		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["first"], 0, 100)
 		assert_equal(len(results), 1)
