@@ -8,7 +8,7 @@ def main():
 	print "Starting Model Server ..."
 
 	settings.log.configure()
-	ModelServer().start()
+	ModelServer().start().wait()
 
 
 main()

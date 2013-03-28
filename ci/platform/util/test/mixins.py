@@ -41,7 +41,7 @@ class GreenProcess(object):
 	def join(self):
 		try:
 			self.greenlet.wait()
-		except:
+		except eventlet.greenlet.GreenletExit:
 			pass
 
 	@classmethod
@@ -57,16 +57,15 @@ class ModelServerTestMixin(BaseTestMixin):
 
 	@classmethod
 	def _start_model_server(cls):
-		connection = Connection(RabbitSettings.kombu_connection_info)
-		cls.model_server_channel = connection.channel()
-		cls.model_server_process = GreenProcess(target=ModelServer(cls.model_server_channel).start)
-		cls.model_server_process.start()
+		cls.model_server_greenlet = ModelServer().start()
 
 	@classmethod
 	def _stop_model_server(cls):
-		cls.model_server_process.terminate()
-		cls.model_server_process.join()
-		cls.model_server_channel.close()
+		cls.model_server_greenlet.kill()
+		try:
+			cls.model_server_greenlet.wait()
+		except eventlet.greenlet.GreenletExit:
+			pass
 
 
 class RabbitMixin(BaseTestMixin):

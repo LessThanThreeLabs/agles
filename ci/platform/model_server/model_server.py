@@ -5,6 +5,8 @@
 This class contains the api that is exposed to clients
 and is the only point of interaction between clients and the model server.
 """
+import eventlet
+
 from kombu.connection import Connection
 
 from builds.create_handler import BuildsCreateHandler
@@ -67,5 +69,10 @@ class ModelServer(object):
 	def start(self):
 		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.channel),
 			self.rpc_handler_classes)
+		ioloop_greenlet = eventlet.spawn(self._ioloop)
+		ioloop_greenlet.link(lambda greenlet: self.channel.connection.close())
+		return ioloop_greenlet
+
+	def _ioloop(self):
 		while True:
 			self.channel.connection.drain_events()

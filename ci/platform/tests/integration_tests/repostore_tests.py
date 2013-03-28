@@ -9,10 +9,10 @@ from repo.store import FileSystemRepositoryStore, MergeError
 
 from util.pathgen import to_path
 from util.test import BaseIntegrationTest
-from util.test.mixins import ModelServerTestMixin, RepoStoreTestMixin
+from util.test.mixins import ModelServerTestMixin, RepoStoreTestMixin, RabbitMixin
 
 
-class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMixin):
+class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMixin, RabbitMixin):
 	TEST_DIR = '/tmp'
 
 	@classmethod
@@ -27,6 +27,8 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		shutil.rmtree(repodir)
 
 	def setUp(self):
+		super(RepoStoreTests, self).setUp()
+		self._purge_queues()
 		self.repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
 		self.store = FileSystemRepositoryStore(self.repodir)
 		self.repo_id = 1
@@ -36,8 +38,10 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self._start_model_server()
 
 	def tearDown(self):
-		self._cleardir(self.repodir)
+		super(RepoStoreTests, self).tearDown()
 		self._stop_model_server()
+		self._cleardir(self.repodir)
+		self._purge_queues()
 
 	def _cleardir(self, dirpath):
 		for filename in os.listdir(dirpath):
@@ -81,8 +85,10 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
 		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
+
 		self._modify_commit_push(work_repo, "test.txt", "c2",
 			parent_commits=[init_commit])
+
 		self._modify_commit_push(work_repo, "test.txt", "c3",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
