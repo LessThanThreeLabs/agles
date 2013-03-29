@@ -5,7 +5,7 @@ pycrypto==2.6
 librabbitmq
 sqlalchemy==0.7.8
 pyyaml
-msgpack-python
+msgpack-python==0.3
 nose
 redis
 eventlet==0.12.1

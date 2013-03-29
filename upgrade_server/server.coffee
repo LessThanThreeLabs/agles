@@ -2,15 +2,15 @@ express = require 'express'
 pg = require 'pg'
 fs = require 'fs'
 
-connectionString = "postgres:///upgrade"
+connectionString = "postgres:///license"
 
 app = express()
 app.use(express.bodyParser())
 
 
-validateLicenseKey = (key, callback) ->
+validateLicenseKey = (key, serverId, callback) ->
 	pg.connect connectionString, (error, client) ->
-		client.query 'SELECT id FROM license WHERE key = $1', [key], (error, result) ->
+		client.query 'SELECT license.id FROM (license JOIN server_id ON license.id = server_id.license_id) WHERE key = $1 AND server_id = $2', [key, serverId], (error, result) ->
 			if error
 				callback error
 			callback null, result.rows.length > 0
@@ -18,7 +18,9 @@ validateLicenseKey = (key, callback) ->
 
 app.post '/license/check', (request, response) ->
 	key = request.body.key
-	validateLicenseKey key, (error, result) ->
+	serverId = request.body.serverId
+
+	validateLicenseKey key, serverId, (error, result) ->
 		if error
 			console.log error
 			response.end 'false'
@@ -31,10 +33,11 @@ app.post '/license/check', (request, response) ->
 
 app.post '/upgrade', (request, response) ->
 	key = request.body.key
+	serverId = request.body.serverId
 	currentVersion = request.body.currentVersion
 	upgradeVersion = request.body.upgradeVersion
 
-	validateLicenseKey key, (error, valid) ->
+	validateLicenseKey key, serverId (error, valid) ->
 		if error
 			console.log error
 			response.send 404
