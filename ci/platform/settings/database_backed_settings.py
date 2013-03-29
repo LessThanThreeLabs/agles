@@ -40,7 +40,8 @@ class DatabaseBackedSettings(object):
 	@classmethod
 	def _get_resource(cls):
 		s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls.__name__)
-		return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+		camelcase = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+		return camelcase[:camelcase.find('_settings')]
 
 	def _add_values(self, **kwargs):
 		for name, default_value in kwargs.items():

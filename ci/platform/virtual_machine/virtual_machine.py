@@ -20,8 +20,12 @@ class VirtualMachine(object):
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		raise NotImplementedError()
 
+	@classmethod
+	def _call(self, command, output_handler=None, env={}, timeout=None, **kwargs):
+		return StreamingExecutor().execute(command, output_handler, env=env, timeout=timeout, **kwargs)
+
 	def call(self, command, output_handler=None, env={}, timeout=None, **kwargs):
-		return StreamingExecutor().execute(command, output_handler, cwd=self.vm_directory, env=env, timeout=timeout, **kwargs)
+		return self.call(command, output_handler, cwd=self.vm_directory, env=env, timeout=timeout, **kwargs)
 
 	def write_vm_info(self):
 		config = yaml.safe_dump({'instance_id': self.instance.id, 'username': self.vm_username})
