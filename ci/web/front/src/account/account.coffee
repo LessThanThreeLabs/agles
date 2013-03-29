@@ -18,7 +18,10 @@ window.AccountBasic = ['$scope', 'initialState', 'rpc', ($scope, initialState, r
 		lastName: initialState.user.lastName
 
 	$scope.submit = () ->
-		rpc.makeRequest 'users', 'update', 'changeBasicInformation', $scope.account
+		rpc.makeRequest 'users', 'update', 'changeBasicInformation', $scope.account, (error) ->
+			$scope.$apply () -> $scope.showSuccess = true if not error?
+
+	$scope.$watch 'account', (() -> $scope.showSuccess = false), true
 ]
 
 

@@ -12,7 +12,7 @@
 
 	<div id="accountBasic" ng-show="currentView == 'basic'" ng-controller="AccountBasic">
 		<content>
-			<content-header content-header-padding>My Account</content-header>
+			<content-header content-header-padding ng-class="{green: showSuccess, red: showError}">My Account</content-header>
 			<content-body unselectable>
 				<div id="accountBasicContent">
 					<styled-form name="basicForm">
