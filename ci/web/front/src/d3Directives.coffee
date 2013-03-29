@@ -39,6 +39,9 @@ angular.module('koality.d3.directive', []).
 
 				return histogram
 
+			getGreatestNumberOfChanges = (allHistogram, passedHistogram, failedHistogram) ->
+				return d3.max [d3.max(allHistogram), d3.max(passedHistogram), d3.max(failedHistogram)]
+
 			drawGraph = () ->
 				startTime = new Date(scope.timeInterval.start)
 				endTime = d3.max [new Date(scope.timeInterval.end),
@@ -60,15 +63,25 @@ angular.module('koality.d3.directive', []).
 					.domain([allIntervals[0], allIntervals[allIntervals.length-1]])
 					.range([padding.left+axisBuffer, width-padding.right])
 				y = d3.scale.linear()
-					.domain([0, d3.max [d3.max(allHistogram), d3.max(passedHistogram), d3.max(failedHistogram)]])
+					.domain([0, getGreatestNumberOfChanges(allHistogram, passedHistogram, failedHistogram)])
 					.range([height-padding.bottom-axisBuffer, padding.top])
+				yStart = (value) -> return y 0
 
 				xAxis = d3.svg.axis().scale(x).ticks(5).tickFormat(d3.time.format '%m/%d').orient 'bottom'
 				yAxis = d3.svg.axis().scale(y).ticks(5).orient 'left'
 
-				allPath.datum(allHistogram).attr('d', computeChangeLine x, y, allIntervals)
-				passedPath.datum(passedHistogram).attr('d', computeChangeLine x, y, allIntervals)
-				failedPath.datum(failedHistogram).attr('d', computeChangeLine x, y, allIntervals)
+				allPath.datum(allHistogram)
+					.attr('d', computeChangeLine x, yStart, allIntervals)
+					.transition().duration(500)
+					.attr('d', computeChangeLine x, y, allIntervals)
+				passedPath.datum(passedHistogram)
+					.attr('d', computeChangeLine x, yStart, allIntervals)
+					.transition().duration(750)
+					.attr('d', computeChangeLine x, y, allIntervals)
+				failedPath.datum(failedHistogram)
+					.attr('d', computeChangeLine x, yStart, allIntervals)
+					.transition().duration(1000)
+					.attr('d', computeChangeLine x, y, allIntervals)
 
 				xAxisLabel.call xAxis
 				yAxisLabel.call yAxis
