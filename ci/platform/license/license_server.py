@@ -7,28 +7,31 @@ from settings.deployment import DeploymentSettings
 
 LICENSE_VERIFICATION_URL = 'https://koalitycode.com/license/check'
 MAX_FAILURES = 12
-HOUR = 3600
 
 
 class LicenseServer(object):
-	def __init__(self):
+	def __init__(self, key_verifier, sleep_time=3600):
 		super(LicenseServer, self).__init__()
+		self.key_verifier = key_verifier
+		self.sleep_time = sleep_time
 
 	def run(self):
 		while True:
-			try:
-				key = DeploymentSettings.license
-				server_id = DeploymentSettings.server_id
-				valid = self.verify_key(key, server_id)
+			self.handle_once()
+			time.sleep(self.sleep_time)
 
-				if valid:
-					self.reset_license_check_failures()
-				else:
-					self.license_check_failed()
-			except:
+	def handle_once(self):
+		try:
+			key = DeploymentSettings.license
+			server_id = DeploymentSettings.server_id
+			valid = self.key_verifier.verify_valid(key, server_id)
+
+			if valid:
+				self.reset_license_check_failures()
+			else:
 				self.license_check_failed()
-
-			time.sleep(2*HOUR)
+		except:
+			self.license_check_failed()
 
 	def verify_key(self, key, server_id):
 		verification_data = {'key': key, 'server_id': server_id}
@@ -47,3 +50,20 @@ class LicenseServer(object):
 
 		if failures > MAX_FAILURES:
 			DeploymentSettings.active = False
+
+
+class LicenseKeyVerifier(object):
+	def verify_valid(self, key, server_id):
+		raise NotImplementedError("Subclasses should override this!")
+
+
+class HttpLicenseKeyVerifier(object):
+	def __init__(self, verification_url=LICENSE_VERIFICATION_URL):
+		self.verification_url = verification_url
+
+	def verify_valid(self, key, server_id):
+		verification_data = {'key': key, 'server_id': server_id}
+		response = requests.post(self.verification_url, data=verification_data)
+		if response.status_code != requests.codes.ok:
+			return False
+		return response.text.lower() == 'true'

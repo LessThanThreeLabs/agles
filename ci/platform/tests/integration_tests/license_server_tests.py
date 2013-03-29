@@ -1,5 +1,5 @@
 from nose.tools import *
-from license.license_server import LicenseServer, MAX_FAILURES
+from license.license_server import LicenseServer, HttpLicenseKeyVerifier, LicenseKeyVerifier, MAX_FAILURES
 from settings.deployment import DeploymentSettings
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
@@ -17,7 +17,7 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._purge_queues()
 
 	def test_license_check_failed(self):
-		serve = LicenseServer()
+		serve = LicenseServer(HttpLicenseKeyVerifier())
 		DeploymentSettings.active = True
 		assert_equals(True, DeploymentSettings.active)
 		for i in range(MAX_FAILURES + 1):
@@ -27,7 +27,7 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		assert_equals(False, DeploymentSettings.active)
 
 	def test_reset_license_check_failures(self):
-		serve = LicenseServer()
+		serve = LicenseServer(HttpLicenseKeyVerifier())
 		DeploymentSettings.initialize()
 		for i in range(MAX_FAILURES + 1):
 			assert_equals(i, DeploymentSettings.license_validation_failures)
@@ -39,3 +39,34 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		serve.reset_license_check_failures()
 		assert_equals(0, DeploymentSettings.license_validation_failures)
 		assert_equals(True, DeploymentSettings.active)
+
+	def test_fail_to_deactivate(self):
+		class FailingLicenseKeyVerifier(LicenseKeyVerifier):
+			def verify_valid(self, key, server_id):
+				return False
+
+		DeploymentSettings.active = True
+		assert_equals(True, DeploymentSettings.active)
+
+		serve = LicenseServer(FailingLicenseKeyVerifier())
+		serve.handle_once()
+
+		assert_equals(1, DeploymentSettings.license_validation_failures)
+		for i in range(MAX_FAILURES + 1):
+			serve.handle_once()
+
+		assert_equals(False, DeploymentSettings.active)
+
+	def test_verify_success(self):
+		class PassingLicenseKeyVerifier(LicenseKeyVerifier):
+			def verify_valid(self, key, server_id):
+				return True
+
+		DeploymentSettings.active = True
+		assert_equals(True, DeploymentSettings.active)
+
+		serve = LicenseServer(PassingLicenseKeyVerifier())
+		for i in range(MAX_FAILURES + 1):
+			serve.handle_once()
+			assert_equals(0, DeploymentSettings.license_validation_failures)
+			assert_equals(True, DeploymentSettings.active)
