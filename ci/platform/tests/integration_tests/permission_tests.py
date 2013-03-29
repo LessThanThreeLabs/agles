@@ -8,9 +8,13 @@ from util.permissions import is_admin, AdminApi, InvalidPermissionsError
 
 
 class PermissionTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
+	@classmethod
+	def setup_class(cls):
+		super(PermissionTest, cls).setup_class()
+		cls._purge_queues()
+
 	def setUp(self):
 		super(PermissionTest, self).setUp()
-		self._purge_queues()
 		self._start_model_server()
 
 	def tearDown(self):

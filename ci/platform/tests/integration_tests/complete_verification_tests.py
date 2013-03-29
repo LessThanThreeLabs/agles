@@ -39,9 +39,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 	@classmethod
 	def setup_class(cls):
+		super(VerificationRoundTripTest, cls).setup_class()
+		cls._start_model_server()
 		cls.repostore_id = 1
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
-		cls._start_model_server()
 		repo_store = Server(FileSystemRepositoryStore(cls.repo_dir))
 		repo_store.bind(StoreSettings.rpc_exchange_name, [RepositoryStore.queue_name(cls.repostore_id)], auto_delete=True)
 		cls.repo_store_process = GreenProcess(target=repo_store.run)
@@ -56,7 +57,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 	def setUp(self):
 		super(VerificationRoundTripTest, self).setUp()
-		self._purge_queues()
 		self.repo_id = 1
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.makedirs(self.repo_dir)
@@ -76,7 +76,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 	def tearDown(self):
-		super(VerificationRoundTripTest, self).setUp()
+		super(VerificationRoundTripTest, self).tearDown()
 		rmtree(self.repo_dir)
 		self.vs_process.terminate()
 		self.vs_process.join()

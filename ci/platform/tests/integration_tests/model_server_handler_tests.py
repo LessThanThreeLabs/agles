@@ -13,9 +13,6 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 		super(ModelServerHandlerTest, self).setUp()
 		self._initialize()
 
-	def tearDown(self):
-		super(ModelServerHandlerTest, self).tearDown()
-
 	def _initialize(self):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			ins_user = user.insert().values(

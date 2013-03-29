@@ -17,18 +17,20 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 
 	@classmethod
 	def setup_class(cls):
+		super(RepoStoreTests, cls).setup_class()
+		cls._purge_queues()
 		repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
 		shutil.rmtree(repodir, ignore_errors=True)
 		os.mkdir(repodir)
 
 	@classmethod
 	def teardown_class(cls):
+		super(RepoStoreTests, cls).teardown_class()
 		repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
 		shutil.rmtree(repodir)
 
 	def setUp(self):
 		super(RepoStoreTests, self).setUp()
-		self._purge_queues()
 		self.repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
 		self.store = FileSystemRepositoryStore(self.repodir)
 		self.repo_id = 1

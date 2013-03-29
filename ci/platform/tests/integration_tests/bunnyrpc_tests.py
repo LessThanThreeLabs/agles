@@ -12,9 +12,13 @@ from util.test.mixins import RabbitMixin, GreenProcess
 
 
 class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
+	@classmethod
+	def setup_class(cls):
+		super(BunnyRPCTest, cls).setup_class()
+		cls._purge_queues()
+
 	def setUp(self):
 		super(BunnyRPCTest, self).setUp()
-		self._purge_queues()
 
 		ttl_event = Event()
 		self.ttl_process = GreenProcess(target=self._runserver,

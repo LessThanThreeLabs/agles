@@ -6,6 +6,9 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from settings.aws import AwsSettings
+from settings.verification_server import VerificationServerSettings
+from settings.web_server import WebServerSettings
 from util.permissions import AdminApi
 
 
@@ -29,12 +32,12 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_website_domain_name(self, user_id):
-		return self.get_setting("webserver", "domain_name")
+		return WebServerSettings.domain_name
 
 	@AdminApi
 	def get_aws_keys(self, user_id):
-		aws_access_key_id = self.get_setting("aws", "aws_access_key_id")
-		aws_secret_access_key = self.get_setting("aws", "aws_secret_access_key")
+		aws_access_key_id = AwsSettings.aws_access_key_id
+		aws_secret_access_key = AwsSettings.aws_secret_access_key
 		return {"access_key": aws_access_key_id, "secret_key": aws_secret_access_key}
 
 	@AdminApi
@@ -44,7 +47,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_instance_settings(self, user_id):
-		instance_size = self.get_setting("aws", "instance_size")
-		num_waiting = self.get_setting("verification_server", "static_pool_size")
-		max_running = self.get_setting("verification_server", "virtual_machine_count")
+		instance_size = AwsSettings.instance_type
+		num_waiting = VerificationServerSettings.static_pool_size
+		max_running = VerificationServerSettings.virtual_machine_count
 		return {"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running}
