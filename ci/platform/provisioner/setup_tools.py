@@ -47,7 +47,7 @@ class SetupCommand(object):
 	def _to_command(self, command):
 		if self.silent:
 			return '(%s) > /dev/null' % command
-		return self._and("echo -e $ %s" % pipes.quote(command), command)
+		return self._and("echo -e $ %s" % pipes.quote(command), "{%s}" % command)
 
 	def to_subshell_command(self):
 		return '(%s)' % self.to_shell_command()

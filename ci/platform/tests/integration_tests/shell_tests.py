@@ -20,9 +20,13 @@ NON_EXISTANT_USER_ID = "0"
 
 
 class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
+	@classmethod
+	def setup_class(cls):
+		super(ShellTest, cls).setup_class()
+		cls._purge_queues()
+
 	def setUp(self):
 		super(ShellTest, self).setUp()
-		self._purge_queues()
 		self._start_model_server()
 
 	def tearDown(self):

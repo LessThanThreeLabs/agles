@@ -9,14 +9,19 @@ class BaseTest(unittest.TestCase):
 	def setup_class(cls):
 		settings.log.configure()
 
+	@classmethod
+	def teardown_class(cls):
+		pass
+
 
 class BaseUnitTest(BaseTest):
 	pass
 
 
 class BaseIntegrationTest(BaseTest):
-	def setUp(self):
-		super(BaseIntegrationTest, self).setUp()
+	@classmethod
+	def setup_class(cls):
+		super(BaseIntegrationTest, cls).setup_class()
 		schema.reseed_db()
 
 	def tearDown(self):

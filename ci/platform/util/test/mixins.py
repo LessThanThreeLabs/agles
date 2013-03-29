@@ -69,7 +69,8 @@ class ModelServerTestMixin(BaseTestMixin):
 
 
 class RabbitMixin(BaseTestMixin):
-	def _purge_queues(self):
+	@classmethod
+	def _purge_queues(cls):
 		command = """rabbitmqadmin -u %s -p %s -f tsv -q list queues name messages|
 			while read queue count;
 			do if [ ${count} -gt "0" ];

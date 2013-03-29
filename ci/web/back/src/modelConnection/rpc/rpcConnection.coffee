@@ -18,6 +18,7 @@ class RpcConnection
 		{localName: 'repositories',		rpcName: 'rpc:repos'}
 		{localName: 'buildConsoles', 	rpcName: 'rpc:build_consoles'} 
 		{localName: 'changes', 			rpcName: 'rpc:changes'}
+		{localName: 'systemSettings',	rpcName: 'rpc:system_settings'}
 	]
 
 	VERBS: ['create', 'read', 'update', 'delete']

@@ -58,9 +58,13 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 	REPO_NAME = "r"
 	REPO_URI = to_clone_path(EMAIL, REPO_NAME)
 
+	@classmethod
+	def setup_class(cls):
+		super(ModelServerFrontEndApiTest, cls).setup_class()
+		cls._purge_queues()
+
 	def setUp(self):
 		super(ModelServerFrontEndApiTest, self).setUp()
-		self._purge_queues()
 		self._start_model_server()
 		self._create_user()
 		self._create_repo()

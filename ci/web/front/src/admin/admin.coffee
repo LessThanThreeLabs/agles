@@ -12,11 +12,20 @@ window.Admin = ['$scope', '$location', '$routeParams', 'initialState', 'fileSuff
 ]
 
 
-window.AdminWebsite = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
+window.AdminWebsite = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
+	getWebsiteSettings = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getWebsiteSettings', null, (error, websiteSettings) ->
+			$scope.$apply () -> $scope.website = websiteSettings
+
 	$scope.website = {}
+	getWebsiteSettings()
 
 	$scope.submit = () ->
-		console.log 'need to submit'
+		rpc.makeRequest 'systemSettings', 'update', 'setWebsiteSettings', $scope.website, (error) ->
+			$scope.$apply () ->
+				$scope.showSuccess = true if not error?
+
+	$scope.$watch 'website', (() -> $scope.showSuccess = false), true
 ]
 
 
@@ -154,18 +163,30 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 
 
 window.AdminAws = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
-	$scope.instanceSizes = ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 
-		'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge', 
-		'm3.xlarge', 'm3.2xlarge', 
-		'c1.medium', 'c1.xlarge',
-		'hi1.4xlarge', 
-		'hs1.8xlarge']
+	getAwsKeys = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getAwsKeys', null, (error, awsKeys) ->
+			$scope.$apply () ->
+				$scope.awsKeys = awsKeys
 
-	$scope.aws = {}
-	$scope.aws.instanceSize = 'm1.medium'
-	$scope.aws.numWaitingInstances = 0
-	$scope.aws.maxInstances = 20
+	getAllowedInstanceSizes = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getAllowedInstanceSizes', null, (error, allowedInstanceSizes) ->
+			$scope.$apply () ->
+				$scope.allowedInstanceSizes = allowedInstanceSizes
+
+	getInstanceSettings = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getInstanceSettings', null, (error, instanceSettings) ->
+			$scope.$apply () ->
+				$scope.instanceSettings = instanceSettings
+
+	getAwsKeys()
+	getAllowedInstanceSizes()
+	getInstanceSettings()
 
 	$scope.submit = () ->
-		console.log 'need to submit'
+		rpc.makeRequest 'systemSettings', 'update', 'setAwsKeys', $scope.awsKeys
+		rpc.makeRequest 'systemSettings', 'update', 'setInstanceSettings', $scope.instanceSettings
+		$scope.showSuccess = true
+
+	$scope.$watch 'awsKeys', (() -> $scope.showSuccess = false), true
+	$scope.$watch 'instanceSettings', (() -> $scope.showSuccess = false), true
 ]

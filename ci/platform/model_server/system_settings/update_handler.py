@@ -6,6 +6,9 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from settings.aws import AwsSettings
+from settings.verification_server import VerificationServerSettings
+from settings.web_server import WebServerSettings
 from util.permissions import AdminApi
 
 
@@ -50,15 +53,15 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def set_website_domain_name(self, user_id, domain_name):
-		self.update_setting("webserver", "domain_name", domain_name)
+		WebServerSettings.domain_name = domain_name
 
 	@AdminApi
 	def set_aws_keys(self, user_id, access_key, secret_key):
-		self.update_setting("aws", "aws_access_key_id", access_key)
-		self.update_setting("aws", "aws_secret_access_key", secret_key)
+		AwsSettings.aws_access_key_id = access_key
+		AwsSettings.aws_secret_access_key = secret_key
 
 	@AdminApi
 	def set_instance_settings(self, user_id, instance_size, num_waiting, max_running):
-		self.update_setting("aws", "instance_size", instance_size)
-		self.update_setting("verification_server", "static_pool_size", num_waiting)
-		self.update_setting("verification_server", "virtual_machine_count", max_running)
+		AwsSettings.instance_type = instance_size
+		VerificationServerSettings.static_pool_size = num_waiting
+		VerificationServerSettings.virtual_machine_count = max_running
