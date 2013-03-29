@@ -8,7 +8,13 @@ def main():
 	print "Starting Model Server ..."
 
 	settings.log.configure()
-	ModelServer().start().wait()
+	try:
+		model_server = ModelServer().start()
+	except:
+		print "Failed to start Model Server"
+		raise
+	print "Successfully started Model Server"
+	model_server.wait()
 
 
 main()
