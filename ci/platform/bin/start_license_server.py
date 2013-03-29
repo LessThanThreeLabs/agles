@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import license_server
+from license import license_server
 
 
 def main():
+	print "Starting license server..."
 	ls = license_server.LicenseServer()
+	print "License server started"
 	ls.run()
 
 
