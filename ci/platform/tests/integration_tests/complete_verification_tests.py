@@ -40,6 +40,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	@classmethod
 	def setup_class(cls):
 		super(VerificationRoundTripTest, cls).setup_class()
+		cls._purge_queues()
 		cls._start_model_server()
 		cls.repostore_id = 1
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
@@ -68,8 +69,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		Repo.init(self.forward_repo_url, bare=True)
 		self._start_redis()
 		verification_server = VerificationServer(self.verifier_pool)
-		self.vs_process = GreenProcess(target=verification_server.run)
-		self.vs_process.start()
+		self.vs_greenlet = verification_server.run()
 
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=binascii.b2a_base64(sha512("").digest())[0:-1], salt="1234567890123456", created=0)
@@ -78,8 +78,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	def tearDown(self):
 		super(VerificationRoundTripTest, self).tearDown()
 		rmtree(self.repo_dir)
-		self.vs_process.terminate()
-		self.vs_process.join()
+		self.vs_greenlet.kill()
 		self.verifier_pool.teardown()
 		self._stop_redis()
 		self._purge_queues()

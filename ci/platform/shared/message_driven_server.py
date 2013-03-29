@@ -22,9 +22,9 @@ class MessageDrivenServer(object):
 		return ioloop_greenlet
 
 	def _bind_handlers(self, connection):
-		with connection.channel() as channel:
-			for handler in self.handlers:
-				handler.bind(channel)
+		channel = connection.channel()
+		for handler in self.handlers:
+			handler.bind(channel)
 
 	def _ioloop(self, connection):
 		while True:
