@@ -5,7 +5,6 @@ import sys
 
 import settings.log
 
-from settings.verification_server import VerificationServerSettings
 from util.uri_translator import RepositoryUriTranslator
 from verification.verification_server import VerificationServer
 from verification.verifier_pool import VirtualMachineVerifierPool
@@ -23,10 +22,10 @@ def main():
 	parser.add_argument("-t", "--type",
 		help="Selects the VM type. Supported options are \"aws\" and \"openstack\"")
 	parser.add_argument("-c", "--count",
-		help="The number of virtual machines for this verification server to manage")
+		help="The maximum number of virtual machines for this verification server to manage")
 	parser.add_argument("-C", "--cleanup", action="store_true",
 		help="Cleans up all virtual machines from previous runs on startup")
-	parser.set_defaults(dir=".", count=VerificationServerSettings.virtual_machine_count)
+	parser.set_defaults(dir=".", count=None)
 	args = parser.parse_args()
 
 	try:
@@ -39,12 +38,15 @@ def main():
 		parser.print_usage()
 		sys.exit(1)
 
-	try:
-		vm_count = int(args.count)
-	except:
-		print "Must supply an integer for VM count"
-		parser.print_usage()
-		sys.exit(1)
+	if args.count is not None:
+		try:
+			max_vm_count = int(args.count)
+		except:
+			print "Must supply an integer for VM count"
+			parser.print_usage()
+			sys.exit(1)
+	else:
+		max_vm_count = None
 
 	vm_dir = os.path.realpath(args.dir)
 
@@ -52,12 +54,16 @@ def main():
 		print "Cleaning up Verification Server directory %s ..." % vm_dir
 		VirtualMachineCleanupTool(vm_dir, vm_class).cleanup()
 
-	print "Starting Verification Server (%d*%s) with directory %s ..." % (
-			vm_count, args.type, vm_dir)
+	print "Starting Verification Server (%s) with directory %s ..." % (args.type, vm_dir)
 
-	verifier_pool = VirtualMachineVerifierPool(vm_class, vm_dir, vm_count, uri_translator=RepositoryUriTranslator())
-	vs = VerificationServer(verifier_pool, RepositoryUriTranslator())
-	vs.run()
+	try:
+		verifier_pool = VirtualMachineVerifierPool(vm_class, vm_dir, max_verifiers=max_vm_count, uri_translator=RepositoryUriTranslator())
+		verification_server = VerificationServer(verifier_pool, RepositoryUriTranslator()).run()
+	except:
+		print "Failed to start Verification Server"
+		raise
+	print "Successfully started Verification Server"
+	verification_server.wait()
 
 
 if __name__ == "__main__":
