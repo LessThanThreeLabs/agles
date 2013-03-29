@@ -132,6 +132,9 @@ window.RepositoryChanges = ['$scope', '$routeParams', 'changesRpc', 'events', 'l
 		change = (change for change in $scope.changes when change.id is data.id)[0]
 		change.status = data.status if change?
 
+		if $scope.currentChangeId is data.id
+			$scope.currentChangeInformation.status = data.status
+
 	changeAddedEvents = events.listen('repositories', 'change added', $routeParams.repositoryId).setCallback(handeChangeAdded).subscribe()
 	changeStartedEvents = events.listen('repositories', 'change started', $routeParams.repositoryId).setCallback(handleChangeStarted).subscribe()
 	changeFinishedEvents = events.listen('repositories', 'change finished', $routeParams.repositoryId).setCallback(handleChangeFinished).subscribe()

@@ -1,7 +1,6 @@
 <div id="repository">
 	<div id="repositoryHeaderPanel" unselectable>
 		<span id="repositoryHeaderTitle">{{repository.name}}</span>
-		<!-- <input id="repositoryHeaderUri" ng-model="repository.uri" highlight-on-first-click> -->
 		<span id="repositoryHeaderUri" text-selectable>{{repository.uri}}</span>
 	</div>
 
@@ -32,7 +31,7 @@
 				<span ng-show="currentChangeInformation != null">Change {{currentChangeInformation.number}}</span>
 			</content-menu-header>
 			<content-menu-options>
-				<content-menu-option menu-option-text="summary" ng-show="currentChangeInformation != null" ng-click="selectStage(null)" ng-class="{selected: currentStageId == null && !showMerge}"></content-menu-option>
+				<content-menu-option menu-option-text="summary" ng-show="currentChangeInformation != null" ng-click="selectStage(null)" ng-class="{selected: currentStageId == null && !showMerge, green: currentChangeInformation.status == 'passed', red: currentChangeInformation.status == 'failed'}"></content-menu-option>
 				<content-menu-option ng-repeat="stage in stages | filter:shouldStageBeVisible | orderBy:[stageSort, 'name']" menu-option-text="{{stage.name}}" menu-option-spinning="{{stage.status == 'running'}}" ng-click="selectStage(stage)" ng-class="{selected: stage.id == currentStageId, green: stage.status == 'passed', red: stage.status == 'failed'}"></content-menu-option>
 				<content-menu-option menu-option-text="merge" ng-show="currentChangeInformation.mergeStatus != null" ng-click="selectMerge()" ng-class="{selected: currentStageId == null && showMerge, green: currentChangeInformation.mergeStatus == 'passed', red: currentChangeInformation.mergeStatus == 'failed'}"></content-menu-option>
 			</content-menu-options>

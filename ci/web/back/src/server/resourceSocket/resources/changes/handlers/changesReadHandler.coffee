@@ -58,6 +58,7 @@ class ChangesReadHandler extends Handler
 	getMetadata: (socket, data, callback) =>
 		sanitizeResult = (metadata) ->
 			number: metadata.change.number
+			status: metadata.change.status
 			user:
 				email: metadata.user.email
 				firstName: metadata.user.first_name
