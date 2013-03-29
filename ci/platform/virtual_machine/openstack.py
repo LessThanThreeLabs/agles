@@ -81,6 +81,10 @@ class OpenstackVm(VirtualMachine):
 			elif vm.instance.status == 'ACTIVE' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
 				vm.delete()
 				return None
+			elif vm.instance.status not in ('ACTIVE', 'BUILD'):
+				OpenstackVm.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_directory, vm_id, vm.instance.status))
+				vm.delete()
+				return None
 			return vm
 		except:
 			return None

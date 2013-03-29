@@ -92,7 +92,10 @@ class Ec2Vm(VirtualMachine):
 			elif vm.instance.state == 'running' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
 				vm.delete()
 				return None
-			# 'pending' means we should return
+			elif vm.instance.state not in ('running', 'pending'):
+				Ec2Client.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_directory, instance_id, vm.instance.state))
+				vm.delete()
+				return None
 			return vm
 		except:
 			return None
