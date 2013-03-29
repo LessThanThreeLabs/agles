@@ -19,6 +19,21 @@ class SystemSettingsReadHandler extends Handler
 				else callback null, domainName: websiteDomain
 
 
+	getAwsInformation: (socket, data, callback) =>
+		errors = []
+		toReturn = {}
+
+		await
+			@getAwsKeys socket, data, defer errors[0], toReturn.awsKeys
+			@getAllowedInstanceSizes socket, data, defer errors[1], toReturn.allowedInstanceSizes
+			@getInstanceSettings socket, data, defer errors[2], toReturn.instanceSettings
+
+		if errors.some((error) -> error is 403) then callback 403
+		else if errors.some((error) -> error is 400) then callback 400
+		else if errors.some((error) -> error is 500) then callback 500
+		else callback null, toReturn
+
+
 	getAwsKeys: (socket, data, callback) =>
 		sanitizeResult = (awsKeys) ->
 			accessKey: awsKeys.access_key

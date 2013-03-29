@@ -15,16 +15,13 @@ window.Admin = ['$scope', '$location', '$routeParams', 'initialState', 'fileSuff
 window.AdminWebsite = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 	getWebsiteSettings = () ->
 		rpc.makeRequest 'systemSettings', 'read', 'getWebsiteSettings', null, (error, websiteSettings) ->
-			console.log websiteSettings
 			$scope.$apply () -> $scope.website = websiteSettings
 
 	$scope.website = {}
-
 	getWebsiteSettings()
 
 	$scope.submit = () ->
-		console.log 'need to submit'
-		console.log $scope.website
+		console.log 'need to update the ui when successful'
 		rpc.makeRequest 'systemSettings', 'update', 'setWebsiteSettings', $scope.website
 ]
 
@@ -163,17 +160,19 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 
 
 window.AdminAws = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
-	$scope.instanceSizes = ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 
-		'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge', 
-		'm3.xlarge', 'm3.2xlarge', 
-		'c1.medium', 'c1.xlarge',
-		'hi1.4xlarge', 
-		'hs1.8xlarge']
+	getAwsInformation = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getAwsInformation', null, (error, instanceInformation) ->
+			$scope.$apply () ->
+				$scope.awsKeys = instanceInformation.awsKeys
+				$scope.allowedInstanceSizes = instanceInformation.allowedInstanceSizes
+				$scope.instanceSettings = instanceInformation.instanceSettings
 
-	$scope.aws = {}
-	$scope.aws.instanceSize = 'm1.medium'
-	$scope.aws.numWaitingInstances = 0
-	$scope.aws.maxInstances = 20
+	$scope.awsKeys = {}
+	$scope.allowedInstanceSizes = []
+	$scope.instanceSettings = {}
+
+	$scope.instanceSettings.instanceSize = 'm1.medium'
+	getAwsInformation()
 
 	$scope.submit = () ->
 		console.log 'need to submit'

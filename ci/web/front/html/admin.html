@@ -232,31 +232,31 @@
 				<div id="adminAwsContent">
 					<styled-form name="awsForm">
 						<styled-form-field label="Access key" label-padding="true">
-							<input type="text" ng-model="aws.key" name="key" placeholder="aws access key id" ng-maxlength="256" required focused>
+							<input type="text" ng-model="awsKeys.key" name="key" placeholder="aws access key id" ng-maxlength="256" required focused>
 							<span class="prettyFormError" tooltip="Invalid access key id" ng-class="{visible: awsForm.key.$dirty && awsForm.key.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>
 						<styled-form-field label="Secret key" label-padding="true">
-							<input type="text" ng-model="aws.secret" name="secret" placeholder="aws secret access key" ng-maxlength="256" required>
+							<input type="text" ng-model="awsKeys.secret" name="secret" placeholder="aws secret access key" ng-maxlength="256" required>
 							<span class="prettyFormError" tooltip="Invalid secret access key" ng-class="{visible: awsForm.secret.$dirty && awsForm.secret.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>
 						<styled-form-field label="Instance size" label-padding="true">
-							<select ng-model="aws.instanceSize" ng-options="instanceSize as instanceSize for instanceSize in instanceSizes"></select>
+							<select ng-model="instanceSettings.instanceSize" ng-options="instanceSize as instanceSize for instanceSize in allowedInstanceSizes"></select>
 						</styled-form-field>
 						<styled-form-field label="Num waiting instances" label-padding="true">
-							<input type="number" ng-model="aws.numWaitingInstances" name="numWaitingInstances" min="0" max="1000" required>
-							<span class="prettyFormError" tooltip="Invalid number of waiting instances (0-1000)" ng-class="{visible: awsForm.numWaitingInstances.$dirty && awsForm.numWaitingInstances.$invalid}">
+							<input type="number" ng-model="instanceSettings.numWaiting" name="numWaiting" min="0" max="1000" required>
+							<span class="prettyFormError" tooltip="Invalid number of waiting instances (0-1000)" ng-class="{visible: awsForm.numWaiting.$dirty && awsForm.numWaiting.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
-							<span class="prettyFormError" tooltip="Must be less than max running instances" ng-class="{visible: awsForm.numWaitingInstances.$valid && awsForm.maxInstances.$valid && aws.numWaitingInstances > aws.maxInstances}">
+							<span class="prettyFormError" tooltip="Must be less than max running instances" ng-class="{visible: awsForm.numWaiting.$valid && awsForm.maxInstances.$valid && instanceSettings.numWaiting > instanceSettings.maxInstances}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>
 						<styled-form-field label="Max running instances" label-padding="true">
-							<input type="number" ng-model="aws.maxInstances" name="maxInstances" min="0" max="10000" required>
+							<input type="number" ng-model="instanceSettings.maxInstances" name="maxInstances" min="0" max="10000" required>
 							<span class="prettyFormError" tooltip="Invalid number of running instances (0-10000)" ng-class="{visible: awsForm.maxInstances.$dirty && awsForm.maxInstances.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
