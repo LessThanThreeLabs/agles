@@ -26,7 +26,6 @@ class Ec2Vm(VirtualMachine):
 	def __init__(self, vm_directory, instance, vm_username=VM_USERNAME):
 		super(Ec2Vm, self).__init__(vm_directory)
 		self.instance = instance
-		self.ec2_client = Ec2Client.get_client()
 		self.vm_username = vm_username
 		self.write_vm_info()
 
@@ -145,7 +144,7 @@ class Ec2Vm(VirtualMachine):
 		)
 
 	def create_image(self, name, description=None):
-		return self.ec2_client.create_image(self.instance.id, name, description)
+		return Ec2Client.get_client().create_image(self.instance.id, name, description)
 
 	def rebuild(self, ami_image_id=None):
 		if not ami_image_id:
@@ -161,7 +160,7 @@ class Ec2Vm(VirtualMachine):
 
 	def delete(self):
 		if 'Name' in self.instance.tags:
-			instances = [reservation.instances[0] for reservation in self.ec2_client.get_all_instances(
+			instances = [reservation.instances[0] for reservation in Ec2Client.get_client().get_all_instances(
 				filters={'tag:Name': self.instance.tags['Name']})]
 			for instance in instances:  # Clean up rogue VMs
 				self._safe_terminate(instance)

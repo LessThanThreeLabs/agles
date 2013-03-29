@@ -26,7 +26,6 @@ class OpenstackVm(VirtualMachine):
 	def __init__(self, vm_directory, instance, vm_username=VM_USERNAME):
 		super(OpenstackVm, self).__init__(vm_directory)
 		self.instance = instance
-		self.nova_client = OpenstackClient.get_client()
 		self.vm_username = vm_username
 		self.write_vm_info()
 
@@ -89,7 +88,7 @@ class OpenstackVm(VirtualMachine):
 	def wait_until_ready(self):
 		while not ('private' in self.instance.addresses and self.instance.status == 'ACTIVE'):
 			eventlet.sleep(3)
-			self.instance = self.nova_client.servers.get(self.instance.id)
+			self.instance = OpenstackClient.get_client().servers.get(self.instance.id)
 			if self.instance.status == 'ERROR':
 				OpenstackVm.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.instance.id))
 				self.rebuild()
@@ -116,7 +115,7 @@ class OpenstackVm(VirtualMachine):
 		self.instance.reboot(reboot_type)
 
 	def delete(self):
-		for instance in self.nova_client.servers.findall(name=self.instance.name):  # Clean up rogue VMs
+		for instance in OpenstackClient.get_client().servers.findall(name=self.instance.name):  # Clean up rogue VMs
 			try:
 				instance.delete()
 			except:
@@ -128,7 +127,7 @@ class OpenstackVm(VirtualMachine):
 
 	def create_image(self, image_name):
 		image_id = self.instance.create_image(image_name)
-		return self.nova_client.images.get(image_id)
+		return OpenstackClient.get_client().images.get(image_id)
 
 	def rebuild(self, image=None):
 		if not image:
@@ -136,7 +135,7 @@ class OpenstackVm(VirtualMachine):
 		name = self.instance.name
 		flavor = self.instance.flavor['id']
 		self.delete()
-		self.instance = self.nova_client.servers.create(name, image, flavor, files=self._default_files(self.vm_username))
+		self.instance = OpenstackClient.get_client().servers.create(name, image, flavor, files=self._default_files(self.vm_username))
 		self.write_vm_info()
 		self.wait_until_ready()
 
