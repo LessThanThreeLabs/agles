@@ -5,6 +5,7 @@ Repository management is done using gitpython.
 """
 from __future__ import print_function
 
+import json
 import logging
 import os
 import re
@@ -200,7 +201,7 @@ class RepositoryStore(object):
 
 	@classmethod
 	def _get_ip_address(cls):  # TODO: find a more legit service for this
-		return urllib2.urlopen('http://ip.42.pl/raw').read()
+		return json.loads(urllib2.urlopen('http://jsonip.com').read())['ip']
 
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
