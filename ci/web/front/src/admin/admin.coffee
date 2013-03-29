@@ -160,20 +160,27 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 
 
 window.AdminAws = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
-	getAwsInformation = () ->
-		rpc.makeRequest 'systemSettings', 'read', 'getAwsInformation', null, (error, instanceInformation) ->
+	getAwsKeys = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getAwsKeys', null, (error, awsKeys) ->
 			$scope.$apply () ->
-				$scope.awsKeys = instanceInformation.awsKeys
-				$scope.allowedInstanceSizes = instanceInformation.allowedInstanceSizes
-				$scope.instanceSettings = instanceInformation.instanceSettings
+				$scope.awsKeys = awsKeys
 
-	$scope.awsKeys = {}
-	$scope.allowedInstanceSizes = []
-	$scope.instanceSettings = {}
+	getAllowedInstanceSizes = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getAllowedInstanceSizes', null, (error, allowedInstanceSizes) ->
+			$scope.$apply () ->
+				$scope.allowedInstanceSizes = allowedInstanceSizes
 
-	$scope.instanceSettings.instanceSize = 'm1.medium'
-	getAwsInformation()
+	getInstanceSettings = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getInstanceSettings', null, (error, instanceSettings) ->
+			$scope.$apply () ->
+				$scope.instanceSettings = instanceSettings
+
+	getAwsKeys()
+	getAllowedInstanceSizes()
+	getInstanceSettings()
 
 	$scope.submit = () ->
-		console.log 'need to submit'
+		console.log 'need to update the ui when successful'
+		rpc.makeRequest 'systemSettings', 'update', 'setAwsKeys', $scope.awsKeys
+		rpc.makeRequest 'systemSettings', 'update', 'setInstanceSettings', $scope.instanceSettings
 ]
