@@ -14,7 +14,11 @@ from virtual_machine import VirtualMachine
 class Ec2Client(object):
 	@classmethod
 	def get_client(cls):
-		return boto.ec2.connect_to_region(AwsSettings.region,
+		region = AwsSettings.region or
+			cls._call(['sh', '-c',
+				'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
+			).output
+		return boto.ec2.connect_to_region(region,
 			**AwsSettings.credentials())
 
 
