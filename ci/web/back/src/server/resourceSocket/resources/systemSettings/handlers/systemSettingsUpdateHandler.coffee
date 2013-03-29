@@ -9,8 +9,6 @@ exports.create = (modelRpcConnection) ->
 
 class SystemSettingsUpdateHandler extends Handler
 	setWebsiteSettings: (socket, data, callback) =>
-		console.log data
-
 		userId = socket.session.userId
 		if not userId?
 			callback 403

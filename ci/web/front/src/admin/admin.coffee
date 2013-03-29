@@ -21,8 +21,11 @@ window.AdminWebsite = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 	getWebsiteSettings()
 
 	$scope.submit = () ->
-		console.log 'need to update the ui when successful'
-		rpc.makeRequest 'systemSettings', 'update', 'setWebsiteSettings', $scope.website
+		rpc.makeRequest 'systemSettings', 'update', 'setWebsiteSettings', $scope.website, (error) ->
+			$scope.$apply () ->
+				$scope.showSuccess = true if not error?
+
+	$scope.$watch 'website', (() -> $scope.showSuccess = false), true
 ]
 
 
@@ -180,7 +183,10 @@ window.AdminAws = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialSt
 	getInstanceSettings()
 
 	$scope.submit = () ->
-		console.log 'need to update the ui when successful'
 		rpc.makeRequest 'systemSettings', 'update', 'setAwsKeys', $scope.awsKeys
 		rpc.makeRequest 'systemSettings', 'update', 'setInstanceSettings', $scope.instanceSettings
+		$scope.showSuccess = true
+
+	$scope.$watch 'awsKeys', (() -> $scope.showSuccess = false), true
+	$scope.$watch 'instanceSettings', (() -> $scope.showSuccess = false), true
 ]
