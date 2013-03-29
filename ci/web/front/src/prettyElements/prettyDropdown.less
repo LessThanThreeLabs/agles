@@ -1,19 +1,44 @@
 @import '../constants';
 
 .prettyDropdownContainer {
+	@initialFadeInOpacity: 0.0;
+	@finalFadeInOpacity: 1.0;
+	@keyframes fadeIn { 
+		from { opacity: @initialFadeInOpacity; }
+		to { opacity: @finalFadeInOpacity; }
+	}
+	@-moz-keyframes fadeIn {
+		from { opacity: @initialFadeInOpacity; }
+		to { opacity: @finalFadeInOpacity; }
+	}
+	@-webkit-keyframes fadeIn {
+		from { opacity: @initialFadeInOpacity; }
+		to { opacity: @finalFadeInOpacity; }
+	}
+	@-o-keyframes fadeIn {
+		from { opacity: @initialFadeInOpacity; }
+		to { opacity: @finalFadeInOpacity; }
+	}
 
 	&:hover {
-		.prettyDropdown { display: block; }
+		.prettyDropdown {
+			@fadeInTransitionTime: 0.25s;
+			animation: fadeIn @fadeInTransitionTime ease-in;
+			-moz-animation: fadeIn @fadeInTransitionTime ease-in;
+			-webkit-animation: fadeIn @fadeInTransitionTime ease-in;
+			-o-animation: fadeIn @fadeInTransitionTime ease-in;
+
+			display: block;
+		}
 	}
 
 	.prettyDropdown {
 		position: absolute;
 		top: 100%;
 		z-index: 9000;
-		// display: block;
 		display: none;
 		min-width: 100%;
-		background-color: rgba(30, 30, 30, 0.75);
+		background-color: @headerBackground;
 
 		&.leftAligned {
 			left: 0px;
@@ -42,7 +67,7 @@
 			white-space: nowrap;
 
 			&:hover {
-				background-color: rgba(20, 20, 20, 0.75);
+				background-color: @koalityGreen;
 			}
 		}
 	}

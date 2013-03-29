@@ -32,6 +32,11 @@ angular.module('koality.directive', []).
 		transclude: true
 		template: '<div class="prettyCenteredPanel" ng-transclude></div>'
 	).
+	directive('dropdownContainer', ['$document', '$timeout', ($document, $timeout) ->
+		restrict: 'A'
+		link: (scope, element, attributes) ->
+			element.addClass 'prettyDropdownContainer'
+	]).
 	directive('dropdown', ['$document', '$timeout', ($document, $timeout) ->
 		restrict: 'E'
 		replace: true
@@ -39,27 +44,9 @@ angular.module('koality.directive', []).
 			alignment: '@dropdownAlignment'
 			options: '=dropdownOptions'
 			clickHandler: '&dropdownOptionClick'
-		# template: '<div class="prettyDropdown {{alignment}}Aligned" ng-show="show">
-		# 	<div class="prettyDropdownOption" ng-repeat="option in options | orderBy:\'title\'" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
-		# 	</div>'
 		template: '<div class="prettyDropdown {{alignment}}Aligned">
 			<div class="prettyDropdownOption" ng-repeat="option in options | orderBy:\'title\'" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
 			</div>'
-		link: (scope, element, attributes) ->
-			# element.parent().bind 'click', () ->
-			# 	scope.$apply () -> scope.show = !scope.show
-
-			documentClickHandler = (event) ->
-				scope.$apply () -> scope.show = false
-
-			scope.$watch 'show', () ->
-				if scope.show then $timeout (() -> $document.bind 'click', documentClickHandler), 0
-				else $document.unbind 'click', documentClickHandler
-
-			element.bind 'click', (event) ->
-				scope.$apply () -> scope.show = false
-				event.preventDefault()
-				event.stopPropagation()
 	]).
 	directive('autoScrollToBottom', ['integerConverter', (integerConverter) ->
 		restrict: 'A'

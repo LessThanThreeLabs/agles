@@ -24,8 +24,8 @@
 
 						<span class="headerOption" ng-controller="HeaderAdmin" ng-show="isAdmin" ng-click="visitAdmin()">Admin</span>
 
-						<span class="headerOption" ng-controller="HeaderRepositories" ng-click="repositoryClick()">Repositories
-							<dropdown alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
+						<span dropdown-container class="headerOption" ng-controller="HeaderRepositories" ng-click="repositoryClick()">Repositories
+							<dropdown dropdown-alignment="right" dropdown-options="repositoryDropdownOptions" dropdown-option-click="repositoryDropdownOptionClick(dropdownOption)" />
 						</span>
 
 						<span class="headerOption" ng-click="feedback.modalVisible = true">Feedback</span>
