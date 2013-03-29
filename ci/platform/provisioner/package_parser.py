@@ -59,7 +59,7 @@ class OmnibusPackageParser(object):
 
 
 class SystemPackageParser(PackageParser):
-	first_run = True
+	# first_run = True
 
 	def __init__(self):
 		super(SystemPackageParser, self).__init__('system')
@@ -83,9 +83,9 @@ class SystemPackageParser(PackageParser):
 				raise InvalidConfigurationException("Could not parse %s package: %s" % (self.package_type, package))
 			package_strings.append(self.to_package_string(*package_info) if package_info[1] else package_info[0])
 		package_steps = [SetupCommand(self.to_install_string(" ".join(package_strings)))]
-		if SystemPackageParser.first_run:
-			SystemPackageParser.first_run = False
-			package_steps = [SetupCommand("apt-get update -y", ignore_failure=True)] + package_steps
+		# if SystemPackageParser.first_run:
+		# 	SystemPackageParser.first_run = False
+		# 	package_steps = [SetupCommand("apt-get update -y", ignore_failure=True)] + package_steps
 		return package_steps
 
 
