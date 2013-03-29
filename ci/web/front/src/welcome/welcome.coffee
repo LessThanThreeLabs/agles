@@ -60,6 +60,9 @@ window.Welcome = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 	retrieveChanges = () ->
 		return if not $scope.repositories? or $scope.repositories.length is 0
 
+		$scope.changes = []
+		updateChangesSummary()
+
 		requestParams =
 			repositories: getRepositoryIdsToDisplay()
 			timestamp: getStartTimeFromFilterOption()

@@ -42,6 +42,18 @@ angular.module('koality.d3.directive', []).
 			getGreatestNumberOfChanges = (allHistogram, passedHistogram, failedHistogram) ->
 				return d3.max [d3.max(allHistogram), d3.max(passedHistogram), d3.max(failedHistogram)]
 
+			updatePath = (path, data, x, y, allIntervals, transitionTime) ->
+				alreadyContainsData = path.datum()?
+
+				path = path.datum(data)
+
+				if not alreadyContainsData
+					yStart = (value) -> return y 0
+					path = path.attr 'd', computeChangeLine x, yStart, allIntervals
+
+				path = path.transition().duration(transitionTime)
+				path = path.attr('d', computeChangeLine x, y, allIntervals)
+
 			drawGraph = () ->
 				startTime = new Date(scope.timeInterval.start)
 				endTime = d3.max [new Date(scope.timeInterval.end),
@@ -65,36 +77,30 @@ angular.module('koality.d3.directive', []).
 				y = d3.scale.linear()
 					.domain([0, getGreatestNumberOfChanges(allHistogram, passedHistogram, failedHistogram)])
 					.range([height-padding.bottom-axisBuffer, padding.top])
-				yStart = (value) -> return y 0
 
 				xAxis = d3.svg.axis().scale(x).ticks(5).tickFormat(d3.time.format '%m/%d').orient 'bottom'
 				yAxis = d3.svg.axis().scale(y).ticks(5).orient 'left'
 
-				allPath.datum(allHistogram)
-					.attr('d', computeChangeLine x, yStart, allIntervals)
-					.transition().duration(500)
-					.attr('d', computeChangeLine x, y, allIntervals)
-				passedPath.datum(passedHistogram)
-					.attr('d', computeChangeLine x, yStart, allIntervals)
-					.transition().duration(750)
-					.attr('d', computeChangeLine x, y, allIntervals)
-				failedPath.datum(failedHistogram)
-					.attr('d', computeChangeLine x, yStart, allIntervals)
-					.transition().duration(1000)
-					.attr('d', computeChangeLine x, y, allIntervals)
+				updatePath allPath, allHistogram, x, y, allIntervals, 500
+				updatePath passedPath, passedHistogram, x, y, allIntervals, 750
+				updatePath failedPath, failedHistogram, x, y, allIntervals, 1000
 
 				xAxisLabel.call xAxis
 				yAxisLabel.call yAxis
 
 			clearGraph = () ->
-				allPath.datum []
-				passedPath.datum []
-				failedPath.datum []
+				emptyLine = d3.svg.line()
+					.x((d) -> return 0)
+					.y((d) -> return 0)
+
+				allPath.attr('d', emptyLine).datum(null) if allPath.datum()?
+				passedPath.attr('d', emptyLine).datum(null) if passedPath.datum()?
+				failedPath.attr('d', emptyLine).datum(null) if failedPath.datum()?
 
 			handleUpdate = (newValue, oldValue) ->
 				if not scope.changes? or scope.changes.length is 0 or not scope.timeInterval?
 					clearGraph()
-				else 
+				else
 					drawGraph()
 
 			scope.$watch 'changes', handleUpdate, true
