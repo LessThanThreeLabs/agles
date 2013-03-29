@@ -57,9 +57,17 @@ window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc
 			$scope.$apply () -> $scope.keys = keys
 
 	addKey = () ->
-		rpc.makeRequest 'users', 'update', 'addSshKey',
+		requestParams = 
 			alias: $scope.addKey.alias
 			key: $scope.addKey.key
+		rpc.makeRequest 'users', 'update', 'addSshKey', requestParams, (error) ->
+			$scope.$apply () ->
+				if error?
+					$scope.addKey.showError = true
+				else
+					$scope.addKey.showError = false
+					$scope.addKey.modalVisible = false
+					$scope.addKey = {}
 		
 	handleAddedKeyUpdated = (data) -> $scope.$apply () ->
 		$scope.keys.push data
@@ -79,7 +87,5 @@ window.AccountSshKeys = ['$scope', 'rpc', 'events', 'initialState', ($scope, rpc
 		rpc.makeRequest 'users', 'update', 'removeSshKey', id: key.id
 
 	$scope.submitKey = () ->
-		$scope.addKey.modalVisible = false
 		addKey()
-		$scope.addKey = {}
 ]

@@ -133,6 +133,7 @@ class UsersUpdateHandler extends Handler
 
 			@modelRpcConnection.users.update.add_ssh_pubkey userId, data.alias, data.key, (error, result) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error?.type is 'KeyAlreadyInUseError' then callback 'key already in use'
 				else if error? then callback 500
 				else callback null, result
 
