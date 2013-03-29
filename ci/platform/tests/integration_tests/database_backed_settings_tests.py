@@ -23,7 +23,7 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		self._purge_queues()
 
 	def test_default_settings(self):
-		class TestSettings(DatabaseBackedSettings):
+		class SampleTestSettings(DatabaseBackedSettings):
 			pass
 
 		alpha = "abc"
@@ -31,16 +31,16 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		a_list = [1, "two", {3: "Three"}]
 		a_dict = {"alpha": alpha, "numeric": numeric, "a_list": a_list}
 
-		assert_raises(AttributeError, lambda: TestSettings.alpha)
+		assert_raises(AttributeError, lambda: SampleTestSettings.alpha)
 
-		TestSettings(alpha=alpha, numeric=numeric, a_list=a_list, a_dict=a_dict)
+		SampleTestSettings(alpha=alpha, numeric=numeric, a_list=a_list, a_dict=a_dict)
 
-		assert_equal(alpha, TestSettings.alpha)
-		assert_equal(numeric, TestSettings.numeric)
-		assert_equal(a_list, TestSettings.a_list)
-		assert_equal(a_dict, TestSettings.a_dict)
+		assert_equal(alpha, SampleTestSettings.alpha)
+		assert_equal(numeric, SampleTestSettings.numeric)
+		assert_equal(a_list, SampleTestSettings.a_list)
+		assert_equal(a_dict, SampleTestSettings.a_dict)
 
-		assert_raises(AttributeError, lambda: TestSettings.not_a_setting)
+		assert_raises(AttributeError, lambda: SampleTestSettings.not_a_setting)
 
 	def test_override_settings(self):
 		alpha = "abc"
@@ -48,9 +48,9 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		a_list = [1, "two", {3: "Three"}]
 		a_dict = {"alpha": alpha, "numeric": numeric, "a_list": a_list}
 
-		class TestSettings(DatabaseBackedSettings):
+		class SampleTestSettings(DatabaseBackedSettings):
 			def __init__(self):
-				super(TestSettings, self).__init__(
+				super(SampleTestSettings, self).__init__(
 					alpha=alpha,
 					numeric=numeric,
 					a_list=a_list,
@@ -60,24 +60,24 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		new_alpha = "zyx"
 		self._change_setting("alpha", new_alpha)
 
-		assert_equal(new_alpha, TestSettings.alpha)
-		assert_equal(numeric, TestSettings.numeric)
+		assert_equal(new_alpha, SampleTestSettings.alpha)
+		assert_equal(numeric, SampleTestSettings.numeric)
 
 		alphanumeric = "abc123XYZ"
 		self._change_setting("alpha", alphanumeric)
 
-		assert_equal(alphanumeric, TestSettings.alpha)
+		assert_equal(alphanumeric, SampleTestSettings.alpha)
 
 	def test_add_new_settings(self):
-		class TestSettings(DatabaseBackedSettings):
+		class SampleTestSettings(DatabaseBackedSettings):
 			pass
 
-		assert_raises(AttributeError, lambda: TestSettings.a_list)
+		assert_raises(AttributeError, lambda: SampleTestSettings.a_list)
 
 		a_list = [1, "two", {3: "Three"}]
 		self._change_setting("a_list", a_list)
 
-		assert_equal(a_list, TestSettings.a_list)
+		assert_equal(a_list, SampleTestSettings.a_list)
 
 	def test_set_attr(self):
 		alpha = "abc"
@@ -85,9 +85,9 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		a_list = [1, "two", {3: "Three"}]
 		a_dict = {"alpha": alpha, "numeric": numeric, "a_list": a_list}
 
-		class TestSettings(DatabaseBackedSettings):
+		class SampleTestSettings(DatabaseBackedSettings):
 			def __init__(self):
-				super(TestSettings, self).__init__(
+				super(SampleTestSettings, self).__init__(
 					alpha=alpha,
 					numeric=numeric,
 					a_list=a_list,
@@ -95,21 +95,32 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				)
 
 		new_alpha = "zyx"
-		TestSettings.alpha = new_alpha
+		SampleTestSettings.alpha = new_alpha
 
-		assert_equal(new_alpha, TestSettings.alpha)
+		assert_equal(new_alpha, SampleTestSettings.alpha)
 		assert_equal(new_alpha, self._get_setting("alpha"))
 
 		alphanumeric = "abc123XYZ"
-		TestSettings.alpha = alphanumeric
+		SampleTestSettings.alpha = alphanumeric
 
-		assert_equal(alphanumeric, TestSettings.alpha)
+		assert_equal(alphanumeric, SampleTestSettings.alpha)
 		assert_equal(alphanumeric, self._get_setting("alpha"))
+
+	def test_resource(self):
+		class SampleTestSettings(DatabaseBackedSettings):
+			pass
+
+		assert_equal('sample_test', SampleTestSettings._get_resource())
+
+		class AsdfSettings(DatabaseBackedSettings):
+			pass
+
+		assert_equal('asdf', AsdfSettings._get_resource())
 
 	def _change_setting(self, key, value):
 		with model_server.rpc_connect("system_settings", "update") as model_server_rpc:
-			model_server_rpc.update_setting("test_settings", key, value)
+			model_server_rpc.update_setting("sample_test", key, value)
 
 	def _get_setting(self, key):
 		with model_server.rpc_connect("system_settings", "read") as model_server_rpc:
-			return model_server_rpc.get_setting("test_settings", key)
+			return model_server_rpc.get_setting("sample_test", key)
