@@ -31,7 +31,7 @@ class BuildVerifier(object):
 		self._register_pubkey()
 
 	def _register_pubkey(self):
-		PubkeyRegistrar().register_pubkey(VerificationUser.id, self.worker_id)
+		PubkeyRegistrar().register_pubkey(VerificationUser.id, "BuildVerifier:%s" % self.worker_id)
 
 	def _get_vm_directory(self):
 		return os.path.abspath(self.build_core.virtual_machine.vm_directory)

@@ -62,14 +62,37 @@ class ChangeVerifier(EventSubscriber):
 			with model_server.rpc_connect("changes", "update") as model_server_rpc:
 				model_server_rpc.mark_change_started(change_id)
 
+		def pass_change():
+			change_done.send(True)
+			self.results_handler.pass_change(change_id)
+
+		def fail_change():
+			change_done.send(False)
+			self.results_handler.fail_change(change_id)
+
+		def prematurely_fail_change():
+			'''Marks that a verifier failed to initialize.
+			If the first verifier hits this state, then all subsequent ones will go into the ready pool if they succeed,
+			or do nothing if they fail.
+			If a verifier reaches this state after another one sets up correctly,
+			we just ignore this and run with one fewer verifier.
+			'''
+			if not change_started.ready():
+				change_started.send(False)
+				fail_change()
+
 		def setup_worker():
-			verifier = self.verifier_pool.get()
-			verifier.setup()
-			if change_done.ready():  # We got a verifier after the change is already done
-				self.verifier_pool.put(verifier)  # Just return this verifier to the pool
+			try:
+				verifier = self.verifier_pool.get()
+				verifier.setup()
+			except:
+				prematurely_fail_change()
 				return
 			if not change_started.ready():
 				start_change()
+			if change_done.ready():  # We got a verifier after the change is already done
+				self.verifier_pool.put(verifier)  # Just return this verifier to the pool
+				return
 			workers_alive.append(1)
 			build_id = self._create_build(change_id, commit_list)
 			worker_greenlet = spawn(verifier.verify_build(build_id, verification_config, task_queue))
@@ -82,16 +105,17 @@ class ChangeVerifier(EventSubscriber):
 
 		task_queue.wait_for_tasks_populated()
 
+		if not change_started.wait():
+			return  # Failed prematurely
+
 		change_failed = False
 		while task_queue.has_more_results():
 			result = task_queue.get_result()
 			if self._is_result_failed(result) and not change_failed:
-				change_done.send(True)
-				self.results_handler.fail_change(change_id)
+				fail_change()
 				change_failed = True
 		if not change_failed:
-			change_done.send(True)
-			self.results_handler.pass_change(change_id)
+			pass_change()
 
 	def _get_commit_permutations(self, change_id):
 		# TODO (bbland): do something more useful than this trivial case

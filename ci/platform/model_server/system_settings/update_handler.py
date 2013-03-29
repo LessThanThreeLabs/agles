@@ -63,4 +63,4 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	def set_instance_settings(self, user_id, instance_size, num_waiting, max_running):
 		AwsSettings.instance_type = instance_size
 		VerificationServerSettings.static_pool_size = num_waiting
-		VerificationServerSettings.virtual_machine_count = max_running
+		VerificationServerSettings.max_virtual_machine_count = max_running

@@ -1,5 +1,7 @@
 import os
 
+import eventlet
+
 from eventlet import queue
 
 from build_core import CloudBuildCore
@@ -8,14 +10,14 @@ from settings.verification_server import VerificationServerSettings
 
 
 class VerifierPool(object):
-	def __init__(self, max_verifiers, min_unallocated=None, uri_translator=None):
-		if min_unallocated is None:
-			min_unallocated = VerificationServerSettings.static_pool_size
+	def __init__(self, max_verifiers=None, min_unallocated=None, uri_translator=None):
+		self._max_verifiers = max_verifiers
+		self._min_unallocated = min_unallocated
 
+		max_verifiers = self._get_max_verifiers()
+		min_unallocated = self._get_min_unallocated()
 		assert max_verifiers >= min_unallocated
 
-		self.max_verifiers = max_verifiers
-		self.min_unallocated = min_unallocated
 		self.uri_translator = uri_translator
 		self.free_slots = queue.Queue()
 		for i in range(max_verifiers):
@@ -25,6 +27,12 @@ class VerifierPool(object):
 		self.verifiers = {}
 
 		self._fill_to_min_unallocated()
+
+	def _get_max_verifiers(self):
+		return self._max_verifiers if self._max_verifiers is not None else VerificationServerSettings.max_virtual_machine_count
+
+	def _get_min_unallocated(self):
+		return self._min_unallocated if self._min_unallocated is not None else VerificationServerSettings.static_pool_size
 
 	def teardown(self):
 		for i in self.unallocated_slots + self.allocated_slots:
@@ -37,7 +45,11 @@ class VerifierPool(object):
 			self.allocated_slots.append(unallocated)
 			return self.verifiers[unallocated]
 		free = self.get_first_free()
-		self._spawn_verifier(free)
+		try:
+			self._spawn_verifier(free)
+		except:
+			self.free_slots.put(free)
+			raise
 		return self.verifiers[free]
 
 	def put(self, verifier):
@@ -79,15 +91,27 @@ class VerifierPool(object):
 		else:
 			self.unallocated_slots.append(verifier_number)
 
+	def _spawn_verifier_multiple_attempts(self, verifier_number, allocated=True, attempts=10):
+		for remaining_attempts in reversed(range(attempts)):
+			try:
+				self._spawn_verifier(verifier_number, allocated=False)
+			except:
+				if remaining_attempts == 0:
+					self.free_slots.put(verifier_number)
+					raise
+				eventlet.sleep(10)
+			else:
+				break
+
 	def _fill_to_min_unallocated(self):
-		num_to_fill = self.min_unallocated - len(self.unallocated_slots)
+		num_to_fill = self._get_min_unallocated() - len(self.unallocated_slots)
 		for i in range(num_to_fill):
 			try:
 				free = self.get_first_free(block=False)
 			except queue.Empty:
 				pass
 			else:
-				self._spawn_verifier(free, allocated=False)
+				self._spawn_verifier_multiple_attempts(free, allocated=False)
 
 	def spawn_verifier(self, verifier_number):
 		raise NotImplementedError()
@@ -98,7 +122,7 @@ class VerifierPool(object):
 
 
 class VirtualMachineVerifierPool(VerifierPool):
-	def __init__(self, virtual_machine_class, directory, max_verifiers, min_unallocated=None, uri_translator=None):
+	def __init__(self, virtual_machine_class, directory, max_verifiers=None, min_unallocated=None, uri_translator=None):
 		self.virtual_machine_class = virtual_machine_class
 		self.directory = directory
 		super(VirtualMachineVerifierPool, self).__init__(max_verifiers, min_unallocated, uri_translator)
