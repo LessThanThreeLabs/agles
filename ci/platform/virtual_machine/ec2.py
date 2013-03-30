@@ -14,7 +14,7 @@ from virtual_machine import VirtualMachine
 class Ec2Client(object):
 	@classmethod
 	def get_client(cls):
-		region = AwsSettings.region or cls._call(
+		region = AwsSettings.region or Ec2Vm._call(
 			['sh', '-c',
 				'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
 			).output
