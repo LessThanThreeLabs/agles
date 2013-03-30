@@ -15,13 +15,13 @@ CreateRepositoryStore = require './stores/createRepositoryStore'
 IndexHandler = require './handlers/indexHandler'
 
 
-exports.create = (configurationParams, domainName, modelConnection, mailer) ->
+exports.create = (configurationParams, modelConnection, mailer) ->
 	stores =
 		sessionStore: SessionStore.create configurationParams
 		createAccountStore: CreateAccountStore.create configurationParams
 		createRepositoryStore: CreateRepositoryStore.create configurationParams
 	
-	resourceSocket = ResourceSocket.create configurationParams, domainName, stores, modelConnection, mailer
+	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection, mailer
 	staticServer = StaticServer.create configurationParams
 
 	httpsOptions =

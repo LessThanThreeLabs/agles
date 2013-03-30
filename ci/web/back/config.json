@@ -1,8 +1,6 @@
 {
 	"mode": "development",
 
-	"domain": "127.0.0.1",
-
 	"server": {
 		"https": {
 			"port": 443

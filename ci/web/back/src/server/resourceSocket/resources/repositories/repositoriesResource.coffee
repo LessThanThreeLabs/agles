@@ -10,12 +10,12 @@ RepositoriesUpdateHandler = require './handlers/repositoriesUpdateHandler'
 RepositoriesDeleteHandler = require './handlers/repositoriesDeleteHandler'
 
 
-exports.create = (configurationParams, domainName, stores, modelConnection, mailer) ->
+exports.create = (configurationParams, stores, modelConnection, mailer) ->
 	passwordHasher = PasswordHasher.create()
 	sshKeyPairGenerator = SshKeyPairGenerator.create configurationParams
 
 	createHandler = RepositoriesCreateHandler.create stores, modelConnection.rpcConnection, sshKeyPairGenerator
-	readHandler = RepositoriesReadHandler.create configurationParams, domainName, modelConnection.rpcConnection
+	readHandler = RepositoriesReadHandler.create configurationParams, modelConnection.rpcConnection
 	updateHandler = RepositoriesUpdateHandler.create modelConnection.rpcConnection
 	deleteHandler = RepositoriesDeleteHandler.create modelConnection.rpcConnection, passwordHasher
 	return new RepositoriesResource configurationParams, stores, modelConnection, createHandler, readHandler, updateHandler, deleteHandler
