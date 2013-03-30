@@ -2,113 +2,113 @@
 /* CSS Document */
 
 div.section {
+	background-color: #fff;
 	width: 100%;
 	text-align: center;
 	padding: 6em 0;
 	float:left; }
 
 	div.container {
-		width: 932px;
+		width: 984px;
 		margin: auto; }
 
 
 
-		/*--- NAVBAR---*/
-		div#navbar{
-			font-size: 1.25em;
-			padding: 15px 0; }
-
-
-		/*--- PRE-PUSH ---*/
-		div#pre-push div.quarters { margin: 0; }
-		div#pre-push a.button { margin-top: 3em; }
-
-
-		/*--- FEATURES ---*/
-
-
-		/*--- SECURITY ---*/
-		div#security div.security-option {
-			width: 700px;
-			height: 120px;
-			padding-bottom: 3em;
-			margin: auto;}
+/*--- HEADER ---*/
+	div#header{ height: 50px;}
 		
-		div#security div.security-option:last-child { padding-bottom: 0; }
-
-			div#security div.security-option div.security-thumb {
-				width: 200px;
-				height: inherit;
-				float:left; }
-			
-			div#security div.security-option div.security-content {
-				text-align: left;
-				width: 475px;
-				height: inherit;
-				float: right; }
-
-
-		/*--- CONTACT ---*/
-		div#contact div#form {
-			/* background-color: red; */
-			width: 330px;
-			text-align: left;
+		div#header div.container {
+			width: 1000px;
 			margin: auto; }
-			
-			div#contact div#form p { margin-bottom: 5px; }
 	
-			div#contact div#form input {
-				font-family: 'Din', sans-serif;	
-				font-size: 16px;
-				font-weight: 100;
-				width: 310px;
-				height: 20px;
-				margin: 0;
-				margin-bottom: 25px;
-				padding: 10px 10px 8px;
-				border: 1px solid #ccc;
-				outline: none;
-				-moz-border-radius: 3px;
-					 border-radius: 3px; }
-			
-			div#contact div#form input:focus {
-				-webkit-box-shadow: 0 0 8px rgba(130, 188, 0, 1); 
-				   -moz-box-shadow: 0 0 8px rgba(130, 188, 0, 1);
-						box-shadow: 0 0 8px rgba(130, 188, 0, 1);
-				border: 1px solid #8ec63f; }
-			
-			div#contact div#form input:last-child { margin-bottom: 50px; }
-			
-			div#contact a.button { width: 280px; }
-			
+			div#header div#logo a {
+				color: #fff;
+				font-size: 1.25em;
+				line-height: 50px;
+				float: left; }
+				
+			div#header div#logo a:hover { text-decoration: none; }
 	
-		/*--- FOOTER ---*/
-		div#footer { padding: 3em 0; }
+	
+			div#header div#navigation{ float:right; }
+	
+				div#header div#navigation a {
+					line-height: 50px;
+					padding: 0 20px;
+					margin: 0;
+					display: inline-block;
+					color: white;
+					float: left; }
+					
+				div#header div#navigation a:hover {
+					background-color: #74a528;
+					text-decoration: none; }
 
 
 
 /*--- LAYOUT TOOLS ---*/
 
-div.arrow {
-	height: 18px;
-	text-align: center; }
+	div.arrow {
+		height: 18px;
+		text-align: center; }
 
 
-div.thirds,
-div.quarters { width: 100%; }
+	div.thirds,
+	div.quarters { width: 100%; }
 
-	div.thirds div {
-		width: 300px;
-		margin-right: 16px;
-		text-align: left;
-		float: left; }
+		div.thirds div {
+			width: 312px;
+			margin-right: 24px;
+			text-align: left;
+			float: left; }
 				
-	div.thirds div:nth-child(3n+0) { margin-right: 0;}
+		div.thirds div:nth-child(3n+0) { margin-right: 0;}
 
 
-	div.quarters div {
-		width: 221px;
-		margin-right: 16px;
-		float: left; }
+		div.quarters div {
+			width: 228px;
+			margin-right: 24px;
+			text-align: left;
+			float: left; }
+
+		div.quarters div:nth-child(4n+0) { margin-right: 0;}
+
+		div.quarters div p { margin-top: 0; }
+
+
+/*--- FOOTER ---*/
+	div#footer { padding: 3em 0; }
+
+		div#footer div.container {
+			width: 1000px;
+			margin: auto; }
+
+			div#footer div.container div {
+				text-align: left;
+				margin-right: 40px;
+				float: left; }
 				
-	div.quarters div:nth-child(4n+0) { margin-right: 0;}
+				div#footer div.container div p { margin-top: .5em;}
+		
+				div#footer div.container div a {color: #fff; }
+			
+				div#footer div.container div a:hover { text-decoration: underline; }
+		
+				/*--- Newsletter Section ---*/
+				div#footer div.container div#newsletter {
+					width: 20em;
+					float: right;
+					margin: 0; }
+		
+					div#footer div.container div input {
+						width: 12em;
+						height: 1.125em;
+						margin-top: .5em;
+						float: left; }
+			
+					div#footer div.container div a.button {
+						font-size: 1em;
+						margin-top: .5em;
+						float:right; }
+		
+					div#footer div.container div a.button:hover { text-decoration: none;  }
