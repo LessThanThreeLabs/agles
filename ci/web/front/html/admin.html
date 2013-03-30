@@ -262,7 +262,7 @@
 							</span>
 						</styled-form-field>
 						<styled-form-field label="">
-							<button id="adminAwsSubmitButton" ng-click="submit()" ng-disabled="awsForm.$invalid">Save Changes</button>
+							<button id="adminAwsSubmitButton" ng-click="submit()" ng-disabled="awsForm.$invalid || instanceSettings.numWaiting > instanceSettings.maxRunning">Save Changes</button>
 						</styled-form-field>
 					</styled-form>
 				</div>
