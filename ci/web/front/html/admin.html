@@ -256,11 +256,10 @@
 							</span>
 						</styled-form-field>
 						<styled-form-field label="Max running instances" label-padding="true">
-							<input type="number" ng-model="instanceSettings.maxRunning" name="maxRunning" min="0" max="10000" required>
-							<span class="prettyFormError" tooltip="Invalid number of running instances (0-10000)" ng-class="{visible: awsForm.maxRunning.$dirty && awsForm.maxRunning.$invalid}">
+							<input type="number" ng-model="instanceSettings.maxRunning" name="maxRunning" min="1" max="10000" required>
+							<span class="prettyFormError" tooltip="Invalid number of running instances (1-10000)" ng-class="{visible: awsForm.maxRunning.$dirty && awsForm.maxRunning.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
-							<div id="adminAwsContentUnlimitedNote">(0 for unlimited)</div>
 						</styled-form-field>
 						<styled-form-field label="">
 							<button id="adminAwsSubmitButton" ng-click="submit()" ng-disabled="awsForm.$invalid">Save Changes</button>
