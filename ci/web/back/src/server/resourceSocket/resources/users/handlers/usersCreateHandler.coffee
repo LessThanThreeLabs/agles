@@ -121,7 +121,7 @@ class UsersCreateHandler extends Handler
 		emailErrors = []
 		await
 			for email, index in emails
-				@_sendEmailAndAddToStore email, emailErrors[index]
+				@_sendEmailAndAddToStore email, defer emailErrors[index]
 
 		emailErrors = emailErrors.filter (error) -> return error?
 

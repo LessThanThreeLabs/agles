@@ -1,22 +1,26 @@
 assert = require 'assert'
 
 
-exports.create = (configurationParams, domain, emailer) ->
-	return new ResetPasswordEmailer configurationParams, domain, emailer
+exports.create = (configurationParams, modelRpcConnection, emailer) ->
+	return new ResetPasswordEmailer configurationParams, modelRpcConnection, emailer
 
 
 class ResetPasswordEmailer
-	constructor: (@configurationParams, @domain, @emailer) ->
+	constructor: (@configurationParams, @modelRpcConnection, @emailer) ->
 		assert.ok @configurationParams?
-		assert.ok @domain?
+		assert.ok @modelRpcConnection?
 		assert.ok @emailer?
 
 
 	email: (toEmail, newPassword, callback) =>
-		fromEmail = "#{@configurationParams.resetPassword.from.name} <#{@configurationParams.resetPassword.from.email}@#{@domain}>"
-		subject = 'Your new Koality password!'
-		body = "Your new password is: #{newPassword}"
+		assert.ok callback?
+		
+		@modelRpcConnection.systemSettings.read.get_website_domain_name 1, (error, domain) =>
+			if error? then callback error
+			else
+				fromEmail = "#{@configurationParams.resetPassword.from.name} <#{@configurationParams.resetPassword.from.email}@#{domain}>"
+				subject = 'Your new Koality password!'
+				body = "Your new password is: #{newPassword}"
 
-		@emailer.sendText fromEmail, toEmail, subject, body, (error) ->
-			console.error error if error?
-			callback error if callback?
+				@emailer.sendText fromEmail, toEmail, subject, body, (error) ->
+					callback error

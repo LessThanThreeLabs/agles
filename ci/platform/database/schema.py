@@ -154,7 +154,7 @@ def _insert_admin_user():
 	query = user.select().where(user.c.id == 1)
 	ins = user.insert().values(id=1, email="lt3@koalitycode.com", first_name="Koality", last_name="Admin",
 		password_hash="mooonIJXsb0zgz2V0LXvN/N4N4zbZE9FadrFl/YBJvzh3Z8O3VT/FH1q6OzWplbrX99D++PO6mpez7QdoIUQ6A==",
-		salt="GMZhGiZU4/JYE3NlmCZgGA==", created=0)
+		salt="GMZhGiZU4/JYE3NlmCZgGA==", created=0, admin=True)
 	with ConnectionFactory.get_sql_connection() as sqlconn:
 		row = sqlconn.execute(query).first()
 		if not row:

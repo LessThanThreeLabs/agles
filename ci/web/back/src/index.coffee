@@ -19,11 +19,11 @@ startEverything = () ->
 
 	environment.setEnvironmentMode configurationParams.mode
 
-	mailer = Mailer.create configurationParams.mailer, configurationParams.domain
 
 	modelConnection = ModelConnection.create configurationParams.modelConnection
 	modelConnection.connect (error) =>
 		throw error if error?
+		mailer = Mailer.create configurationParams.mailer, modelConnection.rpcConnection
 		createServer configurationParams.server, configurationParams.domain, modelConnection, mailer
 
 	if process.env.NODE_ENV is 'production'

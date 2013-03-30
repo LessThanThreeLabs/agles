@@ -6,11 +6,11 @@ InviteUserEmailer = require './mailTypes/inviteUserEmailer'
 ResetPasswordEmailer = require './mailTypes/resetPasswordEmailer'
 
 
-exports.create = (configurationParams, domain) ->
+exports.create = (configurationParams, modelRpcConnection) ->
 	emailer = new Mailgun configurationParams.mailgun.key
 
 	toReturn =
-		feedback: FeedbackEmailer.create configurationParams, domain, emailer
-		inviteUser: InviteUserEmailer.create configurationParams, domain, emailer
-		resetPassword: ResetPasswordEmailer.create configurationParams, domain, emailer
+		feedback: FeedbackEmailer.create configurationParams, modelRpcConnection, emailer
+		inviteUser: InviteUserEmailer.create configurationParams, modelRpcConnection, emailer
+		resetPassword: ResetPasswordEmailer.create configurationParams, modelRpcConnection, emailer
 	toReturn
