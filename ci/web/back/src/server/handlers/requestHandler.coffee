@@ -45,24 +45,3 @@ module.exports = class Resource
 		formattedJsFiles = jsFileNames.map (jsFileName) =>
 			return "<script src='#{jsFileName}'></script>"
 		@jsFilesString = formattedJsFiles.join '\n'
-
-
-	getTemplateValues: (session, callback) =>
-		if session.userId?
-			@modelRpcConnection.users.read.get_user_from_id session.userId, (error, user) =>
-				if error? then callback error
-				else callback null, @_generateTemplateValues session, user
-		else
-			callback null, @_generateTemplateValues session, null
-
-
-	_generateTemplateValues: (session, user={}) =>
-		fileSuffix: @fileSuffix
-		csrfToken: session.csrfToken
-		cssFiles: @cssFilesString
-		jsFiles: @jsFilesString
-		userId: session.userId
-		email: user.email
-		firstName: user.first_name
-		lastName: user.last_name
-		isAdmin: user.admin	? false

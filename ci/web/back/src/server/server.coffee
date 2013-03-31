@@ -13,6 +13,7 @@ CreateAccountStore = require './stores/createAccountStore'
 CreateRepositoryStore = require './stores/createRepositoryStore'
 
 IndexHandler = require './handlers/indexHandler'
+InstallationWizardHandler = require './handlers/installationWizardHandler'
 
 
 exports.create = (configurationParams, modelConnection, mailer) ->
@@ -32,6 +33,7 @@ exports.create = (configurationParams, modelConnection, mailer) ->
 	filesSuffix = '_' + (new Date()).getTime().toString 36
 	handlers =
 		indexHandler: IndexHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
+		installationWizardHandler: InstallationWizardHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
 
 	return new Server configurationParams, httpsOptions, modelConnection, resourceSocket, stores, handlers, staticServer
 
@@ -56,6 +58,7 @@ class Server
 		errors = {}
 		await
 			@handlers.indexHandler.initialize defer errors.indexHandlerError
+			@handlers.installationWizardHandler.initialize defer errors.insallationWizardHanderError
 
 		combinedErrors = []
 		for key, error of errors
@@ -75,22 +78,28 @@ class Server
 
 
 	start: () =>
+		addInstallationWizardBindings = () =>
+			expressServer.get '/', @handlers.installationWizardHandler.handleRequest
+
+		addProjectBindings = () =>
+			expressServer.get '/', @handlers.indexHandler.handleRequest
+			expressServer.get '/welcome', @handlers.indexHandler.handleRequest
+			expressServer.get '/login', @handlers.indexHandler.handleRequest
+			expressServer.get '/account', @handlers.indexHandler.handleRequest
+			expressServer.get '/create/account', @handlers.indexHandler.handleRequest
+			expressServer.get '/resetPassword', @handlers.indexHandler.handleRequest
+			expressServer.get '/repository/:repositoryId', @handlers.indexHandler.handleRequest
+			expressServer.get '/admin', @handlers.indexHandler.handleRequest
+			expressServer.get '/unexpectedError', @handlers.indexHandler.handleRequest
+			expressServer.get '/invalidPermissions', @handlers.indexHandler.handleRequest
+			expressServer.post '/extendCookieExpiration', @_handleExtendCookieExpiration
+
 		expressServer = express()
 		@_configureServer expressServer
 
-		expressServer.get '/', @handlers.indexHandler.handleRequest
-		expressServer.get '/welcome', @handlers.indexHandler.handleRequest
-		expressServer.get '/login', @handlers.indexHandler.handleRequest
-		expressServer.get '/account', @handlers.indexHandler.handleRequest
-		expressServer.get '/create/account', @handlers.indexHandler.handleRequest
-		expressServer.get '/resetPassword', @handlers.indexHandler.handleRequest
-		expressServer.get '/repository/:repositoryId', @handlers.indexHandler.handleRequest
-		expressServer.get '/admin', @handlers.indexHandler.handleRequest
-		expressServer.get '/unexpectedError', @handlers.indexHandler.handleRequest
-		expressServer.get '/invalidPermissions', @handlers.indexHandler.handleRequest
+		addInstallationWizardBindings()
+		# addProjectBindings()
 		expressServer.get '*', @staticServer.handleRequest		
-
-		expressServer.post '/extendCookieExpiration', @_handleExtendCookieExpiration
 
 		server = https.createServer @httpsOptions, expressServer
 		server.listen @configurationParams.https.port

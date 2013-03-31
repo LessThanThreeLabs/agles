@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" ng-app="koalitySetup">
+<head>
+<meta charset="utf-8">
+<title>Koality</title>
+<style type="text/css">[ng\:cloak], [ng-cloak], .ng-cloak { display: none !important; }</style>
+
+<%- cssFiles %>
+
+<style type="text/css">
+#installationWizard {
+	width: 800px;
+	height: 600px;
+}
+</style>
+
+</head>
+<body>
+
+	<div id="main">
+		<div id="headerBackground"></div>
+
+		<div id="centerContainer">
+			<div id="headerContainer">
+				<div id="header" ng-controller="Header" unselectable>
+					<span id="headerTitle" ng-click="visitHome()">Koality</span>
+				</div>
+			</div>
+
+			<div id="contentContainer">
+				<div class="prettyCenteredPanel" id="installationWizard">
+					<div class="prettyContent">
+						<div class="prettyContentHeader prettyContentHeaderPadding">InstallationWizard</div>
+						<div class="prettyContentBody">Hello</div>
+						<div class="prettyContentFooter"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<%- jsFiles %>
+
+</body>
+</html>
