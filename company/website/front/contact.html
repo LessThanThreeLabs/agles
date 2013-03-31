@@ -10,7 +10,7 @@
     <meta name="copyright" content="2013 Less Than Three Labs, Inc" />
     <meta name="author" content="Less Than Three Labs, Inc" />
         
-    <title>Idempotent Parallelization | Koality</title>
+    <title>Contact us for Pre-Push Continuous Integration | Koality</title>
 
     <!--Universal CSS-->
     <link href="css/universal-layout.css" rel="stylesheet" type="text/css" />
@@ -19,9 +19,35 @@
 
 	<!-- Page Specific CSS-->
 
-    <style type="text/css">
+    <style type="text/css">	
 		div#header div#navigation a#contact,
 		div#header div#navigation a#contact:hover { background-color: #212122; }
+		
+		div#contact {
+			background-image: url(img/contact-small.png);
+			background-repeat: no-repeat;
+			background-position: top center;
+			height: 440px; }
+
+			div#contact div.container { width: 730px; }
+			
+			div#contact div#contactInfo { text-align: left; }
+
+
+			div#contact div#contactForm {
+				text-align: left;
+				background-color: #fff;
+				padding: 30px 50px;
+				float: right;
+				-moz-border-radius: 3px;
+			 		 border-radius: 3px;
+				border: 2px solid #8ec63f; }
+
+				div#contact div#contactForm input,
+				div#contact div#contactForm textarea {
+					width: 300px;
+					display: block; }
+
 	</style>
 
 
@@ -37,7 +63,7 @@
 			<div id="logo"><a href="index.html">Koality</a></div><!-- End of Logo -->
             
             <div id="navigation">
-            	<a href="prepush-continuous-integration.html" id="prepush-ci">Pre-Push CI</a>
+            	<a href="prepush-continuous-integration.html" id="Pre-Push-ci">Pre-Push CI</a>
                 <a href="idempotent-parallelization.html" id="parallelization">Parallelization</a>
                 <!-- <a href="security.html" id="security">Security</a> -->
                 <a href="build-analytics.html" id="analytics">Analytics</a>
@@ -51,13 +77,36 @@
 
 
 
-	<!-- PLANS -->
-	<div class="section">
+	<!-- CONTACT -->
+	<div class="section" id="contact">
     	<div class="container">
+
 			<h1>Get in touch</h1>
             <h2>We’re happy to answer any of your questions</h2>
 
-			
+
+			<!-- Arrow Box -->
+			<div class="arrow_box" id="contactInfo">
+            	<h3>Koality</h3>
+
+                <p>(412) 251-2665<br />
+                <a href="">info@koalitycode.com</a></p>
+
+                <p>300 Harrison St,<br />
+                San Francisco, CA 94105</p>
+            </div><!-- End of Arrow Box -->
+
+
+			<!-- Contact Form -->
+            <div id="contactForm">
+            	<h3>General Inquiry</h3>
+                <form>
+                	<input type="text" placeholder="Name" />
+                    <input type="text" placeholder="Email" />
+                    <textarea name="message" placeholder="Message"></textarea>
+                </form>
+                <a href="" class="button">Send</a>
+            </div><!-- End of Contact Form -->
 			
         </div><!-- End of Container -->
     </div><!-- End of Section -->
@@ -75,12 +124,12 @@
             
             	<div>
                 	<h3>Sales</h3>
-                    <p>What do you want to know about Koality? <a href="mailto:sales@koalitycode.com">Email our sales team</a> for answers to all your questions.</p>
+                    <p><a href="mailto:sales@koalitycode.com">Email our sales team</a> for more information about how Koality will improve...</p>
                 </div>
                 
                 <div>
                 	<h3>Support</h3>
-					<p>Need some help? <a href="mailto:support@koalitycode.com">Email our support team</a> for technical assistance with setup, integration and use.</p>
+					<p>Need some help? <a href="mailto:support@koalitycode.com">Email our support team</a> for assistance with setup, integration and use.</p>
                 </div>
                 
                 <div>
@@ -92,7 +141,7 @@
                 
                 <div>
                 	<h3>Press</h3>
-                    <p><a href="mailto:media@koalitycode.com">Email our media team</a> for press-related inquiries.</p>
+                    <p><a href="mailto:media@koalitycode.com">Email our media team</a> for press related inquiries.</p>
                 </div>
             
             </div><!-- End of Quarters -->

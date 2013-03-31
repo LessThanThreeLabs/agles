@@ -1,16 +1,16 @@
 @charset "UTF-8";
 /* CSS Document */
 
-/*--- PRE-PUSH ---*/
+/*--- Pre-Push ---*/
 
 
-div#pre-push div.quarters div {
+div#Pre-Push div.quarters div {
 	margin-top: 2em;
 	text-align: center; }
 
-	div#pre-push div.quarters div p { margin-top: .5em; }
+	div#Pre-Push div.quarters div p { margin-top: .5em; }
 
-div#pre-push a.button { margin-top: 4em; }
+div#Pre-Push a.button { margin-top: 4em; }
 
 
 /*--- FEATURES ---*/
@@ -49,24 +49,7 @@ div#contact div#form {
 		margin-bottom: 5px; }
 
 	div#contact div#form input {
-		font-family: 'Din', sans-serif;	
-		font-size: 1em;
-		font-weight: 100;
 		width: 310px;
-		height: 20px;
-		margin: 0;
-		margin-bottom: 25px;
-		padding: 10px 10px 8px;
-		border: 1px solid #ccc;
-		outline: none;
-		-moz-border-radius: 3px;
-			 border-radius: 3px; }
+		height: 20px; }
 
-	div#contact div#form input:focus {
-		border: 1px solid #8ec63f;
-		-webkit-box-shadow: 0 0 8px rgba(130, 188, 0, 1); 
-		   -moz-box-shadow: 0 0 8px rgba(130, 188, 0, 1);
-				box-shadow: 0 0 8px rgba(130, 188, 0, 1); }
-			
-			
 	div#contact a.button { width: 290px; }
