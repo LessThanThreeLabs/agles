@@ -8,10 +8,15 @@
 <%- cssFiles %>
 
 <style type="text/css">
-#installationWizard {
-	width: 800px;
-	height: 600px;
-}
+	#installationWizard {
+		width: 800px;
+		height: 600px;
+	}
+
+	#installationWizardForm {
+		margin-top: 30px;
+		margin-left: 30px;
+	}
 </style>
 
 </head>
@@ -30,8 +35,29 @@
 			<div id="contentContainer">
 				<div class="prettyCenteredPanel" id="installationWizard">
 					<div class="prettyContent">
-						<div class="prettyContentHeader prettyContentHeaderPadding">InstallationWizard</div>
-						<div class="prettyContentBody">Hello</div>
+						<div class="prettyContentHeader prettyContentHeaderPadding">Installation Wizard</div>
+						<div class="prettyContentBody">
+							<div id="installationWizardForm" class="prettyForm">
+								<div class="prettyFormRow">
+									<div class="prettyFormLabel labelPadding">Domain name</div>
+									<div class="prettyFormValue">
+										<input type="text" placeholder="koality.company.com">
+									</div>
+								</div>
+								<div class="prettyFormRow">
+									<div class="prettyFormLabel labelPadding">AWS key</div>
+									<div class="prettyFormValue">
+										<input type="text" placeholder="aws key id">
+									</div>
+								</div>
+								<div class="prettyFormRow">
+									<div class="prettyFormLabel labelPadding">Aws secret key</div>
+									<div class="prettyFormValue">
+										<input type="text" placeholder="aws secret key">
+									</div>
+								</div>
+							</div>
+						</div>
 						<div class="prettyContentFooter"></div>
 					</div>
 				</div>
