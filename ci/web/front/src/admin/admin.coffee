@@ -1,6 +1,6 @@
 'use strict'
 
-window.Admin = ['$scope', '$location', '$routeParams', 'initialState', 'fileSuffixAdder', ($scope, $location, $routeParams, initialState, fileSuffixAdder) ->
+window.Admin = ['$scope', '$location', '$routeParams', 'initialState', ($scope, $location, $routeParams, initialState) ->
 	$scope.userId = initialState.user.id
 	$scope.currentView = $routeParams.view ? 'website'
 

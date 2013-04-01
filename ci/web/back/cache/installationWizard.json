@@ -14,7 +14,11 @@
 	"js": {
 		"application/javascript": [
 			"/js/libs/assert.js",
-			"/js/libs/jquery.js"
+			"/js/libs/jquery.js",
+			"/js/libs/angular.js",
+
+			"/js/src/installationWizard/directives.js",
+			"/js/src/installationWizard/setup.js"
 		]
 	},
 

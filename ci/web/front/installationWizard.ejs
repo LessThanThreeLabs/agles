@@ -9,13 +9,14 @@
 
 <style type="text/css">
 	#installationWizard {
-		width: 800px;
+		width: 1000px;
 		height: 600px;
 	}
 
-	#installationWizardForm {
-		margin-top: 30px;
-		margin-left: 30px;
+	#adminInformationForm, #awsInformationForm {
+		display: inline-block;
+		margin: 30px 0px 0px 30px;
+		vertical-align: top;
 	}
 
 	#submitButton {
@@ -31,7 +32,7 @@
 
 		<div id="centerContainer">
 			<div id="headerContainer">
-				<div id="header" ng-controller="Header" unselectable>
+				<div id="header" unselectable>
 					<span id="headerTitle" ng-click="visitHome()">Koality</span>
 				</div>
 			</div>
@@ -41,31 +42,67 @@
 					<div class="prettyContent">
 						<div class="prettyContentHeader prettyContentHeaderPadding">Installation Wizard</div>
 						<div class="prettyContentBody">
-							<div id="installationWizardForm" class="prettyForm">
-								<div class="prettyFormRow">
-									<div class="prettyFormLabel labelPadding">Domain name</div>
-									<div class="prettyFormValue">
-										<input type="text" placeholder="koality.company.com">
+							<div id="adminInformationForm">
+								<form class="prettyForm">
+									<div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding">Admin email</div>
+										<div class="prettyFormValue">
+											<input type="email" placeholder="email@address.com">
+										</div>
 									</div>
-								</div>
-								<div class="prettyFormRow">
-									<div class="prettyFormLabel labelPadding">AWS key</div>
-									<div class="prettyFormValue">
-										<input type="text" placeholder="aws key id">
+									<div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding">Admin first name</div>
+										<div class="prettyFormValue">
+											<input type="text" placeholder="First">
+										</div>
 									</div>
-								</div>
-								<div class="prettyFormRow">
-									<div class="prettyFormLabel labelPadding">Aws secret key</div>
-									<div class="prettyFormValue">
-										<input type="text" placeholder="aws secret key">
+									<div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding">Admin last name</div>
+										<div class="prettyFormValue">
+											<input type="text" placeholder="Last">
+										</div>
 									</div>
-								</div>
-								<div class="prettyFormRow">
-									<div class="prettyFormLabel labelPadding"></div>
-									<div class="prettyFormValue">
-										<button id="submitButton">Submit</button>
+									<div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding">Admin password</div>
+										<div class="prettyFormValue">
+											<input type="password" placeholder="p4ssW0rd">
+										</div>
 									</div>
-								</div>
+									<div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding">Admin confirm password</div>
+										<div class="prettyFormValue">
+											<input type="password" placeholder="p4ssW0rd, again">
+										</div>
+									</div>
+								</form>
+							</div>
+							<div id="awsInformationForm">
+								<form class="prettyForm">
+									<div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding">Domain name</div>
+										<div class="prettyFormValue">
+											<input type="text" placeholder="koality.company.com">
+										</div>
+									</div>
+									<div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding">AWS key</div>
+										<div class="prettyFormValue">
+											<input type="text" placeholder="aws key id">
+										</div>
+									</div>
+									<div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding">Aws secret key</div>
+										<div class="prettyFormValue">
+											<input type="text" placeholder="aws secret key">
+										</div>
+									</div>
+									<!-- <div class="prettyFormRow">
+										<div class="prettyFormLabel labelPadding"></div>
+										<div class="prettyFormValue">
+											<button id="submitButton">Submit</button>
+										</div>
+									</div> -->
+								</form>
 							</div>
 						</div>
 						<div class="prettyContentFooter"></div>

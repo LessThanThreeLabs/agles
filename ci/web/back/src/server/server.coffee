@@ -97,8 +97,8 @@ class Server
 		expressServer = express()
 		@_configureServer expressServer
 
-		addInstallationWizardBindings()
-		# addProjectBindings()
+		# addInstallationWizardBindings()
+		addProjectBindings()
 		expressServer.get '*', @staticServer.handleRequest		
 
 		server = https.createServer @httpsOptions, expressServer
