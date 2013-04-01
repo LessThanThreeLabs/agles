@@ -14,6 +14,7 @@ class InstallationWizardHandler extends RequestHandler
 	handleRequest: (request, response) =>
 		response.render 'installationWizard', 
 			fileSuffix: @fileSuffix
+			csrfToken: request.session.csrfToken
 			cssFiles: @cssFilesString
 			jsFiles: @jsFilesString
 			

@@ -37,80 +37,14 @@
 				</div>
 			</div>
 
-			<div id="contentContainer">
-				<div class="prettyCenteredPanel" id="installationWizard">
-					<div class="prettyContent">
-						<div class="prettyContentHeader prettyContentHeaderPadding">Installation Wizard</div>
-						<div class="prettyContentBody">
-							<div id="adminInformationForm">
-								<form class="prettyForm">
-									<div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding">Admin email</div>
-										<div class="prettyFormValue">
-											<input type="email" placeholder="email@address.com">
-										</div>
-									</div>
-									<div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding">Admin first name</div>
-										<div class="prettyFormValue">
-											<input type="text" placeholder="First">
-										</div>
-									</div>
-									<div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding">Admin last name</div>
-										<div class="prettyFormValue">
-											<input type="text" placeholder="Last">
-										</div>
-									</div>
-									<div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding">Admin password</div>
-										<div class="prettyFormValue">
-											<input type="password" placeholder="p4ssW0rd">
-										</div>
-									</div>
-									<div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding">Admin confirm password</div>
-										<div class="prettyFormValue">
-											<input type="password" placeholder="p4ssW0rd, again">
-										</div>
-									</div>
-								</form>
-							</div>
-							<div id="awsInformationForm">
-								<form class="prettyForm">
-									<div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding">Domain name</div>
-										<div class="prettyFormValue">
-											<input type="text" placeholder="koality.company.com">
-										</div>
-									</div>
-									<div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding">AWS key</div>
-										<div class="prettyFormValue">
-											<input type="text" placeholder="aws key id">
-										</div>
-									</div>
-									<div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding">Aws secret key</div>
-										<div class="prettyFormValue">
-											<input type="text" placeholder="aws secret key">
-										</div>
-									</div>
-									<!-- <div class="prettyFormRow">
-										<div class="prettyFormLabel labelPadding"></div>
-										<div class="prettyFormValue">
-											<button id="submitButton">Submit</button>
-										</div>
-									</div> -->
-								</form>
-							</div>
-						</div>
-						<div class="prettyContentFooter"></div>
-					</div>
-				</div>
-			</div>
+			<div id="contentContainer" ng-view></div>
 		</div>
 	</div>
+
+<script>
+	var fileSuffix = '<%- fileSuffix %>'
+	var csrfToken = '<%- csrfToken %>'
+</script>
 
 <%- jsFiles %>
 

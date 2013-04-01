@@ -7,7 +7,11 @@
 			"/css/src/prettyElements/prettyForm.css",
 			"/css/src/prettyElements/prettyTooltip.css",
 			"/css/src/main.css",
-			"/css/src/header/header.css"
+			"/css/src/header/header.css",
+			"/css/src/unexpectedError/unexpectedError.css",
+			"/css/src/invalidPermissions/invalidPermissions.css",
+
+			"/css/src/installationWizard/wizard/wizard.css"
 		]
 	},
 
@@ -16,8 +20,17 @@
 			"/js/libs/assert.js",
 			"/js/libs/jquery.js",
 			"/js/libs/angular.js",
+			"/js/libs/angularSanitize.js",
+			"/js/libs/socket.io.js",
 
-			"/js/src/installationWizard/directives.js",
+			"/js/src/services.js",
+			"/js/src/directives.js",
+			"/js/src/filters.js",
+
+			"/js/src/unexpectedError/unexpectedError.js",
+			"/js/src/invalidPermissions/invalidPermissions.js",
+
+			"/js/src/installationWizard/wizard/wizard.js",
 			"/js/src/installationWizard/setup.js"
 		]
 	},
@@ -25,6 +38,14 @@
 	"img": {
 		"image/png": [
 			"/img/icons/error.png"
+		]
+	},
+
+	"html": {
+		"text/html": [
+			"/html/installationWizard/wizard.html",
+			"/html/unexpectedError.html",
+			"/html/invalidPermissions.html"
 		]
 	},
 

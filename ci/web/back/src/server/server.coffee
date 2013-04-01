@@ -80,6 +80,7 @@ class Server
 	start: () =>
 		addInstallationWizardBindings = () =>
 			expressServer.get '/', @handlers.installationWizardHandler.handleRequest
+			expressServer.get '/wizard', @handlers.installationWizardHandler.handleRequest
 
 		addProjectBindings = () =>
 			expressServer.get '/', @handlers.indexHandler.handleRequest
@@ -97,8 +98,8 @@ class Server
 		expressServer = express()
 		@_configureServer expressServer
 
-		# addInstallationWizardBindings()
-		addProjectBindings()
+		addInstallationWizardBindings()
+		# addProjectBindings()
 		expressServer.get '*', @staticServer.handleRequest		
 
 		server = https.createServer @httpsOptions, expressServer

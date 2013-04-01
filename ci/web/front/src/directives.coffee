@@ -213,6 +213,12 @@ angular.module('koality.directive', []).
 			if attributes.contentHeaderPadding?
 				element.addClass 'prettyContentHeaderPadding'
 	).
+	directive('contentHeaderSubtext', () ->
+		restrict: 'E'
+		replace: true
+		transclude: true
+		template: '<div class="prettyContentHeaderSubtext" unselectable ng-transclude></div>'
+	).
 	directive('contentBody', () ->
 		restrict: 'E'
 		replace: true
