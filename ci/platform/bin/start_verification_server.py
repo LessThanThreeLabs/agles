@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 
-import settings.log
+import util.log
 
 from util.uri_translator import RepositoryUriTranslator
 from verification.verification_server import VerificationServer
@@ -14,7 +14,7 @@ from virtual_machine.openstack import OpenstackVm
 
 
 def main():
-	settings.log.configure()
+	util.log.configure()
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-d", "--dir",

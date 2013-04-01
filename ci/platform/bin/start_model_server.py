@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import settings.log
+import util.log
 
 from model_server.model_server import ModelServer
 
@@ -7,7 +7,7 @@ from model_server.model_server import ModelServer
 def main():
 	print "Starting Model Server ..."
 
-	settings.log.configure()
+	util.log.configure()
 	try:
 		model_server = ModelServer().start()
 	except:

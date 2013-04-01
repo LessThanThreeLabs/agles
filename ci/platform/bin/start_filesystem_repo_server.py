@@ -2,7 +2,7 @@
 import argparse
 import os
 
-import settings.log
+import util.log
 
 from bunnyrpc.server import Server
 from repo.store import RepositoryStore, FileSystemRepositoryStore
@@ -20,7 +20,7 @@ def count_repositories(root_dir):
 
 
 def main():
-	settings.log.configure()
+	util.log.configure()
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-e", "--exchange_name", help="The exchange to bind this server to")
 	parser.add_argument("-r", "--root_dir", help="The root directory to add repositories to")

@@ -1,6 +1,6 @@
 import eventlet
 
-import settings.log
+import util.log
 import unittest
 
 from database import schema
@@ -23,7 +23,7 @@ class Timeout(object):
 class BaseTest(unittest.TestCase):
 	@classmethod
 	def setup_class(cls):
-		settings.log.configure()
+		util.log.configure()
 
 	@classmethod
 	def teardown_class(cls):
