@@ -11,14 +11,15 @@ from settings.verification_server import VerificationServerSettings
 
 class VerifierPool(object):
 	def __init__(self, max_verifiers=None, min_unallocated=None, uri_translator=None):
-		self._max_verifiers = max_verifiers
-		self._min_unallocated = min_unallocated
+		self.max_verifiers = max_verifiers
+		self.min_unallocated = min_unallocated
 
 		max_verifiers = self._get_max_verifiers()
 		min_unallocated = self._get_min_unallocated()
 		assert max_verifiers >= min_unallocated
 
 		self.uri_translator = uri_translator
+		self._current_max_verifiers = max_verifiers
 		self.free_slots = queue.Queue()
 		for i in range(max_verifiers):
 			self.free_slots.put(i)
@@ -29,10 +30,10 @@ class VerifierPool(object):
 		self._fill_to_min_unallocated()
 
 	def _get_max_verifiers(self):
-		return self._max_verifiers if self._max_verifiers is not None else VerificationServerSettings.max_virtual_machine_count
+		return self.max_verifiers if self.max_verifiers is not None else VerificationServerSettings.max_virtual_machine_count
 
 	def _get_min_unallocated(self):
-		return self._min_unallocated if self._min_unallocated is not None else VerificationServerSettings.static_pool_size
+		return self.min_unallocated if self.min_unallocated is not None else VerificationServerSettings.static_pool_size
 
 	def teardown(self):
 		for i in self.unallocated_slots + self.allocated_slots:
@@ -64,7 +65,10 @@ class VerifierPool(object):
 			self.unallocated_slots.remove(slot)
 		elif slot in self.allocated_slots:
 			self.allocated_slots.remove(slot)
-		self.free_slots.put(slot)
+
+		# Abandon slots that are higher than the current cap
+		if self._get_max_verifiers() > slot:
+			self.free_slots.put(slot)
 		self._fill_to_min_unallocated()
 
 	def _get_slot(self, verifier):
@@ -104,6 +108,11 @@ class VerifierPool(object):
 				break
 
 	def _fill_to_min_unallocated(self):
+		new_max = self._get_max_verifiers()
+		for i in range(self._current_max_verifiers, new_max):
+			self.free_slots.put(i)
+			self._current_max_verifiers += 1
+
 		num_to_fill = self._get_min_unallocated() - len(self.unallocated_slots)
 		for i in range(num_to_fill):
 			try:
