@@ -17,3 +17,14 @@ def configure(log_home=LOG_HOME, filepath='/default.log'):
 	# loggers
 	root_logger = logging.getLogger()
 	root_logger.addHandler(default_handler)
+
+
+class Logged(object):
+	def __init__(self, level=logging.INFO):
+		self.level = level
+
+	def __call__(self, cls):
+		class Wrapped(cls):
+			cls.logger = logging.getLogger(cls.__name__)
+			cls.logger.setLevel(self.level)
+		return Wrapped
