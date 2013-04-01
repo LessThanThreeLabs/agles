@@ -2,21 +2,28 @@
 	<content>
 		<content-header content-header-padding>
 			Installation Wizard
-			<content-header-subtext>Step {{stepNumber}} of 4</content-header-subtext>
+			<content-header-subtext>Step {{stepNumber}} of 3</content-header-subtext>
 		</content-header>
 		<content-body unselectable>
-			<div ng-show="stepNumber == 1">
-				<div id="wizardWelcome">
+			<div id="wizardStepZero" ng-show="stepNumber == 0">
+				<div id="wizardStepZeroWelcome">
 					This wizard will help you quickly configure Koality for your company.
-					<button ng-click="submitStepOne()">Get started</button>
 				</div>
+				<button ng-click="goToStepOne()">Get started</button>
 			</div>
 
-			<div ng-show="stepNumber == 2">
-				<styled-form name="adminInformationForm">
+			<div id="wizardStepOne" ng-show="stepNumber == 1">
+				<div id="wizardStepOneInstructions">
+					First, let's create an admin account!
+				</div>
+				<div id="wizardStepOneSubInstructions">
+					This admin can add users, repositories, and other admins.
+				</div>
+
+				<styled-form id="wizardStepTwoForm" name="adminInformationForm" styled-form-alignment="center">
 					<styled-form-field label="Email" label-padding="true">
-						<input type="email" ng-model="admin.email" placeholder="email@address.com" autocomplete="on" required focused>
-						<span class="prettyFormError" tooltip="Invalid first name" ng-class="{visible: adminInformationForm.email.$dirty && adminInformationForm.email.$invalid}">
+						<input type="email" ng-model="admin.email" name="email" placeholder="email@address.com" autocomplete="on" required focused>
+						<span class="prettyFormError" tooltip="Invalid email address" ng-class="{visible: adminInformationForm.email.$dirty && adminInformationForm.email.$invalid}">
 							<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 						</span>
 					</styled-form-field>
@@ -45,7 +52,7 @@
 						</span>
 					</styled-form-field>
 					<styled-form-field label="">
-						<button id="stepTwoButton" ng-click="submitStepTwo()" ng-disabled="adminInformationForm.$invalid || admin.password != admin.confirmPassword">Create</button>	
+						<button ng-click="goToStepTwo()" ng-disabled="adminInformationForm.$invalid || admin.password != admin.confirmPassword">Create</button>	
 					</styled-form-field>
 				</styled-form>
 			</div>

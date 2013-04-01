@@ -4,18 +4,22 @@ window.Wizard = ['$scope', '$location', '$routeParams', 'rpc', ($scope, $locatio
 	$scope.admin = {}
 
 	syncToRouteParams = () ->
-		$scope.stepNumber = $routeParams.step ? 1
+		$scope.stepNumber = $routeParams.step ? 0
 	$scope.$on '$routeUpdate', syncToRouteParams
 	syncToRouteParams()
 
-	$scope.submitStepOne = () ->
-		$scope.stepNumber = 2
+	$scope.goToStepOne = () ->
+		$scope.stepNumber = 1
 
-	$scope.submitStepTwo = () ->
+	$scope.goToStepTwo = () ->
 		console.log 'check validity'
-		$scope.stepNumber = 3
+		$scope.stepNumber = 2
 
 	$scope.$watch 'stepNumber', (newValue, oldValue) ->
 		$location.search 'step', newValue ? null
+
+	$scope.$watch 'admin', ((newValue, oldValue) ->
+		console.log $scope.admin
+	), true
 ]
 
