@@ -45,7 +45,8 @@ angular.module('koality.directive', []).
 			options: '=dropdownOptions'
 			clickHandler: '&dropdownOptionClick'
 		template: '<div class="prettyDropdown {{alignment}}Aligned">
-			<div class="prettyDropdownOption" ng-repeat="option in options | orderBy:\'title\'" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
+				<div class="prettyDropdownOption" ng-repeat="option in options | orderBy:\'title\'" ng-click="clickHandler({dropdownOption: option.name})">{{option.title}}</div>
+				<div class="prettyDropdownOption" ng-show="options.length == 0">-- empty --</div>
 			</div>'
 	]).
 	directive('autoScrollToBottom', ['integerConverter', (integerConverter) ->
