@@ -7,9 +7,7 @@ exports.create = () ->
 
 class SystemSettingsInformationValidator
 	
-	domainNameRegex: new RegExp "^[\w]+$"
-	awsIdRegex: new RegExp "^[\w]+$"
-	awsSecretRegex: new RegExp "^[\w]+$"
+	awsIdRegex: new RegExp "^[\\w]+$"
 
 
 	getInvalidDomainNameString: () =>
@@ -17,7 +15,7 @@ class SystemSettingsInformationValidator
 
 
 	isValidDomainName: (domainName) =>
-		return domainName? and domainName.match @domainNameRegex
+		return domainName? and typeof domainName is 'string' and domainName.length <= 256
 
 
 	getInvalidAwsIdString: () =>
@@ -33,7 +31,7 @@ class SystemSettingsInformationValidator
 
 
 	isValidAwsSecret: (awsSecret) =>
-		return awsSecret? and awsSecret.match @awsIdRegex
+		return awsSecret? and typeof awsSecret is 'string'
 
 
 	getInvalidNumWaitingInstancesString: () =>

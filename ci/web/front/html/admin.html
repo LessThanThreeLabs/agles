@@ -232,13 +232,13 @@
 				<div id="adminAwsContent">
 					<styled-form name="awsForm">
 						<styled-form-field label="Access key" label-padding="true">
-							<input type="text" ng-model="awsKeys.accessKey" name="accessKey" placeholder="aws access key id" ng-maxlength="256" required focused>
+							<input type="text" ng-model="awsKeys.accessKey" name="accessKey" placeholder="aws access key id" ng-pattern="/^[\w]+$/" ng-minlength="16" ng-maxlength="32" required focused>
 							<span class="prettyFormError" tooltip="Invalid access key id" ng-class="{visible: awsForm.accessKey.$dirty && awsForm.accessKey.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>
 						</styled-form-field>
 						<styled-form-field label="Secret key" label-padding="true">
-							<input type="text" ng-model="awsKeys.secretKey" name="secretKey" placeholder="aws secret access key" ng-maxlength="256" required>
+							<input type="text" ng-model="awsKeys.secretKey" name="secretKey" placeholder="aws secret access key" ng-maxlength="128" required>
 							<span class="prettyFormError" tooltip="Invalid secret access key" ng-class="{visible: awsForm.secretKey.$dirty && awsForm.secretKey.$invalid}">
 								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 							</span>

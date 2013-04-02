@@ -38,13 +38,13 @@ class SystemSettingsUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data?.awsId? or not data?.awsSecret?
+		else if not data?.accessKey? or not data?.secretKey?
 			callback 400
 		else
 			errors = {}
-			if not @systemSettingsInformationValidator.isValidAwsId data.awsId
+			if not @systemSettingsInformationValidator.isValidAwsId data.accessKey
 				errors.domainName = @systemSettingsInformationValidator.getInvalidAwsIdString()
-			if not @systemSettingsInformationValidator.isValidAwsSecret data.awsSecret
+			if not @systemSettingsInformationValidator.isValidAwsSecret data.secretKey
 				errors.domainName = @systemSettingsInformationValidator.getInvalidAwsSecretString()
 
 			if Object.keys(errors).length isnt 0
@@ -78,3 +78,19 @@ class SystemSettingsUpdateHandler extends Handler
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback()
+
+
+	setDeploymentInitialized: (socket, data, callback) =>
+		userId = socket.session.userId
+		if not userId?
+			callback 403
+		else
+			console.log 'need to make sure depoylement is not already initialized'
+
+			@modelRpcConnection.systemSettings.update.initialize_deployment userId, (error) =>
+				if error?.type is 'InvalidPermissionsError' then callback 403
+				else if error? then callback 500
+				else callback()
+
+
+	

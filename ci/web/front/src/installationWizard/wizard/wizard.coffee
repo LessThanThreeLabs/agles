@@ -54,7 +54,15 @@ window.Wizard = ['$scope', '$location', '$routeParams', 'rpc', 'integerConverter
 					if error?
 						$scope.errorText = error
 					else
-						$scope.stepNumber = 5
+						_setDeploymentInitialized()
+
+		_setDeploymentInitialized = () ->
+			rpc.makeRequest 'systemSettings', 'update', 'setDeploymentInitialized', null, (error) ->
+				$scope.$apply () ->
+					if error?
+						$scope.errorText = error
+					else
+						$scope.stepNumber = 5			
 
 		_createInitialAdmin()
 

@@ -25,7 +25,7 @@
 				</div>
 				<styled-form id="wizardStepOneForm" name="domainForm" styled-form-alignment="center">
 					<styled-form-field label="Domain name" label-padding="true">
-						<input type="text" ng-model="website.domain" name="domain" placeholder="koality.companyname.com" ng-maxlength="256" required focused>
+						<input type="text" ng-model="website.domainName" name="domain" placeholder="koality.companyname.com" ng-maxlength="256" required focused>
 					</styled-form-field>
 					<styled-form-field label="">
 						<button ng-click="goToStepTwo()" ng-disabled="domainForm.$invalid">Continue</button>	
@@ -104,15 +104,15 @@
 					Please enter your AWS details to continue.
 				</div>
 				<styled-form id="wizardStepFourForm" name="awsForm" styled-form-alignment="center">
-					<styled-form-field label="AWS key id" label-padding="true">
-						<input type="text" ng-model="aws.id" name="id" placeholder="aws key id" ng-pattern="/^[\w]+$/" ng-minlength="16" ng-maxlength="32" required focused>
-						<span class="prettyFormError" tooltip="Invalid AWS key id" ng-class="{visible: awsForm.id.$dirty && awsForm.id.$invalid}">
+					<styled-form-field label="AWS key" label-padding="true">
+						<input type="text" ng-model="aws.accessKey" name="accessKey" placeholder="aws key" ng-pattern="/^[\w]+$/" ng-minlength="16" ng-maxlength="32" required focused>
+						<span class="prettyFormError" tooltip="Invalid AWS key id" ng-class="{visible: awsForm.accessKey.$dirty && awsForm.accessKey.$invalid}">
 							<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 						</span>
 					</styled-form-field>
 					<styled-form-field label="AWS secret key" label-padding="true">
-						<input type="text" ng-model="aws.secret" name="secret" placeholder="aws secret key" ng-maxlength="128" required>
-						<span class="prettyFormError" tooltip="Invalid AWS secret key" ng-class="{visible: awsForm.secret.$dirty && awsForm.secret.$invalid}">
+						<input type="text" ng-model="aws.secretKey" name="secretKey" placeholder="aws secret key" ng-maxlength="128" required>
+						<span class="prettyFormError" tooltip="Invalid AWS secret key" ng-class="{visible: awsForm.secretKey.$dirty && awsForm.secretKey.$invalid}">
 							<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
 						</span>
 					</styled-form-field>
