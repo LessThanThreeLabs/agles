@@ -4,32 +4,26 @@ crypto = require 'crypto'
 Handler = require '../../handler'
 
 
-exports.create = (stores, modelRpcConnection, passwordHasher, accountInformationValidator, mailer) ->
-	return new UsersCreateHandler stores, modelRpcConnection, passwordHasher, accountInformationValidator, mailer
+exports.create = (stores, modelRpcConnection, passwordHasher, accountInformationValidator, mailer, initialAdminToken) ->
+	return new UsersCreateHandler stores, modelRpcConnection, passwordHasher, accountInformationValidator, mailer, initialAdminToken
 
 
 class UsersCreateHandler extends Handler
-	constructor: (@stores, modelRpcConnection, @passwordHasher, @accountInformationValidator, @mailer) ->
+	constructor: (@stores, modelRpcConnection, @passwordHasher, @accountInformationValidator, @mailer, @initialAdminToken) ->
 		super modelRpcConnection
 		assert.ok @stores?
 		assert.ok @passwordHasher?
 		assert.ok @accountInformationValidator?
 		assert.ok @mailer?
+		assert.ok @initialAdminToken?
 
 
 	createUser: (socket, data, callback) =>
 		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName? or not data?.token?
 			callback 400
 		else
-			errors = {}
-			if not @accountInformationValidator.isValidFirstName data.firstName
-				errors.firstName = @accountInformationValidator.getInvalidFirstNameString()
-			if not @accountInformationValidator.isValidLastName data.lastName 
-				errors.lastName = @accountInformationValidator.getInvalidLastNameString()
-			if not @accountInformationValidator.isValidPassword data.password
-				errors.password = @accountInformationValidator.getInvalidPasswordString()
-
-			if Object.keys(errors).length isnt 0
+			errors = @_getUserInformationErrors data.email, data.firstName, data.lastName, data.password
+			if errors?
 				callback errors
 				return
 
@@ -40,6 +34,21 @@ class UsersCreateHandler extends Handler
 				if error? then callback 500
 				else if account.email isnt data.email then callback 403
 				else @_addUser socket.session, data, callback
+
+
+	_getUserInformationErrors: (email, firstName, lastName, password) =>
+		errors = {}
+		if not @accountInformationValidator.isValidEmail email
+			errors.email = @accountInformationValidator.getInvalidEmailString()
+		if not @accountInformationValidator.isValidFirstName firstName
+			errors.firstName = @accountInformationValidator.getInvalidFirstNameString()
+		if not @accountInformationValidator.isValidLastName lastName 
+			errors.lastName = @accountInformationValidator.getInvalidLastNameString()
+		if not @accountInformationValidator.isValidPassword password
+			errors.password = @accountInformationValidator.getInvalidPasswordString()
+
+		if Object.keys(errors).length isnt 0 then return errors
+		else return null
 
 
 	_addUser: (session, account, callback) =>
@@ -139,3 +148,25 @@ class UsersCreateHandler extends Handler
 				key = keyBuffer.toString 'hex'
 				@stores.createAccountStore.addAccount key, email: email
 				@mailer.inviteUser.email email, key, callback
+
+
+	validateInitialAdminUser: (socket, data, callback) =>
+		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName?
+			callback 400
+		else
+			errors = @_getUserInformationErrors data.email, data.firstName, data.lastName, data.password
+			if errors?
+				callback errors
+				return
+
+			@mailer.initialAdmin.email data.email, data.firstName, data.lastName, @initialAdminToken, (error) =>
+				if error? then callback 500
+				else callback()
+
+
+	validateInitialAdminToken: (socket, data, callback) =>
+		if not data?.token?
+			callback 400
+		else
+			if data.token isnt @initialAdminToken then callback 'bad token'
+			else callback()

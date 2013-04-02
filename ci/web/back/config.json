@@ -38,17 +38,6 @@
 			"certrequest": "keys/certrequest.csr"
 		},
 
-		"emailer": {
-			"mailgun": {
-				"hostname": "api.mailgun.net",
-				"port": "443",
-				"path": "/v2/getkoality.com/messages",
-				"method": "POST",
-				"key": "key-9e06ajco0xurqnioji-egwuwajg4jrn2",
-				"testMode": true
-			}
-		},
-
 		"createAccount": {
 			"redisStore": {
 				"url": "127.0.0.1",
@@ -61,6 +50,10 @@
 				"url": "127.0.0.1",
 				"port": 6392
 			}	
+		},
+
+		"initialAdmin": {
+			"token": "KMYFR8KX8RFQOLXR"
 		}
 	},
 
@@ -117,7 +110,14 @@
 				"email": "feedback"
 			},
 			"to": {
-				"email": "jpotter@koalitycode.com"
+				"email": "feedback@koalitycode.com"
+			}
+		},
+
+		"initialAdmin": {
+			"from": {
+				"name": "Koality",
+				"email": "koality"
 			}
 		}
 	}

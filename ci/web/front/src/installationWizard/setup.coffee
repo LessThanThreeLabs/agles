@@ -6,6 +6,7 @@ angular.module('koalitySetup', ['ngSanitize', 'koality.service', 'koality.direct
 			when('/wizard',
 				templateUrl: "/html/installationWizard/wizard#{fileSuffix}.html"
 				controller: Wizard
+				reloadOnSearch: false
 			).
 			when('/unexpectedError',
 				templateUrl: "/html/unexpectedError#{fileSuffix}.html"

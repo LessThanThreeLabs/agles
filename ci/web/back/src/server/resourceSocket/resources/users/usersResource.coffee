@@ -14,7 +14,7 @@ exports.create = (configurationParams, stores, modelConnection, mailer) ->
 	passwordHasher = PasswordHasher.create()
 	accountInformationValidator = AccountInformationValidator.create()
 
-	createHandler = UsersCreateHandler.create stores, modelConnection.rpcConnection, passwordHasher, accountInformationValidator, mailer
+	createHandler = UsersCreateHandler.create stores, modelConnection.rpcConnection, passwordHasher, accountInformationValidator, mailer, configurationParams.initialAdmin.token
 	readHandler = UsersReadHandler.create stores, modelConnection.rpcConnection
 	updateHandler = UsersUpdateHandler.create modelConnection.rpcConnection, passwordHasher, accountInformationValidator, mailer, mailer
 	deleteHandler = UsersDeleteHandler.create modelConnection.rpcConnection

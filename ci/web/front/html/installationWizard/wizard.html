@@ -2,10 +2,14 @@
 	<content>
 		<content-header content-header-padding>
 			Installation Wizard
-			<content-header-subtext>Step {{stepNumber}} of 3</content-header-subtext>
+			<content-header-subtext>Step {{stepNumber}} of 5</content-header-subtext>
 		</content-header>
 		<content-body unselectable>
-			<div id="wizardStepZero" ng-show="stepNumber == 0">
+			<div id="wizardStepError" ng-show="errorText != null">
+				{{errorText}}
+			</div>
+
+			<div id="wizardStepZero" ng-show="stepNumber == 0 && errorText == null">
 				<div id="wizardStepZeroWelcome">
 					This wizard will help you quickly configure Koality for your company.
 				</div>
@@ -13,10 +17,27 @@
 			</div>
 
 			<div id="wizardStepOne" ng-show="stepNumber == 1">
+				<div id="wizardStepOneIntroduction">
+					First, let's configure the website!
+				</div>
 				<div id="wizardStepOneInstructions">
+					What will be the domain name for your Koality website?
+				</div>
+				<styled-form id="wizardStepOneForm" name="domainForm" styled-form-alignment="center">
+					<styled-form-field label="Domain name" label-padding="true">
+						<input type="text" ng-model="website.domain" name="domain" placeholder="koality.companyname.com" ng-maxlength="256" required focused>
+					</styled-form-field>
+					<styled-form-field label="">
+						<button ng-click="goToStepTwo()" ng-disabled="domainForm.$invalid">Continue</button>	
+					</styled-form-field>
+				</styled-form>
+			</div>
+
+			<div id="wizardStepTwo" ng-show="stepNumber == 2 && errorText == null">
+				<div id="wizardStepTwoIntroduction">
 					First, let's create an admin account!
 				</div>
-				<div id="wizardStepOneSubInstructions">
+				<div id="wizardStepTwoInstructions">
 					This admin can add users, repositories, and other admins.
 				</div>
 
@@ -52,9 +73,54 @@
 						</span>
 					</styled-form-field>
 					<styled-form-field label="">
-						<button ng-click="goToStepTwo()" ng-disabled="adminInformationForm.$invalid || admin.password != admin.confirmPassword">Create</button>	
+						<button ng-click="goToStepThree()" ng-disabled="adminInformationForm.$invalid || admin.password != admin.confirmPassword">Create</button>	
 					</styled-form-field>
 				</styled-form>
+			</div>
+
+			<div id="wizardStepThree" ng-show="stepNumber == 3 && errorText == null">
+				<div id="wizardStepThreeIntroduction">
+					Nice to meet you {{admin.firstName}} {{admin.lastName}}!
+				</div>
+				<div id="wizardStepThreeInstructions">
+					A token has been sent to {{admin.email}} to confirm that you own this email account.<br>
+					Paste the token below to continue.
+				</div>
+				<styled-form id="wizardStepThreeForm" name="adminTokenForm" styled-form-alignment="center">
+					<styled-form-field label="Token" label-padding="true">
+						<input type="text" ng-model="admin.token" name="token" placeholder="token" ng-maxlength="32" required focused>
+					</styled-form-field>
+					<styled-form-field label="">
+						<button ng-click="goToStepFour()" ng-disabled="adminTokenForm.$invalid">Continue</button>	
+					</styled-form-field>
+				</styled-form>
+			</div>
+
+			<div id="wizardStepFour" ng-show="stepNumber == 4 && errorText == null">
+				<div id="wizardStepFourIntroduction">
+					Finally, let's make sure Koality can leverage EC2!
+				</div>
+				<div id="wizardStepFourInstructions">
+					Please enter your AWS details to continue.
+				</div>
+				<styled-form id="wizardStepFourForm" name="awsForm" styled-form-alignment="center">
+					<styled-form-field label="AWS key id" label-padding="true">
+						<input type="text" ng-model="aws.id" name="id" placeholder="aws key id" ng-maxlength="128" required focused>
+					</styled-form-field>
+					<styled-form-field label="AWS secret key" label-padding="true">
+						<input type="text" ng-model="aws.secret" name="secret" placeholder="aws secret key" ng-maxlength="128" required>
+					</styled-form-field>
+					<styled-form-field label="">
+						<button ng-click="goToStepFive()" ng-disabled="awsForm.$invalid">Continue</button>	
+					</styled-form-field>
+				</styled-form>
+			</div>
+
+			<div id="wizardStepFive" ng-show="stepNumber == 5 && errorText == null">
+				<div id="wizardStepFiveMessage">
+					You have finished setting up Koality!
+				</div>
+				<button ng-click="goToKoality()">Visit Koality</button>
 			</div>
 		</content-body>
 	</content>
