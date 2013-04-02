@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy import Table, Column, Boolean, Integer, String, Sequence, MetaData, ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy import event, text, DDL
 from sqlalchemy.exc import SQLAlchemyError
