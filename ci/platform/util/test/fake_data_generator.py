@@ -93,6 +93,8 @@ class SchemaDataGenerator(object):
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)
 
+			self.set_deployment_as_initialized(conn)
+
 	def get_random_commit_status(self):
 		if random.randint(0, 100) > 25:
 			return 'passed'
@@ -110,3 +112,11 @@ class SchemaDataGenerator(object):
 				line=output
 			)
 			sqlconn.execute(ins)
+
+	def set_deployment_as_initialized(self, sqlconn):
+		system_setting = schema.system_setting
+		sqlconn.execute(system_setting.insert().values(
+			resource="deployment",
+			key="initialized",
+			value_yaml="true"
+		))
