@@ -81,6 +81,23 @@ class Server
 		addInstallationWizardBindings = () =>
 			expressServer.get '/', @handlers.installationWizardHandler.handleRequest
 			expressServer.get '/wizard', @handlers.installationWizardHandler.handleRequest
+			expressServer.post '/turnOffInstallationWizard', turnOffInstallationWizard
+			expressServer.get '*', @staticServer.handleRequest
+
+		turnOffInstallationWizard = (request, response) =>
+			removeInstallationWizardBindings()
+			addProjectBindings()
+			response.end 'ok'
+
+		removeInstallationWizardBindings = () =>
+			expressServer.routes.get = expressServer.routes.get.filter (route) ->
+				route.path isnt '/'
+			expressServer.routes.get = expressServer.routes.get.filter (route) ->
+				route.path isnt '/wizard'
+			expressServer.routes.post = expressServer.routes.post.filter (route) ->
+				route.path isnt '/turnOffInstallationWizard'
+			expressServer.routes.get = expressServer.routes.get.filter (route) ->
+				route.path isnt '*'
 
 		addProjectBindings = () =>
 			expressServer.get '/', @handlers.indexHandler.handleRequest
@@ -94,13 +111,12 @@ class Server
 			expressServer.get '/unexpectedError', @handlers.indexHandler.handleRequest
 			expressServer.get '/invalidPermissions', @handlers.indexHandler.handleRequest
 			expressServer.post '/extendCookieExpiration', @_handleExtendCookieExpiration
+			expressServer.get '*', @staticServer.handleRequest
 
 		expressServer = express()
 		@_configureServer expressServer
 
 		addInstallationWizardBindings()
-		# addProjectBindings()
-		expressServer.get '*', @staticServer.handleRequest		
 
 		server = https.createServer @httpsOptions, expressServer
 		server.listen @configurationParams.https.port

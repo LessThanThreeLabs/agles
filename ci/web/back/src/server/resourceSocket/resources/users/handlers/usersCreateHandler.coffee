@@ -182,9 +182,10 @@ class UsersCreateHandler extends Handler
 				callback 'bad token'
 				return
 
-			console.log 'need to check that database has not been initialized!!!!'
-			
-			data.isAdmin = true
-			@_addUser socket.session, data, callback
+			@modelRpcConnection.systemSettings.read.is_deployment_initialized (error, initialized) =>
+				if error? or initialized then callback 500
+				else
+					data.isAdmin = true
+					@_addUser socket.session, data, callback
 
-			callback()
+					callback()

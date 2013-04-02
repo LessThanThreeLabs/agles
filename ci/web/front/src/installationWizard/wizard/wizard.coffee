@@ -1,6 +1,6 @@
 'use strict'
 
-window.Wizard = ['$scope', '$location', '$routeParams', 'rpc', 'integerConverter', ($scope, $location, $routeParams, rpc, integerConverter) ->
+window.Wizard = ['$scope', '$http', '$location', '$routeParams', 'rpc', 'integerConverter', ($scope, $http, $location, $routeParams, rpc, integerConverter) ->
 	$scope.website = {}
 	$scope.admin = {}
 	$scope.aws = {}
@@ -52,7 +52,7 @@ window.Wizard = ['$scope', '$location', '$routeParams', 'rpc', 'integerConverter
 			rpc.makeRequest 'systemSettings', 'update', 'setAwsKeys', $scope.aws, (error) ->
 				$scope.$apply () ->
 					if error?
-						$scope.errorText = error
+						$scope.errorText = 'fatal error:' + JSON.stringify error
 					else
 						_setDeploymentInitialized()
 
@@ -60,9 +60,17 @@ window.Wizard = ['$scope', '$location', '$routeParams', 'rpc', 'integerConverter
 			rpc.makeRequest 'systemSettings', 'update', 'setDeploymentInitialized', null, (error) ->
 				$scope.$apply () ->
 					if error?
-						$scope.errorText = error
+						$scope.errorText = 'fatal error:' + JSON.stringify error
 					else
-						$scope.stepNumber = 5			
+						_turnOffInstallationWizard()
+
+		_turnOffInstallationWizard = () ->
+			successHandler = (data, status, headers, config) ->
+				$scope.stepNumber = 5
+			errorHandler = (data, status, headers, config) ->
+				$scope.errorText = 'fatal error while turning off installation wizard'
+
+			$http.post('/turnOffInstallationWizard').success(successHandler).error(errorHandler)	
 
 		_createInitialAdmin()
 

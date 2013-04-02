@@ -85,12 +85,10 @@ class SystemSettingsUpdateHandler extends Handler
 		if not userId?
 			callback 403
 		else
-			console.log 'need to make sure depoylement is not already initialized'
-
-			@modelRpcConnection.systemSettings.update.initialize_deployment userId, (error) =>
-				if error?.type is 'InvalidPermissionsError' then callback 403
-				else if error? then callback 500
-				else callback()
-
-
-	
+			@modelRpcConnection.systemSettings.read.is_deployment_initialized (error, initialized) =>
+				if error? or initialized then callback 500
+				else
+					@modelRpcConnection.systemSettings.update.initialize_deployment (error) =>
+						if error?.type is 'InvalidPermissionsError' then callback 403
+						else if error? then callback 500
+						else callback()
