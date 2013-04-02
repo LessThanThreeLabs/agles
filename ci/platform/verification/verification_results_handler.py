@@ -1,16 +1,14 @@
-import logging
-
 import model_server
 
 from database.engine import ConnectionFactory
 from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeError, PushForwardError
 from shared.constants import BuildStatus, MergeStatus
 from util import pathgen
+from util.log import Logged
 
 
+@Logged()
 class VerificationResultsHandler(object):
-	logger = logging.getLogger("VerificationResultsHandler")
-
 	def __init__(self):
 		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 

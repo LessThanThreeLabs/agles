@@ -1,5 +1,3 @@
-import logging
-
 from eventlet import event, spawn, spawn_n, queue
 from kombu.messaging import Producer
 
@@ -8,12 +6,12 @@ import model_server
 from build_core import LightWeightBuildCore
 from shared.handler import EventSubscriber
 from util import greenlets, pathgen
+from util.log import Logged
 from verification_results_handler import VerificationResultsHandler
 
 
+@Logged()
 class ChangeVerifier(EventSubscriber):
-	logger = logging.getLogger("ChangeVerifier")
-
 	def __init__(self, verifier_pool, uri_translator):
 		super(ChangeVerifier, self).__init__('repos', 'verification:repos.update')
 		self.verifier_pool = verifier_pool

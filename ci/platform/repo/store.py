@@ -22,6 +22,7 @@ from git import GitCommandError, Repo
 from bunnyrpc.client import Client
 from settings.store import StoreSettings
 from util import pathgen
+from util.log import Logged
 
 
 class RemoteRepositoryManager(object):
@@ -222,6 +223,7 @@ class RepositoryStore(object):
 		raise NotImplementedError("Subclasses should override this!")
 
 
+@Logged()
 class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
@@ -229,8 +231,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 	PRIVATE_KEY_SCRIPT = 'koality-get-private-key'
 	if hasattr(sys, 'real_prefix'):  # We're in a virtualenv python, so point at the locally-installed script
 		PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', PRIVATE_KEY_SCRIPT)
-
-	logger = logging.getLogger("FileSystemRepositoryStore")
 
 	def __init__(self, root_storage_directory_path):
 		super(FileSystemRepositoryStore, self).__init__()

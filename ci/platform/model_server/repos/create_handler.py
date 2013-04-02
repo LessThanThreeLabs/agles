@@ -1,4 +1,3 @@
-import logging
 import time
 
 import database.schema
@@ -6,13 +5,14 @@ import repo.store
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from util.log import Logged
 from util.pathgen import to_clone_path
 from util.permissions import AdminApi
 
 
+@Logged()
 class ReposCreateHandler(ModelServerRpcHandler):
 	KEYBITS = 1024
-	logger = logging.getLogger("ReposCreateHandler")
 
 	def __init__(self):
 		super(ReposCreateHandler, self).__init__("repos", "create")

@@ -1,4 +1,3 @@
-import logging
 import os
 import socket
 import yaml
@@ -8,6 +7,7 @@ import model_server
 from pubkey_registrar import PubkeyRegistrar
 from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
+from util.log import Logged
 
 
 def ReturnException(func):
@@ -21,9 +21,9 @@ def ReturnException(func):
 	return wrapper
 
 
+@Logged()
 class BuildVerifier(object):
 	def __init__(self, build_core):
-		self.logger = logging.getLogger("BuildVerifier")
 		self.build_core = build_core
 		# self._check_for_interrupted_build()
 		# TODO: change this to something else

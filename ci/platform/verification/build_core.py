@@ -1,4 +1,3 @@
-import logging
 import os
 import shutil
 import subprocess
@@ -8,13 +7,14 @@ import yaml
 from git import Repo
 
 from model_server.build_consoles import ConsoleType
+from util.log import Logged
 from virtual_machine.remote_command import SimpleRemoteCheckoutCommand, SimpleRemoteProvisionCommand
 from verification_config import VerificationConfig
 
 
+@Logged()
 class BuildCore(object):
 	def __init__(self, uri_translator=None):
-		self.logger = logging.getLogger("BuildCore")
 		self.uri_translator = uri_translator
 		self.source_dir = os.path.join("/tmp", "source")
 

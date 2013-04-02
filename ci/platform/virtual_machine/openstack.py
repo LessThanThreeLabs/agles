@@ -1,4 +1,3 @@
-import logging
 import os
 import socket
 
@@ -7,6 +6,7 @@ import novaclient.client
 import yaml
 
 from settings.openstack import OpenstackSettings
+from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
 
@@ -18,10 +18,10 @@ class OpenstackClient(object):
 		return novaclient.client.Client(*credentials[0], **credentials[1])
 
 
+@Logged()
 class OpenstackVm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
-	logger = logging.getLogger("OpenstackVm")
 
 	def __init__(self, vm_directory, instance, vm_username=VM_USERNAME):
 		super(OpenstackVm, self).__init__(vm_directory)

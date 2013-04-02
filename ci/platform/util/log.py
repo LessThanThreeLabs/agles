@@ -27,9 +27,7 @@ class Logged(object):
 		logfile = LOG_HOME + '%s.log' % cls.__name__
 		handler = logging.handlers.RotatingFileHandler(filename=logfile, maxBytes=8388608, backupCount=4)
 
-		class Wrapped(cls):
-			cls.logger = logging.getLogger(cls.__name__)
-			cls.logger.setLevel(self.level)
-			cls.logger.addHandler(handler)
-
-		return Wrapped
+		cls.logger = logging.getLogger(cls.__name__)
+		cls.logger.setLevel(self.level)
+		cls.logger.addHandler(handler)
+		return cls

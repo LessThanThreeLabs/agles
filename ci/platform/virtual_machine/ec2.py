@@ -1,4 +1,3 @@
-import logging
 import os
 import socket
 
@@ -7,6 +6,7 @@ import eventlet
 import yaml
 
 from settings.aws import AwsSettings
+from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
 
@@ -15,17 +15,16 @@ class Ec2Client(object):
 	@classmethod
 	def get_client(cls):
 		region = AwsSettings.region or Ec2Vm._call(
-			['sh', '-c',
-				'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
-			).output
+			['sh', '-c', 'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
+		).output
 		return boto.ec2.connect_to_region(region,
 			**AwsSettings.credentials())
 
 
+@Logged()
 class Ec2Vm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
-	logger = logging.getLogger("Ec2Vm")
 
 	def __init__(self, vm_directory, instance, vm_username=VM_USERNAME):
 		super(Ec2Vm, self).__init__(vm_directory)
