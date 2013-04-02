@@ -12,7 +12,7 @@ class DatabaseBackedSettings(object):
 				attrname = attr[len('_default_'):] if attr.startswith('_default_') else attr
 				raise AttributeError("'%s' object has no attribute '%s'" % (cls.__name__, attrname))
 			setting = cls._retrieve_setting(attr)
-			if setting:
+			if setting is not None:
 				return setting
 			return getattr(cls, '_default_' + attr)
 
