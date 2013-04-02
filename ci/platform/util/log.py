@@ -24,7 +24,7 @@ class Logged(object):
 		self.level = level
 
 	def __call__(self, cls):
-		logfile = LOG_HOME + '%s.log' % cls.__name__
+		logfile = os.path.join(LOG_HOME, '%s.log' % cls.__name__)
 		handler = logging.handlers.RotatingFileHandler(filename=logfile, maxBytes=8388608, backupCount=4)
 
 		cls.logger = logging.getLogger(cls.__name__)
