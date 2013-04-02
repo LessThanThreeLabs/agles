@@ -78,8 +78,8 @@ angular.module('koality.d3.directive', []).
 					.domain([0, getGreatestNumberOfChanges(allHistogram, passedHistogram, failedHistogram)])
 					.range([height-padding.bottom-axisBuffer, padding.top])
 
-				xAxis = d3.svg.axis().scale(x).ticks(5).tickFormat(d3.time.format '%m/%d').orient 'bottom'
-				yAxis = d3.svg.axis().scale(y).ticks(5).orient 'left'
+				xAxis = d3.svg.axis().scale(x).ticks(8).tickFormat(d3.time.format '%m/%d').orient 'bottom'
+				yAxis = d3.svg.axis().scale(y).ticks(6).orient 'left'
 
 				updatePath allPath, allHistogram, x, y, allIntervals, 500
 				updatePath passedPath, passedHistogram, x, y, allIntervals, 750
