@@ -3,17 +3,16 @@
 window.Wizard = ['$scope', '$location', '$routeParams', 'rpc', 'integerConverter', ($scope, $location, $routeParams, rpc, integerConverter) ->
 	$scope.website = {}
 	$scope.admin = {}
+	$scope.aws = {}
 
-	syncToRouteParams = () ->
+	$scope.$on '$routeUpdate', () ->
 		$scope.stepNumber = integerConverter.toInteger $routeParams.step ? 0
-	$scope.$on '$routeUpdate', syncToRouteParams
-	syncToRouteParams()
+	$scope.stepNumber = 0
 
 	$scope.goToStepOne = () ->
 		$scope.stepNumber = 1
 
 	$scope.goToStepTwo = () ->
-		console.log 'need to validate 1 -> 2'
 		$scope.stepNumber = 2
 
 	$scope.goToStepThree = () ->
@@ -33,8 +32,31 @@ window.Wizard = ['$scope', '$location', '$routeParams', 'rpc', 'integerConverter
 					$scope.stepNumber = 4
 
 	$scope.goToStepFive = () ->
-		console.log 'need to validate 4 -> 5'
-		$scope.stepNumber = 5
+		_createInitialAdmin = () ->
+			rpc.makeRequest 'users', 'create', 'createInitialAdmin', $scope.admin, (error) ->
+				$scope.$apply () ->
+					if error?
+						$scope.errorText = error
+					else
+						_setDomainName()
+
+		_setDomainName = () ->
+			rpc.makeRequest 'systemSettings', 'update', 'setWebsiteSettings', $scope.website, (error) ->
+				$scope.$apply () ->
+					if error?
+						$scope.errorText = error
+					else
+						_setAwsKeys()
+
+		_setAwsKeys = () ->
+			rpc.makeRequest 'systemSettings', 'update', 'setAwsKeys', $scope.aws, (error) ->
+				$scope.$apply () ->
+					if error?
+						$scope.errorText = error
+					else
+						$scope.stepNumber = 5
+
+		_createInitialAdmin()
 
 	$scope.goToKoality = () ->
 		window.location.href = '/'

@@ -33,7 +33,9 @@ class UsersCreateHandler extends Handler
 			@stores.createAccountStore.getAccount data.token, (error, account) =>
 				if error? then callback 500
 				else if account.email isnt data.email then callback 403
-				else @_addUser socket.session, data, callback
+				else
+					data.isAdmin = false
+					@_addUser socket.session, data, callback
 
 
 	_getUserInformationErrors: (email, firstName, lastName, password) =>
@@ -57,7 +59,7 @@ class UsersCreateHandler extends Handler
 				callback 500
 			else
 				@modelRpcConnection.users.create.create_user account.email, account.firstName, account.lastName, 
-					passwordHashResult.passwordHash, passwordHashResult.salt, (error, userId) =>
+					passwordHashResult.passwordHash, passwordHashResult.salt, account.isAdmin, (error, userId) =>
 						if error?.type is 'UserAlreadyExistsError' then callback 'user already exists'
 						else if error? then callback 500
 						else
@@ -170,3 +172,19 @@ class UsersCreateHandler extends Handler
 		else
 			if data.token isnt @initialAdminToken then callback 'bad token'
 			else callback()
+			
+
+	createInitialAdmin: (socket, data, callback) =>
+		if not data?.email? or not data?.password? or not data?.firstName? or not data?.lastName? or not data?.token?
+			callback 400
+		else
+			if data.token isnt @initialAdminToken
+				callback 'bad token'
+				return
+
+			console.log 'need to check that database has not been initialized!!!!'
+			
+			data.isAdmin = true
+			@_addUser socket.session, data, callback
+
+			callback()

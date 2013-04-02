@@ -1,13 +1,17 @@
 assert = require 'assert'
 
 Resource = require '../resource'
+SystemSettingsInformationValidator = require './systemSettingsInformationValidator'
+
 SystemSettingsReadHandler = require './handlers/systemSettingsReadHandler'
 SystemSettingsUpdateHandler = require './handlers/systemSettingsUpdateHandler'
 
 
 exports.create = (configurationParams, stores, modelConnection, mailer) ->
+	systemSettingsInformationValidator = SystemSettingsInformationValidator.create()
+
 	readHandler = SystemSettingsReadHandler.create modelConnection.rpcConnection
-	updateHandler = SystemSettingsUpdateHandler.create modelConnection.rpcConnection
+	updateHandler = SystemSettingsUpdateHandler.create modelConnection.rpcConnection, systemSettingsInformationValidator
 	return new SystemSettingsResource configurationParams, stores, modelConnection, readHandler, updateHandler
 
 

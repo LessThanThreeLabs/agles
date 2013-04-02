@@ -105,10 +105,16 @@
 				</div>
 				<styled-form id="wizardStepFourForm" name="awsForm" styled-form-alignment="center">
 					<styled-form-field label="AWS key id" label-padding="true">
-						<input type="text" ng-model="aws.id" name="id" placeholder="aws key id" ng-maxlength="128" required focused>
+						<input type="text" ng-model="aws.id" name="id" placeholder="aws key id" ng-pattern="/^[\w]+$/" ng-minlength="16" ng-maxlength="32" required focused>
+						<span class="prettyFormError" tooltip="Invalid AWS key id" ng-class="{visible: awsForm.id.$dirty && awsForm.id.$invalid}">
+							<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+						</span>
 					</styled-form-field>
 					<styled-form-field label="AWS secret key" label-padding="true">
 						<input type="text" ng-model="aws.secret" name="secret" placeholder="aws secret key" ng-maxlength="128" required>
+						<span class="prettyFormError" tooltip="Invalid AWS secret key" ng-class="{visible: awsForm.secret.$dirty && awsForm.secret.$invalid}">
+							<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
+						</span>
 					</styled-form-field>
 					<styled-form-field label="">
 						<button ng-click="goToStepFive()" ng-disabled="awsForm.$invalid">Continue</button>	
