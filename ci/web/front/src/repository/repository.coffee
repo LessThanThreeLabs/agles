@@ -18,6 +18,7 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 			$scope.$apply () ->
 				$scope.currentChangeInformation = changeInformation
 				$scope.showMerge = false if not $scope.currentChangeInformation.mergeStatus?
+				$scope.showDebug = false if $scope.currentChangeInformation.status isnt 'failed'
 
 	retrieveCurrentStageInformation = () ->
 		$scope.currentStageInformation = null
@@ -86,6 +87,7 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 		$location.search 'merge', if newValue then true else null
 
 	$scope.$watch 'showDebug', (newValue, oldValue) ->
+		console.log '~ ' + newValue
 		$location.search 'debug', if newValue then true else null
 
 	retrieveRepositoryInformation()
@@ -203,9 +205,11 @@ window.RepositoryStages = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
 			$scope.$apply () ->
-				# $scope.stages = buildConsoles
-				console.log 'fix this!!'
-				$scope.stages = []
+				$scope.stages = buildConsoles
+
+				if $scope.stages.length > 0
+					$scope.selectStage null
+
 				if $scope.currentStageId? and not isStageIdInStages $scope.currentStageId
 					$scope.selectStage null
 

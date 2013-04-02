@@ -81,7 +81,12 @@
 				</div>
 
 				<div id="repositoryStageDetailsDebug" ng-show="currentChangeId != null && currentChangeInformation != null && currentStageId == null && !showMerge && showDebug">
-					hello
+					<div id="repositoryStageDetailsDebugMessage">
+						This change failed to create any output. This could be caused by invalid AWS credentials.<br>
+					</div>
+					<div id="repositoryStageDetailsDebugInstructions">
+						Contact your administrator to correct the issue.
+					</div>
 				</div>
 			</content-body>
 		</content>
