@@ -17,6 +17,10 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(SystemSettingsReadHandler, self).__init__("system_settings", "read")
 
+	def is_koality_initialized(self):
+		result = self.get_setting("deployment", "initialized")
+		return result if result else False
+
 	def get_setting(self, resource, key):
 		system_setting = database.schema.system_setting
 		query = system_setting.select().where(

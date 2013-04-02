@@ -47,6 +47,7 @@ import model_server
 
 from bunnyrpc.exceptions import RPCRequestError
 from database.engine import ConnectionFactory
+from settings.deployment import DeploymentSettings
 from util.pathgen import to_clone_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
@@ -217,3 +218,8 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals({"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running},
 				conn.get_instance_settings(self.user_id))
+
+	def test_deployment_settings(self):
+		assert_false(DeploymentSettings._is_initialized)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_false(conn.is_koality_initialized())
