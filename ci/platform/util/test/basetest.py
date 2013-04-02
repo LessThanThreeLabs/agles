@@ -1,4 +1,5 @@
 import eventlet
+import logging
 
 import util.log
 import unittest
@@ -23,6 +24,7 @@ class Timeout(object):
 class BaseTest(unittest.TestCase):
 	@classmethod
 	def setup_class(cls):
+		logging.disable(logging.CRITICAL)
 		util.log.configure()
 
 	@classmethod

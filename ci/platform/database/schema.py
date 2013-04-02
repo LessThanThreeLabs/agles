@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import Table, Column, Boolean, Integer, String, Sequence, MetaData, ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy import event, text, DDL
 from sqlalchemy.exc import SQLAlchemyError
@@ -162,6 +164,11 @@ def _insert_admin_user():
 
 
 def reseed_db():
+	# TODO: uncomment and fix this
+	#import util.log
+	#util.log.configure()
+	#logging.getLogger("Schema").critical("Database reseeded")
+
 	engine = ConnectionFactory.get_sql_engine()
 	_drop_all_tables_and_sequences(engine)
 	_create_and_initialize(engine)

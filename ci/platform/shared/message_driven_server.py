@@ -3,6 +3,7 @@ import eventlet
 from kombu.connection import Connection
 
 from settings.rabbit import RabbitSettings
+from util.log import Logged
 
 
 class MessageDrivenServer(object):
@@ -11,6 +12,7 @@ class MessageDrivenServer(object):
 	Effectively a collection of handlers to connect to a single channel.
 	"""
 
+	@Logged()
 	def __init__(self, handlers):
 		self.handlers = handlers
 
@@ -27,5 +29,9 @@ class MessageDrivenServer(object):
 			handler.bind(channel)
 
 	def _ioloop(self, connection):
-		while True:
-			connection.drain_events()
+		try:
+			while True:
+				connection.drain_events()
+		except:
+			self.logger.critical("Server IOloop exited", exc_info=True)
+			raise

@@ -1,5 +1,9 @@
 """ permissions.py - utility classes for handling permissions"""
+import logging
+
 import database.schema
+import util.log
+
 from database.engine import ConnectionFactory
 
 
@@ -16,6 +20,8 @@ def is_admin(user_id):
 def AdminApi(func):
 	def wrapper(self, user_id, *args, **kwargs):
 		if not is_admin(user_id):
+			util.log.configure()
+			logging.getLogger('AdminApi').warn('User %d attempted to call admin api method %s' % (user_id, func.func_name))
 			raise InvalidPermissionsError("%d is not an admin" % user_id)
 		return func(self, user_id, *args, **kwargs)
 	return wrapper

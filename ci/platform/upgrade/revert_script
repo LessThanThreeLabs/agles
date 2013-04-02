@@ -1,3 +1,4 @@
+#!/bin/bash
 (echo -e $ 'dropdb koality' &&
 dropdb koality &&
 echo -e $ 'createdb koality' &&

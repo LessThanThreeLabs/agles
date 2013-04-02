@@ -7,8 +7,10 @@ from eventlet import queue
 from build_core import CloudBuildCore
 from build_verifier import BuildVerifier
 from settings.verification_server import VerificationServerSettings
+from util.log import Logged
 
 
+@Logged()
 class VerifierPool(object):
 	def __init__(self, max_verifiers=None, min_unallocated=None, uri_translator=None):
 		self.max_verifiers = max_verifiers
@@ -100,8 +102,10 @@ class VerifierPool(object):
 			try:
 				self._spawn_verifier(verifier_number, allocated=False)
 			except:
+				self.logger.debug("Failed to spawn verifier %d, %d attempts remaining" % (verifier_number, remaining_attempts), exc_info=True)
 				if remaining_attempts == 0:
 					self.free_slots.put(verifier_number)
+					self.logger.error("Failed to spawn verifier %d" % verifier_number, exc_info=True)
 					raise
 				eventlet.sleep(10)
 			else:

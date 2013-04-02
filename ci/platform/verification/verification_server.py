@@ -9,8 +9,10 @@ a spawned virtual machine.
 
 from change_verifier import ChangeVerifier
 from shared.message_driven_server import MessageDrivenServer
+from util.log import Logged
 
 
+@Logged()
 class VerificationServer(MessageDrivenServer):
 	"""Verifies correctness of builds.
 

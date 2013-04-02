@@ -19,6 +19,7 @@ class VerificationResultsHandler(object):
 				client.mark_change_finished(change_id, BuildStatus.PASSED, MergeStatus.PASSED)
 
 	def fail_change(self, change_id):
+		self.logger.info("Failing change %d" % change_id)
 		with model_server.rpc_connect("changes", "update") as client:
 			client.mark_change_finished(change_id, BuildStatus.FAILED)
 
@@ -31,7 +32,7 @@ class VerificationResultsHandler(object):
 			client.mark_change_finished(change_id, BuildStatus.FAILED, MergeStatus.FAILED)
 
 	def _send_merge_request(self, change_id):
-		self.logger.info("Sending merge request for change %s" % change_id)
+		self.logger.info("Sending merge request for change %d" % change_id)
 		with model_server.rpc_connect("changes", "read") as client:
 			change_attributes = client.get_change_attributes(change_id)
 
@@ -50,11 +51,11 @@ class VerificationResultsHandler(object):
 			return True
 		except MergeError:
 			self._mark_change_merge_failure(change_id)
-			self.logger.info("Failed to merge change %s" % change_id, exc_info=True)
+			self.logger.info("Failed to merge change %d" % change_id, exc_info=True)
 		except PushForwardError:
 			self._mark_change_pushforward_failure(change_id)
-			self.logger.warn("Failed to forward push change %s" % change_id, exc_info=True)
+			self.logger.warn("Failed to forward push change %d" % change_id, exc_info=True)
 		except:
 			self._mark_change_merge_failure(change_id)
-			self.logger.error("Failed to merge/push change %s" % change_id, exc_info=True)
+			self.logger.error("Failed to merge/push change %d" % change_id, exc_info=True)
 		return False

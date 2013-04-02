@@ -28,8 +28,10 @@ from users.create_handler import UsersCreateHandler
 from users.read_handler import UsersReadHandler
 from users.update_handler import UsersUpdateHandler
 from users.delete_handler import UsersDeleteHandler
+from util.log import Logged
 
 
+@Logged()
 class ModelServer(object):
 	"""A higher level abstraction on top of the database that allows for event creation on database
 	actions.
@@ -74,5 +76,9 @@ class ModelServer(object):
 		return ioloop_greenlet
 
 	def _ioloop(self):
-		while True:
-			self.channel.connection.drain_events()
+		try:
+			while True:
+				self.channel.connection.drain_events()
+		except:
+			self.logger.critical("Model server IOloop exited", exc_info=True)
+			raise

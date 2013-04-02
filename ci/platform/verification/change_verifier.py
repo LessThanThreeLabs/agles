@@ -1,3 +1,5 @@
+import sys
+
 from eventlet import event, spawn, spawn_n, queue
 from kombu.messaging import Producer
 
@@ -40,6 +42,9 @@ class ChangeVerifier(EventSubscriber):
 		task_queue = TaskQueue()
 		num_workers = max(1, min(64, len(verification_config.test_commands)))
 
+		self.logger.info("Verifying change %d with %d workers" % (change_id, num_workers))
+		self.logger.debug("Verification config: %s" % verification_config.to_dict())
+
 		task_queue.begin_populating_tasks()
 		task_queue.populate_tasks(*(test_command for test_command in verification_config.test_commands))
 		task_queue.finish_populating_tasks()
@@ -68,7 +73,7 @@ class ChangeVerifier(EventSubscriber):
 			change_done.send(False)
 			self.results_handler.fail_change(change_id)
 
-		def prematurely_fail_change():
+		def prematurely_fail_change(exc_info):
 			'''Marks that a verifier failed to initialize.
 			If the first verifier hits this state, then all subsequent ones will go into the ready pool if they succeed,
 			or do nothing if they fail.
@@ -77,6 +82,7 @@ class ChangeVerifier(EventSubscriber):
 			'''
 			if not change_started.ready():
 				change_started.send(False)
+				self.logger.error("Prematurely failed change %d" % change_id, exc_info=exc_info)
 				fail_change()
 
 		def setup_worker():
@@ -84,7 +90,7 @@ class ChangeVerifier(EventSubscriber):
 				verifier = self.verifier_pool.get()
 				verifier.setup()
 			except:
-				prematurely_fail_change()
+				prematurely_fail_change(sys.exc_info())
 				return
 			if not change_started.ready():
 				start_change()

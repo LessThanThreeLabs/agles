@@ -1,17 +1,23 @@
 import collections
 import logging
-import logging.handlers
 import os
 
 import eventlet
 
 from settings.deployment import DeploymentSettings
-from util.mail import sendmail
 
 LOG_HOME = './log'
+CONFIGURED = False
 
 
 def configure(log_home=LOG_HOME, filepath='/default.log'):
+	if not CONFIGURED:
+		_configure(log_home, filepath)
+
+
+def _configure(log_home, filepath):
+	global CONFIGURED
+	CONFIGURED = True
 	# formatters
 	simple_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 	# create log directory
@@ -54,7 +60,7 @@ class TimedBufferedMailHandler(logging.Handler):
 		if self.timer_greenlet is not None:
 			self.timer_greenlet.cancel()
 		self.timer_greenlet = None
-		if len(self.buffered_records) > 0:
+		if len(self.buffered_records) > 0 and any(map(lambda record: record.levelno >= self.send_level, self.buffered_records)):
 			output_string = '\n'.join((self.format(record) for record in self.buffered_records))
 			self.buffered_records = collections.deque(maxlen=self.max_records)
 			self._send_log_mail(output_string)
@@ -74,6 +80,7 @@ class TimedBufferedMailHandler(logging.Handler):
 class Logged(object):
 	def __init__(self, level=logging.DEBUG):
 		self.level = level
+		configure()
 
 	def __call__(self, cls):
 		handler = TimedBufferedMailHandler()
@@ -86,3 +93,7 @@ class Logged(object):
 		cls.logger.setLevel(self.level)
 		cls.logger.addHandler(handler)
 		return cls
+
+
+from util.mail import sendmail
+

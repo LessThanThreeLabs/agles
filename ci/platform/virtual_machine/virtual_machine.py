@@ -5,10 +5,12 @@ import yaml
 
 from shared.constants import VerificationUser
 from util import greenlets
+from util.log import Logged
 from util.streaming_executor import StreamingExecutor
 from verification.pubkey_registrar import PubkeyRegistrar
 
 
+@Logged()
 class VirtualMachine(object):
 	"""A minimal virtual machine representation"""
 	def __init__(self, vm_directory):
@@ -40,6 +42,7 @@ class VirtualMachine(object):
 		pubkey_results = self.ssh_call("(%s) > /dev/null 2>&1; cat .ssh/id_rsa.pub" % generate_key, timeout=20)
 		if pubkey_results.returncode != 0:
 			output_handler.append({1: "Failed to connect to the testing instance. Please try again."})
+			self.logger.error("Failed to set up ssh on vm at %s, results: %s" % (self.vm_directory, pubkey_results))
 			return pubkey_results
 		pubkey = pubkey_results.output
 		alias = '__vm_' + str(uuid.uuid1())
@@ -57,6 +60,9 @@ class VirtualMachine(object):
 					'git fetch origin %s' % ref,
 					'git merge FETCH_HEAD'])
 			results = self.ssh_call(command, output_handler)
+		except:
+			self.logger.error("Failed to check out refs %s from %s, results: %s" % (refs, git_url, results), exc_info=True)
+			raise
 		finally:
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 		return results

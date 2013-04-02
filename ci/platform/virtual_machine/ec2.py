@@ -87,7 +87,7 @@ class Ec2Vm(VirtualMachine):
 		try:
 			vm = Ec2Vm(vm_directory, Ec2Client.get_client().get_all_instances([instance_id])[0].instances[0], vm_username)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
-				Ec2Vm.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, instance_id))
+				cls.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, instance_id))
 				vm.delete()
 				return None
 			elif vm.instance.state == 'shutting-down' or vm.instance.state == 'terminated':
@@ -96,7 +96,7 @@ class Ec2Vm(VirtualMachine):
 				vm.delete()
 				return None
 			elif vm.instance.state not in ('running', 'pending'):
-				Ec2Client.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_directory, instance_id, vm.instance.state))
+				cls.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_directory, instance_id, vm.instance.state))
 				vm.delete()
 				return None
 			return vm
@@ -117,16 +117,16 @@ class Ec2Vm(VirtualMachine):
 			eventlet.sleep(3)
 			self.instance.update()
 			if self.instance.state == 'terminated' or self.instance.state == 'stopped':
-				Ec2Vm.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.instance.id))
+				self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.instance.id))
 				self.rebuild()
 		for remaining_attempts in range(24, 0, -1):
 			if remaining_attempts <= 3:
-				Ec2Vm.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.instance.id, remaining_attempts))
+				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.instance.id, remaining_attempts))
 			if self.ssh_call("true").returncode == 0:
 				return
 			eventlet.sleep(5)
 		# Failed to ssh into machine, try again
-		Ec2Vm.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.instance.id))
+		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.instance.id))
 		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
@@ -181,4 +181,4 @@ class Ec2Vm(VirtualMachine):
 		try:
 			instance.terminate()
 		except:
-			pass
+			self.logger.info("Failed to terminate instance %s" % instance, exc_info=True)

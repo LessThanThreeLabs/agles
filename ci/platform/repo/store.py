@@ -297,7 +297,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 				if i >= self.NUM_RETRIES:
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
-					self.logger.debug(error_msg, exc_info=True)
+					self.logger.warn(error_msg, exc_info=True)
 					self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
@@ -383,7 +383,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		try:
 			self._push_with_private_key(repo, remote_repo, ':'.join([from_target, to_target]), force=True)
 		except GitCommandError:
-			self.logger.warning("A git error occurred on force push", exc_info=True)
+			self.logger.warn("A git error occurred on force push", exc_info=True)
 			raise
 
 	def force_delete(self, repo_id, repo_name, target):
@@ -391,7 +391,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				self.push_force(repo_id, repo_name, "", target)
 			except GitCommandError as e:
-				self.logger.warning("Force delete encountered an error", exc_info=True)
+				self.logger.warn("Force delete encountered an error", exc_info=True)
 				self._update_branch(repo_id, repo_name, target)
 				return e.stderr
 		self._delete_branch(repo_id, repo_name, target)
@@ -408,7 +408,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			self._update_branch_from_forward_url(repo_slave, remote_repo, target)
 			repo_slave.git.push("origin", ":".join([target, target]), force=True)
 		except GitCommandError:
-			self.logger.debug("Failed to update branch.", exc_info=True)
+			self.logger.warn("Failed to update branch.", exc_info=True)
 
 	def _delete_branch(self, repo_id, repo_name, target):
 		""" This assumes the branch exists"""
@@ -419,7 +419,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		try:
 			self._push_with_private_key(repo_slave, "origin", ':'.join(["", target]), force=True)
 		except GitCommandError:
-			self.logger.warning("Failed to delete local branch", exc_info=True)
+			self.logger.warn("Failed to delete local branch", exc_info=True)
 
 	def _remote_branch_exists(self, repo_id, repo_name, branch):
 		with model_server.rpc_connect("repos", "read") as conn:

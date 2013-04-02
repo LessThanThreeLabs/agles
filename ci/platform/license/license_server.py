@@ -3,6 +3,7 @@ import time
 import requests
 
 from settings.deployment import DeploymentSettings
+from util.log import Logged
 
 
 LICENSE_VERIFICATION_URL = 'https://koalitycode.com/license/check'
@@ -57,13 +58,16 @@ class LicenseKeyVerifier(object):
 		raise NotImplementedError("Subclasses should override this!")
 
 
-class HttpLicenseKeyVerifier(object):
+@Logged()
+class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 	def __init__(self, verification_url=LICENSE_VERIFICATION_URL):
 		self.verification_url = verification_url
 
 	def verify_valid(self, key, server_id):
 		verification_data = {'key': key, 'server_id': server_id}
 		response = requests.post(self.verification_url, data=verification_data)
-		if response.status_code != requests.codes.ok:
+		if not response.ok:
+			self.logger.critical("License check failed: url: %s, data: %s, response: %s" %
+				(self.verification_url, verification_data, {'text': response.text, 'code': response.status_code}))
 			return False
 		return response.text.lower() == 'true'

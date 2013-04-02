@@ -73,7 +73,7 @@ class OpenstackVm(VirtualMachine):
 		try:
 			vm = OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
 			if vm.instance.status == 'ERROR':
-				OpenstackVm.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, vm_id))
+				cls.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, vm_id))
 				vm.delete()
 				return None
 			elif vm.instance.status == 'DELETED':
@@ -82,7 +82,7 @@ class OpenstackVm(VirtualMachine):
 				vm.delete()
 				return None
 			elif vm.instance.status not in ('ACTIVE', 'BUILD'):
-				OpenstackVm.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_directory, vm_id, vm.instance.status))
+				cls.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_directory, vm_id, vm.instance.status))
 				vm.delete()
 				return None
 			return vm
@@ -94,16 +94,16 @@ class OpenstackVm(VirtualMachine):
 			eventlet.sleep(3)
 			self.instance = OpenstackClient.get_client().servers.get(self.instance.id)
 			if self.instance.status == 'ERROR':
-				OpenstackVm.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.instance.id))
+				self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.instance.id))
 				self.rebuild()
 		for remaining_attempts in range(24, 0, -1):
 			if remaining_attempts <= 3:
-				OpenstackVm.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.instance.id, remaining_attempts))
+				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.instance.id, remaining_attempts))
 			if self.ssh_call("true").returncode == 0:
 				return
 			eventlet.sleep(5)
 		# Failed to ssh into machine, try again
-		OpenstackVm.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.instance.id))
+		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.instance.id))
 		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
