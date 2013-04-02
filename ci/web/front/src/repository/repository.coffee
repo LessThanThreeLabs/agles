@@ -87,7 +87,6 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 		$location.search 'merge', if newValue then true else null
 
 	$scope.$watch 'showDebug', (newValue, oldValue) ->
-		console.log '~ ' + newValue
 		$location.search 'debug', if newValue then true else null
 
 	retrieveRepositoryInformation()
