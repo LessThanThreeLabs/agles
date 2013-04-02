@@ -48,6 +48,7 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 		$scope.currentChangeId = integerConverter.toInteger $routeParams.change
 		$scope.currentStageId = integerConverter.toInteger $routeParams.stage
 		$scope.showMerge = $routeParams.merge?
+		$scope.showDebug = $routeParams.debug?
 	$scope.$on '$routeUpdate', syncToRouteParams
 	syncToRouteParams()
 
@@ -55,14 +56,22 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 		$scope.currentChangeId = change?.id
 		$scope.currentStageId = null
 		$scope.showMerge = false
+		$scope.showDebug = false
 
 	$scope.selectStage = (stage) ->
 		$scope.currentStageId = stage?.id
 		$scope.showMerge = false
+		$scope.showDebug = false
 
-	$scope.selectMerge = (merge) ->
+	$scope.selectMerge = () ->
 		$scope.currentStageId = null
 		$scope.showMerge = true
+		$scope.showDebug = false
+
+	$scope.selectDebug = () ->
+		$scope.currentStageId = null
+		$scope.showMerge = false
+		$scope.showDebug = true
 
 	$scope.$watch 'currentChangeId', (newValue, oldValue) ->
 		updateMergeStatusListener()
@@ -75,6 +84,9 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 
 	$scope.$watch 'showMerge', (newValue, oldValue) ->
 		$location.search 'merge', if newValue then true else null
+
+	$scope.$watch 'showDebug', (newValue, oldValue) ->
+		$location.search 'debug', if newValue then true else null
 
 	retrieveRepositoryInformation()
 ]
@@ -191,7 +203,9 @@ window.RepositoryStages = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
 			$scope.$apply () ->
-				$scope.stages = buildConsoles
+				# $scope.stages = buildConsoles
+				console.log 'fix this!!'
+				$scope.stages = []
 				if $scope.currentStageId? and not isStageIdInStages $scope.currentStageId
 					$scope.selectStage null
 
