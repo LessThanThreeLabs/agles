@@ -17,6 +17,10 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(SystemSettingsUpdateHandler, self).__init__("system_settings", "update")
 
+	def initialize_deployment(self):
+		self.update_setting("mail", "test_mode", False)
+		self.update_setting("deployment", "initialized", True)
+
 	def update_setting(self, resource, key, value):
 		system_setting = database.schema.system_setting
 		query = system_setting.select().where(

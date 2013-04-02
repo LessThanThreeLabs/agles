@@ -37,6 +37,7 @@ buildTestLines[] : dict = getTestOutput(userId, buildId)
 <more to be added>
 '''
 import database
+import database.schema
 import binascii
 
 from hashlib import sha512
@@ -47,7 +48,7 @@ import model_server
 
 from bunnyrpc.exceptions import RPCRequestError
 from database.engine import ConnectionFactory
-from settings.deployment import DeploymentSettings
+from settings.mail import MailSettings
 from util.pathgen import to_clone_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
@@ -220,6 +221,12 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				conn.get_instance_settings(self.user_id))
 
 	def test_deployment_settings(self):
-		assert_false(DeploymentSettings._is_initialized)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_false(conn.is_koality_initialized())
+			assert_false(conn.is_deployment_initialized())
+
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.initialize_deployment()
+
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_true(conn.is_deployment_initialized())
+			assert_false(MailSettings.test_mode)
