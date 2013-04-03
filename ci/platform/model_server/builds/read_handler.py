@@ -19,12 +19,6 @@ class BuildsReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 		return to_dict(row, build.columns)
 
-	def get_commit_list(self, build_id):
-		build_commits_map = database.schema.build_commits_map
-		query = build_commits_map.select().where(build_commits_map.c.build_id == build_id)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			return [row[build_commits_map.c.commit_id] for row in sqlconn.execute(query)]
-
 ##################
 # Front end API
 ##################

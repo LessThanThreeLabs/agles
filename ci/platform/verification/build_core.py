@@ -18,8 +18,8 @@ class BuildCore(object):
 		self.uri_translator = uri_translator
 		self.source_dir = os.path.join("/tmp", "source")
 
-	def setup_build(self, repo_uri, refs, console_appender=None):
-		self._checkout_refs(repo_uri, refs)
+	def setup_build(self, repo_uri, ref, console_appender=None):
+		self._checkout_ref(repo_uri, ref)
 		verification_config = self._get_verification_configuration_from_file()
 		return verification_config
 
@@ -27,7 +27,7 @@ class BuildCore(object):
 		if os.access(self.source_dir, os.F_OK):
 			shutil.rmtree(self.source_dir)
 
-	def _checkout_refs(self, repo_uri, refs):
+	def _checkout_ref(self, repo_uri, ref):
 		self._cleanup_source_dir()
 		if self.uri_translator:
 			checkout_url = self.uri_translator.translate(repo_uri)
@@ -37,12 +37,8 @@ class BuildCore(object):
 		else:
 			checkout_url = repo_uri
 		repo = Repo.init(self.source_dir)
-		ref = refs[0]
 		repo.git.fetch(checkout_url, ref, "-n", depth=1)
 		repo.git.checkout("FETCH_HEAD")
-		for ref in refs[1:]:
-			repo.git.fetch(checkout_url, ref, "-n", depth=1)
-			repo.git.merge("FETCH_HEAD")
 
 	def _get_verification_configuration_from_file(self):
 		"""Reads in the yaml config file contained in the checked
@@ -70,8 +66,7 @@ class BuildCore(object):
 
 
 class LightWeightBuildCore(BuildCore):
-	def setup_build(self, repo_uri, refs, console_appender=None):
-		ref = refs[-1]  # only get config from last ref
+	def setup_build(self, repo_uri, ref, console_appender=None):
 		if self.uri_translator:
 			checkout_url = self.uri_translator.translate(repo_uri)
 			host_url = checkout_url[:checkout_url.find(":")]
@@ -105,7 +100,7 @@ class VirtualMachineBuildCore(BuildCore):
 	def rollback_virtual_machine(self):
 		raise NotImplementedError()
 
-	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
+	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
 		self.setup_virtual_machine(private_key, console_appender)
 
 	def _get_output_handler(self, console_appender, type, subtype=""):
@@ -177,13 +172,13 @@ class CloudBuildCore(VirtualMachineBuildCore):
 			else:
 				break
 
-	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
-		self.setup_virtual_machine(repo_uri, refs, private_key, console_appender)
+	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
+		self.setup_virtual_machine(repo_uri, ref, private_key, console_appender)
 
-	def setup_virtual_machine(self, repo_uri, refs, private_key, console_appender):
+	def setup_virtual_machine(self, repo_uri, ref, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
-		checkout_command = SimpleRemoteCheckoutCommand(repo_name, checkout_url, refs)
+		checkout_command = SimpleRemoteCheckoutCommand(repo_name, checkout_url, ref)
 		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
 
 
