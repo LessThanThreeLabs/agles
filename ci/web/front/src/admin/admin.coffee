@@ -162,7 +162,7 @@ window.AdminRepositories = ['$scope', '$location', 'initialState', 'rpc', 'event
 ]
 
 
-window.AdminAws = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialState, rpc, events) ->
+window.AdminAws = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 	getAwsKeys = () ->
 		rpc.makeRequest 'systemSettings', 'read', 'getAwsKeys', null, (error, awsKeys) ->
 			$scope.$apply () ->
@@ -189,4 +189,9 @@ window.AdminAws = ['$scope', 'initialState', 'rpc', 'events', ($scope, initialSt
 
 	$scope.$watch 'awsKeys', (() -> $scope.showSuccess = false), true
 	$scope.$watch 'instanceSettings', (() -> $scope.showSuccess = false), true
+]
+
+
+window.AdminUpgrade = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
+	
 ]
