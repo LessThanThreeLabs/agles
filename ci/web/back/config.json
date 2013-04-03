@@ -84,7 +84,7 @@
 		"mailgun": {
 			"hostname": "api.mailgun.net",
 			"port": "443",
-			"path": "/v2/getkoality.com/messages",
+			"path": "/v2/koalitycode.com/messages",
 			"method": "POST",
 			"key": "key-9e06ajco0xurqnioji-egwuwajg4jrn2",
 			"testMode": true
