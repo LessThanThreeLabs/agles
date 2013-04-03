@@ -67,6 +67,7 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 			change_id = sqlconn.execute(ins_change).inserted_primary_key[0]
 
 			ins_build = build.insert().values(
+				commit_id=commit_id,
 				change_id=change_id,
 				repo_id=self.repo_id,
 				status='a',

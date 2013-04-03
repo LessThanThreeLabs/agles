@@ -89,15 +89,15 @@ class BuildVerifier(object):
 
 	@ReturnException
 	def _setup(self, build_id, verification_config):
-		commit_list = self._get_commit_list(build_id)
-		self.logger.info("Worker %s processing verification request: (build id: %s, commit list: %s)" % (self.worker_id, build_id, commit_list))
+		commit_id = self._get_commit_id(build_id)
+		self.logger.info("Worker %s processing verification request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
 		self._start_build(build_id)
-		repo_uri = self._get_repo_uri(commit_list[0])
-		refs = self._get_ref_list(commit_list)
+		repo_uri = self._get_repo_uri(commit_id)
+		ref = pathgen.hidden_ref(commit_id)
 		private_key = self._get_private_key(repo_uri)
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
-			self.build_core.setup_build(repo_uri, refs, private_key, console_appender)
+			self.build_core.setup_build(repo_uri, ref, private_key, console_appender)
 			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
 
 	@ReturnException
@@ -122,12 +122,9 @@ class BuildVerifier(object):
 			os.remove(self._get_build_info_file())
 		self.build_core.teardown()
 
-	def _get_commit_list(self, build_id):
+	def _get_commit(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:
-			return model_server_rpc.get_commit_list(build_id)
-
-	def _get_ref_list(self, commit_list):
-		return [pathgen.hidden_ref(commit) for commit in commit_list]
+			return model_server_rpc.get_build_from_id(build_id)['commit_id']
 
 	def _start_build(self, build_id):
 		self.logger.debug("Worker %s starting build %s" % (self.worker_id, build_id))
@@ -137,8 +134,6 @@ class BuildVerifier(object):
 			build_file.write(yaml.safe_dump({'build_id': build_id}))
 
 	def _get_repo_uri(self, commit_id):
-		"""Sends out a rpc call to the model server to retrieve
-		the uri of a repository for a commit"""
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			return model_server_rpc.get_repo_uri(commit_id)
 

@@ -75,18 +75,13 @@ change = Table('change', metadata,
 
 build = Table('build', metadata,
 	Column('id', Integer, primary_key=True),
+	Column('commit_id', Integer, ForeignKey('commit.id'), nullable=False),
 	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
 	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False),
 	Column('status', String, nullable=False),
 	Column('create_time', Integer, nullable=False),
 	Column('start_time', Integer, nullable=True),
 	Column('end_time', Integer, nullable=True)
-)
-
-"""Maps builds to lists of commits"""
-build_commits_map = Table('build_commits_map', metadata,
-	Column('build_id', Integer, ForeignKey('build.id'), nullable=False),
-	Column('commit_id', Integer, ForeignKey('commit.id'), nullable=False)
 )
 
 build_console = Table('build_console', metadata,

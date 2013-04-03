@@ -74,13 +74,12 @@ class SchemaDataGenerator(object):
 						start_time=int(time.time()) + random.randint(-10000, 10000),
 						end_time=int(time.time()) + random.randint(10000, 12000))
 					change_id = conn.execute(ins_change).inserted_primary_key[0]
-					ins_build = schema.build.insert().values(change_id=change_id, repo_id=repo_id, status=self.get_random_commit_status(),
+					ins_build = schema.build.insert().values(commit_id=commit_id, change_id=change_id,
+						repo_id=repo_id, status=self.get_random_commit_status(),
 						create_time=int(time.time()) + random.randint(-10000, 10000),
 						start_time=int(time.time()) + random.randint(-10000, 10000),
 						end_time=int(time.time()) + random.randint(10000, 12000))
 					build_id = conn.execute(ins_build).inserted_primary_key[0]
-					ins_map = schema.build_commits_map.insert().values(build_id=build_id, commit_id=commit_id)
-					conn.execute(ins_map)
 
 					for console_type in ['compile', 'test']:
 						ins_console = schema.build_console.insert().values(build_id=build_id, repo_id=repo_id, type=console_type,

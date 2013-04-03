@@ -31,14 +31,14 @@ class ChangeVerifier(EventSubscriber):
 
 	def _handle_new_change(self, contents):
 		change_id = contents["change_id"]
-		commit_list = self._get_commit_permutations(change_id)[0]
-		verification_config = self._get_verification_config(commit_list)
+		commit_id = self._get_commit_id(change_id)
+		verification_config = self._get_verification_config(commit_id)
 
 		workers_spawned = event.Event()
-		spawn_n(self.verify_change, verification_config, change_id, commit_list, workers_spawned)
+		spawn_n(self.verify_change, verification_config, change_id, workers_spawned)
 		workers_spawned.wait()
 
-	def verify_change(self, verification_config, change_id, commit_list, workers_spawned):
+	def verify_change(self, verification_config, change_id, workers_spawned):
 		task_queue = TaskQueue()
 		num_workers = max(1, min(64, len(verification_config.test_commands)))
 
@@ -98,7 +98,7 @@ class ChangeVerifier(EventSubscriber):
 				self.verifier_pool.put(verifier)  # Just return this verifier to the pool
 				return
 			workers_alive.append(1)
-			build_id = self._create_build(change_id, commit_list)
+			build_id = self._create_build(change_id)
 			worker_greenlet = spawn(verifier.verify_build(build_id, verification_config, task_queue))
 			worker_greenlet.link(cleanup_greenlet, verifier)
 
@@ -121,25 +121,20 @@ class ChangeVerifier(EventSubscriber):
 		if not change_failed:
 			pass_change()
 
-	def _get_commit_permutations(self, change_id):
-		# TODO (bbland): do something more useful than this trivial case
-		# This is a single permutation which is a single commit id
-		return [[self._get_commit_id(change_id)]]
-
 	def _get_commit_id(self, change_id):
 		with model_server.rpc_connect("changes", "read") as model_server_rpc:
 			return model_server_rpc.get_change_attributes(change_id)['commit_id']
 
-	def _create_build(self, change_id, commit_list):
+	def _create_build(self, change_id):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:
-			return model_server_rpc.create_build(change_id, commit_list)
+			return model_server_rpc.create_build(change_id)
 
-	def _get_verification_config(self, commit_list):
+	def _get_verification_config(self, commit_id):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
-			repo_uri = model_server_rpc.get_repo_uri(commit_list[0])
-		refs = [pathgen.hidden_ref(commit) for commit in commit_list]
+			repo_uri = model_server_rpc.get_repo_uri(commit_id)
+		ref = pathgen.hidden_ref(commit_id)
 		build_core = LightWeightBuildCore(self.uri_translator)
-		verification_config = build_core.setup_build(repo_uri, refs)
+		verification_config = build_core.setup_build(repo_uri, ref)
 		return verification_config
 
 	def _is_result_failed(self, result):
