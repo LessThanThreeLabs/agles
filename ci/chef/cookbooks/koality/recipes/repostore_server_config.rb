@@ -42,11 +42,12 @@ if not File.exists? '/usr/local/bin/ssh'
 			if [ $? -ne 0 ]
 				then chmod +x #{node[:koality][:source_path][:authorized_keys_script]}
 				mv sshd_config sshd_config.bu
-				sed '/AuthorizedKeysFile/d' sshd_config.bu > sshd_config
+				sed '/AuthorizedKeysFile/d' sshd_config.bu | sed '/PasswordAuthentication/d' > sshd_config
 
 				# Setting the authorized_keys file to something that can't exist so it uses the script
 				echo "AuthorizedKeysScript #{node[:koality][:source_path][:authorized_keys_script]}" >> sshd_config
 				echo "AuthorizedKeysFile /dev/null/authorized_keys" >> sshd_config
+				echo "PasswordAuthentication no" >> sshd_config
 			fi
 		EOH
 	end
