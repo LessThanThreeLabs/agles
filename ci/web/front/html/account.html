@@ -39,7 +39,11 @@
 
 	<div id="accountPassword" ng-show="currentView == 'password'" ng-controller="AccountPassword">
 		<content>
-			<content-header content-header-padding ng-class="{green: showSuccess, red: showError}">Password<span id="accountPasswordSuccess" ng-show="showSuccess">Password changed</span><span id="accountPasswordError" ng-show="showError">Invalid password</span></content-header>
+			<content-header content-header-padding ng-class="{green: showSuccess, red: showError}">Password
+				<content-header-subtext>
+					<span ng-show="showSuccess">Password changed</span><span ng-show="showError">Invalid password</span>
+				</content-header-subtext>
+			</content-header>
 			<content-body unselectable>
 				<div id="accountPasswordContent">
 					<styled-form name="passwordForm">
@@ -69,7 +73,9 @@
 
 	<div id="accountSshKeys" ng-show="currentView == 'sshKeys'" ng-controller="AccountSshKeys">
 		<content>
-			<content-header content-header-padding>SSH Keys<a id="addSshKeyLink" ng-click="addKey.modalVisible=true">+ Add a New SSH Key</a></content-header>
+			<content-header content-header-padding>SSH Keys
+				<content-header-subtext><a ng-click="addKey.modalVisible=true">+ Add a New SSH Key</a></content-header-subtext>
+			</content-header>
 			<content-body unselectable>
 				<div id="accountSshKeysContent">
 					<table class="prettyTable">
@@ -98,9 +104,8 @@
 		<modal modal-visible="addKey.modalVisible">
 			<div id="accountAddSshKey">
 				<content>
-					<content-header content-header-padding ng-class="{green: addKey.showSuccess, red: addKey.showError}">
-						Add a New SSH Key
-						<span id="accountAddKeyError" ng-show="addKey.showError">Already in use</span>
+					<content-header content-header-padding ng-class="{green: addKey.showSuccess, red: addKey.showError}">Add a New SSH Key
+						<content-header-subtext><span ng-show="addKey.showError">Already in use</span></content-header-subtext>
 					</content-header>
 					<content-body unselectable>
 						<div id="accountAddSshKeyContent">

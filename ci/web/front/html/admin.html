@@ -35,7 +35,9 @@
 
 	<div id="adminUsers" ng-show="currentView == 'users'" ng-controller="AdminUsers">
 		<content>
-			<content-header content-header-padding>Manage User Accounts<a id="addUsersLink" ng-click="addUsers.modalVisible=true">+ Add New Users</a></content-header>
+			<content-header content-header-padding>Manage User Accounts
+				<content-header-subtext><a ng-click="addUsers.modalVisible=true">+ Add New Users</a></content-header-subtext>
+			</content-header>
 			<content-body unselectable>
 				<div id="adminUsersContent">
 					<table class="prettyTable">
@@ -88,7 +90,9 @@
 
 	<div id="adminRepositories" ng-show="currentView == 'repositories'" ng-controller="AdminRepositories">
 		<content>
-			<content-header content-header-padding>Manage Repositories<a id="addRepositoryLink" ng-click="addRepository.modalVisible=true">+ Add Repository</a></content-header>
+			<content-header content-header-padding>Manage Repositories
+				<content-header-subtext><a ng-click="addRepository.modalVisible=true">+ Add Repository</a></content-header-subtext>
+			</content-header>
 			<content-body unselectable>
 				<div id="adminRepositoriesContent">
 					<table class="prettyTable">
