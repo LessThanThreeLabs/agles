@@ -36,8 +36,9 @@ class VirtualMachine(object):
 		with open(os.path.join(self.vm_directory, self.VM_INFO_FILE), "w") as vm_info_file:
 			vm_info_file.write(config)
 
-	def remote_checkout(self, git_url, refs, output_handler=None):
-		host_url = git_url[:git_url.find(":")]
+	def remote_checkout(self, repo_name, git_url, ref, output_handler=None):
+		assert isinstance(ref, str)
+
 		generate_key = "mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa"
 		pubkey_results = self.ssh_call("(%s) > /dev/null 2>&1; cat .ssh/id_rsa.pub" % generate_key, timeout=20)
 		if pubkey_results.returncode != 0:
@@ -48,23 +49,29 @@ class VirtualMachine(object):
 		alias = '__vm_' + str(uuid.uuid1())
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
 		try:
-			command = ' && '.join([
-				'ssh -oStrictHostKeyChecking=no %s true > /dev/null' % host_url,  # first, bypass the yes/no prompt
-				'git init source',
-				'cd source',
-				'git fetch %s %s -n --depth 1' % (git_url, refs[0]),
-				'git checkout FETCH_HEAD'])
-			for ref in refs[1:]:
-				command = ' && '.join([
-					command,
-					'git fetch origin %s' % ref,
-					'git merge FETCH_HEAD'])
-			results = self.ssh_call(command, output_handler)
-		except:
-			self.logger.error("Failed to check out refs %s from %s, results: %s" % (refs, git_url, results), exc_info=True)
-			raise
+			return self._remote_fetch(repo_name, git_url, ref, output_handler)
 		finally:
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
+
+	def _remote_fetch(self, repo_name, git_url, ref, output_handler):
+		host_url = git_url[:git_url.find(":")]
+		try:
+			commands_list = [
+				'''
+				if [ -d /repositories/cached/%s ]; then
+					mv /repositories/cached/%s source
+				else
+					git init source
+				fi''' % (repo_name, repo_name),
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null' % host_url,  # first, bypass the yes/no prompt
+				'cd source',
+				'git fetch %s %s -n --depth 1' % (git_url, ref),
+				'git checkout FETCH_HEAD']
+			shell_commands = ' && '.join(commands_list)
+			results = self.ssh_call(shell_commands, output_handler)
+		except:
+			self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, git_url, results), exc_info=True)
+			raise
 		return results
 
 	@classmethod

@@ -182,7 +182,8 @@ class CloudBuildCore(VirtualMachineBuildCore):
 
 	def setup_virtual_machine(self, repo_uri, refs, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
-		checkout_command = SimpleRemoteCheckoutCommand(checkout_url, refs)
+		repo_name = self.uri_translator.extract_repo_name(repo_uri)
+		checkout_command = SimpleRemoteCheckoutCommand(repo_name, checkout_url, refs)
 		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
 
 
