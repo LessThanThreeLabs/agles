@@ -112,7 +112,8 @@ class SimplePrinter(object):
 		sys.stdout.write(output)
 
 	def close(self):
-		sys.stdout.write('\n')
+		if (self.last_line_number, self.last_column) != (1, 0):
+			sys.stdout.write('\n')
 
 
 class InvalidConfigurationException(Exception):
