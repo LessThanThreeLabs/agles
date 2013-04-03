@@ -225,7 +225,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			assert_false(conn.is_deployment_initialized())
 
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.initialize_deployment()
+			conn.initialize_deployment(self.user_id)
 
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_true(conn.is_deployment_initialized())
