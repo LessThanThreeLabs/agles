@@ -276,7 +276,12 @@
 			<content-header content-header-padding>Upgrade</content-header>
 			<content-body unselectable>
 				<div id="adminUpgradeContent">
-					hello
+					<div id="adminUpgradeMessage">
+						This feature has not been implemented yet.<br>
+						In the future, information about available upgrades will be displayed here.
+					</div>
+
+					<button id="adminUpgradeButton" ng-click="performUpgrade()" ng-disabled="true">Upgrade</button>
 				</div>
 			</content-body>
 		</content>

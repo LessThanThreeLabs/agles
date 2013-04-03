@@ -193,5 +193,6 @@ window.AdminAws = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 
 
 window.AdminUpgrade = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
-	
+	$scope.performUpgrade = () ->
+		console.log 'need to perform upgrade here'
 ]
