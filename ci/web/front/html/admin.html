@@ -20,9 +20,7 @@
 					<styled-form name="websiteForm">
 						<styled-form-field label="Domain" label-padding="true">
 							<input type="text" ng-model="website.domainName" name="domainName" placeholder="koality.company.com" ng-maxlength="256" required focused>
-							<span class="prettyFormError" tooltip="Invalid domain name" ng-class="{visible: websiteForm.domainName.$dirty && websiteForm.domainName.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Invalid domain name" error-visible="websiteForm.domainName.$dirty && websiteForm.domainName.$invalid"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="">
 							<button id="adminWebsiteSubmitButton" ng-click="submit()" ng-disabled="websiteForm.$invalid">Save Changes</button>
@@ -133,15 +131,11 @@
 							<styled-form name="addRepositoryForm" id="adminAddRepositoryForm">
 								<styled-form-field label="Name" label-padding="true">
 									<input type="text" ng-model="addRepository.name" name="name" placeholder="name" ng-pattern="/^[A-Za-z0-9-_]+$/" ng-maxlength="64" required focused>
-									<span class="prettyFormError" tooltip="Name contains invalid characters" ng-class="{visible: addRepositoryForm.name.$dirty && addRepositoryForm.name.$invalid}">
-										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-									</span>
+									<styled-form-field-error tooltip="Name contains invalid characters" error-visible="addRepositoryForm.name.$dirty && addRepositoryForm.name.$invalid"></styled-form-field-error>
 								</styled-form-field>
 								<styled-form-field label="Forward Url" label-padding="true">
 									<input type="text" ng-model="addRepository.forwardUrl" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
-									<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: addRepositoryForm.forwardUrl.$dirty && addRepositoryForm.forwardUrl.$invalid}">
-										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-									</span>
+									<styled-form-field-error tooltip="Invalid forward url" error-visible="addRepositoryForm.forwardUrl.$dirty && addRepositoryForm.forwardUrl.$invalid"></styled-form-field-error>
 								</styled-form-field>
 								<styled-form-field label="">
 									<button id="adminAddRepositoryGetPublicKeyButton" ng-click="getSshKey()" ng-disabled="addRepositoryForm.$invalid">Add Repository</button>
@@ -183,9 +177,7 @@
 								</styled-form-field>
 								<styled-form-field label="Token" label-padding="true">
 									<input type="text" ng-model="removeRepository.token" name="token" placeholder="token" ng-maxlength="64" required>
-									<span class="prettyFormError" tooltip="Token mismatch" ng-class="{visible: removeRepositoryForm.token.$dirty && removeRepository.token != removeRepository.tokenToMatch}">
-										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-									</span>
+									<styled-form-field-error tooltip="Token mismatch" error-visible="removeRepositoryForm.token.$dirty && removeRepository.token != removeRepository.tokenToMatch"></styled-form-field-error>
 								</styled-form-field>
 								<styled-form-field label="">
 									<button id="adminRemoveRepositoryButton" ng-click="submitRemoveRepository()" ng-disabled="removeRepositoryForm.$invalid || removeRepository.token != removeRepository.tokenToMatch">Remove Repository</button>
@@ -216,9 +208,7 @@
 						<styled-form name="editForwardUrlForm" id="adminForwardUrlForm">
 							<styled-form-field label="Forward Url" label-padding="true">
 								<input type="text" ng-model="forwardUrl.url" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
-								<span class="prettyFormError" tooltip="Invalid forward url" ng-class="{visible: editForwardUrlForm.forwardUrl.$dirty && editForwardUrlForm.forwardUrl.$invalid}">
-									<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-								</span>
+								<styled-form-field-error tooltip="Invalid forward url" error-visible="editForwardUrlForm.forwardUrl.$dirty && editForwardUrlForm.forwardUrl.$invalid"></styled-form-field-error>
 							</styled-form-field>
 							<styled-form-field label="">
 								<button id="adminForwardUrlButton" ng-click="editForwardUrl()" ng-disabled="editForwardUrlForm.$invalid">Save</button>
@@ -238,33 +228,23 @@
 					<styled-form name="awsForm">
 						<styled-form-field label="Access key" label-padding="true">
 							<input type="text" ng-model="awsKeys.accessKey" name="accessKey" placeholder="aws access key id" ng-pattern="/^[\w]+$/" ng-minlength="16" ng-maxlength="32" required focused>
-							<span class="prettyFormError" tooltip="Invalid access key id" ng-class="{visible: awsForm.accessKey.$dirty && awsForm.accessKey.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Invalid access key id" error-visible="awsForm.accessKey.$dirty && awsForm.accessKey.$invalid"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="Secret key" label-padding="true">
 							<input type="text" ng-model="awsKeys.secretKey" name="secretKey" placeholder="aws secret access key" ng-maxlength="128" required>
-							<span class="prettyFormError" tooltip="Invalid secret access key" ng-class="{visible: awsForm.secretKey.$dirty && awsForm.secretKey.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Invalid secret access key" error-visible="awsForm.secretKey.$dirty && awsForm.secretKey.$invalid"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="Instance size" label-padding="true">
 							<select ng-model="instanceSettings.instanceSize" ng-options="instanceSize as instanceSize for instanceSize in allowedInstanceSizes"></select>
 						</styled-form-field>
 						<styled-form-field label="Num waiting instances" label-padding="true">
 							<input type="number" ng-model="instanceSettings.numWaiting" name="numWaiting" min="0" max="1000" required>
-							<span class="prettyFormError" tooltip="Invalid number of waiting instances (0-1000)" ng-class="{visible: awsForm.numWaiting.$dirty && awsForm.numWaiting.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
-							<span class="prettyFormError" tooltip="Must be less than max running instances" ng-class="{visible: awsForm.numWaiting.$valid && awsForm.maxRunning.$valid && instanceSettings.numWaiting > instanceSettings.maxRunning}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Invalid number of waiting instances (0-1000)" error-visible="awsForm.numWaiting.$dirty && awsForm.numWaiting.$invalid"></styled-form-field-error>
+							<styled-form-field-error tooltip="Must be less than max running instances" error-visible="awsForm.numWaiting.$valid && awsForm.maxRunning.$valid && instanceSettings.numWaiting > instanceSettings.maxRunning"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="Max running instances" label-padding="true">
 							<input type="number" ng-model="instanceSettings.maxRunning" name="maxRunning" min="1" max="10000" required>
-							<span class="prettyFormError" tooltip="Invalid number of running instances (1-10000)" ng-class="{visible: awsForm.maxRunning.$dirty && awsForm.maxRunning.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Invalid number of running instances (1-10000)" error-visible="awsForm.maxRunning.$dirty && awsForm.maxRunning.$invalid"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="">
 							<button id="adminAwsSubmitButton" ng-click="submit()" ng-disabled="awsForm.$invalid || instanceSettings.numWaiting > instanceSettings.maxRunning">Save Changes</button>
