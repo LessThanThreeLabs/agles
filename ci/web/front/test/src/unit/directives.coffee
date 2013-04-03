@@ -23,12 +23,12 @@ describe 'Koality directives', () ->
 			numOptions = 5
 			scope.$apply () -> scope.dropdownOptions = (createOption optionNum for optionNum in [0...numOptions])
 			options = element.find('.prettyDropdownOption')
-			expect(options.length).toBe numOptions
+			expect(options.length).toBe numOptions + 1  # to account for "-- empty --" option
 
 			numOptions = 7
 			scope.$apply () -> scope.dropdownOptions = (createOption optionNum for optionNum in [0...numOptions])
 			options = element.find('.prettyDropdownOption')
-			expect(options.length).toBe numOptions
+			expect(options.length).toBe numOptions + 1  # to account for "-- empty --" option
 
 		it 'should handle option click properly', () ->
 			scope.$apply () -> scope.dropdownOptions = [{title: 'First', name: 'first'}, {title: 'Second', name: 'second'}]
