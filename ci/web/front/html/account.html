@@ -18,15 +18,11 @@
 					<styled-form name="basicForm">
 						<styled-form-field label="First name" label-padding="true">
 							<input type="text" ng-model="account.firstName" name="firstName" placeholder="First" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required focused>
-							<span class="prettyFormError" tooltip="Invalid first name" ng-class="{visible: basicForm.firstName.$dirty && basicForm.firstName.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Invalid first name" error-visible="basicForm.firstName.$dirty && basicForm.firstName.$invalid"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="Last name" label-padding="true">
 							<input type="text" ng-model="account.lastName" name="lastName" placeholder="Last" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required>
-							<span class="prettyFormError" tooltip="Invalid last name" ng-class="{visible: basicForm.lastName.$dirty && basicForm.lastName.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Invalid last name" error-visible="basicForm.lastName.$dirty && basicForm.lastName.$invalid"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="">
 							<button id="accountBasicButton" ng-click="submit()" ng-disabled="basicForm.$invalid">Save Changes</button>

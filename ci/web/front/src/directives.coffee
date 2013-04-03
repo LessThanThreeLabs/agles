@@ -89,19 +89,15 @@ angular.module('koality.directive', []).
 	]).
 	directive('tooltip', () ->
 		restrict: 'A'
-		replace: true
-		transclude: true
-		scope: true
-		template: '<span class="prettyTooltipContainer" ng-transclude>
-				<span class="prettyTooltipCenterAnchor">
-					<span class="prettyTooltipCenterContainer">
-						<span class="prettyTooltip">{{text}}</span>
+		link: (scope, element, attributes) ->
+			html = "<span class='prettyTooltipContainer'>
+					<span class='prettyTooltipCenterAnchor'>
+						<span class='prettyTooltipCenterContainer'>
+							<span class='prettyTooltip'>#{attributes.tooltip}</span>
+						</span>
 					</span>
-				</span>
-			</span>'
-		compile: (element, attributes, transclude) ->
-			pre: (scope, element, attributes, controller) ->
-				scope.text = attributes.tooltip
+				</span>"
+			element.append html
 	).
 	directive('styledForm', () ->
 		restrict: 'E'
@@ -117,14 +113,23 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
-		scope:
-			label: '@label'
-			padding: '@labelPadding'
 		template: '<div class="prettyFormRow">
 				<div class="prettyFormLabel" ng-class="{labelPadding: padding}">{{label}}</div>
 				<div class="prettyFormValue" ng-transclude>
 				</div>
 			</div>'
+	).
+	directive('styledFormFieldError', () ->
+		restrict: 'E'
+		replace: true
+		scope: visible: '=errorVisible'
+		template: '<div class="prettyFormError">
+				<img ng-src="{{\'/img/icons/error.png\' | fileSuffix}}">
+			</div>'
+		link: (scope, element, attributes) ->
+			scope.$watch 'visible', (newValue, oldValue) ->
+				if newValue then element.addClass 'visible'
+				else element.removeClass 'visible'
 	).
 	directive('contentMenu', () ->
 		restrict: 'E'
