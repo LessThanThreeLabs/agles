@@ -4,25 +4,28 @@ import yaml
 
 import model_server
 
+from build_core import VerificationException
 from pubkey_registrar import PubkeyRegistrar
 from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
 from util.log import Logged
 
 
-def ReturnException(func):
-
-	def wrapper(*args, **kwargs):
-		try:
-			return func(*args, **kwargs)
-		except Exception as e:
-			return e
-
-	return wrapper
-
-
 @Logged()
 class BuildVerifier(object):
+	def ReturnException(func):
+
+		def wrapper(*args, **kwargs):
+			try:
+				return func(*args, **kwargs)
+			except VerificationException as e:
+				return e
+			except Exception as e:
+				BuildVerifier.logger.critical("Unexpected exception thrown during verification", exc_info=True)
+				return e
+
+		return wrapper
+
 	def __init__(self, build_core):
 		self.build_core = build_core
 		# self._check_for_interrupted_build()
@@ -122,7 +125,7 @@ class BuildVerifier(object):
 			os.remove(self._get_build_info_file())
 		self.build_core.teardown()
 
-	def _get_commit(self, build_id):
+	def _get_commit_id(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:
 			return model_server_rpc.get_build_from_id(build_id)['commit_id']
 
