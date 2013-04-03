@@ -39,24 +39,9 @@ class VirtualMachine(object):
 	def remote_checkout(self, repo_name, git_url, ref, output_handler=None):
 		assert isinstance(ref, str)
 
-		generate_key = "mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa"
-		pubkey_results = self.ssh_call("(%s) > /dev/null 2>&1; cat .ssh/id_rsa.pub" % generate_key, timeout=20)
-		if pubkey_results.returncode != 0:
-			output_handler.append({1: "Failed to connect to the testing instance. Please try again."})
-			self.logger.error("Failed to set up ssh on vm at %s, results: %s" % (self.vm_directory, pubkey_results))
-			return pubkey_results
-		pubkey = pubkey_results.output
-		alias = '__vm_' + str(uuid.uuid1())
-		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
-		try:
-			return self._remote_fetch(repo_name, git_url, ref, output_handler)
-		finally:
-			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
-
-	def _remote_fetch(self, repo_name, git_url, ref, output_handler):
-		host_url = git_url[:git_url.find(":")]
-		try:
-			commands_list = [
+		def _remote_fetch():
+			host_url = git_url[:git_url.find(":")]
+			command = ' && '.join([
 				'''
 				if [ -d /repositories/cached/%s ]; then
 					mv /repositories/cached/%s source
@@ -66,18 +51,50 @@ class VirtualMachine(object):
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null' % host_url,  # first, bypass the yes/no prompt
 				'cd source',
 				'git fetch %s %s -n --depth 1' % (git_url, ref),
-				'git checkout FETCH_HEAD']
-			shell_commands = ' && '.join(commands_list)
-			results = self.ssh_call(shell_commands, output_handler)
-		except:
-			self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, git_url, results), exc_info=True)
-			raise
-		return results
+				'git checkout FETCH_HEAD'])
+			results = self.ssh_call(command, output_handler)
+			if results.returncode != 0:
+				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, git_url, results), exc_info=True)
+			return results
+		return self._ssh_authorized(_remote_fetch, output_handler)
+
+	def remote_clone(self, git_url, output_handler=None):
+		def _remote_clone():
+			host_url = git_url[:git_url.find(":")]
+			command = ' && '.join([
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null' % host_url,  # first, bypass the yes/no prompt
+				'git clone %s source' % git_url])
+			results = self.ssh_call(command, output_handler)
+			if results.returncode != 0:
+				self.logger.error("Failed to clone %s, results: %s" % (git_url, results), exc_info=True)
+			return results
+		return self._ssh_authorized(_remote_clone, output_handler)
+
+	def _ssh_authorized(self, authorized_command, output_handler=None):
+		generate_key = "mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa"
+		pubkey_results = self.ssh_call("(%s) > /dev/null 2>&1; cat .ssh/id_rsa.pub" % generate_key, timeout=20)
+		if pubkey_results.returncode != 0:
+			if output_handler:
+				output_handler.append({1: "Failed to connect to the testing instance. Please try again."})
+			self.logger.error("Failed to set up ssh on vm at %s, results: %s" % (self.vm_directory, pubkey_results))
+			return pubkey_results
+		pubkey = pubkey_results.output
+		alias = '__vm_' + str(uuid.uuid1())
+		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
+		try:
+			return authorized_command()
+		finally:
+			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 
 	@classmethod
 	def get_newest_image(cls):
 		images = cls.get_all_images()
 		return max(images, key=cls.get_image_version)  # get image with greatest version
+
+	@classmethod
+	def get_newest_global_image(cls):
+		images = cls.get_all_images()
+		return max(filter(lambda image: cls.get_image_version(image)[1] == -1, images), key=lambda image: cls.get_image_version(image)[0])
 
 	@classmethod
 	def get_all_images(cls):

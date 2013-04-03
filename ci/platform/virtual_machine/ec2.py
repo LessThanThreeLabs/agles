@@ -113,6 +113,7 @@ class Ec2Vm(VirtualMachine):
 				eventlet.sleep(1)  # Sometimes EC2 doesn't recognize that an instance exists yet
 
 	def wait_until_ready(self):
+		self.instance.update()
 		while not self.instance.state == 'running':
 			eventlet.sleep(3)
 			self.instance.update()
