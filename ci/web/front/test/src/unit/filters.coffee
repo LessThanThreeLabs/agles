@@ -49,4 +49,5 @@ describe 'Koality filters', () ->
 				expect(newLineFilter 'hello\n').toBe 'hello<br>'
 				expect(newLineFilter '\nhello').toBe '<br>hello'
 				expect(newLineFilter 'hello\nthere').toBe 'hello<br>there'
-
+				expect(newLineFilter '\nhello\nthere').toBe '<br>hello<br>there'
+				expect(newLineFilter '\nhello\nthere\n').toBe '<br>hello<br>there<br>'
