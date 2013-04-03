@@ -48,15 +48,11 @@
 						</styled-form-field>
 						<styled-form-field label="New password" label-padding="true">
 							<input type="password" ng-model="account.newPassword" name="newPassword" placeholder="new p4ssW0rd" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
-							<span class="prettyFormError" tooltip="Password must contain at least 8 characters, a letter, and a number" ng-class="{visible: passwordForm.newPassword.$dirty && passwordForm.newPassword.$invalid}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Password must contain at least 8 characters, a letter, and a number" error-visible="passwordForm.newPassword.$dirty && passwordForm.newPassword.$invalid"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="Confirm password" label-padding="true">
 							<input type="password" ng-model="account.confirmPassword" name="confirmPassword" placeholder="p4ssW0rd, again" ng-pattern="/^(?=.*[a-zA-Z])(?=.*\d).+$/" ng-minlength="8" ng-maxlength="256" required>
-							<span class="prettyFormError" tooltip="Passwords do not match" ng-class="{visible: passwordForm.confirmPassword.$dirty && account.newPassword != account.confirmPassword}">
-								<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-							</span>
+							<styled-form-field-error tooltip="Passwords do not match" error-visible="passwordForm.confirmPassword.$dirty && account.newPassword != account.confirmPassword"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="">
 							<button id="accountPasswordButton" ng-click="submit()" ng-disabled="passwordForm.$invalid">Save Changes</button>
@@ -111,9 +107,7 @@
 								</styled-form-field>
 								<styled-form-field label="Key" label-padding="true">
 									<textarea type="text" ng-model="addKey.key" name="key" placeholder="Key" ng-pattern="/^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}/" ng-maxlength="8192" required></textarea>
-									<span class="prettyFormError" tooltip="Invalid key" ng-class="{visible: addSshKeyForm.key.$dirty && addSshKeyForm.key.$invalid}">
-										<img ng-src="{{'/img/icons/error.png' | fileSuffix}}">
-									</span>
+									<styled-form-field-error tooltip="Invalid key" error-visible="addSshKeyForm.key.$dirty && addSshKeyForm.key.$invalid"></styled-form-field-error>
 								</styled-form-field>
 								<styled-form-field label="">
 									<button id="accountAddSshKeyButton" ng-click="submitKey()" ng-disabled="addSshKeyForm.$invalid">Add Key</button>
