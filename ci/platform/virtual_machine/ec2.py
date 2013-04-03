@@ -45,8 +45,11 @@ class Ec2Vm(VirtualMachine):
 		if not instance_type:
 			instance_type = AwsSettings.instance_type
 
+		security_group = AwsSettings.security_group
+		cls._validate_security_group(security_group)
+
 		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type,
-			security_groups=cls._validate_security_groups(AwsSettings.security_groups),
+			security_groups=[security_group],
 			user_data=cls._default_user_data(vm_username)).instances[0]
 		cls._name_instance(instance, name)
 		return Ec2Vm(vm_directory, instance)
@@ -63,12 +66,30 @@ class Ec2Vm(VirtualMachine):
 			"chown -R %s:%s /home/%s/.ssh" % (vm_username, vm_username, vm_username)))
 
 	@classmethod
-	def _validate_security_groups(cls, security_groups):
-		try:
-			groups = Ec2Client.get_client().get_all_security_groups(security_groups)
-			return [group.name for group in groups]
-		except:
-			return None
+	def _validate_security_group(cls, security_group):
+		group = cls._get_or_create_security_group(security_group)
+		for rule in group.rules:
+			if (rule.ip_protocol == 'tcp' and
+				rule.from_port == '22' and
+				rule.to_port == '22'):
+				for grant in rule.grants:
+					if grant.cidr_ip == '0.0.0.0/0':
+						cls.logger.debug('Found ssh authorization rule on security group "%s"' % security_group)
+						return
+		cls.logger.info('Adding ssh authorization rule to security group "%s"' % security_group)
+		group.authorize('tcp', '22', '22', '0.0.0.0/0', None)
+
+	@classmethod
+	def _get_or_create_security_group(cls, security_group):
+		ec2_client = Ec2Client.get_client()
+		groups = filter(lambda group: group.name == security_group, ec2_client.get_all_security_groups())
+		if groups:
+			cls.logger.debug('Found existing security_group "%s"' % security_group)
+			group = groups[0]
+		else:
+			cls.logger.info('Creating new security group "%s"' % security_group)
+			group = ec2_client.create_security_group(security_group, "Auto-generated Koality verification security group")
+		return group
 
 	@classmethod
 	def from_directory(cls, vm_directory):
@@ -85,9 +106,10 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def from_id(cls, vm_directory, instance_id, vm_username=VM_USERNAME):
 		try:
-			vm = Ec2Vm(vm_directory, Ec2Client.get_client().get_all_instances([instance_id])[0].instances[0], vm_username)
+			client = Ec2Client.get_client()
+			vm = Ec2Vm(vm_directory, client.get_all_instances(instance_id)[0].instances[0], vm_username)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
-				cls.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, instance_id))
+				cls.logger.warn("Found VM (%s, %s) in %s state" % (vm_directory, vm.instance.state, instance_id))
 				vm.delete()
 				return None
 			elif vm.instance.state == 'shutting-down' or vm.instance.state == 'terminated':
@@ -125,7 +147,7 @@ class Ec2Vm(VirtualMachine):
 				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.instance.id, remaining_attempts))
 			if self.ssh_call("true").returncode == 0:
 				return
-			eventlet.sleep(5)
+			eventlet.sleep(3)
 		# Failed to ssh into machine, try again
 		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.instance.id))
 		self.rebuild()
