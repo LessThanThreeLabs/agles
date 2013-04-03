@@ -27,12 +27,6 @@ def upgrade():
             build.update().values(commit_id=build_to_commit[build_commits_map.c.commit_id]).where(build.c.id == build_to_commit[build_commits_map.c.build_id])
         )
 
-    # op.execute(
-    #     build.update().values(commit_id=build_commits_map.select(build_commits_map.c.commit_id).where(
-    #         build_commits_map.c.build_id == build.c.id)
-    #     )
-    # )
-
     op.alter_column('build', sa.Column('commit_id', sa.Integer(), nullable=False))
     op.drop_table(u'build_commits_map')
     ### end Alembic commands ###
@@ -53,7 +47,8 @@ def downgrade():
 
     builds = op.get_bind().execute(build.select())
     ins = [{'build_id': b[build.c.id], 'commit_id': b[build.c.commit_id]} for b in builds]
-    op.bulk_insert(build_commits_map, ins)
+    if ins:
+        op.bulk_insert(build_commits_map, ins)
 
     op.drop_column('build', 'commit_id')
     ### end Alembic commands ###
