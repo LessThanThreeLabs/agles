@@ -8,7 +8,7 @@ import model_server
 from settings.aws import AwsSettings
 from shared.constants import VerificationUser
 from util.uri_translator import RepositoryUriTranslator
-from virtual_machine.ec2 import Ec2Vm
+from virtual_machine.ec2 import Ec2Client, Ec2Vm
 
 
 def main():
@@ -52,6 +52,16 @@ def main():
 	new_image_name = '%s%d_%d' % (AwsSettings.vm_image_name_prefix, cache_version[0], cache_version[1])
 	print 'Saving instance as AMI "%s"' % new_image_name
 	virtual_machine.create_image(new_image_name)
+
+	while True:
+		try:
+			image = Ec2Client.get_client().get_all_images(filters={'name': new_image_name})[0]
+		except:
+			pass
+		if image.state == 'available':
+			break
+		else:
+			time.sleep(2)
 
 	print 'Deleting instance "%s"' % instance_name
 	virtual_machine.delete()
