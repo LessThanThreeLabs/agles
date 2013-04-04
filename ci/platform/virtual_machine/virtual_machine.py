@@ -48,7 +48,7 @@ class VirtualMachine(object):
 				else
 					git init source
 				fi''' % (repo_name, repo_name),
-				'ssh -oStrictHostKeyChecking=no %s true > /dev/null' % host_url,  # first, bypass the yes/no prompt
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # first, bypass the yes/no prompt
 				'cd source',
 				'git fetch %s %s -n --depth 1' % (git_url, ref),
 				'git checkout FETCH_HEAD'])
