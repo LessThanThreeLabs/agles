@@ -14,7 +14,7 @@ class PubkeyRegistrar(object):
 			with model_server.rpc_connect("users", "update") as users_update_rpc:
 				users_update_rpc.add_ssh_pubkey(user_id, alias, pubkey)
 		except:
-			self.logger.warn("Could not register pubkey %s for user %d with alias %s" % (pubkey, user_id, alias))
+			self.logger.info("Could not register pubkey %s for user %d with alias %s" % (pubkey, user_id, alias))
 
 	def unregister_pubkey(self, user_id, alias):
 		try:
