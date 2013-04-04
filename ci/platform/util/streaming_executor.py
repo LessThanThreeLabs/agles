@@ -16,6 +16,8 @@ class StreamingExecutor(object):
 			with Timeout(timeout):
 				self._handle_output(process, output_handler)
 		except Timeout:
+			timeout_line = {len(self._output_lines) + 1: 'Command timed out after %d seconds' % timeout}
+			self._handle_lines(output_handler, timeout_line)
 			returncode = 127
 		else:
 			returncode = process.wait()

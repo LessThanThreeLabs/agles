@@ -77,9 +77,9 @@ class StreamingExecutorTests(BaseUnitTest):
 		assert_equal('one\ntwo', results.output)
 
 	def test_timeout(self):
-		results = StreamingExecutor().execute(['sleep', '1'], timeout=0.1)
+		results = StreamingExecutor().execute(['bash', '-c', 'echo hi; sleep 1; echo bye'], timeout=0.1)
 		assert_equal(127, results.returncode)
-		assert_equal('', results.output)
+		assert_equal('hi\nCommand timed out after 0 seconds', results.output)
 
 
 class TestOutputHandler(object):
