@@ -62,7 +62,7 @@ class VirtualMachine(object):
 		def _remote_clone():
 			host_url = git_url[:git_url.find(":")]
 			command = ' && '.join([
-				'ssh -oStrictHostKeyChecking=no %s true > /dev/null' % host_url,  # first, bypass the yes/no prompt
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # first, bypass the yes/no prompt
 				'git clone %s source' % git_url])
 			results = self.ssh_call(command, output_handler)
 			if results.returncode != 0:
