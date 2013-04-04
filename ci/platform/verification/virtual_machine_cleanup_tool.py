@@ -9,13 +9,14 @@ class VirtualMachineCleanupTool(object):
 
 	def cleanup(self, filesystem=True):
 		try:
-			for directory in (directory for directory in os.listdir(self.directory) if os.path.isdir(directory) and not directory.endswith('log')):
-				try:
-					vm = self.vm_class.from_directory(directory)
-					vm.delete() if vm else None
-					if filesystem:
-						shutil.rmtree(directory)
-				except:
-					pass
+			for directory in os.listdir(self.directory):
+				if os.path.is_dir(directory) and not directory.endswith('log'):
+					try:
+						vm = self.vm_class.from_directory(directory)
+						vm.delete() if vm else None
+						if filesystem:
+							shutil.rmtree(directory)
+					except:
+						pass
 		except:
 			pass
