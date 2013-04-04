@@ -113,6 +113,9 @@ angular.module('koality.directive', []).
 		restrict: 'E'
 		replace: true
 		transclude: true
+		scope:
+			label: '@label'
+			padding: '@labelPadding'
 		template: '<div class="prettyFormRow">
 				<div class="prettyFormLabel" ng-class="{labelPadding: padding}">{{label}}</div>
 				<div class="prettyFormValue" ng-transclude>
