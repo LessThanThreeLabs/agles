@@ -60,7 +60,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		last_name = row[user.c.last_name]
 		repo_id = row[change.c.repo_id]
 		change_number = row[change.c.number]
-		change_link = "https://%s/repository/%d/changes/%d/home" % (WebServerSettings.domain_name, repo_id, change_id)
+		change_link = "https://%s/repository/%d?change=%d" % (WebServerSettings.domain_name, repo_id, change_id)
 
 		subject = "There was an issue with your change (#%d)" % change_number
 		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link)
