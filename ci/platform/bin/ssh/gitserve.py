@@ -9,9 +9,10 @@ import os
 import sys
 
 import model_server
+import util.log
 
 from util.permissions import InvalidPermissionsError
-from util.shell import RestrictedGitShell, InvalidCommandError
+from util.shell import RestrictedGitShell, InvalidCommandError, RepositoryNotFoundError
 
 valid_commands = [
 	"git-receive-pack",
@@ -33,15 +34,18 @@ def main():
 		else:
 			with model_server.rpc_connect("users", "read") as client:
 				user_info = client.get_user_from_id(user_id)
-			print "You have been successfully authenticated as %s, but shell access is not permitted." % user_info["email"]
+			print >> sys.stderr, "You have been successfully authenticated as %s, but shell access is not permitted." % user_info["email"]
 	except InvalidCommandError:
-		print "The attempted command is not a permitted action in this restricted shell."
+		print >> sys.stderr, "The attempted command is not a permitted action in this restricted shell."
 	except InvalidPermissionsError:
-		print "You do not have the necessary permissions to perform this action."
+		print >> sys.stderr, "You do not have the necessary permissions to perform this action."
+	except RepositoryNotFoundError:
+		print >> sys.stderr, "Repository not found. Please check your git configuration."
 	except:
+		util.log.configure()
 		logger = logging.getLogger("gitserve")
 		logger.error("Failed to process git command %s for user %s" % (os.environ.get("SSH_ORIGINAL_COMMAND", "<no command supplied>"), user_id), exc_info=True)
-		print "An error has occured. Please contact your system administrator or support for more help."
+		print >> sys.stderr, "An error has occured. Please contact your system administrator or support for more help."
 
 
 if __name__ == "__main__":

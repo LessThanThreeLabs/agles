@@ -67,7 +67,10 @@ class RestrictedGitShell(object):
 
 	def handle_upload_pack(self, requested_repo_uri, user_id):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			repo_attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			if repo_attributes is None:
+				raise RepositoryNotFoundError(requested_repo_uri)
+			repostore_id, route, repos_path, repo_id, repo_name, private_key = repo_attributes
 			forward_url = modelserver_rpc_conn.get_repo_forward_url(repo_id)
 
 		self.verify_user_exists("git-upload-pack", user_id, repo_id)
@@ -118,6 +121,10 @@ class InvalidCommandError(Exception):
 	def __init__(self, command):
 		super(InvalidCommandError, self).__init__(
 			'"%s" cannot be executed in this restricted shell.' % command)
+
+
+class RepositoryNotFoundError(Exception):
+	pass
 
 
 class MalformedCommandError(Exception):
