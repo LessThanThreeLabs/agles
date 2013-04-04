@@ -37,7 +37,7 @@ def main():
 	primary_branch = branch_counter.most_common(1)[0][0]
 	print 'Primary branch is "%s"' % primary_branch
 
-	virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown lt3:lt3 /repositories/cached')
+	virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R lt3:lt3 /repositories/cached')
 	uri_translator = RepositoryUriTranslator()
 	for repository in repositories:
 		print 'Cloning repository "%s"' % repository['name']
