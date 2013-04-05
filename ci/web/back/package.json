@@ -12,6 +12,7 @@
     "ejs": "0.8.3",
     "express":  "3.0.5",
     "iced-coffee-script": "1.4.0a",
+    "koality-logger": "git+ssh://git@github.com:LessThanThreeLabs/koality-logger.git",
     "mailgun": "0.4.2",
     "msgpack": "0.1.8",
     "redis": "0.8.2",
