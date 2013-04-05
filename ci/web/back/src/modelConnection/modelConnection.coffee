@@ -5,20 +5,24 @@ RpcConnection = require './rpc/rpcConnection'
 EventConnection = require './events/eventConnection'
 
 
-exports.create = (configurationParams) ->
-	return new ModelConnection configurationParams
+exports.create = (configurationParams, logger) ->
+	return new ModelConnection configurationParams, logger
 
 
 class ModelConnection
-	constructor: (@configurationParams) ->
+	constructor: (@configurationParams, @logger) ->
 		assert.ok @configurationParams?
+		assert.ok @logger?
+
+		@rpcConnection = null
+		@eventConnection = null
 
 
 	connect: (callback) ->
 		@connection = amqp.createConnection @configurationParams.messageBroker
 		@connection.on 'ready', () =>
-			@rpcConnection = RpcConnection.create @configurationParams, @connection
-			@eventConnection = EventConnection.create @configurationParams, @connection
+			@rpcConnection = RpcConnection.create @configurationParams, @connection, @logger
+			@eventConnection = EventConnection.create @configurationParams, @connection, @logger
 			
 			await
 				@rpcConnection.connect defer rpcConnectionError
@@ -30,7 +34,6 @@ class ModelConnection
 				callback()
 			else 
 				callback errors
-
 
 		@connection.on 'error', (error) =>
 			callback error

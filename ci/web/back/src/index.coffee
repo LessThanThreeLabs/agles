@@ -20,30 +20,38 @@ startEverything = () ->
 
 	environment.setEnvironmentMode configurationParams.mode
 
-	modelConnection = ModelConnection.create configurationParams.modelConnection
-	modelConnection.connect (error) =>
-		throw error if error?
-		mailer = Mailer.create configurationParams.mailer, modelConnection.rpcConnection
-		logger = Logger.create mailer.logger, 'warn'
-		createServer configurationParams.server, modelConnection, mailer, logger
+	domainRetriever = getDomain: (callback) -> callback ''
 
-		if process.env.NODE_ENV is 'production'
-			process.on 'uncaughtException', (error) =>
-				logger.error error
+	mailer = Mailer.create configurationParams.mailer, domainRetriever
+
+	logger = Logger.create mailer.logger, 'warn'
+
+	modelConnection = ModelConnection.create configurationParams.modelConnection, logger
+
+	if process.env.NODE_ENV is 'production'
+		process.on 'uncaughtException', (error) -> logger.error error
+
+	modelConnection.connect (error) ->
+		if error?
+			logger.fatal error
+		else
+			domainRetriever.getDomain = (callback) ->
+				modelConnection.rpcConnection.systemSettings.read.get_website_domain_name 1, callback
+
+			server = Server.create configurationParams.server, modelConnection, mailer, logger
+			server.initialize (error) =>
+				if error? then logger.fatal error
+				else server.start()
+
+				logger.fatal 'hello'
 
 
-getConfiguration = (configFileLocation = './config.json', mode, httpsPort) =>
+
+getConfiguration = (configFileLocation = './config.json', mode, httpsPort) ->
 	config = JSON.parse(fs.readFileSync configFileLocation, 'ascii')
 	if mode? then config.mode = mode
 	if httpsPort? then config.server.https.port = httpsPort
 	return Object.freeze config
-
-
-createServer = (serverConfigurationParams, domainName, modelConnection, mailer) =>
-	server = Server.create serverConfigurationParams, domainName, modelConnection, mailer
-	server.initialize (error) =>
-		throw error if error?
-		server.start()
 
 
 startEverything()

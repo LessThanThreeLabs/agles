@@ -110,24 +110,24 @@
 				"email": "feedback"
 			},
 			"to": {
-				"email": "feedback@koalitycode.com"
+				"email": "jpotter@koalitycode.com"
 			}
 		},
 
 		"initialAdmin": {
 			"from": {
-				"name": "Log Mailer",
-				"email": "logmailer"
+				"name": "Koality",
+				"email": "koality"
 			}
 		},
 
 		"logger": {
 			"from": {
-				"name": "Koality",
-				"email": "koality"
+				"name": "Log Mailer",
+				"email": "logmailer"
 			},
 			"to": {
-				"email": "logmailer@koalitycode.com"
+				"email": "jpotter@koalitycode.com"
 			}
 		}
 	}

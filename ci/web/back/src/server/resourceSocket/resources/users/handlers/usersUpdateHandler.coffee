@@ -85,7 +85,7 @@ class UsersUpdateHandler extends Handler
 							@modelRpcConnection.users.update.change_password user.id, newPasswordHash, user.salt, (error, result) =>
 								if error? then callback 500
 								else
-									@mailer.resetPassword.email data.email, newPassword, (error) =>
+									@mailer.resetPassword.send data.email, newPassword, (error) =>
 										if error? then callback 500
 										else callback()
 
@@ -169,4 +169,4 @@ class UsersUpdateHandler extends Handler
 			@modelRpcConnection.users.read.get_user_from_id userId, (error, user) =>
 				if error then callback 500
 				else
-					@mailer.feedback.email sanitizeResult(user), data.feedback, data.userAgent, data.screen
+					@mailer.feedback.send sanitizeResult(user), data.feedback, data.userAgent, data.screen

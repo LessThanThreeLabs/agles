@@ -1,23 +1,21 @@
 assert = require 'assert'
 
-
-exports.create = (configurationParams, modelRpcConnection, emailer) ->
-	return new LoggerEmailer configurationParams, modelRpcConnection, emailer
+Emailer = require './emailer'
 
 
-class LoggerEmailer
-	constructor: (@configurationParams, @modelRpcConnection, @emailer) ->
-		assert.ok @configurationParams?
-		assert.ok @modelRpcConnection?
-		assert.ok @emailer?
+exports.create = (configurationParams, emailSender, domainRetriever) ->
+	return new LoggerEmailer configurationParams, emailSender, domainRetriever
 
 
+class LoggerEmailer extends Emailer
 	send: (body, callback) =>
-		@modelRpcConnection.systemSettings.read.get_website_domain_name 1, (error, domain) =>
-			return if error?
-			
-			fromEmail = "#{@configurationParams.logger.from.name} <#{@configurationParams.logger.from.email}@#{domain}>"
-			toEmail = @configurationParams.logger.to.email
-			subject = 'Logs'
+		console.log body
+		
+		@getDomain (error, domain) =>
+			if error? then callback error
+			else
+				fromEmail = "#{@configurationParams.from.name} <#{@configurationParams.from.email}@#{domain}>"
+				toEmail = @configurationParams.to.email
+				subject = 'Logs'
 
-			@emailer.sendText fromEmail, toEmail, subject, body, callback
+				@emailSender.sendText fromEmail, toEmail, subject, body, callback

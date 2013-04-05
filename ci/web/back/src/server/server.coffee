@@ -117,17 +117,18 @@ class Server
 		@_configureServer expressServer
 
 		@modelConnection.rpcConnection.systemSettings.read.is_deployment_initialized (error, initialized) =>
-			throw error if error?
+			if error? @logger.error error
+			else
+				if initialized then addProjectBindings()
+				else addInstallationWizardBindings()
 
-			if initialized then addProjectBindings()
-			else addInstallationWizardBindings()
+				server = https.createServer @httpsOptions, expressServer
+				server.listen @configurationParams.https.port
 
-			server = https.createServer @httpsOptions, expressServer
-			server.listen @configurationParams.https.port
+				@resourceSocket.start server
 
-			@resourceSocket.start server
-
-			console.log "SERVER STARTED on port #{@configurationParams.https.port}".bold.magenta
+				@logger.info 'server started'
+				console.log "SERVER STARTED on port #{@configurationParams.https.port}".bold.magenta
 
 
 	_configureServer: (expressServer) =>

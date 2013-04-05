@@ -2,6 +2,6 @@ assert = require 'assert'
 
 
 exports.setEnvironmentMode = (mode) ->
-	assert.ok mode == 'development' or mode == 'production'
+	assert.ok mode is 'development' or mode is 'production'
 	process.env.NODE_ENV = mode
 	

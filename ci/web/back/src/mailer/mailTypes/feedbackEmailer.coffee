@@ -1,25 +1,21 @@
 assert = require 'assert'
 
-
-exports.create = (configurationParams, modelRpcConnection, emailer) ->
-	return new FeedbackEmailer configurationParams, modelRpcConnection, emailer
+Emailer = require './emailer'
 
 
-class FeedbackEmailer
-	constructor: (@configurationParams, @modelRpcConnection, @emailer) ->
-		assert.ok @configurationParams?
-		assert.ok @modelRpcConnection?
-		assert.ok @emailer?
+exports.create = (configurationParams, emailSender, domainRetriever) ->
+	return new FeedbackEmailer configurationParams, emailSender, domainRetriever
 
 
-	email: (user, feedback, userAgent, screen) =>
-		@modelRpcConnection.systemSettings.read.get_website_domain_name 1, (error, domain) =>
+class FeedbackEmailer extends Emailer
+	send: (user, feedback, userAgent, screen) =>
+		@getDomain (error, domain) =>
 			return if error?
 			
-			fromEmail = "#{@configurationParams.feedback.from.name} <#{@configurationParams.feedback.from.email}@#{domain}>"
-			toEmail = @configurationParams.feedback.to.email
+			fromEmail = "#{@configurationParams.from.name} <#{@configurationParams.from.email}@#{domain}>"
+			toEmail = @configurationParams.to.email
 			subject = 'Feedback'
 			body = "User: #{user.firstName} #{user.lastName} (#{user.email})\n\nFeedback: #{feedback}\n\nUser Agent: #{userAgent}\n\nScreen: #{screen.width} x #{screen.height}"
 
-			@emailer.sendText fromEmail, toEmail, subject, body, (error) ->
+			@emailSender.sendText fromEmail, toEmail, subject, body, (error) ->
 				console.error error if error?

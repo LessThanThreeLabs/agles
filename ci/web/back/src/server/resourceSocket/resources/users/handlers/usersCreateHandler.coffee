@@ -149,7 +149,7 @@ class UsersCreateHandler extends Handler
 			else
 				key = keyBuffer.toString 'hex'
 				@stores.createAccountStore.addAccount key, email: email
-				@mailer.inviteUser.email email, key, callback
+				@mailer.inviteUser.send email, key, callback
 
 
 	validateInitialAdminUser: (socket, data, callback) =>
@@ -161,7 +161,7 @@ class UsersCreateHandler extends Handler
 				callback errors
 				return
 
-			@mailer.initialAdmin.email data.email, data.firstName, data.lastName, @initialAdminToken, (error) =>
+			@mailer.initialAdmin.send data.email, data.firstName, data.lastName, @initialAdminToken, (error) =>
 				if error? then callback 500
 				else callback()
 
