@@ -116,8 +116,18 @@
 
 		"initialAdmin": {
 			"from": {
+				"name": "Log Mailer",
+				"email": "logmailer"
+			}
+		},
+
+		"logger": {
+			"from": {
 				"name": "Koality",
 				"email": "koality"
+			},
+			"to": {
+				"email": "logmailer@koalitycode.com"
 			}
 		}
 	}

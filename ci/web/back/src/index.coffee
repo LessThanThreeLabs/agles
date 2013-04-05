@@ -1,5 +1,6 @@
 fs = require 'fs'
 colors = require 'colors'
+Logger = require 'koality-logger'
 
 environment = require './environment'
 
@@ -23,11 +24,12 @@ startEverything = () ->
 	modelConnection.connect (error) =>
 		throw error if error?
 		mailer = Mailer.create configurationParams.mailer, modelConnection.rpcConnection
-		createServer configurationParams.server, modelConnection, mailer
+		logger = Logger.create mailer.logger, 'warn'
+		createServer configurationParams.server, modelConnection, mailer, logger
 
-	if process.env.NODE_ENV is 'production'
-		process.on 'uncaughtException', (error) =>
-			console.error error
+		if process.env.NODE_ENV is 'production'
+			process.on 'uncaughtException', (error) =>
+				logger.error error
 
 
 getConfiguration = (configFileLocation = './config.json', mode, httpsPort) =>

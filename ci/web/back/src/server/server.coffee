@@ -16,13 +16,13 @@ IndexHandler = require './handlers/indexHandler'
 InstallationWizardHandler = require './handlers/installationWizardHandler'
 
 
-exports.create = (configurationParams, modelConnection, mailer) ->
+exports.create = (configurationParams, modelConnection, mailer, logger) ->
 	stores =
 		sessionStore: SessionStore.create configurationParams
 		createAccountStore: CreateAccountStore.create configurationParams
 		createRepositoryStore: CreateRepositoryStore.create configurationParams
 	
-	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection, mailer
+	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection, mailer, logger
 	staticServer = StaticServer.create configurationParams
 
 	httpsOptions =
@@ -35,13 +35,13 @@ exports.create = (configurationParams, modelConnection, mailer) ->
 		indexHandler: IndexHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
 		installationWizardHandler: InstallationWizardHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
 
-	return new Server configurationParams, httpsOptions, modelConnection, resourceSocket, stores, handlers, staticServer
+	return new Server configurationParams, httpsOptions, modelConnection, resourceSocket, stores, handlers, staticServer, logger
 
 
 class Server
-	constructor: (@configurationParams, @httpsOptions, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer) ->
+	constructor: (@configurationParams, @httpsOptions, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer, @logger) ->
 		assert.ok @configurationParams? and @httpsOptions? and @modelConnection? and 
-			@resourceSocket? and @stores? and @handlers? and @staticServer?
+			@resourceSocket? and @stores? and @handlers? and @staticServer? and @logger?
 
 
 	initialize: (callback) =>
