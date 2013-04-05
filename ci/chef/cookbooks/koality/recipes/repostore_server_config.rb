@@ -48,8 +48,14 @@ if not File.exists? '/usr/local/bin/ssh'
 				echo "AuthorizedKeysScript #{node[:koality][:source_path][:authorized_keys_script]}" >> sshd_config
 				echo "AuthorizedKeysFile /dev/null/authorized_keys" >> sshd_config
 				echo "PasswordAuthentication no" >> sshd_config
+				echo "AllowUsers git" >> sshd_config
 			fi
 		EOH
+	end
+
+	bash "lock down standard ssh daemon" do
+		user "root"
+		code "sed -i.bak -r 's/^AllowUsers .*$/AllowUsers lt3 git/g' /etc/ssh/sshd_config"
 	end
 
 	if false  # dulwich
