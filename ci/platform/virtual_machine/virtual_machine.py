@@ -42,12 +42,7 @@ class VirtualMachine(object):
 		def _remote_fetch():
 			host_url = git_url[:git_url.find(":")]
 			command = ' && '.join([
-				'''
-				if [ -d /repositories/cached/%s ]; then
-					mv /repositories/cached/%s source
-				else
-					git init source
-				fi''' % (repo_name, repo_name),
+				'( mv /repositories/cached/%s source > /dev/null 2>&1 || git init source)' % repo_name,
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # first, bypass the yes/no prompt
 				'cd source',
 				'git fetch %s %s -n --depth 1' % (git_url, ref),
