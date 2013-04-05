@@ -53,9 +53,10 @@ if not File.exists? '/usr/local/bin/ssh'
 		EOH
 	end
 
+	#  TODO: remove ubuntu from this list
 	bash "lock down standard ssh daemon" do
 		user "root"
-		code "sed -i.bak -r 's/^AllowUsers .*$/AllowUsers lt3 git/g' /etc/ssh/sshd_config"
+		code "sed -i.bak -r 's/^AllowUsers .*$/AllowUsers lt3 git ubuntu/g' /etc/ssh/sshd_config"
 	end
 
 	if false  # dulwich
