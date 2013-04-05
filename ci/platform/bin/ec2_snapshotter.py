@@ -58,10 +58,12 @@ def main():
 			image = Ec2Client.get_client().get_all_images(filters={'name': new_image_name})[0]
 		except:
 			pass
+	while True:
 		if image.state == 'available':
 			break
 		else:
 			time.sleep(2)
+			image.update()
 
 	print 'Deleting instance "%s"' % instance_name
 	virtual_machine.delete()
