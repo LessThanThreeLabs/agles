@@ -30,8 +30,8 @@ class ChangeVerifier(EventSubscriber):
 		message.ack()
 
 	def _handle_new_change(self, contents):
-		change_id = contents["change_id"]
-		commit_id = self._get_commit_id(change_id)
+		change_id = contents['change_id']
+		commit_id = contents['commit_id']
 		verification_config = self._get_verification_config(commit_id)
 
 		workers_spawned = event.Event()
@@ -120,10 +120,6 @@ class ChangeVerifier(EventSubscriber):
 				change_failed = True
 		if not change_failed:
 			pass_change()
-
-	def _get_commit_id(self, change_id):
-		with model_server.rpc_connect("changes", "read") as model_server_rpc:
-			return model_server_rpc.get_change_attributes(change_id)['commit_id']
 
 	def _create_build(self, change_id):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:
