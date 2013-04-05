@@ -129,8 +129,11 @@ class Ec2Vm(VirtualMachine):
 	def _name_instance(cls, instance, name):
 		ec2_client = Ec2Client.get_client()
 		#  Wait until EC2 recognizes that the instance exists
-		while not instance.id in map(lambda inst: inst.id, ec2_client.get_all_instances()):
+		while True:
+			if instance.id in map(lambda res: res.instances[0].id, ec2_client.get_all_instances()):
+				break
 			eventlet.sleep(2)
+			instance.update()
 		while not 'Name' in instance.tags:
 			try:
 				instance.add_tag('Name', name)

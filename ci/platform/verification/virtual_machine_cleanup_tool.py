@@ -10,6 +10,7 @@ class VirtualMachineCleanupTool(object):
 	def cleanup(self, filesystem=True):
 		try:
 			for directory in os.listdir(self.directory):
+				directory = os.path.join(self.directory, directory)
 				if os.path.is_dir(directory) and not directory.endswith('log'):
 					try:
 						vm = self.vm_class.from_directory(directory)
