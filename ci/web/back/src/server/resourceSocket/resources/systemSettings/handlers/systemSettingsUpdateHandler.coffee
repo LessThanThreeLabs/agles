@@ -88,7 +88,7 @@ class SystemSettingsUpdateHandler extends Handler
 			@modelRpcConnection.systemSettings.read.is_deployment_initialized (error, initialized) =>
 				if error? or initialized then callback 500
 				else
-					@modelRpcConnection.systemSettings.update.initialize_deployment (error) =>
+					@modelRpcConnection.systemSettings.update.initialize_deployment userId, (error) =>
 						if error?.type is 'InvalidPermissionsError' then callback 403
 						else if error? then callback 500
 						else callback()
