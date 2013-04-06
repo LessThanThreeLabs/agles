@@ -68,10 +68,7 @@
 
 		"rpc": {
 			"exchange": "model:rpc",
-
-			"deadLetter": {
-				"exchange": "model:rpc_dlx"
-			}
+			"deadLetterExchange": "model:rpc_dlx"
 		},
 
 		"events": {
