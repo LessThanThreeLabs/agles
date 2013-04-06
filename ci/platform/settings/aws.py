@@ -7,7 +7,7 @@ class AwsSettings(DatabaseBackedSettings):
 			region="",
 			aws_access_key_id="",
 			aws_secret_access_key="",
-			instance_type="m1.small",
+			instance_type="m1.medium",
 			vm_image_name_prefix="koality_verification_",
 			security_group="koality_verification",
 			credentials=lambda cls: dict(
