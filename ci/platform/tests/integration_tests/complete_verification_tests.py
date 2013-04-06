@@ -131,7 +131,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
 			events_broker = EventsBroker(connection)
 			events_broker.publish("repos", repo_id, "change added",
-				change_id=commit_id, merge_target="master")
+				change_id=commit_id, commit_id=commit_id, merge_target="master")
 			with events_broker.subscribe("repos", callback=self._on_response) as consumer:
 				self.change_status = None
 				start_time = time.time()
