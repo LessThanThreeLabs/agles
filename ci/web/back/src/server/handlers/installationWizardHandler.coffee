@@ -13,7 +13,7 @@ exports.create = (configurationParams, stores, modelRpcConnection, filesSuffix) 
 class InstallationWizardHandler extends RequestHandler
 	handleRequest: (request, response) =>
 		# just in case there's a lingering session
-		request.session.userId = null
+		delete request.session.userId
 
 		response.render 'installationWizard', 
 			fileSuffix: @fileSuffix
