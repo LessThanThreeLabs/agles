@@ -187,5 +187,3 @@ class UsersCreateHandler extends Handler
 				else
 					data.isAdmin = true
 					@_addUser socket.session, data, callback
-
-					callback()
