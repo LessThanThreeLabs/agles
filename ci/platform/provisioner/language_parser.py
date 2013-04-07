@@ -12,8 +12,8 @@ class LanguageParser(object):
 			'python': self.validate_python,
 			'ruby': self.validate_ruby,
 			'nodejs': self.validate_nodejs,
-			'java': self.validate_java,
-			'jvm': self.validate_java
+			'java': self.validate_jvm,
+			'jvm': self.validate_jvm
 		}
 		self.global_install = global_install
 
@@ -89,7 +89,7 @@ class LanguageParser(object):
 	def _nvm_command(self, shell_command):
 		return "bash -c %s" % pipes.quote(shell_command)
 
-	def validate_java(self, version):
+	def validate_jvm(self, version):
 		version = str(version).lower()
 		version_aliases = {
 			'5': ['1.5', '1.5.0'],

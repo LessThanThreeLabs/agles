@@ -10,7 +10,6 @@ from setup_tools import InvalidConfigurationException, SetupCommand, SetupScript
 
 
 class Provisioner(object):
-
 	def __init__(self, packages=True, scripts=True, databases=True):
 		self.setup_dispatcher = {
 			'packages': self.parse_packages if packages else lambda *args: [],
@@ -86,9 +85,9 @@ class Provisioner(object):
 
 	def _provision(self, *steps):
 		for action_name, step in steps:
-			self.run_step(action_name, step)
+			self._run_step(action_name, step)
 
-	def run_step(self, action_name, setup_step):
+	def _run_step(self, action_name, setup_step):
 		if not setup_step:
 			return
 		steps = setup_step if isinstance(setup_step, list) else [setup_step]

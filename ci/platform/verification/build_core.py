@@ -14,6 +14,13 @@ from verification_config import VerificationConfig
 
 @Logged()
 class BuildCore(object):
+	"""Component that contains setup and cleanup functionality for
+	steps in box setup related to building."""
+
+	# TODO (bbland/jchu): This class has a fundamental flaw.
+	# It copies the head to /tmp/source, but if 2 of these
+	# are running at the same time, this is a race condition.
+	# For every run, you should have a unique source_dir
 	def __init__(self, uri_translator=None):
 		self.uri_translator = uri_translator
 		self.source_dir = os.path.join("/tmp", "source")
