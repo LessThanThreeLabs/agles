@@ -58,6 +58,8 @@ def main():
 			image = Ec2Client.get_client().get_all_images(filters={'name': new_image_name})[0]
 		except:
 			pass
+		else:
+			break
 	while True:
 		if image.state == 'available':
 			break
