@@ -45,9 +45,9 @@ class ChangeVerifier(EventSubscriber):
 		self.logger.info("Verifying change %d with %d workers" % (change_id, num_workers))
 		self.logger.debug("Verification config: %s" % verification_config.to_dict())
 
-		task_queue.begin_populating_tasks()
-		task_queue.populate_tasks(*(test_command for test_command in verification_config.test_commands))
-		task_queue.finish_populating_tasks()
+		#task_queue.begin_populating_tasks()
+		#task_queue.populate_tasks(*(test_command for test_command in verification_config.test_commands))
+		#task_queue.finish_populating_tasks()
 
 		# This list is only used as a counter (we only care about its len)
 		# We can't use an int because of function scoping and integer assignment
