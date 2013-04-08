@@ -79,7 +79,7 @@ class BuildVerifier(object):
 			return
 
 		if test_queue.can_populate_tasks():
-			self._populate_tests(test_queue)
+			self._populate_tests(verification_config, test_queue)
 		else:
 			test_queue.wait_for_tasks_populated()
 
@@ -104,8 +104,10 @@ class BuildVerifier(object):
 			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
 
 	@ReturnException
-	def _populate_tests(self, test_queue):
-		raise NotImplementedError("Should never reach here yet")
+	def _populate_tests(self, verification_config, test_queue):
+		test_queue.begin_populating_tasks()
+		test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
+		test_queue.finish_populating_tasks()
 
 	@ReturnException
 	def _do_test(self, build_id, test_command):
