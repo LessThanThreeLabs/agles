@@ -27,7 +27,7 @@ class ResourceSocketConfigurer
 			socket.enable 'browser client gzip'
 			@_configureAuthorization socket
 			@_configureRedisStore socket
-			@_configureModelEvents socket
+			# @_configureModelEvents socket
 
 		socket.configure 'development', () ->
 			socket.set 'log level', 2

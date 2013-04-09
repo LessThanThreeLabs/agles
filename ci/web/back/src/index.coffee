@@ -41,13 +41,10 @@ startEverything = () ->
 			domainRetriever.getDomain = (callback) ->
 				modelConnection.rpcConnection.systemSettings.read.get_website_domain_name 1, callback
 
-	# 		server = Server.create configurationParams.server, modelConnection, mailer, logger
-	# 		server.initialize (error) =>
-	# 			if error? then logger.fatal error
-	# 			else server.start()
-
-	# 			logger.fatal 'hello'
-
+			server = Server.create configurationParams.server, modelConnection, mailer, logger
+			server.initialize (error) =>
+				if error? then logger.fatal error
+				else server.start()
 
 
 getConfiguration = (configFileLocation = './config.json', mode, httpsPort) ->
