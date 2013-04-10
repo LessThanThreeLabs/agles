@@ -42,6 +42,11 @@ class SimpleRemoteTestCommand(SimpleRemoteCommand):
 		super(SimpleRemoteTestCommand, self).__init__("test", name)
 
 
+class SimpleRemotePartitionCommand(SimpleRemoteCommand):
+	def __init__(self, name):
+		super(SimpleRemotePartitionCommand, self).__init__("partition", name)
+
+
 class SimpleRemoteSetupCommand(RemoteCommand):
 	def __init__(self, name):
 		super(SimpleRemoteSetupCommand, self).__init__()

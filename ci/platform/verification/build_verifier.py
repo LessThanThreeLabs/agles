@@ -103,9 +103,16 @@ class BuildVerifier(object):
 			self.build_core.setup_build(repo_uri, ref, private_key, console_appender)
 			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
 
-	@ReturnException
 	def _populate_tests(self, verification_config, test_queue):
+		class ConsoleAppender(object):
+			pass  # make it go to string
+
 		test_queue.begin_populating_tasks()
+
+		for partition_command in verification_config.partition_commands:
+			console_output_yaml = self.build_core.run_partition_command(partition_command, ConsoleAppender)
+			partition_sections = yaml.load(console_output_yaml)
+			test_queue.populate_tasks(*partition_sections)
 		test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
 		test_queue.finish_populating_tasks()
 

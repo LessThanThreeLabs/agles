@@ -69,7 +69,7 @@ class BuildCore(object):
 				return config_path
 
 	def _get_verification_configuration(self, config_dict):
-		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"))
+		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"), config_dict.get("partition"))
 
 
 class LightWeightBuildCore(BuildCore):
@@ -138,6 +138,11 @@ class VirtualMachineBuildCore(BuildCore):
 		if test_command.run(self.virtual_machine,
 			self._get_output_handler(console_appender, ConsoleType.Test, test_command.name)):
 			raise VerificationException("Testing: %s" % test_command.name)
+
+	def run_partition_command(self, partition_command, console_appender):
+		if partition_command.run(self.virtual_machine,
+			self._get_output_handler(console_appender, ConsoleType.Test, partition_command.name)):
+			raise VerificationException("Partitioning: %s:" % partition_command.name)
 
 
 class VagrantBuildCore(VirtualMachineBuildCore):
