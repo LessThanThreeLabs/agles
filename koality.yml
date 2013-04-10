@@ -1,4 +1,4 @@
---- #Koality: 0.0.1
+--- #Koality: 0.1.4
 languages:
   python: 2.7
   ruby: 1.9.3
@@ -47,11 +47,16 @@ compile:
       path: ci/web/front
       script: ./compile.sh
 test:
-  - platform tests:
+  - platform unit tests:
       path: ci/platform
       script:
-        - nosetests -sv
+        - nosetests -sv tests/unit_tests
       timeout: 240
   - website unit tests:
       script:
         - karma start ci/web/front/test/karma.unit.conf.js --browsers PhantomJS --single-run
+partition:
+  - integration test partitioner:
+      path: ci/platform
+      script:
+        - ls tests/integration_tests/*.py | while read test; do echo - nosetests -sv $test; done
