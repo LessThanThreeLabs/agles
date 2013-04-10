@@ -1,3 +1,6 @@
+import pipes
+
+
 class RemoteCommand(object):
 	def run(self, virtual_machine, output_handler):
 		if output_handler:
@@ -5,7 +8,7 @@ class RemoteCommand(object):
 		results = self._run(virtual_machine, output_handler)
 		if output_handler:
 			output_handler.set_return_code(results.returncode)
-		return results.returncode
+		return results
 
 	def _run(self, virtual_machine, output_handler=None):
 		raise NotImplementedError("Subclasses should override this!")
@@ -16,46 +19,56 @@ class NullRemoteCommand(RemoteCommand):
 		self.name = name
 
 	def _run(self, virtual_machine, output_handler=None):
-		return 0
+		return {'returncode': 0,
+			'output': ''}
 
 
-class SimpleRemoteCommand(RemoteCommand):
+class RemoteShellCommand(RemoteCommand):
+	def __init__(self, command):
+		super(RemoteShellCommand, self).__init__()
+		self.command = command
+
+	def _run(self, virtual_machine, output_handler=None):
+		return virtual_machine.ssh_call('bash --login -c %s' % pipes.quote(self.command), output_handler)
+
+
+class RemoteScriptCommand(RemoteCommand):
 	def __init__(self, type, name):
-		super(SimpleRemoteCommand, self).__init__()
+		super(RemoteScriptCommand, self).__init__()
 		self.type = type
 		self.name = name
 
 	def _get_command(self):
-		return "bash --login scripts/%s/%s" % (self.type, self.name.replace(" ", "\ "))
+		return "bash --login scripts/%s/%s" % (pipes.quote(self.type), pipes.quote(self.name))
 
 	def _run(self, virtual_machine, output_handler=None):
 		return virtual_machine.ssh_call(self._get_command(), output_handler)
 
 
-class SimpleRemoteCompileCommand(SimpleRemoteCommand):
+class RemoteCompileCommand(RemoteScriptCommand):
 	def __init__(self, name):
-		super(SimpleRemoteCompileCommand, self).__init__("compile", name)
+		super(RemoteCompileCommand, self).__init__("compile", name)
 
 
-class SimpleRemoteTestCommand(SimpleRemoteCommand):
+class RemoteTestCommand(RemoteScriptCommand):
 	def __init__(self, name):
-		super(SimpleRemoteTestCommand, self).__init__("test", name)
+		super(RemoteTestCommand, self).__init__("test", name)
 
 
-class SimpleRemotePartitionCommand(SimpleRemoteCommand):
+class RemotePartitionCommand(RemoteScriptCommand):
 	def __init__(self, name):
-		super(SimpleRemotePartitionCommand, self).__init__("partition", name)
+		super(RemotePartitionCommand, self).__init__("partition", name)
 
 
-class SimpleRemoteSetupCommand(RemoteCommand):
+class RemoteSetupCommand(RemoteCommand):
 	def __init__(self, name):
-		super(SimpleRemoteSetupCommand, self).__init__()
+		super(RemoteSetupCommand, self).__init__()
 		self.name = name
 
 
-class SimpleRemoteCheckoutCommand(SimpleRemoteSetupCommand):
+class RemoteCheckoutCommand(RemoteSetupCommand):
 	def __init__(self, repo_name, git_url, ref):
-		super(SimpleRemoteCheckoutCommand, self).__init__("git")
+		super(RemoteCheckoutCommand, self).__init__("git")
 		self.git_url = git_url
 		self.ref = ref
 		self.repo_name = repo_name
@@ -64,9 +77,9 @@ class SimpleRemoteCheckoutCommand(SimpleRemoteSetupCommand):
 		return virtual_machine.remote_checkout(self.repo_name, self.git_url, self.ref, output_handler=output_handler)
 
 
-class SimpleRemoteProvisionCommand(SimpleRemoteSetupCommand):
+class RemoteProvisionCommand(RemoteSetupCommand):
 	def __init__(self, private_key):
-		super(SimpleRemoteProvisionCommand, self).__init__("provision")
+		super(RemoteProvisionCommand, self).__init__("provision")
 		self.private_key = private_key
 
 	def _run(self, virtual_machine, output_handler=None):

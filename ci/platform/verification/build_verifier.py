@@ -9,6 +9,7 @@ from pubkey_registrar import PubkeyRegistrar
 from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
 from util.log import Logged
+from virtual_machine.remote_command import RemoteShellCommand
 
 
 @Logged()
@@ -104,15 +105,12 @@ class BuildVerifier(object):
 			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
 
 	def _populate_tests(self, verification_config, test_queue):
-		class ConsoleAppender(object):
-			pass  # make it go to string
-
 		test_queue.begin_populating_tasks()
 
 		for partition_command in verification_config.partition_commands:
-			console_output_yaml = self.build_core.run_partition_command(partition_command, ConsoleAppender)
+			console_output_yaml = self.build_core.run_partition_command(partition_command)
 			partition_sections = yaml.load(console_output_yaml)
-			test_queue.populate_tasks(*partition_sections)
+			test_queue.populate_tasks(*[RemoteShellCommand(partition) for partition in partition_sections])
 		test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
 		test_queue.finish_populating_tasks()
 
@@ -132,7 +130,6 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 		if os.access(self._get_build_info_file(), os.F_OK):
 			os.remove(self._get_build_info_file())
-		self.build_core.teardown()
 
 	def _get_commit_id(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:

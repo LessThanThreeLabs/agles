@@ -5,7 +5,7 @@ from database_parser import OmnibusDatabaseParser
 from language_parser import LanguageParser
 from package_parser import OmnibusPackageParser
 from script_parser import ScriptParser
-from run_step_parser import CompileStepParser, TestStepParser
+from run_step_parser import CompileStepParser, TestStepParser, PartitionStepParser
 from setup_tools import InvalidConfigurationException, SetupCommand, SetupScript, RcUtils
 
 
@@ -78,10 +78,12 @@ class Provisioner(object):
 		setup_steps += self.parse_setup(config, source_path)
 		compile_steps = self.parse_compile(config, source_path)
 		test_steps = self.parse_test(config, source_path)
+		partition_commands = self.parse_partition(config, source_path)
 		return (("Language configuration", SetupScript(*language_steps)),
 			("Setup", SetupScript(*setup_steps)),
 			("Compile configuration", compile_steps),
-			("Test configuration", test_steps))
+			("Test configuration", test_steps),
+			("Test partitioners", partition_commands))
 
 	def _provision(self, *steps):
 		for action_name, step in steps:
@@ -140,6 +142,10 @@ class Provisioner(object):
 	def parse_test(self, config, source_path):
 		if 'test' in config:
 			return TestStepParser().parse_steps(config['test'], source_path)
+
+	def parse_partition(self, config, source_path):
+		if 'partition' in config:
+			return PartitionStepParser().parse_steps(config['partition'], source_path)
 
 
 class ProvisionFailedException(Exception):

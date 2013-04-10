@@ -8,7 +8,7 @@ from git import Repo
 
 from model_server.build_consoles import ConsoleType
 from util.log import Logged
-from virtual_machine.remote_command import SimpleRemoteCheckoutCommand, SimpleRemoteProvisionCommand
+from virtual_machine.remote_command import RemoteCheckoutCommand, RemoteProvisionCommand
 from verification_config import VerificationConfig
 
 
@@ -115,14 +115,15 @@ class VirtualMachineBuildCore(BuildCore):
 
 	def setup_virtual_machine(self, private_key, console_appender, setup_commands=[]):
 		"""Provisions the contained virtual machine for analysis and test running"""
-		provision_command = SimpleRemoteProvisionCommand(private_key)
+		provision_command = RemoteProvisionCommand(private_key)
 		setup_commands = setup_commands + [provision_command]
 		for setup_command in setup_commands:
 			self.run_setup_command(setup_command, console_appender)
 
 	def run_setup_command(self, setup_command, console_appender):
-		if setup_command.run(self.virtual_machine,
-			self._get_output_handler(console_appender, ConsoleType.Setup, setup_command.name)):
+		results = setup_command.run(self.virtual_machine,
+			self._get_output_handler(console_appender, ConsoleType.Setup, setup_command.name))
+		if results.returncode:
 			raise VerificationException("Setup: %s" % setup_command.name)
 
 	def run_compile_step(self, compile_commands, console_appender):
@@ -130,19 +131,23 @@ class VirtualMachineBuildCore(BuildCore):
 			self.run_compile_command(compile_command, console_appender)
 
 	def run_compile_command(self, compile_command, console_appender):
-		if compile_command.run(self.virtual_machine,
-			self._get_output_handler(console_appender, ConsoleType.Compile, compile_command.name)):
+		results = compile_command.run(self.virtual_machine,
+			self._get_output_handler(console_appender, ConsoleType.Compile, compile_command.name))
+		if results.returncode:
 			raise VerificationException("Compiling: %s" % compile_command.name)
 
 	def run_test_command(self, test_command, console_appender):
-		if test_command.run(self.virtual_machine,
-			self._get_output_handler(console_appender, ConsoleType.Test, test_command.name)):
+		results = test_command.run(self.virtual_machine,
+			self._get_output_handler(console_appender, ConsoleType.Test, test_command.name))
+		if results.returncode:
 			raise VerificationException("Testing: %s" % test_command.name)
 
-	def run_partition_command(self, partition_command, console_appender):
-		if partition_command.run(self.virtual_machine,
-			self._get_output_handler(console_appender, ConsoleType.Test, partition_command.name)):
+	def run_partition_command(self, partition_command, console_appender=None):
+		results = partition_command.run(self.virtual_machine,
+			self._get_output_handler(console_appender, ConsoleType.Test, partition_command.name))
+		if results.returncode:
 			raise VerificationException("Partitioning: %s:" % partition_command.name)
+		return results.output
 
 
 class VagrantBuildCore(VirtualMachineBuildCore):
@@ -190,7 +195,7 @@ class CloudBuildCore(VirtualMachineBuildCore):
 	def setup_virtual_machine(self, repo_uri, ref, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
-		checkout_command = SimpleRemoteCheckoutCommand(repo_name, checkout_url, ref)
+		checkout_command = RemoteCheckoutCommand(repo_name, checkout_url, ref)
 		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
 
 
