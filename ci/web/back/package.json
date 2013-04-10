@@ -14,11 +14,11 @@
     "iced-coffee-script": "1.4.0a",
     "koality-logger": "git+ssh://git@github.com:LessThanThreeLabs/koality-logger.git",
     "koality-model-connection": "git+ssh://git@github.com:LessThanThreeLabs/koality-model-connection.git",
+    "koality-resource-connection": "git+ssh://git@github.com:LessThanThreeLabs/koality-resource-connection.git",
     "mailgun": "0.4.2",
     "msgpack": "0.1.8",
     "redis": "0.8.2",
     "rsa-json": "0.0.1",
-    "socket.io": "git://github.com/jchonphoenix/socket.io.git",
     "uglify-js": "2.2.2"
   },
 

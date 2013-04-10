@@ -5,7 +5,7 @@ express = require 'express'
 csrf = require './csrf'
 gzip = require './gzip'
 
-ResourceSocket = require './resourceSocket/resourceSocket'
+ResourceConnection = require 'koality-resource-connection'
 StaticServer = require './static/staticServer'
 
 SessionStore = require './stores/sessionStore'
@@ -22,7 +22,7 @@ exports.create = (configurationParams, modelConnection, mailer, logger) ->
 		createAccountStore: CreateAccountStore.create configurationParams
 		createRepositoryStore: CreateRepositoryStore.create configurationParams
 	
-	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection, mailer, logger
+	resourceConnection = ResourceConnection.create()
 	staticServer = StaticServer.create configurationParams
 
 	httpsOptions =
@@ -35,13 +35,13 @@ exports.create = (configurationParams, modelConnection, mailer, logger) ->
 		indexHandler: IndexHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
 		installationWizardHandler: InstallationWizardHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
 
-	return new Server configurationParams, httpsOptions, modelConnection, resourceSocket, stores, handlers, staticServer, logger
+	return new Server configurationParams, httpsOptions, modelConnection, resourceConnection, stores, handlers, staticServer, logger
 
 
 class Server
-	constructor: (@configurationParams, @httpsOptions, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer, @logger) ->
-		assert.ok @configurationParams? and @httpsOptions? and @modelConnection? and 
-			@resourceSocket? and @stores? and @handlers? and @staticServer? and @logger?
+	constructor: (@configurationParams, @httpsOptions, @modelConnection, @resourceConnection, @stores, @handlers, @staticServer, @logger) ->
+		assert.ok @configurationParams? and @httpsOptions? and @modelConnection? and
+			@resourceConnection? and @stores? and @handlers? and @staticServer? and @logger?
 
 
 	initialize: (callback) =>
@@ -125,7 +125,7 @@ class Server
 				server = https.createServer @httpsOptions, expressServer
 				server.listen @configurationParams.https.port
 
-				@resourceSocket.start server
+				@resourceConnection.start server
 
 				@logger.info 'server started'
 				console.log "SERVER STARTED on port #{@configurationParams.https.port}".bold.magenta
