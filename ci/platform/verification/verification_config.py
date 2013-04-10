@@ -1,13 +1,13 @@
-from virtual_machine.remote_command import SimpleRemoteCompileCommand, SimpleRemoteTestCommand, SimpleRemotePartitionCommand
+from virtual_machine.remote_command import RemoteCompileCommand, RemoteTestCommand, RemotePartitionCommand
 
 
 class VerificationConfig(object):
 	def __init__(self, compile_commands, test_commands, partition_commands):
-		self.compile_commands = [SimpleRemoteCompileCommand(self._get_command_name(command))
+		self.compile_commands = [RemoteCompileCommand(self._get_command_name(command))
 			for command in compile_commands] if compile_commands else []
-		self.test_commands = [SimpleRemoteTestCommand(self._get_command_name(command))
+		self.test_commands = [RemoteTestCommand(self._get_command_name(command))
 			for command in test_commands] if test_commands else []
-		self.partition_commands = [SimpleRemotePartitionCommand(self._get_command_name(command))
+		self.partition_commands = [RemotePartitionCommand(self._get_command_name(command))
 			for command in partition_commands] if partition_commands else []
 		self._compile_commands = compile_commands
 		self._test_commands = test_commands
@@ -21,7 +21,8 @@ class VerificationConfig(object):
 
 	def to_dict(self):
 		return {'compile_commands': self._compile_commands,
-			'test_commands': self._test_commands}
+			'test_commands': self._test_commands,
+			'partition_commands': self._partition_commands}
 
 	@classmethod
 	def from_dict(cls, config_dict):

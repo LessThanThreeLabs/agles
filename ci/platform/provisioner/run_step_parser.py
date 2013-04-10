@@ -65,6 +65,11 @@ class TestStepParser(RunStepParser):
 		super(TestStepParser, self).__init__('test')
 
 
+class PartitionStepParser(RunStepParser):
+	def __init__(self):
+		super(PartitionStepParser, self).__init__('partition')
+
+
 class RunStepFileBuilder(object):
 	def __init__(self, source_path, step_type, step_name, step_path, commands, timeout):
 		self.source_path = source_path
