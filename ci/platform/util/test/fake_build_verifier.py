@@ -30,12 +30,16 @@ class FakeBuildCore(object):
 		pass
 
 	def setup_build(self, repo_uri, refs, private_key, console_appender=None):
-		return VerificationConfig(None, None)
+		return VerificationConfig(None, None, None)
 
 	def run_compile_step(self, compile_commands, console_appender=None):
 		pass
 
 	def run_test_command(self, test_command, console_appender=None):
+		if not self.passes:
+			raise Exception()
+
+	def run_partition_command(self, partition_command, console_appender=None):
 		if not self.passes:
 			raise Exception()
 
