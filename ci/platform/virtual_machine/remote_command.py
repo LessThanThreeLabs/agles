@@ -26,10 +26,10 @@ class NullRemoteCommand(RemoteCommand):
 class RemoteShellCommand(RemoteCommand):
 	def __init__(self, command):
 		super(RemoteShellCommand, self).__init__()
-		self.command = command
+		self.name = command
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.ssh_call('bash --login -c %s' % pipes.quote(self.command), output_handler)
+		return virtual_machine.ssh_call('bash --login -c %s' % pipes.quote(self.name), output_handler)
 
 
 class RemoteScriptCommand(RemoteCommand):
