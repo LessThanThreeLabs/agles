@@ -1,26 +1,22 @@
 assert = require 'assert'
 
-
-exports.create = (configurationParams, modelRpcConnection, emailer) ->
-	return new ResetPasswordEmailer configurationParams, modelRpcConnection, emailer
+Emailer = require './emailer'
 
 
-class ResetPasswordEmailer
-	constructor: (@configurationParams, @modelRpcConnection, @emailer) ->
-		assert.ok @configurationParams?
-		assert.ok @modelRpcConnection?
-		assert.ok @emailer?
+exports.create = (configurationParams, emailSender, domainRetriever) ->
+	return new ResetPasswordEmailer configurationParams, emailSender, domainRetriever
 
 
-	email: (toEmail, newPassword, callback) =>
+class ResetPasswordEmailer extends Emailer
+	send: (toEmail, newPassword, callback) =>
 		assert.ok callback?
 		
-		@modelRpcConnection.systemSettings.read.get_website_domain_name 1, (error, domain) =>
+		@getDomain (error, domain) =>
 			if error? then callback error
 			else
-				fromEmail = "#{@configurationParams.resetPassword.from.name} <#{@configurationParams.resetPassword.from.email}@#{domain}>"
+				fromEmail = "#{@configurationParams.from.name} <#{@configurationParams.from.email}@#{domain}>"
 				subject = 'Your new Koality password!'
 				body = "Your new password is: #{newPassword}"
 
-				@emailer.sendText fromEmail, toEmail, subject, body, (error) ->
+				@emailSender.sendText fromEmail, toEmail, subject, body, (error) ->
 					callback error

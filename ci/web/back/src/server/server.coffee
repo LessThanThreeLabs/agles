@@ -16,13 +16,13 @@ IndexHandler = require './handlers/indexHandler'
 InstallationWizardHandler = require './handlers/installationWizardHandler'
 
 
-exports.create = (configurationParams, modelConnection, mailer) ->
+exports.create = (configurationParams, modelConnection, mailer, logger) ->
 	stores =
 		sessionStore: SessionStore.create configurationParams
 		createAccountStore: CreateAccountStore.create configurationParams
 		createRepositoryStore: CreateRepositoryStore.create configurationParams
 	
-	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection, mailer
+	resourceSocket = ResourceSocket.create configurationParams, stores, modelConnection, mailer, logger
 	staticServer = StaticServer.create configurationParams
 
 	httpsOptions =
@@ -35,13 +35,13 @@ exports.create = (configurationParams, modelConnection, mailer) ->
 		indexHandler: IndexHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
 		installationWizardHandler: InstallationWizardHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
 
-	return new Server configurationParams, httpsOptions, modelConnection, resourceSocket, stores, handlers, staticServer
+	return new Server configurationParams, httpsOptions, modelConnection, resourceSocket, stores, handlers, staticServer, logger
 
 
 class Server
-	constructor: (@configurationParams, @httpsOptions, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer) ->
+	constructor: (@configurationParams, @httpsOptions, @modelConnection, @resourceSocket, @stores, @handlers, @staticServer, @logger) ->
 		assert.ok @configurationParams? and @httpsOptions? and @modelConnection? and 
-			@resourceSocket? and @stores? and @handlers? and @staticServer?
+			@resourceSocket? and @stores? and @handlers? and @staticServer? and @logger?
 
 
 	initialize: (callback) =>
@@ -117,17 +117,18 @@ class Server
 		@_configureServer expressServer
 
 		@modelConnection.rpcConnection.systemSettings.read.is_deployment_initialized (error, initialized) =>
-			throw error if error?
+			if error? @logger.error error
+			else
+				if initialized then addProjectBindings()
+				else addInstallationWizardBindings()
 
-			if initialized then addProjectBindings()
-			else addInstallationWizardBindings()
+				server = https.createServer @httpsOptions, expressServer
+				server.listen @configurationParams.https.port
 
-			server = https.createServer @httpsOptions, expressServer
-			server.listen @configurationParams.https.port
+				@resourceSocket.start server
 
-			@resourceSocket.start server
-
-			console.log "SERVER STARTED on port #{@configurationParams.https.port}".bold.magenta
+				@logger.info 'server started'
+				console.log "SERVER STARTED on port #{@configurationParams.https.port}".bold.magenta
 
 
 	_configureServer: (expressServer) =>

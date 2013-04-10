@@ -3,15 +3,21 @@ msgpack = require 'msgpack'
 crypto = require 'crypto'
 
 
-exports.create = (connection, exchange, deadLetterExchange, messageIdGenerator) ->
-	return new RpcBroker connection, exchange, deadLetterExchange, messageIdGenerator
+exports.create = (connection, exchange, deadLetterExchange, messageIdGenerator, logger) ->
+	return new RpcBroker connection, exchange, deadLetterExchange, messageIdGenerator, logger
 
 
 class RpcBroker
-	constructor: (@connection, @exchange, @deadLetterExchange, @messageIdGenerator) ->
-		assert.ok @connection? and @exchange? and @deadLetterExchange? and @messageIdGenerator?
+	constructor: (@connection, @exchange, @deadLetterExchange, @messageIdGenerator, @logger) ->
+		assert.ok @connection?
+		assert.ok @exchange?
+		assert.ok @deadLetterExchange?
+		assert.ok @messageIdGenerator?
+		assert.ok @logger?
+
 		@exchange.on 'basic-return', (args) ->
-			throw new Error 'Message broker - ' + args.replyText if args.replyCode != 200
+			if args.replyCode isnt 200
+				logger.error "Message broker bad reply (#{args.replyCode}) - #{args.replyText}"
 
 		# If someone makes this an array instead of an object
 		# our servers will OOM and I'll punch a small duckling.
@@ -49,8 +55,7 @@ class RpcBroker
 			correlationId: messageId
 			mandatory: true
 
-		if process.env.NODE_ENV is 'development'
-			console.log '-- calling function: ' + route + ' > ' + methodName
+		@logger.debug 'rpcBroker | calling function: ' + route + ' > ' + methodName
 
 
 	_handleResponse: (message, headers, deliveryInformation) =>
@@ -58,21 +63,19 @@ class RpcBroker
 		data = msgpack.unpack message.data
 
 		if not @messageIdsToCallbacks[messageId]?
-			console.error 'Received unexpected rpc message ' + JSON.stringify data
+			@logger.warn 'rpcBroker | received unexpected rpc message ' + JSON.stringify data
 		else
 			callback = @messageIdsToCallbacks[messageId]
 			delete @messageIdsToCallbacks[messageId]
 
 			if data.error?
-				console.error data.error.type
-				console.error data.error.message
-				console.error data.error.traceback
+				@logger.info 'rpcBroker | error in handle response: ' + JSON.stringify data.error 
 
 			callback data.error, data.value
 
 
 	_handleDeadLetterResponse: (message, headers, deliveryInformation) =>
-		console.error 'Received dead letter message!! ' + JSON.stringify msgpack.unpack message.data
+		@logger.warn 'rpcBroker | received dead letter message: ' + JSON.stringify msgpack.unpack message.data
 
 		responseQueueName = deliveryInformation.replyTo
 		messageId = deliveryInformation.correlationId

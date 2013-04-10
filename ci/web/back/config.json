@@ -110,7 +110,7 @@
 				"email": "feedback"
 			},
 			"to": {
-				"email": "feedback@koalitycode.com"
+				"email": "jpotter@koalitycode.com"
 			}
 		},
 
@@ -118,6 +118,16 @@
 			"from": {
 				"name": "Koality",
 				"email": "koality"
+			}
+		},
+
+		"logger": {
+			"from": {
+				"name": "Log Mailer",
+				"email": "logmailer"
+			},
+			"to": {
+				"email": "jpotter@koalitycode.com"
 			}
 		}
 	}
