@@ -83,7 +83,9 @@ class BuildVerifier(object):
 			return
 
 		if test_queue.can_populate_tasks():
-			self._populate_tests(verification_config, test_queue)
+			population_result = self._populate_tests(verification_config, test_queue)
+			results.append(population_result)
+			test_queue.add_other_result(population_result)
 		else:
 			test_queue.wait_for_tasks_populated()
 
@@ -107,15 +109,17 @@ class BuildVerifier(object):
 			self.build_core.setup_build(repo_uri, ref, private_key, console_appender)
 			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
 
+	@ReturnException
 	def _populate_tests(self, verification_config, test_queue):
 		test_queue.begin_populating_tasks()
-
-		for partition_command in verification_config.partition_commands:
-			console_output_yaml = self.build_core.run_partition_command(partition_command)
-			partition_sections = yaml.load(console_output_yaml)
-			test_queue.populate_tasks(*[RemoteTestCommand(partition) for partition in partition_sections])
-		test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
-		test_queue.finish_populating_tasks()
+		try:
+			for partition_command in verification_config.partition_commands:
+				console_output_yaml = self.build_core.run_partition_command(partition_command)
+				partition_sections = yaml.load(console_output_yaml)
+				test_queue.populate_tasks(*[RemoteTestCommand(partition) for partition in partition_sections])
+			test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
+		finally:
+			test_queue.finish_populating_tasks()
 
 	@ReturnException
 	def _do_test(self, build_id, test_command):
