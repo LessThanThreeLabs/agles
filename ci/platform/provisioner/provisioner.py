@@ -5,7 +5,6 @@ from database_parser import OmnibusDatabaseParser
 from language_parser import LanguageParser
 from package_parser import OmnibusPackageParser
 from script_parser import ScriptParser
-from run_step_parser import CompileStepParser, TestStepParser, PartitionStepParser
 from setup_tools import InvalidConfigurationException, SetupCommand, SetupScript, RcUtils
 
 
@@ -76,14 +75,8 @@ class Provisioner(object):
 		language_steps.append(RcUtils.rc_append_command("export GIT_SSH=%s" % self.git_ssh, global_install=global_install, silent=True))
 		setup_steps = [SetupCommand("pkill -9 -u rabbitmq beam; service rabbitmq-server start", silent=True, ignore_failure=True)] + setup_steps
 		setup_steps += self.parse_setup(config, source_path)
-		compile_steps = self.parse_compile(config, source_path)
-		test_steps = self.parse_test(config, source_path)
-		partition_commands = self.parse_partition(config, source_path)
 		return (("Language configuration", SetupScript(*language_steps)),
-			("Setup", SetupScript(*setup_steps)),
-			("Compile configuration", compile_steps),
-			("Test configuration", test_steps),
-			("Test partitioners", partition_commands))
+			("Setup", SetupScript(*setup_steps)))
 
 	def _provision(self, *steps):
 		for action_name, step in steps:
@@ -134,18 +127,6 @@ class Provisioner(object):
 			database_type, databases = database_info.items()[0]
 			database_steps = database_steps + OmnibusDatabaseParser().parse_databases(database_type, databases)
 		return database_steps
-
-	def parse_compile(self, config, source_path):
-		if 'compile' in config:
-			return CompileStepParser().parse_steps(config['compile'], source_path)
-
-	def parse_test(self, config, source_path):
-		if 'test' in config:
-			return TestStepParser().parse_steps(config['test'], source_path)
-
-	def parse_partition(self, config, source_path):
-		if 'partition' in config:
-			return PartitionStepParser().parse_steps(config['partition'], source_path)
 
 
 class ProvisionFailedException(Exception):
