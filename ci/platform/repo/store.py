@@ -25,7 +25,6 @@ from util.log import Logged
 
 
 class RemoteRepositoryManager(object):
-
 	def register_remote_store(self, repostore_id, num_repos):
 		"""Registers a remote store as a managed store of this manager
 
@@ -291,7 +290,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 			i += 1
 			try:
 				self._push_with_private_key(repo, remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
-				break
 			except GitCommandError:
 				if i >= self.NUM_RETRIES:
 					stacktrace = sys.exc_info()[2]
@@ -301,6 +299,12 @@ class FileSystemRepositoryStore(RepositoryStore):
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
+			except:
+				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
+				self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
+				raise
+			else:
+				break
 
 	def _push_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to push repo %s to forward url with args: %s, kwargs: %s" % (repo, str(args), str(kwargs)))
@@ -314,7 +318,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def _reset_repository_head(self, repo, repo_slave, ref_to_reset, original_head):
 		try:
-			repo_slave.push('origin', '%s' % ':'.join(original_head, ref_to_reset), force=True)
+			repo_slave.git.push('origin', '%s' % ':'.join([original_head, ref_to_reset]), force=True)
 		except GitCommandError as e:
 			error_msg = "Unable to reset repo: %s ref: %s to commit: %s" % (repo, ref_to_reset, original_head)
 			self.logger.error(error_msg)

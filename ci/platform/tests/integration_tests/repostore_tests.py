@@ -87,11 +87,31 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
 		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
-
 		self._modify_commit_push(work_repo, "test.txt", "c2",
 			parent_commits=[init_commit])
+
+		master_sha = bare_repo.heads.master.commit.hexsha
 
 		self._modify_commit_push(work_repo, "test.txt", "c3",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
 		assert_raises(MergeError, self.store.merge_changeset, self.repo_id, "repo.git", "refs/pending/1", "master")
+		clone_repo = bare_repo.clone(bare_repo.working_dir + ".clone2")
+		assert_equals(master_sha, clone_repo.heads.master.commit.hexsha)  # Makes sure the repository has reset
+
+	def test_push_forwarding_fail_repo_reset(self):
+		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
+
+		bare_repo = Repo.init(self.repo_path, bare=True)
+		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
+
+		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
+
+		master_sha = bare_repo.heads.master.commit.hexsha
+
+		self._modify_commit_push(work_repo, "test.txt", "c2",
+			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
+
+		assert_raises(Exception, self.store.merge_changeset, self.repo_id, "repo.git", "refs/pending/1", "master")
+		clone_repo = bare_repo.clone(bare_repo.working_dir + ".clone2")
+		assert_equals(master_sha, clone_repo.heads.master.commit.hexsha)  # Makes sure the repository has reset

@@ -11,8 +11,6 @@ import subprocess
 
 import eventlet
 
-from kombu.connection import Connection
-
 from database.engine import ConnectionFactory
 from model_server.model_server import ModelServer
 from settings.rabbit import RabbitSettings
