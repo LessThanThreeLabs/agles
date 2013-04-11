@@ -61,6 +61,8 @@ partition:
       script:
         - |
           ls tests/integration_tests/*.py | while read test; do
+            shortname=${test##*/}
+            shortname=${shortname%.py}
             echo - ${${test##*/}%.py}:
             echo "    script: nosetests -sv $test"
             echo "    path: ci/platform"
