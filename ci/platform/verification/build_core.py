@@ -104,9 +104,6 @@ class VirtualMachineBuildCore(BuildCore):
 	def teardown(self):
 		raise NotImplementedError()
 
-	def rollback_virtual_machine(self):
-		raise NotImplementedError()
-
 	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
 		self.setup_virtual_machine(private_key, console_appender)
 
@@ -163,9 +160,6 @@ class VagrantBuildCore(VirtualMachineBuildCore):
 	def teardown(self):
 		self.virtual_machine.teardown()
 
-	def rollback_virtual_machine(self):
-		self.virtual_machine.sandbox_rollback()
-
 
 class CloudBuildCore(VirtualMachineBuildCore):
 	def __init__(self, cloud_vm, uri_translator):
@@ -182,15 +176,6 @@ class CloudBuildCore(VirtualMachineBuildCore):
 
 	def teardown(self):
 		self.virtual_machine.delete()
-
-	def rollback_virtual_machine(self):
-		while True:
-			try:
-				self.virtual_machine.rebuild()
-			except:
-				self.logger.warn("Failed to roll back virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.instance.id), exc_info=True)
-			else:
-				break
 
 	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
 		self.setup_virtual_machine(repo_uri, ref, private_key, console_appender)
