@@ -27,18 +27,13 @@ class ProvisionerTest(BaseUnitTest):
 		assert_in('setup', config)
 		assert_in('compile', config)
 		assert_in('test', config)
+		assert_in('partition', config)
 
 	def test_parse_config(self):
 		config = self.provisioner.read_config(self.yaml_path)
 		steps = self.provisioner.parse_config(config, self.repo_root, global_install=True)
 		for action_name, step in steps:
 			assert_is_instance(action_name, str)
-		language_steps, setup_steps, compile_steps, test_steps, partition_steps = steps
+		language_steps, setup_steps = steps
 		assert_true(len(setup_steps[1].setup_steps) > 0)
 		assert_true(len(setup_steps[1].get_script_contents()) > 0)
-		for compile_step in compile_steps[1]:
-			assert_equal('compile', compile_step.step_type)
-			assert_true(len(compile_step.commands) > 0)
-		for test_step in test_steps[1]:
-			assert_equal('test', test_step.step_type)
-			assert_true(len(test_step.commands) > 0)
