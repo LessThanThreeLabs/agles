@@ -83,7 +83,7 @@ class BuildVerifier(object):
 			return
 
 		if test_queue.can_populate_tasks():
-			population_result = self._populate_tests(verification_config, test_queue)
+			population_result = self._populate_tests(build_id, verification_config, test_queue)
 			results.append(population_result)
 			test_queue.add_other_result(population_result)
 		else:
@@ -110,11 +110,13 @@ class BuildVerifier(object):
 			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
 
 	@ReturnException
-	def _populate_tests(self, verification_config, test_queue):
+	def _populate_tests(self, build_id, verification_config, test_queue):
 		test_queue.begin_populating_tasks()
 		try:
 			for partition_command in verification_config.partition_commands:
-				console_output_yaml = self.build_core.run_partition_command(partition_command)
+				with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
+					console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
+					console_output_yaml = self.build_core.run_partition_command(partition_command, console_appender)
 				partition_sections = yaml.load(console_output_yaml)
 				test_queue.populate_tasks(*[RemoteTestCommand(partition) for partition in partition_sections])
 			test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
