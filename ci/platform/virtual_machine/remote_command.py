@@ -35,7 +35,7 @@ class RemoteShellCommand(RemoteCommand):
 		return virtual_machine.ssh_call('bash --login -c %s' % pipes.quote(self._to_script()), output_handler)
 
 	def _parse_step(self, step):
-		path = '.'
+		path = None
 		timeout = 600
 		if isinstance(step, str):
 			name = step
@@ -52,7 +52,7 @@ class RemoteShellCommand(RemoteCommand):
 		return name, path, commands, timeout
 
 	def _parse_step_info(self, step_info):
-		path = '.'
+		path = None
 		commands = None
 		timeout = 600
 		if isinstance(step_info, str):
@@ -79,7 +79,7 @@ class RemoteShellCommand(RemoteCommand):
 
 	def _to_script(self):
 		full_command = "&&\n".join(map(self._advertised_command, self.commands))
-		script = "%s\n" % self._advertised_command("cd %s" % os.path.abspath(os.path.join('source', self.path)))
+		script = "%s\n" % self._advertised_command("cd %s" % os.path.join('source', self.path) if self.path else 'source')
 		script = script + "timeout -s INT -k 3 %d bash --login -c %s\n" % (self.timeout, pipes.quote(full_command))
 		script = script + "_r=$?\n"
 		script = script + "if [ $_r -eq 124 ]; then sleep 2; echo; echo %s timed out after %s seconds;\n" % (self.name, self.timeout)
