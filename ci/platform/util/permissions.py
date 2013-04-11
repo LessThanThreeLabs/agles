@@ -4,6 +4,8 @@ import logging
 import database.schema
 import util.log
 
+from functools import wraps
+
 from database.engine import ConnectionFactory
 
 
@@ -18,6 +20,7 @@ def is_admin(user_id):
 
 
 def AdminApi(func):
+	@wraps(func)
 	def wrapper(self, user_id, *args, **kwargs):
 		if not is_admin(user_id):
 			util.log.configure()
