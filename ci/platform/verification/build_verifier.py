@@ -70,6 +70,9 @@ class BuildVerifier(object):
 	def setup(self):
 		self.build_core.setup()
 
+	def teardown(self):
+		self.build_core.teardown()
+
 	def verify_build(self, build_id, verification_config, test_queue):
 		results = []
 		setup_result = self._setup(build_id, verification_config)
@@ -141,7 +144,6 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 		if os.access(self._get_build_info_file(), os.F_OK):
 			os.remove(self._get_build_info_file())
-		self.build_core.teardown()
 
 	def _get_commit_id(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:

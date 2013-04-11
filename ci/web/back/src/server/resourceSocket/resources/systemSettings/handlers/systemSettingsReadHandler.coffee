@@ -50,6 +50,7 @@ class SystemSettingsReadHandler extends Handler
 			instanceSize: instanceSettings.instance_size
 			numWaiting: instanceSettings.num_waiting
 			maxRunning: instanceSettings.max_running
+			teardownAfterChange: instanceSettings.teardown_after_change
 
 		userId = socket.session.userId
 		if not userId?

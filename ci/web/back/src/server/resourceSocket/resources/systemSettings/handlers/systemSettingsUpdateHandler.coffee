@@ -61,7 +61,7 @@ class SystemSettingsUpdateHandler extends Handler
 		userId = socket.session.userId
 		if not userId?
 			callback 403
-		else if not data?.instanceSize? or not data?.numWaiting? or not data?.maxRunning?
+		else if not data?.instanceSize? or not data?.numWaiting? or not data?.maxRunning? or not data?.teardownAfterChange?
 			callback 400
 		else
 			errors = {}
@@ -74,7 +74,7 @@ class SystemSettingsUpdateHandler extends Handler
 				callback errors
 				return
 
-			@modelRpcConnection.systemSettings.update.set_instance_settings userId, data.instanceSize, data.numWaiting, data.maxRunning, (error) =>
+			@modelRpcConnection.systemSettings.update.set_instance_settings userId, data.instanceSize, data.numWaiting, data.maxRunning, data.teardownAfterChange, (error) =>
 				if error?.type is 'InvalidPermissionsError' then callback 403
 				else if error? then callback 500
 				else callback()

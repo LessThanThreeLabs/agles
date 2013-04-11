@@ -7,6 +7,7 @@ import model_server
 
 from build_core import LightWeightBuildCore
 from shared.handler import EventSubscriber
+from settings.verification_server import VerificationServerSettings
 from util import greenlets, pathgen
 from util.log import Logged
 from verification_results_handler import VerificationResultsHandler
@@ -60,7 +61,11 @@ class ChangeVerifier(EventSubscriber):
 			workers_alive.pop()
 			if not workers_alive:
 				task_queue.clear_remaining_tasks()
-			self.verifier_pool.remove(verifier)
+			if VerificationServerSettings.teardown_after_build:
+				verifier.teardown()
+				self.verifier_pool.remove(verifier)
+			else:
+				self.verifier_pool.put(verifier)
 			raise greenlet.throw()
 
 		def start_change():
