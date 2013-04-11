@@ -79,7 +79,7 @@ class RemoteShellCommand(RemoteCommand):
 
 	def _to_script(self):
 		full_command = "&&\n".join(map(self._advertised_command, self.commands))
-		script = "%s\n" % self._advertised_command("cd %s" % self.path)
+		script = "%s\n" % self._advertised_command("cd %s" % os.abspath(os.path.join('source', self.path)))
 		script = script + "timeout -s INT -k 3 %d bash --login -c %s\n" % (self.timeout, pipes.quote(full_command))
 		script = script + "_r=$?\n"
 		script = script + "if [ $_r -eq 124 ]; then sleep 2; echo; echo %s timed out after %s seconds;\n" % (self.name, self.timeout)

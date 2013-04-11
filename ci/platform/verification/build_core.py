@@ -125,6 +125,7 @@ class VirtualMachineBuildCore(BuildCore):
 			self._get_output_handler(console_appender, ConsoleType.Setup, setup_command.name))
 		if results.returncode:
 			raise VerificationException("Setup: %s" % setup_command.name)
+		return results.output
 
 	def run_compile_step(self, compile_commands, console_appender):
 		for compile_command in compile_commands:
@@ -135,12 +136,14 @@ class VirtualMachineBuildCore(BuildCore):
 			self._get_output_handler(console_appender, ConsoleType.Compile, compile_command.name))
 		if results.returncode:
 			raise VerificationException("Compiling: %s" % compile_command.name)
+		return results.output
 
 	def run_test_command(self, test_command, console_appender):
 		results = test_command.run(self.virtual_machine,
 			self._get_output_handler(console_appender, ConsoleType.Test, test_command.name))
 		if results.returncode:
 			raise VerificationException("Testing: %s" % test_command.name)
+		return results.output
 
 	def run_partition_command(self, partition_command, console_appender=None):
 		results = partition_command.run(self.virtual_machine,
