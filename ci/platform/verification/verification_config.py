@@ -3,21 +3,15 @@ from virtual_machine.remote_command import RemoteCompileCommand, RemoteTestComma
 
 class VerificationConfig(object):
 	def __init__(self, compile_commands, test_commands, partition_commands):
-		self.compile_commands = [RemoteCompileCommand(self._get_command_name(command))
+		self.compile_commands = [RemoteCompileCommand(command)
 			for command in compile_commands] if compile_commands else []
-		self.test_commands = [RemoteTestCommand(self._get_command_name(command))
+		self.test_commands = [RemoteTestCommand(command)
 			for command in test_commands] if test_commands else []
-		self.partition_commands = [RemotePartitionCommand(self._get_command_name(command))
+		self.partition_commands = [RemotePartitionCommand(command)
 			for command in partition_commands] if partition_commands else []
 		self._compile_commands = compile_commands
 		self._test_commands = test_commands
 		self._partition_commands = partition_commands
-
-	def _get_command_name(self, command):
-		if isinstance(command, (str, unicode)):
-			return command
-		elif isinstance(command, dict):
-			return command.iterkeys().next()
 
 	def to_dict(self):
 		return {'compile_commands': self._compile_commands,

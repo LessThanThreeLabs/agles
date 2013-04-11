@@ -110,7 +110,7 @@ class BuildVerifier(object):
 		for partition_command in verification_config.partition_commands:
 			console_output_yaml = self.build_core.run_partition_command(partition_command)
 			partition_sections = yaml.load(console_output_yaml)
-			test_queue.populate_tasks(*[RemoteShellCommand(partition) for partition in partition_sections])
+			test_queue.populate_tasks(*[RemoteTestCommand(partition) for partition in partition_sections])
 		test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
 		test_queue.finish_populating_tasks()
 
