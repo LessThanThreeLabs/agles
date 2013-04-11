@@ -59,4 +59,4 @@ partition:
   - integration test partitioner:
       path: ci/platform
       script:
-        - ls tests/integration_tests/*.py | while read test; do echo - nosetests -sv $test; done
+        - 'ls tests/integration_tests/*.py | while read test; do echo - nosetests -sv $test:; echo "    path: ci/platform"; done'
