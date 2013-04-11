@@ -9,7 +9,7 @@ from pubkey_registrar import PubkeyRegistrar
 from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
 from util.log import Logged
-from virtual_machine.remote_command import RemoteShellCommand
+from virtual_machine.remote_command import RemoteTestCommand
 
 
 @Logged()
@@ -130,6 +130,7 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 		if os.access(self._get_build_info_file(), os.F_OK):
 			os.remove(self._get_build_info_file())
+		self.build_core.teardown()
 
 	def _get_commit_id(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:
