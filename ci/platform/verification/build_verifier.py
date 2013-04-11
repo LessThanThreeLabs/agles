@@ -76,6 +76,9 @@ class BuildVerifier(object):
 		results.append(setup_result)
 		test_queue.add_other_result(setup_result)
 		if isinstance(setup_result, Exception):
+			if test_queue.can_populate_tasks():
+				test_queue.begin_populating_tasks()
+				test_queue.finish_populating_tasks()
 			self._cleanup(build_id, results)
 			return
 
