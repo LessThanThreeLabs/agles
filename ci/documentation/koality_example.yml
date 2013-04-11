@@ -110,7 +110,7 @@ test:
         - nosetests -sv
       # You can define a timeout in case your tests may hang or run infinitely.
       # The default timeout if one is not defined is 300 seconds.
-      timeout: 240
+      timeout: 600
   - npm_tests:
       path: ci/web/back
       script:
