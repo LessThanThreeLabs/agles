@@ -199,8 +199,8 @@ class RepositoryStore(object):
 			conn.update_repostore(repostore_id, ip_address, root_dir, num_repos)
 
 	@classmethod
-	def _get_ip_address(cls):  # TODO: find a more legit service for this
-		return json.loads(urllib2.urlopen('http://jsonip.com').read())['ip']
+	def _get_ip_address(cls):  # TODO: Have the system handle elastic IPs correctly (if we do distributed repos, we must)
+		return '127.0.0.1'  # json.loads(urllib2.urlopen('http://jsonip.com').read())['ip']
 
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
