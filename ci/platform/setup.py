@@ -8,7 +8,7 @@ setup(
 		"bin",
 		"tests",
 		]),
-	entry_points = {
+	entry_points={
 		'console_scripts': [
 			'koality-get-private-key = repo.scripts.get_private_key:main',
 		],

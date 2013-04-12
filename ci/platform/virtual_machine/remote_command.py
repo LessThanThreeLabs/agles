@@ -1,6 +1,8 @@
 import os
 import pipes
 
+from streaming_executor import CommandResults
+
 
 class RemoteCommand(object):
 	def run(self, virtual_machine, output_handler):
@@ -20,8 +22,7 @@ class NullRemoteCommand(RemoteCommand):
 		self.name = name
 
 	def _run(self, virtual_machine, output_handler=None):
-		return {'returncode': 0,
-			'output': ''}
+		return CommandResults(0, '')
 
 
 class RemoteShellCommand(RemoteCommand):

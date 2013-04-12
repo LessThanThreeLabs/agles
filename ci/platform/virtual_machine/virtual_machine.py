@@ -4,9 +4,9 @@ import uuid
 import yaml
 
 from shared.constants import VerificationUser
+from streaming_executor import StreamingExecutor
 from util import greenlets
 from util.log import Logged
-from util.streaming_executor import StreamingExecutor
 from verification.pubkey_registrar import PubkeyRegistrar
 
 
