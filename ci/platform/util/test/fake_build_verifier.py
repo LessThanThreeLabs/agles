@@ -4,7 +4,6 @@ import shlex
 import shutil
 
 from verification.build_core import VirtualMachineBuildCore
-#from verification.verification_config import VerificationConfig
 from virtual_machine.virtual_machine import VirtualMachine
 
 

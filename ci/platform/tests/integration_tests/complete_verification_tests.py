@@ -28,7 +28,7 @@ from util.test.fake_build_verifier import FakeBuildCore
 from verification.build_verifier import BuildVerifier
 from verification.verifier_pool import VerifierPool
 
-DEFAULT_NUM_VERIFIERS = 10
+DEFAULT_NUM_VERIFIERS = 2
 TEST_ROOT = "/tmp/verification"
 
 
@@ -109,10 +109,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		if body["type"] == "change finished":
 			self.change_status = body["contents"]["status"]
 
-	def _test_commands(self):
-		return [{'hello_%s' % x: {'script': 'echo %s' % x}} for x in range(30)]
+	def _test_commands(self, passes):
+		return [{'hello_%s' % x: {'script': 'true' if passes else 'false'}} for x in range(5)]
 
-	def _repo_roundtrip(self, modfile, contents):
+	def _repo_roundtrip(self, modfile, contents, passes=True):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
 			client.create_repository(self.repo_id, "repo.git", "privatekey")
 
@@ -125,7 +125,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		commit_id = self._insert_commit_info()
 
 		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
-			yaml.safe_dump({'test': self._test_commands()}),
+			yaml.safe_dump({'test': self._test_commands(passes)}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
@@ -143,13 +143,19 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 					except socket.timeout:
 						pass
 					assert time.time() - start_time < 120  # 120s timeout
-		work_repo.git.pull()
+		work_repo.git.fetch()
+		work_repo.git.checkout('origin/master')
 		return commit_sha, work_repo
 
-	def test_hello_world_repo_roundtrip(self):
+	def test_passing_roundtrip(self):
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
 		assert_equal(BuildStatus.PASSED, self.change_status)
 		assert_equal(commit_sha, work_repo.head.commit.hexsha)
+
+	def test_failing_roundtrip(self):
+		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1", passes=False)
+		assert_equal(BuildStatus.FAILED, self.change_status)
+		assert_not_equal(commit_sha, work_repo.head.commit.hexsha)
 
 	def test_roundtrip_with_postmerge_success(self):
 		forward_repo = Repo(self.forward_repo_url)

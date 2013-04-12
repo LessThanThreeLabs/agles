@@ -51,7 +51,7 @@ test:
       path: ci/platform
       script:
         - nosetests -sv tests/unit_tests
-      timeout: 240
+      timeout: 5
   - website unit tests:
       script:
         - karma start ci/web/front/test/karma.unit.conf.js --browsers PhantomJS --single-run
