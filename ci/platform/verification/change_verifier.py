@@ -41,10 +41,9 @@ class ChangeVerifier(EventSubscriber):
 
 	def verify_change(self, verification_config, change_id, workers_spawned):
 		task_queue = TaskQueue()
-		num_workers = max(1, min(64, len(verification_config.test_commands)))
+		num_workers = max(1, min(verification_config.parallel, len(verification_config.test_commands)))
 
 		self.logger.info("Verifying change %d with %d workers" % (change_id, num_workers))
-		self.logger.debug("Verification config: %s" % verification_config.to_dict())
 
 		#task_queue.begin_populating_tasks()
 		#task_queue.populate_tasks(*(test_command for test_command in verification_config.test_commands))

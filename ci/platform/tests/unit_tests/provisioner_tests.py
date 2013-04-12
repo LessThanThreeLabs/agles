@@ -27,7 +27,10 @@ class ProvisionerTest(BaseUnitTest):
 		assert_in('setup', config)
 		assert_in('compile', config)
 		assert_in('test', config)
-		assert_in('partition', config)
+		assert_not_in('manual', config['test'])
+		#assert_in('manual', config['test'])
+		#assert_in('automatic', config['test'])
+		#assert_in('parallel', config['test'])
 
 	def test_parse_config(self):
 		config = self.provisioner.read_config(self.yaml_path)

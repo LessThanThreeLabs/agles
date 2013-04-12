@@ -69,7 +69,7 @@ class BuildCore(object):
 				return config_path
 
 	def _get_verification_configuration(self, config_dict):
-		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"), config_dict.get("partition"))
+		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"))
 
 
 class LightWeightBuildCore(BuildCore):
