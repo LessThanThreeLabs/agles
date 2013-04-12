@@ -151,6 +151,7 @@ class TaskQueue(object):
 		self.results_queue = queue.Queue()
 		self.tasks_populating = event.Event()
 		self.num_results_received = 0
+		self.task_number = 0
 
 	def can_populate_tasks(self):
 		return not self.tasks_populating.ready()
@@ -173,9 +174,13 @@ class TaskQueue(object):
 
 	def get_task(self):
 		try:
-			return self.task_queue.get(block=False)
+			task = self.task_queue.get(block=False)
 		except queue.Empty:
 			return None
+		else:
+			ret = (self.task_number, task)
+			self.task_number += 1
+			return ret
 
 	def task_iterator(self):
 		while True:

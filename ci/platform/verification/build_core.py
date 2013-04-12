@@ -149,6 +149,10 @@ class VirtualMachineBuildCore(BuildCore):
 			raise VerificationException("Partitioning: %s:" % partition_command.name)
 		return results.output
 
+	def cache_repository(self, repo_uri, console_appender=None):
+		repo_name = self.uri_translator.extract_repo_name(repo_uri)
+		return self.virtual_machine.cache_repository(repo_name, console_appender)
+
 
 class VagrantBuildCore(VirtualMachineBuildCore):
 	def __init__(self, vagrant, uri_translator=None):

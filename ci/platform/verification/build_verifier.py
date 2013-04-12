@@ -24,6 +24,8 @@ class BuildVerifier(object):
 			except Exception as e:
 				BuildVerifier.logger.critical("Unexpected exception thrown during verification", exc_info=True)
 				return e
+			except:
+				raise
 
 		return wrapper
 
@@ -92,8 +94,8 @@ class BuildVerifier(object):
 		else:
 			test_queue.wait_for_tasks_populated()
 
-		for test in test_queue.task_iterator():
-			test_result = self._do_test(build_id, test)
+		for test_number, test in test_queue.task_iterator():
+			test_result = self._do_test(build_id, test_number, test)
 			results.append(test_result)
 			test_queue.add_task_result(test_result)
 
@@ -129,9 +131,9 @@ class BuildVerifier(object):
 			test_queue.finish_populating_tasks()
 
 	@ReturnException
-	def _do_test(self, build_id, test_command):
+	def _do_test(self, build_id, test_number, test_command):
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
-			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
+			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id, test_number)
 			return self.build_core.run_test_command(test_command, console_appender)
 
 	@ReturnException
@@ -144,6 +146,9 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 		if os.access(self._get_build_info_file(), os.F_OK):
 			os.remove(self._get_build_info_file())
+		commit_id = self._get_commit_id(build_id)
+		repo_uri = self._get_repo_uri(commit_id)
+		self.build_core.cache_repository(repo_uri)
 
 	def _get_commit_id(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:
@@ -165,7 +170,7 @@ class BuildVerifier(object):
 			repostore_id, ip_address, repo_path, repo_id, repo_name, private_key = repos_read_rpc.get_repo_attributes(repo_uri)
 		return private_key
 
-	def _make_console_appender(self, build_consoles_update_rpc, build_id):
+	def _make_console_appender(self, build_consoles_update_rpc, build_id, priority=None):
 		class ConsoleAppender(object):
 			def __init__(self, type, subtype):
 				self.build_consoles_update_rpc = build_consoles_update_rpc
@@ -174,7 +179,7 @@ class BuildVerifier(object):
 				self.subtype = subtype
 
 			def declare_command(self):
-				self.build_consoles_update_rpc.add_subtype(self.build_id, self.type, self.subtype)
+				self.build_consoles_update_rpc.add_subtype(self.build_id, self.type, self.subtype, priority)
 
 			def append(self, read_lines):
 				self.build_consoles_update_rpc.append_console_lines(self.build_id, read_lines, self.type, self.subtype)

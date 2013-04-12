@@ -16,7 +16,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(BuildConsolesUpdateHandler, self).__init__("build_consoles", "update")
 
-	def add_subtype(self, build_id, type, subtype):
+	def add_subtype(self, build_id, type, subtype, priority=None):
 		assert type in ['setup', 'compile', 'test']
 
 		build_console = schema.build_console
@@ -30,19 +30,21 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			[build_console]
 		)
 
+		if priority is None:
+			with ConnectionFactory.get_sql_connection() as sqlconn:
+				max_priority_result = sqlconn.execute(query).first()
+			if max_priority_result and max_priority_result[0] is not None:
+				priority = max_priority_result[0] + 1
+			else:
+				priority = 0
+
 		build_query = build.select().where(build.c.id == build_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			max_priority_result = sqlconn.execute(query).first()
 			build_row = sqlconn.execute(build_query).first()
 			assert build_row is not None
 			repo_id = build_row[build.c.repo_id]
 			change_id = build_row[build.c.change_id]  # TODO: This is a hack for the front end
-
-		if max_priority_result and max_priority_result[0] is not None:
-			priority = max_priority_result[0] + 1
-		else:
-			priority = 0
 
 		start_time = time.time()
 

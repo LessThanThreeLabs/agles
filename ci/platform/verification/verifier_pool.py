@@ -100,7 +100,7 @@ class VerifierPool(object):
 	def _spawn_verifier_multiple_attempts(self, verifier_number, allocated=True, attempts=10):
 		for remaining_attempts in reversed(range(attempts)):
 			try:
-				self._spawn_verifier(verifier_number, allocated=False)
+				self._spawn_verifier(verifier_number, allocated)
 			except:
 				self.logger.debug("Failed to spawn verifier %d, %d attempts remaining" % (verifier_number, remaining_attempts), exc_info=True)
 				if remaining_attempts == 0:

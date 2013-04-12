@@ -24,7 +24,8 @@ from settings.store import StoreSettings
 from bunnyrpc.server import Server
 from bunnyrpc.client import Client
 from git import Repo
-from util.test.fake_build_verifier import FakeBuildVerifier
+from util.test.fake_build_verifier import FakeBuildCore
+from verification.build_verifier import BuildVerifier
 from verification.verifier_pool import VerifierPool
 
 DEFAULT_NUM_VERIFIERS = 10
@@ -35,7 +36,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 	class FakeBuildVerifierPool(VerifierPool):
 		def spawn_verifier(self, verifier_number):
-			return FakeBuildVerifier(passes=True)
+			return BuildVerifier(FakeBuildCore())
 
 	@classmethod
 	def setup_class(cls):
