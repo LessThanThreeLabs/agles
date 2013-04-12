@@ -80,7 +80,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		super(VerificationRoundTripTest, self).tearDown()
 		rmtree(self.repo_dir)
 		self.vs_greenlet.kill()
-		self.verifier_pool.teardown()
 		self._stop_redis()
 		self._purge_queues()
 
