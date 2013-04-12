@@ -118,14 +118,14 @@ class BuildVerifier(object):
 	def _populate_tests(self, build_id, verification_config, test_queue):
 		test_queue.begin_populating_tasks()
 		try:
-			for partition_command in verification_config.partition_commands:
+			for factory_command in verification_config.test_factory_commands:
 				with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 					console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
-					console_output_yaml = self.build_core.run_partition_command(partition_command, console_appender)
-				partition_sections = yaml.load(console_output_yaml)
-				if not isinstance(partition_sections, list):  # Handle case where they only output a single command
-					partition_sections = [partition_sections]
-				test_queue.populate_tasks(*[RemoteTestCommand(partition) for partition in partition_sections])
+					console_output_yaml = self.build_core.run_factory_command(factory_command, console_appender)
+				test_sections = yaml.load(console_output_yaml)
+				if not isinstance(test_sections, list):  # Handle case where they only output a single command
+					test_sections = [test_sections]
+				test_queue.populate_tasks(*[RemoteTestCommand(test_section) for test_section in test_sections])
 			test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
 		finally:
 			test_queue.finish_populating_tasks()

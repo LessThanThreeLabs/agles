@@ -69,7 +69,7 @@ class BuildCore(object):
 				return config_path
 
 	def _get_verification_configuration(self, config_dict):
-		return VerificationConfig(config_dict.get("compile"), config_dict.get("test"))
+		return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))
 
 
 class LightWeightBuildCore(BuildCore):
@@ -142,11 +142,11 @@ class VirtualMachineBuildCore(BuildCore):
 			raise VerificationException("Testing: %s" % test_command.name)
 		return results.output
 
-	def run_partition_command(self, partition_command, console_appender=None):
-		results = partition_command.run(self.virtual_machine,
-			self._get_output_handler(console_appender, ConsoleType.Test, partition_command.name))
+	def run_factory_command(self, factory_command, console_appender=None):
+		results = factory_command.run(self.virtual_machine,
+			self._get_output_handler(console_appender, ConsoleType.Test, factory_command.name))
 		if results.returncode:
-			raise VerificationException("Partitioning: %s:" % partition_command.name)
+			raise VerificationException("Factory: %s:" % factory_command.name)
 		return results.output
 
 	def cache_repository(self, repo_uri, console_appender=None):

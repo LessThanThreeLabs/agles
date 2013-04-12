@@ -38,27 +38,28 @@ setup:
     - directory: ci/scripts
       script: ./rabbitmq_setup.sh
 compile:
-  - python setup.py install:
-      path: ci/platform
-  - compile webserver:
-      path: ci/web/back
-      script: ./compile.sh
-  - compile website:
-      path: ci/web/front
-      script: ./compile.sh
+  scripts:
+    - python setup.py install:
+        path: ci/platform
+    - compile webserver:
+        path: ci/web/back
+        script: ./compile.sh
+    - compile website:
+        path: ci/web/front
+        script: ./compile.sh
 test:
-  parallel: 8
-  manual:
+  machines: 2
+  scripts:
     - platform unit tests:
         path: ci/platform
         script:
           - nosetests -sv tests/unit_tests
-        timeout: 5
+        timeout: 3
     - website unit tests:
         script:
           - karma start ci/web/front/test/karma.unit.conf.js --browsers PhantomJS --single-run
-  automatic:
-    - integration test partitioner:
+  factories:
+    - integration test factory:
         path: ci/platform
         script:
           - |

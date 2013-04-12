@@ -104,9 +104,9 @@ class RemoteTestCommand(RemoteShellCommand):
 		super(RemoteTestCommand, self).__init__("test", test_step)
 
 
-class RemotePartitionCommand(RemoteShellCommand):
+class RemoteTestFactoryCommand(RemoteShellCommand):
 	def __init__(self, partition_step):
-		super(RemotePartitionCommand, self).__init__("partition", partition_step, advertise_commands=False)
+		super(RemoteTestFactoryCommand, self).__init__("partition", partition_step, advertise_commands=False)
 
 
 class RemoteSetupCommand(RemoteCommand):
@@ -136,4 +136,4 @@ class RemoteProvisionCommand(RemoteSetupCommand):
 
 
 class InvalidConfigurationException(Exception):
- 	pass
+	pass
