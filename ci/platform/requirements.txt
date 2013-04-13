@@ -17,5 +17,5 @@ python-novaclient
 requests
 boto==2.6.0
 alembic==0.4.2
--e git+ssh://git@github.com/LessThanThreeLabs/koality-streaming-executor.git#egg=streaming-executor
--e git+ssh://git@github.com/LessThanThreeLabs/koality-provisioner.git#egg=provisioner
+git+ssh://git@github.com/LessThanThreeLabs/koality-streaming-executor.git#egg=streaming-executor
+git+ssh://git@github.com/LessThanThreeLabs/koality-provisioner.git#egg=provisioner

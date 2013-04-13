@@ -132,16 +132,15 @@ class ChangeVerifier(EventSubscriber):
 	def _get_num_workers(self, verification_config):
 		if verification_config.test_factory_commands:
 			if verification_config.machines:
-				num_workers = verification_config.machines
+				num_workers = max(1, verification_config.machines)
 			else:
-				num_workers = min(1, len(verification_config.test_commands))
+				num_workers = max(1, len(verification_config.test_commands))
 		else:
 			if verification_config.machines:
-				num_workers = min(verification_config.machines, len(verification_config.test_commands))
+				num_workers = max(1, min(verification_config.machines, len(verification_config.test_commands)))
 			else:
-				num_workers = min(1, len(verification_config.test_commands))
+				num_workers = max(1, len(verification_config.test_commands))
 		return num_workers
-
 
 	def _create_build(self, change_id):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:
