@@ -4,8 +4,6 @@
 Repository management is done using gitpython.
 """
 from __future__ import print_function
-
-import json
 import os
 import re
 import shutil
@@ -14,14 +12,22 @@ import time
 import urllib2
 import yaml
 
+import eventlet
 import model_server
 
 from git import GitCommandError, Repo
 
 from bunnyrpc.client import Client
 from settings.store import StoreSettings
-from util import pathgen
+from util import greenlets, pathgen
 from util.log import Logged
+
+try:
+	import simplejson as json
+except ImportError:
+	import json
+
+MINUTE = 60
 
 
 class RemoteRepositoryManager(object):
@@ -165,6 +171,10 @@ class RepositoryStore(object):
 	"""Base class for RepositoryStore"""
 	CONFIG_FILE = ".repostore_config.yml"
 
+	def __init__(self, repostore_id):
+		self.repostore_id = repostore_id
+		eventlet.spawn_n(self._ip_address_updater)
+
 	@classmethod
 	def queue_name(cls, repostore_id):
 		return "repostore:%d" % repostore_id
@@ -199,8 +209,18 @@ class RepositoryStore(object):
 			conn.update_repostore(repostore_id, ip_address, root_dir, num_repos)
 
 	@classmethod
-	def _get_ip_address(cls):  # TODO: Have the system handle elastic IPs correctly (if we do distributed repos, we must)
-		return '127.0.0.1'  # json.loads(urllib2.urlopen('http://jsonip.com').read())['ip']
+	def _get_ip_address(cls):
+		return json.loads(urllib2.urlopen('http://jsonip.com').read())['ip']
+
+	def _ip_address_updater(self):
+		while True:
+			try:
+				ip_address = self._get_ip_address()
+				with model_server.rpc_connect("repos", "update") as conn:
+					conn.update_repostore_ip(self.repostore_id, ip_address)
+			except:
+				self.logger.error("ip address updater greenlet failed unexpectedly", exc_info=True)
+			time.sleep(MINUTE)
 
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
@@ -230,8 +250,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 	if hasattr(sys, 'real_prefix'):  # We're in a virtualenv python, so point at the locally-installed script
 		PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', PRIVATE_KEY_SCRIPT)
 
-	def __init__(self, root_storage_directory_path):
-		super(FileSystemRepositoryStore, self).__init__()
+	def __init__(self, repostore_id, root_storage_directory_path):
+		super(FileSystemRepositoryStore, self).__init__(repostore_id)
 		if not os.path.exists(root_storage_directory_path):
 			os.makedirs(root_storage_directory_path)
 		self._root_path = root_storage_directory_path

@@ -45,7 +45,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		cls._start_model_server()
 		cls.repostore_id = 1
 		cls.repo_dir = os.path.join(TEST_ROOT, 'repo')
-		repo_store = Server(FileSystemRepositoryStore(cls.repo_dir))
+		repo_store = Server(FileSystemRepositoryStore(cls.repostore_id, cls.repo_dir))
 		repo_store.bind(StoreSettings.rpc_exchange_name, [RepositoryStore.queue_name(cls.repostore_id)], auto_delete=True)
 		cls.repo_store_process = GreenProcess(target=repo_store.run)
 		cls.repo_store_process.start()

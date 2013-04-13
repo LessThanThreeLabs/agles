@@ -30,9 +30,13 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		shutil.rmtree(repodir)
 
 	def setUp(self):
+		class NonIpUpdatingFileSystemRepositoryStore(FileSystemRepositoryStore):
+			def _ip_address_updater(self):
+				pass
+
 		super(RepoStoreTests, self).setUp()
 		self.repodir = os.path.join(RepoStoreTests.TEST_DIR, 'repositories')
-		self.store = FileSystemRepositoryStore(self.repodir)
+		self.store = NonIpUpdatingFileSystemRepositoryStore(1, self.repodir)
 		self.repo_id = 1
 		self.repo_path = os.path.join(
 			self.repodir,
@@ -115,3 +119,16 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		assert_raises(Exception, self.store.merge_changeset, self.repo_id, "repo.git", "refs/pending/1", "master")
 		clone_repo = bare_repo.clone(bare_repo.working_dir + ".clone2")
 		assert_equals(master_sha, clone_repo.heads.master.commit.hexsha)  # Makes sure the repository has reset
+
+	def test_get_ip_address(self):
+		ip_address = self.store._get_ip_address()
+		assert_not_equals(ip_address, 'localhost')
+		assert_not_equals(ip_address, '127.0.0.1')
+
+		numbers = ip_address.split('.')
+		assert_equals(len(numbers), 4)
+
+		for i in numbers:
+			i = int(i)
+			assert_greater_equal(i, 0)
+			assert_less_equal(i, 255)
