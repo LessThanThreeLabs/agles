@@ -104,7 +104,7 @@
 				"email": "feedback"
 			},
 			"to": {
-				"email": "jpotter@koalitycode.com"
+				"email": "feedback@koalitycode.com"
 			}
 		},
 
@@ -121,7 +121,7 @@
 				"email": "logmailer"
 			},
 			"to": {
-				"email": "jpotter@koalitycode.com"
+				"email": "logmailer@koalitycode.com"
 			}
 		}
 	}
