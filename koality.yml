@@ -38,32 +38,35 @@ setup:
     - directory: ci/scripts
       script: ./rabbitmq_setup.sh
 compile:
-  - python setup.py install:
-      path: ci/platform
-  - compile webserver:
-      path: ci/web/back
-      script: ./compile.sh
-  - compile website:
-      path: ci/web/front
-      script: ./compile.sh
+  scripts:
+    - python setup.py install:
+        path: ci/platform
+    - compile webserver:
+        path: ci/web/back
+        script: ./compile.sh
+    - compile website:
+        path: ci/web/front
+        script: ./compile.sh
 test:
-  - platform unit tests:
-      path: ci/platform
-      script:
-        - nosetests -sv tests/unit_tests
-      timeout: 5
-  - website unit tests:
-      script:
-        - karma start ci/web/front/test/karma.unit.conf.js --browsers PhantomJS --single-run
-partition:
-  - integration test partitioner:
-      path: ci/platform
-      script:
-        - |
-          ls tests/integration_tests/*.py | while read test; do
-            shortname=${test##*/}
-            shortname=${shortname%.py}
-            echo - $shortname:
-            echo "    script: nosetests -sv $test"
-            echo "    path: ci/platform"
-          done
+  machines: 2
+  scripts:
+    - platform unit tests:
+        path: ci/platform
+        script:
+          - nosetests -sv tests/unit_tests
+        timeout: 3
+    - website unit tests:
+        script:
+          - karma start ci/web/front/test/karma.unit.conf.js --browsers PhantomJS --single-run
+  factories:
+    - integration test factory:
+        path: ci/platform
+        script:
+          - |
+            ls tests/integration_tests/*.py | while read test; do
+              shortname=${test##*/}
+              shortname=${shortname%.py}
+              echo - $shortname:
+              echo "    script: nosetests -sv $test"
+              echo "    path: ci/platform"
+            done
