@@ -39,7 +39,7 @@ To set up Koality, you\'ll need know some details about your system. Here's a ge
 
 Change Verification and Testing Environment Configuration (koality.yml)
 =======================================================================
-To use Koality, you'll need to create a koality.yml (or .koality.yml) in the root of your repository. The koality.yml file is responsible for the configuration and the execution of scripts that run on your verification machines in the cloud and we look for this file in order to provision your cloud testing machines. We allow you to run arbitrary shell scripts within the koality.yml file, which means that this file can be as simple or as powerful as you need.
+To use Koality, you'll need to create a koality.yml (or .koality.yml) in the root of your repository. The koality.yml file is syntactic sugar around shell script that allows you to easily configure your verification machines in the cloud and recreate your production/testing environment. The syntax of the koality.yml file is simple enough to be easily understood, but if necessary, is powerful enough to run arbitrary scripts for configuration.
 
 Writing a koality.yml
 ---------------------
@@ -57,9 +57,37 @@ test
 
 Installation and Server Setup
 =============================
+
+SERVER SETUP STUFF GOES HERE
+
+Installation of Koality is quite simple. Launch an instance of the koality service AMI. Then, using your DNS credentials point your internal domain name to the ip address of that instance. The instance will take a few minutes to start.
+
+Open up the domain name you chose in your browser (or the ip of the koality service instance works too) and follow the wizard for first time setup.
+
+Once you've completed all these steps, you're all set! Koality is up and running. Time to make your first push!
+
 Admin Panel and Options
 =======================
 Optimizing Koality for Speed
 ============================
+1. I make large changes and git push takes a long time
+      
+      AWS is notorious for having bad IO. The larger the instance you choose for the Koality master, the faster the IO and the faster your git push will work.
+
 Troubleshooting
 ===============
+1. I can't push or pull from Koality 
+
+     You should double check the security group you placed Koality master in. Make sure tcp port 22 (ssh) is open to the ips you are pushing from.(Hint: AWS is sometimes finicky. Trying 0.0.0.0 and 127.0.0.1 rather than localhost may fix issues)
+
+2. Pulling works, but pushing to Koality master times out
+
+     Are you using an elastic IP? Koality master needs to know its own ip, and elastic IPs erase the previous IP address from an AWS instance. Wait a few minutes and try again, since the Koality master will update itself.
+
+3. Pushing doesn't send anything to Koality, but goes directly into my git repository
+
+     Check to see that you've updated your .gitconfig to point to the Koality master. Koality acts as a proxy, so if you don't point to the proxy, we can't verify your changes!
+
+4. Koality accepts my change, but doesn't show the correct stages and immediately rejects the change
+
+     Check your koality.yml file to make sure it is valid.
