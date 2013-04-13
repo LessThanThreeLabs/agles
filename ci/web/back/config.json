@@ -3,10 +3,14 @@
 
 	"server": {
 		"https": {
-			"port": 443
-		},
+			"port": 443,
 
-		"developmentAddedLatency": 250,
+			"security": {
+				"key": "keys/privatekey.pem",
+				"certificate": "keys/certificate.pem",
+				"certrequest": "keys/certrequest.csr"
+			}
+		},
 
 		"staticFiles": {
 			"rootDirectory": "front"
@@ -19,41 +23,34 @@
 				"name": "session.id"
 			},
 
-			"redisStore": {
-				"url": "127.0.0.1",
-				"port": 6390
-			},
-
 			"rememberMeDuration": 2592000000
 		},
 
 		"socket": {
-			"transports": ["websocket", "htmlfile", "xhr-polling", "jsonp-polling"],
-			"sessionRestoreInterval": 60000
+			"transports": ["websocket", "htmlfile", "xhr-polling", "jsonp-polling"]
 		},
 
-		"security": {
-			"key": "keys/privatekey.pem",
-			"certificate": "keys/certificate.pem",
-			"certrequest": "keys/certrequest.csr"
-		},
-
-		"createAccount": {
-			"redisStore": {
+		"redisStores": {
+			"session": {
 				"url": "127.0.0.1",
-				"port": 6391
+				"port": 6390	
+			},
+
+			"createAccount": {
+				"url": "127.0.0.1",
+				"port": 6391	
+			},
+
+			"createRepository": {
+				"url": "127.0.0.1",
+				"port": 6392
 			}
 		},
 
-		"createRepository": {
-			"redisStore": {
-				"url": "127.0.0.1",
-				"port": 6392
-			}	
-		},
-
-		"initialAdmin": {
-			"token": "KMYFR8KX8RFQOLXR"
+		"resources": {
+			"initialAdmin": {
+				"token": "KMYFR8KX8RFQOLXR"
+			}
 		}
 	},
 

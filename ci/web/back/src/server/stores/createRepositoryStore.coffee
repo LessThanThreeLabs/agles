@@ -15,8 +15,8 @@ class CreateRepositoryStore
 
 
 	initialize: () ->
-		@redisConnection = redis.createClient @configurationParams.createRepository.redisStore.port, 
-			@configurationParams.createRepository.redisStore.url, return_buffers: true
+		@redisConnection = redis.createClient @configurationParams.redisStores.createRepository.port, 
+			@configurationParams.redisStores.createRepository.url, return_buffers: true
 
 
 	addRepository: (alias, repository) ->

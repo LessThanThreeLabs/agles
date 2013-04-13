@@ -22,13 +22,15 @@ exports.create = (configurationParams, modelConnection, mailer, logger) ->
 		createAccountStore: CreateAccountStore.create configurationParams
 		createRepositoryStore: CreateRepositoryStore.create configurationParams
 	
-	resourceConnection = ResourceConnection.create()
+	cookieName = configurationParams.session.cookie.name
+	transports = configurationParams.socket.transports
+	resourceConnection = ResourceConnection.create configurationParams.resources, modelConnection, stores, cookieName, transports, mailer, logger
 	staticServer = StaticServer.create configurationParams
 
 	httpsOptions =
-		key: fs.readFileSync configurationParams.security.key
-		cert: fs.readFileSync configurationParams.security.certificate
-		ca: fs.readFileSync configurationParams.security.certrequest
+		key: fs.readFileSync configurationParams.https.security.key
+		cert: fs.readFileSync configurationParams.https.security.certificate
+		ca: fs.readFileSync configurationParams.https.security.certrequest
 
 	filesSuffix = '_' + (new Date()).getTime().toString 36
 	handlers =
@@ -114,7 +116,7 @@ class Server
 			expressServer.get '*', @staticServer.handleRequest
 
 		expressServer = express()
-		@_configureServer expressServer
+		@_configure expressServer
 
 		@modelConnection.rpcConnection.systemSettings.read.is_deployment_initialized (error, initialized) =>
 			if error? @logger.error error
@@ -131,7 +133,7 @@ class Server
 				console.log "SERVER STARTED on port #{@configurationParams.https.port}".bold.magenta
 
 
-	_configureServer: (expressServer) =>
+	_configure: (expressServer) =>
 		# ORDER IS IMPORTANT HERE!!!!
 		expressServer.use express.favicon 'front/favicon.ico'
 		expressServer.use express.cookieParser()
