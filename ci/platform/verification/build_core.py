@@ -69,7 +69,11 @@ class BuildCore(object):
 				return config_path
 
 	def _get_verification_configuration(self, config_dict):
-		return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))
+		try:
+			return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))
+		except:
+			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=True)
+			return VerificationConfig({}, {})
 
 
 class LightWeightBuildCore(BuildCore):

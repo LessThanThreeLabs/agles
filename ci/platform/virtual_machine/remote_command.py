@@ -135,5 +135,15 @@ class RemoteProvisionCommand(RemoteSetupCommand):
 		return virtual_machine.provision(self.private_key, output_handler=output_handler)
 
 
+class RemoteErrorCommand(RemoteCommand):
+	def __init__(self, name, error_message):
+		super(RemoteErrorCommand, self).__init__()
+		self.name = name
+		self.error_message = error_message
+
+	def _run(self, virtual_machine, output_handler=None):
+		return virtual_machine.ssh_call("echo -e 'Error: %s'; exit 1" % self.error_message)
+
+
 class InvalidConfigurationException(Exception):
 	pass
