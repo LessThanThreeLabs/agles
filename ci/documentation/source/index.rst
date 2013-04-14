@@ -147,10 +147,97 @@ Installation of Koality is quite simple. Launch an instance of the koality servi
 
 Open up the domain name you chose in your browser (or the ip of the koality service instance works too) and follow the wizard for first time setup.
 
+Wizard Walkthrough
+------------------
+Upon initial startup, visiting your instance of Koality will redirect you to an installation wizard. This simple wizard makes sure your deployment has everything it needs to run smoothly.
+
+Step 1 - Domain Name:
+~~~~~~~~~~~~~~~~~~~~~
+Enter the domain name of your Koality instance. This is important so that Koality can send emails and links with the correct domain name.
+
+For example, setting the domain name to “koality.foo.com” will:
+
+* Notify a user that change 137 failed by linking them to koality.foo.com/repository/1?change=137
+* Send invites to other users by having them visit koailty.foo.com/create/account
+* Allow users to share and discuss specific changes and stages by linking them to koality.foo.com/repository/1?change=385&stage=4238
+
+
+Step 2 - Initial Admin:
+~~~~~~~~~~~~~~~~~~~~~~~
+Create the initial admin. Koality admins can manage users, repositories, and even other admins. After completing the wizard, this admin should invite other users to Koality (discussed later).
+
+
+Step 3 - Verify Admin:
+~~~~~~~~~~~~~~~~~~~~~~
+Enter the admin token emailed to you. This token is used to verify that you own the email address entered.
+
+
+Step 4 - AWS Credentials:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Enter your AWS credentials so that Koality can use EC2 to verify changesets. Koality needs these credentials so it can spawn EC2 instances as they are needed.
+
+To find your AWS credentials:
+
+#. Visit http://aws.amazon.com
+#. Click on My Account/Console in the top-right corner, and select Security Credentials
+#. Click the Access Credentials section and select the Access Keys tab
+
+
 Once you've completed all these steps, you're all set! Koality is up and running. Time to make your first push!
 
 Admin Panel and Options
 =======================
+At the end of server setup, the created user is designated as an "Admin", which grants him access to system configuration settings. To view these settings, click on the link titled "Admin" in the upper right corner.
+
+Manage Website
+--------------
+Sets the domain that the Koality server is located at. This is the internal domain you chose earlier (and what you type into your browser as the URL).
+
+Koality uses this domain in order to send emails and send results from the testing machines to the koality service machine.
+
+Manage User Accounts
+--------------------
+This panel allows you to add and remove users from your Koality instance.
+
+Manage Repositories
+-------------------
+This page allows your basic repository management functionality including adding and removing repositories.
+
+Repository URL
+--------------
+Koality acts as a proxy to an actual repository, intercepting commits and forwarding requests. The repository URL allows Koality to know where the actual repository is located in order to forward successful changes (push) or redirect pulls.
+
+To modify this URL, click the "Edit URL" setting.
+
+Repository SSH Keys
+-------------------
+Koality creates a unique private/public rsa key pair for every repository. Since we act as a proxy, this key allows us to perform actions on the actual repository (such as forwarding pushes or pulls). The view this key, click on "Show SSH".
+
+You should give Koality access to the actual repository through this SSH key. If you are using github, log in to a user account with privileges to this repository (or have an admin log into the admin github account for your company), and add this SSH key to the list of accepted keys.
+
+Manage AWS
+----------
+Configuration for your AWS Settings.
+
+**Access Key:** Your AWS Access Key
+
+**Secret Key:** Your AWS Secret Key
+
+Together, the AWS Access Key and Secret Key allows us to manage your EC2 Cloud and create/destroy and set up verification VMs.
+
+**Instance Size:** The VM instance size of a verification machine. Larger instances will run your tests faster due to higher hardware specifications
+
+**Num waiting instances:** The size of the standing (always available) VM pool. On EC2, VMs can take up to 2 minutes to spin up. This can be a hefty time cost your organization isn't willing to take. To counterbalance this, we allow you to define a number of "always ready" instances so you don't have to wait in order to use a VM.
+
+**Max running instances:** The max number of EC2 instances that can be running at any given time.
+
+For example, if you have Num waiting instances set to 8 and Max running instances set to 20, 8 VMs will always be provisioned and ready to use. However, if the system comes under heavy load, up to 12 more VMs may be spawned (for a total of 20) to be used at any given time.
+
+Upgrade
+-------
+As of this writing, automatic upgrades are not yet implemented. When an update is available, a member of the Koality team will contact you.
+
+
 Optimizing Koality for Speed
 ============================
 1. I make large changes and git push takes a long time
