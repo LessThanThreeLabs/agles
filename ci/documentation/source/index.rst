@@ -22,7 +22,7 @@ To set up Koality, you\'ll need know some details about your system. Here's a ge
 
    * All of the information required here can be found at https://portal.aws.amazon.com/gp/aws/securityCredentials
    * The main Koality instance needs the ability to launch other instances to verify your change, this requires:
-   
+
      - Access Key ID (An alphanumeric string)
      - Secret Access Key (A base64 string)
 
@@ -34,7 +34,7 @@ To set up Koality, you\'ll need know some details about your system. Here's a ge
      - TCP Port 80: http
      - TCP Port 22: ssh with security restrictions for git only
      - TCP Port 2222: alternate ssh for administrative purposes
-   
+
    * The verification instances will be launched on an automatically-generated security group named \"koality_verification\"
 
 Change Verification and Testing Environment Configuration (koality.yml)
@@ -45,15 +45,98 @@ Writing a koality.yml
 ---------------------
 languages
 ~~~~~~~~~
+Languages are specified as a simple key-value pair mapping language name to version.
+The following languages are supported:
+
+#. Java and JVM:
+
+   * Chosen with "java" or "jvm"
+   * Supported versions include 1.5 and 1.6
+#. Node.js:
+
+   * Chosen with "nodejs"
+   * Uses nvm for versioning to support most standard versions
+#. Python:
+
+   * Chosen with "python"
+   * Uses a virtualenv for safe versioning
+   * Supported versions include 2.5, 2.6, 2.7, 3.2, 3.3
+#. Ruby
+
+   * Chosen with "ruby"
+   * Uses rvm for versioning to support most standard versions
 
 setup
 ~~~~~
+The setup section defines the production or testing environment for your code. Each step in the setup section is explicitly ordered to function like a shell script, and the return code for each step is checked to validate that no steps fail. The three major types of setup steps are "packages", "databases", and "scripts".
+
+packages
+````````
+The packages section defines package dependencies. Each item in the level directly below packages must be a package type, which includes "system", "gem", "npm", and "pip". Within each package type, a list of packages should be specified, each as either the package name or a key-value pair specifying the name and version.
+
+system
+******
+System packages specify packages that are installed by the system package manager. Koality currently uses Ubuntu 12.04 machines for verification, so each package listed under "system" must be installable via the aptitude package manager (apt-get).
+
+gem
+***
+In addition to the syntax for installing a single package by name or name and version, the additional command "bundle install" is supported for gems. "bundle install" uses bundler to install packages listed in a Gemfile. If you specify "bundle install" as a key-value pair, the value denotes the relative path to your Gemfile from the root of your repository.
+
+npm
+***
+In addition to the syntax for installing a single package by name or name and version, the additional command "npm install" is supported for npm. "npm install" runs the command "npm install" in either a specified directory or from the root of your repository if not specified.
+
+pip
+***
+In addition to the syntax for installing a single package by name or name and version, the additional command "install requirements" is supported for pip. "install requirements" runs the command "pip install -r" with the given path to a requirements file, defaulting to "requirements.txt".
+
+databases
+`````````
+The databases section defines databases that you wish to use for testing. Each database is represented by a dictionary specifying the name of the database and the username with which to access it. Each database must be specified in a list below the database type. Supported database types are "mysql" and "postgres"
+
+scripts
+```````
+The scripts section is used to run any other scripts or commands that cannot be simplified by the packages and databases sections. Each script must be represented as either a string or a dictionary.
+
+.. _`script format`:
+
+The dictionary form is as follows:
+
+| script name:
+|	    path: relative path at which to run the command  # This is optional and defaults to the repository root
+|	    script: a string or array of commands to run  # This is optional and defaults to the name
+
+The string form is just the name of the command to be run, which uses the default values for the dictionary form above.
 
 compile
 ~~~~~~~
+The compile section is used to specify any compilation steps that must be run before running tests.
+
+Each step should be specified as a script, and as such your steps should be represented as a list under a parent key "scripts". Each of these scripts should follow the script format `specified above`__.
+
+__ `script format`_
 
 test
 ~~~~
+The test section is used to specify any test steps that must be run to verify your change. All test steps can be run in parallel across any virtual machines launched to verify your change, allowing each test step to run only once.
+
+The test section is specified as a single dictionary defining three parts that designate how to best run your tests, which are "machines", "scripts", and "factories".
+
+machines
+````````
+The value specified for machines should be a positive integer denoting the number of machines to use to parallelize your tests.
+
+scripts
+```````
+The scripts section should contain a list of scripts that each follow the same format used for compile and setup, which is `specified above`__.
+
+__ `script format`_
+
+factories
+`````````
+The factories section should contain a list of scripts which construct other test sections to run. This can be used for automatically splitting up a large number of tests using anything ranging from a simple shell script to code introspection.
+
+Each of these factory steps should be specified in the standard script format, and their output should be in the same format, which will then be parsed and treated the same as manually-specified test scripts.
 
 Installation and Server Setup
 =============================
@@ -71,12 +154,12 @@ Admin Panel and Options
 Optimizing Koality for Speed
 ============================
 1. I make large changes and git push takes a long time
-      
+
       AWS is notorious for having bad IO. The larger the instance you choose for the Koality master, the faster the IO and the faster your git push will work.
 
 Troubleshooting
 ===============
-1. I can't push or pull from Koality 
+1. I can't push or pull from Koality
 
      You should double check the security group you placed Koality master in. Make sure tcp port 22 (ssh) is open to the ips you are pushing from.(Hint: AWS is sometimes finicky. Trying 0.0.0.0 and 127.0.0.1 rather than localhost may fix issues)
 
@@ -90,4 +173,4 @@ Troubleshooting
 
 4. Koality accepts my change, but doesn't show the correct stages and immediately rejects the change
 
-     Check your koality.yml file to make sure it is valid.
+     Check your koality.yml file to make sure it is valid. The easiest first step for this is to verify that you are using valid YAML with a tool such as http://yamllint.com. Oftentimes this is caused by indenting your YAML file with tabs, which violates the YAML spec.

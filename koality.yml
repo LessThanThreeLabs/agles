@@ -33,9 +33,9 @@ setup:
   - scripts:
     - git config --global user.email "koality@koalitycode.com"
     - git config --global user.name "Koality"
-    - directory: ci/scripts
+    - path: ci/scripts
       script: ./install_phantomjs.sh
-    - directory: ci/scripts
+    - path: ci/scripts
       script: ./rabbitmq_setup.sh
 compile:
   scripts:
