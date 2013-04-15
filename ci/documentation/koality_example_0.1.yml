@@ -1,4 +1,4 @@
---- #Koality: 0.0.2
+--- #Koality: 0.1.4
 
 # All configuration is done in a koality.yml or .koality.yml file placed in the root directory of your repository.
 # Yaml is human readable format that represents JSON (dictionaries)
@@ -8,7 +8,6 @@
 # If a version number is omitted, Koality will revert to sane defaults (latest version)
 languages:
   python: 2.7
-  ruby: 1.9.3
   nodejs: 0.8.12
 
 # The setup section allows you to define and describe your production environment. We use it to exactly replicate 
@@ -19,27 +18,24 @@ setup:
     # Define system packages dependencies here. These packages are installed through apt.
     - system:
       - zlib1g
-      - gcc
       - g++
-      - curl
-      - libevent-dev
+      - libssl-dev
+      - apache2-utils
+      - lessc
     # Here's an example of language specific dependencies. Pip is utilized for python
     # You can define versions of packages or just grab the default pip package.
     # For python, you can also define a requirements.txt file.
     - pip:
-      - pika: 0.9.5
       - pycrypto: 2.6
-      - psycopg2
-      - requests
-      - install requirements: ci/platform/requirements.txt
-
+      - sqlalchemy: 0.7.8
+      - install requirements: platform/requirements.txt
     # This example is for nodejs. Npm is used to resolve packages.
     - npm:
       # Packages defined directly under npm are install globally
-      - iced-coffee-script
-      - testacular
-      # If a directory section is defined, "npm install" is run from that directory, installing all dependencies under package.json
-      - directory: ci/web/back
+      - less
+      - karma
+      # If an "npm install" section is defined, "npm install" is run from that directory, installing all dependencies under package.json
+      - npm install: web/back
   # Defines databases used in a production environment. Databases for tests are local to a particular VM running tests.
   # Currently, only postgres and mysql are supported
   - databases:
@@ -55,10 +51,9 @@ setup:
   # by our default sections. In this example, a .gitconfig is being created as part of provisioning and rabbitmq is started.
   - scripts:
     # Each of these lines is run as if it was typed into a shell.
-    - cd scripts
-    - ./post-setup.sh
-    # When "directory" section is defined, the following command under "script" is run in that directory.
-    - directory: ci/scripts
+    - scripts/post_install.sh
+    # When "path" section is defined, the following command under "script" is run in that directory.
+    - path: scripts
       script: ./rabbitmq_setup.sh
 
 # The following sections are relevant to the building and testing of your code.
@@ -72,14 +67,14 @@ compile:
   # we will prevent the code from merging and notify the committer.
   - build_platform:
       # The path definition defines the directory from which the script will be run.
-      path: ci/platform
+      path: platform
       # A script which runs to build your code. This should return 0 or 1.
       script: python setup.py install
   - compile_webserver:
-      path: ci/web/back
+      path: web/back
       script: ./compile.sh
   - compile_website:
-      path: ci/web/front
+      path: web/front
       script: ./compile.sh
 # The test section defines the running of unit tests to check the correctness of your change. Multiple sections under test allow for
 # multiple levels of parallelization. Each section is placed on a different VM and run in parallel. In this example, 
@@ -87,7 +82,7 @@ compile:
 test:
   - platform_tests:
       # The path at which the following testing scripts will run
-      path: ci/platform
+      path: platform
       # The scripts or list of commands we'll be running to test the code. The return value of the list of commands determines
       # whether we consider this run a successful test run or a failure. A returncode of 0 means success, otherwise its failure.
       script:
@@ -95,50 +90,6 @@ test:
       # You can define a timeout in case your tests may hang or run infinitely.
       # The default timeout if one is not defined is 600 seconds.
       timeout: 240
-  - npm_tests:
-      path: ci/web/back
-      script:
-        - npm test
-
-
-compile:
-  scripts:
-    # Each section under compile can be given an arbitrary name, which will appear in the web ui. We've named the following
-    # sections install_platform, compile_webserver, compile_website, but these names can be arbitrary. The script that is run
-    # must return an error code. If it returns 0, we assume it ran successfully. Any other code means that this build has failed, and
-    # we will prevent the code from merging and notify the committer.
-    - python setup.py install:
-        path: ci/platform
-    - compile webserver:
-        path: ci/web/back
-        script: ./compile.sh
-    - compile website:
-        path: ci/web/front
-        script: ./compile.sh
-# test section is modeled after the compile section
-test:
-  # The number of VMs to create to run tests on
-  machines: 2
-  scripts:
-    - platform unit tests:
-        path: ci/platform
-        script:
-          - nosetests -sv tests/unit_tests
-        timeout: 3
-    - website unit tests:
-        script:
-          - karma start ci/web/front/test/karma.unit.conf.js --browsers PhantomJS --single-run
-  # factory scripts that will output test scripts sections to be run in parallel. These should be ouptutted to stdout in yaml in the same format as above
-  factories:
-    - integration test factory:
-        path: ci/platform
-        script:
-          - |
-            ls tests/integration_tests/*.py | while read test; do
-              shortname=${test##*/}
-              shortname=${shortname%.py}
-              echo - $shortname:
-              echo "    script: nosetests -sv $test"
-              echo "    path: ci/platform"
-            done
-
+  # If no "script" section is specified, the command name is run
+  - npm test:
+      path: web/back

@@ -1,11 +1,10 @@
---- #Koality: 0.0.1
+--- #Koality: 0.2
 
 # All configuration is done in a koality.yml or .koality.yml file placed in the root directory of your repository.
 # Yaml is human readable format that represents JSON (dictionaries)
 # The following is an example configuration file from one of the repositories for the Koality product itself.
 
 # The first section is the language definition. Define which languages your project uses and what version is needed.
-# If a version number is omitted, Koality will revert to sane defaults (latest version)
 languages:
   python: 2.7
   ruby: 1.9.3
@@ -22,40 +21,24 @@ setup:
       - gcc
       - g++
       - curl
-      - libssl-dev
-      - apache2-utils
       - libevent-dev
-      - libpq-dev
-      - lessc
     # Here's an example of language specific dependencies. Pip is utilized for python
     # You can define versions of packages or just grab the default pip package.
     # For python, you can also define a requirements.txt file.
     - pip:
-      - amqp
       - pika: 0.9.5
-      - kombu: 2.5.3
       - pycrypto: 2.6
-      - librabbitmq
-      - sqlalchemy: 0.7.8
-      - pyyaml
-      - msgpack-python
-      - nose
-      - redis
-      - eventlet
-      - gitpython
       - psycopg2
-      - argparse
-      - rackspace-novaclient
-      - python-novaclient
       - requests
+      - install requirements: platform/requirements.txt
+
     # This example is for nodejs. Npm is used to resolve packages.
     - npm:
       # Packages defined directly under npm are install globally
       - iced-coffee-script
-      - less
       - testacular
       # If a directory section is defined, "npm install" is run from that directory, installing all dependencies under package.json
-      - directory: ci/web/back
+      - npm install: web/back
   # Defines databases used in a production environment. Databases for tests are local to a particular VM running tests.
   # Currently, only postgres and mysql are supported
   - databases:
@@ -71,10 +54,9 @@ setup:
   # by our default sections. In this example, a .gitconfig is being created as part of provisioning and rabbitmq is started.
   - scripts:
     # Each of these lines is run as if it was typed into a shell.
-    - git config --global user.email "koality@koalitycode.com"
-    - git config --global user.name "Koality"
+    - scripts/post-setup.sh
     # When "directory" section is defined, the following command under "script" is run in that directory.
-    - directory: ci/scripts
+    - path: scripts
       script: ./rabbitmq_setup.sh
 
 # The following sections are relevant to the building and testing of your code.
@@ -82,36 +64,43 @@ setup:
 # Any script definitions under compile are run pre-testing. These can be used to build your code, create artifacts,
 # or run static analysis checks.
 compile:
-  # Each section under compile can be given an arbitrary name, which will appear in the web ui. We've named the following
-  # sections install_platform, compile_webserver, compile_website, but these names can be arbitrary. The script that is run
-  # must return an error code. If it returns 0, we assume it ran successfully. Any other code means that this build has failed, and
-  # we will prevent the code from merging and notify the committer.
-  - build_platform:
-      # The path definition defines the directory from which the script will be run.
-      path: ci/platform
-      # A script which runs to build your code. This should return 0 or 1.
-      script: python setup.py install
-  - compile_webserver:
-      path: ci/web/back
-      script: ./compile.sh
-  - compile_website:
-      path: ci/web/front
-      script: ./compile.sh
-# The test section defines the running of unit tests to check the correctness of your change. Multiple sections under test allow for
-# multiple levels of parallelization. Each section is placed on a different VM and run in parallel. In this example, 
-# platform_tests and npm_tests will run in parallel on separate VMs.
+  scripts:
+    # Each section under compile can be given an arbitrary name, which will appear in the web ui. We've named the following
+    # sections install_platform, compile_webserver, compile_website, but these names can be arbitrary. The script that is run
+    # must return an error code. If it returns 0, we assume it ran successfully. Any other code means that this build has failed, and
+    # we will prevent the code from merging and notify the committer.
+    - python setup.py install:
+        path: platform
+    - compile webserver:
+        path: web/back
+        script: ./compile.sh
+    - compile website:
+        path: web/front
+        script: ./compile.sh
+# The test section is modeled after the compile section, but has the additional "machines" and "factories" sections.
 test:
-  - platform_tests:
-      # The path at which the following testing scripts will run
-      path: ci/platform
-      # The scripts or list of commands we'll be running to test the code. The return value of the list of commands determines
-      # whether we consider this run a successful test run or a failure. A returncode of 0 means success, otherwise its failure.
-      script:
-        - nosetests -sv
-      # You can define a timeout in case your tests may hang or run infinitely.
-      # The default timeout if one is not defined is 600 seconds.
-      timeout: 240
-  - npm_tests:
-      path: ci/web/back
-      script:
-        - npm test
+  # The number of VMs to create to run tests on
+  machines: 2
+  # Each script in the test section can be run in parallel with others across multiple virtual machines
+  scripts:
+    - platform unit tests:
+        path: platform
+        script:
+          - nosetests -sv tests/unit_tests
+        timeout: 3
+    # If a "script" key is not provided, the command name is run.
+    # The default path is the root of the repository, and the default timeout is 600 seconds
+    - npm test
+  # Factory scripts that will output test scripts sections to be run in parallel. These should be ouptutted to stdout in yaml in the same format as each above test section
+  factories:
+    - integration test factory:
+        path: platform
+        # The following is an example factory which prints out a nosetests command for each .py file in the platform/tests/integration_tests directory
+        script:
+          - |
+            ls tests/integration_tests/*.py | while read test; do
+              echo "- $test:"
+              echo "    script: nosetests -sv $test"
+              echo "    path: platform"
+            done
+
