@@ -38,15 +38,14 @@ setup:
     - path: ci/scripts
       script: ./rabbitmq_setup.sh
 compile:
-  scripts:
-    - python setup.py install:
-        path: ci/platform
-    - compile webserver:
-        path: ci/web/back
-        script: ./compile.sh
-    - compile website:
-        path: ci/web/front
-        script: ./compile.sh
+  - python setup.py install:
+      path: ci/platform
+  - compile webserver:
+      path: ci/web/back
+      script: ./compile.sh
+  - compile website:
+      path: ci/web/front
+      script: ./compile.sh
 test:
   machines: 2
   scripts:
