@@ -49,21 +49,17 @@ Languages are specified as a simple key-value pair mapping language name to vers
 
 The following languages are supported:
 
-#. Java and JVM:
-
+- Java and JVM:
    * Chosen with "java" or "jvm"
    * Supported versions include 1.5 and 1.6
-#. Node.js:
-
+- Node.js:
    * Chosen with "nodejs"
    * Uses nvm for versioning to support most standard versions
-#. Python:
-
+- Python:
    * Chosen with "python"
    * Uses a virtualenv for safe versioning
    * Supported versions include 2.5, 2.6, 2.7, 3.2, 3.3
-#. Ruby
-
+- Ruby
    * Chosen with "ruby"
    * Uses rvm for versioning to support most standard versions
 
@@ -101,23 +97,28 @@ scripts
 ```````
 The scripts section is used to run any other scripts or commands that cannot be simplified by the packages and databases sections. Each script must be represented as either a string or a dictionary.
 
-.. _`script format`:
-
 The dictionary form is as follows:
 
-| script name:
-|	    path: relative path at which to run the command. This is optional and defaults to the repository root
-|	    script: a string or array of commands to run. This is optional and defaults to the name
+| path: relative path from the repository root at which to run the command
+| script: a string or array of commands to run
 
-The string form is just the name of the command to be run, which uses the default values for the dictionary form above.
+The string form is just the name of the command to be run, which will run from the repository root.
 
 compile
 ~~~~~~~
 The compile section is used to specify any compilation steps that must be run before running tests.
 
-Each step should be specified as a script, and as such your steps should be represented as a list under a parent key "scripts". Each of these scripts should follow the script format `specified above`__.
+Each step should be specified as a script, and as such your steps should be represented as a list under a parent key "scripts". Each of these scripts should be represented as either a string or a dictionary.
 
-__ `script format`_
+.. _`script format`:
+
+The dictionary form is as follows:
+
+| script name:
+|     path: relative path at which to run the command  # This is optional and defaults to the repository root
+|     script: a string or array of commands to run  # This is optional and defaults to the name
+
+The string form is just the name of the command to be run, which uses the default values for the dictionary form above.
 
 test
 ~~~~
@@ -131,7 +132,7 @@ The value specified for machines should be a positive integer denoting the numbe
 
 scripts
 ```````
-The scripts section should contain a list of scripts that each follow the same format used for compile and setup, which is `specified above`__.
+The scripts section should contain a list of scripts that each follow the same format used for compile, which is `specified above`__.
 
 __ `script format`_
 
@@ -139,16 +140,15 @@ factories
 `````````
 The factories section should contain a list of scripts which construct other test sections to run. This can be used for automatically splitting up a large number of tests using anything ranging from a simple shell script to code introspection.
 
-Each of these factory steps should be specified in the standard script format, and their output should be in the same format, which will then be parsed and treated the same as manually-specified test scripts.
+Each of these factory steps should be specified in the `test script format`__, and their output should be in the same format, which will then be parsed and treated the same as manually-specified test scripts.
+
+__ `script format`_
 
 Installation and Server Setup
 =============================
+Installation of Koality is quite simple. Launch an instance of the koality service AMI. This will be a private AMI with a name beginning with "koality_service". Then, using your DNS credentials point your internal domain name to the ip address of that instance. The instance will take a few minutes to start.
 
-SERVER SETUP STUFF GOES HERE
-
-Installation of Koality is quite simple. Launch an instance of the koality service AMI. Then, using your DNS credentials point your internal domain name to the ip address of that instance. The instance will take a few minutes to start.
-
-Open up the domain name you chose in your browser (or the ip of the koality service instance works too) and follow the wizard for first time setup.
+Open up the domain name you chose in your browser (or the ip of the koality service instance works too) and follow the wizard for first time setup. If no page loads yet, you may need to wait a few minutes for Koality to first initialize.
 
 Wizard Walkthrough
 ------------------
