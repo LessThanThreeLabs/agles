@@ -45,7 +45,8 @@ Writing a koality.yml
 ---------------------
 languages
 ~~~~~~~~~
-Languages are specified as a simple key-value pair mapping language name to version.
+Languages are specified as a simple key-value pair mapping language name to version. You can use unsupported languages by installing them with your own script under the `"scripts"`_ section of setup.
+
 The following languages are supported:
 
 #. Java and JVM:
@@ -68,7 +69,7 @@ The following languages are supported:
 
 setup
 ~~~~~
-The setup section defines the production or testing environment for your code. Each step in the setup section is explicitly ordered to function like a shell script, and the return code for each step is checked to validate that no steps fail. The three major types of setup steps are "packages", "databases", and "scripts".
+The setup section defines the production or testing environment for your code. Each step in the setup section is explicitly ordered to function like a shell script, and the return code for each step is checked to validate that no steps fail. The three major types of setup steps are "packages", "databases", and `"scripts"`_.
 
 packages
 ````````
@@ -94,6 +95,8 @@ databases
 `````````
 The databases section defines databases that you wish to use for testing. Each database is represented by a dictionary specifying the name of the database and the username with which to access it. Each database must be specified in a list below the database type. Supported database types are "mysql" and "postgres"
 
+.. _`"scripts"`:
+
 scripts
 ```````
 The scripts section is used to run any other scripts or commands that cannot be simplified by the packages and databases sections. Each script must be represented as either a string or a dictionary.
@@ -103,8 +106,8 @@ The scripts section is used to run any other scripts or commands that cannot be 
 The dictionary form is as follows:
 
 | script name:
-|	    path: relative path at which to run the command  # This is optional and defaults to the repository root
-|	    script: a string or array of commands to run  # This is optional and defaults to the name
+|	    path: relative path at which to run the command. This is optional and defaults to the repository root
+|	    script: a string or array of commands to run. This is optional and defaults to the name
 
 The string form is just the name of the command to be run, which uses the default values for the dictionary form above.
 
@@ -248,16 +251,14 @@ Troubleshooting
 ===============
 1. I can't push or pull from Koality
 
+     First, check to make sure you have your SSH keys set correctly. Make sure you've uploaded your (personal) SSH key to your user account. If this is correct, make sure you've uploaded the repository SSH key to the repository server.
+
      You should double check the security group you placed Koality master in. Make sure tcp port 22 (ssh) is open to the ips you are pushing from.(Hint: AWS is sometimes finicky. Trying 0.0.0.0 and 127.0.0.1 rather than localhost may fix issues)
 
-2. Pulling works, but pushing to Koality master times out
-
-     Are you using an elastic IP? Koality master needs to know its own ip, and elastic IPs erase the previous IP address from an AWS instance. Wait a few minutes and try again, since the Koality master will update itself.
-
-3. Pushing doesn't send anything to Koality, but goes directly into my git repository
+2. Pushing doesn't send anything to Koality, but goes directly into my git repository
 
      Check to see that you've updated your .gitconfig to point to the Koality master. Koality acts as a proxy, so if you don't point to the proxy, we can't verify your changes!
 
-4. Koality accepts my change, but doesn't show the correct stages and immediately rejects the change
+3. Koality accepts my change, but doesn't show the correct stages and immediately rejects the change
 
      Check your koality.yml file to make sure it is valid. The easiest first step for this is to verify that you are using valid YAML with a tool such as http://yamllint.com. Oftentimes this is caused by indenting your YAML file with tabs, which violates the YAML spec.
