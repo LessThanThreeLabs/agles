@@ -246,6 +246,9 @@ Upgrade
 -------
 As of this writing, automatic upgrades are not yet implemented. When an update is available, a member of the Koality team will contact you.
 
+Creating a Personal SSH Key
+===========================
+Github has written wonderful documentation on this. You can find it at: https://help.github.com/articles/generating-ssh-keys
 
 Optimizing Koality for Speed
 ============================
@@ -255,16 +258,25 @@ Optimizing Koality for Speed
 
 Troubleshooting
 ===============
-1. I can't push or pull from Koality
+
+1. My SSH key doesn't appear to be working.
+
+     Have you uploaded your SSH key to Koality? Make sure you have before you continue. You can do this from the Account->SSH Keys (click on your name to get there).
+
+     Additionally, if you have more than one key, SSH may be handing Koality the wrong key. The SSH protocol only sends 1 key over the wire. If you have multiple keys, it sometimes selects the incorrect one. Temporarily remove all of you keys (other than the one you uploaded to Koality) from your ~/.ssh directory and try again to verify.
+
+     If all else fails, you'll need to do some manual debugging. You can see what SSH is doing by passing the -v option to a git pull or git push (you can also do ssh -v git@your.internal.koality.com).
+
+2. I can't push or pull from Koality
 
      First, check to make sure you have your SSH keys set correctly. Make sure you've uploaded your (personal) SSH key to your user account. If this is correct, make sure you've uploaded the repository SSH key to the repository server.
 
      You should double check the security group you placed Koality master in. Make sure tcp port 22 (ssh) is open to the ips you are pushing from.(Hint: AWS is sometimes finicky. Trying 0.0.0.0 and 127.0.0.1 rather than localhost may fix issues)
 
-2. Pushing doesn't send anything to Koality, but goes directly into my git repository
+3. Pushing doesn't send anything to Koality, but goes directly into my git repository
 
      Check to see that you've updated your .gitconfig to point to the Koality master. Koality acts as a proxy, so if you don't point to the proxy, we can't verify your changes!
 
-3. Koality accepts my change, but doesn't show the correct stages and immediately rejects the change
+4. Koality accepts my change, but doesn't show the correct stages and immediately rejects the change
 
      Check your koality.yml file to make sure it is valid. The easiest first step for this is to verify that you are using valid YAML with a tool such as http://yamllint.com. Oftentimes this is caused by indenting your YAML file with tabs, which violates the YAML spec.
