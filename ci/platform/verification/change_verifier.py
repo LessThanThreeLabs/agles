@@ -31,13 +31,17 @@ class ChangeVerifier(EventSubscriber):
 		message.ack()
 
 	def _handle_new_change(self, contents):
-		change_id = contents['change_id']
-		commit_id = contents['commit_id']
-		verification_config = self._get_verification_config(commit_id)
+		try:
+			change_id = contents['change_id']
+			commit_id = contents['commit_id']
+			verification_config = self._get_verification_config(commit_id)
 
-		workers_spawned = event.Event()
-		spawn_n(self.verify_change, verification_config, change_id, workers_spawned)
-		workers_spawned.wait()
+			workers_spawned = event.Event()
+			spawn_n(self.verify_change, verification_config, change_id, workers_spawned)
+			workers_spawned.wait()
+		except:
+			self.logger.critical("Unexpected failure while verifying change %d, commit %d. Failing change." % (change_id, commit_id), exc_info=True)
+			self.results_handler.fail_change(change_id)
 
 	def verify_change(self, verification_config, change_id, workers_spawned):
 		task_queue = TaskQueue()
