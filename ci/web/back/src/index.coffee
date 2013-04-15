@@ -1,5 +1,5 @@
 fs = require 'fs'
-colors = require 'colors'
+
 Logger = require 'koality-logger'
 ModelConnection = require 'koality-model-connection'
 
