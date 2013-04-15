@@ -43,6 +43,8 @@ To use Koality, you'll need to create a koality.yml (or .koality.yml) in the roo
 
 Writing a koality.yml
 ---------------------
+A koality.yml file consists of four sections: languages_, setup_, compile_, and test_. Each of these sections is used as a simple way of specifying the steps required to configure a machine to verify each change.
+
 languages
 ~~~~~~~~~
 Languages are specified as a simple key-value pair mapping language name to version. You can use unsupported languages by installing them with your own script under the `"scripts"`_ section of setup.
