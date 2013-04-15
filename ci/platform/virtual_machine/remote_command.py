@@ -142,7 +142,7 @@ class RemoteErrorCommand(RemoteCommand):
 		self.error_message = error_message
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.ssh_call("echo -e 'Error: %s'; exit 1" % self.error_message)
+		return virtual_machine.ssh_call("echo -e 'Error: %s'; exit 1" % self.error_message, output_handler=output_handler)
 
 
 class InvalidConfigurationException(Exception):

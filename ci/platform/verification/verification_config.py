@@ -17,5 +17,5 @@ class VerificationConfig(object):
 		except:
 			self.machines = 1
 			self.compile_commands = []
-			self.test_commands = [RemoteErrorCommand("Parsing Error", "Could not parse your koality.yml file.\nPlease verify that it is valid yaml and matches the expected format.")]
+			self.test_commands = [RemoteErrorCommand("parse error", "Could not parse your koality.yml file.\nPlease verify that it is valid yaml and matches the expected format.")]
 			self.test_factory_commands = []
