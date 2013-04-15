@@ -65,11 +65,11 @@ The following languages are supported:
 
 setup
 ~~~~~
-The setup section defines the production or testing environment for your code. Each step in the setup section is explicitly ordered to function like a shell script, and the return code for each step is checked to validate that no steps fail. The three major types of setup steps are "packages", "databases", and `"scripts"`_.
+The setup section defines the production or testing environment for your code. Each step in the setup section is explicitly ordered to function like a shell script, and the return code for each step is checked to validate that no steps fail. The three major types of setup steps are "packages_", "databases_", and `"scripts"`_.
 
 packages
 ````````
-The packages section defines package dependencies. Each item in the level directly below packages must be a package type, which includes "system", "gem", "npm", and "pip". Within each package type, a list of packages should be specified, each as either the package name or a key-value pair specifying the name and version.
+The packages section defines package dependencies. Each item in the level directly below packages must be a package type, which includes "system_", "gem_", "npm_", and "pip_". Within each package type, a list of packages should be specified, each as either the package name or a key-value pair specifying the name and version.
 
 system
 ******
@@ -124,11 +124,15 @@ test
 ~~~~
 The test section is used to specify any test steps that must be run to verify your change. All test steps can be run in parallel across any virtual machines launched to verify your change, allowing each test step to run only once.
 
-The test section is specified as a single dictionary defining three parts that designate how to best run your tests, which are "machines", "scripts", and "factories".
+The test section is specified as a single dictionary defining three parts that designate how to best run your tests, which are "machines_", "scripts__", and "factories_".
+
+__ `test scripts`_
 
 machines
 ````````
 The value specified for machines should be a positive integer denoting the number of machines to use to parallelize your tests.
+
+.. _`test scripts`:
 
 scripts
 ```````
