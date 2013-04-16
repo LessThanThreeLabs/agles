@@ -48,7 +48,7 @@ compile:
         path: ci/web/front
         script: ./compile.sh
 test:
-  machines: 2
+  machines: 5  # lol parallelization
   scripts:
     - platform unit tests:
         path: ci/platform
