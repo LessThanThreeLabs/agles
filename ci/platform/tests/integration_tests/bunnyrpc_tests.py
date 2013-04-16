@@ -64,9 +64,9 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 
 	def test_exceptional_controlflow_rpc(self):
 		with Client("exchange", "queue0", globals=globals()) as client:
-			assert_raises(ZeroDivisionError, lambda: client.div(6, 0))
-			assert_raises(MyError, lambda: client.raise_my_error())
-			assert_raises(RPCRequestError, lambda: client.raise_special_error())
+			assert_raises(ZeroDivisionError, client.div, 6, 0)
+			assert_raises(MyError, client.raise_my_error)
+			assert_raises(RPCRequestError, client.raise_special_error)
 
 	def _run_multiclients_in_tandem(self, client0, client1):
 		try:
