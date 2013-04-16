@@ -36,7 +36,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 	class FakeBuildVerifierPool(VerifierPool):
 		def spawn_verifier(self, verifier_number):
-			return BuildVerifier(FakeBuildCore())
+			return BuildVerifier(FakeBuildCore(verifier_number))
 
 	@classmethod
 	def setup_class(cls):

@@ -1,5 +1,4 @@
 import os
-import random
 import shlex
 import shutil
 
@@ -8,11 +7,12 @@ from virtual_machine.virtual_machine import VirtualMachine
 
 
 class FakeBuildCore(VirtualMachineBuildCore):
-	def __init__(self):
-		self.virtual_machine = FakeVirtualMachine()
+	def __init__(self, vm_id):
+		self.virtual_machine = FakeVirtualMachine(vm_id)
 
 	def setup(self):
-		os.makedirs(self.virtual_machine.vm_directory)
+		if not os.access(self.virtual_machine.vm_directory, os.F_OK):
+			os.makedirs(self.virtual_machine.vm_directory)
 
 	def teardown(self):
 		shutil.rmtree(self.virtual_machine.vm_directory, ignore_errors=True)
@@ -22,8 +22,8 @@ class FakeBuildCore(VirtualMachineBuildCore):
 
 
 class FakeVirtualMachine(VirtualMachine):
-	def __init__(self):
-		self.vm_directory = "/tmp/fakevm_%s" % str(random.random())[2:]
+	def __init__(self, vm_id):
+		self.vm_directory = "/tmp/fakevm_%d" % vm_id
 
 	def provision(self, private_key, output_handler=None):
 		return self.call(["true"])
