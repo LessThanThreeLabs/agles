@@ -148,7 +148,7 @@ class VirtualMachineBuildCore(BuildCore):
 
 	def run_factory_command(self, factory_command, console_appender=None):
 		results = factory_command.run(self.virtual_machine,
-			self._get_output_handler(console_appender, ConsoleType.Test, factory_command.name))
+			self._get_output_handler(console_appender, ConsoleType.TestFactory, factory_command.name))
 		if results.returncode:
 			raise VerificationException("Factory: %s:" % factory_command.name)
 		return results.output

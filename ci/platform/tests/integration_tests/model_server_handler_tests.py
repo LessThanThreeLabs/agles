@@ -86,6 +86,7 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 		for i in self.build_ids:
 			update_handler.add_subtype(i, ConsoleType.Setup, "setup")
 			update_handler.add_subtype(i, ConsoleType.Compile, "compile")
+			update_handler.add_subtype(i, ConsoleType.TestFactory, "my factory")
 			update_handler.add_subtype(i, ConsoleType.Test, "unittest")
 
 			test_lines = {}

@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 
 from database import schema
 from database.engine import ConnectionFactory
+from model_server.build_consoles import ConsoleType
 from model_server.rpc_handler import ModelServerRpcHandler
 
 
@@ -17,7 +18,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		super(BuildConsolesUpdateHandler, self).__init__("build_consoles", "update")
 
 	def add_subtype(self, build_id, type, subtype, priority=None):
-		assert type in ['setup', 'compile', 'test']
+		assert type in ConsoleType.valid_types
 
 		build_console = schema.build_console
 		build = schema.build

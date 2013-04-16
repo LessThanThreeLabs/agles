@@ -29,7 +29,7 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 			id: $scope.currentStageId
 
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsole', requestData, (error, stageInformation) ->
-			$scope.$apply () -> 
+			$scope.$apply () ->
 				$scope.currentStageInformation = stageInformation
 
 	handleMergeStatusUpdate = (data) -> $scope.$apply () ->
@@ -118,7 +118,7 @@ window.RepositoryChanges = ['$scope', '$routeParams', 'changesRpc', 'events', 'l
 		else if $scope.changes[0]?
 			$scope.selectChange changes[0] if not $scope.currentChangeId?
 
-	handleMoreChanges = (error, changes) -> $scope.$apply () -> 
+	handleMoreChanges = (error, changes) -> $scope.$apply () ->
 		$scope.changes = $scope.changes.concat changes
 
 	getInitialChanges = () ->
@@ -162,7 +162,7 @@ window.RepositoryChanges = ['$scope', '$routeParams', 'changesRpc', 'events', 'l
 	$scope.scrolledToBottom = () ->
 		getMoreChanges()
 
-	$scope.$watch 'search', ((newValue, oldValue) -> 
+	$scope.$watch 'search', ((newValue, oldValue) ->
 		getInitialChanges()
 		localStorage.searchMode = $scope.search.mode
 	), true
@@ -247,11 +247,13 @@ window.RepositoryStages = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 			return 10000 + stage.orderNumber
 		else if stage.type is 'compile'
 			return 20000 + stage.orderNumber
-		else if stage.type is 'test'
+		else if stage.type is 'testFactory'
 			return 30000 + stage.orderNumber
+		else if stage.type is 'test'
+			return 40000 + stage.orderNumber
 		else
 			console.error 'Cannot sort stage'
-			return 40000
+			return 50000
 
 	$scope.shouldStageBeVisible = (stage) ->
 		return true if stage.id is $scope.currentStageId

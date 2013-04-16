@@ -12,8 +12,6 @@ import subprocess
 import eventlet
 
 from database.engine import ConnectionFactory
-from model_server.model_server import ModelServer
-from settings.rabbit import RabbitSettings
 
 FILEDIR = os.path.dirname(os.path.realpath(__file__))
 REDISCONF = os.path.join(FILEDIR, '..', '..', 'conf', 'redis', 'filesystem_repo_server_redis.conf')
@@ -55,6 +53,7 @@ class ModelServerTestMixin(BaseTestMixin):
 
 	@classmethod
 	def _start_model_server(cls):
+		from model_server.model_server import ModelServer
 		cls.model_server_greenlet = ModelServer().start()
 
 	@classmethod
@@ -69,6 +68,7 @@ class ModelServerTestMixin(BaseTestMixin):
 class RabbitMixin(BaseTestMixin):
 	@classmethod
 	def _purge_queues(cls):
+		from settings.rabbit import RabbitSettings
 		command = """rabbitmqadmin -u %s -p %s -f tsv -q list queues name messages|
 			while read queue count;
 			do if [ ${count} -gt "0" ];
