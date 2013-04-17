@@ -157,6 +157,16 @@ class VirtualMachineBuildCore(BuildCore):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		return self.virtual_machine.cache_repository(repo_name, console_appender)
 
+	def export_files(self, export_prefix, files):
+		export_command = RemoteExportCommand(
+			AwsSettings.aws_access_key_id,
+			AwsSettings.aws_secret_access_key,
+			AwsSettings.s3_bucket_name,
+			export_prefix,
+			files
+		)
+		return export_command.run(self.virtual_machine).output
+
 
 class VagrantBuildCore(VirtualMachineBuildCore):
 	def __init__(self, vagrant, uri_translator=None):

@@ -135,6 +135,26 @@ class RemoteProvisionCommand(RemoteSetupCommand):
 		return virtual_machine.provision(self.private_key, output_handler=output_handler)
 
 
+class RemoteExportCommand(RemoteCommand):
+	def __init__(self, aws_key, aws_secret_key, s3_bucket_name, export_prefix, *files):
+		super(RemoteCommand, self).__init__()
+		self.aws_key = aws_key
+		self.aws_secret_key = aws_secret_key
+		self.s3_bucket_name = s3_bucket_name
+		self.export_prefix = export_prefix
+		self.files = files
+
+	def _run(self, virtual_machine, output_handler=None):
+		return virtual_machine.ssh_call("koality-s3-export %s %s %s %s %s" % (
+			pipes.quote(self.aws_key),
+			pipes.quote(self.aws_secret_key),
+			pipes.quote(self.s3_bucket_name),
+			pipes.quote(self.export_prefix),
+			' '.join([pipes.quote(f) for f in self.files])),
+			output_handler=output_handler
+		)
+
+
 class RemoteErrorCommand(RemoteCommand):
 	def __init__(self, name, error_message):
 		super(RemoteErrorCommand, self).__init__()
@@ -142,7 +162,8 @@ class RemoteErrorCommand(RemoteCommand):
 		self.error_message = error_message
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.ssh_call("echo -e 'Error: %s'; exit 1" % self.error_message, output_handler=output_handler)
+		full_message = 'Error: %s' % self.error_message
+		return virtual_machine.ssh_call("echo -e %s; exit 1" % pipes.quote(full_message), output_handler=output_handler)
 
 
 class InvalidConfigurationException(Exception):
