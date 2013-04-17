@@ -45,6 +45,10 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		return {"access_key": aws_access_key_id, "secret_key": aws_secret_access_key}
 
 	@AdminApi
+	def get_s3_bucket_name(self, user_id):
+		return AwsSettings.s3_bucket_name
+
+	@AdminApi
 	def get_allowed_instance_sizes(self, user_id):
 		return ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge',
 			'm3.xlarge', 'm3.2xlarge', 'c1.medium', 'c1.xlarge', 'hi1.4xlarge', 'hs1.8xlarge']

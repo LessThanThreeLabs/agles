@@ -10,6 +10,7 @@ class AwsSettings(DatabaseBackedSettings):
 			instance_type="m1.medium",
 			vm_image_name_prefix="koality_verification_",
 			security_group="koality_verification",
+			s3_bucket_name="",
 			credentials=lambda cls: dict(
 				aws_access_key_id=str(cls.aws_access_key_id),
 				aws_secret_access_key=str(cls.aws_secret_access_key)))

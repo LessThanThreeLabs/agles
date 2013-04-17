@@ -66,6 +66,10 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		AwsSettings.aws_secret_access_key = secret_key
 
 	@AdminApi
+	def set_s3_bucket_name(self, user_id, bucket_name):
+		AwsSettings.s3_bucket_name = bucket_name
+
+	@AdminApi
 	def set_instance_settings(self, user_id, instance_size, num_waiting, max_running, teardown_after_change):
 		AwsSettings.instance_type = instance_size
 		VerificationServerSettings.static_pool_size = num_waiting
