@@ -20,7 +20,7 @@ def main():
 	parser.add_argument("-d", "--dir",
 		help="The root directory for the virtual machine pool")
 	parser.add_argument("-t", "--type",
-		help="Selects the VM type. Supported options are \"aws\" and \"openstack\"")
+		help="Selects the VM type. Supported options are \"aws\" and \"openstack\"")  # or "mock" for testing
 	parser.add_argument("-c", "--count",
 		help="The maximum number of virtual machines for this verification server to manage")
 	parser.add_argument("-C", "--cleanup", action="store_true",

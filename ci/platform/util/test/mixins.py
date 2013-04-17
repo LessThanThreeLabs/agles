@@ -90,23 +90,25 @@ class RepoStoreTestMixin(BaseTestMixin):
 
 
 class RedisTestMixin(BaseTestMixin):
-	def _start_redis(self):
-		self._redis_process = subprocess.Popen(
+	@classmethod
+	def _start_redis(cls):
+		cls._redis_process = subprocess.Popen(
 			["redis-server", REDISCONF],
 			stderr=subprocess.PIPE,
 			stdout=subprocess.PIPE)
 
 		while True:
-			self._redis_process.poll()
-			if self._redis_process.returncode is not None:
-				print self._redis_process.communicate()
+			cls._redis_process.poll()
+			if cls._redis_process.returncode is not None:
+				print cls._redis_process.communicate()
 				assert False
-			assert self._redis_process.returncode is None
-			line = self._redis_process.stdout.readline()
+			assert cls._redis_process.returncode is None
+			line = cls._redis_process.stdout.readline()
 			if line.find("The server is now ready to accept connections") != -1:
 				break
 
-	def _stop_redis(self):
+	@classmethod
+	def _stop_redis(cls):
 		redis_conn = ConnectionFactory.get_redis_connection()
 		redis_conn.flushdb()
-		self._redis_process.terminate()
+		cls._redis_process.terminate()
