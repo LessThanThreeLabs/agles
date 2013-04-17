@@ -7,7 +7,7 @@ import util.log
 
 from util.uri_translator import RepositoryUriTranslator
 from verification.verification_server import VerificationServer
-from verification.verifier_pool import VirtualMachineVerifierPool
+from verification.verifier_pool import VerifierPool, VirtualMachineVerifierPool
 from verification.virtual_machine_cleanup_tool import VirtualMachineCleanupTool
 from virtual_machine.ec2 import Ec2Vm
 from virtual_machine.openstack import OpenstackVm
@@ -31,7 +31,8 @@ def main():
 	try:
 		vm_class = {
 			'aws': Ec2Vm,
-			'openstack': OpenstackVm
+			'openstack': OpenstackVm,
+			'mock': None
 		}[args.type]
 	except:
 		print "Must supply either \"aws\" or \"openstack\" as a VM type"
@@ -57,7 +58,10 @@ def main():
 	print "Starting Verification Server (%s) with directory %s ..." % (args.type, vm_dir)
 
 	try:
-		verifier_pool = VirtualMachineVerifierPool(vm_class, vm_dir, max_verifiers=max_vm_count, uri_translator=RepositoryUriTranslator())
+		if vm_class is not None:
+			verifier_pool = VirtualMachineVerifierPool(vm_class, vm_dir, max_verifiers=max_vm_count, uri_translator=RepositoryUriTranslator())
+		else:
+			verifier_pool = VerifierPool(max_vm_count, 0)
 		verification_server = VerificationServer(verifier_pool, RepositoryUriTranslator()).run()
 	except:
 		print "Failed to start Verification Server"

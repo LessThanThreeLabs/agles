@@ -1,6 +1,7 @@
-import time
-
+import eventlet
 import requests
+
+import util.greenlets
 
 from settings.deployment import DeploymentSettings
 from util.log import Logged
@@ -17,9 +18,16 @@ class LicenseServer(object):
 		self.sleep_time = sleep_time
 
 	def run(self):
+		poller_greenlet = eventlet.spawn(self._poller)
+		return poller_greenlet
+
+	def _poller(self):
 		while True:
-			self.handle_once()
-			time.sleep(self.sleep_time)
+			self._poll_and_wait()
+
+	def _poll_and_wait(self):
+		self.handle_once()
+		eventlet.sleep(self.sleep_time)
 
 	def handle_once(self):
 		try:
