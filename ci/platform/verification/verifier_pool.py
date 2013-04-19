@@ -59,20 +59,21 @@ class VerifierPool(object):
 
 	def put(self, verifier):
 		slot = self._get_slot(verifier)
-		self.allocated_slots.remove(slot)
 		self.unallocated_slots.append(slot)
+		self.allocated_slots.remove(slot)
 
 	def remove(self, verifier):
 		slot = self._get_slot(verifier)
+		# Abandon slots that are higher than the current cap
+		if self._get_max_verifiers() > slot:
+			self.free_slots.put(slot)
+
 		del self.verifiers[slot]
 		if slot in self.unallocated_slots:
 			self.unallocated_slots.remove(slot)
 		elif slot in self.allocated_slots:
 			self.allocated_slots.remove(slot)
 
-		# Abandon slots that are higher than the current cap
-		if self._get_max_verifiers() > slot:
-			self.free_slots.put(slot)
 		self._fill_to_min_unallocated()
 
 	def _get_slot(self, verifier):
@@ -103,11 +104,12 @@ class VerifierPool(object):
 			try:
 				self._spawn_verifier(verifier_number, allocated)
 			except:
-				self.logger.debug("Failed to spawn verifier %d, %d attempts remaining" % (verifier_number, remaining_attempts), exc_info=True)
 				if remaining_attempts == 0:
 					self.free_slots.put(verifier_number)
 					self.logger.error("Failed to spawn verifier %d" % verifier_number, exc_info=True)
 					raise
+				else:
+					self.logger.debug("Failed to spawn verifier %d, %d attempts remaining" % (verifier_number, remaining_attempts), exc_info=True)
 				eventlet.sleep(10)
 			else:
 				break
