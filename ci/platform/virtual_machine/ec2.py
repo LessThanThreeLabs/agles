@@ -169,8 +169,8 @@ class Ec2Vm(VirtualMachine):
 			pipes.quote(AwsSettings.aws_access_key_id),
 			pipes.quote(AwsSettings.aws_secret_access_key),
 			pipes.quote(AwsSettings.s3_bucket_name),
-			pipes.quote(self.export_prefix),
-			' '.join([pipes.quote(f) for f in self.files])),
+			pipes.quote(export_prefix),
+			' '.join([pipes.quote(f) for f in files])),
 			output_handler=output_handler
 		)
 
