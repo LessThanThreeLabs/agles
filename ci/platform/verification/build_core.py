@@ -8,7 +8,7 @@ from git import Repo
 
 from model_server.build_consoles import ConsoleType
 from util.log import Logged
-from virtual_machine.remote_command import RemoteCheckoutCommand, RemoteProvisionCommand
+from virtual_machine.remote_command import RemoteCheckoutCommand, RemoteExportCommand, RemoteProvisionCommand
 from verification_config import VerificationConfig
 
 

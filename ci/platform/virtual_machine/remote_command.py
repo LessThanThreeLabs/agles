@@ -6,7 +6,7 @@ from streaming_executor import CommandResults
 
 
 class RemoteCommand(object):
-	def run(self, virtual_machine, output_handler):
+	def run(self, virtual_machine, output_handler=None):
 		if output_handler:
 			output_handler.declare_command()
 		results = self._run(virtual_machine, output_handler)

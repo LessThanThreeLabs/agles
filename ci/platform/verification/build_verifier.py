@@ -101,7 +101,7 @@ class BuildVerifier(object):
 
 	@ReturnException
 	def _setup(self, build_id, verification_config):
-		commit_id = self._get_commit_id(build_id)
+		commit_id = self._get_build(build_id)['commit_id']
 		self.logger.info("Worker %s processing verification request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
 		self._start_build(build_id)
 		repo_uri = self._get_repo_uri(commit_id)
@@ -146,8 +146,8 @@ class BuildVerifier(object):
 			os.remove(self._get_build_info_file())
 
 		build = self._get_build(build_id)
-		export_prefix = 'repo_%d/change_%d/test' % (build['repo_id']), str(build['change_id'])
-		self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, 'test'))
+		export_prefix = "repo_%d/change_%d/test" % (build['repo_id'], build['change_id'])
+		self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test"))
 
 		commit_id = build['commit_id']
 		repo_uri = self._get_repo_uri(commit_id)

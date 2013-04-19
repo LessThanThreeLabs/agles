@@ -30,3 +30,6 @@ class FakeVirtualMachine(VirtualMachine):
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		return self.call(shlex.split(command), output_handler, timeout=timeout)
+
+	def export(self, export_prefix, files, output_handler=None):
+		return self.call(["true"])
