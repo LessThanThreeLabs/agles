@@ -39,6 +39,7 @@ class RemoteShellCommand(RemoteCommand):
 	def _parse_step(self, step):
 		path = None
 		timeout = 600
+		export = None
 		if isinstance(step, str):
 			name = step
 			commands = [step]
