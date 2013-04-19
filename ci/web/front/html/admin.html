@@ -19,7 +19,7 @@
 				<div id="adminWebsiteContent">
 					<styled-form name="websiteForm">
 						<styled-form-field label="Domain" label-padding="true">
-							<input type="text" ng-model="website.domainName" name="domainName" placeholder="koality.company.com" ng-maxlength="256" required focused>
+							<input type="text" ng-model="website.domainName" name="domainName" placeholder="koality.company.com" ng-pattern="/^[a-zA-Z0-9]+(-+[a-zA-Z0-9]+)*(.[a-zA-Z0-9]+(-+[a-zA-Z0-9]+)*)*$/" ng-maxlength="256" required focused>
 							<styled-form-field-error tooltip="Invalid domain name" error-visible="websiteForm.domainName.$dirty && websiteForm.domainName.$invalid"></styled-form-field-error>
 						</styled-form-field>
 						<styled-form-field label="">

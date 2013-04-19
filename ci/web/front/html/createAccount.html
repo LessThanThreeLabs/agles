@@ -5,7 +5,7 @@
 			<div id="createAccountContent">
 				<styled-form name="createAccountForm">
 					<styled-form-field label="Email" label-padding="true">
-						<input type="email" ng-model="account.email" readonly>
+						<input type="email" ng-model="account.email" ng-maxlength="256" readonly>
 					</styled-form-field>
 					<styled-form-field label="First name" label-padding="true">
 						<input type="text" ng-model="account.firstName" name="firstName" placeholder="First" ng-pattern="/^[A-Z][-'a-zA-Z]+$/" ng-maxlength="64" autocomplete="on" required focused>
