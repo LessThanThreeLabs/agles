@@ -142,12 +142,12 @@ temp_string = Table('temp', metadata,
 
 def _create_and_initialize(engine):
 	metadata.create_all(engine)
-	_insert_admin_user()
-	_insert_admin_api_user()
-	_insert_admin_verifier()
+	insert_admin_user()
+	insert_admin_api_user()
+	insert_admin_verifier()
 
 
-def _insert_admin_user():
+def insert_admin_user():
 	query = user.select().where(user.c.id == 1)
 	ins = user.insert().values(id=1, email="admin-koala@koalitycode.com", first_name="Koality", last_name="Admin",
 		password_hash="mooonIJXsb0zgz2V0LXvN/N4N4zbZE9FadrFl/YBJvzh3Z8O3VT/FH1q6OzWplbrX99D++PO6mpez7QdoIUQ6A==",
@@ -158,7 +158,7 @@ def _insert_admin_user():
 			sqlconn.execute(ins)
 
 
-def _insert_admin_api_user():
+def insert_admin_api_user():
 	query = user.select().where(user.c.id == 2)
 	ins = user.insert().values(id=2, email="api-koala@koalitycode.com", first_name="Koality", last_name="Api",
 		password_hash="mooonIJXsb0zgz2V0LXvN/N4N4zbZE9FadrFl/YBJvzh3Z8O3VT/FH1q6OzWplbrX99D++PO6mpez7QdoIUQ6A==",
@@ -169,7 +169,7 @@ def _insert_admin_api_user():
 			sqlconn.execute(ins)
 
 
-def _insert_admin_verifier():
+def insert_admin_verifier():
 	query = user.select().where(user.c.id == 3)
 	ins = user.insert().values(id=3, email="verify-koala@koalitycode.com", first_name="Koality", last_name="Verifier",
 		password_hash="mooonIJXsb0zgz2V0LXvN/N4N4zbZE9FadrFl/YBJvzh3Z8O3VT/FH1q6OzWplbrX99D++PO6mpez7QdoIUQ6A==",
