@@ -6,7 +6,7 @@ import model_server
 
 from build_core import VerificationException
 from pubkey_registrar import PubkeyRegistrar
-from shared.constants import BuildStatus, VerificationUser
+from shared.constants import BuildStatus, VerificationUser, KOALITY_EXPORT_PATH
 from util import pathgen
 from util.log import Logged
 from virtual_machine.remote_command import RemoteTestCommand
@@ -144,13 +144,18 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 		if os.access(self._get_build_info_file(), os.F_OK):
 			os.remove(self._get_build_info_file())
-		commit_id = self._get_commit_id(build_id)
+
+		build = self._get_build(build_id)
+		export_prefix = 'repo_%d/change_%d/test' % (build['repo_id']), str(build['change_id'])
+		self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, 'test'))
+
+		commit_id = build['commit_id']
 		repo_uri = self._get_repo_uri(commit_id)
 		self.build_core.cache_repository(repo_uri)
 
-	def _get_commit_id(self, build_id):
+	def _get_build(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:
-			return model_server_rpc.get_build_from_id(build_id)['commit_id']
+			return model_server_rpc.get_build_from_id(build_id)
 
 	def _start_build(self, build_id):
 		self.logger.debug("Worker %s starting build %s" % (self.worker_id, build_id))

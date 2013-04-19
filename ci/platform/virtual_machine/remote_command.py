@@ -1,9 +1,8 @@
 import os
 import pipes
 
+from shared import constants
 from streaming_executor import CommandResults
-
-KOALITY_EXPORT_PATH = '/koality/export'
 
 
 class RemoteCommand(object):
@@ -116,7 +115,7 @@ class RemoteTestCommand(RemoteShellCommand):
 		script = self._to_executed_script()
 
 		if self.export:
-			export_directory = os.path.join(KOALITY_EXPORT_PATH, 'test', self.name)
+			export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name)
 			path = os.path.join('source', self.path) if self.path else 'source'
 			script += "mkdir -p %s; mv %s %s;\n" % (export_directory, os.path.join(path, self.export, '*'), export_directory)
 
