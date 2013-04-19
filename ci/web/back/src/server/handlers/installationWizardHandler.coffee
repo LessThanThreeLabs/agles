@@ -6,7 +6,7 @@ FilesCacher = require './cache/filesCacher'
 
 
 exports.create = (configurationParams, stores, modelRpcConnection, filesSuffix) ->
-	filesCacher = FilesCacher.create 'index', configurationParams, './cache/installationWizard.json', filesSuffix
+	filesCacher = FilesCacher.create 'installation wizard', configurationParams, './cache/installationWizard.json', filesSuffix
 	return new InstallationWizardHandler configurationParams, stores, modelRpcConnection, filesCacher, filesSuffix
 
 

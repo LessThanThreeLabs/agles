@@ -1,4 +1,6 @@
 import yaml
+import string
+import random
 
 from sqlalchemy import and_
 
@@ -21,6 +23,9 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	def initialize_deployment(self, user_id):
 		self.update_setting("mail", "test_mode", False)
 		self.update_setting("deployment", "initialized", True)
+
+		admin_api_key = ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(32))
+		self.update_setting("deployment", "admin_api_key", admin_api_key)
 
 	def update_setting(self, resource, key, value):
 		system_setting = database.schema.system_setting
