@@ -136,7 +136,7 @@ class RemoteProvisionCommand(RemoteSetupCommand):
 
 
 class RemoteExportCommand(RemoteCommand):
-	def __init__(self, export_prefix, *files):
+	def __init__(self, export_prefix, files):
 		super(RemoteCommand, self).__init__()
 		self.name = 'export'
 		self.export_prefix = export_prefix
