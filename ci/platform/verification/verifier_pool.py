@@ -115,18 +115,14 @@ class VerifierPool(object):
 	def _fill_to_min_unallocated(self):
 		new_max = self._get_max_verifiers()
 		all_slots = set(list(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots)
-		#print all_slots
 		for i in range(new_max):
 			if i not in all_slots:
-				#print "adding %d" % i
 				self.free_slots.put(i)
-		#print list(self.free_slots.queue), self.unallocated_slots, self.allocated_slots
 
 		num_to_fill = self._get_min_unallocated() - len(self.unallocated_slots)
 		for i in range(num_to_fill):
 			try:
 				free = self.get_first_free(block=False)
-				#print "free: %d" % free
 			except queue.Empty:
 				pass
 			else:
