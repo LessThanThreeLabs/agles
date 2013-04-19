@@ -158,13 +158,7 @@ class VirtualMachineBuildCore(BuildCore):
 		return self.virtual_machine.cache_repository(repo_name, console_appender)
 
 	def export_files(self, export_prefix, files):
-		export_command = RemoteExportCommand(
-			AwsSettings.aws_access_key_id,
-			AwsSettings.aws_secret_access_key,
-			AwsSettings.s3_bucket_name,
-			export_prefix,
-			files
-		)
+		export_command = RemoteExportCommand(export_prefix, files)
 		return export_command.run(self.virtual_machine).output
 
 

@@ -19,6 +19,9 @@ class VirtualMachine(object):
 	def provision(self, private_key, output_handler=None):
 		raise NotImplementedError()
 
+	def export(self, export_prefix, files, output_handler=None):
+		raise NotImplementedError("Currently only supported for EC2 VMs")
+
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		raise NotImplementedError()
 

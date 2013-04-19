@@ -136,23 +136,14 @@ class RemoteProvisionCommand(RemoteSetupCommand):
 
 
 class RemoteExportCommand(RemoteCommand):
-	def __init__(self, aws_key, aws_secret_key, s3_bucket_name, export_prefix, *files):
+	def __init__(self, export_prefix, *files):
 		super(RemoteCommand, self).__init__()
-		self.aws_key = aws_key
-		self.aws_secret_key = aws_secret_key
-		self.s3_bucket_name = s3_bucket_name
+		self.name = 'export'
 		self.export_prefix = export_prefix
 		self.files = files
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.ssh_call("koality-s3-export %s %s %s %s %s" % (
-			pipes.quote(self.aws_key),
-			pipes.quote(self.aws_secret_key),
-			pipes.quote(self.s3_bucket_name),
-			pipes.quote(self.export_prefix),
-			' '.join([pipes.quote(f) for f in self.files])),
-			output_handler=output_handler
-		)
+		return virtual_machine.export(self.export_prefix, self.files, output_handler=output_handler)
 
 
 class RemoteErrorCommand(RemoteCommand):

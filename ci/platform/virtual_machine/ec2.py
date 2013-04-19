@@ -1,4 +1,5 @@
 import os
+import pipes
 import socket
 
 import boto.ec2
@@ -162,6 +163,16 @@ class Ec2Vm(VirtualMachine):
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
 			timeout=3600, output_handler=output_handler)
+
+	def export(self, export_prefix, files, output_handler=None):
+		return self.ssh_call("koality-s3-export %s %s %s %s %s" % (
+			pipes.quote(AwsSettings.aws_access_key_id),
+			pipes.quote(AwsSettings.aws_secret_access_key),
+			pipes.quote(AwsSettings.s3_bucket_name),
+			pipes.quote(self.export_prefix),
+			' '.join([pipes.quote(f) for f in self.files])),
+			output_handler=output_handler
+		)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		login = "%s@%s" % (self.vm_username, self.instance.ip_address)
