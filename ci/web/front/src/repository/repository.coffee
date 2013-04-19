@@ -80,7 +80,6 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 		$location.search 'change', newValue ? null
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
-		console.log newValue
 		retrieveCurrentStageInformation()
 		$location.search 'stage', newValue ? null
 
