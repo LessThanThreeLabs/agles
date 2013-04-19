@@ -31,7 +31,8 @@
 
 		&.prettyContentMenuHeaderPadding {
 			.prettyContentMenuHeaderContent {
-				padding-left: 8px;
+				padding-left: 12px;
+				padding-right: 12px
 			}
 		}
 
@@ -44,6 +45,7 @@
 			height: @menuHeaderHeight;
 			overflow: hidden;
 			text-overflow: ellipsis;
+			white-space: nowrap;
 			background-color: @panelHeaderBackground;
 			border-bottom: 1px solid @platformBackground;
 			border-top-left-radius: @borderRadius;
@@ -129,6 +131,7 @@
 							bottom: 0px;
 							overflow: hidden;
 							text-overflow: ellipsis;
+							white-space: nowrap;
 
 							.prettyContentMenuOptionIdentifier {
 								display: inline;
@@ -326,6 +329,7 @@
 		height: @menuHeaderHeight;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		white-space: nowrap;
 		color: @koalityWhite;
 		font-size: 18px;
 		line-height: @menuHeaderHeight;
@@ -345,8 +349,8 @@
 		}
 
 		&.prettyContentHeaderPadding {
-			padding-left: 8px;
-			padding-right: 8px;
+			padding-left: 12px;
+			padding-right: 12px;
 		}
 
 		&.green {
