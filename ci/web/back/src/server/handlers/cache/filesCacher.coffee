@@ -6,7 +6,7 @@ FilesMinifier = require './filesMinifier'
 FilesCompressor = require './filesCompressor'
 
 
-exports.create = (name, configurationParams, filesToLoadUri, filesSuffix) ->
+exports.create = (name, configurationParams, filesToLoadUri, filesSuffix, logger) ->
 	filesLoader = FilesLoader.create configurationParams, filesToLoadUri, filesSuffix
 	filesMinifier = FilesMinifier.create configurationParams
 	filesCompressor = FilesCompressor.create configurationParams

@@ -2,12 +2,13 @@ assert = require 'assert'
 
 
 module.exports = class Resource
-	constructor: (@configurationParams, @stores, @modelRpcConnection, @filesCacher, @fileSuffix) ->
+	constructor: (@configurationParams, @stores, @modelRpcConnection, @filesCacher, @fileSuffix, @logger) ->
 		assert.ok @configurationParams? 
 		assert.ok @stores?
 		assert.ok @modelRpcConnection?
 		assert.ok @filesCacher?
 		assert.ok @fileSuffix?
+		assert.ok @logger?
 
 
 	initialize: (callback) =>

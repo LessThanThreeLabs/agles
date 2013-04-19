@@ -5,9 +5,9 @@ RequestHandler = require './requestHandler'
 FilesCacher = require './cache/filesCacher'
 
 
-exports.create = (configurationParams, stores, modelRpcConnection, filesSuffix) ->
-	filesCacher = FilesCacher.create 'index', configurationParams, './cache/index.json', filesSuffix
-	return new IndexHandler configurationParams, stores, modelRpcConnection, filesCacher, filesSuffix
+exports.create = (configurationParams, stores, modelRpcConnection, filesSuffix, logger) ->
+	filesCacher = FilesCacher.create 'index', configurationParams, './cache/index.json', filesSuffix, logger
+	return new IndexHandler configurationParams, stores, modelRpcConnection, filesCacher, filesSuffix, logger
 
 
 class IndexHandler extends RequestHandler

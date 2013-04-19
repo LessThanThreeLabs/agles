@@ -34,8 +34,8 @@ exports.create = (configurationParams, modelConnection, mailer, logger) ->
 
 	filesSuffix = '_' + (new Date()).getTime().toString 36
 	handlers =
-		indexHandler: IndexHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
-		installationWizardHandler: InstallationWizardHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix
+		indexHandler: IndexHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix, logger
+		installationWizardHandler: InstallationWizardHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix, logger
 
 	return new Server configurationParams, httpsOptions, modelConnection, resourceConnection, stores, handlers, staticServer, logger
 
