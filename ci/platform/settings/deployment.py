@@ -6,6 +6,7 @@ class DeploymentSettings(DatabaseBackedSettings):
 	def __init__(self):
 		super(DeploymentSettings, self).__init__(
 			license=None,
+			admin_api_key=None,
 			active=False,
 			server_id=None,
 			version=VERSION,

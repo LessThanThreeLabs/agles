@@ -49,6 +49,7 @@ import model_server
 from bunnyrpc.exceptions import RPCRequestError
 from database.engine import ConnectionFactory
 from settings.mail import MailSettings
+from settings.deployment import DeploymentSettings
 from util.pathgen import to_clone_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
@@ -234,3 +235,4 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_true(conn.is_deployment_initialized())
 			assert_false(MailSettings.test_mode)
+			assert_is_not_none(DeploymentSettings.admin_api_key)
