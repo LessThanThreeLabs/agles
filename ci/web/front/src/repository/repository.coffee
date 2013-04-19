@@ -80,6 +80,7 @@ window.Repository = ['$scope', '$location', '$routeParams', 'rpc', 'events', 'in
 		$location.search 'change', newValue ? null
 
 	$scope.$watch 'currentStageId', (newValue, oldValue) ->
+		console.log newValue
 		retrieveCurrentStageInformation()
 		$location.search 'stage', newValue ? null
 
@@ -206,7 +207,7 @@ window.RepositoryStages = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 			$scope.$apply () ->
 				$scope.stages = buildConsoles
 
-				if $scope.stages.length > 0
+				if $scope.stages.length is 0
 					$scope.selectStage null
 
 				if $scope.currentStageId? and not isStageIdInStages $scope.currentStageId
