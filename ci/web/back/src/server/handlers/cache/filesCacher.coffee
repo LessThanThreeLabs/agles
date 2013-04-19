@@ -1,4 +1,5 @@
 assert = require 'assert'
+colors = require 'colors'
 
 FilesLoader = require './filesLoader'
 FilesMinifier = require './filesMinifier'
