@@ -73,7 +73,7 @@ class BuildVerifier(object):
 	def teardown(self):
 		self.build_core.teardown()
 
-	def verify_build(self, build_id, verification_config, test_queue):
+	def verify_build(self, build_id, verification_config, test_queue, artifact_export_event):
 		results = []
 		setup_result = self._setup(build_id, verification_config)
 		results.append(setup_result)
@@ -82,7 +82,7 @@ class BuildVerifier(object):
 			if test_queue.can_populate_tasks():
 				test_queue.begin_populating_tasks()
 				test_queue.finish_populating_tasks()
-			self._cleanup(build_id, results)
+			self._cleanup(build_id, results, artifact_export_event)
 			return
 
 		if test_queue.can_populate_tasks():
@@ -97,7 +97,7 @@ class BuildVerifier(object):
 			results.append(test_result)
 			test_queue.add_task_result(test_result)
 
-		self._cleanup(build_id, results)
+		self._cleanup(build_id, results, artifact_export_event)
 
 	@ReturnException
 	def _setup(self, build_id, verification_config):
@@ -135,7 +135,7 @@ class BuildVerifier(object):
 			return self.build_core.run_test_command(test_command, console_appender)
 
 	@ReturnException
-	def _cleanup(self, build_id, results):
+	def _cleanup(self, build_id, results, artifact_export_event):
 		# check that no results are exceptions
 		success = not any(map(lambda result: isinstance(result, Exception), results))
 		build_status = BuildStatus.PASSED if success else BuildStatus.FAILED
@@ -148,6 +148,11 @@ class BuildVerifier(object):
 		build = self._get_build(build_id)
 		export_prefix = "repo_%d/change_%d/test" % (build['repo_id'], build['change_id'])
 		self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test"))
+
+		if not artifact_export_event.ready():
+			artifact_export_event.send()
+			export_prefix = "repo_%d/change_%d/compile" % (build['repo_id'], build['change_id'])
+			self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
 
 		commit_id = build['commit_id']
 		repo_uri = self._get_repo_uri(commit_id)

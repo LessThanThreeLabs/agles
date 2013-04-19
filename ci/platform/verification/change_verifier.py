@@ -45,6 +45,7 @@ class ChangeVerifier(EventSubscriber):
 
 	def verify_change(self, verification_config, change_id, workers_spawned):
 		task_queue = TaskQueue()
+		artifact_export_event = event.Event()
 
 		num_workers = self._get_num_workers(verification_config)
 
@@ -107,7 +108,7 @@ class ChangeVerifier(EventSubscriber):
 				return
 			workers_alive.append(1)
 			build_id = self._create_build(change_id)
-			worker_greenlet = spawn(verifier.verify_build(build_id, verification_config, task_queue))
+			worker_greenlet = spawn(verifier.verify_build(build_id, verification_config, task_queue, artifact_export_event))
 			worker_greenlet.link(cleanup_greenlet, verifier)
 
 		for worker in range(num_workers):

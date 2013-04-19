@@ -106,6 +106,19 @@ class RemoteCompileCommand(RemoteShellCommand):
 	def __init__(self, compile_step):
 		super(RemoteCompileCommand, self).__init__("compile", compile_step)
 
+	def _to_script(self):
+		script = self._to_executed_script()
+
+		if self.export:
+			export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'compile', self.name))
+			script += "mkdir -p %s\n" % export_directory
+			for export in self.export:
+				export = pipes.quote(export)
+				script += "ln -s %s %s\n" % (os.path.join('source', export), os.path.join(export_directory, export))
+
+		script = script + "exit $_r"
+		return script
+
 
 class RemoteTestCommand(RemoteShellCommand):
 	def __init__(self, test_step):
@@ -115,9 +128,12 @@ class RemoteTestCommand(RemoteShellCommand):
 		script = self._to_executed_script()
 
 		if self.export:
-			export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name)
-			path = os.path.join('source', self.path) if self.path else 'source'
-			script += "mkdir -p %s; mv %s %s;\n" % (export_directory, os.path.join(path, self.export, '*'), export_directory)
+			for export in self.export:
+				export = pipes.quote(os.path.join('source', export))
+				export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name))
+				script += "mkdir -p %s;" % export_directory
+				script += "if [ -d %s ]; then mv %s %s; mkdir -p %s\n" % (export, export, export_directory, export)
+				script += "else; mv %s %s; fi\n" % (export, export_directory)
 
 		script = script + "exit $_r"
 		return script
