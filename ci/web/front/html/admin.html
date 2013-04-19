@@ -134,7 +134,7 @@
 									<styled-form-field-error tooltip="Name contains invalid characters" error-visible="addRepositoryForm.name.$dirty && addRepositoryForm.name.$invalid"></styled-form-field-error>
 								</styled-form-field>
 								<styled-form-field label="Forward Url" label-padding="true">
-									<input type="text" ng-model="addRepository.forwardUrl" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
+									<input type="text" ng-model="addRepository.forwardUrl" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-pattern="/^git@[\\.a-zA-Z0-9]+:[\\.a-zA-Z0-9]+$/" ng-maxlength="256" required>
 									<styled-form-field-error tooltip="Invalid forward url" error-visible="addRepositoryForm.forwardUrl.$dirty && addRepositoryForm.forwardUrl.$invalid"></styled-form-field-error>
 								</styled-form-field>
 								<styled-form-field label="">
@@ -207,7 +207,7 @@
 					<content-body unselectable>
 						<styled-form name="editForwardUrlForm" id="adminForwardUrlForm">
 							<styled-form-field label="Forward Url" label-padding="true">
-								<input type="text" ng-model="forwardUrl.url" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-maxlength="256" required>
+								<input type="text" ng-model="forwardUrl.url" name="forwardUrl" placeholder="git@awesome.com:awesome/repository.git" ng-pattern="/^git@[\\.a-zA-Z0-9]+:[\\.a-zA-Z0-9]+$/" ng-maxlength="256" required>
 								<styled-form-field-error tooltip="Invalid forward url" error-visible="editForwardUrlForm.forwardUrl.$dirty && editForwardUrlForm.forwardUrl.$invalid"></styled-form-field-error>
 							</styled-form-field>
 							<styled-form-field label="">
