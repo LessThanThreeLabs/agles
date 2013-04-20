@@ -28,3 +28,14 @@ supervisor_service "verification_server" do
 	user "verification"
 	priority 1
 end
+
+supervisor_service "ec2_snapshotter" do
+	action [:enable, :start]
+	environment "HOME" => "/home/verification"
+	directory "/verification/snapshotter"
+	command "/etc/koality/python #{node[:koality][:source_path][:internal]}/ci/platform/bin/ec2_snapshotter.py --daemon"
+	stdout_logfile "#{node[:koality][:supervisor][:logdir]}/ec2_snapshotter_stdout.log"
+	stderr_logfile "#{node[:koality][:supervisor][:logdir]}/ec2_snapshotter_stderr.log"
+	user "verification"
+	priority 1
+end
