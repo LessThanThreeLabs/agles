@@ -14,6 +14,8 @@ CreateRepositoryStore = require './stores/createRepositoryStore'
 
 IndexHandler = require './handlers/indexHandler'
 InstallationWizardHandler = require './handlers/installationWizardHandler'
+UnexpectedErrorHandler = require './handlers/unexpectedErrorHandler'
+InvalidPermissionsHandler = require './handlers/invalidPermissionsHandler'
 
 
 exports.create = (configurationParams, modelConnection, mailer, logger) ->
@@ -36,6 +38,8 @@ exports.create = (configurationParams, modelConnection, mailer, logger) ->
 	handlers =
 		indexHandler: IndexHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix, logger
 		installationWizardHandler: InstallationWizardHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix, logger
+		unexpectedErrorHandler: UnexpectedErrorHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix, logger
+		invalidPermissionsHandler: InvalidPermissionsHandler.create configurationParams, stores, modelConnection.rpcConnection, filesSuffix, logger
 
 	return new Server configurationParams, httpsOptions, modelConnection, resourceConnection, stores, handlers, staticServer, logger
 
@@ -60,7 +64,9 @@ class Server
 		errors = {}
 		await
 			@handlers.indexHandler.initialize defer errors.indexHandlerError
-			@handlers.installationWizardHandler.initialize defer errors.insallationWizardHanderError
+			@handlers.installationWizardHandler.initialize defer errors.insallationWizardHandlerError
+			@handlers.unexpectedErrorHandler.initialize defer errors.unexpectedErrorHandlerError
+			@handlers.invalidPermissionsHandler.initialize defer errors.invalidPermissionsHandlerError
 
 		combinedErrors = []
 		for key, error of errors
@@ -110,8 +116,8 @@ class Server
 			expressServer.get '/resetPassword', @handlers.indexHandler.handleRequest
 			expressServer.get '/repository/:repositoryId', @handlers.indexHandler.handleRequest
 			expressServer.get '/admin', @handlers.indexHandler.handleRequest
-			expressServer.get '/unexpectedError', @handlers.indexHandler.handleRequest
-			expressServer.get '/invalidPermissions', @handlers.indexHandler.handleRequest
+			expressServer.get '/unexpectedError', @handlers.unexpectedErrorHandler.handleRequest
+			expressServer.get '/invalidPermissions', @handlers.invalidPermissionsHandler.handleRequest
 			expressServer.post '/extendCookieExpiration', @_handleExtendCookieExpiration
 			expressServer.get '*', @staticServer.handleRequest
 

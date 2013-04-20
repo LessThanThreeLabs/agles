@@ -35,14 +35,22 @@ module.exports = class Resource
 
 
 	_createCssString: () =>
-		cssFileNames = Object.keys @getFiles().css
-		formatedCssFiles = cssFileNames.map (cssFileName) =>
-			return "<link rel='stylesheet' type='text/css' href='#{cssFileName}' />"
-		@cssFilesString = formatedCssFiles.join '\n'
+		cssFiles = @getFiles().css
+		if not cssFiles?
+			@cssFilesString = ''
+		else
+			cssFileNames = Object.keys cssFiles
+			formatedCssFiles = cssFileNames.map (cssFileName) =>
+				return "<link rel='stylesheet' type='text/css' href='#{cssFileName}' />"
+			@cssFilesString = formatedCssFiles.join '\n'
 
 
 	_createJsString: () =>
-		jsFileNames = Object.keys @getFiles().js
-		formattedJsFiles = jsFileNames.map (jsFileName) =>
-			return "<script src='#{jsFileName}'></script>"
-		@jsFilesString = formattedJsFiles.join '\n'
+		jsFiles = @getFiles().js
+		if not jsFiles?
+			@jsFilesString = ''
+		else
+			jsFileNames = Object.keys jsFiles
+			formattedJsFiles = jsFileNames.map (jsFileName) =>
+				return "<script src='#{jsFileName}'></script>"
+			@jsFilesString = formattedJsFiles.join '\n'
