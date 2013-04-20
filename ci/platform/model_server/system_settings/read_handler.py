@@ -1,3 +1,5 @@
+import random
+import string
 import yaml
 
 from sqlalchemy import and_
@@ -37,7 +39,11 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_admin_api_key(self, user_id):
-		return DeploymentSettings.admin_api_key
+		admin_api_key = DeploymentSettings.admin_api_key
+		if not admin_api_key:
+			admin_api_key = ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(32))
+			DeploymentSettings.admin_api_key = admin_api_key
+		return admin_api_key
 
 	@AdminApi
 	def get_website_domain_name(self, user_id):

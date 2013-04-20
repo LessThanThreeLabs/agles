@@ -235,4 +235,5 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_true(conn.is_deployment_initialized())
 			assert_false(MailSettings.test_mode)
+			assert_is_not_none(conn.get_admin_api_key(self.user_id))
 			assert_is_not_none(DeploymentSettings.admin_api_key)
