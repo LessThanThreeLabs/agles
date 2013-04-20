@@ -20,9 +20,7 @@
 			"/css/src/createAccount/createAccount.css",
 			"/css/src/resetPassword/resetPassword.css",
 			"/css/src/repository/repository.css",
-			"/css/src/admin/admin.css",
-			"/css/src/unexpectedError/unexpectedError.css",
-			"/css/src/invalidPermissions/invalidPermissions.css"
+			"/css/src/admin/admin.css"
 		]
 	},
 
@@ -51,9 +49,7 @@
 			"/js/src/createAccount/createAccount.js",
 			"/js/src/resetPassword/resetPassword.js",
 			"/js/src/repository/repository.js",
-			"/js/src/admin/admin.js",
-			"/js/src/unexpectedError/unexpectedError.js",
-			"/js/src/invalidPermissions/invalidPermissions.js"
+			"/js/src/admin/admin.js"
 		]
 	},
 
@@ -73,9 +69,7 @@
 			"/html/createAccount.html",
 			"/html/resetPassword.html",
 			"/html/repository.html",
-			"/html/admin.html",
-			"/html/unexpectedError.html",
-			"/html/invalidPermissions.html"
+			"/html/admin.html"
 		]
 	},
 
