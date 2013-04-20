@@ -1,4 +1,5 @@
 #!/bin/bash
+rm -rf css/src
 declare -a pids=()
 declare -a lessfiles=()
 while read filename; do

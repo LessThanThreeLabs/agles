@@ -1,8 +1,10 @@
 #!/bin/bash
 cd $(dirname $0)
+rm -rf js/src
 iced --compile --lint --output js/src/ src/ &
 icedPidMain=$!
 
+rm -rf test/js
 iced --compile --lint --output test/js/ test/src/ &
 icedPidTest=$!
 
