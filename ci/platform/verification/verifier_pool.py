@@ -27,6 +27,10 @@ class VerifierPool(object):
 			self.free_slots.put(i)
 		self.unallocated_slots = []
 		self.allocated_slots = []
+
+		self.to_unallocate = []
+		self.to_allocate = []
+
 		self.verifiers = {}
 
 		self._fill_to_min_unallocated()
@@ -42,14 +46,20 @@ class VerifierPool(object):
 			self.remove_verifier(i)
 
 	def get(self):
-		self._fill_to_min_unallocated()
-		unallocated = self.get_first_unallocated()
-
-		if unallocated is not None:
-			self.allocated_slots.append(unallocated)
+		while True:
 			self._fill_to_min_unallocated()
-			return self.verifiers[unallocated]
-		free = self.get_first_free()
+			unallocated = self.get_first_unallocated()
+
+			if unallocated is not None:
+				self.allocated_slots.append(unallocated)
+				self._fill_to_min_unallocated()
+				return self.verifiers[unallocated]
+			try:
+				free = self.get_first_free(block=False)
+			except queue.Empty:
+				eventlet.sleep(0.1)
+			else:
+				break
 		try:
 			self._spawn_verifier(free)
 		except:
@@ -90,15 +100,20 @@ class VerifierPool(object):
 		return None
 
 	def get_first_free(self, block=True):
-		return self.free_slots.get(block)
+		return self.free_slots.get(block=block)
 
 	def _spawn_verifier(self, verifier_number, allocated=True):
 		assert verifier_number not in self.verifiers
+
+		limbo_slots = self.to_allocate if allocated else self.to_unallocate
+		limbo_slots.append(verifier_number)
+
 		self.verifiers[verifier_number] = self.spawn_verifier(verifier_number)
 		if allocated:
 			self.allocated_slots.append(verifier_number)
 		else:
 			self.unallocated_slots.append(verifier_number)
+		limbo_slots.remove(verifier_number)
 
 	def _spawn_verifier_multiple_attempts(self, verifier_number, allocated=True, attempts=10):
 		for remaining_attempts in reversed(range(attempts)):
@@ -117,13 +132,11 @@ class VerifierPool(object):
 
 	def _fill_to_min_unallocated(self):
 		new_max = self._get_max_verifiers()
-		all_slots = set(list(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots)
+		all_slots = set(list(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots + self.to_unallocate + self.to_allocate)
 		for i in range(new_max):
 			if i not in all_slots:
-				self.logger.warn("Adding slot %d to verifier pool" % i)
 				self.free_slots.put(i)
-
-		num_to_fill = self._get_min_unallocated() - len(self.unallocated_slots)
+		num_to_fill = self._get_min_unallocated() - len(self.unallocated_slots) - len(self.to_unallocate)
 		for i in range(num_to_fill):
 			try:
 				free = self.get_first_free(block=False)

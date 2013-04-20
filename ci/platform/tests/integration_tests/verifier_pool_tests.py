@@ -9,6 +9,7 @@ from verification.verifier_pool import VerifierPool
 
 class SimpleVerifierPool(VerifierPool):
 	def spawn_verifier(self, verifier_number):
+		eventlet.sleep()
 		return verifier_number
 
 
@@ -236,6 +237,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 			results_queue.put(None)
 
 	def _assert_pool_size(self, pool, free_size, unallocated_size, allocated_size):
+		eventlet.sleep(0.1)
 		assert_equal(free_size, pool.free_slots.qsize())
 		assert_equal(unallocated_size, len(pool.unallocated_slots))
 		assert_equal(allocated_size, len(pool.allocated_slots))
