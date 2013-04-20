@@ -29,6 +29,10 @@ supervisor_service "verification_server" do
 	priority 1
 end
 
+directory "/verification/snapshotter" do
+	user "verification"
+end
+
 supervisor_service "ec2_snapshotter" do
 	action [:enable, :start]
 	environment "HOME" => "/home/verification"
