@@ -64,11 +64,12 @@ class VerifierPool(object):
 
 	def remove(self, verifier):
 		slot = self._get_slot(verifier)
+
+		del self.verifiers[slot]
 		# Abandon slots that are higher than the current cap
 		if self._get_max_verifiers() > slot:
 			self.free_slots.put(slot)
 
-		del self.verifiers[slot]
 		if slot in self.unallocated_slots:
 			self.unallocated_slots.remove(slot)
 		elif slot in self.allocated_slots:
@@ -119,6 +120,7 @@ class VerifierPool(object):
 		all_slots = set(list(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots)
 		for i in range(new_max):
 			if i not in all_slots:
+				self.logger.warn("Adding slot %d to verifier pool" % i)
 				self.free_slots.put(i)
 
 		num_to_fill = self._get_min_unallocated() - len(self.unallocated_slots)
