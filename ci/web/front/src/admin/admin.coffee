@@ -192,6 +192,22 @@ window.AdminAws = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 ]
 
 
+window.AdminApi = ['$scope', 'rpc', ($scope, rpc) ->
+	getApiKey = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getAdminApiKey', null, (error, apiKey) ->
+			$scope.$apply () ->
+				$scope.apiKey = apiKey
+
+	getDomainName = () ->
+		rpc.makeRequest 'systemSettings', 'read', 'getWebsiteSettings', null, (error, websiteSettings) ->
+			$scope.$apply () ->
+				$scope.domainName = websiteSettings.domainName
+
+	getApiKey()
+	getDomainName()
+]
+
+
 window.AdminUpgrade = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 	$scope.performUpgrade = () ->
 		console.log 'need to perform upgrade here'

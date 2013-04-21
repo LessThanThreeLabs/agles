@@ -7,6 +7,7 @@
 				<content-menu-option menu-option-text="Manage User Accounts" ng-click="menuOptionClick('users')" ng-class="{selected: currentView == 'users', green: currentView == 'users'}"></content-menu-option>
 				<content-menu-option menu-option-text="Manage Repositories" ng-click="menuOptionClick('repositories')" ng-class="{selected: currentView == 'repositories', green: currentView == 'repositories'}"></content-menu-option>
 				<content-menu-option menu-option-text="Manage AWS" ng-click="menuOptionClick('aws')" ng-class="{selected: currentView == 'aws', green: currentView == 'aws'}"></content-menu-option>
+				<content-menu-option menu-option-text="Api" ng-click="menuOptionClick('api')" ng-class="{selected: currentView == 'api', green: currentView == 'api'}"></content-menu-option>
 				<content-menu-option menu-option-text="Upgrade" ng-click="menuOptionClick('upgrade')" ng-class="{selected: currentView == 'upgrade', green: currentView == 'upgrade'}"></content-menu-option>
 			</content-menu-options>
 		</menu>
@@ -250,6 +251,21 @@
 							<button id="adminAwsSubmitButton" ng-click="submit()" ng-disabled="awsForm.$invalid || instanceSettings.numWaiting > instanceSettings.maxRunning">Save Changes</button>
 						</styled-form-field>
 					</styled-form>
+				</div>
+			</content-body>
+		</content>
+	</div>
+
+	<div id="adminApi" ng-show="currentView == 'api'" ng-controller="AdminApi">
+		<content>
+			<content-header content-header-padding>Api</content-header>
+			<content-body unselectable>
+				<div id="adminApiContent">
+					<div id="adminApiMessage" ng-show="domainName != null" text-selectable>
+						You can access the Admin REST Api from <span id="adminApiUri">https://{{domainName}}:1337</span>, using the following api key:
+					</div>
+					
+					<div id="adminApiKey" text-selectable>{{apiKey}}</div>
 				</div>
 			</content-body>
 		</content>

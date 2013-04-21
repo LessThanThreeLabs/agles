@@ -12,7 +12,7 @@
 		width: @menuWidth;
 	}
 
-	#adminWebsite, #adminUsers, #adminRepositories, #adminAws, #adminUpgrade {
+	#adminWebsite, #adminUsers, #adminRepositories, #adminAws, #adminApi, #adminUpgrade {
 		position: absolute;
 		top: 0px;
 		left: @menuWidth + @panelSpacing;
@@ -269,6 +269,31 @@
 		}
 	}
 
+	#adminApi {
+
+		#adminApiContent {
+			width: 100%;
+			height: 100%;
+			overflow-y: auto;
+			text-align: center;
+
+			#adminApiMessage {
+				margin-top: 50px;
+				padding-left: 60px;
+				padding-right: 60px;
+
+				#adminApiUri {
+					color: @koalityGreen;
+				}
+			}
+
+			#adminApiKey {
+				margin-top: 30px;
+				color: @koalityGreen;
+			}
+		}
+	}
+
 	#adminUpgrade {
 
 		#adminUpgradeContent {
@@ -282,7 +307,7 @@
 			}
 
 			#adminUpgradeButton {
-				margin-top: 30px;
+				margin-top: 50px;
 			}
 		}
 	}
