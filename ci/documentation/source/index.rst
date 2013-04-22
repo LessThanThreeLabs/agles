@@ -250,6 +250,236 @@ Creating a Personal SSH Key
 ===========================
 Github has written wonderful documentation on this. You can find it at: https://help.github.com/articles/generating-ssh-keys
 
+Admin API
+=========
+
+Your Admin REST Api is located at ``https://<domain-name>:1337``.
+
+All api calls must include your Admin Api Key, which can be found in the admin panel under "api": ``https://<domain name>/admin?view=api``. This key can be included in the query string of a GET request or in the body of a POST request.
+
+Calls to the admin api are versioned. Currently the verison is 0, which can be seen in the admin api url (ex: https://domain-name:1337/v/0/...).
+
+Data can be displayed in either json (default) or xml format.
+  Show data in json by adding .json to the end of the url (ex: https://koality.company.com:1337/v/0/users.json)
+  Show data in xml by adding .xml to the end of the url (ex: https://koality.company.com:1337/v/0/users.xml)
+
+Users
+-----
+
+All Users
+~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/users``
+  :Request type: GET
+  :Query params: 
+    :key: the admin api key (string)
+  :Returns:
+    :id: the user id (number)
+    :email: the user email (string)
+    :firstName: the user's first name (string)
+    :lastName: the user's last name (string)
+    :isAdmin: whether this user is an admin (boolean)
+    :created: timestamp when the user was created, in milliseconds (number)
+  :Example: https://domain-name:1337/v/0/users?key=whatislove
+
+
+Single User
+~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/users/<user id>``
+  :Request type: GET
+  :Query params: 
+    :key: the admin api key (string)
+  :Returns:
+    :id: the user id (number)
+    :email: the user email (string)
+    :firstName: the user's first name (string)
+    :lastName: the user's last name (string)
+    :isAdmin: whether this user is an admin (boolean)
+    :created: timestamp when the user was created, in milliseconds (number)
+  :Example: https://domain-name:1337/v/0/users/17?key=whatislove
+
+
+Repositories
+------------
+
+All Repositories
+~~~~~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/repositories``
+  :Request type: GET
+  :Query params:
+    :key: the admin api key (string)
+  :Returns:
+    :id: the repository id (number)
+    :name: the name of the repository (string)
+    :uri: the Koality uri for the repository (string)
+    :publicKey: the repository's public key, to be included in the destination repository (string)
+    :created: timestamp when the repository was created, in milliseconds (number)
+  :Example: https://domain-name:1337/v/0/repositories?key=whatislove
+
+Single Repository
+~~~~~~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/repositories/<repository id>``
+  :Request type: GET
+  :Query params:
+    :key: the admin api key (string)
+  :Returns:
+    :id: the repository id (number)
+    :name: the name of the repository (string)
+    :uri: the Koality uri for the repository (string)
+    :publicKey: the repository's public key, to be included in the destination repository (string)
+    :created: timestamp when the repository was created, in milliseconds (number)
+  :Example: https://domain-name:1337/v/0/repositories/7?key=whatislove
+
+
+Changes
+-------
+
+All Changes
+~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/repositories/<repository id>/changes``
+  :Request type: GET
+  :Query params:
+    :key: the admin api key (string)
+    :search: names to search for, defaults to '' (string)
+    :start: where to start search, where 0 represents the most recent (number)
+    :results: number of results to return (number)
+  :Returns:
+    :id: the change id (number)
+    :number: the change number for the repository (number)
+    :status: the change's current status (string)
+    :mergeStatus: whether the change successfully merged (boolean)
+    :createTime: timestamp when the change was created, in milliseconds (number)
+    :startTime: timestamp when the change was started, in milliseconds (number)
+    :endTime: timestamp when the change ended, in milliseconds (number)
+  :Example: https://domain-name:1337/v/0/repositories/7/changes?key=whatislove&search=koala&start=0&results=100
+
+Single Change
+~~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/repositories/<repository id>/changes/<change id>``
+  :Request type: GET
+  :Query params:
+    :key: the admin api key (string)
+  :Returns:
+    :id: the change id (number)
+    :number: the change number for the repository (number)
+    :status: the change's current status (string)
+    :user:
+      :id: the id for the user that created the change (number)
+      :email: the email for the user that created the change (string)
+      :firstName: the first name of the user that created the change (string)
+      :lastName: the last name of the user that created the change (string)
+    :headCommit:
+      :message: the message for the head commit (string)
+      :sha: the sha for the head commit (string)
+    :target: the branch for that change (string)
+    :mergeStatus: whether the change successfully merged (boolean)
+    :createTime: timestamp when the change was created, in milliseconds (number)
+    :startTime: timestamp when the change was started, in milliseconds (number)
+    :endTime: timestamp when the change ended, in milliseconds (number)
+  :Example: https://domain-name:1337/v/0/repositories/7/changes/9001?key=whatislove
+
+
+Stages
+------
+
+All Stages
+~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/repositories/<repository id>/changes/<change id>/stages``
+  :Request type: GET
+  :Query params:
+    :key: the admin api key (string)
+  :Returns:
+    :id: the stage id (number)
+    :type: the type of stage (string)
+    :name: the name of the stage (string)
+    :status: whether the stage is running, passed, or failed (string)
+  :Example: https://domain-name:1337/v/0/repositories/7/changes/9001/stages?key=whatislove
+
+Single Stage
+~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/repositories/<repository id>/changes/<change id>/stages/<stage id>``
+  :Request type: GET
+  :Query params:
+    :key: the admin api key (string)
+  :Returns:
+    :id: the stage id (number)
+    :type: the type of stage (string)
+    :name: the name of the stage (string)
+    :status: whether the stage is running, passed, or failed (string)
+    :lines: an array of lines [string]
+  :Example: https://domain-name:1337/v/0/repositories/7/changes/9001/stages/1234?key=whatislove
+
+
+Aws
+---
+
+Getting Information
+~~~~~~~~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/aws``
+  :Request type: GET
+  :Query params:
+    :key: the admin api key (string)
+  :Returns:
+    :awsKeys:
+      :accessKey: aws access key (string)
+      :secretKey: aws secret key (string)
+    :allowedInstances: array of allowed instance types [string]
+    :instanceSettings:
+      :instanceSize: currently selected instance size (string)
+      :numWaiting: number of instances to have waiting (number)
+      :maxRunning: maximum number of running instances (number)
+  :Example: https://domain-name:1337/v/0/aws?key=whatislove
+
+Setting Information
+~~~~~~~~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/aws``
+  :Request type: POST
+  :Body:
+    :key: the admin api key (string)
+    :awsKeys:
+      :accessKey: aws access key (string)
+      :secretKey: aws secret key (string)
+    :instanceSettings:
+      :instanceSize: currently selected instance size (string)
+      :numWaiting: number of instances to have waiting (number)
+      :maxRunning: maximum number of running instances (number)
+  :Returns: ``ok`` on success
+
+
+Domain
+------
+
+Getting Information
+~~~~~~~~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/domain``
+  :Request type: GET
+  :Query params:
+    :key: the admin api key (string)
+  :Returns:
+    :name: the domain name (string)
+  :Example: https://domain-name:1337/v/0/domain?key=whatislove
+
+Setting Information
+~~~~~~~~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/domain``
+  :Request type: POST
+  :Body:
+    :key: the admin api key (string)
+    :name: the domain name (string)
+  :Returns: ``ok`` on success
+
+
 Optimizing Koality for Speed
 ============================
 1. I make large changes and git push takes a long time
