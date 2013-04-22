@@ -134,7 +134,7 @@ class RemoteTestCommand(RemoteShellCommand):
 				export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name))
 				script += "mkdir -p %s;" % export_directory
 				script += "if [ -d %s ]; then mv %s %s; mkdir -p %s\n" % (export, export, export_directory, export)
-				script += "else; mv %s %s; fi\n" % (export, export_directory)
+				script += "else mv %s %s; fi\n" % (export, export_directory)
 
 		script = script + "exit $_r"
 		return script
