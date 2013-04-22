@@ -157,7 +157,7 @@ class VirtualMachineBuildCore(BuildCore):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		return self.virtual_machine.cache_repository(repo_name, console_appender)
 
-	def export_files(self, export_prefix, files):
+	def export_files(self, export_prefix, *files):
 		export_command = RemoteExportCommand(export_prefix, files)
 		return export_command.run(self.virtual_machine).output
 

@@ -112,7 +112,7 @@ class RemoteCompileCommand(RemoteShellCommand):
 
 		if self.export:
 			export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'compile', self.name))
-			script += "mkdir -p %s\n" % export_directory
+			script += "cd; mkdir -p %s\n" % export_directory
 			for export in self.export:
 				export = pipes.quote(export)
 				script += "ln -s %s %s\n" % (os.path.join('source', export), os.path.join(export_directory, export))
@@ -132,7 +132,7 @@ class RemoteTestCommand(RemoteShellCommand):
 			for export in self.export:
 				export = pipes.quote(os.path.join('source', export))
 				export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name))
-				script += "mkdir -p %s;" % export_directory
+				script += "cd; mkdir -p %s;" % export_directory
 				script += "if [ -d %s ]; then mv %s %s; mkdir -p %s\n" % (export, export, export_directory, export)
 				script += "else mv %s %s; fi\n" % (export, export_directory)
 

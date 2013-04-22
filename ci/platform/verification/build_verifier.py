@@ -146,12 +146,11 @@ class BuildVerifier(object):
 			os.remove(self._get_build_info_file())
 
 		build = self._get_build(build_id)
-		export_prefix = "repo_%d/change_%d/test" % (build['repo_id'], build['change_id'])
+		export_prefix = "repo_%d/change_%d" % (build['repo_id'], build['change_id'])
 		self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test"))
 
 		if not artifact_export_event.ready():
 			artifact_export_event.send()
-			export_prefix = "repo_%d/change_%d/compile" % (build['repo_id'], build['change_id'])
 			self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
 
 		commit_id = build['commit_id']
