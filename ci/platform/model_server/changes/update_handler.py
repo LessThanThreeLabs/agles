@@ -66,3 +66,11 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link)
 
 		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)
+
+	def set_export_url(self, change_id, export_url):
+		change = schema.change
+		update = change.update().where(change.c.id == change_id).values(export_url=export_url)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(update)
+
+		self.publish_event("changes", change_id, "export url added", export_url=export_url)

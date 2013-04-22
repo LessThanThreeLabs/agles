@@ -6,6 +6,7 @@ import model_server
 
 from build_core import VerificationException
 from pubkey_registrar import PubkeyRegistrar
+from settings.aws import AwsSettings
 from shared.constants import BuildStatus, VerificationUser, KOALITY_EXPORT_PATH
 from util import pathgen
 from util.log import Logged
@@ -152,6 +153,10 @@ class BuildVerifier(object):
 		if not artifact_export_event.ready():
 			artifact_export_event.send()
 			self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
+			with model_server.rpc_connect("changes", "update") as changes_update_rpc:
+				# TODO: generalize this
+				s3_export_url = "s3.amazonaws.com/%s/%s" % (AwsSettings.s3_bucket_name, export_prefix)
+				changes_update_rpc.set_export_url(change_id, export_prefix)
 
 		commit_id = build['commit_id']
 		repo_uri = self._get_repo_uri(commit_id)

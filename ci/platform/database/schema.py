@@ -69,6 +69,7 @@ change = Table('change', metadata,
 	Column('create_time', Integer, nullable=False),
 	Column('start_time', Integer, nullable=True),
 	Column('end_time', Integer, nullable=True),
+	Column('export_url', String, nullable=True),
 
 	UniqueConstraint('repo_id', 'number')
 )

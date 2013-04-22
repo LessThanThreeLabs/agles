@@ -96,4 +96,3 @@ class Logged(object):
 
 
 from util.mail import sendmail
-
