@@ -229,6 +229,34 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		results = sorted([verifier_pool.get() for i in range(5)])
 		assert_equal(range(5), results)
 
+	@Timeout(time=2)
+	def test_queuing_reinitialize_up_down(self):
+		verifier_pool = SimpleVerifierPool(max_verifiers=8, min_unallocated=5)
+		self._assert_pool_size(verifier_pool, 3, 5, 0)
+
+		# verifier_pool._initializing acts as a lock
+		verifier_pool._initializing = True
+		verifier_pool.reinitialize(max_verifiers=10, min_unallocated=4)
+		verifier_pool.reinitialize(max_verifiers=3, min_unallocated=1)  # This should be the last to run
+		verifier_pool._initializing = False
+		verifier_pool.reinitialize(max_verifiers=5, min_unallocated=2)
+
+		self._assert_pool_size(verifier_pool, 2, 1, 0)
+
+	@Timeout(time=2)
+	def test_queuing_reinitialize_down_up(self):
+		verifier_pool = SimpleVerifierPool(max_verifiers=8, min_unallocated=5)
+		self._assert_pool_size(verifier_pool, 3, 5, 0)
+
+		# verifier_pool._initializing acts as a lock
+		verifier_pool._initializing = True
+		verifier_pool.reinitialize(max_verifiers=3, min_unallocated=1)
+		verifier_pool.reinitialize(max_verifiers=10, min_unallocated=4)  # This should be the last to run
+		verifier_pool._initializing = False
+		verifier_pool.reinitialize(max_verifiers=5, min_unallocated=2)
+
+		self._assert_pool_size(verifier_pool, 6, 4, 0)
+
 	def _recycle_multiple_times(self, verifier_pool, recycle_count, results_queue, keep_result=False):
 		for i in range(recycle_count - 1):
 			verifier = verifier_pool.get()
@@ -241,6 +269,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
 	def _assert_pool_size(self, pool, free_size, unallocated_size, allocated_size):
 		eventlet.sleep(0.1)
-		assert_equal(free_size, pool.free_slots.qsize())
+
+		assert_equal(free_size, pool.free_slots.qsize() - len(pool.to_remove_free))
 		assert_equal(unallocated_size, len(pool.unallocated_slots))
 		assert_equal(allocated_size, len(pool.allocated_slots))

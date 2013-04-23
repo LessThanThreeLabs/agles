@@ -48,9 +48,10 @@ class VerifierPool(object):
 			self._initialize_continuation = lambda: self._reinitialize(max_verifiers, min_unallocated)
 
 	def _reinitialize(self, max_verifiers=None, min_unallocated=None):
+		old_max = self._get_max_verifiers()
 		self.max_verifiers = max_verifiers
 		self.min_unallocated = min_unallocated
-		self._decrease_pool_size()
+		self._decrease_pool_size(old_max)
 		self._increase_pool_size()
 		self._fill_to_min_unallocated()
 		if self._initialize_continuation:
@@ -159,13 +160,12 @@ class VerifierPool(object):
 			else:
 				break
 
-	def _decrease_pool_size(self):
+	def _decrease_pool_size(self, old_max):
+		new_min = self._get_min_unallocated()
 		new_max = self._get_max_verifiers()
-		all_slots = set(list(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots + self.to_unallocate + self.to_allocate)
-		num_slots = len(all_slots)
 
-		for i in xrange(new_max, num_slots):
-			if i in set(self.free_slots.queue):
+		for i in xrange(new_min, old_max):
+			if i >= new_max and i in set(self.free_slots.queue):
 				self.to_remove_free.add(i)
 			elif i in self.unallocated_slots:
 				self.unallocated_slots.remove(i)
@@ -173,7 +173,7 @@ class VerifierPool(object):
 
 	def _increase_pool_size(self):
 		new_max = self._get_max_verifiers()
-		all_slots = set(list(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots + self.to_unallocate + self.to_allocate)
+		all_slots = set(list(set(self.free_slots.queue) - self.to_remove_free) + self.unallocated_slots + self.allocated_slots + self.to_unallocate + self.to_allocate)
 
 		for i in xrange(new_max):
 			if i not in all_slots:
