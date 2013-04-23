@@ -23,6 +23,8 @@ def upgrade():
                nullable=False)
     ### end Alembic commands ###
 
+    user = sa.sql.table('user', sa.sql.column('id', sa.Integer()))
+    op.get_bind().execute(user.delete().where(user.c.id == 1))
     schema.insert_admin_user()
     schema.insert_admin_api_user()
     schema.insert_admin_verifier()
@@ -35,6 +37,5 @@ def downgrade():
                nullable=True)
     ### end Alembic commands ###
     user = sa.sql.table('user', sa.sql.column('id', sa.Integer()))
-    op.get_bind().execute(user.delete().where(user.c.id == 1))
     op.get_bind().execute(user.delete().where(user.c.id == 2))
     op.get_bind().execute(user.delete().where(user.c.id == 3))
