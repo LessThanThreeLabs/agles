@@ -6,7 +6,7 @@ from kombu.messaging import Producer
 import model_server
 
 from build_core import LightWeightBuildCore
-from shared.handler import EventSubscriber
+from shared.handler import EventSubscriber, ResourceBinding
 from settings.verification_server import VerificationServerSettings
 from util import greenlets, pathgen
 from util.log import Logged
@@ -16,7 +16,10 @@ from verification_results_handler import VerificationResultsHandler
 @Logged()
 class ChangeVerifier(EventSubscriber):
 	def __init__(self, verifier_pool, uri_translator):
-		super(ChangeVerifier, self).__init__('repos', 'verification:repos.update')
+		super(ChangeVerifier, self).__init__([
+			ResourceBinding('repos', 'verification:repos.update'),
+			ResourceBinding('system_settings', None)
+		])
 		self.verifier_pool = verifier_pool
 		self.uri_translator = uri_translator
 		self.results_handler = VerificationResultsHandler()
@@ -28,6 +31,8 @@ class ChangeVerifier(EventSubscriber):
 	def handle_message(self, body, message):
 		if body['type'] == 'change added':
 			self._handle_new_change(body['contents'])
+		elif body['type'] == 'verifier settings updated':
+			self._handle_verifier_settings_update(body['contents'])
 		message.ack()
 
 	def _handle_new_change(self, contents):
@@ -42,6 +47,14 @@ class ChangeVerifier(EventSubscriber):
 		except:
 			self.logger.critical("Unexpected failure while verifying change %d, commit %d. Failing change." % (change_id, commit_id), exc_info=True)
 			self.results_handler.fail_change(change_id)
+
+	def _handle_verifier_settings_update(self, contents):
+		try:
+			max_verifiers = contents["max_verifiers"]
+			min_unallocated = contents["min_unallocated"]
+			self.verifier_pool.reinitialize(max_verifiers=max_verifiers, min_unallocated=min_unallocated)
+		except:
+			self.logger.critical("Unexpected failure while updating verifier pool to max_verifiers: %s, min_unallocated: %s." % (max_verifiers, min_unallocated), exc_info=True)
 
 	def verify_change(self, verification_config, change_id, workers_spawned):
 		task_queue = TaskQueue()

@@ -70,8 +70,10 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		AwsSettings.s3_bucket_name = bucket_name
 
 	@AdminApi
-	def set_instance_settings(self, user_id, instance_size, num_waiting, max_running, teardown_after_change):
+	def set_instance_settings(self, user_id, instance_size, min_unallocated, max_verifiers, teardown_after_change):
 		AwsSettings.instance_type = instance_size
-		VerificationServerSettings.static_pool_size = num_waiting
-		VerificationServerSettings.max_virtual_machine_count = max_running
+		VerificationServerSettings.static_pool_size = min_unallocated
+		VerificationServerSettings.max_virtual_machine_count = max_verifiers
 		VerificationServerSettings.teardown_after_build = teardown_after_change
+		self.publish_event("system_settings", None, "verifier settings updated", max_verifiers=max_verifiers, min_unallocated=min_unallocated)
+

@@ -27,5 +27,4 @@ class EventsBroker(object):
 		message = {'id': _id, 'type': _event_type, 'contents': contents}
 		producer.publish(message,
 			routing_key=_resource,
-			delivery_mode=2
-		)
+			delivery_mode=2)

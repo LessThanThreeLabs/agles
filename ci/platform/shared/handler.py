@@ -1,6 +1,8 @@
 # handler.py - Abstract message handlers
-""" Abstract message handler and two basic extending types
-"""
+""" Abstract message handler and two basic extending types"""
+
+import collections
+
 from util import greenlets
 from model_server.events_broker import EventsBroker
 
@@ -24,14 +26,18 @@ class QueueListener(MessageHandler):
 		consumer.consume()
 
 
+ResourceBinding = collections.namedtuple('ResourceBinding', ['resource', 'queue_name'])
+
+
 class EventSubscriber(MessageHandler):
-	def __init__(self, resource, queue_name=None):
+	def __init__(self, resources):
 		super(EventSubscriber, self).__init__()
-		self.resource = resource
-		self.queue_name = queue_name
+		self.resources = resources
 
 	def bind(self, channel):
 		channel.basic_qos(0, 1, False)
-		consumer = EventsBroker(channel).subscribe(self.resource, queue_name=self.queue_name,
-			callback=greenlets.spawn_wrap(self.handle_message))
-		consumer.consume()
+		for rb in self.resources:
+			assert isinstance(rb, ResourceBinding)
+			consumer = EventsBroker(channel).subscribe(rb.resource, queue_name=rb.queue_name,
+				callback=greenlets.spawn_wrap(self.handle_message))
+			consumer.consume()
