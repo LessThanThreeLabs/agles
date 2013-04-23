@@ -105,7 +105,7 @@ class VirtualMachine(object):
 	def get_image_version(cls, image):
 		name_parts = image.name.split('_')
 		try:
-			major_version, minor_version = int(name_parts[-2]), int(name_parts[-1])
+			major_version, minor_version = float(name_parts[-2]), float(name_parts[-1])
 		except (IndexError, ValueError):
-			major_version, minor_version = int(name_parts[-1]), -1
+			major_version, minor_version = float(name_parts[-1]), -1
 		return major_version, minor_version
