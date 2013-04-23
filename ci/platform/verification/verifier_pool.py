@@ -21,11 +21,10 @@ class VerifierPool(object):
 		assert max_verifiers >= min_unallocated
 
 		self.uri_translator = uri_translator
-		self._current_max_verifiers = max_verifiers
+
 		self.free_slots = queue.Queue()
 		self.to_remove_free = set()
-		for i in range(max_verifiers):
-			self.free_slots.put(i)
+
 		self.unallocated_slots = []
 		self.allocated_slots = []
 
@@ -37,7 +36,7 @@ class VerifierPool(object):
 		self._initializing = False
 		self._initialize_continuation = None
 
-		self._fill_to_min_unallocated()
+		self.reinitialize(max_verifiers=max_verifiers, min_unallocated=min_unallocated)
 
 	def reinitialize(self, max_verifiers=None, min_unallocated=None):
 		# We use self._initializing as a lock for greenlets
@@ -53,6 +52,7 @@ class VerifierPool(object):
 		self.min_unallocated = min_unallocated
 		self._decrease_pool_size()
 		self._increase_pool_size()
+		self._fill_to_min_unallocated()
 		if self._initialize_continuation:
 			continuation = self._initialize_continuation
 			self._initialize_continuation = None
