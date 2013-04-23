@@ -84,7 +84,12 @@ def snapshot():
 
 		print 'Provisioning for repository "%s" on branch "%s"' % (primary_repository['name'], primary_branch)
 		virtual_machine.ssh_call('mv /repositories/cached/%s source' % primary_repository['name'])
-		virtual_machine.provision(primary_repository['privatekey'])
+		provision_results = virtual_machine.provision(primary_repository['privatekey'])
+		if provision_results.returncode != 0:
+			failure_message = 'Provisioning failed with returncode %d' % provision_results.returncode
+			print failure_message
+			print 'Provision output:\n%s' % provision_results.output
+			raise Exception(failure_message)
 		virtual_machine.cache_repository(primary_repository['name'])
 
 		new_image_name = '%s%s_%s' % (AwsSettings.vm_image_name_prefix, snapshot_version[0], snapshot_version[1])
