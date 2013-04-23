@@ -22,6 +22,7 @@ setup:
       - iced-coffee-script
       - less
       - karma
+      - grunt-cli
       - npm install: ci/web/back
   - databases:
     - postgres:
