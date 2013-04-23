@@ -21,6 +21,10 @@
     "uglify-js": "2.2.2"
   },
 
+  "devDependencies": {
+    "grunt": "0.4.1"
+  },
+
   "engines": {
     "node": "x.x.x",
     "npm":  "x.x.x"
