@@ -23,6 +23,7 @@ class VerifierPool(object):
 		self.uri_translator = uri_translator
 		self._current_max_verifiers = max_verifiers
 		self.free_slots = queue.Queue()
+		self.to_remove_free = set()
 		for i in range(max_verifiers):
 			self.free_slots.put(i)
 		self.unallocated_slots = []
@@ -34,6 +35,12 @@ class VerifierPool(object):
 		self.verifiers = {}
 
 		self._fill_to_min_unallocated()
+
+	def reinitialize(self, max_verifiers=None, min_unallocated=None):
+		self.max_verifiers = max_verifiers
+		self.min_unallocated = min_unallocated
+		self._fill_to_min_unallocated()
+		self._unfill_to_max_allocated()
 
 	def _get_max_verifiers(self):
 		return self.max_verifiers if self.max_verifiers is not None else VerificationServerSettings.max_virtual_machine_count
@@ -100,7 +107,11 @@ class VerifierPool(object):
 		return None
 
 	def get_first_free(self, block=True):
-		return self.free_slots.get(block=block)
+		slot = self.free_slots.get(block=block)
+		while slot in self.to_remove_free:
+			self.to_remove_free.remove(slot)
+			slot = self.free_slots.get(block=block)
+		return slot
 
 	def _spawn_verifier(self, verifier_number, allocated=True):
 		assert verifier_number not in self.verifiers
@@ -112,7 +123,10 @@ class VerifierPool(object):
 		if allocated:
 			self.allocated_slots.append(verifier_number)
 		else:
-			self.unallocated_slots.append(verifier_number)
+			if verifier_number >= self._get_max_verifiers():
+				self.remove_verifier(verifier_number)
+			else:
+				self.unallocated_slots.append(verifier_number)
 		limbo_slots.remove(verifier_number)
 
 	def _spawn_verifier_multiple_attempts(self, verifier_number, allocated=True, attempts=10):
@@ -130,14 +144,34 @@ class VerifierPool(object):
 			else:
 				break
 
+	def _unfill_to_max_allocated(self):
+		new_max = self._get_max_verifiers()
+		free_list = set(self.free_slots.queue)
+		all_slots = set(list(free_list) + self.unallocated_slots + self.allocated_slots + self.to_unallocate + self.to_allocate)
+		num_slots = len(all_slots)
+
+		if new_max >= num_slots:
+			return
+
+		for i in xrange(new_max, num_slots):
+			if i in free_list:
+				self.to_remove_free.add(i)
+			elif i in self.unallocated_slots:
+				self.remove_verifier(i)
+
 	def _fill_to_min_unallocated(self):
 		new_max = self._get_max_verifiers()
 		all_slots = set(list(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots + self.to_unallocate + self.to_allocate)
-		for i in range(new_max):
+		num_slots = len(all_slots)
+
+		if new_max < num_slots:
+			return
+
+		for i in xrange(new_max):
 			if i not in all_slots:
 				self.free_slots.put(i)
 		num_to_fill = self._get_min_unallocated() - len(self.unallocated_slots) - len(self.to_unallocate)
-		for i in range(num_to_fill):
+		for i in xrange(num_to_fill):
 			try:
 				free = self.get_first_free(block=False)
 			except queue.Empty:
