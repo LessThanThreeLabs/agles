@@ -119,7 +119,7 @@ def remove_stale_snapshots():
 	stale_images = local_images[3:]
 	for image in stale_images:
 		print 'Removing snapshot %s' % image.name
-		image.deregister()
+		image.deregister(delete_snapshot=True)
 
 
 def _sleep_until(t):
