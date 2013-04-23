@@ -52,10 +52,10 @@ def snapshot():
 	newest_global_image = vm_class.get_newest_global_image()
 	newest_image_version = vm_class.get_image_version(vm_class.get_newest_image())
 	snapshot_version = newest_image_version[0], newest_image_version[1] + 1
-	instance_name = 'koality_snapshot_%d_%d' % snapshot_version
+	instance_name = 'koality_snapshot_%s_%s' % snapshot_version
 
 	print 'Creating new instance named "%s" based on image "%s"' % (instance_name, newest_global_image.name)
-	virtual_machine = vm_class.from_directory_or_construct("/tmp/koality/cached/%d_%d" % snapshot_version, instance_name, newest_global_image.id)
+	virtual_machine = vm_class.from_directory_or_construct("/tmp/koality/cached/%s_%s" % snapshot_version, instance_name, newest_global_image.id)
 
 	try:
 		virtual_machine.wait_until_ready()
@@ -87,7 +87,7 @@ def snapshot():
 		virtual_machine.provision(primary_repository['privatekey'])
 		virtual_machine.cache_repository(primary_repository['name'])
 
-		new_image_name = '%s%d_%d' % (AwsSettings.vm_image_name_prefix, snapshot_version[0], snapshot_version[1])
+		new_image_name = '%s%s_%s' % (AwsSettings.vm_image_name_prefix, snapshot_version[0], snapshot_version[1])
 		print 'Saving instance as AMI "%s"' % new_image_name
 		virtual_machine.create_image(new_image_name)
 
