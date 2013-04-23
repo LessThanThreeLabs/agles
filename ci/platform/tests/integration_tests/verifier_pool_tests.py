@@ -12,6 +12,9 @@ class SimpleVerifierPool(VerifierPool):
 		eventlet.sleep()
 		return verifier_number
 
+	def remove_verifier(self, verifier_number):
+		del self.verifiers[verifier_number]
+
 
 class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	@classmethod
@@ -93,11 +96,11 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		verifier_pool = SimpleVerifierPool(max_verifiers=3, min_unallocated=1)
 		self._assert_pool_size(verifier_pool, 2, 1, 0)
 
-		verifier_pool.max_verifiers = 5
+		verifier_pool.reinitialize(max_verifiers=5, min_unallocated=1)
 		verifier_pool._fill_to_min_unallocated()
 		self._assert_pool_size(verifier_pool, 4, 1, 0)
 
-		verifier_pool.max_verifiers = 10
+		verifier_pool.reinitialize(max_verifiers=10, min_unallocated=1)
 		results = sorted([verifier_pool.get() for i in range(10)])
 		assert_equal(range(10), results)
 
@@ -106,7 +109,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		verifier_pool = SimpleVerifierPool(max_verifiers=10, min_unallocated=2)
 		self._assert_pool_size(verifier_pool, 8, 2, 0)
 
-		verifier_pool.max_verifiers = 5
+		verifier_pool.reinitialize(max_verifiers=5, min_unallocated=2)
 		empty_results_queue = eventlet.queue.Queue()
 		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, empty_results_queue) for i in range(3)]
 
@@ -124,7 +127,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		verifier_pool = SimpleVerifierPool(max_verifiers=10, min_unallocated=2)
 		self._assert_pool_size(verifier_pool, 8, 2, 0)
 
-		verifier_pool.max_verifiers = 5
+		verifier_pool.reinitialize(max_verifiers=5, min_unallocated=2)
 		empty_results_queue = eventlet.queue.Queue()
 		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, empty_results_queue) for i in range(3)]
 
@@ -137,7 +140,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._assert_pool_size(verifier_pool, 0, 0, 5)
 		assert_equal(range(5), remaining)
 
-		verifier_pool.max_verifiers = 10
+		verifier_pool.reinitialize(max_verifiers=10, min_unallocated=2)
 		empty_results_queue = eventlet.queue.Queue()
 		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 10, empty_results_queue) for i in range(3)]
 
@@ -163,7 +166,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		verifier_pool = SimpleVerifierPool(max_verifiers=5, min_unallocated=2)
 		self._assert_pool_size(verifier_pool, 3, 2, 0)
 
-		verifier_pool.max_verifiers = 10
+		verifier_pool.reinitialize(max_verifiers=10, min_unallocated=2)
 		empty_results_queue = eventlet.queue.Queue()
 		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 10, empty_results_queue) for i in range(3)]
 
@@ -178,7 +181,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
 		[verifier_pool.remove(i) for i in list(verifier_pool.allocated_slots)]
 
-		verifier_pool.max_verifiers = 5
+		verifier_pool.reinitialize(max_verifiers=5, min_unallocated=2)
 		empty_results_queue = eventlet.queue.Queue()
 		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 10, empty_results_queue) for i in range(3)]
 

@@ -34,6 +34,9 @@ class VerifierPool(object):
 
 		self.verifiers = {}
 
+		self._initializing = False
+		self._initialize_continuation = None
+
 		self._fill_to_min_unallocated()
 
 	def reinitialize(self, max_verifiers=None, min_unallocated=None):
@@ -158,13 +161,14 @@ class VerifierPool(object):
 
 	def _decrease_pool_size(self):
 		new_max = self._get_max_verifiers()
-		all_slots = set(set(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots + self.to_unallocate + self.to_allocate)
+		all_slots = set(list(self.free_slots.queue) + self.unallocated_slots + self.allocated_slots + self.to_unallocate + self.to_allocate)
 		num_slots = len(all_slots)
 
 		for i in xrange(new_max, num_slots):
 			if i in set(self.free_slots.queue):
 				self.to_remove_free.add(i)
 			elif i in self.unallocated_slots:
+				self.unallocated_slots.remove(i)
 				self.remove_verifier(i)
 
 	def _increase_pool_size(self):
@@ -189,8 +193,9 @@ class VerifierPool(object):
 		raise NotImplementedError()
 
 	def remove_verifier(self, verifier_number):
-		self.verifiers[verifier_number].teardown()
+		verifier = self.verifiers[verifier_number]
 		del self.verifiers[verifier_number]
+		verifier.teardown()
 
 
 class VirtualMachineVerifierPool(VerifierPool):
