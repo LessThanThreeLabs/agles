@@ -67,10 +67,15 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 
 		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)
 
-	def set_export_url(self, change_id, export_url):
-		change = schema.change
-		update = change.update().where(change.c.id == change_id).values(export_url=export_url)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(update)
+	def add_export_uris(self, change_id, export_uris):
+		change_export_uri = schema.change_export_uri
 
-		self.publish_event("changes", change_id, "export url added", export_url=export_url)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			for uri in export_uris:
+				ins = change_export_uri.insert().values(
+					change_id=change_id,
+					uri=uri
+				)
+				sqlconn.execute(ins)
+
+		self.publish_event("changes", change_id, "export uris added", export_uris=export_uris)

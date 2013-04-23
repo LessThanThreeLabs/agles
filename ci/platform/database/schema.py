@@ -69,7 +69,6 @@ change = Table('change', metadata,
 	Column('create_time', Integer, nullable=False),
 	Column('start_time', Integer, nullable=True),
 	Column('end_time', Integer, nullable=True),
-	Column('export_url', String, nullable=True),
 
 	UniqueConstraint('repo_id', 'number')
 )
@@ -106,6 +105,14 @@ console_output = Table('console_output', metadata,
 	Column('line', String, nullable=False),
 
 	UniqueConstraint('build_console_id', 'line_number')
+)
+
+change_export_uri = Table('change_export_uri', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
+	Column('uri', String, nullable=False),
+
+	UniqueConstraint('change_id', 'uri')
 )
 
 repostore = Table('repostore', metadata,

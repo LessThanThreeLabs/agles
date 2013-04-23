@@ -172,14 +172,14 @@ class RemoteProvisionCommand(RemoteSetupCommand):
 
 
 class RemoteExportCommand(RemoteCommand):
-	def __init__(self, export_prefix, files):
+	def __init__(self, export_prefix, filepath):
 		super(RemoteCommand, self).__init__()
 		self.name = 'export'
 		self.export_prefix = export_prefix
-		self.files = files
+		self.filepath = filepath
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.export(self.export_prefix, self.files, output_handler=output_handler)
+		return virtual_machine.export(self.export_prefix, self.filepath, output_handler=output_handler)
 
 
 class RemoteErrorCommand(RemoteCommand):

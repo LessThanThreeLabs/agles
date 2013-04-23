@@ -148,15 +148,23 @@ class BuildVerifier(object):
 
 		build = self._get_build(build_id)
 		export_prefix = "repo_%d/change_%d" % (build['repo_id'], build['change_id'])
-		self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test"))
+
+		def parse_export_uris(export_results):
+			if export_results.return_code != 0:
+				try:
+					return yaml.safe_load(export_results.output)['uris']
+				except:
+					return []
+
+		export_uris = parse_export_uris(self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test")))
 
 		if not artifact_export_event.ready():
 			artifact_export_event.send()
-			self.build_core.export_files(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
-			with model_server.rpc_connect("changes", "update") as changes_update_rpc:
-				# TODO: generalize this
-				s3_export_url = "s3.amazonaws.com/%s/%s" % (AwsSettings.s3_bucket_name, export_prefix)
-				changes_update_rpc.set_export_url(change_id, export_prefix)
+			results = self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
+			export_uris += parse_export_uris(results)
+
+		with model_server.rpc_connect("changes", "update") as changes_update_rpc:
+			changes_update_rpc.add_export_uris(build['change_id'], export_uris)
 
 		commit_id = build['commit_id']
 		repo_uri = self._get_repo_uri(commit_id)
