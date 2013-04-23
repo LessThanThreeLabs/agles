@@ -150,7 +150,7 @@ class BuildVerifier(object):
 		export_prefix = "repo_%d/change_%d" % (build['repo_id'], build['change_id'])
 
 		def parse_export_uris(export_results):
-			if export_results.return_code != 0:
+			if export_results.returncode != 0:
 				try:
 					return yaml.safe_load(export_results.output)['uris']
 				except:
