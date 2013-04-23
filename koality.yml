@@ -20,7 +20,6 @@ setup:
       - install requirements: ci/platform/requirements.txt
     - npm:
       - iced-coffee-script
-      - coffee-script
       - less
       - karma
       - grunt-cli
