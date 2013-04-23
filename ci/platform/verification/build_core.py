@@ -159,7 +159,7 @@ class VirtualMachineBuildCore(BuildCore):
 
 	def export_path(self, export_prefix, filepath):
 		export_command = RemoteExportCommand(export_prefix, filepath)
-		return export_command.run(self.virtual_machine).output
+		return export_command.run(self.virtual_machine)
 
 
 class VagrantBuildCore(VirtualMachineBuildCore):
