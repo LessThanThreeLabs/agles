@@ -13,7 +13,6 @@ from util.permissions import AdminApi
 
 
 class SystemSettingsUpdateHandler(ModelServerRpcHandler):
-
 	def __init__(self):
 		super(SystemSettingsUpdateHandler, self).__init__("system_settings", "update")
 

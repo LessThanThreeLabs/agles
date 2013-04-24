@@ -220,7 +220,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		verifier_pool.min_unallocated = 1
 		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, empty_results_queue) for i in range(3)]
 
-		for i in range(3):
+		for i in xrange(3):
 			assert_is_none(empty_results_queue.get())
 
 		self._assert_pool_size(verifier_pool, 4, 1, 0)
@@ -232,28 +232,42 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	@Timeout(time=2)
 	def test_queuing_reinitialize_up_down(self):
 		verifier_pool = SimpleVerifierPool(max_verifiers=8, min_unallocated=5)
+		results_queue = eventlet.queue.Queue()
 		self._assert_pool_size(verifier_pool, 3, 5, 0)
 
 		# verifier_pool._initializing acts as a lock
 		verifier_pool._initializing = True
+		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, results_queue) for i in range(5)]
 		verifier_pool.reinitialize(max_verifiers=10, min_unallocated=4)
+		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, results_queue) for i in range(5)]
 		verifier_pool.reinitialize(max_verifiers=3, min_unallocated=1)  # This should be the last to run
 		verifier_pool._initializing = False
+		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, results_queue) for i in range(5)]
 		verifier_pool.reinitialize(max_verifiers=5, min_unallocated=2)
+
+		for i in xrange(15):
+			assert_is_none(results_queue.get())
 
 		self._assert_pool_size(verifier_pool, 2, 1, 0)
 
 	@Timeout(time=2)
 	def test_queuing_reinitialize_down_up(self):
 		verifier_pool = SimpleVerifierPool(max_verifiers=8, min_unallocated=5)
+		results_queue = eventlet.queue.Queue()
 		self._assert_pool_size(verifier_pool, 3, 5, 0)
 
 		# verifier_pool._initializing acts as a lock
 		verifier_pool._initializing = True
+		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, results_queue) for i in range(5)]
 		verifier_pool.reinitialize(max_verifiers=3, min_unallocated=1)
+		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, results_queue) for i in range(5)]
 		verifier_pool.reinitialize(max_verifiers=10, min_unallocated=4)  # This should be the last to run
 		verifier_pool._initializing = False
+		[eventlet.spawn(self._recycle_multiple_times, verifier_pool, 5, results_queue) for i in range(5)]
 		verifier_pool.reinitialize(max_verifiers=5, min_unallocated=2)
+
+		for i in xrange(15):
+			assert_is_none(results_queue.get())
 
 		self._assert_pool_size(verifier_pool, 6, 4, 0)
 
