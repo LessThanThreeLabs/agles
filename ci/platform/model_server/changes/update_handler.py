@@ -68,6 +68,9 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)
 
 	def add_export_uris(self, change_id, export_uris):
+		if not export_uris:
+			return
+
 		change_export_uri = schema.change_export_uri
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
