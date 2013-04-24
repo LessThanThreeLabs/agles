@@ -137,7 +137,7 @@ system_setting = Table('system_setting', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('resource', String, nullable=False),
 	Column('key', String, nullable=False),
-	Column('value_yaml', String, nullable=False),
+	Column('value', String, nullable=False),
 
 	UniqueConstraint('resource', 'key')
 )

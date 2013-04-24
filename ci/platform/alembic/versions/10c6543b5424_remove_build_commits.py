@@ -27,7 +27,7 @@ def upgrade():
             build.update().values(commit_id=build_to_commit[build_commits_map.c.commit_id]).where(build.c.id == build_to_commit[build_commits_map.c.build_id])
         )
 
-    op.alter_column('build', sa.Column('commit_id', sa.Integer(), nullable=False))
+    op.alter_column('build', 'commit_id', nullable=False)
     op.drop_table(u'build_commits_map')
     ### end Alembic commands ###
 

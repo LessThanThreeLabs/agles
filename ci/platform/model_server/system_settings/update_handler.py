@@ -1,5 +1,3 @@
-import yaml
-
 from sqlalchemy import and_
 
 import database.schema
@@ -9,6 +7,8 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from settings.aws import AwsSettings
 from settings.verification_server import VerificationServerSettings
 from settings.web_server import WebServerSettings
+from model_server.system_settings import system_settings_cipher
+from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi
 
 
@@ -44,7 +44,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 				system_setting.c.key == key
 			)
 		).values(
-			value_yaml=yaml.safe_dump(value)
+			value=CryptoYaml(system_settings_cipher).dump(value)
 		)
 
 	def _get_insert_command(self, resource, key, value):
@@ -52,7 +52,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		return system_setting.insert().values(
 			resource=resource,
 			key=key,
-			value_yaml=yaml.safe_dump(value)
+			value=CryptoYaml(system_settings_cipher).dump(value)
 		)
 
 	@AdminApi

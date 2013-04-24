@@ -1,6 +1,5 @@
 import random
 import string
-import yaml
 
 from sqlalchemy import and_
 
@@ -12,6 +11,8 @@ from settings.aws import AwsSettings
 from settings.verification_server import VerificationServerSettings
 from settings.web_server import WebServerSettings
 from settings.deployment import DeploymentSettings
+from model_server.system_settings import system_settings_cipher
+from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi
 
 
@@ -35,7 +36,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-			return yaml.safe_load(row[system_setting.c.value_yaml]) if row else None
+			return CryptoYaml(system_settings_cipher).load(row[system_setting.c.value]) if row else None
 
 	@AdminApi
 	def get_admin_api_key(self, user_id):
