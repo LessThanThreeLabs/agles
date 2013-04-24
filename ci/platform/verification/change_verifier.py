@@ -31,7 +31,7 @@ class ChangeVerifier(EventSubscriber):
 	def handle_message(self, body, message):
 		if body['type'] == 'change added':
 			self._handle_new_change(body['contents'])
-		elif body['type'] == 'verifier settings updated':
+		elif body['type'] == 'instance settings updated':
 			self._handle_verifier_settings_update(body['contents'])
 		message.ack()
 

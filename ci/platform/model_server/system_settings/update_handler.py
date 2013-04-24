@@ -75,5 +75,4 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		VerificationServerSettings.static_pool_size = min_unallocated
 		VerificationServerSettings.max_virtual_machine_count = max_verifiers
 		VerificationServerSettings.teardown_after_build = teardown_after_change
-		self.publish_event("system_settings", None, "verifier settings updated", max_verifiers=max_verifiers, min_unallocated=min_unallocated)
-
+		self.publish_event("system_settings", None, "instance settings updated", max_verifiers=max_verifiers, min_unallocated=min_unallocated)
