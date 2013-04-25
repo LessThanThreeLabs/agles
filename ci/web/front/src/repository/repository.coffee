@@ -202,8 +202,10 @@ window.RepositoryStages = ['$scope', 'rpc', 'events', ($scope, rpc, events) ->
 		$scope.stages = []
 		return if not $scope.currentChangeId?
 
+		$scope.retrievingStages = true
 		rpc.makeRequest 'buildConsoles', 'read', 'getBuildConsoles', changeId: $scope.currentChangeId, (error, buildConsoles) ->
 			$scope.$apply () ->
+				$scope.retrievingStages = false
 				$scope.stages = buildConsoles
 
 				if $scope.stages.length is 0

@@ -37,7 +37,7 @@
 
 				<content-menu-option menu-option-text="merge" ng-show="currentChangeInformation.mergeStatus != null" ng-click="selectMerge()" ng-class="{selected: currentStageId == null && showMerge, green: currentChangeInformation.mergeStatus == 'passed', red: currentChangeInformation.mergeStatus == 'failed'}"></content-menu-option>
 
-				<content-menu-option menu-option-text="debug" ng-show="currentChangeInformation.status == 'failed' && stages.length == 0" ng-click="selectDebug()" ng-class="{selected: currentStageId == null && showDebug, red: true}"></content-menu-option>
+				<content-menu-option menu-option-text="debug" ng-show="currentChangeInformation.status == 'failed' && !retrievingStages && stages.length == 0" ng-click="selectDebug()" ng-class="{selected: currentStageId == null && showDebug, red: true}"></content-menu-option>
 			</content-menu-options>
 		</menu>
 	</div>
