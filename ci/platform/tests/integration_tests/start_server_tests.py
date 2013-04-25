@@ -35,7 +35,7 @@ class StartServerTests(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, R
 	def test_start_repo_server(self):
 
 		def start_model_server():
-			start_model_server_p = subprocess.Popen(["bin/start_model_server.py"])
+			start_model_server_p = subprocess.Popen(["scripts/server/start_model_server.py"])
 			eventlet.sleep(5)
 			retcode = start_model_server_p.poll()
 			try:
@@ -45,7 +45,7 @@ class StartServerTests(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, R
 			return retcode is None
 
 		def start_filesystem_repo_server():
-			start_filesystem_repo_server_p = subprocess.Popen(["bin/start_filesystem_repo_server.py", "-r", self.repodir])
+			start_filesystem_repo_server_p = subprocess.Popen(["scripts/server/start_filesystem_repo_server.py", "-r", self.repodir])
 			eventlet.sleep(5)
 			retcode = start_filesystem_repo_server_p.poll()
 			try:
@@ -55,7 +55,7 @@ class StartServerTests(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, R
 			return retcode is None
 
 		def start_verification_server():
-			start_verification_server_p = subprocess.Popen(["bin/start_verification_server.py", "-t", "mock"])
+			start_verification_server_p = subprocess.Popen(["scripts/server/start_verification_server.py", "-t", "mock"])
 			eventlet.sleep(5)
 			retcode = start_verification_server_p.poll()
 			try:
@@ -65,7 +65,7 @@ class StartServerTests(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, R
 			return retcode is None
 
 		def start_license_server():
-			start_license_server_p = subprocess.Popen(["bin/start_license_server.py"])
+			start_license_server_p = subprocess.Popen(["scripts/server/start_license_server.py"])
 			eventlet.sleep(5)
 			retcode = start_license_server_p.poll()
 			try:

@@ -17,4 +17,5 @@ def main():
 	model_server_event.wait()
 
 
-main()
+if __name__ == '__main__':
+	main()

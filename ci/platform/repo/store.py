@@ -263,9 +263,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
 	NUM_RETRIES = 4
-	PRIVATE_KEY_SCRIPT = 'koality-get-private-key'
+	GIT_WITH_PRIVATE_KEY_SCRIPT = 'koality-git-with-private-key'
 	if hasattr(sys, 'real_prefix'):  # We're in a virtualenv python, so point at the locally-installed script
-		PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', PRIVATE_KEY_SCRIPT)
+		GIT_WITH_PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', GIT_WITH_PRIVATE_KEY_SCRIPT)
 
 	def __init__(self, repostore_id, root_storage_directory_path):
 		super(FileSystemRepositoryStore, self).__init__(repostore_id)
@@ -346,12 +346,12 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def _push_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to push repo %s to forward url with args: %s, kwargs: %s" % (repo, str(args), str(kwargs)))
 		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
-		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT, 'GIT_SSH_TIMEOUT': '120'})
+		repo.git.execute(execute_args, env={'GIT_SSH': self.GIT_WITH_PRIVATE_KEY_SCRIPT, 'GIT_SSH_TIMEOUT': '120'})
 
 	def _fetch_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to fetch to repo %s" % repo)
 		execute_args = ['git', 'fetch'] + list(args) + repo.git.transform_kwargs(**kwargs)
-		repo.git.execute(execute_args, env={'GIT_SSH': self.PRIVATE_KEY_SCRIPT, 'GIT_SSH_TIMEOUT': '120'})
+		repo.git.execute(execute_args, env={'GIT_SSH': self.GIT_WITH_PRIVATE_KEY_SCRIPT, 'GIT_SSH_TIMEOUT': '120'})
 
 	def _reset_repository_head(self, repo, repo_slave, ref_to_reset, original_head):
 		try:
