@@ -70,6 +70,4 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		instance_size = AwsSettings.instance_type
 		num_waiting = VerificationServerSettings.static_pool_size
 		max_running = VerificationServerSettings.max_virtual_machine_count
-		teardown_after_change = VerificationServerSettings.teardown_after_build
-		return {"instance_size": instance_size, "num_waiting": num_waiting,
-			"max_running": max_running, "teardown_after_change": teardown_after_change}
+		return {"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running}
