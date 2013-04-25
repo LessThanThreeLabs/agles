@@ -11,17 +11,17 @@ LICENSE_VERIFICATION_URL = 'https://koalitycode.com/license/check'
 MAX_FAILURES = 12
 
 
-class LicenseServer(object):
+class LicenseVerifier(object):
 	def __init__(self, key_verifier, sleep_time=3600):
-		super(LicenseServer, self).__init__()
+		super(LicenseVerifier, self).__init__()
 		self.key_verifier = key_verifier
 		self.sleep_time = sleep_time
 
 	def run(self):
-		poller_greenlet = eventlet.spawn(self._poller)
+		poller_greenlet = eventlet.spawn(self.poll)
 		return poller_greenlet
 
-	def _poller(self):
+	def poll(self):
 		while True:
 			self._poll_and_wait()
 

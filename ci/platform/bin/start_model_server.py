@@ -9,12 +9,12 @@ def main():
 
 	util.log.configure()
 	try:
-		model_server = ModelServer().start()
+		model_server_event = ModelServer().start()
 	except:
 		print "Failed to start Model Server"
 		raise
 	print "Successfully started Model Server"
-	model_server.wait()
+	model_server_event.wait()
 
 
 main()

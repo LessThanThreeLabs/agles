@@ -1,5 +1,5 @@
 from nose.tools import *
-from license.license_server import LicenseServer, HttpLicenseKeyVerifier, LicenseKeyVerifier, MAX_FAILURES
+from license.license_verifier import LicenseVerifier, HttpLicenseKeyVerifier, LicenseKeyVerifier, MAX_FAILURES
 from settings.deployment import DeploymentSettings
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
@@ -17,7 +17,7 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		self._purge_queues()
 
 	def test_license_check_failed(self):
-		serve = LicenseServer(HttpLicenseKeyVerifier())
+		serve = LicenseVerifier(HttpLicenseKeyVerifier())
 		DeploymentSettings.active = True
 		assert_equals(True, DeploymentSettings.active)
 		for i in range(MAX_FAILURES + 1):
@@ -27,7 +27,7 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		assert_equals(False, DeploymentSettings.active)
 
 	def test_reset_license_check_failures(self):
-		serve = LicenseServer(HttpLicenseKeyVerifier())
+		serve = LicenseVerifier(HttpLicenseKeyVerifier())
 		DeploymentSettings.initialize()
 		for i in range(MAX_FAILURES + 1):
 			assert_equals(i, DeploymentSettings.license_validation_failures)
@@ -48,7 +48,7 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		DeploymentSettings.active = True
 		assert_equals(True, DeploymentSettings.active)
 
-		serve = LicenseServer(FailingLicenseKeyVerifier())
+		serve = LicenseVerifier(FailingLicenseKeyVerifier())
 		serve.handle_once()
 
 		assert_equals(1, DeploymentSettings.license_validation_failures)
@@ -65,7 +65,7 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		DeploymentSettings.active = True
 		assert_equals(True, DeploymentSettings.active)
 
-		serve = LicenseServer(PassingLicenseKeyVerifier())
+		serve = LicenseVerifier(PassingLicenseKeyVerifier())
 		for i in range(MAX_FAILURES + 1):
 			serve.handle_once()
 			assert_equals(0, DeploymentSettings.license_validation_failures)
