@@ -52,6 +52,7 @@ def snapshot():
 	newest_global_image = vm_class.get_newest_global_image()
 	newest_image_version = vm_class.get_image_version(vm_class.get_newest_image())
 	snapshot_version = newest_image_version[0], newest_image_version[1] + 1
+	snapshot_version = truncate_decimal(snapshot_version[0]), truncate_decimal(snapshot_version[1])
 	instance_name = 'koality_snapshot_%s_%s' % snapshot_version
 
 	print 'Creating new instance named "%s" based on image "%s"' % (instance_name, newest_global_image.name)
@@ -113,6 +114,12 @@ def snapshot():
 		print 'Deleting instance "%s"' % instance_name
 	finally:
 		virtual_machine.delete()
+
+
+def truncate_decimal(value):
+	if value == int(value):
+		return int(value)
+	return value
 
 
 def remove_stale_snapshots():
