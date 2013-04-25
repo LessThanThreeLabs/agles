@@ -154,7 +154,8 @@ class BuildVerifier(object):
 				try:
 					return yaml.safe_load(export_results.output)['uris']
 				except:
-					return []
+					pass
+			return []
 
 		export_uris = parse_export_uris(self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test")))
 
