@@ -383,6 +383,17 @@ Single Change
     :endTime: timestamp when the change ended, in milliseconds (number)
   :Example: https://domain-name:1337/v/0/repositories/7/changes/9001?key=whatislove
 
+Create Change
+~~~~~~~~~~~~~
+
+  :Url: ``https://<domain name>:1337/v/0/repositories/<repository id>/changes``
+  :Request type: POST
+  :Body:
+    :key: the admin api key (string)
+    :sha: the sha to verify (string)
+  :Returns:
+    :changeId: the newly created change id (number)
+
 
 Stages
 ------
