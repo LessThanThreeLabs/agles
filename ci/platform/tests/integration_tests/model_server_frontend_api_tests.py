@@ -185,14 +185,14 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		access_key = "access KEY"
 		secret_key = "SUPER_secret"
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_aws_keys(self.user_id, access_key, secret_key)
+			conn.set_aws_keys(self.user_id, access_key, secret_key, False)
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals({"access_key": access_key, "secret_key": secret_key}, conn.get_aws_keys(self.user_id))
 
 		access_key = "abc123XYZ"
 		secret_key = "#!/\\(0xf ?'"
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_aws_keys(self.user_id, access_key, secret_key)
+			conn.set_aws_keys(self.user_id, access_key, secret_key, False)
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals({"access_key": access_key, "secret_key": secret_key}, conn.get_aws_keys(self.user_id))
 

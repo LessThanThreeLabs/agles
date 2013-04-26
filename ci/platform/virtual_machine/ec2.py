@@ -16,11 +16,25 @@ from virtual_machine import VirtualMachine
 class Ec2Client(object):
 	@classmethod
 	def get_client(cls):
-		region = AwsSettings.region or Ec2Vm._call(
-			['sh', '-c', 'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
-		).output
+		return cls._connect(AwsSettings.aws_access_key_id, AwsSettings.aws_secret_access_key)
+
+	@classmethod
+	def validate_credentials(cls, aws_access_key_id, aws_secret_access_key, region=None):
+		try:
+			cls._connect(aws_access_key_id, aws_secret_access_key, region)
+		except:
+			return False
+		else:
+			return True
+
+	@classmethod
+	def _connect(cls, aws_access_key_id, aws_secret_access_key, region=None):
+		if region is None:
+			region = AwsSettings.region or Ec2Vm._call(
+				['sh', '-c', 'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
+			).output
 		return boto.ec2.connect_to_region(region,
-			**AwsSettings.credentials())
+			aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
 
 @Logged()

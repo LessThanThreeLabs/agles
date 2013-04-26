@@ -10,6 +10,7 @@ from settings.web_server import WebServerSettings
 from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi
+from virtual_machine.ec2 import Ec2Client
 
 
 class SystemSettingsUpdateHandler(ModelServerRpcHandler):
@@ -60,7 +61,9 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		WebServerSettings.domain_name = domain_name
 
 	@AdminApi
-	def set_aws_keys(self, user_id, access_key, secret_key):
+	def set_aws_keys(self, user_id, access_key, secret_key, validate=True):
+		if validate and not Ec2Client.validate_credentials(access_key, secret_key):
+			raise InvalidConfigurationException(access_key, secret_key)
 		AwsSettings.aws_access_key_id = access_key
 		AwsSettings.aws_secret_access_key = secret_key
 
@@ -77,3 +80,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			instance_size=instance_size,
 			min_unallocated=min_unallocated,
 			max_verifiers=max_verifiers)
+
+
+class InvalidConfigurationException(Exception):
+	pass
