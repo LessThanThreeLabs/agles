@@ -65,7 +65,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		if row:
-			return row[commit.c.repo_id], row[commit.c.user_id], row[commit.c.message], row[commit.c.timestamp]
+			return to_dict(row, commit.columns)
 		else:
 			return None
 

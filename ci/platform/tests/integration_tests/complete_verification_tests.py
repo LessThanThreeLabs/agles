@@ -96,7 +96,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		commit_id = 0
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id,
-				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()))
+				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()), pending=True)
 			conn.execute(ins_commit)
 			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master",
 				number=1, status=BuildStatus.QUEUED, create_time=int(time.time()))

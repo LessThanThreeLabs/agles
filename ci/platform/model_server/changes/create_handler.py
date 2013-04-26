@@ -14,8 +14,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ChangesCreateHandler, self).__init__("changes", "create")
 
-	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target):
-		commit_id = self._create_commit(repo_id, user_id, commit_message, sha)
+	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target, pending=True):
+		commit_id = self._create_commit(repo_id, user_id, commit_message, sha, pending)
 
 		change = database.schema.change
 		repo = database.schema.repo
@@ -43,15 +43,15 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		user = to_dict(user_row, user.columns)
 		self.publish_event("repos", repo_id, "change added", user=user, change_id=change_id, change_number=change_number,
-			change_status="queued", commit_id=commit_id, merge_target=merge_target, create_time=create_time)
+			change_status="queued", commit_id=commit_id, merge_target=merge_target, create_time=create_time, pending=pending)
 		return {"change_id": change_id, "commit_id": commit_id}
 
-	def _create_commit(self, repo_id, user_id, commit_message, sha):
+	def _create_commit(self, repo_id, user_id, commit_message, sha, pending):
 		commit = database.schema.commit
 
 		timestamp = int(time.time())
 		ins = commit.insert().values(repo_id=repo_id, user_id=user_id,
-			message=commit_message, sha=sha, timestamp=timestamp)
+			message=commit_message, sha=sha, timestamp=timestamp, pending=pending)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]

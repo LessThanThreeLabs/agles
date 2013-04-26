@@ -106,7 +106,8 @@ class BuildVerifier(object):
 		self.logger.info("Worker %s processing verification request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
 		self._start_build(build_id)
 		repo_uri = self._get_repo_uri(commit_id)
-		ref = pathgen.hidden_ref(commit_id)
+		commit = self._get_commit(commit_id)
+		ref = pathgen.get_ref(commit['id'], commit['sha'], commit['pending'])
 		private_key = self._get_private_key(repo_uri)
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
@@ -174,6 +175,10 @@ class BuildVerifier(object):
 	def _get_build(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:
 			return model_server_rpc.get_build_from_id(build_id)
+
+	def _get_commit(self, commit_id):
+		with model_server.rpc_connect("repos", "read") as model_server_rpc:
+			return model_server_rpc.get_commit_attributes(commit_id)
 
 	def _start_build(self, build_id):
 		self.logger.debug("Worker %s starting build %s" % (self.worker_id, build_id))
