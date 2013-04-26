@@ -71,10 +71,15 @@ class ModelServer(object):
 			self.channel = connection.channel()
 
 	def start(self, license_verifier=True):
-		return eventlet.spawn(self._start, license_verifier=True)
+		greenlets_started_event = eventlet.event.Event()
 
-	def _start(self, license_verifier=True):
+		main_greenlet = eventlet.spawn(self._start, license_verifier, greenlets_started_event)
+		greenlets_started_event.wait()
+		return main_greenlet
+
+	def _start(self, license_verifier, started_event):
 		model_server_start_event = eventlet.event.Event()
+		server_greenlets = []
 
 		def send_if_unset(event, *args):
 			if not event.ready():
@@ -92,6 +97,7 @@ class ModelServer(object):
 			self.rpc_handler_classes)
 		ioloop_greenlet = eventlet.spawn(self._ioloop)
 		ioloop_greenlet.link(ioloop_link)
+		server_greenlets.append(ioloop_greenlet)
 
 		if license_verifier:
 			key_verifier = verifier.HttpLicenseKeyVerifier()
@@ -105,7 +111,13 @@ class ModelServer(object):
 					send_if_unset(model_server_start_event, *sys.exc_info())
 				send_if_unset(model_server_start_event, ModelServerError)
 			license_verifier_greenlet.link(license_verifier_link)
-		model_server_start_event.wait()
+			server_greenlets.append(license_verifier_greenlet)
+		try:
+			started_event.send()
+			model_server_start_event.wait()
+		finally:
+			for g in server_greenlets:
+				g.kill()
 
 	def _ioloop(self):
 		try:

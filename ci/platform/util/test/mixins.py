@@ -54,7 +54,7 @@ class ModelServerTestMixin(BaseTestMixin):
 	@classmethod
 	def _start_model_server(cls, license_verifier=True):
 		from model_server.model_server import ModelServer
-		cls.model_server_greenlet = ModelServer().start(license_verifier)
+		cls.model_server_greenlet = ModelServer().start(license_verifier=license_verifier)
 
 	@classmethod
 	def _stop_model_server(cls):

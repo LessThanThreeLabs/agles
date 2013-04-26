@@ -39,6 +39,8 @@ class LicenseVerifier(object):
 				self.reset_license_check_failures()
 			else:
 				self.license_check_failed()
+		except eventlet.greenlet.GreenletExit:
+			raise
 		except:
 			self.license_check_failed()
 
