@@ -1,5 +1,5 @@
 from nose.tools import *
-from license.license_verifier import LicenseVerifier, HttpLicenseKeyVerifier, LicenseKeyVerifier, MAX_FAILURES
+from license.verifier import LicenseVerifier, HttpLicenseKeyVerifier, LicenseKeyVerifier, MAX_FAILURES
 from settings.deployment import DeploymentSettings
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
@@ -9,7 +9,7 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	def setUp(self):
 		super(LicenseServerTest, self).setUp()
 		self._purge_queues()
-		self._start_model_server()
+		self._start_model_server(license_verifier=False)
 
 	def tearDown(self):
 		super(LicenseServerTest, self).tearDown()
@@ -51,7 +51,7 @@ class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		serve = LicenseVerifier(FailingLicenseKeyVerifier())
 		serve.handle_once()
 
-		assert_equals(1, DeploymentSettings.license_validation_failures)
+		assert_equal(1, DeploymentSettings.license_validation_failures)
 		for i in range(MAX_FAILURES + 1):
 			serve.handle_once()
 

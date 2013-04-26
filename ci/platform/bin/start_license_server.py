@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-from license import license_verifier
+from license import verifier
 
 
 def main():
 	print "Starting license server..."
-	key_verifier = license_verifier.HttpLicenseKeyVerifier()
-	ls = license_verifier.LicenseVerifier(key_verifier).run()
+	key_verifier = verifier.HttpLicenseKeyVerifier()
+	ls = verifier.LicenseVerifier(key_verifier).run()
 	print "License server started"
 	ls.wait()
 

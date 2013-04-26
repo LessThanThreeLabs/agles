@@ -35,10 +35,15 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 		SampleTestSettings(alpha=alpha, numeric=numeric, a_list=a_list, a_dict=a_dict)
 
+		print 'hi1'
 		assert_equal(alpha, SampleTestSettings.alpha)
+		print 'hi2'
 		assert_equal(numeric, SampleTestSettings.numeric)
+		print 'hi3'
 		assert_equal(a_list, SampleTestSettings.a_list)
+		print 'h4'
 		assert_equal(a_dict, SampleTestSettings.a_dict)
+		print 'hi5'
 
 		assert_raises(AttributeError, lambda: SampleTestSettings.not_a_setting)
 

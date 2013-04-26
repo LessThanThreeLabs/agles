@@ -74,7 +74,7 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		[verifier_pool.remove(i) for i in range(5)]
 		self._assert_pool_size(verifier_pool, 2, 3, 0)
 
-	@Timeout(time=10)
+	@Timeout(time=20)
 	def test_semirandom_stability(self):
 		verifier_pool = SimpleVerifierPool(max_verifiers=20, min_unallocated=4)
 		self._assert_pool_size(verifier_pool, 16, 4, 0)

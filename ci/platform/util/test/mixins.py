@@ -52,9 +52,9 @@ class ModelServerTestMixin(BaseTestMixin):
 	"""Mixin for integration tests that require a running model server"""
 
 	@classmethod
-	def _start_model_server(cls):
+	def _start_model_server(cls, license_verifier=True):
 		from model_server.model_server import ModelServer
-		cls.model_server_greenlet = ModelServer().start()
+		cls.model_server_greenlet = ModelServer().start(license_verifier)
 
 	@classmethod
 	def _stop_model_server(cls):

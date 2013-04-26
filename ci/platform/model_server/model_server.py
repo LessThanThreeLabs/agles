@@ -18,7 +18,7 @@ from build_consoles.update_handler import BuildConsolesUpdateHandler
 from changes.create_handler import ChangesCreateHandler
 from changes.read_handler import ChangesReadHandler
 from changes.update_handler import ChangesUpdateHandler
-from license import license_verifier
+from license import verifier
 from repos.create_handler import ReposCreateHandler
 from repos.read_handler import ReposReadHandler
 from repos.update_handler import ReposUpdateHandler
@@ -70,37 +70,41 @@ class ModelServer(object):
 			connection = Connection(RabbitSettings.kombu_connection_info)
 			self.channel = connection.channel()
 
-	def start(self):
-		return eventlet.spawn(self._start)
+	def start(self, license_verifier=True):
+		return eventlet.spawn(self._start, license_verifier=True)
 
-	def _start(self):
+	def _start(self, license_verifier=True):
 		model_server_start_event = eventlet.event.Event()
+
+		def send_if_unset(event, *args):
+			if not event.ready():
+				event.send_exception(*args)
 
 		def ioloop_link(greenlet):
 			self.channel.connection.close()
 			try:
 				greenlet.wait()
 			except:
-				model_server_start_event.send_exception(*sys.exc_info())
-			model_server_start_event.send_exception(ModelServerError)
+				send_if_unset(model_server_start_event, *sys.exc_info())
+			send_if_unset(model_server_start_event, ModelServerError)
 
 		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.channel),
 			self.rpc_handler_classes)
 		ioloop_greenlet = eventlet.spawn(self._ioloop)
 		ioloop_greenlet.link(ioloop_link)
 
-		key_verifier = license_verifier.HttpLicenseKeyVerifier()
-		lv = license_verifier.LicenseVerifier(key_verifier, sleep_time=1)
-		license_verifier_greenlet = eventlet.spawn(lv.poll)
+		if license_verifier:
+			key_verifier = verifier.HttpLicenseKeyVerifier()
+			lv = verifier.LicenseVerifier(key_verifier)
+			license_verifier_greenlet = eventlet.spawn(lv.poll)
 
-		def license_verifier_link(greenlet):
-			try:
-				greenlet.wait()
-			except:
-				model_server_start_event.send_exception(*sys.exc_info())
-			model_server_start_event.send_exception(ModelServerError)
-
-		license_verifier_greenlet.link(license_verifier_link)
+			def license_verifier_link(greenlet):
+				try:
+					greenlet.wait()
+				except:
+					send_if_unset(model_server_start_event, *sys.exc_info())
+				send_if_unset(model_server_start_event, ModelServerError)
+			license_verifier_greenlet.link(license_verifier_link)
 		model_server_start_event.wait()
 
 	def _ioloop(self):
