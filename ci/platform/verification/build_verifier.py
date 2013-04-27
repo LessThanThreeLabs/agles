@@ -21,8 +21,10 @@ class BuildVerifier(object):
 			try:
 				return func(*args, **kwargs)
 			except VerificationException as e:
+				print e
 				return e
 			except BaseException as e:
+				print e
 				BuildVerifier.logger.critical("Unexpected exception thrown during verification", exc_info=True)
 				return e
 
@@ -106,8 +108,7 @@ class BuildVerifier(object):
 		self.logger.info("Worker %s processing verification request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
 		self._start_build(build_id)
 		repo_uri = self._get_repo_uri(commit_id)
-		commit = self._get_commit(commit_id)
-		ref = pathgen.get_ref(commit['id'], commit['sha'], commit['pending'])
+		ref = pathgen.hidden_ref(commit_id)
 		private_key = self._get_private_key(repo_uri)
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)

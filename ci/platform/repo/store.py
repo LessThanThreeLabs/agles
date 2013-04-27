@@ -17,7 +17,7 @@ import requests
 
 import model_server
 
-from git import GitCommandError, Repo
+from git import GitCommandError, Repo, refs
 
 from bunnyrpc.client import Client
 from settings.store import StoreSettings
@@ -89,6 +89,18 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
+	def store_pending(self, repostore_id, repo_id, repo_name, sha, commit_id):
+		"""Stores the given sha as a pending ref based on the commit id
+
+		:param repostore_id: The identifier of the local machine the repo is on
+		:param repo_id: The unique id of the RepositoryStore
+		:param repo_name: The name of the repo
+		:param sha: The SHA-1 ref of the commit to store
+		:param commit_id: The pending id to store the SHA-1 ref at
+		"""
+
+		raise NotImplementedError("Subclasses should override this!")
+
 	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
 		"""Renames a repository on the given local store.
 
@@ -143,6 +155,10 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 	def force_delete(self, repostore_id, repo_id, repo_name, target):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			return client.force_delete(repo_id, repo_name, target)
+
+	def store_pending(self, repostore_id, repo_id, repo_name, sha, commit_id):
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
+			return client.store_pending(repo_id, repo_name, sha, commit_id)
 
 	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
 		assert old_repo_name.endswith(".git")
@@ -232,7 +248,10 @@ class RepositoryStore(object):
 	def push_force(self, repo_id, repo_name, from_target, to_target):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def force_delete(repo_id, repo_name, target):
+	def force_delete(self, repo_id, repo_name, target):
+		raise NotImplementedError("Subclasses should override this!")
+
+	def store_pending(self, repo_id, repo_name, sha, commit_id):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def rename_repository(self, repo_id, old_repo_name, new_repo_name):
@@ -452,6 +471,21 @@ class FileSystemRepositoryStore(RepositoryStore):
 		remote_branch = "origin/%s" % branch
 		remote_branch_exists = re.search("\\s+" + remote_branch + "$", repo.git.branch("-r"), re.MULTILINE)
 		return remote_branch_exists
+
+	def store_pending(self, repo_id, repo_name, sha, commit_id):
+		repo_path = self._resolve_path(repo_id, repo_name)
+		repo = Repo(repo_path)
+
+		with model_server.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+
+		self._fetch_with_private_key(repo, remote_repo)
+
+		try:
+			refs.SymbolicReference.create(repo, 'refs/pending/%d' % commit_id, sha)
+		except:
+			self.logger.critical("Failed to create pending ref %d for sha %s" % (commit_id, sha), exc_info=True)
+			raise
 
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.

@@ -33,12 +33,6 @@ def directory_treeify(pathseed, dir_levels=DIR_LEVELS):
 	return os.path.join(*chunked_hash) + padded_id[pivot:]
 
 
-def get_ref(commit_id, sha, pending):
-	if pending:
-		return hidden_ref(commit_id)
-	return sha
-
-
 def hidden_ref(commit_id):
 	""" Converts a commit id to a hidden ref that the commit was stored in
 

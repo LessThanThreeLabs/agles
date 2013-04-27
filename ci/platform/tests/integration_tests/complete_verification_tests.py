@@ -77,11 +77,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 	def tearDown(self):
-		super(VerificationRoundTripTest, self).tearDown()
 		rmtree(self.repo_dir)
 		self.vs_greenlet.kill()
 		self._stop_redis()
 		self._purge_queues()
+		super(VerificationRoundTripTest, self).tearDown()
 
 	def _insert_repo_info(self, repo_uri):
 		with ConnectionFactory.get_sql_connection() as conn:
@@ -96,7 +96,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		commit_id = 0
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id,
-				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()), pending=True)
+				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()))
 			conn.execute(ins_commit)
 			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master",
 				number=1, status=BuildStatus.QUEUED, create_time=int(time.time()))
@@ -109,7 +109,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			self.change_status = body["contents"]["status"]
 
 	def _test_commands(self, passes):
-		return [{'hello_%s' % x: {'script': 'true' if passes else 'false'}} for x in range(5)]
+		return [{'%s_%s' % ('pass' if passes else 'fail', x): {'script': 'true' if passes else 'false'}} for x in range(5)]
 
 	def _repo_roundtrip(self, modfile, contents, passes=True):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:

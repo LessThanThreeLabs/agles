@@ -39,13 +39,12 @@ class VerificationResultsHandler(object):
 		commit_id = change_attributes['commit_id']
 		merge_target = change_attributes['merge_target']
 
+		if merge_target == 'verify only':
+			return True
+
 		with model_server.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)
 			repostore_id, route, repos_path, repo_id, repo_name, private_key = client.get_repo_attributes(repo_uri)
-			commit = client.get_commit_attributes(commit_id)
-
-		if not commit['pending']:
-			return True
 
 		ref = pathgen.hidden_ref(commit_id)
 		try:

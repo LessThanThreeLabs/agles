@@ -1,6 +1,7 @@
 import time
 
 import database.schema
+import repo.store as repostore
 
 from shared.constants import BuildStatus
 from database.engine import ConnectionFactory
@@ -14,8 +15,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ChangesCreateHandler, self).__init__("changes", "create")
 
-	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target, pending=True):
-		commit_id = self._create_commit(repo_id, user_id, commit_message, sha, pending)
+	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target, store_pending=False):
+		commit_id = self._create_commit(repo_id, user_id, commit_message, sha, store_pending)
 
 		change = database.schema.change
 		repo = database.schema.repo
@@ -43,19 +44,28 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		user = to_dict(user_row, user.columns)
 		self.publish_event("repos", repo_id, "change added", user=user, change_id=change_id, change_number=change_number,
-			change_status="queued", commit_id=commit_id, merge_target=merge_target, create_time=create_time, pending=pending)
+			change_status="queued", commit_id=commit_id, merge_target=merge_target, create_time=create_time)
 		return {"change_id": change_id, "commit_id": commit_id}
 
-	def _create_commit(self, repo_id, user_id, commit_message, sha, pending):
+	def _create_commit(self, repo_id, user_id, commit_message, sha, store_pending):
 		commit = database.schema.commit
 
 		timestamp = int(time.time())
 		ins = commit.insert().values(repo_id=repo_id, user_id=user_id,
-			message=commit_message, sha=sha, timestamp=timestamp, pending=pending)
+			message=commit_message, sha=sha, timestamp=timestamp)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]
+
+		if store_pending:
+			self._store_pending_commit(repo_id, sha, commit_id)
+
 		return commit_id
+
+	def _store_pending_commit(self, repo_id, sha, commit_id):
+		info = self._get_repostore_id_and_repo_name(repo_id)
+		manager = repostore.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager.store_pending(info['repostore_id'], repo_id, info['repo_name'], sha, commit_id)
 
 
 class NoSuchCommitError(Exception):

@@ -3,10 +3,14 @@ import shutil
 
 from os.path import exists
 
+import model_server
+
 from nose.tools import *
 from git import Repo
 from repo.store import FileSystemRepositoryStore, MergeError
 
+from database import schema
+from database.engine import ConnectionFactory
 from util.pathgen import to_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RepoStoreTestMixin, RabbitMixin
@@ -119,6 +123,65 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		assert_raises(Exception, self.store.merge_changeset, self.repo_id, "repo.git", "refs/pending/1", "master")
 		clone_repo = bare_repo.clone(bare_repo.working_dir + ".clone2")
 		assert_equals(master_sha, clone_repo.heads.master.commit.hexsha)  # Makes sure the repository has reset
+
+	def test_store_local_commit_as_pending(self):
+		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
+
+		repostore_id = self._create_repo_store()
+		with model_server.rpc_connect("repos", "create") as model_rpc:
+			model_rpc._create_repo_in_db(1, "repo.git", "repo_uri", repostore_id, ".", "privatekey", "publickey", 0)
+
+		bare_repo = Repo.init(self.repo_path, bare=True)
+		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
+
+		self._modify_commit_push(work_repo, "test.txt", "c1")
+		first_sha = bare_repo.heads.master.commit.hexsha
+
+		self._modify_commit_push(work_repo, "test.txt", "c2")
+		second_sha = bare_repo.heads.master.commit.hexsha
+
+		self.store.store_pending(self.repo_id, "repo.git", first_sha, 42)
+
+		work_repo.git.fetch("origin", "refs/pending/42:pending")
+
+		assert_equals(first_sha, work_repo.heads.pending.commit.hexsha)
+		assert_equals(second_sha, work_repo.heads.master.commit.hexsha)
+
+	def test_store_remote_commit_as_pending(self):
+		self.store.create_repository(self.repo_id, "remote_repo.git", "privatekey")
+		self.store.create_repository(self.repo_id, "repo.git", "privatekey")
+
+		remote_repo_path = os.path.join(self.repodir, "remote_repo.git")
+
+		repostore_id = self._create_repo_store()
+		with model_server.rpc_connect("repos", "create") as model_rpc:
+			model_rpc._create_repo_in_db(1, "repo.git", "repo_uri", repostore_id,
+				remote_repo_path, "privatekey", "publickey", 0)
+
+		remote_repo = Repo.init(remote_repo_path, bare=True)
+		remote_work_repo = remote_repo.clone(remote_repo.working_dir + ".clone")
+
+		bare_repo = Repo.init(self.repo_path, bare=True)
+		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
+
+		# Push commit to remote repo
+		self._modify_commit_push(remote_work_repo, "test.txt", "c1")
+		master_sha = remote_repo.heads.master.commit.hexsha
+
+		assert_items_equal([], bare_repo.heads)
+
+		# Store commit into main repo
+		self.store.store_pending(self.repo_id, "repo.git", master_sha, 42)
+
+		work_repo.git.fetch("origin", "refs/pending/42:pending")
+
+		assert_equals(master_sha, work_repo.heads.pending.commit.hexsha)
+
+	def _create_repo_store(self):
+		ins = schema.repostore.insert().values(ip_address="127.0.0.1", repositories_path="/tmp")
+		with ConnectionFactory.get_sql_connection() as conn:
+			result = conn.execute(ins)
+			return result.inserted_primary_key[0]
 
 	def test_get_ip_address(self):
 		ip_address = self.store._get_ip_address()
