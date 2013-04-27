@@ -92,6 +92,7 @@ class RepoStoreTestMixin(BaseTestMixin):
 class RedisTestMixin(BaseTestMixin):
 	@classmethod
 	def _start_redis(cls):
+		cls._stop_redis()
 		cls._redis_process = subprocess.Popen(
 			["redis-server", REDISCONF],
 			stderr=subprocess.PIPE,
@@ -109,6 +110,9 @@ class RedisTestMixin(BaseTestMixin):
 
 	@classmethod
 	def _stop_redis(cls):
-		redis_conn = ConnectionFactory.get_redis_connection()
-		redis_conn.flushdb()
-		cls._redis_process.terminate()
+		try:
+			redis_conn = ConnectionFactory.get_redis_connection()
+			redis_conn.flushdb()
+			cls._redis_process.terminate()
+		except:
+			pass
