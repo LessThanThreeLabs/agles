@@ -116,6 +116,5 @@ class RedisTestMixin(BaseTestMixin):
 			redis_conn.flushdb()
 			cls._redis_process.terminate()
 		except:
-			if not subprocess.call(['pgrep', '-f', 'redis-server', REDISCONF]):
-				subprocess.call(['pkill', '-f', 'redis-server', REDISCONF])
-				time.sleep(1)  # The redis does not immediately die
+			redis_cmd = 'redis-server.*%s' % os.path.basename(REDISCONF)
+			subprocess.call('pgrep -f %s | xargs kill -9' % redis_cmd, shell=True)
