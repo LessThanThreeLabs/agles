@@ -8,6 +8,7 @@ consequences/side effects.
 """
 import os
 import subprocess
+import time
 
 import eventlet
 
@@ -115,4 +116,6 @@ class RedisTestMixin(BaseTestMixin):
 			redis_conn.flushdb()
 			cls._redis_process.terminate()
 		except:
-			pass
+			if not subprocess.call(['pgrep', '-f', 'redis-server', REDISCONF]):
+				subprocess.call(['pkill', '-f', 'redis-server', REDISCONF])
+				time.sleep(1)  # The redis does not immediately die
