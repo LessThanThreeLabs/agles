@@ -123,7 +123,10 @@ class Ec2Vm(VirtualMachine):
 	def from_id(cls, vm_directory, instance_id, vm_username=VM_USERNAME):
 		try:
 			client = Ec2Client.get_client()
-			vm = Ec2Vm(vm_directory, client.get_all_instances(instance_id)[0].instances[0], vm_username)
+			reservations = client.get_all_instances(filters={'instance-id': instance_id})
+			if not reservations:
+				return None
+			vm = Ec2Vm(vm_directory, reservations[0].instances[0], vm_username)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
 				cls.logger.warn("Found VM (%s, %s) in %s state" % (vm_directory, vm.instance.state, instance_id))
 				vm.delete()
@@ -146,7 +149,7 @@ class Ec2Vm(VirtualMachine):
 		ec2_client = Ec2Client.get_client()
 		#  Wait until EC2 recognizes that the instance exists
 		while True:
-			if instance.id in map(lambda res: res.instances[0].id, ec2_client.get_all_instances()):
+			if ec2_client.get_all_instances(filters={'instance-id': instance_id}):
 				break
 			eventlet.sleep(2)
 			instance.update()
