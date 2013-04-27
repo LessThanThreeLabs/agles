@@ -19,6 +19,7 @@ angular.module('koality.service', []).
 	]).
 	factory('fileSuffixAdder', ['initialState', (initialState) ->
 		return addFileSuffix: (fileSrc) ->
+			return null if not fileSrc?
 			lastPeriodIndex = fileSrc.lastIndexOf '.'
 			return fileSrc if lastPeriodIndex is -1
 			return fileSrc.substr(0, lastPeriodIndex) + initialState.fileSuffix + fileSrc.substr(lastPeriodIndex)
