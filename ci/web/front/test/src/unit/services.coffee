@@ -73,7 +73,7 @@ describe 'Koality services', () ->
 			
 		it 'should properly add the correct file suffix for valid file urls', () ->
 			inject (fileSuffixAdder) ->
-				expect(fileSuffixAdder.addFileSuffix('a.gif')).toBe "a#{fileSuffix}.gif"
+				expect(fileSuffixAdder.addFileSuffix('a.gif')).toBe "a#{fileSuffix}.gif "
 				expect(fileSuffixAdder.addFileSuffix('/img/a.png')).toBe "/img/a#{fileSuffix}.png"
 				expect(fileSuffixAdder.addFileSuffix('/short.html')).toBe "/short#{fileSuffix}.html"
 				expect(fileSuffixAdder.addFileSuffix('/img/longerName.fakeExtension')).toBe "/img/longerName#{fileSuffix}.fakeExtension"
