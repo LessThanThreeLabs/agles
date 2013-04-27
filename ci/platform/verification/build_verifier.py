@@ -6,7 +6,6 @@ import model_server
 
 from build_core import VerificationException
 from pubkey_registrar import PubkeyRegistrar
-from settings.aws import AwsSettings
 from shared.constants import BuildStatus, VerificationUser, KOALITY_EXPORT_PATH
 from util import pathgen
 from util.log import Logged
@@ -21,10 +20,8 @@ class BuildVerifier(object):
 			try:
 				return func(*args, **kwargs)
 			except VerificationException as e:
-				print e
 				return e
 			except BaseException as e:
-				print e
 				BuildVerifier.logger.critical("Unexpected exception thrown during verification", exc_info=True)
 				return e
 
