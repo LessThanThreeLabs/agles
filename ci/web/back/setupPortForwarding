@@ -1,1 +1,0 @@
-ipfw add fwd 127.0.0.1,10443 tcp from any to me 443
