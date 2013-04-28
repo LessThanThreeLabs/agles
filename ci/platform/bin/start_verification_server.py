@@ -6,6 +6,7 @@ import sys
 import util.log
 
 from util.uri_translator import RepositoryUriTranslator
+from verification.change_verifier import ChangeVerifier
 from verification.verification_server import VerificationServer
 from verification.verifier_pool import VerifierPool, VirtualMachineVerifierPool
 from verification.virtual_machine_cleanup_tool import VirtualMachineCleanupTool
@@ -62,7 +63,8 @@ def main():
 			verifier_pool = VirtualMachineVerifierPool(vm_class, vm_dir, max_verifiers=max_vm_count, uri_translator=RepositoryUriTranslator())
 		else:
 			verifier_pool = VerifierPool(max_vm_count, 0)
-		verification_server = VerificationServer(verifier_pool, RepositoryUriTranslator()).run()
+		change_verifier = ChangeVerifier(verifier_pool, RepositoryUriTranslator())
+		verification_server = VerificationServer(change_verifier).run()
 	except:
 		print "Failed to start Verification Server"
 		raise

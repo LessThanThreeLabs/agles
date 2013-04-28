@@ -3,6 +3,7 @@ import socket
 import time
 import binascii
 
+import eventlet
 import yaml
 
 from hashlib import sha512
@@ -26,6 +27,7 @@ from bunnyrpc.client import Client
 from git import Repo
 from util.test.fake_build_verifier import FakeBuildCore
 from verification.build_verifier import BuildVerifier
+from verification.change_verifier import ChangeVerifier
 from verification.verifier_pool import VerifierPool
 
 DEFAULT_NUM_VERIFIERS = 2
@@ -37,6 +39,15 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	class FakeBuildVerifierPool(VerifierPool):
 		def spawn_verifier(self, verifier_number):
 			return BuildVerifier(FakeBuildCore(verifier_number))
+
+	class TestChangeVerifier(ChangeVerifier):
+		def __init__(self, verifier_pool):
+			super(VerificationRoundTripTest.TestChangeVerifier, self).__init__(verifier_pool, None)
+			self._change_finished = eventlet.event.Event()
+
+		def verify_change(self, verification_config, change_id, workers_spawned):
+			super(VerificationRoundTripTest.TestChangeVerifier, self).verify_change(verification_config, change_id, workers_spawned)
+			self._change_finished.send()
 
 	@classmethod
 	def setup_class(cls):
@@ -69,7 +80,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		self.forward_repo_url = os.path.join(self.repo_dir, "forwardrepo.git")
 		Repo.init(self.forward_repo_url, bare=True)
 		self._start_redis()
-		verification_server = VerificationServer(self.verifier_pool)
+
+		self.change_verifier = VerificationRoundTripTest.TestChangeVerifier(self.verifier_pool)
+		verification_server = VerificationServer(self.change_verifier)
+
 		self.vs_greenlet = verification_server.run()
 
 		with ConnectionFactory.get_sql_connection() as conn:
@@ -77,11 +91,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
 
 	def tearDown(self):
-		super(VerificationRoundTripTest, self).tearDown()
 		rmtree(self.repo_dir)
 		self.vs_greenlet.kill()
 		self._stop_redis()
 		self._purge_queues()
+		super(VerificationRoundTripTest, self).tearDown()
 
 	def _insert_repo_info(self, repo_uri):
 		with ConnectionFactory.get_sql_connection() as conn:
@@ -96,7 +110,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		commit_id = 0
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id,
-				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()), pending=True)
+				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()))
 			conn.execute(ins_commit)
 			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master",
 				number=1, status=BuildStatus.QUEUED, create_time=int(time.time()))
@@ -109,7 +123,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			self.change_status = body["contents"]["status"]
 
 	def _test_commands(self, passes):
-		return [{'hello_%s' % x: {'script': 'true' if passes else 'false'}} for x in range(5)]
+		return [{'%s_%s' % ('pass' if passes else 'fail', x): {'script': 'true' if passes else 'false'}} for x in range(5)]
 
 	def _repo_roundtrip(self, modfile, contents, passes=True):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
@@ -142,6 +156,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 					except socket.timeout:
 						pass
 					assert time.time() - start_time < 120  # 120s timeout
+
+		self.change_verifier._change_finished.wait()
 		work_repo.git.fetch()
 		work_repo.git.checkout('origin/master')
 		return commit_sha, work_repo

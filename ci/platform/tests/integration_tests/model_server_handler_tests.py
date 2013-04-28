@@ -48,8 +48,7 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 				user_id=self.user_id,
 				message='a',
 				sha="sha",
-				timestamp=1,
-				pending=True
+				timestamp=1
 			)
 
 			commit_id = sqlconn.execute(ins_commit).inserted_primary_key[0]

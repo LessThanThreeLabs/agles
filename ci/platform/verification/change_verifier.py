@@ -163,8 +163,7 @@ class ChangeVerifier(EventSubscriber):
 	def _get_verification_config(self, commit_id):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
-			commit = model_server_rpc.get_commit_attributes(commit_id)
-		ref = pathgen.get_ref(commit['id'], commit['sha'], commit['pending'])
+		ref = pathgen.hidden_ref(commit_id)
 		build_core = LightWeightBuildCore(self.uri_translator)
 		verification_config = build_core.setup_build(repo_uri, ref)
 		return verification_config

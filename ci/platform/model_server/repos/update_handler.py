@@ -51,7 +51,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		# A repo should already exist
 		update = repo.update().where(repo.c.id == repo_id).values(forward_url=forward_url)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-				sqlconn.execute(update)
+			sqlconn.execute(update)
 		self.publish_event("repos", repo_id, "forward url updated", forward_url=forward_url)
 
 

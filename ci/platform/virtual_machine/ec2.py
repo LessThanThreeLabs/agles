@@ -16,11 +16,25 @@ from virtual_machine import VirtualMachine
 class Ec2Client(object):
 	@classmethod
 	def get_client(cls):
-		region = AwsSettings.region or Ec2Vm._call(
-			['sh', '-c', 'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
-		).output
+		return cls._connect(AwsSettings.aws_access_key_id, AwsSettings.aws_secret_access_key)
+
+	@classmethod
+	def validate_credentials(cls, aws_access_key_id, aws_secret_access_key, region=None):
+		try:
+			cls._connect(aws_access_key_id, aws_secret_access_key, region)
+		except:
+			return False
+		else:
+			return True
+
+	@classmethod
+	def _connect(cls, aws_access_key_id, aws_secret_access_key, region=None):
+		if region is None:
+			region = AwsSettings.region or Ec2Vm._call(
+				['sh', '-c', 'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
+			).output
 		return boto.ec2.connect_to_region(region,
-			**AwsSettings.credentials())
+			aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
 
 @Logged()
@@ -109,7 +123,10 @@ class Ec2Vm(VirtualMachine):
 	def from_id(cls, vm_directory, instance_id, vm_username=VM_USERNAME):
 		try:
 			client = Ec2Client.get_client()
-			vm = Ec2Vm(vm_directory, client.get_all_instances(instance_id)[0].instances[0], vm_username)
+			reservations = client.get_all_instances(filters={'instance-id': instance_id})
+			if not reservations:
+				return None
+			vm = Ec2Vm(vm_directory, reservations[0].instances[0], vm_username)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
 				cls.logger.warn("Found VM (%s, %s) in %s state" % (vm_directory, vm.instance.state, instance_id))
 				vm.delete()
@@ -132,7 +149,7 @@ class Ec2Vm(VirtualMachine):
 		ec2_client = Ec2Client.get_client()
 		#  Wait until EC2 recognizes that the instance exists
 		while True:
-			if instance.id in map(lambda res: res.instances[0].id, ec2_client.get_all_instances()):
+			if ec2_client.get_all_instances(filters={'instance-id': instance_id}):
 				break
 			eventlet.sleep(2)
 			instance.update()
