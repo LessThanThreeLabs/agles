@@ -149,7 +149,7 @@ class Ec2Vm(VirtualMachine):
 		ec2_client = Ec2Client.get_client()
 		#  Wait until EC2 recognizes that the instance exists
 		while True:
-			if ec2_client.get_all_instances(filters={'instance-id': instance_id}):
+			if ec2_client.get_all_instances(filters={'instance-id': instance.id}):
 				break
 			eventlet.sleep(2)
 			instance.update()
