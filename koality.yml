@@ -14,15 +14,8 @@ setup:
       - apache2-utils
       - libevent-dev
       - libpq-dev
-      - lessc
-      - fontconfig  # for phantomjs
     - pip:
       - install requirements: ci/platform/requirements.txt
-    - npm:
-      - iced-coffee-script
-      - less
-      - karma
-      - npm install: ci/web/back
   - databases:
     - postgres:
       - name: koality
@@ -34,30 +27,19 @@ setup:
     - git config --global user.email "koality@koalitycode.com"
     - git config --global user.name "Koality"
     - path: ci/scripts
-      script: ./install_phantomjs.sh
-    - path: ci/scripts
       script: ./rabbitmq_setup.sh
 compile:
   scripts:
     - python setup.py install:
         path: ci/platform
-    - compile webserver:
-        path: ci/web/back
-        script: ./compile.sh
-    - compile website:
-        path: ci/web/front
-        script: ./compile.sh
 test:
-  machines: 4
+  machines: 2
   scripts:
     - platform unit tests:
         path: ci/platform
         script:
           - nosetests -sv tests/unit_tests
         timeout: 3
-    - website unit tests:
-        script:
-          - karma start ci/web/front/test/karma.unit.conf.js --browsers PhantomJS --single-run
   factories:
     - integration test factory:
         path: ci/platform
