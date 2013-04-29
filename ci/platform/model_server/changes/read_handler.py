@@ -149,5 +149,14 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				tablename=change.name), sqlconn.execute(query))
 		return changes
 
+	def get_export_uris(self, user_id, change_id):
+		change_export_uri = database.schema.change_export_uri
+
+		query = change_export_uri.select().where(change_export_uri.c.change_id == change_id)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			export_uris = [row[change_export_uri.c.uri] for row in sqlconn.execute(query)]
+		return export_uris
+
 	def can_hear_change_events(self, user_id, id_to_listen_to):
 		return True
