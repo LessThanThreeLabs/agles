@@ -67,6 +67,16 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		manager = repostore.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
 		manager.store_pending(info['repostore_id'], repo_id, info['repo_name'], sha, commit_id)
 
+	def _get_repostore_id_and_repo_name(self, repo_id):
+		schema = database.schema
+		query = schema.repo.select().where(schema.repo.c.id == repo_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+			assert row is not None
+			repostore_id = row[schema.repo.c.repostore_id]
+			repo_name = row[schema.repo.c.name]
+		return dict(repostore_id=repostore_id, repo_name=repo_name)
+
 
 class NoSuchCommitError(Exception):
 	pass
