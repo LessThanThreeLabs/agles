@@ -447,6 +447,7 @@ Getting Information
       :instanceSize: currently selected instance size (string)
       :numWaiting: number of instances to have waiting (number)
       :maxRunning: maximum number of running instances (number)
+    :bucketName: aws bucket name for exporting files (string)
   :Example: https://domain-name:1337/v/0/aws?key=whatislove
 
 Setting Information
@@ -463,6 +464,7 @@ Setting Information
       :instanceSize: currently selected instance size (string)
       :numWaiting: number of instances to have waiting (number)
       :maxRunning: maximum number of running instances (number)
+    :bucketName: aws bucket name for exporting files (string)
   :Returns: ``ok`` on success
 
 
