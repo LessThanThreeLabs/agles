@@ -10,6 +10,8 @@ setup(
 	]),
 	entry_points={
 		'console_scripts': [
+# SETUP
+			'koality-schema = database.schema:main',
 # SSH
 			'koality-authorized-keys-script = scripts.ssh.authorized_keys_script:main',
 			'koality-gitserve = scripts.ssh.gitserve:main',
@@ -21,7 +23,7 @@ setup(
 			'verify-repository-permissions = scripts.repo.verify_repository_permissions',
 			'koality-git-with-private-key = scripts.repo.git_with_private_key:main',
 # SERVERS
-			'koality-start-filesystem-repo-sever = scripts.server.start_filesystem_repo_server:main',
+			'koality-start-filesystem-repo-server = scripts.server.start_filesystem_repo_server:main',
 			'koality-start-model-server = scripts.server.start_model_server:main',
 			'koality-start-verification-server = scripts.server.start_verification_server:main',
 			'koality-ec2-snapshotter = scripts.server.ec2_snapshotter:main',
