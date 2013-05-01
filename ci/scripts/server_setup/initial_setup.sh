@@ -162,18 +162,7 @@ function setup_java () {
     fi
 }
 
-function setup_chef () {
-    if [ ! -f "/usr/bin/chef-solo" ]; then
-	    echo "deb http://apt.opscode.com/ `lsb_release -cs`-0.10 main" | sudo tee /etc/apt/sources.list.d/opscode.list
-	    sudo mkdir -p /etc/apt/trusted.gpg.d
-		gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
-		gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg > /dev/null
-		sudo apt-get update
-		sudo apt-get install -y opscode-keyring
-		echo "chef chef/chef_server_url string" | sudo debconf-set-selections && sudo apt-get install -y chef
-	fi
-}
-
+# TODO: This currently doesn't do anything correct (no more chef)
 function setup_koality_service () {
 	source /etc/koality/koalityrc
 	pushd ~/code/agles/ci/platform
@@ -253,7 +242,6 @@ function host_setup () {
 	build_vm_image
 
 	setup_java
-	setup_chef
 
 	setup_koality_service
 	sudo service koality start
@@ -274,7 +262,6 @@ function service_setup () {
 	rvm use system
 
 	setup_java
-	setup_chef
 
 	setup_koality_service
 	sudo service koality start
