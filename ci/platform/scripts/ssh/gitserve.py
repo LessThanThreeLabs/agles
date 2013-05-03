@@ -21,7 +21,7 @@ valid_commands = [
 	"git-show"
 ]
 
-user_id_commands = ["git-receive-pack"]
+user_id_commands = ["jgit receive-pack"]
 
 
 def main():
