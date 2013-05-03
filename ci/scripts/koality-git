@@ -1,0 +1,40 @@
+#!/bin/bash
+
+function push() {
+	local local_branch="HEAD"
+	local remote_branch=$(\git rev-parse --abbrev-ref HEAD)
+	local qualifier="for"
+	# check for force push
+	args=()
+	flags=()
+	for arg in "$@"; do
+		if [ "$arg" == "-f" -o "$arg" == "--force" ]; then
+			local qualifier="force"
+		elif [ "${arg:0:1}" == "-" ]; then
+			flags+=("$arg")
+		else
+			args+=("$arg")
+		fi
+	done
+	
+	local remote="origin"
+	if [ "${args[0]}" ]; then
+		local remote=${args[0]}
+		unset args[0]
+	fi
+
+	if [ "${args[1]}" ]; then
+		local local_branch=${args[1]}
+		local remote_branch=${args[1]}
+		unset args[1]
+	fi
+
+	\git push ${flags[@]} ${args[@]} $remote $local_branch:refs/$qualifier/$remote_branch
+}
+
+if [ "$1" == "push" ]; then
+	shift
+	push $*
+else
+	\git $*
+fi

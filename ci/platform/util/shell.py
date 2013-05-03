@@ -62,7 +62,7 @@ class RestrictedGitShell(object):
 		return self._create_ssh_exec_args(route, command, remote_filesystem_path, user_id)
 
 	def handle_receive_pack(self, requested_repo_uri, user_id):
-		args = self.rp_new_sshargs("git-receive-pack", requested_repo_uri, user_id)
+		args = self.rp_new_sshargs("jgit receive-pack", requested_repo_uri, user_id)
 		os.execlp(*args)
 
 	def handle_upload_pack(self, requested_repo_uri, user_id):
@@ -73,11 +73,11 @@ class RestrictedGitShell(object):
 			repostore_id, route, repos_path, repo_id, repo_name, private_key = repo_attributes
 			forward_url = modelserver_rpc_conn.get_repo_forward_url(repo_id)
 
-		self.verify_user_exists("git-upload-pack", user_id, repo_id)
+		self.verify_user_exists("jgit upload-pack", user_id, repo_id)
 
 		if int(user_id) == VerificationUser.id:
 			remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
-			args = self._create_ssh_exec_args(route, "git-upload-pack", remote_filesystem_path, user_id)
+			args = self._create_ssh_exec_args(route, "jgit upload-pack", remote_filesystem_path, user_id)
 		else:
 			args = self._up_pullthrough_args(private_key, forward_url, user_id)
 		os.execlp(*args)
