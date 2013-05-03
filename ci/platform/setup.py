@@ -20,7 +20,7 @@ setup(
 			'force-push = scripts.repo.force_push:main',
 			'push-to-forwardurl = scripts.repo.push_to_forwardurl:main',
 			'store-pending-and-trigger-build = scripts.repo.store_pending_and_trigger_build:main',
-			'verify-repository-permissions = scripts.repo.verify_repository_permissions',
+			'verify-repository-permissions = scripts.repo.verify_repository_permissions:main',
 			'koality-git-with-private-key = scripts.repo.git_with_private_key:main',
 # SERVERS
 			'koality-start-filesystem-repo-server = scripts.server.start_filesystem_repo_server:main',
