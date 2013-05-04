@@ -8,7 +8,7 @@ from git import Repo
 
 from model_server.build_consoles import ConsoleType
 from util.log import Logged
-from virtual_machine.remote_command import RemoteCheckoutCommand, RemoteExportCommand, RemoteProvisionCommand
+from virtual_machine.remote_command import RemoteCheckoutCommand, RemoteExportCommand, RemoteProvisionCommand, RemoteTestCommand, InvalidConfigurationException
 from verification_config import VerificationConfig
 
 
@@ -147,11 +147,44 @@ class VirtualMachineBuildCore(BuildCore):
 		return results.output
 
 	def run_factory_command(self, factory_command, console_appender=None):
-		results = factory_command.run(self.virtual_machine,
-			self._get_output_handler(console_appender, ConsoleType.TestFactory, factory_command.name))
+		output_handler = self._get_output_handler(console_appender, ConsoleType.TestFactory, factory_command.name)
+		results = factory_command.run(self.virtual_machine, output_handler)
 		if results.returncode:
-			raise VerificationException("Factory: %s:" % factory_command.name)
-		return results.output
+			raise VerificationException("Factory: %s" % factory_command.name)
+
+		def factory_failures(*exceptions):
+			line_number = results.output.count('\n') + 3  # leave a blank line
+			failure_lines = {}
+			for e in exceptions:
+				failure_message = '%s: %s' % (type(e).__name__, str(e))
+				for line in failure_message.split('\n'):
+					failure_lines[line_number] = line
+					line_number += 1
+				line_number += 1  # leave a blank line in between errors
+			if output_handler:
+				output_handler.append(failure_lines)
+				output_handler.set_return_code(255)
+			raise VerificationException("Factory: %s" % factory_command.name)
+
+		try:
+			test_sections = yaml.load(results.output)
+		except yaml.YAMLError as e:
+			factory_failures(e)
+
+		if not isinstance(test_sections, list):
+			test_sections = [test_sections]
+
+		commands = []
+		failures = []
+
+		for test_section in test_sections:
+			try:
+				commands.append(RemoteTestCommand(test_section))
+			except InvalidConfigurationException as e:
+				failures.append(e)
+		if failures:
+			factory_failures(*failures)
+		return commands
 
 	def cache_repository(self, repo_uri, console_appender=None):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
