@@ -45,13 +45,16 @@ class RemoteShellCommand(RemoteCommand):
 			commands = [step]
 		elif isinstance(step, dict):
 			if len(step.items()) > 1:
-				raise InvalidConfigurationException("Could not parse %s step: %s" % (self.step_type, step))
+				raise InvalidConfigurationException("Could not parse %s step: %s" % (self.type, step))
 			name = step.keys()[0]
-			path, commands, timeout, export = self._parse_step_info(step.values()[0])
+			try:
+				path, commands, timeout, export = self._parse_step_info(step.values()[0])
+			except InvalidConfigurationException as e:
+				raise InvalidConfigurationException("%s in step: %s" % (e.message, step))
 			if not commands:
 				commands = [name]
 		else:
-			raise InvalidConfigurationException("Could not parse %s step: %s" % (self.step_type, step))
+			raise InvalidConfigurationException("Could not parse %s step: %s" % (self.type, step))
 		return name, path, commands, timeout, export
 
 	def _parse_step_info(self, step_info):
@@ -61,6 +64,8 @@ class RemoteShellCommand(RemoteCommand):
 		export = None
 		if isinstance(step_info, str):
 			commands = [step_info]
+		elif isinstance(step_info, list):
+			commands = step_info
 		elif isinstance(step_info, dict):
 			for key, value in step_info.items():
 				if key == 'script':
@@ -72,7 +77,7 @@ class RemoteShellCommand(RemoteCommand):
 				elif key == 'export':
 					export = self._listify(value)
 				else:
-					raise InvalidConfigurationException("Invalid %s option: %s" % (self.step_type, key))
+					raise InvalidConfigurationException("Invalid %s option: %s" % (self.type, key))
 		return path, commands, timeout, export
 
 	def _listify(self, value):
@@ -81,7 +86,7 @@ class RemoteShellCommand(RemoteCommand):
 		elif isinstance(value, list):
 			return value
 		else:
-			raise InvalidConfigurationException("Could not parse %s value: %s" % (self.step_type, value))
+			raise InvalidConfigurationException("Could not parse %s value: %s" % (self.type, value))
 
 	def _to_script(self):
 		script = self._to_executed_script()
