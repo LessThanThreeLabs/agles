@@ -111,8 +111,8 @@ def snapshot():
 				time.sleep(2)
 				image.update()
 
-		print 'Deleting instance "%s"' % instance_name
 	finally:
+		print 'Deleting instance "%s"' % instance_name
 		virtual_machine.delete()
 
 
