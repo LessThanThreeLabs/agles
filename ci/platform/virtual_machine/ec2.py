@@ -154,10 +154,14 @@ class Ec2Vm(VirtualMachine):
 			eventlet.sleep(2)
 			instance.update()
 		while not 'Name' in instance.tags:
+			failures = 0
 			try:
-				instance.add_tag('Name', name)
+				instance.add_tag('Name', name or '')
 				instance.update()
 			except:
+				failures += 1
+				if failures > 20:
+					raise
 				eventlet.sleep(1)  # Sometimes EC2 doesn't recognize that an instance exists yet
 
 	def wait_until_ready(self):
@@ -218,7 +222,7 @@ class Ec2Vm(VirtualMachine):
 			ami_image_id = self.get_newest_image().id
 		instance_type = self.instance.instance_type
 		self.delete()
-		instance_name = self.instance.tags.get('Name')
+		instance_name = self.instance.tags.get('Name', '')
 		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=self._default_user_data(self.vm_username)).instances[0]
 		self._name_instance(self.instance, instance_name)
 
