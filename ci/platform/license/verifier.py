@@ -44,13 +44,6 @@ class LicenseVerifier(object):
 		except:
 			self.license_check_failed()
 
-	def verify_key(self, key, server_id):
-		verification_data = {'key': key, 'server_id': server_id}
-		response = requests.post(LICENSE_VERIFICATION_URL, data=verification_data)
-		if response.status_code != requests.codes.ok:
-			return False
-		return response.text.lower() == 'true'
-
 	def reset_license_check_failures(self):
 		DeploymentSettings.license_validation_failures = 0
 		DeploymentSettings.active = True
@@ -80,4 +73,4 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 			self.logger.critical("License check failed: url: %s, data: %s, response: %s" %
 				(self.verification_url, verification_data, {'text': response.text, 'code': response.status_code}))
 			return False
-		return response.text.lower() == 'true'
+		return response.text.lower() == 'valid'
