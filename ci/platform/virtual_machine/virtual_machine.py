@@ -26,7 +26,7 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	@classmethod
-	def _call(self, command, output_handler=None, env={}, timeout=None, **kwargs):
+	def _call(cls, command, output_handler=None, env={}, timeout=None, **kwargs):
 		return StreamingExecutor().execute(command, output_handler, env=env, timeout=timeout, **kwargs)
 
 	def call(self, command, output_handler=None, env={}, timeout=None, **kwargs):

@@ -83,17 +83,19 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _validate_security_group(cls, security_group):
+		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
+		own_security_groups = Ec2Vm._call(['ec2metadata', '--security-groups']).output.split('\n')
 		group = cls._get_or_create_security_group(security_group)
 		for rule in group.rules:
 			if (rule.ip_protocol == 'tcp' and
 				rule.from_port == '22' and
 				rule.to_port == '22'):
 				for grant in rule.grants:
-					if grant.cidr_ip == '0.0.0.0/0':
+					if grant.cidr_ip == cidr_ip or grant.groupName in own_security_groups:
 						cls.logger.debug('Found ssh authorization rule on security group "%s"' % security_group)
 						return
 		cls.logger.info('Adding ssh authorization rule to security group "%s"' % security_group)
-		group.authorize('tcp', '22', '22', '0.0.0.0/0', None)
+		group.authorize('tcp', '22', '22', cidr_ip, None)
 
 	@classmethod
 	def _get_or_create_security_group(cls, security_group):
