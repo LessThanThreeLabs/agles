@@ -73,12 +73,11 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 
 		change_export_uri = schema.change_export_uri
 
+		# TODO: make this a mass insert
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			for uri in export_uris:
-				ins = change_export_uri.insert().values(
-					change_id=change_id,
-					uri=uri
-				)
-				sqlconn.execute(ins)
+			sqlconn.execute(
+				change.insert(),
+				[{'change_id': change_id, 'uri': uri} for uri in export_uris]
+			)
 
 		self.publish_event("changes", change_id, "export uris added", export_uris=export_uris)
