@@ -91,7 +91,7 @@ class Ec2Vm(VirtualMachine):
 				rule.from_port == '22' and
 				rule.to_port == '22'):
 				for grant in rule.grants:
-					if grant.cidr_ip == cidr_ip or grant.groupName in own_security_groups:
+					if grant.cidr_ip == cidr_ip or grant.name in own_security_groups:
 						cls.logger.debug('Found ssh authorization rule on security group "%s"' % security_group)
 						return
 		cls.logger.info('Adding ssh authorization rule to security group "%s"' % security_group)
