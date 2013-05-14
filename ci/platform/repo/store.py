@@ -7,13 +7,12 @@ from __future__ import print_function
 import os
 import re
 import shutil
+import socket
 import sys
 import time
 import yaml
 
-import bs4
 import eventlet
-import requests
 
 import model_server
 
@@ -223,8 +222,7 @@ class RepositoryStore(object):
 
 	@classmethod
 	def _get_ip_address(cls):
-		markup = requests.get('http://checkip.dyndns.com').text
-		return bs4.BeautifulSoup(markup).body.string.lstrip('Current IP Address: ')
+		return socket.gethostbyname(socket.gethostname())
 
 	def _ip_address_updater(self):
 		while True:
@@ -234,7 +232,7 @@ class RepositoryStore(object):
 					conn.update_repostore_ip(self.repostore_id, ip_address)
 			except:
 				self.logger.error("ip address updater greenlet failed unexpectedly", exc_info=True)
-			time.sleep(5*MINUTE)
+			time.sleep(5 * MINUTE)
 
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
@@ -507,8 +505,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			raise RepositoryAlreadyExistsException(repo_id, new_repo_path)
 
 	def _resolve_path(self, repo_id, repo_name):
-		repo_path = os.path.join(self._root_path,
-									pathgen.to_path(repo_id, repo_name))
+		repo_path = os.path.join(self._root_path, pathgen.to_path(repo_id, repo_name))
 		return os.path.realpath(repo_path)
 
 

@@ -120,7 +120,7 @@ class RemoteCompileCommand(RemoteShellCommand):
 			script += "cd; mkdir -p %s\n" % export_directory
 			for export in self.export:
 				export = pipes.quote(export)
-				script += "ln -s %s %s\n" % (os.path.join('source', export), os.path.join(export_directory, export))
+				script += "ln -s $(pwd)/%s %s\n" % (os.path.join('source', export), os.path.join(export_directory, export))
 
 		script = script + "exit $_r"
 		return script
