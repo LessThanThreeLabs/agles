@@ -77,7 +77,7 @@ class RestrictedGitShell(object):
 
 		if int(user_id) == VerificationUser.id:
 			remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
-			args = self._create_ssh_exec_args(route, "jgit upload-pack", remote_filesystem_path, user_id)
+			args = self._create_ssh_exec_args(route, "git upload-pack", remote_filesystem_path, user_id)
 		else:
 			args = self._up_pullthrough_args(private_key, forward_url, user_id)
 		os.execlp(*args)
