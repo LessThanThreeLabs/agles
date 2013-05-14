@@ -1,5 +1,6 @@
 import eventlet
 import requests
+import simplejson
 
 import util.greenlets
 
@@ -33,9 +34,9 @@ class LicenseVerifier(object):
 		try:
 			key = DeploymentSettings.license
 			server_id = DeploymentSettings.server_id
-			valid = self.key_verifier.verify_valid(key, server_id)
+			response = self.key_verifier.verify_valid(key, server_id)
 
-			if valid:
+			if response['is_valid']:
 				self.reset_license_check_failures()
 			else:
 				self.license_check_failed()
@@ -67,10 +68,10 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 		self.verification_url = verification_url
 
 	def verify_valid(self, key, server_id):
-		verification_data = {'key': key, 'server_id': server_id}
+		verification_data = {'license_key': key, 'server_id': server_id}
 		response = requests.post(self.verification_url, data=verification_data)
 		if not response.ok:
 			self.logger.critical("License check failed: url: %s, data: %s, response: %s" %
 				(self.verification_url, verification_data, {'text': response.text, 'code': response.status_code}))
 			return False
-		return response.text.lower() == 'valid'
+		return simplejson.loads(response.text)
