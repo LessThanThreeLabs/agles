@@ -8,6 +8,8 @@ from util.log import configure
 def sendmail(send_from, send_to, subject, text, cc=None, bcc=None, html=None, attachment=None, testmode=None):
 	if testmode is None:
 		testmode = MailSettings.test_mode
+	if testmode is True:
+		return True
 
 	configure()
 	logging.getLogger("Mailer").debug(_log_string('Sending mail', send_from, send_to, subject, testmode))
