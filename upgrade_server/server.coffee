@@ -129,7 +129,7 @@ app.post '/upgrade', (request, response) ->
 			response.send 400, error: 'Bad license key'
 		else
 			if licenseResponse.is_valid
-				upgradeTarKey = "upgrade/#{upgradeVersion}.tar.gz"
+				upgradeTarKey = "upgrade/koality-#{upgradeVersion}.tar.gz"
 				console.log upgradeTarKey
 				s3Client.get(upgradeTarKey).on('response', (s3Response) ->
 					if s3Response.statusCode isnt 200
