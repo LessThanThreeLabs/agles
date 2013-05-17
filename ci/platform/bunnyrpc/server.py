@@ -23,6 +23,8 @@ from util import greenlets
 import sys
 import traceback
 
+import eventlet
+
 from kombu.connection import Connection
 from kombu.entity import Exchange, Queue
 from settings.rabbit import RabbitSettings
@@ -67,6 +69,8 @@ class Server(object):
 		assert isinstance(exchange_name, str)
 		assert isinstance(queue_names, list)
 
+		self.response_lock = eventlet.semaphore.Semaphore()
+
 		self.exchange_name = exchange_name
 		self.queue_names = set(queue_names)
 		self.message_ttl = message_ttl
@@ -98,12 +102,15 @@ class Server(object):
 	def _handle_call(self, body, message):
 		message_proto = self._call(body["method"], body["args"])
 		correlation_id = message.properties.get("correlation_id")
+
+		self.response_lock.acquire()
 		self.producer.publish(message_proto,
 			routing_key=message.properties["reply_to"],
 			correlation_id=correlation_id,
 			delivery_mode=2
 		)
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
+		self.response_lock.release()
 
 	def _call(self, method_name, args):
 		proto = {}
