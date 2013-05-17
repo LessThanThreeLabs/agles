@@ -1,26 +1,27 @@
-ddb = require('dynamodb').ddb {
+express = require 'express'
+knox = require 'knox'
+
+aws_credentials = 
 	accessKeyId: 'AKIAJMQW32VH2MIGJ3UQ'
 	secretAccessKey: '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'
+
+ddb = require('dynamodb').ddb {
+	accessKeyId: aws_credentials.accessKeyId
+	secretAccessKey: aws_credentials.secretAccessKey
 	endpoint: 'dynamodb.us-west-2.amazonaws.com'
 }
-knox = require 'knox'
-express = require 'express'
-# pg = require 'pg'
-# fs = require 'fs'
 
-# connectionString = "postgres:///license"
-
-app = express()
-app.use(express.bodyParser())
+s3Client = knox.createClient
+ 	key: aws_credentials.accessKeyId
+ 	secret: aws_credentials.secretAccessKey
+ 	bucket: 'koality_release'
 
 licenseTable = 'license_metadata'
 licensePermissionsTable = 'license_permissions'
 # License table looks like "key -> (created, expires, is_valid, )"
 
-s3Client = knox.createClient
- 	key: 'AKIAJMQW32VH2MIGJ3UQ'
- 	secret: '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'
- 	bucket: 'koality_release'
+app = express()
+app.use(express.bodyParser())
 
 checkTable = (tableName, callback) ->
 	ddb.describeTable tableName, callback
