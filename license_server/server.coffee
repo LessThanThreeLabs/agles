@@ -48,8 +48,11 @@ validateLicenseKey = (licenseKey, serverId, callback) ->
 			_getLicensePermissions licenseKey, callback
 
 
+updateDeploymentInfo = (licenseKey, serverId, userCount, callback) ->
+	ddb.updateItem licenseTable, licenseKey, null, { user_count: { value: userCount } }, {}, callback
+
 registerServerForLicenseKey = (licenseKey, serverId, callback) ->
-	ddb.updateItem licenseTable, licenseKey, null, { server_id: { value: serverId} }, {}, callback
+	ddb.updateItem licenseTable, licenseKey, null, { server_id: { value: serverId } }, {}, callback
 
 
 _checkTable = (tableName, callback) ->
@@ -109,13 +112,23 @@ main = () ->
 	app.post '/license/check', (request, response) ->
 		licenseKey = request.body.license_key
 		serverId = request.body.server_id
+		userCount = request.body.user_count
 
-		validateLicenseKey licenseKey, serverId, (error, result) ->
+		if not licenseKey? or not serverId? or not userCount?
+			response.send 400, error: 'Malformed request'
+			return
+
+		updateDeploymentInfo licenseKey, serverId, userCount, (error, result) ->
 			if error
 				console.error error
 				response.send JSON.stringify {is_valid: false, reason: 'error'}
 			else
-				response.send JSON.stringify result
+				validateLicenseKey licenseKey, serverId, (error, result) ->
+					if error
+						console.error error
+						response.send JSON.stringify {is_valid: false, reason: 'error'}
+					else
+						response.send JSON.stringify result
 
 
 	app.post '/upgrade', (request, response) ->
@@ -124,7 +137,7 @@ main = () ->
 		currentVersion = request.body.current_version
 		upgradeVersion = request.body.upgrade_version
 
-		if not currentVersion? or not upgradeVersion?
+		if not licenseKey? or not serverId? or not currentVersion? or not upgradeVersion?
 			response.send 400, error: 'Malformed request'
 			return
 
