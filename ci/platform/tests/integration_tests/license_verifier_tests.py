@@ -46,7 +46,7 @@ class LicenseVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin
 
 	def test_fail_to_deactivate(self):
 		class FailingLicenseKeyVerifier(LicenseKeyVerifier):
-			def verify_valid(self, key, server_id):
+			def verify_valid(self, license_key, server_id, user_count):
 				return {'is_valid': False}
 
 		DeploymentSettings.active = True
@@ -63,7 +63,7 @@ class LicenseVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin
 
 	def test_verify_success(self):
 		class PassingLicenseKeyVerifier(LicenseKeyVerifier):
-			def verify_valid(self, key, server_id):
+			def verify_valid(self, license_key, server_id, user_count):
 				return {'is_valid': True}
 
 		DeploymentSettings.active = True

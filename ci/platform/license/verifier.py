@@ -34,9 +34,13 @@ class LicenseVerifier(object):
 
 	def handle_once(self):
 		try:
-			key = DeploymentSettings.license_key
+			license_key = DeploymentSettings.license_key
 			server_id = DeploymentSettings.server_id
-			response = self.key_verifier.verify_valid(key, server_id)
+
+			with model_server.rpc_connect('users', 'read') as users_read_rpc:
+				user_count = users_read_rpc.get_user_count()
+
+			response = self.key_verifier.verify_valid(license_key, server_id, user_count)
 
 			if response and response['is_valid']:
 				self.reset_license_check_failures()
@@ -60,7 +64,7 @@ class LicenseVerifier(object):
 
 
 class LicenseKeyVerifier(object):
-	def verify_valid(self, key, server_id):
+	def verify_valid(self, license_key, server_id, user_count):
 		raise NotImplementedError("Subclasses should override this!")
 
 
@@ -69,11 +73,8 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 	def __init__(self, verification_url=LICENSE_VERIFICATION_URL):
 		self.verification_url = verification_url
 
-	def verify_valid(self, key, server_id):
-		with model_server.rpc_connect('users', 'read') as users_read_rpc:
-			user_count = users_read_rpc.get_user_count()
-
-		verification_data = {'license_key': key, 'server_id': server_id}
+	def verify_valid(self, license_key, server_id, user_count):
+		verification_data = {'license_key': license_key, 'server_id': server_id}
 		system_metadata = {'user_count': user_count}
 		request_data = dict(verification_data.items() + system_metadata.items())
 
