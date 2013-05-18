@@ -1,7 +1,7 @@
 express = require 'express'
 knox = require 'knox'
 
-aws_credentials = 
+aws_credentials =
 	accessKeyId: 'AKIAJMQW32VH2MIGJ3UQ'
 	secretAccessKey: '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'
 
@@ -99,9 +99,10 @@ _getLicensePermissions = (licenseKey, callback) ->
 		else if not item?
 			callback null, {is_valid: false, reason: 'no permissions found'}
 		else
-			response = item
-			delete response.license_key
-			response.is_valid = true
+			response =
+				is_valid: true
+				permissions: item
+			delete response.permissions.license_key
 			callback null, response
 
 
