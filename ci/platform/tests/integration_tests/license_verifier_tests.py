@@ -5,20 +5,20 @@ from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
 
 
-class LicenseServerTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
+class LicenseVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	@classmethod
 	def setup_class(cls):
-		super(LicenseServerTest, cls).setup_class()
+		super(LicenseVerifierTest, cls).setup_class()
 		cls._purge_queues()
 
 	def setUp(self):
-		super(LicenseServerTest, self).setUp()
+		super(LicenseVerifierTest, self).setUp()
 		self._start_model_server(license_verifier=False)
 
 	def tearDown(self):
 		self._stop_model_server()
 		self._purge_queues()
-		super(LicenseServerTest, self).tearDown()
+		super(LicenseVerifierTest, self).tearDown()
 
 	def test_license_check_failed(self):
 		serve = LicenseVerifier(HttpLicenseKeyVerifier())

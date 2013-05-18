@@ -33,6 +33,9 @@ class UsersReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_all_users(self, user_id):
+		self._get_all_users()
+
+	def _get_all_users(self):
 		user = database.schema.user
 
 		query = user.select().where(and_(
@@ -41,6 +44,9 @@ class UsersReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			rows = sqlconn.execute(query)
 		return [to_dict(row, user.columns) for row in rows]
+
+	def get_user_count(self):
+		return len(self._get_all_users())
 
 	def get_user_id(self, email):
 		return self.get_user(email)['id']

@@ -3,12 +3,14 @@ import requests
 import simplejson
 
 import util.greenlets
+import model_server
 
 from settings.deployment import DeploymentSettings
 from util.log import Logged
 
 
-LICENSE_VERIFICATION_URL = 'https://koalitycode.com/license/check'
+# TODO: this is very much a temporary url
+LICENSE_VERIFICATION_URL = 'http://staging.koalitycode.com:9001/license/check'
 MAX_FAILURES = 12
 
 
@@ -32,11 +34,11 @@ class LicenseVerifier(object):
 
 	def handle_once(self):
 		try:
-			key = DeploymentSettings.license
+			key = DeploymentSettings.license_key
 			server_id = DeploymentSettings.server_id
 			response = self.key_verifier.verify_valid(key, server_id)
 
-			if response['is_valid']:
+			if response and response['is_valid']:
 				self.reset_license_check_failures()
 			else:
 				self.license_check_failed()
@@ -68,10 +70,16 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 		self.verification_url = verification_url
 
 	def verify_valid(self, key, server_id):
+		with model_server.rpc_connect('users', 'read') as users_read_rpc:
+			user_count = users_read_rpc.get_user_count()
+
 		verification_data = {'license_key': key, 'server_id': server_id}
-		response = requests.post(self.verification_url, data=verification_data)
+		system_metadata = {'user_count': user_count}
+		request_data = dict(verification_data.items() + system_metadata.items())
+
+		response = requests.post(self.verification_url, data=request_data)
 		if not response.ok:
 			self.logger.critical("License check failed: url: %s, data: %s, response: %s" %
-				(self.verification_url, verification_data, {'text': response.text, 'code': response.status_code}))
+				(self.verification_url, request_data, {'text': response.text, 'code': response.status_code}))
 			return False
 		return simplejson.loads(response.text)
