@@ -127,5 +127,5 @@ class RepositoryNotFoundError(Exception):
 	pass
 
 
-class MalformedCommandError(Exception):
+class MalformedCommandError(RepositoryNotFoundError):
 	pass
