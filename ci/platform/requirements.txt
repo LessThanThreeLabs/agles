@@ -1,6 +1,7 @@
-amqp
+amqp==1.2.0
+amqplib==1.0.2
 pika==0.9.5
-kombu==2.5.3
+kombu==2.5.10
 pycrypto==2.6
 librabbitmq
 sqlalchemy==0.7.8
