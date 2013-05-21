@@ -50,6 +50,8 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email','deleted')
     )
+    op.execute('alter sequence user_id_seq restart with 1000')
+    op.execute('alter table "user" alter column id set default nextval(\'user_id_seq\'::regclass);')
     op.create_table('media',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('hash', sa.String(length=32), nullable=False),
