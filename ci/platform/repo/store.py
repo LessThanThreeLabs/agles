@@ -120,7 +120,6 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		self._redisdb = redis_connection
 
 	def register_remote_store(self, repostore_id, num_repos=0):
-
 		self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{str(repostore_id): num_repos})
 
 	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
