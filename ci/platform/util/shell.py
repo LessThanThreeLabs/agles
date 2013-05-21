@@ -80,7 +80,7 @@ class RestrictedGitShell(object):
 			remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 			args = self._create_ssh_exec_args(route, "git upload-pack", remote_filesystem_path, user_id)
 		else:
-			private_key = StoreSettings.ssh_public_key
+			private_key = StoreSettings.ssh_private_key
 			args = self._up_pullthrough_args(private_key, forward_url, user_id)
 		os.execlp(*args)
 
