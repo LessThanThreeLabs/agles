@@ -26,7 +26,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		self.update_setting("mail", "test_mode", False)
 		self.update_setting("deployment", "initialized", True)
 		self.update_setting("store", "ssh_private_key", private_key.exportKey())
-		self.update_setting("store", "ssh_public_key", public_key.exportKey())
+		self.update_setting("store", "ssh_public_key", public_key.exportKey('OpenSSH'))
 
 	def update_setting(self, resource, key, value):
 		system_setting = database.schema.system_setting
