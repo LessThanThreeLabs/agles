@@ -313,7 +313,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def _update_branch_from_forward_url(self, repo_slave, remote_repo, ref_to_update):
 			# branch has to exist on the non-slave (not forward url) because we're trying to push it
 			remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
-			self._fetch_with_private_key(repo_slave, remote_repo)
+			self._fetch_with_private_key(repo_slave, remote_repo, ref_to_update)
 			repo_slave.git.checkout("FETCH_HEAD")
 			ref_sha = repo_slave.head.commit.hexsha
 			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
