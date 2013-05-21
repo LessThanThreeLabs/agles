@@ -4,7 +4,7 @@ import yaml
 
 
 class FileBackedSettings(object):
-	SETTINGS_DIRECTORIES = [os.path.join(os.environ.get('HOME', '/'), 'koality'), os.path.join('/', 'etc', 'koality')]
+	SETTINGS_DIRECTORIES = [os.path.join(os.environ.get('HOME', '/'), '.koality'), os.path.join('/', 'etc', 'koality', 'conf')]
 	SETTINGS_FILE_EXTENSIONS = ['yml']
 	SETTINGS_EXTENSION_TO_HANDLER = {'yml': yaml.safe_load}
 	_is_initialized = False
