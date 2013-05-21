@@ -4,9 +4,9 @@ import sys
 
 
 def main():
-	repo_path = os.getcwd()
-	main_repo_path = repo_path[:repo_path.rfind('.git')] + '.git'
-	private_key = main_repo_path + '.id_rsa'
+	private_key = os.environ.get('GIT_PRIVATE_KEY_PATH')
+	if private_key is None:
+		raise Exception('Private key not found. Please check your system configuration.')
 
 	timeout = os.environ.get('GIT_SSH_TIMEOUT', 120)
 

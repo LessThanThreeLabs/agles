@@ -11,6 +11,7 @@ from settings.aws import AwsSettings
 from settings.verification_server import VerificationServerSettings
 from settings.web_server import WebServerSettings
 from settings.deployment import DeploymentSettings
+from settings.store import StoreSettings
 from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi
@@ -71,3 +72,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		num_waiting = VerificationServerSettings.static_pool_size
 		max_running = VerificationServerSettings.max_virtual_machine_count
 		return {"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running}
+
+	@AdminApi
+	def get_ssh_public_key(self, user_id):
+		return StoreSettings.ssh_public_key

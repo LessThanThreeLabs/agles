@@ -138,8 +138,6 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				self.REPO_URI,
 				self.repostore_id,
 				"forwardurl",
-				"privatekey",
-				"publickey",
 				0)
 
 	def test_get_repositories(self):

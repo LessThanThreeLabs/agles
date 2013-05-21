@@ -18,7 +18,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
 	@AdminApi
-	def create_repo(self, user_id, repo_name, forward_url, keypair):
+	def create_repo(self, user_id, repo_name, forward_url):
 		if not repo_name:
 			raise RepositoryCreateError("repo_name cannot be empty")
 		try:
@@ -28,9 +28,6 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			uri = repo_name  # email addresses in uri don't make sense anymore
 			current_time = int(time.time())
 
-			privatekey = keypair["private"]
-			publickey = keypair["public"]
-
 			# Set entries in db
 			repo_id = self._create_repo_in_db(
 				user_id,
@@ -38,11 +35,9 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				uri,
 				repostore_id,
 				forward_url,
-				privatekey,
-				publickey,
 				current_time)
 			# make filesystem changes
-			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name, privatekey)
+			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name)
 
 			self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name, created=current_time)
 			return repo_id
@@ -51,10 +46,10 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			self.logger.exception(error_msg)
 			raise RepositoryCreateError(e)
 
-	def _create_repo_on_filesystem(self, manager, repostore_id, repo_id, repo_name, privatekey):
-		manager.create_repository(repostore_id, repo_id, repo_name, privatekey)
+	def _create_repo_on_filesystem(self, manager, repostore_id, repo_id, repo_name):
+		manager.create_repository(repostore_id, repo_id, repo_name)
 
-	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, privatekey, publickey, current_time):
+	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, current_time):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		query = repostore.select().where(repostore.c.id == repostore_id)
@@ -66,8 +61,6 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				uri=uri,
 				repostore_id=repostore_id,
 				forward_url=forward_url,
-				privatekey=privatekey,
-				publickey=publickey,
 				created=current_time)
 			result = sqlconn.execute(ins)
 

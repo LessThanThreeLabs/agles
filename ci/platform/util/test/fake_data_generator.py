@@ -52,8 +52,7 @@ class SchemaDataGenerator(object):
 
 				for repo in range(num_repos):
 					ins_repo = schema.repo.insert().values(name="repo-%d" % repo, uri="koality-%d-%d.git" % (repostore, repo),
-						repostore_id=repostore_id, forward_url="bogusurl", publickey="somepublickey",
-						privatekey="someprivatekey", created=int(time.time()))
+						repostore_id=repostore_id, forward_url="bogusurl", created=int(time.time()))
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
 					repos[repo_id] = 0
 					repo_ids.append(repo_id)

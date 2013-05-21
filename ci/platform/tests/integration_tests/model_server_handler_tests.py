@@ -36,8 +36,6 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 				uri='a',
 				repostore_id=repostore_id,
 				forward_url="forwardurl",
-				privatekey="privatekey",
-				publickey="publickey",
 				created=1234
 			)
 

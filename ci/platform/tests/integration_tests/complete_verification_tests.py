@@ -86,6 +86,8 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 		self.vs_greenlet = verification_server.run()
 
+		StoreSettings.ssh_private_key = 'privatekey'
+
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_user = schema.user.insert().values(email="bbland@lt3.com", first_name="brian", last_name="bland", password_hash=binascii.b2a_base64(sha512("").digest())[0:-1], salt="1234567890123456", created=0)
 			self.user_id = conn.execute(ins_user).inserted_primary_key[0]
@@ -102,7 +104,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			ins_machine = schema.repostore.insert().values(ip_address="127.0.0.1", repositories_path=self.repo_dir)
 			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
 			ins_repo = schema.repo.insert().values(id=self.repo_id, name="repo.git", repostore_id=repostore_key, uri=repo_uri,
-				forward_url=self.forward_repo_url, privatekey="privatekey", publickey="publickey", created=120929)
+				forward_url=self.forward_repo_url, created=120929)
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			return repo_key
 
@@ -127,7 +129,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 	def _repo_roundtrip(self, modfile, contents, passes=True):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
-			client.create_repository(self.repo_id, "repo.git", "privatekey")
+			client.create_repository(self.repo_id, "repo.git")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")

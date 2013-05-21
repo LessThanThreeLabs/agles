@@ -48,13 +48,12 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repostore_id, repo_id, repo_name, private_key):
+	def create_repository(self, repostore_id, repo_id, repo_name):
 		"""Creates a repository on the given local store.
 
 		:param repostore_id: The identifier of the local store(machine) to create the repository on.
 		:param repo_id: The unique identifier for the repository being created.
 		:param repo_name: The name of the new repository.
-		:param private_key: An RSA private key for the repository to push to other forward urls
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -131,12 +130,12 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.merge_changeset(repo_id, repo_name, ref_to_merge, ref_to_merge_into)
 
-	def create_repository(self, repostore_id, repo_id, repo_name, private_key):
+	def create_repository(self, repostore_id, repo_id, repo_name):
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.create_repository(repo_id, repo_name, private_key)
+			client.create_repository(repo_id, repo_name)
 		self._update_store_repo_count(repostore_id)
 
 	def delete_repository(self, repostore_id, repo_id, repo_name):
@@ -237,7 +236,7 @@ class RepositoryStore(object):
 	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def create_repository(self, repo_id, repo_name, private_key):
+	def create_repository(self, repo_id, repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def delete_repository(self, repo_id, repo_name):
@@ -261,9 +260,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
 	NUM_RETRIES = 4
-	GIT_WITH_PRIVATE_KEY_SCRIPT = 'koality-git-with-private-key'
+	SSH_WITH_PRIVATE_KEY_SCRIPT = 'koality-ssh-with-private-key'
 	if hasattr(sys, 'real_prefix'):  # We're in a virtualenv python, so point at the locally-installed script
-		GIT_WITH_PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', GIT_WITH_PRIVATE_KEY_SCRIPT)
+		SSH_WITH_PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', SSH_WITH_PRIVATE_KEY_SCRIPT)
 
 	def __init__(self, repostore_id, root_storage_directory_path):
 		super(FileSystemRepositoryStore, self).__init__(repostore_id)
@@ -344,12 +343,34 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def _push_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to push repo %s to forward url with args: %s, kwargs: %s" % (repo, str(args), str(kwargs)))
 		execute_args = ['git', 'push'] + list(args) + repo.git.transform_kwargs(**kwargs)
-		repo.git.execute(execute_args, env={'GIT_SSH': self.GIT_WITH_PRIVATE_KEY_SCRIPT, 'GIT_SSH_TIMEOUT': '120'})
+		repo.git.execute(execute_args,
+			env={'GIT_SSH': self.SSH_WITH_PRIVATE_KEY_SCRIPT, 'GIT_PRIVATE_KEY_PATH': self._get_private_key_path(), 'GIT_SSH_TIMEOUT': '120'}
+		)
 
 	def _fetch_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to fetch to repo %s" % repo)
 		execute_args = ['git', 'fetch'] + list(args) + repo.git.transform_kwargs(**kwargs)
-		repo.git.execute(execute_args, env={'GIT_SSH': self.GIT_WITH_PRIVATE_KEY_SCRIPT, 'GIT_SSH_TIMEOUT': '120'})
+		repo.git.execute(execute_args,
+			env={'GIT_SSH': self.SSH_WITH_PRIVATE_KEY_SCRIPT, 'GIT_PRIVATE_KEY_PATH': self._get_private_key_path(), 'GIT_SSH_TIMEOUT': '120'}
+		)
+
+	def _get_private_key_path(self):
+		with model_server.rpc_connect("repos", "read") as conn:
+			repostore_root = conn.get_repostore_root(self.repostore_id)
+
+		keys_directory = os.path.join(repostore_root, 'keys')
+		private_key_path = os.path.join(keys_directory, 'id_rsa')
+
+		if not os.path.exists(keys_directory):
+			os.makedirs(keys_directory)
+
+		if not os.path.exists(private_key_path):
+			private_key = StoreSettings.ssh_private_key
+			with open(private_key_path, 'w') as private_key_file:
+				os.chmod(private_key_path, 0600)
+				print(private_key, file=private_key_file)
+
+		return private_key_path
 
 	def _reset_repository_head(self, repo, repo_slave, ref_to_reset, original_head):
 		try:
@@ -372,28 +393,23 @@ class FileSystemRepositoryStore(RepositoryStore):
 		original_head = self.merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
 		self._push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into, original_head)
 
-	def create_repository(self, repo_id, repo_name, private_key):
+	def create_repository(self, repo_id, repo_name):
 		"""Creates a new server side repository. Raises an exception on failure.
 		We create bare repositories because they are server side.
 
 		:param repo_id: A unique id assigned to each repository that is used to determine
 						which directory the repository is stored under.
 		:param repo_name: The name of the new repository.
-		:param private_key: RSA private key for pushing/pulling to other repos
 		"""
 		assert repo_name.endswith(".git")
 		assert isinstance(repo_id, int)
 
 		repo_path = self._resolve_path(repo_id, repo_name)
-		private_key_path = repo_path + ".id_rsa"
 		if not os.path.exists(repo_path):
 			os.makedirs(repo_path)
 		else:
 			raise RepositoryAlreadyExistsException(repo_id, repo_path)
 		Repo.init(repo_path, bare=True)
-		with open(private_key_path, 'w') as f:
-			os.chmod(private_key_path, 0600)
-			print(private_key, file=f)
 
 	def delete_repository(self, repo_id, repo_name):
 		"""Deletes a server side repository. This cannot be undone. Raises an exception on failure.
@@ -407,7 +423,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		repo_path = self._resolve_path(repo_id, repo_name)
 		shutil.rmtree(repo_path)
-		os.remove(repo_path + ".id_rsa")
 
 	def push_force(self, repo_id, repo_name, from_target, to_target):
 		"""Pushes forward to the url with a force"""

@@ -6,6 +6,7 @@ import model_server
 
 from build_core import VerificationException
 from pubkey_registrar import PubkeyRegistrar
+from settings.store import StoreSettings
 from shared.constants import BuildStatus, VerificationUser, KOALITY_EXPORT_PATH
 from util import pathgen
 from util.log import Logged
@@ -106,7 +107,7 @@ class BuildVerifier(object):
 		self._start_build(build_id)
 		repo_uri = self._get_repo_uri(commit_id)
 		ref = pathgen.hidden_ref(commit_id)
-		private_key = self._get_private_key(repo_uri)
+		private_key = StoreSettings.ssh_private_key
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 			self.build_core.setup_build(repo_uri, ref, private_key, console_appender)
@@ -185,11 +186,6 @@ class BuildVerifier(object):
 	def _get_repo_uri(self, commit_id):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			return model_server_rpc.get_repo_uri(commit_id)
-
-	def _get_private_key(self, repo_uri):
-		with model_server.rpc_connect("repos", "read") as repos_read_rpc:
-			repostore_id, ip_address, repo_path, repo_id, repo_name, private_key = repos_read_rpc.get_repo_attributes(repo_uri)
-		return private_key
 
 	def _make_console_appender(self, build_consoles_update_rpc, build_id, priority=None):
 		class ConsoleAppender(object):
