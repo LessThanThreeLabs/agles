@@ -10,7 +10,6 @@ from settings.store import StoreSettings
 from shared.constants import BuildStatus, VerificationUser, KOALITY_EXPORT_PATH
 from util import pathgen
 from util.log import Logged
-from virtual_machine.remote_command import RemoteTestCommand
 
 
 @Logged()

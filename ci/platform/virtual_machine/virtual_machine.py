@@ -85,7 +85,7 @@ class VirtualMachine(object):
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 
 	def cache_repository(self, repo_name, output_handler=None):
-		return self.ssh_call('mv source /repositories/cached/%s' % repo_name, output_handler)
+		return self.ssh_call('mv source /repositories/cached/%s || rm -rf source' % repo_name, output_handler)
 
 	@classmethod
 	def get_newest_image(cls):
