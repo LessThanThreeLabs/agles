@@ -3,12 +3,10 @@ import hashlib
 import random
 import string
 import time
-import yaml
-import base64
 
 from database import schema
 from database.engine import ConnectionFactory
-from Crypto.Cipher import AES
+from model_server.system_settings.update_handler import SystemSettingsUpdateHandler
 
 SALT = 'GMZhGiZU4/JYE3NlmCZgGA=='
 
@@ -19,8 +17,6 @@ USER_EMAIL = 'user@user.com'
 USER_PASSWORD = 'user123'
 
 REPOSITORIES_PATH = 'repos'
-
-system_settings_cipher = AES.new(binascii.unhexlify('6B9945583AF2F9DE00D9EF1FABCCFA30CF84AA4E855E12DC448B277D7C65D90F'))
 
 
 class SchemaDataGenerator(object):
@@ -96,7 +92,7 @@ class SchemaDataGenerator(object):
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)
 
-			self.set_deployment_as_initialized(conn)
+			SystemSettingsUpdateHandler().initialize_deployment(1)
 
 	def get_random_commit_status(self):
 		if random.randint(0, 100) > 25:
@@ -115,16 +111,3 @@ class SchemaDataGenerator(object):
 				line=output
 			)
 			sqlconn.execute(ins)
-
-	def set_deployment_as_initialized(self, sqlconn):
-		system_setting = schema.system_setting
-		value = base64.encodestring(system_settings_cipher.encrypt(self._pad(yaml.safe_dump(True))))
-
-		sqlconn.execute(system_setting.insert().values(
-			resource="deployment",
-			key="initialized",
-			value=value
-		))
-
-	def _pad(self, setting):
-		return setting + ((system_settings_cipher.block_size - len(setting) % system_settings_cipher.block_size) * '\n')
