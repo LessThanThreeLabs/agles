@@ -1,3 +1,4 @@
+import logging
 import os
 import pipes
 import socket
@@ -35,6 +36,13 @@ class Ec2Client(object):
 			).output
 		return boto.ec2.connect_to_region(region,
 			aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+
+	class InvalidCredentialsFilter(object):
+		def filter(self, record):
+			return 'AWS was not able to validate the provided access credentials' not in record.getMessage()
+
+	# Never log invalid credentials errors
+	logging.getLogger().addFilter(InvalidCredentialsFilter())
 
 
 @Logged()
