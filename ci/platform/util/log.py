@@ -67,7 +67,7 @@ class TimedBufferedMailHandler(logging.Handler):
 
 	def _send_log_mail(self, output_string):
 		try:
-			deployment_info = "%s @ %s" % (DeploymentSettings.license, DeploymentSettings.version)
+			deployment_info = "%s @ %s" % (DeploymentSettings.license_key, DeploymentSettings.version)
 		except Exception as e:
 			deployment_info = "FATAL"
 			output_string = "Error while retrieving deployment info: %s\n\n%s" % (e, output_string)

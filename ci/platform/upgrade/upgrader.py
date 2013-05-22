@@ -34,7 +34,7 @@ class Upgrader(object):
 			DeploymentSettings.version = self._to_version
 
 	def _install_version(self, from_version, to_version):
-		license_key = DeploymentSettings.license
+		license_key = DeploymentSettings.license_key
 		self.download_upgrade_files(license_key, from_version, to_version, to_path='/tmp')
 		return self._get_upgrade_script().run().returncode
 
