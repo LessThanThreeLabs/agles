@@ -10,7 +10,7 @@ from util.log import Logged
 @Logged()
 class VerificationResultsHandler(object):
 	def __init__(self):
-		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 
 	def pass_change(self, change_id):
 		merge_success = self._send_merge_request(change_id)

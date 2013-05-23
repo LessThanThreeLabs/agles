@@ -23,7 +23,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			raise RepositoryCreateError("repo_name cannot be empty")
 		try:
 			repo_name += ".git"
-			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 			repostore_id = manager.get_least_loaded_store()
 			uri = repo_name  # email addresses in uri don't make sense anymore
 			current_time = int(time.time())
@@ -82,7 +82,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			result = sqlconn.execute(ins)
 			repostore_id = result.inserted_primary_key[0]
 
-		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		manager.register_remote_store(repostore_id)
 		return repostore_id
 

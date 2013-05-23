@@ -8,14 +8,13 @@ consequences/side effects.
 """
 import os
 import subprocess
-import time
 
 import eventlet
 
 from database.engine import ConnectionFactory
 
 FILEDIR = os.path.dirname(os.path.realpath(__file__))
-REDISCONF = os.path.join(FILEDIR, '..', '..', 'conf', 'redis', 'filesystem_repo_server_redis.conf')
+REDISCONF = os.path.join(FILEDIR, '..', '..', 'conf', 'redis', 'platform_redis.conf')
 
 
 class BaseTestMixin(object):
@@ -112,8 +111,9 @@ class RedisTestMixin(BaseTestMixin):
 	@classmethod
 	def _stop_redis(cls):
 		try:
-			redis_conn = ConnectionFactory.get_redis_connection()
-			redis_conn.flushdb()
+			for redis_type in ('repostore', 'virtual_machine'):
+				with ConnectionFactory.get_redis_connection(redis_type) as redis_conn:
+					redis_conn.flushdb()
 			cls._redis_process.terminate()
 		except:
 			redis_cmd = 'redis-server.*%s' % os.path.basename(REDISCONF)

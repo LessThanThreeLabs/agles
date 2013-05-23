@@ -57,7 +57,7 @@ def snapshot():
 	instance_name = 'koality_snapshot_%s_%s' % snapshot_version
 
 	print 'Creating new instance named "%s" based on image "%s"' % (instance_name, newest_global_image.name)
-	virtual_machine = vm_class.from_directory_or_construct("/tmp/koality/cached/%s_%s" % snapshot_version, instance_name, newest_global_image.id)
+	virtual_machine = vm_class.from_id_or_construct('cached:%s_%s' % snapshot_version, instance_name, newest_global_image.id)
 
 	try:
 		virtual_machine.wait_until_ready()

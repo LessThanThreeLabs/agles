@@ -64,7 +64,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 	def _store_pending_commit(self, repo_id, sha, commit_id):
 		info = self._get_repostore_id_and_repo_name(repo_id)
-		manager = repostore.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager = repostore.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		manager.store_pending(info['repostore_id'], repo_id, info['repo_name'], sha, commit_id)
 
 	def _get_repostore_id_and_repo_name(self, repo_id):

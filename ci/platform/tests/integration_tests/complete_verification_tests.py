@@ -125,7 +125,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			self.change_status = body["contents"]["status"]
 
 	def _test_commands(self, passes):
-		return [{'%s_%s' % ('pass' if passes else 'fail', x): {'script': 'true' if passes else 'false'}} for x in range(5)]
+		num_commands = 5
+		if passes:
+			return [{'pass_%s' % x: {'script': 'true'}} for x in xrange(num_commands)]
+		else:
+			return [{'pass_%s' % x: {'script': 'true'}} for x in xrange(num_commands - 1)] + [{'fail_%s' % (num_commands - 1): {'script': 'false'}}]
 
 	def _repo_roundtrip(self, modfile, contents, passes=True):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:

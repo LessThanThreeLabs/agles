@@ -9,9 +9,15 @@ class DatabaseSettings(FileBackedSettings):
 			postgres_host='localhost',
 			redis_host='localhost',
 			redis_port=6400,
-			redis_db=0)
+			repostore_redis_db=0,
+			virtual_machine_redis_db=1)
 		self.add_values(
-			sql_database_url=sqlalchemy.engine.url.URL("postgresql", host=self.postgres_host, database="koality"),
-			redis_connection_params={"host": self.redis_host, "port": self.redis_port, "db": self.redis_db})
+			sql_database_url=sqlalchemy.engine.url.URL('postgresql', host=self.postgres_host, database='koality'),
+			redis_connection_params={
+				'repostore':
+					{'host': self.redis_host, 'port': self.redis_port, 'db': self.repostore_redis_db},
+				'virtual_machine':
+					{'host': self.redis_host, 'port': self.redis_port, 'db': self.virtual_machine_redis_db},
+			})
 
 DatabaseSettings.initialize()
