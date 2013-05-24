@@ -76,11 +76,11 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 	def verify_valid(self, license_key, server_id, user_count):
 		verification_data = {'license_key': license_key, 'server_id': server_id}
 		system_metadata = {'user_count': user_count}
-		request_data = dict(verification_data.items() + system_metadata.items())
+		request_params = dict(verification_data.items() + system_metadata.items())
 
-		response = requests.post(self.verification_url, data=request_data)
+		response = requests.get(self.verification_url, params=request_params)
 		if not response.ok:
-			self.logger.critical("License check failed: url: %s, data: %s, response: %s" %
-				(self.verification_url, request_data, {'text': response.text, 'code': response.status_code}))
+			self.logger.critical("License check failed: url: %s, params: %s, response: %s" %
+				(self.verification_url, request_params, {'text': response.text, 'code': response.status_code}))
 			return False
 		return simplejson.loads(response.text)
