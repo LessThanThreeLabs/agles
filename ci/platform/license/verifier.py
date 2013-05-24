@@ -5,7 +5,9 @@ import simplejson
 import util.greenlets
 import model_server
 
+from settings.aws import AwsSettings
 from settings.deployment import DeploymentSettings
+from settings.verification_server import VerificationServerSettings
 from util.log import Logged
 
 
@@ -14,9 +16,10 @@ MAX_FAILURES = 12
 
 
 class LicenseVerifier(object):
-	def __init__(self, key_verifier, sleep_time=3600):
+	def __init__(self, key_verifier, permissions_handler, sleep_time=3600):
 		super(LicenseVerifier, self).__init__()
 		self.key_verifier = key_verifier
+		self.permissions_handler = permissions_handler
 		self.sleep_time = sleep_time
 
 	def run(self):
@@ -42,7 +45,7 @@ class LicenseVerifier(object):
 			response = self.key_verifier.verify_valid(license_key, server_id, user_count)
 
 			if response and response['is_valid']:
-				self.reset_license_check_failures()
+				self.license_check_passed(response)
 			else:
 				self.license_check_failed()
 		except eventlet.greenlet.GreenletExit:
@@ -53,6 +56,11 @@ class LicenseVerifier(object):
 	def reset_license_check_failures(self):
 		DeploymentSettings.license_validation_failures = 0
 		DeploymentSettings.active = True
+
+	def license_check_passed(self, response):
+		DeploymentSettings.license_type = response['license_type']
+		self.permissions_handler.handle_permissions(response['permissions'])
+		self.reset_license_check_failures()
 
 	def license_check_failed(self):
 		failures = DeploymentSettings.license_validation_failures + 1
@@ -83,3 +91,22 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 				(self.verification_url, request_params, {'text': response.text, 'code': response.status_code}))
 			return False
 		return simplejson.loads(response.text)
+
+
+@Logged()
+class LicensePermissionsHandler(object):
+	def __init__(self):
+		def handle_largest_instance_type(value):
+			AwsSettings.largest_instance_type = value
+
+		def handle_parallelization_cap(value):
+			VerificationServerSettings.parallelization_cap = value
+
+		self._permissions_handlers = {
+			'largest_instance_type': handle_largest_instance_type,
+			'parallelization_cap': handle_parallelization_cap
+		}
+
+	def handle_permissions(self, permissions):
+		for key, value in permissions.items():
+			self._permissions_handlers.get(key, lambda value: None)(value)

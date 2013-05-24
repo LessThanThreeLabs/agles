@@ -63,8 +63,13 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_allowed_instance_sizes(self, user_id):
-		return ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge',
+		largest_instance_type = AwsSettings.largest_instance_type
+		instance_types = ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge',
 			'm3.xlarge', 'm3.2xlarge', 'c1.medium', 'c1.xlarge', 'hi1.4xlarge', 'hs1.8xlarge']
+		if largest_instance_type in instance_types:
+			return instance_types[:instance_types.index(largest_instance_type) + 1]
+		else:
+			return instance_types
 
 	@AdminApi
 	def get_instance_settings(self, user_id):

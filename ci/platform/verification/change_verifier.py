@@ -157,7 +157,8 @@ class ChangeVerifier(EventSubscriber):
 				num_workers = max(1, min(verification_config.machines, len(verification_config.test_commands)))
 			else:
 				num_workers = max(1, len(verification_config.test_commands))
-		return num_workers
+		# TODO: give a warning if the parallelization was capped
+		return min(VerificationServerSettings.parallelization_cap, num_workers)
 
 	def _create_build(self, change_id):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:

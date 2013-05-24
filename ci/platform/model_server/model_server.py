@@ -101,7 +101,8 @@ class ModelServer(object):
 
 		if license_verifier:
 			key_verifier = verifier.HttpLicenseKeyVerifier()
-			lv = verifier.LicenseVerifier(key_verifier)
+			permissions_handler = verifier.LicensePermissionsHandler()
+			lv = verifier.LicenseVerifier(key_verifier, permissions_handler)
 			license_verifier_greenlet = eventlet.spawn(lv.poll)
 
 			def license_verifier_link(greenlet):
