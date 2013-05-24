@@ -47,9 +47,9 @@ class VirtualMachine(object):
 
 	@classmethod
 	def load_vm_info(cls, vm_id):
-		with ConnectionFactory.get_redis_connection('virtual_machine') as redis_conn:
-			instance_id, username = redis_conn.hmget('instance_id', 'username')
-			return {'instance_id': instance_id, 'username': username}
+		redis_conn = ConnectionFactory.get_redis_connection('virtual_machine')
+		instance_id, username = redis_conn.hmget('instance_id', 'username')
+		return {'instance_id': instance_id, 'username': username}
 
 	def remote_checkout(self, repo_name, git_url, ref, output_handler=None):
 		assert isinstance(ref, str)

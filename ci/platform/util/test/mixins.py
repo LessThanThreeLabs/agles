@@ -112,8 +112,8 @@ class RedisTestMixin(BaseTestMixin):
 	def _stop_redis(cls):
 		try:
 			for redis_type in ('repostore', 'virtual_machine'):
-				with ConnectionFactory.get_redis_connection(redis_type) as redis_conn:
-					redis_conn.flushdb()
+				redis_conn = ConnectionFactory.get_redis_connection(redis_type)
+				redis_conn.flushdb()
 			cls._redis_process.terminate()
 		except:
 			redis_cmd = 'redis-server.*%s' % os.path.basename(REDISCONF)
