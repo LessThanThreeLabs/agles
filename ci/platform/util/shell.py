@@ -4,6 +4,7 @@ import re
 
 import model_server
 
+from settings.store import StoreSettings
 from shared.constants import VerificationUser
 from util import pathgen
 from util.permissions import InvalidPermissionsError
@@ -54,7 +55,7 @@ class RestrictedGitShell(object):
 
 	def rp_new_sshargs(self, command, requested_repo_uri, user_id):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			repostore_id, route, repos_path, repo_id, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
 		self.verify_user_exists(command, user_id, repo_id)
 
@@ -70,7 +71,7 @@ class RestrictedGitShell(object):
 			repo_attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 			if repo_attributes is None:
 				raise RepositoryNotFoundError(requested_repo_uri)
-			repostore_id, route, repos_path, repo_id, repo_name, private_key = repo_attributes
+			repostore_id, route, repos_path, repo_id, repo_name = repo_attributes
 			forward_url = modelserver_rpc_conn.get_repo_forward_url(repo_id)
 
 		self.verify_user_exists("jgit upload-pack", user_id, repo_id)
@@ -79,12 +80,13 @@ class RestrictedGitShell(object):
 			remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 			args = self._create_ssh_exec_args(route, "git upload-pack", remote_filesystem_path, user_id)
 		else:
+			private_key = StoreSettings.ssh_private_key
 			args = self._up_pullthrough_args(private_key, forward_url, user_id)
 		os.execlp(*args)
 
 	def handle_git_show(self, requested_repo_uri, show_ref_file, user_id):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, route, repos_path, repo_id, repo_name, private_key = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			repostore_id, route, repos_path, repo_id, repo_name = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
 		self.verify_user_exists("git-show", user_id, repo_id)
 		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
@@ -127,5 +129,5 @@ class RepositoryNotFoundError(Exception):
 	pass
 
 
-class MalformedCommandError(Exception):
+class MalformedCommandError(RepositoryNotFoundError):
 	pass

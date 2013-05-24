@@ -39,8 +39,6 @@ repo = Table('repo', metadata,
 	Column('uri', String, nullable=False),  # this is the clone uri
 	Column('repostore_id', Integer, ForeignKey('repostore.id'), nullable=False),
 	Column('forward_url', String, nullable=False),  # required forwarding url for repositories
-	Column('privatekey', String, nullable=False),  # rsa privkey
-	Column('publickey', String, nullable=False),  # rsa pubkey
 	Column('created', Integer, nullable=False),
 	Column('deleted', Integer, nullable=False, default=0),  # when deleted, set this column to the id
 

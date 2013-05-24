@@ -1,106 +1,15 @@
-import os
-import shutil
-import subprocess
-
 import yaml
-
-from git import Repo
 
 from model_server.build_consoles import ConsoleType
 from util.log import Logged
 from virtual_machine.remote_command import RemoteCheckoutCommand, RemoteExportCommand, RemoteProvisionCommand, RemoteTestCommand, InvalidConfigurationException
-from verification_config import VerificationConfig
 
 
 @Logged()
-class BuildCore(object):
-	"""Component that contains setup and cleanup functionality for
-	steps in box setup related to building."""
-
-	# TODO (bbland/jchu): This class has a fundamental flaw.
-	# It copies the head to /tmp/source, but if 2 of these
-	# are running at the same time, this is a race condition.
-	# For every run, you should have a unique source_dir
-	def __init__(self, uri_translator=None):
-		self.uri_translator = uri_translator
-		self.source_dir = os.path.join("/tmp", "source")
-
-	def setup_build(self, repo_uri, ref, console_appender=None):
-		self._checkout_ref(repo_uri, ref)
-		verification_config = self._get_verification_configuration_from_file()
-		return verification_config
-
-	def _cleanup_source_dir(self):
-		if os.access(self.source_dir, os.F_OK):
-			shutil.rmtree(self.source_dir)
-
-	def _checkout_ref(self, repo_uri, ref):
-		self._cleanup_source_dir()
-		if self.uri_translator:
-			checkout_url = self.uri_translator.translate(repo_uri)
-			host_url = checkout_url[:checkout_url.find(":")]
-			# Add repostore to authorized keys for the following git command
-			subprocess.call(["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "true"])
-		else:
-			checkout_url = repo_uri
-		repo = Repo.init(self.source_dir)
-		repo.git.fetch(checkout_url, ref, "-n", depth=1)
-		repo.git.checkout("FETCH_HEAD")
-
-	def _get_verification_configuration_from_file(self):
-		"""Reads in the yaml config file contained in the checked
-		out user repository which this server is verifying"""
-		config_path = self._get_config_path()
-		if config_path:
-			with open(config_path) as config_file:
-				try:
-					config = yaml.safe_load(config_file.read())
-				except:
-					config = dict()
-		else:
-			config = dict()
-		return self._get_verification_configuration(config)
-
-	def _get_config_path(self):
-		possible_file_names = ['koality.yml', '.koality.yml']
-		for file_name in possible_file_names:
-			config_path = os.path.join(self.source_dir, file_name)
-			if os.access(config_path, os.F_OK):
-				return config_path
-
-	def _get_verification_configuration(self, config_dict):
-		try:
-			return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))
-		except:
-			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=True)
-			return VerificationConfig({}, {})
-
-
-class LightWeightBuildCore(BuildCore):
-	def setup_build(self, repo_uri, ref, console_appender=None):
-		if self.uri_translator:
-			checkout_url = self.uri_translator.translate(repo_uri)
-			host_url = checkout_url[:checkout_url.find(":")]
-			repo_path = checkout_url[checkout_url.find(":") + 1:]
-			show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
-		else:
-			show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
-		return self._get_verification_configuration(self._show_config(show_command))
-
-	def _show_config(self, show_command):
-		for file_name in ['koality.yml', '.koality.yml']:
-			try:
-				return yaml.safe_load(subprocess.check_output(show_command(file_name)))
-			except:
-				pass
-		return {}
-
-
-class VirtualMachineBuildCore(BuildCore):
+class VirtualMachineBuildCore(object):
 	def __init__(self, virtual_machine, uri_translator=None):
-		super(VirtualMachineBuildCore, self).__init__(uri_translator)
 		self.virtual_machine = virtual_machine
-		self.source_dir = os.path.join(virtual_machine.vm_directory, "source")
+		self.uri_translator = uri_translator
 
 	def setup(self):
 		raise NotImplementedError()
@@ -207,7 +116,7 @@ class VagrantBuildCore(VirtualMachineBuildCore):
 
 
 class CloudBuildCore(VirtualMachineBuildCore):
-	def __init__(self, cloud_vm, uri_translator):
+	def __init__(self, cloud_vm, uri_translator=None):
 		super(CloudBuildCore, self).__init__(cloud_vm, uri_translator)
 
 	def setup(self):
@@ -215,7 +124,7 @@ class CloudBuildCore(VirtualMachineBuildCore):
 			try:
 				self.virtual_machine.wait_until_ready()
 			except:
-				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_directory, self.virtual_machine.instance.id), exc_info=True)
+				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_id, self.virtual_machine.instance.id), exc_info=True)
 			else:
 				break
 

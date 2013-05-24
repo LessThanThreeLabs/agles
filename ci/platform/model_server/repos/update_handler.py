@@ -12,7 +12,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 	def update_repostore(self, repostore_id, ip_address, root_dir, num_repos):
 		self.update_repostore_ip(repostore_id, ip_address)
-		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		manager.register_remote_store(repostore_id, num_repos=num_repos)
 
 	def update_repostore_ip(self, repostore_id, ip_address):
@@ -36,13 +36,13 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 
 	def force_push(self, repo_id, user_id, from_target, to_target):
 		info = self._get_repostore_id_and_repo_name(repo_id)
-		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		manager.push_force(info['repostore_id'], repo_id, info['repo_name'], from_target, to_target)
 
 	def force_delete(self, repo_id, user_id, target):
 		info = self._get_repostore_id_and_repo_name(repo_id)
 
-		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		return manager.force_delete(info['repostore_id'], repo_id, info['repo_name'], target)
 
 	def set_forward_url(self, user_id, repo_id, forward_url):

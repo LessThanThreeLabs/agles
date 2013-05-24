@@ -209,5 +209,4 @@ class VirtualMachineVerifierPool(VerifierPool):
 		return BuildVerifier(CloudBuildCore(virtual_machine, self.uri_translator))
 
 	def spawn_virtual_machine(self, virtual_machine_number):
-		vm_directory = os.path.join(self.directory, str(virtual_machine_number))
-		return self.virtual_machine_class.from_directory_or_construct(vm_directory)
+		return self.virtual_machine_class.from_id_or_construct(virtual_machine_number)

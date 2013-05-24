@@ -1,9 +1,7 @@
-import os
 import socket
 
 import eventlet
 import novaclient.client
-import yaml
 
 from settings.openstack import OpenstackSettings
 from util.log import Logged
@@ -23,26 +21,26 @@ class OpenstackVm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
 
-	def __init__(self, vm_directory, instance, vm_username=VM_USERNAME):
-		super(OpenstackVm, self).__init__(vm_directory)
+	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
+		super(OpenstackVm, self).__init__(vm_id)
 		self.instance = instance
 		self.vm_username = vm_username
 		self.write_vm_info()
 
 	@classmethod
-	def from_directory_or_construct(cls, vm_directory, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
-		return cls.from_directory(vm_directory) or cls.construct(vm_directory, name, image, flavor, vm_username)
+	def from_id_or_construct(cls, vm_id, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
+		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, image, flavor, vm_username)
 
 	@classmethod
-	def construct(cls, vm_directory, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
+	def construct(cls, vm_id, name=None, image=None, flavor=None, vm_username=VM_USERNAME):
 		if not name:
-			name = "koality:%s:%s" % (socket.gethostname(), os.path.basename(os.path.abspath(vm_directory)))
+			name = "koality:%s:%s" % (socket.gethostname(), vm_id)
 		if not image:
 			image = cls.get_newest_image()
 		if not flavor:
 			flavor = cls._default_flavor()
 		instance = OpenstackClient.get_client().servers.create(name, image, flavor, files=cls._default_files(vm_username))
-		return OpenstackVm(vm_directory, instance)
+		return OpenstackVm(vm_id, instance)
 
 	@classmethod
 	def _default_flavor(cls):
@@ -57,23 +55,20 @@ class OpenstackVm(VirtualMachine):
 		return {"/home/%s/.ssh/authorized_keys" % vm_username: PubkeyRegistrar().get_ssh_pubkey()}
 
 	@classmethod
-	def from_directory(cls, vm_directory):
+	def from_vm_id(cls, vm_id):
 		try:
-			with open(os.path.join(vm_directory, OpenstackVm.VM_INFO_FILE)) as vm_info_file:
-				config = yaml.safe_load(vm_info_file.read())
-				vm_id = config['instance_id']
-				vm_username = config['username']
+			vm_info = cls.load_vm_info(vm_id)
 		except:
 			return None
 		else:
-			return cls.from_id(vm_directory, vm_id, vm_username)
+			return cls._from_instance_id(vm_id, vm_info['instance_id'], vm_info['vm_username'])
 
 	@classmethod
-	def from_id(cls, vm_directory, vm_id, vm_username=VM_USERNAME):
+	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
 		try:
-			vm = OpenstackVm(vm_directory, OpenstackClient.get_client().servers.get(vm_id), vm_username=vm_username)
+			vm = OpenstackVm(vm_id, OpenstackClient.get_client().servers.get(instance_id), vm_username=vm_username)
 			if vm.instance.status == 'ERROR':
-				cls.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_directory, vm_id))
+				cls.logger.warn("Found VM (%s, %s) in ERROR state" % (vm_id, instance_id))
 				vm.delete()
 				return None
 			elif vm.instance.status == 'DELETED':
@@ -82,7 +77,7 @@ class OpenstackVm(VirtualMachine):
 				vm.delete()
 				return None
 			elif vm.instance.status not in ('ACTIVE', 'BUILD'):
-				cls.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_directory, vm_id, vm.instance.status))
+				cls.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_id, instance_id, vm.instance.status))
 				vm.delete()
 				return None
 			return vm
@@ -94,16 +89,16 @@ class OpenstackVm(VirtualMachine):
 			eventlet.sleep(3)
 			self.instance = OpenstackClient.get_client().servers.get(self.instance.id)
 			if self.instance.status == 'ERROR':
-				self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_directory, self.instance.id))
+				self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_id, self.instance.id))
 				self.rebuild()
 		for remaining_attempts in range(24, 0, -1):
 			if remaining_attempts <= 3:
-				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_directory, self.instance.id, remaining_attempts))
+				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
 			if self.ssh_call("true").returncode == 0:
 				return
 			eventlet.sleep(5)
 		# Failed to ssh into machine, try again
-		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_directory, self.instance.id))
+		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
 		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
@@ -124,10 +119,7 @@ class OpenstackVm(VirtualMachine):
 				instance.delete()
 			except:
 				pass
-		try:
-			os.remove(os.path.join(self.vm_directory, OpenstackVm.VM_INFO_FILE))
-		except:
-			pass
+		self.remove_vm_info()
 
 	def create_image(self, image_name):
 		image_id = self.instance.create_image(image_name)

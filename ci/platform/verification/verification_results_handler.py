@@ -10,7 +10,7 @@ from util.log import Logged
 @Logged()
 class VerificationResultsHandler(object):
 	def __init__(self):
-		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection())
+		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 
 	def pass_change(self, change_id):
 		merge_success = self._send_merge_request(change_id)
@@ -44,7 +44,7 @@ class VerificationResultsHandler(object):
 
 		with model_server.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)
-			repostore_id, route, repos_path, repo_id, repo_name, private_key = client.get_repo_attributes(repo_uri)
+			repostore_id, route, repos_path, repo_id, repo_name = client.get_repo_attributes(repo_uri)
 
 		ref = pathgen.hidden_ref(commit_id)
 		try:

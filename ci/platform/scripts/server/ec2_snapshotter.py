@@ -10,6 +10,7 @@ import model_server
 import util.log
 
 from settings.aws import AwsSettings
+from settings.store import StoreSettings
 from shared.constants import VerificationUser
 from util.uri_translator import RepositoryUriTranslator
 from virtual_machine.ec2 import Ec2Client, Ec2Vm
@@ -56,7 +57,7 @@ def snapshot():
 	instance_name = 'koality_snapshot_%s_%s' % snapshot_version
 
 	print 'Creating new instance named "%s" based on image "%s"' % (instance_name, newest_global_image.name)
-	virtual_machine = vm_class.from_directory_or_construct("/tmp/koality/cached/%s_%s" % snapshot_version, instance_name, newest_global_image.id)
+	virtual_machine = vm_class.from_id_or_construct('cached:%s_%s' % snapshot_version, instance_name, newest_global_image.id)
 
 	try:
 		virtual_machine.wait_until_ready()
@@ -85,7 +86,7 @@ def snapshot():
 
 		print 'Provisioning for repository "%s" on branch "%s"' % (primary_repository['name'], primary_branch)
 		virtual_machine.ssh_call('mv /repositories/cached/%s source' % primary_repository['name'])
-		provision_results = virtual_machine.provision(primary_repository['privatekey'])
+		provision_results = virtual_machine.provision(StoreSettings.ssh_private_key)
 		if provision_results.returncode != 0:
 			failure_message = 'Provisioning failed with returncode %d' % provision_results.returncode
 			print failure_message

@@ -5,6 +5,7 @@ import os
 import eventlet
 
 from settings.deployment import DeploymentSettings
+from settings.web_server import WebServerSettings
 
 LOG_HOME = './log'
 CONFIGURED = False
@@ -68,11 +69,14 @@ class TimedBufferedMailHandler(logging.Handler):
 	def _send_log_mail(self, output_string):
 		try:
 			deployment_info = "%s @ %s" % (DeploymentSettings.license_key, DeploymentSettings.version)
+			send_from = "logmailer@%s" % WebServerSettings.domain_name
 		except Exception as e:
 			deployment_info = "FATAL"
+			send_from = "logmailer@koality.error.com"
 			output_string = "Error while retrieving deployment info: %s\n\n%s" % (e, output_string)
 
-		sendmail("logmailer@koalitycode.com", "logmailer@koalitycode.com",
+		sendmail(send_from,
+			"logmailer@koalitycode.com",
 			"%s Error: %s" % (self.name or 'root', deployment_info),
 			output_string)
 

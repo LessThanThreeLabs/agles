@@ -1,23 +1,15 @@
-import shutil
-import os
+from database.engine import ConnectionFactory
 
 
 class VirtualMachineCleanupTool(object):
-	def __init__(self, directory, vm_class):
-		self.directory = directory
+	def __init__(self, vm_class):
 		self.vm_class = vm_class
 
-	def cleanup(self, filesystem=True):
-		try:
-			for directory in os.listdir(self.directory):
-				directory = os.path.join(self.directory, directory)
-				if os.path.isdir(directory) and not directory.endswith('log'):
-					try:
-						vm = self.vm_class.from_directory(directory)
-						vm.delete() if vm else None
-						if filesystem:
-							shutil.rmtree(directory)
-					except:
-						pass
-		except:
-			pass
+	def cleanup(self):
+		with ConnectionFactory.get_redis_connection('virtual_machine') as redis_conn:
+			for key in redis_conn.keys('*'):
+				try:
+					vm = self.vm_class.from_vm_id(key)
+					vm.delete() if vm else None
+				except:
+					pass

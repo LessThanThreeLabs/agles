@@ -54,7 +54,7 @@ def main():
 
 	if args.cleanup:
 		print "Cleaning up Verification Server directory %s ..." % vm_dir
-		VirtualMachineCleanupTool(vm_dir, vm_class).cleanup(filesystem=False)
+		VirtualMachineCleanupTool(vm_class).cleanup()
 
 	print "Starting Verification Server (%s) with directory %s ..." % (args.type, vm_dir)
 

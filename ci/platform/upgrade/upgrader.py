@@ -17,13 +17,13 @@ class Upgrader(object):
 			SetupCommand(
 				"sudo rm -rf /tmp/%s" % self._to_version,
 				"tar xf /tmp/%s.tar.gz -C /tmp" % self._to_version,
-				"cat /tmp/%s/upgrade_script" % self._to_version
+				"/tmp/%s/upgrade_script" % self._to_version
 			)
 		)
 
 	def _get_revert_script(self):
 		return SetupScript(
-			SetupCommand("cat /tmp/%s/revert_script" % self._to_version)
+			SetupCommand("/tmp/%s/revert_script" % self._to_version)
 		)
 
 	def do_upgrade(self):

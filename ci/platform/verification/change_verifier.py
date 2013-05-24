@@ -1,15 +1,18 @@
+import subprocess
 import sys
+
+import yaml
 
 from eventlet import event, spawn, spawn_n, queue
 from kombu.messaging import Producer
 
 import model_server
 
-from build_core import LightWeightBuildCore
 from shared.handler import EventSubscriber, ResourceBinding
 from settings.verification_server import VerificationServerSettings
 from util import greenlets, pathgen
 from util.log import Logged
+from verification_config import VerificationConfig
 from verification_results_handler import VerificationResultsHandler
 
 
@@ -164,9 +167,29 @@ class ChangeVerifier(EventSubscriber):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
 		ref = pathgen.hidden_ref(commit_id)
-		build_core = LightWeightBuildCore(self.uri_translator)
-		verification_config = build_core.setup_build(repo_uri, ref)
-		return verification_config
+
+		if self.uri_translator:
+			checkout_url = self.uri_translator.translate(repo_uri)
+			host_url = checkout_url[:checkout_url.find(":")]
+			repo_path = checkout_url[checkout_url.find(":") + 1:]
+			show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
+		else:
+			show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
+
+		config_dict = {}
+		for file_name in ['koality.yml', '.koality.yml']:
+			try:
+				config_dict = yaml.safe_load(subprocess.check_output(show_command(file_name)))
+			except:
+				pass
+			else:
+				break
+
+		try:
+			return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))
+		except:
+			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=True)
+			return VerificationConfig({}, {})
 
 	def _is_result_failed(self, result):
 		return isinstance(result, Exception)

@@ -49,7 +49,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 			row_result = sqlconn.execute(query).first()
 		if not row_result:
 			return None
-		return row_result[repostore.c.id], row_result[repostore.c.ip_address], row_result[repostore.c.repositories_path], row_result[repo.c.id], row_result[repo.c.name], row_result[repo.c.privatekey]
+		return row_result[repostore.c.id], row_result[repostore.c.ip_address], row_result[repostore.c.repositories_path], row_result[repo.c.id], row_result[repo.c.name]
 
 	def get_user_id_from_public_key(self, key):
 		ssh_pubkey = database.schema.ssh_pubkey
@@ -68,6 +68,13 @@ class ReposReadHandler(ModelServerRpcHandler):
 			return to_dict(row, commit.columns)
 		else:
 			return None
+
+	def get_repostore_root(self, repostore_id):
+		repostore = database.schema.repostore
+		query = repostore.select().where(repostore.c.id == repostore_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+			return row[repostore.c.repositories_path] if row else None
 
 	#################
 	# Front end API #
