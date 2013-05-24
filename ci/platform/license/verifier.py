@@ -9,8 +9,7 @@ from settings.deployment import DeploymentSettings
 from util.log import Logged
 
 
-# TODO: this is very much a temporary url
-LICENSE_VERIFICATION_URL = 'http://staging.koalitycode.com:9001/license/check'
+LICENSE_VERIFICATION_URL = 'http://license.koalitycode.com:9001/license/check'
 MAX_FAILURES = 12
 
 
