@@ -42,8 +42,11 @@ class VirtualMachine(object):
 	def store_vm_metadata(self, **metadata):
 		self._redis_conn.hmset(self.vm_id, metadata)
 
+	def get_vm_metadata(self):
+		return self._redis_conn.hgetall(self.vm_id)
+
 	def remove_vm_metadata(self, *keys):
-		self._redis_conn.hdel(*keys)
+		self._redis_conn.hdel(self.vm_id, *keys)
 
 	@classmethod
 	def load_vm_info(cls, vm_id):

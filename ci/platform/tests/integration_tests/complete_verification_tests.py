@@ -73,13 +73,13 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		self.repo_id = 1
 		rmtree(self.repo_dir, ignore_errors=True)
 		os.makedirs(self.repo_dir)
+		self._start_redis()
 		self.verifier_pool = VerificationRoundTripTest.FakeBuildVerifierPool(DEFAULT_NUM_VERIFIERS)
 		self.repo_path = os.path.join(
 			self.repo_dir,
 			to_path(self.repo_id, "repo.git"))
 		self.forward_repo_url = os.path.join(self.repo_dir, "forwardrepo.git")
 		Repo.init(self.forward_repo_url, bare=True)
-		self._start_redis()
 
 		self.change_verifier = VerificationRoundTripTest.TestChangeVerifier(self.verifier_pool)
 		verification_server = VerificationServer(self.change_verifier)

@@ -10,6 +10,7 @@ from settings.store import StoreSettings
 from shared.constants import BuildStatus, VerificationUser, KOALITY_EXPORT_PATH
 from util import pathgen
 from util.log import Logged
+from verification_results_handler import VerificationResultsHandler
 
 
 @Logged()
@@ -29,34 +30,29 @@ class BuildVerifier(object):
 
 	def __init__(self, build_core):
 		self.build_core = build_core
-		# self._check_for_interrupted_build()
 		# TODO: change this to something else
 		self.worker_id = build_core.virtual_machine.vm_id
+		self._check_for_interrupted_build()
 		self._register_pubkey()
 
 	def _register_pubkey(self):
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, "BuildVerifier:%s" % self.worker_id)
 
-	# def _check_for_interrupted_build(self):
-	# 	if os.access(self._get_build_info_file(), os.F_OK):
-	# 		with open(self._get_build_info_file()) as build_file:
-	# 			build_id = yaml.load(build_file.read())['build_id']
-	# 			self._handle_interrupted_build(build_id)
+	def _check_for_interrupted_build(self):
+		build_id = self.build_core.virtual_machine.get_vm_metadata().get('build_id')
+		if build_id is not None:
+			self._handle_interrupted_build(build_id)
 
-	# def _handle_interrupted_build(self, build_id):
-	# 	self.logger.warn("Worker %s found interrupted build with id %s. Failing build." % (self.worker_id, build_id))
-	# 	status = BuildStatus.FAILED
-	# 	with model_server.rpc_connect("builds", "update") as builds_update_rpc:
-	# 		builds_update_rpc.mark_build_finished(build_id, status)
-	# 	with Connection(RabbitSettings.kombu_connection_info).Producer(serializer='msgpack') as producer:
-	# 		producer.publish({'build_id': build_id, 'status': status},
-	# 			exchange=VerificationServerSettings.verification_results_queue.exchange,
-	# 			routing_key=VerificationServerSettings.verification_results_queue.routing_key,
-	# 			mandatory=True,
-	# 		)
-	# 	if os.access(self._get_build_info_file(), os.F_OK):
-	# 		os.remove(self._get_build_info_file())
-	# 	self.logger.debug("Failed interrupted build %s, resuming initialization" % build_id)
+	def _handle_interrupted_build(self, build_id):
+		self.logger.error("Worker %s found interrupted build with id %s. Failing build." % (self.worker_id, build_id))
+		status = BuildStatus.FAILED
+		with model_server.rpc_connect("builds", "update") as builds_update_rpc:
+			builds_update_rpc.mark_build_finished(build_id, status)
+		with model_server.rpc_connect("builds", "read") as builds_read_rpc:
+			change_id = builds_read_rpc.get_build_from_id(build_id)['change_id']
+		VerificationResultsHandler().fail_change(change_id)
+		self.build_core.virtual_machine.remove_vm_metadata('build_id')
+		self.logger.debug("Failed interrupted build %s, resuming initialization" % build_id)
 
 	def setup(self):
 		self.build_core.setup()
@@ -155,6 +151,7 @@ class BuildVerifier(object):
 		commit_id = build['commit_id']
 		repo_uri = self._get_repo_uri(commit_id)
 		self.build_core.cache_repository(repo_uri)
+		self.build_core.virtual_machine.remove_vm_metadata('build_id')
 
 	def _get_build(self, build_id):
 		with model_server.rpc_connect("builds", "read") as model_server_rpc:
