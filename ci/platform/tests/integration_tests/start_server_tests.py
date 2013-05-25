@@ -64,20 +64,10 @@ class StartServerTests(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, R
 				return False
 			return retcode is None
 
-		def start_license_server():
-			start_license_server_p = subprocess.Popen(['python', '-m', 'scripts.server.start_license_server'])
-			eventlet.sleep(5)
-			retcode = start_license_server_p.poll()
-			try:
-				start_license_server_p.terminate()
-			except:
-				return False
-			return retcode is None
 		errors = []
 		model_server_thread = eventlet.spawn(start_model_server)
 		repo_server_thread = eventlet.spawn(start_filesystem_repo_server)
 		verification_server_thread = eventlet.spawn(start_verification_server)
-		license_server_thread = eventlet.spawn(start_license_server)
 
 		if not model_server_thread.wait():
 			errors.append("model server startup failed")
@@ -85,7 +75,5 @@ class StartServerTests(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, R
 			errors.append("repo server startup failed")
 		if not verification_server_thread.wait():
 			errors.append("verification server startup failed")
-		if not license_server_thread.wait():
-			errors.append("license server startup failed")
 
 		assert_equal(len(errors), 0, errors)

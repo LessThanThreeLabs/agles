@@ -59,7 +59,7 @@ class LicenseVerifier(object):
 
 	def license_check_passed(self, response):
 		DeploymentSettings.license_type = response['license_type']
-		self.permissions_handler.handle_permissions(response['permissions'])
+		self.permissions_handler.handle_permissions(response.get('permissions', {}))
 		self.reset_license_check_failures()
 
 	def license_check_failed(self):
