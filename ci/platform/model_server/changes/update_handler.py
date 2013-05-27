@@ -4,7 +4,7 @@ from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.web_server import WebServerSettings
-from shared.constants import BuildStatus
+from shared.constants import BuildStatus, MergeStatus
 from util.mail import sendmail
 
 FAILMAIL_TEMPLATE = """%s %s,
@@ -29,7 +29,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 	def mark_change_finished(self, change_id, status, merge_status=None):
 		self._update_change_status(change_id, status,
 			"change finished", end_time=int(time.time()), merge_status=merge_status)
-		if status == BuildStatus.FAILED:
+		if status == BuildStatus.FAILED or merge_status == MergeStatus.FAILED:
 			self._notify_failure(change_id)
 
 	def _update_change_status(self, change_id, status, event_name, **kwargs):

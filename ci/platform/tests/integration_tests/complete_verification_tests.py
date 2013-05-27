@@ -17,8 +17,9 @@ from database.engine import ConnectionFactory
 from database import schema
 from model_server.events_broker import EventsBroker
 from verification.verification_server import VerificationServer
+from settings.deployment import DeploymentSettings
 from settings.rabbit import RabbitSettings
-from shared.constants import BuildStatus
+from shared.constants import BuildStatus, MergeStatus
 from repo.store import FileSystemRepositoryStore, RepositoryStore
 from util.pathgen import to_path
 from settings.store import StoreSettings
@@ -47,6 +48,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 		def verify_change(self, verification_config, change_id, workers_spawned):
 			super(VerificationRoundTripTest.TestChangeVerifier, self).verify_change(verification_config, change_id, workers_spawned)
+			self._change_finished.send()
+
+		def skip_change(self, change_id):
+			super(VerificationRoundTripTest.TestChangeVerifier, self).skip_change(change_id)
 			self._change_finished.send()
 
 	@classmethod
@@ -123,6 +128,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		if body["type"] == "change finished":
 			self.change_status = body["contents"]["status"]
+			self.merge_status = body["contents"].get("merge_status")
 
 	def _test_commands(self, passes):
 		num_commands = 5
@@ -169,28 +175,40 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		return commit_sha, work_repo
 
 	def test_passing_roundtrip(self):
+		DeploymentSettings.active = True
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
 		assert_equal(BuildStatus.PASSED, self.change_status)
 		assert_equal(commit_sha, work_repo.head.commit.hexsha)
 
 	def test_failing_roundtrip(self):
+		DeploymentSettings.active = True
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1", passes=False)
 		assert_equal(BuildStatus.FAILED, self.change_status)
 		assert_not_equal(commit_sha, work_repo.head.commit.hexsha)
 
 	def test_roundtrip_with_postmerge_success(self):
+		DeploymentSettings.active = True
 		forward_repo = Repo(self.forward_repo_url)
 		work_repo = forward_repo.clone(forward_repo.working_dir + ".clone")
 
 		self._modify_commit_push(work_repo, "other.txt", "c2")
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
 		assert_equal(BuildStatus.PASSED, self.change_status)
+		assert_equal(MergeStatus.PASSED, self.merge_status)
 		assert_not_equal(commit_sha, work_repo.head.commit.hexsha)
 
 	def test_roundtrip_with_postmerge_failure(self):
+		DeploymentSettings.active = True
 		forward_repo = Repo(self.forward_repo_url)
 		work_repo = forward_repo.clone(forward_repo.working_dir + ".clone")
 
 		self._modify_commit_push(work_repo, "conflict.txt", "c2")
 		self._repo_roundtrip("conflict.txt", "conflict")
-		assert_equal(BuildStatus.FAILED, self.change_status)
+		assert_equal(BuildStatus.PASSED, self.change_status)
+		assert_equal(MergeStatus.FAILED, self.merge_status)
+
+	def test_skip_roundtrip(self):
+		DeploymentSettings.active = False
+		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
+		assert_equal(BuildStatus.SKIPPED, self.change_status)
+		assert_equal(commit_sha, work_repo.head.commit.hexsha)

@@ -9,6 +9,7 @@ from kombu.messaging import Producer
 import model_server
 
 from shared.handler import EventSubscriber, ResourceBinding
+from settings.deployment import DeploymentSettings
 from settings.verification_server import VerificationServerSettings
 from util import greenlets, pathgen
 from util.log import Logged
@@ -42,6 +43,11 @@ class ChangeVerifier(EventSubscriber):
 		try:
 			change_id = contents['change_id']
 			commit_id = contents['commit_id']
+
+			if not DeploymentSettings.active:
+				self.skip_change(change_id)
+				return
+
 			verification_config = self._get_verification_config(commit_id)
 
 			workers_spawned = event.Event()
@@ -58,6 +64,9 @@ class ChangeVerifier(EventSubscriber):
 			self.verifier_pool.reinitialize(max_verifiers=max_verifiers, min_unallocated=min_unallocated)
 		except:
 			self.logger.critical("Unexpected failure while updating verifier pool to max_verifiers: %s, min_unallocated: %s." % (max_verifiers, min_unallocated), exc_info=True)
+
+	def skip_change(self, change_id):
+		self.results_handler.skip_change(change_id)
 
 	def verify_change(self, verification_config, change_id, workers_spawned):
 		task_queue = TaskQueue()
