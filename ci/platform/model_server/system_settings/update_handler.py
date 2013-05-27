@@ -1,3 +1,5 @@
+import uuid
+
 from Crypto.PublicKey import RSA
 from sqlalchemy import and_
 
@@ -22,9 +24,11 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	def initialize_deployment(self, user_id):
 		private_key = RSA.generate(2048)
 		public_key = private_key.publickey()
+		system_id = str(uuid.uuid1())
 
 		self.update_setting("mail", "test_mode", False)
 		self.update_setting("deployment", "initialized", True)
+		self.update_setting("deployment", "system_id", system_id)
 		self.update_setting("store", "ssh_private_key", private_key.exportKey())
 		self.update_setting("store", "ssh_public_key", public_key.exportKey('OpenSSH'))
 
