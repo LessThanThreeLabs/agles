@@ -45,7 +45,7 @@ class LicenseVerifier(object):
 
 			response = self.key_verifier.verify_valid(license_key, server_id, user_count)
 
-			if response and response['is_valid']:
+			if response and response['isValid']:
 				self.license_check_passed(response)
 			else:
 				self.license_check_failed()
@@ -59,7 +59,7 @@ class LicenseVerifier(object):
 		DeploymentSettings.active = True
 
 	def license_check_passed(self, response):
-		DeploymentSettings.license_type = response['license_type']
+		DeploymentSettings.license_type = response['licenseType']
 		self.permissions_handler.handle_permissions(response.get('permissions', {}))
 		self.reset_license_check_failures()
 
@@ -82,8 +82,8 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 		self.verification_url = verification_url
 
 	def verify_valid(self, license_key, server_id, user_count):
-		verification_data = {'license_key': license_key, 'server_id': server_id}
-		system_metadata = {'user_count': user_count}
+		verification_data = {'licenseKey': license_key, 'serverId': server_id}
+		system_metadata = {'userCount': user_count}
 		request_params = dict(verification_data.items() + system_metadata.items())
 
 		response = requests.get(self.verification_url, params=request_params)
@@ -107,9 +107,9 @@ class LicensePermissionsHandler(object):
 			StoreSettings.max_repository_count = value
 
 		self._permissions_handlers = {
-			'largest_instance_type': handle_largest_instance_type,
-			'parallelization_cap': handle_parallelization_cap,
-			'max_repository_count': handle_max_repository_count
+			'largestInstanceType': handle_largest_instance_type,
+			'parallelizationCap': handle_parallelization_cap,
+			'maxRepositoryCount': handle_max_repository_count
 		}
 
 	def handle_permissions(self, permissions):

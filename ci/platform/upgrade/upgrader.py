@@ -57,14 +57,14 @@ class Upgrader(object):
 
 
 class TarFetcher(object):
-	def __init__(self, fetch_url):
-		self._fetch_url = fetch_url
+	def __init__(self, fetch_uri):
+		self._fetch_uri = fetch_uri
 
 
 class HttpTarFetcher(TarFetcher):
 	def fetch_bytes(self, license_key, from_version, to_version):
 		upgrade_data = {"key": license_key, "currentVersion": from_version, "upgradeVersion": to_version}
-		response = requests.post(self._fetch_url, data=upgrade_data)
+		response = requests.post(self._fetch_uri, data=upgrade_data)
 		if not response.ok:
 			raise UpgradeException("Failed to download upgrade tarball. upgrade_data: %s" % upgrade_data)
 		return response.content
