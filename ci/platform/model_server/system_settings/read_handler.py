@@ -81,3 +81,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	@AdminApi
 	def get_ssh_public_key(self, user_id):
 		return StoreSettings.ssh_public_key
+
+	@AdminApi
+	def get_max_repository_count(self, user_id):
+		return StoreSettings.max_repository_count

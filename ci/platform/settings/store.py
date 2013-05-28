@@ -6,5 +6,6 @@ class StoreSettings(DatabaseBackedSettings):
 		super(StoreSettings, self).__init__(
 			rpc_exchange_name='repostore:rpc',
 			ssh_private_key=None,
-			ssh_public_key=None
+			ssh_public_key=None,
+			max_repository_count=None
 		)

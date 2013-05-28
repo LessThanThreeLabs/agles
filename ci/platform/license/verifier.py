@@ -7,6 +7,7 @@ import model_server
 
 from settings.aws import AwsSettings
 from settings.deployment import DeploymentSettings
+from settings.store import StoreSettings
 from settings.verification_server import VerificationServerSettings
 from util.log import Logged
 
@@ -102,9 +103,13 @@ class LicensePermissionsHandler(object):
 		def handle_parallelization_cap(value):
 			VerificationServerSettings.parallelization_cap = value
 
+		def handle_max_repository_count(value):
+			StoreSettings.max_repository_count = value
+
 		self._permissions_handlers = {
 			'largest_instance_type': handle_largest_instance_type,
-			'parallelization_cap': handle_parallelization_cap
+			'parallelization_cap': handle_parallelization_cap,
+			'max_repository_count': handle_max_repository_count
 		}
 
 	def handle_permissions(self, permissions):

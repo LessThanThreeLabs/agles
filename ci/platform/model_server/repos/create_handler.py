@@ -5,6 +5,7 @@ import repo.store
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from settings.store import StoreSettings
 from util.log import Logged
 from util.pathgen import to_clone_path
 from util.permissions import AdminApi
@@ -22,6 +23,13 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		if not repo_name:
 			raise RepositoryCreateError("repo_name cannot be empty")
 		try:
+			max_repo_count = StoreSettings.max_repository_count
+			if max_repo_count is not None:
+				query = database.schema.repo.select().where(database.schema.repo.c.deleted == 0)
+				with ConnectionFactory.get_sql_connection as sqlconn:
+					repo_count = len(sqlconn.execute(query))
+				if repo_count >= max_repo_count:
+					raise RepositoryCreateError("Already have the maximum allowed number of repositories (%d)" % max_repo_count)
 			repo_name += ".git"
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 			repostore_id = manager.get_least_loaded_store()
