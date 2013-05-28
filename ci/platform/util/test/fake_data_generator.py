@@ -92,13 +92,10 @@ class SchemaDataGenerator(object):
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)
 
-			SystemSettingsUpdateHandler().initialize_deployment(1)
+			SystemSettingsUpdateHandler().initialize_deployment(1, True)
 
 	def get_random_commit_status(self):
-		if random.randint(0, 100) > 25:
-			return 'passed'
-		else:
-			return 'failed'
+		return random.choice(['queued', 'running', 'passed', 'failed', 'skipped'])
 
 	def generate_console_output(self, sqlconn, console_id):
 		console_output = schema.console_output

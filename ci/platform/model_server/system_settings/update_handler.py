@@ -21,12 +21,12 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		super(SystemSettingsUpdateHandler, self).__init__("system_settings", "update")
 
 	@AdminApi
-	def initialize_deployment(self, user_id):
+	def initialize_deployment(self, user_id, test_mode=False):
 		private_key = RSA.generate(2048)
 		public_key = private_key.publickey()
 		server_id = str(uuid.uuid1())
 
-		self.update_setting("mail", "test_mode", False)
+		self.update_setting("mail", "test_mode", test_mode)
 		self.update_setting("deployment", "initialized", True)
 		self.update_setting("deployment", "server_id", server_id)
 		self.update_setting("store", "ssh_private_key", private_key.exportKey())
