@@ -50,6 +50,7 @@ from bunnyrpc.exceptions import RPCRequestError
 from database.engine import ConnectionFactory
 from settings.mail import MailSettings
 from settings.deployment import DeploymentSettings
+from settings.store import StoreSettings
 from util.pathgen import to_clone_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
@@ -222,6 +223,9 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 	def test_deployment_settings(self):
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_false(conn.is_deployment_initialized())
+		assert_is_none(DeploymentSettings.server_id)
+		assert_is_none(StoreSettings.ssh_private_key)
+		assert_is_none(StoreSettings.ssh_public_key)
 
 		with model_server.rpc_connect("system_settings", "update") as conn:
 			conn.initialize_deployment(self.user_id)
@@ -231,3 +235,6 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			assert_false(MailSettings.test_mode)
 			assert_is_not_none(conn.get_admin_api_key(self.user_id))
 			assert_is_not_none(DeploymentSettings.admin_api_key)
+			assert_is_not_none(DeploymentSettings.server_id)
+			assert_is_not_none(StoreSettings.ssh_private_key)
+			assert_is_not_none(StoreSettings.ssh_public_key)
