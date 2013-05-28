@@ -50,9 +50,9 @@ class Upgrader(object):
 			raise FatalUpgradeException()
 
 	def download_upgrade_files(self, license_key, from_version, to_version, to_path):
-		dowload_path = os.path.join(to_path, "%s.tar.gz" % to_version)
+		download_path = os.path.join(to_path, "%s.tar.gz" % to_version)
 		content = self._tar_fetcher.fetch_bytes(license_key, from_version, to_version)
-		with open(dowload_path, "wb") as upgrade_tar:
+		with open(download_path, "wb") as upgrade_tar:
 			upgrade_tar.write(content)
 
 
