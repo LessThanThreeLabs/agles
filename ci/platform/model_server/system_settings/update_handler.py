@@ -1,3 +1,4 @@
+import os
 import sys
 import uuid
 
@@ -96,7 +97,6 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def upgrade_deployment(self, user_id):
-		self.logger.info('Attempting to upgrade deployment')
 		upgrade_script = 'koality-upgrade'
 		if hasattr(sys, 'real_prefix'):  # We're in a virtualenv python, so point at the locally-installed script
 			upgrade_script = os.path.join(sys.prefix, 'bin', upgrade_script)
