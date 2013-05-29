@@ -18,15 +18,16 @@ class Upgrader(object):
 	def _get_upgrade_script(self):
 		return SetupScript(
 			SetupCommand(
-				"sudo rm -rf /tmp/%s" % self._to_version,
-				"tar xf /tmp/%s.tar.gz -C /tmp" % self._to_version,
-				"/tmp/%s/upgrade_script" % self._to_version
+				"sudo rm -rf /tmp/koalityupgrade/%s" % self._to_version,
+				"mkdir -p /tmp/koalityupgrade/%s" % self._to_version,
+				"tar xf /tmp/%s.tar.gz -C /tmp/koalityupgrade/%s" % (self._to_version, self._to_version),
+				"/tmp/koalityupgrade/%s/*/upgrade_script" % self._to_version
 			)
 		)
 
 	def _get_revert_script(self):
 		return SetupScript(
-			SetupCommand("/tmp/%s/revert_script" % self._to_version)
+			SetupCommand("/tmp/koalityupgrade/%s/*/revert_script" % self._to_version)
 		)
 
 	def do_upgrade(self):

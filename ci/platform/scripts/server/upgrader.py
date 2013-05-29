@@ -17,7 +17,7 @@ def main():
 	try:
 		upgrader = Upgrader(upgrade_version, HttpTarFetcher())
 
-		upgrade_process = multiprocessing.Process(target=upgrader.run)
+		upgrade_process = multiprocessing.Process(target=upgrader.do_upgrade)
 		upgrade_process.start()
 
 		upgrade_process.join()
