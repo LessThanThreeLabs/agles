@@ -27,6 +27,7 @@ setup(
 			'koality-start-model-server = scripts.server.start_model_server:main',
 			'koality-start-verification-server = scripts.server.start_verification_server:main',
 			'koality-ec2-snapshotter = scripts.server.ec2_snapshotter:main',
+			'koality-upgrade = scripts.server.upgrader:main',
 		],
 	},
 )
