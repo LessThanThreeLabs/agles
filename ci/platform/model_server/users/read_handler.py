@@ -33,7 +33,7 @@ class UsersReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_all_users(self, user_id):
-		self._get_all_users()
+		return self._get_all_users()
 
 	def _get_all_users(self):
 		user = database.schema.user
