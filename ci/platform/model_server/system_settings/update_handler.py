@@ -1,4 +1,7 @@
+import sys
 import uuid
+
+from subprocess import Popen
 
 from Crypto.PublicKey import RSA
 from sqlalchemy import and_
@@ -90,6 +93,15 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			instance_size=instance_size,
 			min_unallocated=min_unallocated,
 			max_verifiers=max_verifiers)
+
+	@AdminApi
+	def upgrade_deployment(self, user_id):
+		self.logger.warn('Attempting to upgrade deployment')
+		upgrade_script = 'koality-upgrade'
+		if hasattr(sys, 'real_prefix'):  # We're in a virtualenv python, so point at the locally-installed script
+			upgrade_script = os.path.join(sys.prefix, 'bin', upgrade_script)
+
+		Popen(upgrade_script)
 
 
 class InvalidConfigurationException(Exception):
