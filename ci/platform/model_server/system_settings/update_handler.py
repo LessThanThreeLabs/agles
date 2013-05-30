@@ -12,6 +12,7 @@ import database.schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.aws import AwsSettings
+from settings.deployment import DeploymentSettings
 from settings.verification_server import VerificationServerSettings
 from settings.web_server import WebServerSettings
 from model_server.system_settings import system_settings_cipher
