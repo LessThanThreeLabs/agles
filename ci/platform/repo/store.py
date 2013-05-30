@@ -293,21 +293,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 		finally:
 			repo_slave.git.reset(hard=True)
 
-	def _update_from_forward_url(self, repo_slave, remote_repo, ref_to_update):
-		try:
-			ref_sha = self._update_branch_from_forward_url(repo_slave, remote_repo, ref_to_update)
-			remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
-			repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
-			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
-			repo_slave.git.push("origin", "HEAD:%s" % ref_to_update)
-		except GitCommandError:
-			stacktrace = sys.exc_info()[2]
-			error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_update)
-			self.logger.info(error_msg, exc_info=True)
-			raise MergeError, error_msg, stacktrace
-		finally:
-			repo_slave.git.reset(hard=True)
-
 	def _update_branch_from_forward_url(self, repo_slave, remote_repo, ref_to_update):
 			# branch has to exist on the non-slave (not forward url) because we're trying to push it
 			remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
@@ -318,6 +303,24 @@ class FileSystemRepositoryStore(RepositoryStore):
 			return ref_sha
 
 	def _push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into, original_head):
+		def update_from_forward_url():
+			try:
+				ref_sha = self._update_branch_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
+				remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
+				repo_slave.git.checkout(remote_branch, "-B", ref_to_merge_into)
+				repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
+				repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
+			except GitCommandError:
+				stacktrace = sys.exc_info()[2]
+				error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_merge_into)
+				self.logger.info(error_msg, exc_info=True)
+				self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
+				raise MergeError, error_msg, stacktrace
+			except:
+				self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
+			finally:
+				repo_slave.git.reset(hard=True)
+
 		i = 0
 		while True:
 			i += 1
@@ -331,7 +334,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 					self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
-				self._update_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
+				update_from_forward_url()
 			except:
 				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
 				self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
