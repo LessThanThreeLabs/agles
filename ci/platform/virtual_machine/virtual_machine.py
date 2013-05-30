@@ -51,7 +51,7 @@ class VirtualMachine(object):
 	@classmethod
 	def load_vm_info(cls, vm_id):
 		redis_conn = ConnectionFactory.get_redis_connection('virtual_machine')
-		instance_id, username = redis_conn.hmget('instance_id', 'username')
+		instance_id, username = redis_conn.hmget(vm_id, ('instance_id', 'username'))
 		return {'instance_id': instance_id, 'username': username}
 
 	def remote_checkout(self, repo_name, git_url, ref, output_handler=None):
