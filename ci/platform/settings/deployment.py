@@ -12,5 +12,6 @@ class DeploymentSettings(DatabaseBackedSettings):
 			version=VERSION,
 			license_validation_failures=0,
 			license_type=None,
-			initialized=False
+			initialized=False,
+			upgrade_status=None
 		)

@@ -85,3 +85,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	@AdminApi
 	def get_max_repository_count(self, user_id):
 		return StoreSettings.max_repository_count
+
+	@AdminApi
+	def get_upgrade_status(self, user_id):
+		return DeploymentSettings.upgrade_status

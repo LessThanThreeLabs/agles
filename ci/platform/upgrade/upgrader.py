@@ -31,6 +31,10 @@ class Upgrader(object):
 		)
 
 	def do_upgrade(self):
+		if DeploymentSettings.upgrade_status == 'running':
+			raise UpgradeInProgressException()
+
+		DeploymentSettings.upgrade_status = 'running'
 		returncode = self._install_version(self._from_version, self._to_version)
 		if returncode:
 			self.revert_upgrade()
@@ -41,7 +45,7 @@ class Upgrader(object):
 				except bunnyrpc.exceptions.RPCRequestError:  # Model server might not be up again yet
 					eventlet.sleep(3)
 				else:
-					break
+					DeploymentSettings.upgrade_status = 'passed'
 
 	def _install_version(self, from_version, to_version):
 		license_key = DeploymentSettings.license_key
@@ -52,13 +56,20 @@ class Upgrader(object):
 	def revert_upgrade(self):
 		returncode = self._get_revert_script().run().returncode
 		if returncode:
-			# log here
-			raise FatalUpgradeException()
+			try:
+				# log here
+				DeploymentSettings.upgrade_status = 'failed'
+			finally:
+				raise FatalUpgradeException()
 
 		returncode = self._install_version(self._to_version, self._from_version)
 		if returncode:
-			# log here
-			raise FatalUpgradeException()
+			try:
+				# log here
+				DeploymentSettings.upgrade_status = 'failed'
+			finally:
+				raise FatalUpgradeException()
+		DeploymentSettings.upgrade_status = 'rolled back'
 
 	def download_upgrade_files(self, license_key, server_id, from_version, to_version, to_path):
 		download_path = os.path.join(to_path, "%s.tar.gz" % to_version)
@@ -92,3 +103,8 @@ class UpgradeException(Exception):
 
 class FatalUpgradeException(UpgradeException):
 	pass
+
+
+class UpgradeInProgressException(UpgradeException):
+	def __init__(self):
+		super(UpgradeInProgressException, self).__init__('An upgrade is already in progress')
