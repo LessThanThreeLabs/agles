@@ -66,7 +66,7 @@ def snapshot():
 			repositories = model_rpc.get_repositories(VerificationUser.id)
 
 		with model_server.rpc_connect('changes', 'read') as model_rpc:
-			changes = model_rpc.get_changes_from_timestamp(VerificationUser.id, map(lambda repo: repo['id'], repositories), _one_week_ago())
+			changes = model_rpc.get_changes_between_timestamps(VerificationUser.id, map(lambda repo: repo['id'], repositories), _one_week_ago())
 
 		repo_change_counter = Counter(map(lambda change: change['repo_id'], changes))
 		primary_repository_id = repo_change_counter.most_common(1)[0][0]

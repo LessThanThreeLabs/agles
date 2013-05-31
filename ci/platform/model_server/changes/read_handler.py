@@ -1,4 +1,4 @@
-from sqlalchemy import cast, func, or_, Integer
+from sqlalchemy import cast, func, and_, or_, Integer
 
 import collections
 import database.schema
@@ -130,7 +130,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				tablename=change.name), sqlconn.execute(query))
 		return changes
 
-	def get_changes_from_timestamp(self, user_id, repo_ids, timestamp):
+	def get_changes_between_timestamps(self, user_id, repo_ids, start_timestamp, end_timestamp=None):
 		assert isinstance(repo_ids, collections.Iterable)
 		assert not isinstance(repo_ids, str)
 
@@ -141,7 +141,14 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			temp_string,
 			cast(temp_string.c.string, Integer) == change.c.repo_id
 		)
-		query = query.select().apply_labels().where(change.c.start_time > timestamp)
+		range_query = change.c.end_time > start_timestamp
+		if end_timestamp is not None:
+			range_query = and_(
+				range_query,
+				change.c.end_time < end_timestamp
+			)
+
+		query = query.select().apply_labels().where(range_query)
 
 		with ConnectionFactory.transaction_context() as sqlconn:
 			load_temp_strings(repo_ids)
