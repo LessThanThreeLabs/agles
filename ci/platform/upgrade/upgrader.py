@@ -35,15 +35,18 @@ class Upgrader(object):
 			raise UpgradeInProgressException()
 
 		DeploymentSettings.upgrade_status = 'running'
-		returncode = self._install_version(self._from_version, self._to_version)
-		if returncode:
-			self.revert_upgrade()
-		else:
-			for attempt in xrange(10):
-				try:
-					DeploymentSettings.upgrade_status = 'passed'
-				except bunnyrpc.exceptions.RPCRequestError:  # Model server might not be up again yet
-					eventlet.sleep(3)
+		try:
+			returncode = self._install_version(self._from_version, self._to_version)
+			if returncode:
+				self.revert_upgrade()
+			else:
+				for attempt in xrange(10):
+					try:
+						DeploymentSettings.upgrade_status = 'passed'
+					except bunnyrpc.exceptions.RPCRequestError:  # Model server might not be up again yet
+						eventlet.sleep(3)
+		except:
+			DeploymentSettings.upgrade_status = 'failed'
 
 	def _install_version(self, from_version, to_version):
 		license_key = DeploymentSettings.license_key

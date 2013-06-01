@@ -50,7 +50,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 			update_command = self._get_update_command(resource, key, value) if row else self._get_insert_command(resource, key, value)
 			sqlconn.execute(update_command)
-		self.publish_event("system_settings", None, "system setting updated", resource=resource, key=key, value=value)
+		self.publish_event_to_admins("system_settings", "system setting updated", resource=resource, key=key, value=value)
 
 	def _get_update_command(self, resource, key, value):
 		system_setting = database.schema.system_setting

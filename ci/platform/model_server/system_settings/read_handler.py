@@ -14,7 +14,7 @@ from settings.deployment import DeploymentSettings
 from settings.store import StoreSettings
 from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
-from util.permissions import AdminApi
+from util.permissions import AdminApi, is_admin
 
 
 class SystemSettingsReadHandler(ModelServerRpcHandler):
@@ -89,3 +89,6 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	@AdminApi
 	def get_upgrade_status(self, user_id):
 		return DeploymentSettings.upgrade_status
+
+	def can_hear_system_settings_events(self, user_id, id_to_listen_to):
+		return is_admin(user_id)
