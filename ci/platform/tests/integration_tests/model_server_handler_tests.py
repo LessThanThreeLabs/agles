@@ -56,7 +56,7 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 				repo_id=self.repo_id,
 				merge_target='a',
 				number=1,
-				status='a',
+				verification_status='a',
 				create_time=1,
 				start_time=1,
 				end_time=1

@@ -69,7 +69,7 @@ class SchemaDataGenerator(object):
 						message="message-%d" % commit, timestamp=random.randint(1, int(time.time())), sha="thisissha")
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target-%d" % commit,
-						number=repos[repo_id], status=self.get_random_commit_status(),
+						number=repos[repo_id], verification_status=self.get_random_commit_status(), merge_status=self.get_random_merge_status(),
 						create_time=int(time.time()) + random.randint(-10000, 10000),
 						start_time=int(time.time()) + random.randint(-10000, 10000),
 						end_time=int(time.time()) + random.randint(10000, 12000))
@@ -96,6 +96,9 @@ class SchemaDataGenerator(object):
 
 	def get_random_commit_status(self):
 		return random.choice(['queued', 'running', 'passed', 'failed', 'skipped'])
+
+	def get_random_merge_status(self):
+		return random.choice(['passed', 'failed', None])
 
 	def generate_console_output(self, sqlconn, console_id):
 		console_output = schema.console_output

@@ -26,15 +26,15 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		self._update_change_status(change_id, BuildStatus.RUNNING,
 			"change started", start_time=int(time.time()))
 
-	def mark_change_finished(self, change_id, status, merge_status=None):
-		self._update_change_status(change_id, status,
+	def mark_change_finished(self, change_id, verification_status, merge_status=None):
+		self._update_change_status(change_id, verification_status,
 			"change finished", end_time=int(time.time()), merge_status=merge_status)
-		if status == BuildStatus.FAILED or merge_status == MergeStatus.FAILED:
+		if verification_status == BuildStatus.FAILED or merge_status == MergeStatus.FAILED:
 			self._notify_failure(change_id)
 
-	def _update_change_status(self, change_id, status, event_name, **kwargs):
+	def _update_change_status(self, change_id, verification_status, event_name, **kwargs):
 		change = schema.change
-		update = change.update().where(change.c.id == change_id).values(status=status, **kwargs)
+		update = change.update().where(change.c.id == change_id).values(verification_status=verification_status, **kwargs)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
 
@@ -45,7 +45,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 
 		if "merge_status" in kwargs:
 			self.publish_event("changes", change_id, "merge completed", merge_status=kwargs["merge_status"])
-		self.publish_event("repos", repository_id, event_name, change_id=change_id, status=status, **kwargs)
+		self.publish_event("repos", repository_id, event_name, change_id=change_id, verification_status=verification_status, **kwargs)
 
 	def _notify_failure(self, change_id):
 		change = schema.change

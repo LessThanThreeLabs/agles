@@ -120,14 +120,14 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()))
 			conn.execute(ins_commit)
 			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master",
-				number=1, status=BuildStatus.QUEUED, create_time=int(time.time()))
+				number=1, verification_status=BuildStatus.QUEUED, create_time=int(time.time()))
 			conn.execute(ins_change)
 			return commit_id
 
 	def _on_response(self, body, message):
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		if body["type"] == "change finished":
-			self.change_status = body["contents"]["status"]
+			self.verification_status = body["contents"]["verification_status"]
 			self.merge_status = body["contents"].get("merge_status")
 
 	def _test_commands(self, passes):
@@ -159,10 +159,10 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			events_broker.publish("repos", repo_id, "change added",
 				change_id=commit_id, commit_id=commit_id, merge_target="master")
 			with events_broker.subscribe("repos", callback=self._on_response) as consumer:
-				self.change_status = None
+				self.verification_status = None
 				start_time = time.time()
 				consumer.consume()
-				while self.change_status is None:
+				while self.verification_status is None:
 					try:
 						connection.drain_events(timeout=1)
 					except socket.timeout:
@@ -177,13 +177,13 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	def test_passing_roundtrip(self):
 		DeploymentSettings.active = True
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
-		assert_equal(BuildStatus.PASSED, self.change_status)
+		assert_equal(BuildStatus.PASSED, self.verification_status)
 		assert_equal(commit_sha, work_repo.head.commit.hexsha)
 
 	def test_failing_roundtrip(self):
 		DeploymentSettings.active = True
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1", passes=False)
-		assert_equal(BuildStatus.FAILED, self.change_status)
+		assert_equal(BuildStatus.FAILED, self.verification_status)
 		assert_not_equal(commit_sha, work_repo.head.commit.hexsha)
 
 	def test_roundtrip_with_postmerge_success(self):
@@ -193,7 +193,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 		self._modify_commit_push(work_repo, "other.txt", "c2")
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
-		assert_equal(BuildStatus.PASSED, self.change_status)
+		assert_equal(BuildStatus.PASSED, self.verification_status)
 		assert_equal(MergeStatus.PASSED, self.merge_status)
 		assert_not_equal(commit_sha, work_repo.head.commit.hexsha)
 
@@ -204,11 +204,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 		self._modify_commit_push(work_repo, "conflict.txt", "c2")
 		self._repo_roundtrip("conflict.txt", "conflict")
-		assert_equal(BuildStatus.PASSED, self.change_status)
+		assert_equal(BuildStatus.PASSED, self.verification_status)
 		assert_equal(MergeStatus.FAILED, self.merge_status)
 
 	def test_skip_roundtrip(self):
 		DeploymentSettings.active = False
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
-		assert_equal(BuildStatus.SKIPPED, self.change_status)
+		assert_equal(BuildStatus.SKIPPED, self.verification_status)
 		assert_equal(commit_sha, work_repo.head.commit.hexsha)

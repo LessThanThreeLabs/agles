@@ -26,13 +26,13 @@ class VerificationResultsHandler(object):
 		self.logger.info("Failing change %d" % change_id)
 		self._set_change_status_if_not_finished(change_id, BuildStatus.FAILED)
 
-	def _mark_change_merge_failure(self, change_id, status):
-		self._set_change_status_if_not_finished(change_id, status, MergeStatus.FAILED)
+	def _mark_change_merge_failure(self, change_id, verification_status):
+		self._set_change_status_if_not_finished(change_id, verification_status, MergeStatus.FAILED)
 
-	def _mark_change_pushforward_failure(self, change_id, status):
-		self._set_change_status_if_not_finished(change_id, status, MergeStatus.FAILED)
+	def _mark_change_pushforward_failure(self, change_id, verification_status):
+		self._set_change_status_if_not_finished(change_id, verification_status, MergeStatus.FAILED)
 
-	def _send_merge_request(self, change_id, status):
+	def _send_merge_request(self, change_id, verification_status):
 		self.logger.info("Sending merge request for change %d" % change_id)
 		with model_server.rpc_connect("changes", "read") as client:
 			change_attributes = client.get_change_attributes(change_id)
@@ -54,19 +54,19 @@ class VerificationResultsHandler(object):
 				repo_name, ref, merge_target)
 			return True
 		except MergeError:
-			self._mark_change_merge_failure(change_id, status)
+			self._mark_change_merge_failure(change_id, verification_status)
 			self.logger.info("Failed to merge change %d" % change_id, exc_info=True)
 		except PushForwardError:
-			self._mark_change_pushforward_failure(change_id, status)
+			self._mark_change_pushforward_failure(change_id, verification_status)
 			self.logger.warn("Failed to forward push change %d" % change_id, exc_info=True)
 		except:
-			self._mark_change_merge_failure(change_id, status)
+			self._mark_change_merge_failure(change_id, verification_status)
 			self.logger.error("Failed to merge/push change %d" % change_id, exc_info=True)
 		return False
 
-	def _set_change_status_if_not_finished(self, change_id, status, merge_status=None):
+	def _set_change_status_if_not_finished(self, change_id, verification_status, merge_status=None):
 		with model_server.rpc_connect("changes", "read") as changes_read_rpc:
-			change_status = changes_read_rpc.get_change_attributes(change_id)['status']
-		if change_status not in (BuildStatus.PASSED, BuildStatus.FAILED, BuildStatus.SKIPPED):
+			existing_verification_status = changes_read_rpc.get_change_attributes(change_id)['verification_status']
+		if existing_verification_status not in (BuildStatus.PASSED, BuildStatus.FAILED, BuildStatus.SKIPPED):
 			with model_server.rpc_connect("changes", "update") as changes_update_rpc:
-				changes_update_rpc.mark_change_finished(change_id, status, merge_status)
+				changes_update_rpc.mark_change_finished(change_id, verification_status, merge_status)
