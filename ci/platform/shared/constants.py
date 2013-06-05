@@ -1,4 +1,4 @@
-VERSION = '0.1.5'
+VERSION = '0.1.5b'
 
 KOALITY_EXPORT_PATH = '/koality/export'
 
