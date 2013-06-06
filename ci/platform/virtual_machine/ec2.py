@@ -249,3 +249,24 @@ class Ec2Vm(VirtualMachine):
 			instance.terminate()
 		except:
 			self.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
+
+
+class InstanceTypes(object):
+	ordered_types = ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge',
+			'm3.xlarge', 'm3.2xlarge', 'c1.medium', 'c1.xlarge', 'hi1.4xlarge', 'hs1.8xlarge']
+
+	@classmethod
+	def set_largest_instance_type(cls, largest_instance_type):
+		current_instance_type = AwsSettings.instance_type
+		AwsSettings.largest_instance_type = largest_instance_type
+
+		if current_instance_type not in cls.get_allowed_instance_types():
+			AwsSettings.instance_type = largest_instance_type
+
+	@classmethod
+	def get_allowed_instance_types(cls):
+		largest_instance_type = AwsSettings.largest_instance_type
+		if largest_instance_type in cls.ordered_types:
+			return cls.ordered_types[:cls.ordered_types.index(largest_instance_type) + 1]
+		else:
+			return cls.ordered_types

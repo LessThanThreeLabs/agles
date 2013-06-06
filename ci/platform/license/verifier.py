@@ -10,6 +10,7 @@ from settings.deployment import DeploymentSettings
 from settings.store import StoreSettings
 from settings.verification_server import VerificationServerSettings
 from util.log import Logged
+from virtual_machine import ec2
 
 
 LICENSE_VERIFICATION_URL = 'http://license.koalitycode.com:9001/license/check'
@@ -105,7 +106,7 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 class LicensePermissionsHandler(object):
 	def __init__(self):
 		def handle_largest_instance_type(value):
-			AwsSettings.largest_instance_type = value
+			ec2.InstanceTypes.set_largest_instance_type(value)
 
 		def handle_parallelization_cap(value):
 			VerificationServerSettings.parallelization_cap = value
