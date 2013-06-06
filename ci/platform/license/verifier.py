@@ -113,6 +113,8 @@ class LicensePermissionsHandler(object):
 
 		def handle_max_repository_count(value):
 			StoreSettings.max_repository_count = value
+			with model_server.rpc_connect('repos', 'delete') as repos_delete_rpc:
+				repos_delete_rpc.truncate_repositories(value)
 
 		self._permissions_handlers = {
 			'largestInstanceType': handle_largest_instance_type,
