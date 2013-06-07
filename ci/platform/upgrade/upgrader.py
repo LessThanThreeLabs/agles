@@ -6,6 +6,7 @@ import bunnyrpc.exceptions
 
 from provisioner.setup_tools import SetupScript, SetupCommand
 from settings.deployment import DeploymentSettings
+from upgrade import upgrade_url
 
 
 class Upgrader(object):
@@ -85,9 +86,7 @@ class TarFetcher(object):
 
 
 class HttpTarFetcher(TarFetcher):
-	UPGRADE_URI = 'http://license.koalitycode.com:9001/upgrade'
-
-	def __init__(self, fetch_uri=UPGRADE_URI):
+	def __init__(self, fetch_uri=upgrade_url):
 		super(HttpTarFetcher, self).__init__(fetch_uri)
 
 	def fetch_bytes(self, license_key, server_id, from_version, to_version):

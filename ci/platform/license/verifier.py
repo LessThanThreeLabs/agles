@@ -61,12 +61,6 @@ class LicenseVerifier(object):
 
 	def license_check_passed(self, response):
 		DeploymentSettings.license_type = response['licenseType']
-		newestVersion = response.get('newestVersion')
-		if newestVersion is not None:
-			if newestVersion != DeploymentSettings.version:
-				DeploymentSettings.upgrade_status = 'ready'
-			elif DeploymentSettings.upgrade_status == 'passed':
-				DeploymentSettings.upgrade_status = None
 
 		self.permissions_handler.handle_permissions(response.get('permissions', {}))
 		self.reset_license_check_failures()

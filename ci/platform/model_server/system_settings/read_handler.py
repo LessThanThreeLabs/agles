@@ -1,4 +1,6 @@
 import random
+import requests
+import simplejson
 import string
 
 from sqlalchemy import and_
@@ -15,6 +17,7 @@ from settings.store import StoreSettings
 from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi, is_admin
+from upgrade import upgrade_check_url
 from virtual_machine import ec2
 
 
@@ -83,7 +86,20 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_upgrade_status(self, user_id):
-		return DeploymentSettings.upgrade_status
+		request_params = {'licenseKey': DeploymentSettings.license_key, 'serverId': DeploymentSettings.server_id, 'currentVersion': DeploymentSettings.version}
+		try:
+			response = requests.get(upgrade_check_url, params=request_params)
+			if response.ok:
+				upgrade_available = simplejson.loads(response.text).get('upgradeAvailable', False)
+				upgrade_version = simplejson.loads(response.text).get('upgradeVersion')
+			else:
+				upgrade_available = False
+				upgrade_version = None
+		except:
+			upgrade_available = False
+			upgrade_version = None
+
+		return {'last_upgrade_status': DeploymentSettings.upgrade_status, 'upgrade_available': upgrade_available, 'upgrade_version': upgrade_version}
 
 	def can_hear_system_settings_events(self, user_id, id_to_listen_to):
 		return is_admin(user_id)
