@@ -2,10 +2,9 @@ import eventlet
 import os.path
 import requests
 
-import bunnyrpc.exceptions
-
 from provisioner.setup_tools import SetupScript, SetupCommand
 from settings.deployment import DeploymentSettings
+from settings.rabbit import RabbitSettings
 from upgrade import upgrade_url
 
 
@@ -44,8 +43,9 @@ class Upgrader(object):
 				for attempt in xrange(10):
 					try:
 						DeploymentSettings.upgrade_status = 'passed'
-					except bunnyrpc.exceptions.RPCRequestError:  # Model server might not be up again yet
+					except:  # Model server might not be up again yet
 						eventlet.sleep(3)
+						RabbitSettings.reinitialize()
 		except:
 			DeploymentSettings.upgrade_status = 'failed'
 
