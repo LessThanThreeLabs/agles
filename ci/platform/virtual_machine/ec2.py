@@ -1,5 +1,6 @@
 import logging
 import pipes
+import re
 import socket
 
 import boto.ec2
@@ -29,9 +30,10 @@ class Ec2Client(object):
 	@classmethod
 	def _connect(cls, aws_access_key_id, aws_secret_access_key, region=None):
 		if region is None:
-			region = AwsSettings.region or Ec2Vm._call(
-				['sh', '-c', 'ec2metadata --availability-zone | grep -Po "(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+"']
-			).output
+			region = AwsSettings.region or re.search(
+				"(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+",
+				Ec2Vm._call(['ec2metadata', '--availability-zone']).output
+			).group(0)
 		return boto.ec2.connect_to_region(region,
 			aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
