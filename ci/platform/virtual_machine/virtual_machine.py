@@ -54,6 +54,13 @@ class VirtualMachine(object):
 		instance_id, username = redis_conn.hmget(vm_id, ('instance_id', 'username'))
 		return {'instance_id': instance_id, 'username': username}
 
+	def _try_multiple_times(self, num_attempts, success_check, method, *args, **kwargs):
+		for x in xrange(num_attempts):
+			results = method(*args, **kwargs)
+			if success_check(results):
+				return results
+		return results
+
 	def remote_checkout(self, repo_name, git_url, ref, output_handler=None):
 		assert isinstance(ref, str)
 
@@ -61,11 +68,11 @@ class VirtualMachine(object):
 			host_url = git_url[:git_url.find(":")]
 			command = ' && '.join([
 				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; git init source))' % repo_name,
-				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # first, bypass the yes/no prompt
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
 				'cd source',
 				'git fetch %s %s -n --depth 1' % (git_url, ref),
 				'git checkout FETCH_HEAD'])
-			results = self.ssh_call(command, output_handler)
+			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, git_url, results), exc_info=True)
 			return results
@@ -75,9 +82,10 @@ class VirtualMachine(object):
 		def _remote_clone():
 			host_url = git_url[:git_url.find(":")]
 			command = ' && '.join([
-				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # first, bypass the yes/no prompt
+				'if [ -e source ]; then rm -rf source; fi',  # Make sure there's no "source" directory. Especially important for retries
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
 				'git clone %s source' % git_url])
-			results = self.ssh_call(command, output_handler)
+			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to clone %s, results: %s" % (git_url, results), exc_info=True)
 			return results
@@ -85,7 +93,8 @@ class VirtualMachine(object):
 
 	def _ssh_authorized(self, authorized_command, output_handler=None):
 		generate_key = "mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa"
-		pubkey_results = self.ssh_call("(%s) > /dev/null 2>&1; cat .ssh/id_rsa.pub" % generate_key, timeout=20)
+		retrieve_key = "(%s) > /dev/null 2>&1; cat ~/.ssh/id_rsa.pub" % generate_key
+		pubkey_results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, retrieve_key, timeout=20)
 		if pubkey_results.returncode != 0:
 			if output_handler:
 				output_handler.append({1: "Failed to connect to the testing instance. Please try again."})
