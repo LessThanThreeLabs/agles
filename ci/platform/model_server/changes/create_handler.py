@@ -76,7 +76,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		info = self._get_repostore_id_and_repo_name(repo_id)
 		manager = repostore.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		try:
-			manager.push(info['repostore_id'], repo_id, info['repo_name'], sha, pathgen.hidden_ref(commit_id), force=False)
+			# Make the commit available at refs/pending/<sha>
+			manager.push(info['repostore_id'], repo_id, info['repo_name'], sha, pathgen.hidden_ref(sha), force=False)
 		except:
 			self.logger.warn('Failed to push back pending commit', exc_info=True)
 
