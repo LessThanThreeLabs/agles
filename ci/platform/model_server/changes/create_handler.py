@@ -9,9 +9,11 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from sqlalchemy import select
 from sqlalchemy.sql import func
 from util import pathgen
+from util.log import Logged
 from util.sql import to_dict
 
 
+@Logged()
 class ChangesCreateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ChangesCreateHandler, self).__init__("changes", "create")
@@ -76,7 +78,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		try:
 			manager.push(info['repostore_id'], repo_id, info['repo_name'], sha, pathgen.hidden_ref(commit_id), force=False)
 		except:
-			pass  # should log here, but otherwise ignore failure
+			self.logger.warn('Failed to push back pending commit', exc_info=True)
 
 	def _get_repostore_id_and_repo_name(self, repo_id):
 		schema = database.schema
