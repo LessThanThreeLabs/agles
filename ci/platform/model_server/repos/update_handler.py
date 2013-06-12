@@ -37,7 +37,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 	def force_push(self, repo_id, user_id, from_target, to_target):
 		info = self._get_repostore_id_and_repo_name(repo_id)
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
-		manager.push_force(info['repostore_id'], repo_id, info['repo_name'], from_target, to_target)
+		manager.push(info['repostore_id'], repo_id, info['repo_name'], from_target, to_target, force=True)
 
 	def force_delete(self, repo_id, user_id, target):
 		info = self._get_repostore_id_and_repo_name(repo_id)

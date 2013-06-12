@@ -8,6 +8,7 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from sqlalchemy import select
 from sqlalchemy.sql import func
+from util import pathgen
 from util.sql import to_dict
 
 
@@ -60,12 +61,22 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		if store_pending:
 			self._store_pending_commit(repo_id, sha, commit_id)
 
+		self._push_pending_change(repo_id, sha, commit_id)
+
 		return commit_id
 
 	def _store_pending_commit(self, repo_id, sha, commit_id):
 		info = self._get_repostore_id_and_repo_name(repo_id)
 		manager = repostore.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		manager.store_pending(info['repostore_id'], repo_id, info['repo_name'], sha, commit_id)
+
+	def _push_pending_commit(self, repo_id, sha, commit_id):
+		info = self._get_repostore_id_and_repo_name(repo_id)
+		manager = repostore.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
+		try:
+			manager.push(info['repostore_id'], repo_id, info['repo_name'], sha, pathgen.hidden_ref(commit_id), force=False)
+		except:
+			pass  # should log here, but otherwise ignore failure
 
 	def _get_repostore_id_and_repo_name(self, repo_id):
 		schema = database.schema

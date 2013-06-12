@@ -39,7 +39,7 @@ def hidden_ref(commit_id):
 	:param commit_id: The commit id stored in the hidden ref
 	:return: The hidden ref that the commit is stored in
 	"""
-	return os.sep.join(['refs/pending', str(commit_id)])
+	return 'refs/pending/%s' % commit_id
 
 
 def get_repo_id(abspath):

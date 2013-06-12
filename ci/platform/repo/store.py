@@ -66,7 +66,7 @@ class RemoteRepositoryManager(object):
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
-	def push_force(self, repostore_id, repo_id, repo_name, from_target, to_target):
+	def push(self, repostore_id, repo_id, repo_name, from_target, to_target, force):
 		"""Force pushes the repository to the forwarding url
 
 		:param repostore_id: The identifier of the local machine the repo is on
@@ -74,6 +74,7 @@ class RemoteRepositoryManager(object):
 		:param repo_name: The name of the repo
 		:param from_target: The ref we're pushing to target
 		:param to_target: The ref to push
+		:param force: Whether or not to force push
 		"""
 		raise NotImplementedError("Subclasses should override this!")
 
@@ -145,9 +146,9 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 			client.delete_repository(repo_id, repo_name)
 		self._update_store_repo_count(repostore_id, -1)
 
-	def push_force(self, repostore_id, repo_id, repo_name, from_target, to_target):
+	def push(self, repostore_id, repo_id, repo_name, from_target, to_target, force):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.push_force(repo_id, repo_name, from_target, to_target)
+			client.push(repo_id, repo_name, from_target, to_target, force)
 
 	def force_delete(self, repostore_id, repo_id, repo_name, target):
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
@@ -241,7 +242,7 @@ class RepositoryStore(object):
 	def delete_repository(self, repo_id, repo_name):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def push_force(self, repo_id, repo_name, from_target, to_target):
+	def push(self, repo_id, repo_name, from_target, to_target, force):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def force_delete(self, repo_id, repo_name, target):
@@ -426,7 +427,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo_path = self._resolve_path(repo_id, repo_name)
 		shutil.rmtree(repo_path)
 
-	def push_force(self, repo_id, repo_name, from_target, to_target):
+	def push(self, repo_id, repo_name, from_target, to_target, force):
 		"""Pushes forward to the url with a force"""
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
@@ -436,7 +437,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		self.logger.info("Pushing branch %s:%s on %s" % (from_target, to_target, repo_path))
 		try:
-			self._push_with_private_key(repo, remote_repo, ':'.join([from_target, to_target]), force=True)
+			self._push_with_private_key(repo, remote_repo, ':'.join([from_target, to_target]), force=force)
 		except GitCommandError:
 			self.logger.warn("A git error occurred on force push", exc_info=True)
 			raise
@@ -444,7 +445,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def force_delete(self, repo_id, repo_name, target):
 		if self._remote_branch_exists:
 			try:
-				self.push_force(repo_id, repo_name, "", target)
+				self.push(repo_id, repo_name, "", target, force=True)
 			except GitCommandError as e:
 				self.logger.warn("Force delete encountered an error", exc_info=True)
 				self._update_branch(repo_id, repo_name, target)
