@@ -6,6 +6,7 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from settings.web_server import WebServerSettings
 from shared.constants import BuildStatus, MergeStatus
 from util.mail import sendmail
+from util.sql import to_dict
 
 FAILMAIL_TEMPLATE = """%s %s,
 
@@ -34,18 +35,25 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 
 	def _update_change_status(self, change_id, verification_status, event_name, **kwargs):
 		change = schema.change
+		commit = schema.commit
+		user = schema.user
+
 		update = change.update().where(change.c.id == change_id).values(verification_status=verification_status, **kwargs)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
 
-		query = change.select().where(change.c.id == change_id)
+		query = change.join(commit).join(user).select().apply_labels().where(change.c.id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		repository_id = row[change.c.repo_id]
+		change_number = row[change.c.number]
+
+		user = to_dict(row, user.columns, tablename=user.name)
 
 		if "merge_status" in kwargs:
 			self.publish_event("changes", change_id, "merge completed", merge_status=kwargs["merge_status"])
-		self.publish_event("repos", repository_id, event_name, change_id=change_id, verification_status=verification_status, **kwargs)
+		self.publish_event("repos", repository_id, event_name, change_id=change_id, verification_status=verification_status,
+			change_number=change_number, user=user, **kwargs)
 
 	def _notify_failure(self, change_id):
 		change = schema.change
