@@ -30,11 +30,21 @@ class Upgrader(object):
 			SetupCommand("/tmp/koalityupgrade/%s/*/revert_script" % self._to_version)
 		)
 
+	def _set_upgrade_status(self, status, attempts=10):
+		for attempt in xrange(attempts):
+			try:
+				DeploymentSettings.upgrade_status = status
+			except:
+				if attempt < attempts - 1:
+					eventlet.sleep(3)
+				else:
+					raise
+
 	def do_upgrade(self):
 		if DeploymentSettings.upgrade_status == 'running':
 			raise UpgradeInProgressException()
 
-		DeploymentSettings.upgrade_status = 'running'
+		self._set_upgrade_status('running', attempts=1)
 		try:
 			returncode = self._install_version(self._from_version, self._to_version)
 			if returncode:
@@ -42,12 +52,12 @@ class Upgrader(object):
 			else:
 				for attempt in xrange(10):
 					try:
-						DeploymentSettings.upgrade_status = 'passed'
+						self._set_upgrade_status('passed', attemtps=1)
 					except:  # Model server might not be up again yet
 						eventlet.sleep(3)
 						RabbitSettings.reinitialize()
 		except:
-			DeploymentSettings.upgrade_status = 'failed'
+			self._set_upgrade_status('failed')
 
 	def _install_version(self, from_version, to_version):
 		license_key = DeploymentSettings.license_key
@@ -60,7 +70,7 @@ class Upgrader(object):
 		if returncode:
 			try:
 				# log here
-				DeploymentSettings.upgrade_status = 'failed'
+				self._set_upgrade_status('failed')
 			finally:
 				raise FatalUpgradeException()
 
@@ -68,10 +78,10 @@ class Upgrader(object):
 		if returncode:
 			try:
 				# log here
-				DeploymentSettings.upgrade_status = 'failed'
+				self._set_upgrade_status('failed')
 			finally:
 				raise FatalUpgradeException()
-		DeploymentSettings.upgrade_status = 'rolled back'
+		self._set_upgrade_status('rolled back')
 
 	def download_upgrade_files(self, license_key, server_id, from_version, to_version, to_path):
 		download_path = os.path.join(to_path, "%s.tar.gz" % to_version)
