@@ -63,7 +63,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		if store_pending:
 			self._store_pending_commit(repo_id, sha, commit_id)
 
-		self._push_pending_change(repo_id, sha, commit_id)
+		self._push_pending_commit(repo_id, sha, commit_id)
 
 		return commit_id
 
