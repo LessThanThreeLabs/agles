@@ -64,7 +64,12 @@ class LicenseVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin
 	def test_verify_success(self):
 		class PassingLicenseKeyVerifier(LicenseKeyVerifier):
 			def verify_valid(self, license_key, server_id, user_count):
-				return {'isValid': True, 'licenseType': 'bronze'}
+				return {
+					'isValid': True,
+					'licenseType': 'bronze',
+					'trialExpiration': None,
+					'unpaidExpiration': None
+				}
 
 		DeploymentSettings.active = True
 		assert_equals(True, DeploymentSettings.active)
