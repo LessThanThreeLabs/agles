@@ -57,9 +57,10 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_aws_keys(self, user_id):
-		aws_access_key_id = AwsSettings.aws_access_key_id
-		aws_secret_access_key = AwsSettings.aws_secret_access_key
-		return {"access_key": aws_access_key_id, "secret_key": aws_secret_access_key}
+		return {
+			'access_key': AwsSettings.aws_access_key_id,
+			'secret_key': AwsSettings.aws_secret_access_key
+		}
 
 	@AdminApi
 	def get_s3_bucket_name(self, user_id):
@@ -71,10 +72,11 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_instance_settings(self, user_id):
-		instance_size = AwsSettings.instance_type
-		num_waiting = VerificationServerSettings.static_pool_size
-		max_running = VerificationServerSettings.max_virtual_machine_count
-		return {"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running}
+		return {
+			'instance_size': AwsSettings.instance_type,
+			'num_waiting': VerificationServerSettings.static_pool_size,
+			'max_running': VerificationServerSettings.max_virtual_machine_count
+		}
 
 	@AdminApi
 	def get_ssh_public_key(self, user_id):
@@ -83,6 +85,16 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	@AdminApi
 	def get_max_repository_count(self, user_id):
 		return StoreSettings.max_repository_count
+
+	@AdminApi
+	def get_license_information(self, user_id):
+		return {
+			'active': DeploymentSettings.active,
+			'license_type': DeploymentSettings.license_type,
+			'license_trial_expiration_time': DeploymentSettings.license_trial_expiration_time,
+			'license_unpaid_expiration_time': DeploymentSettings.license_unpaid_expiration_time,
+			'license_key': DeploymentSettings.license_key
+		}
 
 	@AdminApi
 	def get_upgrade_status(self, user_id):

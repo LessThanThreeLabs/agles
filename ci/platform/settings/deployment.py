@@ -5,13 +5,15 @@ from shared.constants import VERSION
 class DeploymentSettings(DatabaseBackedSettings):
 	def __init__(self):
 		super(DeploymentSettings, self).__init__(
-			license_key=None,
-			admin_api_key=None,
+			version=VERSION,
 			active=False,
 			server_id=None,
-			version=VERSION,
+			admin_api_key=None,
+			initialized=False,
+			upgrade_status=None,
+			license_key=None,
+			license_trial_expiration_time=None,
+			license_unpaid_expiration_time=None,
 			license_validation_failures=0,
 			license_type=None,
-			initialized=False,
-			upgrade_status=None
 		)

@@ -5,7 +5,6 @@ import simplejson
 import util.greenlets
 import model_server
 
-from settings.aws import AwsSettings
 from settings.deployment import DeploymentSettings
 from settings.store import StoreSettings
 from settings.verification_server import VerificationServerSettings
@@ -49,11 +48,11 @@ class LicenseVerifier(object):
 			if response and response['isValid']:
 				self.license_check_passed(response)
 			else:
-				self.license_check_failed()
+				self.license_check_failed(reason=response.get('reason', 'Unknown license check error'))
 		except eventlet.greenlet.GreenletExit:
 			raise
 		except:
-			self.license_check_failed()
+			self.license_check_failed(reason='Failed to reach license server')
 
 	def reset_license_check_failures(self):
 		DeploymentSettings.license_validation_failures = 0
@@ -61,16 +60,19 @@ class LicenseVerifier(object):
 
 	def license_check_passed(self, response):
 		DeploymentSettings.license_type = response['licenseType']
+		DeploymentSettings.license_trial_expiration_time = response['trialExpiration']
+		DeploymentSettings.license_unpaid_expiration_time = response['unpaidExpiration']
 
 		self.permissions_handler.handle_permissions(response.get('permissions', {}))
 		self.reset_license_check_failures()
 
-	def license_check_failed(self):
+	def license_check_failed(self, reason):
 		failures = DeploymentSettings.license_validation_failures + 1
 		DeploymentSettings.license_validation_failures = failures
 
 		if failures > MAX_FAILURES:
 			DeploymentSettings.active = False
+			DeploymentSettings.license_failure_reason = reason
 
 
 class LicenseKeyVerifier(object):
