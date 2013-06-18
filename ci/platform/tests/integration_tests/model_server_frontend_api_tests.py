@@ -238,3 +238,16 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		assert_is_not_none(DeploymentSettings.server_id)
 		assert_is_not_none(StoreSettings.ssh_private_key)
 		assert_is_not_none(StoreSettings.ssh_public_key)
+
+	def test_recreate_admin_api_key(self):
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.initialize_deployment(self.user_id)
+
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_true(conn.is_deployment_initialized())
+			assert_is_not_none(conn.get_admin_api_key(self.user_id))
+
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			new_api_key = conn.regenerate_api_key(self.user_id)
+
+		assert_equals(new_api_key, DeploymentSettings.admin_api_key)
