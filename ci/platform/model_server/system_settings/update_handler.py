@@ -97,6 +97,10 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			max_verifiers=max_verifiers)
 
 	@AdminApi
+	def set_license_key(self, user_id, license_key):
+		DeploymentSettings.license_key = license_key
+
+	@AdminApi
 	def upgrade_deployment(self, user_id):
 		if DeploymentSettings.upgrade_status == 'running':
 			raise UpgradeInProgressException()
