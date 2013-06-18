@@ -85,7 +85,7 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 	def __init__(self, verification_url=LICENSE_VERIFICATION_URL):
 		self.verification_url = verification_url
 
-	def verify_valid(self, license_key, server_id, user_count):
+	def verify_valid(self, license_key, server_id, user_count=0):
 		verification_data = {'licenseKey': license_key, 'serverId': server_id}
 		system_metadata = {'userCount': user_count}
 		request_params = dict(verification_data.items() + system_metadata.items())

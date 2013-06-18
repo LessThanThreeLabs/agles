@@ -12,6 +12,7 @@ from sqlalchemy import and_
 import database.schema
 
 from database.engine import ConnectionFactory
+from license.verifier import HttpLicenseKeyVerifier
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.aws import AwsSettings
 from settings.deployment import DeploymentSettings
@@ -97,6 +98,14 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			instance_size=instance_size,
 			min_unallocated=min_unallocated,
 			max_verifiers=max_verifiers)
+
+	@AdminApi
+	def validate_license_key(self, user_id, license_key):
+		validity_response = HttpLicenseKeyVerifier().verify_valid(license_key, DeploymentSettings.server_id)
+		if validity_response and isinstance(validity_response, dict):
+			return validity_response.get('isValid') or False
+		else:
+			return False
 
 	@AdminApi
 	def set_license_key(self, user_id, license_key):
