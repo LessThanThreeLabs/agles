@@ -1,4 +1,6 @@
 import os
+import random
+import string
 import sys
 import uuid
 
@@ -99,6 +101,12 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	@AdminApi
 	def set_license_key(self, user_id, license_key):
 		DeploymentSettings.license_key = license_key
+
+	@AdminApi
+	def regenerate_api_key(self, user_id):
+		new_admin_api_key = ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(32))
+		DeploymentSettings.admin_api_key = new_admin_api_key
+		return new_admin_api_key
 
 	@AdminApi
 	def upgrade_deployment(self, user_id):
