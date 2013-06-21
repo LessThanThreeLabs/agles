@@ -233,7 +233,7 @@ class Ec2Vm(VirtualMachine):
 		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=self._default_user_data(self.vm_username)).instances[0]
 		self._name_instance(self.instance, instance_name)
 
-		self.write_vm_info()
+		self.store_vm_info()
 		self.wait_until_ready()
 
 	def delete(self):

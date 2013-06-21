@@ -1,7 +1,5 @@
 import socket
 
-import eventlet
-
 from libcloud.compute.base import NodeState
 from libcloud.compute.providers import get_driver
 
@@ -11,43 +9,46 @@ from verification.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
 
 
-class OpenstackClient(object):
-	import platform
-
-	if platform.system() == 'Darwin':
+class CloudDriver(object):
+	@classmethod
+	def get_client(cls):
 		import libcloud.security
 		libcloud.security.VERIFY_SSL_CERT_STRICT = False
 
-	@classmethod
-	def get_client(cls):
-		credentials = LibCloudSettings.extra_credentials
-		credentials['key'] = LibCloudSettings.key
-		credentials['secret'] = LibCloudSettings.secret
-		return cls.connect(LibCloudSettings.cloud_provider, credentials)
+		return cls._connect(LibCloudSettings.credentials)
 
 	@classmethod
-	def validate_credentials(cls, cloud_provider, credentials):
+	def validate_credentials(cls, credentials):
 		try:
-			cls.connect(cloud_provider, credentials)
+			cls._connect(credentials)
 		except:
 			return False
 		else:
 			return True
 
 	@classmethod
-	def connect(cls, cloud_provider, credentials):
-		return get_driver(cloud_provider)(**credentials)
+	def _connect(cls, credentials):
+		assert 'key' in credentials
+		assert 'secret' in credentials
+		assert 'ex_tenant_name' in credentials
+		connection_parameters = {
+			'ex_force_auth_url': 'https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/',
+			'ex_force_auth_version': '2.0_password',
+			'ex_force_service_name': 'Compute',
+			'ex_force_service_region': 'az-1.region-a.geo-1',
+		}
+		connection_parameters.update(credentials)
+
+		return get_driver('openstack')(**connection_parameters)
 
 
 @Logged()
-class OpenstackVm(VirtualMachine):
+class LibCloudVm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
 
-	CloudClient = OpenstackClient.get_client
-
 	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
-		super(OpenstackVm, self).__init__(vm_id)
+		super(LibCloudVm, self).__init__(vm_id)
 		self.instance = instance
 		self.vm_username = vm_username
 		self.store_vm_info()
@@ -65,11 +66,11 @@ class OpenstackVm(VirtualMachine):
 		else:
 			image = cls.get_newest_image()
 		instance_type = instance_type or LibCloudSettings.instance_type
-		size = filter(lambda size: size.id == instance_type, cls.CloudClient().list_sizes())[0]
+		size = filter(lambda size: size.id == instance_type, CloudDriver.get_client().list_sizes())[0]
 
-		instance = cls.CloudClient().create_node(name=name, image=image, size=size,
+		instance = CloudDriver.get_client().create_node(name=name, image=image, size=size,
 			ex_userdata=cls._default_user_data(vm_username))
-		return cls(vm_id, instance)
+		return LibCloudVm(vm_id, instance)
 
 	@classmethod
 	def _default_user_data(cls, vm_username=VM_USERNAME):
@@ -95,11 +96,11 @@ class OpenstackVm(VirtualMachine):
 	@classmethod
 	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
 		try:
-			client = cls.CloudClient()
+			client = CloudDriver.get_client()
 			instance = filter(lambda instance: instance.id == instance_id, client.list_nodes())[0]
-			vm = cls(vm_id, instance, vm_username)
-			if vm.instance.state == NodeState.REBOOTING:
-				cls.logger.warn("Found VM (%s, %s) in REBOOTING state" % (vm_id, vm.instance.state, instance_id))
+			vm = LibCloudVm(vm_id, instance, vm_username)
+			if vm.instance.state == NodeState.REBOOTING or vm.instance.state == NodeState.UNKNOWN:
+				cls.logger.warn("Found VM (%s, %s) in %s state" % (vm_id, vm.instance.state, instance_id))
 				vm.delete()
 				return None
 			elif vm.instance.state == NodeState.TERMINATED:
@@ -108,7 +109,7 @@ class OpenstackVm(VirtualMachine):
 				vm.delete()
 				return None
 			elif vm.instance.state not in (NodeState.RUNNING, NodeState.PENDING):
-				cls.logger.critical("Found VM (%s, %s) in unexpected %s state.\nState map: %s" % (vm_id, instance_id, vm.instance.state, client.NODE_STATE_MAP))
+				cls.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_id, instance_id, vm.instance.state))
 				vm.delete()
 				return None
 			return vm
@@ -118,22 +119,13 @@ class OpenstackVm(VirtualMachine):
 	def wait_until_ready(self):
 		instance, ip = self.instance.driver.wait_until_running([self.instance])[0]
 		self.instance = instance
-		for remaining_attempts in range(24, 0, -1):
-			if remaining_attempts <= 3:
-				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
-			if self.ssh_call("true").returncode == 0:
-				return
-			eventlet.sleep(3)
-		# Failed to ssh into machine, try again
-		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
-		self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
 			timeout=3600, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.instance.public_ips[-1])
+		login = "%s@%s" % (self.vm_username, self.instance.private_ips[-1])
 		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
@@ -141,10 +133,15 @@ class OpenstackVm(VirtualMachine):
 
 	@classmethod
 	def get_all_images(cls):
-		return filter(lambda image: LibCloudSettings.vm_image_name_prefix in image.name, cls.CloudClient().list_images())
+		return filter(lambda image: LibCloudSettings.vm_image_name_prefix in image.name, CloudDriver.get_client().list_images())
 
 	def create_image(self, name, description=None):
-		self.instance.driver.ex_save_image(self.instance, name, metadata={'description': description})
+		# TODO: FIGURE OUT HOW TO CREATE AN IMAGE
+		driver = self.instance.driver
+		if 'ex_save_image' in dir(driver):
+			driver.ex_save_image(self.instance, name, metadata={'description': description})
+		else:
+			raise NotImplementedError('Not supported for many libcloud VMs')
 
 	def rebuild(self, image_id=None):
 		if image_id:
@@ -167,17 +164,8 @@ class OpenstackVm(VirtualMachine):
 			instances = filter(lambda instance: instance.id == instance_id, driver.list_nodes())
 			old_instance = instances[0] if instances else None
 
-		for attempt in xrange(5):
-			try:
-				self.instance = driver.create_node(name=instance_name, image=image, size=size,
-					ex_userdata=self._default_user_data(self.vm_username))
-			except:
-				if attempt < 4:
-					eventlet.sleep(3)
-				else:
-					raise
-			else:
-				break
+		self.instance = driver.create_node(name=instance_name, image=image, size=size,
+			ex_userdata=self._default_user_data(self.vm_username))
 
 		self.store_vm_info()
 		self.wait_until_ready()
@@ -199,8 +187,6 @@ class OpenstackVm(VirtualMachine):
 
 
 class InstanceTypes(object):
-	CloudClient = OpenstackClient.get_client
-
 	@classmethod
 	def set_largest_instance_type(cls, largest_instance_type):
 		current_instance_type = LibCloudSettings.instance_type
@@ -212,7 +198,7 @@ class InstanceTypes(object):
 	@classmethod
 	def get_allowed_instance_types(cls):
 		largest_instance_type = LibCloudSettings.largest_instance_type
-		ordered_types = map(lambda size: size.id, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		ordered_types = map(lambda size: size.id, CloudDriver.get_client().list_sizes())
 		if largest_instance_type in ordered_types:
 			return ordered_types[:ordered_types.index(largest_instance_type) + 1]
 		else:

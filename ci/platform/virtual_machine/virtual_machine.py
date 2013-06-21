@@ -131,5 +131,8 @@ class VirtualMachine(object):
 		try:
 			major_version, minor_version = float(name_parts[-2]), float(name_parts[-1])
 		except (IndexError, ValueError):
-			major_version, minor_version = float(name_parts[-1]), -1
+			try:
+				major_version, minor_version = float(name_parts[-1]), -1
+			except:
+				major_version, minor_version = -1, -1
 		return major_version, minor_version
