@@ -194,7 +194,7 @@ class Ec2Vm(VirtualMachine):
 			timeout=3600, output_handler=output_handler)
 
 	def export(self, export_prefix, filepath, output_handler=None):
-		return self.ssh_call("cd %s && koality-s3-export %s %s %s %s %s; rm -rf %s" % (
+		return self.ssh_call("cd %s && koality-export s3 %s %s %s %s %s; rm -rf %s" % (
 			KOALITY_EXPORT_PATH,
 			pipes.quote(AwsSettings.aws_access_key_id),
 			pipes.quote(AwsSettings.aws_secret_access_key),
