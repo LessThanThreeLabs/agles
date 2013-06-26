@@ -14,6 +14,9 @@ function platform_configure () {
 		exit 1
 	fi
 	sudo sed -i.bak -r 's/^(.*Defaults\s+always_set_home.*)$/# \1/g' /etc/sudoers
+	if [ $USER == 'root' ]; then
+		sed -i.bak -r 's/^(.*Defaults\s+requiretty.*)$/# \1/g' /etc/sudoers
+	fi
 }
 
 function check_sudo () {
@@ -29,7 +32,11 @@ function add_user () {
 	if [ $? -ne "0" ]; then
 		echo "Creating user $1"
 		read -s -p "Enter password for user $1: " password
-		sudo adduser "$1" --home "/home/$1" --shell /bin/bash
+		if [ $PACKAGE_MANAGER == 'apt-get' ]; then
+			sudo adduser "$1" --home "/home/$1" --shell /bin/bash --disabled-password --gecos ""
+		elif [ $PACKAGE_MANAGER == 'yum' ]; then
+			sudo adduser "$1" --home "/home/$1" --shell /bin/bash
+		fi
 		echo -e "$password\n$password" | sudo passwd "$1"
 		echo "$1 ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers >/dev/null
 	fi
@@ -37,6 +44,7 @@ function add_user () {
 
 function bootstrap () {
 	check_sudo
+	platform_configure
 	add_user lt3
 	this_script=$(readlink -f $0)
 	sudo -E su lt3 -c "cd; $this_script _$1_setup"
@@ -123,6 +131,7 @@ function setup_python () {
 	if [ ! $(which pythonz) ]; then
 		curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | sudo bash
 		source ~/.bashrc
+		source /etc/profile
 	fi
 	for p in 2.5.6 2.6.8 2.7.5 3.2.5 3.3.2; do
 		if [ ! -f "$PYTHONZ_ROOT/pythons/*$p*/python" ]; then
@@ -132,8 +141,8 @@ function setup_python () {
 			fi
 		fi
 		major_version=${p%.*}
-		if [ ! -e "$HOME/virtualenvs/$major_version" ]; then
-			virtualenv "$HOME/virtualenvs/$major_version" -p $PYTHONZ_ROOT/pythons/*$p*/bin/python
+		if [ ! -e "$HOME/virtualenvs/${major_version}" ]; then
+			virtualenv "$HOME/virtualenvs/${major_version}" -p ${PYTHONZ_ROOT}/pythons/*${p}*/bin/python${major_version}
 		fi
 	done
 }
