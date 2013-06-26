@@ -96,7 +96,8 @@ class RemoteShellCommand(RemoteCommand):
 	def _to_executed_script(self):
 		full_command = "&&\n".join(map(self._advertised_command, self.commands))
 		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join('source', self.path) if self.path else 'source'))
-		script += "timeout -s INT -k 3 %d bash --login -c %s\n" % (self.timeout, pipes.quote(full_command))
+		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
+		script += "timeout -s KILL %d timeout -s INT %d bash --login -c %s\n" % (self.timeout + 3, self.timeout, pipes.quote(full_command))
 		script += "_r=$?\n"
 		script += "if [ $_r -eq 124 ]; then sleep 2; echo; echo %s timed out after %s seconds;\n" % (self.name, self.timeout)
 		script += "elif [ $_r -ne 0 ]; then echo; echo %s failed with return code $_r; fi\n" % self.name

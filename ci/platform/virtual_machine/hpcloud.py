@@ -7,7 +7,11 @@ from util.log import Logged
 class HpCloudClient(openstack.OpenstackClient):
 	@classmethod
 	def get_client(cls):
-		return cls.connect(LibCloudSettings.credentials)
+		credentials = LibCloudSettings.extra_credentials
+		credentials['key'] = LibCloudSettings.key
+		credentials['secret'] = LibCloudSettings.secret
+
+		return cls.connect(credentials)
 
 	@classmethod
 	def validate_credentials(cls, credentials):
@@ -20,7 +24,8 @@ class HpCloudClient(openstack.OpenstackClient):
 
 	@classmethod
 	def connect(cls, credentials):
-		assert 'ex_tenant_name' in credentials
+		if 'ex_tenant_name' not in credentials:
+			credentials['ex_tenant_name'] = '%s-project1' % credentials['key']
 
 		connection_parameters = {
 			'ex_force_auth_url': 'https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/',

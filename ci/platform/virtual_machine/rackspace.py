@@ -7,7 +7,11 @@ from util.log import Logged
 class RackspaceClient(openstack.OpenstackClient):
 	@classmethod
 	def get_client(cls):
-		return cls.connect(LibCloudSettings.credentials)
+		credentials = LibCloudSettings.extra_credentials
+		credentials['key'] = LibCloudSettings.key
+		credentials['secret'] = LibCloudSettings.secret
+
+		return cls.connect(credentials)
 
 	@classmethod
 	def validate_credentials(cls, credentials):
