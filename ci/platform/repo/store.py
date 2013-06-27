@@ -260,9 +260,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	"""Local filesystem store for server side git repositories"""
 
 	NUM_RETRIES = 4
-	SSH_WITH_PRIVATE_KEY_SCRIPT = 'koality-ssh-with-private-key'
-	if hasattr(sys, 'real_prefix'):  # We're in a virtualenv python, so point at the locally-installed script
-		SSH_WITH_PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', SSH_WITH_PRIVATE_KEY_SCRIPT)
+	SSH_WITH_PRIVATE_KEY_SCRIPT = os.path.join(sys.prefix, 'bin', 'koality-ssh-with-private-key')
 
 	def __init__(self, repostore_id, root_storage_directory_path):
 		super(FileSystemRepositoryStore, self).__init__(repostore_id)

@@ -11,7 +11,8 @@ from verification.verification_server import VerificationServer
 from verification.verifier_pool import VerifierPool, VirtualMachineVerifierPool
 from verification.virtual_machine_cleanup_tool import VirtualMachineCleanupTool
 from virtual_machine.ec2 import Ec2Vm
-from virtual_machine.openstack import OpenstackVm
+from virtual_machine.hpcloud import HpCloudVm
+from virtual_machine.rackspace import RackspaceVm
 
 
 def main():
@@ -21,7 +22,7 @@ def main():
 	parser.add_argument("-d", "--dir",
 		help="The root directory for the virtual machine pool")
 	parser.add_argument("-t", "--type",
-		help="Selects the VM type. Supported options are \"aws\" and \"openstack\"")  # or "mock" for testing
+		help="Selects the VM type. Supported options are \"aws\". \"hpcloud\", and \"rackspace\"")  # or "mock" for testing
 	parser.add_argument("-c", "--count",
 		help="The maximum number of virtual machines for this verification server to manage")
 	parser.add_argument("-C", "--cleanup", action="store_true",
@@ -32,11 +33,12 @@ def main():
 	try:
 		vm_class = {
 			'aws': Ec2Vm,
-			'openstack': OpenstackVm,
+			'hpcloud': HpCloudVm,
+			'rackspace': RackspaceVm,
 			'mock': None
 		}[args.type]
 	except:
-		print "Must supply either \"aws\" or \"openstack\" as a VM type"
+		print "Must supply either \"aws\", \"hpcloud\", or \"rackspace\" as a VM type"
 		parser.print_usage()
 		sys.exit(1)
 
