@@ -13,8 +13,6 @@ eventlet==0.12.1
 gitpython
 psycopg2
 argparse
-rackspace-novaclient
-python-novaclient
 requests
 boto==2.6.0
 apache-libcloud==0.12.4
