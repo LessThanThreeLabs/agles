@@ -28,7 +28,7 @@ class OpenstackClient(object):
 	@classmethod
 	def validate_credentials(cls, cloud_provider, credentials):
 		try:
-			cls.connect(cloud_provider, credentials)
+			cls.connect(cloud_provider, credentials).list_nodes()
 		except:
 			return False
 		else:

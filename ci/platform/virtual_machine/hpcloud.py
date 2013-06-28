@@ -16,7 +16,7 @@ class HpCloudClient(openstack.OpenstackClient):
 	@classmethod
 	def validate_credentials(cls, credentials):
 		try:
-			cls.connect(credentials)
+			cls.connect(credentials).list_nodes()
 		except:
 			return False
 		else:
