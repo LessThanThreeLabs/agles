@@ -32,7 +32,7 @@ class StartServerTests(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, R
 		cls._stop_redis()
 		cls._purge_queues()
 
-	def test_start_repo_server(self):
+	def test_start_servers(self):
 		def start_model_server():
 			start_model_server_p = subprocess.Popen(['python', '-m', 'scripts.server.start_model_server'])
 			eventlet.sleep(5)
