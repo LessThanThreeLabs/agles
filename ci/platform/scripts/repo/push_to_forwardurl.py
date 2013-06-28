@@ -11,10 +11,10 @@ def main():
 	repo_dir = sys.argv[2]
 	repo_id = pathgen.get_repo_id(repo_dir)
 	target = sys.argv[3]
-	force_push(user_id, repo_id, target)
+	push_forwardurl(user_id, repo_id, target)
 
 
-def force_push(user_id, repo_id, message, target):
+def push_forwardurl(user_id, repo_id, message, target):
 	with model_server.rpc_connect("repos", "update") as client:
 		client.push_forwardurl(repo_id, user_id, target)
 
