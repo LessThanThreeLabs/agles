@@ -101,11 +101,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def validate_license_key(self, user_id, license_key):
-		validity_response = HttpLicenseKeyVerifier().verify_valid(license_key, DeploymentSettings.server_id)
-		if validity_response and isinstance(validity_response, dict):
-			return validity_response.get('isValid') or False
-		else:
-			return False
+		return HttpLicenseKeyVerifier().verify_valid(license_key, DeploymentSettings.server_id)
 
 	@AdminApi
 	def set_license_key(self, user_id, license_key):

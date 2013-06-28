@@ -94,7 +94,7 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 		if not response.ok:
 			self.logger.critical("License check failed: url: %s, params: %s, response: %s" %
 				(self.verification_url, request_params, {'text': response.text, 'code': response.status_code}))
-			return False
+			return {'isValid': False, 'reason': response.text}
 		return simplejson.loads(response.text)
 
 
