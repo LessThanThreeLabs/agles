@@ -138,12 +138,18 @@ class BuildVerifier(object):
 					pass
 			return []
 
-		export_uris = parse_export_uris(self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test")))
+		try:
+			export_uris = parse_export_uris(self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test")))
+		except:
+			export_uris = []
 
 		if not artifact_export_event.ready():
 			artifact_export_event.send()
-			results = self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
-			export_uris += parse_export_uris(results)
+			try:
+				results = self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
+				export_uris += parse_export_uris(results)
+			except:
+				pass
 
 		with model_server.rpc_connect("changes", "update") as changes_update_rpc:
 			changes_update_rpc.add_export_uris(build['change_id'], export_uris)

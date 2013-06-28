@@ -24,12 +24,11 @@ class HpCloudClient(openstack.OpenstackClient):
 
 	@classmethod
 	def connect(cls, credentials):
-		if 'ex_tenant_name' not in credentials:
-			credentials['ex_tenant_name'] = '%s-project1' % credentials['key']
+		assert 'ex_tenant_name' in credentials
 
 		connection_parameters = {
 			'ex_force_auth_url': 'https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/',
-			'ex_force_auth_version': '2.0_password',
+			'ex_force_auth_version': '2.0_keypair',
 			'ex_force_service_name': 'Compute',
 			'ex_force_service_region': 'az-1.region-a.geo-1',
 		}
