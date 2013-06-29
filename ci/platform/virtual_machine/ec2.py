@@ -39,10 +39,11 @@ class Ec2Client(object):
 
 	class InvalidCredentialsFilter(object):
 		def filter(self, record):
-			return 'AWS was not able to validate the provided access credentials' not in record.getMessage()
+			message = record.getMessage()
+			return message != '401 Unauthorized' and 'AWS was not able to validate the provided access credentials' not in message
 
 	# Never log invalid credentials errors
-	logging.getLogger().addFilter(InvalidCredentialsFilter())
+	logging.getLogger('boto').addFilter(InvalidCredentialsFilter())
 
 
 @Logged()
