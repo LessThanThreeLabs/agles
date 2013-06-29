@@ -111,7 +111,8 @@ class RemoteShellCommand(RemoteCommand):
 
 	def _advertised_command(self, command):
 		if self.advertise_commands:
-			return "echo -e $ %s &&\n%s" % (pipes.quote(command), command)
+			advertised_command = '$ ' + '\n> '.join(command.split('\n'))
+			return "echo -e %s &&\n%s" % (pipes.quote(advertised_command), command)
 		return command
 
 
