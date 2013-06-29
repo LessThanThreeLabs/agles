@@ -78,6 +78,12 @@ class RemoteShellCommand(RemoteCommand):
 					export = self._listify(value)
 				else:
 					raise InvalidConfigurationException("Invalid %s option: %s" % (self.type, key))
+
+		assert path is None or isinstance(path, str)
+		assert all(map(lambda command: isinstance(command, str), commands))
+		assert isinstance(timeout, int)
+		assert export is None or all(map(lambda path: isinstance(path, str), export))
+
 		return path, commands, timeout, export
 
 	def _listify(self, value):
