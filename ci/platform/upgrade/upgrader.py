@@ -101,7 +101,7 @@ class HttpTarFetcher(TarFetcher):
 
 	def fetch_bytes(self, license_key, server_id, from_version, to_version):
 		upgrade_data = {"licenseKey": license_key, "serverId": server_id, "currentVersion": from_version, "upgradeVersion": to_version}
-		response = requests.get(self._fetch_uri, params=upgrade_data)
+		response = requests.get(self._fetch_uri, params=upgrade_data, verify=False)
 		if not response.ok:
 			raise UpgradeException("Failed to download upgrade tarball. upgrade_data: %s" % upgrade_data)
 		return response.content
