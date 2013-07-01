@@ -80,7 +80,7 @@ class RemoteShellCommand(RemoteCommand):
 					raise InvalidConfigurationException("Invalid %s option: %s" % (self.type, key))
 
 		assert path is None or isinstance(path, str)
-		assert all(map(lambda command: isinstance(command, str), commands))
+		assert commands is None or all(map(lambda command: isinstance(command, str), commands))
 		assert isinstance(timeout, int)
 		assert export is None or all(map(lambda path: isinstance(path, str), export))
 
