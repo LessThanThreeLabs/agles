@@ -12,7 +12,7 @@ from util.log import Logged
 from virtual_machine import ec2
 
 
-LICENSE_VERIFICATION_URL = 'http://license.koalitycode.com:9001/license/check'
+LICENSE_VERIFICATION_URL = 'https://license.koalitycode.com:9001/license/check'
 MAX_FAILURES = 12
 
 
@@ -90,7 +90,7 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 		system_metadata = {'userCount': user_count}
 		request_params = dict(verification_data.items() + system_metadata.items())
 
-		response = requests.get(self.verification_url, params=request_params)
+		response = requests.get(self.verification_url, params=request_params, verify=False)
 		if not response.ok:
 			self.logger.critical("License check failed: url: %s, params: %s, response: %s" %
 				(self.verification_url, request_params, {'text': response.text, 'code': response.status_code}))
