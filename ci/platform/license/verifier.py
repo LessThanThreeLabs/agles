@@ -102,15 +102,18 @@ class HttpLicenseKeyVerifier(LicenseKeyVerifier):
 class LicensePermissionsHandler(object):
 	def __init__(self):
 		def handle_largest_instance_type(value):
-			ec2.InstanceTypes.set_largest_instance_type(value)
+			largest_instance_type = str(value) if value is not None else None
+			ec2.InstanceTypes.set_largest_instance_type(largest_instance_type)
 
 		def handle_parallelization_cap(value):
-			VerificationServerSettings.parallelization_cap = value
+			VerificationServerSettings.parallelization_cap = int(value) if value is not None else None
 
 		def handle_max_repository_count(value):
-			StoreSettings.max_repository_count = value
-			with model_server.rpc_connect('repos', 'delete') as repos_delete_rpc:
-				repos_delete_rpc.truncate_repositories(value)
+			if value is not None:
+				max_repository_count = int(value)
+				StoreSettings.max_repository_count = max_repository_count
+				with model_server.rpc_connect('repos', 'delete') as repos_delete_rpc:
+					repos_delete_rpc.truncate_repositories(max_repository_count)
 
 		self._permissions_handlers = {
 			'largestInstanceType': handle_largest_instance_type,

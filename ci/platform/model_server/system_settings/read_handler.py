@@ -86,14 +86,12 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	def get_max_repository_count(self, user_id):
 		return StoreSettings.max_repository_count
 
-	@AdminApi
 	def get_license_information(self, user_id):
 		return {
 			'active': DeploymentSettings.active,
 			'license_type': DeploymentSettings.license_type,
 			'license_trial_expiration_time': DeploymentSettings.license_trial_expiration_time,
-			'license_unpaid_expiration_time': DeploymentSettings.license_unpaid_expiration_time,
-			'license_key': DeploymentSettings.license_key
+			'license_unpaid_expiration_time': DeploymentSettings.license_unpaid_expiration_time
 		}
 
 	@AdminApi

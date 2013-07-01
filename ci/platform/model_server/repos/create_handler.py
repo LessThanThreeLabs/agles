@@ -26,8 +26,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			max_repo_count = StoreSettings.max_repository_count
 			if max_repo_count is not None:
 				query = database.schema.repo.select().where(database.schema.repo.c.deleted == 0)
-				with ConnectionFactory.get_sql_connection as sqlconn:
-					repo_count = len(sqlconn.execute(query))
+				with ConnectionFactory.get_sql_connection() as sqlconn:
+					repo_count = sqlconn.execute(query).rowcount
 				if repo_count >= max_repo_count:
 					raise RepositoryCreateError("Already have the maximum allowed number of repositories (%d)" % max_repo_count)
 			repo_name += ".git"
