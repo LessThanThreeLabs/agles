@@ -49,6 +49,10 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 			self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name, created=current_time)
 			return repo_id
+		except RepositoryCreateError as e:
+			error_msg = "failed to create repo: [user_id: %d, repo_name: %s]" % (user_id, repo_name)
+			self.logger.exception(error_msg)
+			raise
 		except Exception as e:
 			error_msg = "failed to create repo: [user_id: %d, repo_name: %s]" % (user_id, repo_name)
 			self.logger.exception(error_msg)
@@ -60,10 +64,13 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, current_time):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
-		query = repostore.select().where(repostore.c.id == repostore_id)
+		repostore_query = repostore.select().where(repostore.c.id == repostore_id)
+		existing_repo_query = repo.select().where(repo.c.name == repo_name)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			repostore_id = sqlconn.execute(query).first()[repostore.c.id]
+			repostore_id = sqlconn.execute(repostore_query).first()[repostore.c.id]
+			if sqlconn.execute(existing_repo_query).rowcount > 0:
+				raise RepositoryAlreadyExistsError(repo_name)
 			ins = repo.insert().values(
 				name=repo_name,
 				uri=uri,
@@ -96,4 +103,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 
 class RepositoryCreateError(Exception):
+	pass
+
+
+class RepositoryAlreadyExistsError(RepositoryCreateError):
 	pass

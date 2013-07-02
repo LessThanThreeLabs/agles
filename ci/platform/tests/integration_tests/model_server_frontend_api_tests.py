@@ -59,7 +59,7 @@ from util.test.mixins import ModelServerTestMixin, RabbitMixin
 class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
 	EMAIL = "jchu@lt3.com"
-	REPO_NAME = "r"
+	REPO_NAME = "TestRepository"
 	REPO_URI = to_clone_path(EMAIL, REPO_NAME)
 
 	@classmethod
@@ -71,6 +71,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		super(ModelServerFrontEndApiTest, self).setUp()
 		self._start_model_server()
 		self._create_user()
+		self._create_repostore()
 		self._create_repo()
 
 	def tearDown(self):
@@ -124,7 +125,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 # TODO: FIX ALL OF THIS BELOW. THIS IS ALL HAX
 
-	def _create_repo(self):
+	def _create_repostore(self):
 		repostore = database.schema.repostore
 		repostore_ins = repostore.insert().values(ip_address="127.0.0.1", repositories_path="/tmp")
 
@@ -132,6 +133,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			result = conn.execute(repostore_ins)
 			self.repostore_id = result.inserted_primary_key[0]
 
+	def _create_repo(self):
 		with model_server.rpc_connect("repos", "create") as conn:
 			self.repo_id = conn._create_repo_in_db(
 				self.user_id,
@@ -162,6 +164,16 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("repos", "read") as conn:
 			repos = conn.get_repositories(self.user_id)
 		assert_true(len(repos) == 0)
+
+	def test_create_duplicate_repo(self):
+		try:
+			self._create_repo()
+		except RPCRequestError as e:
+			assert_true('RepositoryAlreadyExistsError' in str(e))
+		except:
+			assert_true(False, 'Should raise a RepositoryAlreadyExistsError')
+		else:
+			assert_true(False, 'Should raise a RepositoryAlreadyExistsError')
 
 #####################
 #	SYSTEM SETTINGS
