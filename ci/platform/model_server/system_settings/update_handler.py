@@ -39,6 +39,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		self.update_setting("deployment", "server_id", server_id)
 		self.update_setting("store", "ssh_private_key", private_key.exportKey())
 		self.update_setting("store", "ssh_public_key", public_key.exportKey('OpenSSH'))
+		HttpLicenseKeyVerifier().handle_once()
 
 	def update_setting(self, resource, key, value):
 		system_setting = database.schema.system_setting
