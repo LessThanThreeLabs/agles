@@ -1,8 +1,8 @@
 import eventlet
 import os.path
 import requests
+import subprocess
 
-from provisioner.setup_tools import SetupScript, SetupCommand
 from settings.deployment import DeploymentSettings
 from settings.rabbit import RabbitSettings
 from upgrade import upgrade_url
@@ -16,19 +16,16 @@ class Upgrader(object):
 		self._tar_fetcher = tar_fetcher
 
 	def _get_upgrade_script(self):
-		return SetupScript(
-			SetupCommand(
+		return ['bash', '-c',
+			'&&'.join((
 				"sudo rm -rf /tmp/koalityupgrade/%s" % self._to_version,
 				"mkdir -p /tmp/koalityupgrade/%s" % self._to_version,
 				"tar xf /tmp/%s.tar.gz -C /tmp/koalityupgrade/%s" % (self._to_version, self._to_version),
 				"/tmp/koalityupgrade/%s/*/upgrade_script" % self._to_version
-			)
-		)
+			))]
 
 	def _get_revert_script(self):
-		return SetupScript(
-			SetupCommand("/tmp/koalityupgrade/%s/*/revert_script" % self._to_version)
-		)
+		return "/tmp/koalityupgrade/%s/*/revert_script" % self._to_version
 
 	def _set_upgrade_status(self, status, attempts=10):
 		for attempt in xrange(attempts):
@@ -63,10 +60,10 @@ class Upgrader(object):
 		license_key = DeploymentSettings.license_key
 		server_id = DeploymentSettings.server_id
 		self.download_upgrade_files(license_key, server_id, from_version, to_version, to_path='/tmp')
-		return self._get_upgrade_script().run().returncode
+		return subprocess.call(self._get_upgrade_script())
 
 	def revert_upgrade(self):
-		returncode = self._get_revert_script().run().returncode
+		returncode = subprocess.call(self._get_revert_script())
 		if returncode:
 			try:
 				# log here
