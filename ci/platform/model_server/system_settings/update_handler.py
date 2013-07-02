@@ -12,7 +12,7 @@ from sqlalchemy import and_
 import database.schema
 
 from database.engine import ConnectionFactory
-from license.verifier import HttpLicenseKeyVerifier
+from license.verifier import HttpLicenseKeyVerifier, LicenseVerifier, LicensePermissionsHandler
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.aws import AwsSettings
 from settings.deployment import DeploymentSettings
@@ -39,6 +39,8 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		self.update_setting("deployment", "server_id", server_id)
 		self.update_setting("store", "ssh_private_key", private_key.exportKey())
 		self.update_setting("store", "ssh_public_key", public_key.exportKey('OpenSSH'))
+		if not test_mode:
+			LicenseVerifier(HttpLicenseKeyVerifier(), LicensePermissionsHandler()).handle_once()
 
 	def update_setting(self, resource, key, value):
 		system_setting = database.schema.system_setting
