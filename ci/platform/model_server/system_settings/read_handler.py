@@ -102,7 +102,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	def get_upgrade_status(self, user_id):
 		request_params = {'licenseKey': DeploymentSettings.license_key, 'serverId': DeploymentSettings.server_id, 'currentVersion': DeploymentSettings.version}
 		try:
-			response = requests.get(upgrade_check_url, params=request_params)
+			response = requests.get(upgrade_check_url, params=request_params, verify=False)
 			if response.ok:
 				upgrade_available = simplejson.loads(response.text).get('upgradeAvailable', False)
 				upgrade_version = simplejson.loads(response.text).get('upgradeVersion')
