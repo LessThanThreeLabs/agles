@@ -22,6 +22,9 @@ class DatabaseBackedSettings(object):
 				return
 			cls._update_setting(attr, value)
 
+		def __delattr__(cls, attr):
+			cls._reset_setting(attr)
+
 	_is_initialized = False
 
 	@classmethod
@@ -62,3 +65,8 @@ class DatabaseBackedSettings(object):
 	def _update_setting(cls, attr, value):
 		with model_server.rpc_connect("system_settings", "update") as model_server_rpc:
 			model_server_rpc.update_setting(cls._get_resource(), attr, value)
+
+	@classmethod
+	def _reset_setting(cls, attr):
+		with model_server.rpc_connect("system_settings", "update") as model_server_rpc:
+			model_server_rpc.reset_setting(cls._get_resource(), attr)

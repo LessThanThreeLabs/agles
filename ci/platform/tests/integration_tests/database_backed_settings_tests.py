@@ -117,6 +117,37 @@ class DatabaseBackedSettingsTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 		assert_equal('asdf', AsdfSettings._get_resource())
 
+	def test_del_attr(self):
+		alpha = "abc"
+		numeric = 123
+		a_list = [1, "two", {3: "Three"}]
+		a_dict = {"alpha": alpha, "numeric": numeric, "a_list": a_list}
+
+		class SampleTestSettings(DatabaseBackedSettings):
+			def __init__(self):
+				super(SampleTestSettings, self).__init__(
+					alpha=alpha,
+					numeric=numeric,
+					a_list=a_list,
+					a_dict=a_dict
+				)
+
+		new_alpha = "zyx"
+		SampleTestSettings.alpha = new_alpha
+
+		assert_equal(new_alpha, SampleTestSettings.alpha)
+		assert_equal(new_alpha, self._get_setting("alpha"))
+
+		del SampleTestSettings.alpha
+
+		assert_equal(alpha, SampleTestSettings.alpha)
+		assert_equal(None, self._get_setting("alpha"))
+
+		del SampleTestSettings.numeric
+
+		assert_equal(numeric, SampleTestSettings.numeric)
+		assert_equal(None, self._get_setting("numeric"))
+
 	def _change_setting(self, key, value):
 		with model_server.rpc_connect("system_settings", "update") as model_server_rpc:
 			model_server_rpc.update_setting("sample_test", key, value)

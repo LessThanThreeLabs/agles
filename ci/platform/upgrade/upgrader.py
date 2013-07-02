@@ -49,7 +49,8 @@ class Upgrader(object):
 			else:
 				for attempt in xrange(10):
 					try:
-						self._set_upgrade_status('passed', attemtps=1)
+						self._set_upgrade_status('passed', attempts=1)
+						del DeploymentSettings.version
 					except:  # Model server might not be up again yet
 						eventlet.sleep(3)
 						RabbitSettings.reinitialize()

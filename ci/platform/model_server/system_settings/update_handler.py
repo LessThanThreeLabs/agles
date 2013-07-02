@@ -76,6 +76,18 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			value=CryptoYaml(system_settings_cipher).dump(value)
 		)
 
+	def reset_setting(self, resource, key):
+		system_setting = database.schema.system_setting
+		delete_command = system_setting.delete().where(
+			and_(
+				system_setting.c.resource == resource,
+				system_setting.c.key == key
+			)
+		)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(delete_command)
+
 	@AdminApi
 	def set_website_domain_name(self, user_id, domain_name):
 		WebServerSettings.domain_name = domain_name
