@@ -56,6 +56,7 @@ class LicenseVerifier(object):
 
 	def reset_license_check_failures(self):
 		DeploymentSettings.license_validation_failures = 0
+		DeploymentSettings.license_failure_reason = None
 		DeploymentSettings.active = True
 
 	def license_check_passed(self, response):
