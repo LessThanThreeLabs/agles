@@ -208,7 +208,7 @@ class Ec2Vm(VirtualMachine):
 		)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.instance.ip_address)
+		login = "%s@%s" % (self.vm_username, self.instance.private_ip_address)
 		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
@@ -232,7 +232,13 @@ class Ec2Vm(VirtualMachine):
 		instance_type = self.instance.instance_type
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')
-		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type, user_data=self._default_user_data(self.vm_username)).instances[0]
+
+		security_group = AwsSettings.security_group
+		cls._validate_security_group(security_group)
+
+		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type,
+			security_groups=[security_group],
+			user_data=self._default_user_data(self.vm_username)).instances[0]
 		self._name_instance(self.instance, instance_name)
 
 		self.store_vm_info()
