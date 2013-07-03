@@ -183,9 +183,10 @@ class Ec2Vm(VirtualMachine):
 		for remaining_attempts in range(24, 0, -1):
 			if remaining_attempts <= 3:
 				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
-			if self.ssh_call("true").returncode == 0:
+			if self.ssh_call("true", timeout=30).returncode == 0:
 				return
 			eventlet.sleep(3)
+			self.instance.update()
 		# Failed to ssh into machine, try again
 		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
 		self.rebuild()
