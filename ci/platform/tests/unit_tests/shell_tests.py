@@ -1,5 +1,5 @@
 from nose.tools import *
-from util.shell import *
+from util.restricted_git_shell import *
 
 from util.test import BaseUnitTest
 

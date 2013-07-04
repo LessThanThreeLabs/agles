@@ -5,7 +5,7 @@ import model_server
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
 from util.permissions import InvalidPermissionsError
-from util.shell import *
+from util.restricted_shell import *
 from database.engine import ConnectionFactory
 from database import schema
 
