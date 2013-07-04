@@ -41,6 +41,7 @@ repo = Table('repo', metadata,
 	Column('forward_url', String, nullable=False),  # required forwarding url for repositories
 	Column('created', Integer, nullable=False),
 	Column('deleted', Integer, nullable=False, default=0),  # when deleted, set this column to the id
+	Column('type', String, nullable=False),	# the type (git, hg ...) of the repository
 
 	UniqueConstraint('uri', 'deleted'),
 	CheckConstraint('deleted = 0 OR id = deleted')

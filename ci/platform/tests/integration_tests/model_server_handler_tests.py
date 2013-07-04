@@ -36,7 +36,8 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 				uri='a',
 				repostore_id=repostore_id,
 				forward_url="forwardurl",
-				created=1234
+				created=1234,
+				type='git'
 			)
 
 			self.repo_id = sqlconn.execute(ins_repo).inserted_primary_key[0]

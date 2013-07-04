@@ -141,7 +141,8 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 				self.REPO_URI,
 				self.repostore_id,
 				"forwardurl",
-				0)
+				0,
+				'git')
 
 	def test_get_repositories(self):
 		with model_server.rpc_connect("repos", "read") as conn:

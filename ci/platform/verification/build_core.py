@@ -17,7 +17,7 @@ class VirtualMachineBuildCore(object):
 	def teardown(self):
 		raise NotImplementedError()
 
-	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
+	def setup_build(self, repo_uri, repo_type, sha,  ref, private_key, console_appender=None):
 		self.setup_virtual_machine(private_key, console_appender)
 
 	def _get_output_handler(self, console_appender, type, subtype=""):
@@ -131,13 +131,13 @@ class CloudBuildCore(VirtualMachineBuildCore):
 	def teardown(self):
 		self.virtual_machine.delete()
 
-	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
-		self.setup_virtual_machine(repo_uri, ref, private_key, console_appender)
+	def setup_build(self, repo_uri, repo_type, ref, private_key, console_appender=None):
+		self.setup_virtual_machine(repo_uri, ref, repo_type, sha, private_key, console_appender)
 
-	def setup_virtual_machine(self, repo_uri, ref, private_key, console_appender):
+	def setup_virtual_machine(self, repo_uri, repo_type, ref, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
-		checkout_command = RemoteCheckoutCommand(repo_name, checkout_url, ref)
+		checkout_command = RemoteCheckoutCommand(repo_name, checkout_url, repo_type, ref)
 		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
 
 
