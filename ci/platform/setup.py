@@ -14,7 +14,7 @@ setup(
 			'koality-schema = database.schema:main',
 # SSH
 			'koality-authorized-keys-script = scripts.ssh.authorized_keys_script:main',
-			'koality-gitserve = scripts.ssh.gitserve:main',
+			'koality-serve = scripts.ssh.serve:main',
 # GIT
 			'force-delete = scripts.repo.force_delete:main',
 			'force-push = scripts.repo.force_push:main',

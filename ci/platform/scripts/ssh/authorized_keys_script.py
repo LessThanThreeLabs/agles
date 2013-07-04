@@ -5,7 +5,7 @@ import sys
 
 import model_server
 
-GITSERVE = os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), "koality-gitserve")
+SERVE = os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), "koality-serve")
 FORCED_COMMAND = 'command="%s %d",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty'
 valid_key = re.compile('^ssh-(?:dss|rsa) [A-Za-z0-9+/]+={0,2}$')
 
@@ -20,7 +20,7 @@ def main():
 			user_id = client.get_user_id_from_public_key(sshkey)
 
 		if user_id:
-			sys.stdout.write(FORCED_COMMAND % (GITSERVE, user_id))
+			sys.stdout.write(FORCED_COMMAND % (SERVE, user_id))
 			sys.exit(0)
 		else:
 			sys.exit(1)
