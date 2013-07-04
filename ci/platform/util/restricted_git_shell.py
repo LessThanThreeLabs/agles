@@ -3,6 +3,7 @@ import os
 import re
 
 import model_server
+import restricted_shell
 
 from settings.store import StoreSettings
 from shared.constants import VerificationUser
@@ -10,11 +11,9 @@ from util import pathgen
 from util.permissions import InvalidPermissionsError
 REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"
 
-
-class RestrictedGitShell(object):
+class RestrictedGitShell(RestrictedShell):
 	def __init__(self, valid_commands, user_id_commands):
-		self.valid_commands = valid_commands
-		self.user_id_commands = user_id_commands
+		self.supeR().init(valid_commands, user_id_commands)
 
 		self._git_command_handlers = {
 			"git-receive-pack": self.handle_receive_pack,
@@ -39,13 +38,6 @@ class RestrictedGitShell(object):
 		match = re.search(REPO_PATH_PATTERN, cmd_args_str)
 		assert match is not None
 		return match.group()
-
-	def verify_user_exists(self, command, user_id, repo_id):
-		with model_server.rpc_connect("users", "read") as client:
-			try:
-				client.get_user_from_id(user_id)
-			except:
-				raise InvalidPermissionsError("User %s does not have the necessary permissions to run %s on repository %d" % (user_id, command, repo_id))
 
 	def _validate(self, repo_path):
 		if not repo_path.endswith(".git"):
@@ -117,17 +109,3 @@ class RestrictedGitShell(object):
 		self._validate(repo_path)
 		command_parts[1] = self._get_requested_repo_uri(repo_path)
 		self._git_command_handlers[command_parts[0]](*command_parts[1:])
-
-
-class InvalidCommandError(Exception):
-	def __init__(self, command):
-		super(InvalidCommandError, self).__init__(
-			'"%s" cannot be executed in this restricted shell.' % command)
-
-
-class RepositoryNotFoundError(Exception):
-	pass
-
-
-class MalformedCommandError(RepositoryNotFoundError):
-	pass
