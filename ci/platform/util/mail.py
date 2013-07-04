@@ -6,6 +6,7 @@ from util.log import configure
 
 
 def sendmail(send_from, send_to, subject, text, cc=None, bcc=None, html=None, attachment=None, testmode=None):
+	return True
 	if testmode is None:
 		testmode = MailSettings.test_mode
 	if testmode is True:

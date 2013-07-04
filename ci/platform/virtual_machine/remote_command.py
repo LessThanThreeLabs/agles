@@ -165,14 +165,15 @@ class RemoteSetupCommand(RemoteCommand):
 
 
 class RemoteCheckoutCommand(RemoteSetupCommand):
-	def __init__(self, repo_name, git_url, ref):
-		super(RemoteCheckoutCommand, self).__init__("git")
-		self.git_url = git_url
+	def __init__(self, repo_name, repo_url, repo_type, ref):
+		super(RemoteCheckoutCommand, self).__init__(repo_type)
+		self.repo_url = repo_url
+		self.repo_type = repo_type
 		self.ref = ref
 		self.repo_name = repo_name
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.remote_checkout(self.repo_name, self.git_url, self.ref, output_handler=output_handler)
+		return virtual_machine.remote_checkout(self.repo_name, self.repo_url, self.repo_type, self.ref, output_handler=output_handler)
 
 
 class RemoteProvisionCommand(RemoteSetupCommand):

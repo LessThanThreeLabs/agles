@@ -43,17 +43,19 @@ class ChangeVerifier(EventSubscriber):
 		try:
 			change_id = contents['change_id']
 			commit_id = contents['commit_id']
+			repo_type = contents['repo_type']
+			sha = contents['sha']
 
 			if not DeploymentSettings.active:
 				self.skip_change(change_id)
 				return
 
-			verification_config = self._get_verification_config(commit_id)
+			verification_config = self._get_verification_config(commit_id, sha, repo_type)
 
 			workers_spawned = event.Event()
-			spawn_n(self.verify_change, verification_config, change_id, workers_spawned)
+			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned)
 			workers_spawned.wait()
-		except:
+		except Exception as e:
 			self.logger.critical("Unexpected failure while verifying change %d, commit %d. Failing change." % (change_id, commit_id), exc_info=True)
 			self.results_handler.fail_change(change_id)
 
@@ -68,7 +70,7 @@ class ChangeVerifier(EventSubscriber):
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)
 
-	def verify_change(self, verification_config, change_id, workers_spawned):
+	def verify_change(self, verification_config, change_id, repo_type, workers_spawned):
 		task_queue = TaskQueue()
 		artifact_export_event = event.Event()
 
@@ -116,7 +118,7 @@ class ChangeVerifier(EventSubscriber):
 			'''
 			if not change_started.ready():
 				change_started.send(False)
-				self.logger.error("Prematurely failed change %d" % change_id, exc_info=exc_info)
+				self.logger.error("Prematurely failed change %d" % 3, exc_info=exc_info)
 				fail_change()
 
 		def setup_worker():
@@ -133,7 +135,7 @@ class ChangeVerifier(EventSubscriber):
 				return
 			workers_alive.append(1)
 			build_id = self._create_build(change_id)
-			worker_greenlet = spawn(verifier.verify_build(build_id, verification_config, task_queue, artifact_export_event))
+			worker_greenlet = spawn(verifier.verify_build(build_id, repo_type, verification_config, task_queue, artifact_export_event))
 			worker_greenlet.link(cleanup_greenlet, verifier)
 
 		for worker in range(num_workers):
@@ -173,18 +175,31 @@ class ChangeVerifier(EventSubscriber):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:
 			return model_server_rpc.create_build(change_id)
 
-	def _get_verification_config(self, commit_id):
+	def _get_verification_config(self, commit_id, sha, repo_type):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
-		ref = pathgen.hidden_ref(commit_id)
 
-		if self.uri_translator:
-			checkout_url = self.uri_translator.translate(repo_uri)
-			host_url = checkout_url[:checkout_url.find(":")]
-			repo_path = checkout_url[checkout_url.find(":") + 1:]
-			show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
+		if repo_type == 'git':
+			ref = pathgen.hidden_ref(commit_id)
+
+			if self.uri_translator:
+				checkout_url = self.uri_translator.translate(repo_uri)
+				host_url = checkout_url[:checkout_url.find(":")]
+				repo_path = checkout_url[checkout_url.find(":") + 1:]
+				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
+			else:
+				show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
+		elif repo_type == 'hg':
+			if self.uri_translator:
+				checkout_url = self.uri_translator.translate(repo_uri)
+				host_url = checkout_url[:checkout_url.find(":")]
+				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "hg show-koality", sha]
+			else:
+				# TODO(andrey) Test this case!
+				show_command = ["bash", "-c", "cat %s" % os.path.join(repo_uri, ".hg", "strip-backup", sha + "-koality.yml")]
 		else:
-			show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
+			# TODO(andrey) Proper failure
+			assert False
 
 		config_dict = {}
 		for file_name in ['koality.yml', '.koality.yml']:

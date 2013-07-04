@@ -12,24 +12,18 @@ import model_server
 import util.log
 
 from util.permissions import InvalidPermissionsError
-from util.shell import RestrictedGitShell, InvalidCommandError, RepositoryNotFoundError
-
-valid_commands = [
-	"git-receive-pack",
-	"git-upload-pack",
-	"git-upload-archive",
-	"git-show"
-]
-
-user_id_commands = ["jgit receive-pack"]
-
+from util.restricted_shell import RestrictedGitShell, RestrictedHgShell, InvalidCommandError, RepositoryNotFoundError
 
 def main():
 	user_id = sys.argv[1]
 	try:
 		if "SSH_ORIGINAL_COMMAND" in os.environ:
 			command = os.environ["SSH_ORIGINAL_COMMAND"] + ' ' + user_id
-			rsh = RestrictedGitShell(valid_commands, user_id_commands)
+			if command.split()[0] == 'hg':
+				rsh = RestrictedHgShell()
+			# TODO(andrey) This code needs to be cleaner with definitive third case!
+			else:
+				rsh = RestrictedGitShell()
 			rsh.handle_command(command)
 		else:
 			with model_server.rpc_connect("users", "read") as client:
@@ -40,11 +34,11 @@ def main():
 	except InvalidPermissionsError:
 		print >> sys.stderr, "You do not have the necessary permissions to perform this action."
 	except RepositoryNotFoundError:
-		print >> sys.stderr, "Repository not found. Please check your git configuration."
+		print >> sys.stderr, "Repository not found. Please check your VCS' configuration."
 	except:
 		util.log.configure()
 		logger = logging.getLogger("gitserve")
-		logger.error("Failed to process git command %s for user %s" % (os.environ.get("SSH_ORIGINAL_COMMAND", "<no command supplied>"), user_id), exc_info=True)
+		logger.error("Failed to process shell command %s for user %s" % (os.environ.get("SSH_ORIGINAL_COMMAND", "<no command supplied>"), user_id), exc_info=True)
 		print >> sys.stderr, "An error has occured. Please contact your system administrator or support for more help."
 
 
