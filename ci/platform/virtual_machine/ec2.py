@@ -234,7 +234,7 @@ class Ec2Vm(VirtualMachine):
 		instance_name = self.instance.tags.get('Name', '')
 
 		security_group = AwsSettings.security_group
-		cls._validate_security_group(security_group)
+		self._validate_security_group(security_group)
 
 		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
