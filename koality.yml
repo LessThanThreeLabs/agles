@@ -32,7 +32,10 @@ compile:
   scripts:
     - python setup.py install:
         path: ci/platform
-        export: ci/platform/build
+        export:
+          - ci/platform/build
+          - ci/platform/alembic
+          - ci/platform/koality.egg-info
 test:
   machines: 2
   scripts:
