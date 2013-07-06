@@ -32,6 +32,7 @@ compile:
   scripts:
     - python setup.py install:
         path: ci/platform
+        export: ci/platform/build
 test:
   machines: 2
   scripts:
@@ -39,6 +40,7 @@ test:
         path: ci/platform
         script:
           - nosetests -sv tests/unit_tests
+        export: ci/platform/tests/unit_tests
         timeout: 3
   factories:
     - integration test factory:
