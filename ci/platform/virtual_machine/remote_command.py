@@ -124,12 +124,14 @@ class RemoteCompileCommand(RemoteShellCommand):
 		script = self._to_executed_script()
 
 		if self.export:
-			export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'compile', self.name))
+			export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'compile', self.name)
 			for export in self.export:
 				export_parent = os.path.dirname(export.strip(os.path.sep))
-				export = pipes.quote(export)
 				script += "cd; mkdir -p %s\n" % pipes.quote(os.path.join(export_directory, export_parent))
-				script += "ln -s $(pwd)/%s %s\n" % (os.path.join('source', export), os.path.join(export_directory, export))
+				script += "ln -s $(pwd)/%s %s\n" % (
+					pipes.quote(os.path.join('source', export)),
+					pipes.quote(os.path.join(export_directory, export))
+				)
 
 		script = script + "exit $_r"
 		return script
@@ -145,14 +147,17 @@ class RemoteTestCommand(RemoteShellCommand):
 		if self.export:
 			for export in self.export:
 				export_parent = os.path.dirname(export.strip(os.path.sep))
-				export = pipes.quote(export)
-				export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name))
-				script += "cd; mkdir -p %s\n" %  pipes.quote(os.path.join(export_directory, export_parent))
+				export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name)
+				script += "cd; mkdir -p %s\n" % pipes.quote(os.path.join(export_directory, export_parent))
 				script += "if [ -d %s ]; then mv %s %s; mkdir -p %s\n" % (
-					os.path.join('source', export),
-					os.path.join('source', export), os.path.join(export_directory, export),
-					os.path.join('source', export))
-				script += "else mv %s %s; fi\n" % (os.path.join('source', export), os.path.join(export_directory, export))
+					pipes.quote(os.path.join('source', export)),
+					pipes.quote(os.path.join('source', export)), pipes.quote(os.path.join(export_directory, export)),
+					pipes.quote(os.path.join('source', export))
+				)
+				script += "else mv %s %s; fi\n" % (
+					pipes.quote(os.path.join('source', export)),
+					pipes.quote(os.path.join(export_directory, export))
+				)
 
 		script = script + "exit $_r"
 		return script
