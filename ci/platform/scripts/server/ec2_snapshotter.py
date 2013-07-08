@@ -95,7 +95,13 @@ def snapshot():
 			raise Exception(failure_message)
 		virtual_machine.cache_repository(primary_repository['name'])
 
-		new_image_name = '%s%s_%s' % (AwsSettings.vm_image_name_prefix, snapshot_version[0], snapshot_version[1])
+		image_name_prefix = AwsSettings.vm_image_name_prefix
+		if image_name_prefix.endswith(snapshot_version[0]):
+			new_image_name = '%s_%s' % (image_name_prefix, snapshot_version[1])
+		elif image_name_prefix.endswith('%s_' % snapshot_version[0]):
+			new_image_name = '%s%s' % (image_name_prefix, snapshot_version[1])
+		else:
+			new_image_name = '%s%s_%s' % (image_name_prefix, snapshot_version[0], snapshot_version[1])
 		print 'Saving instance as AMI "%s"' % new_image_name
 		virtual_machine.create_image(new_image_name)
 
