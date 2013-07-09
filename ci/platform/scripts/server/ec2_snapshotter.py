@@ -96,7 +96,7 @@ def snapshot():
 		virtual_machine.cache_repository(primary_repository['name'])
 
 		image_name_prefix = AwsSettings.vm_image_name_prefix
-		if image_name_prefix.endswith(snapshot_version[0]):
+		if image_name_prefix.endswith(str(snapshot_version[0])):
 			new_image_name = '%s_%s' % (image_name_prefix, snapshot_version[1])
 		elif image_name_prefix.endswith('%s_' % snapshot_version[0]):
 			new_image_name = '%s%s' % (image_name_prefix, snapshot_version[1])
