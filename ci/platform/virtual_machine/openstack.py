@@ -64,16 +64,29 @@ class OpenstackVm(VirtualMachine):
 			image = filter(lambda image: str(image.id) == str(image_id), cls.get_all_images())[0]
 		else:
 			image = cls.get_newest_image()
-		instance_type = instance_type or LibCloudSettings.instance_type
+		instance_type = instance_type or cls.Settings.instance_type
 		size = cls._get_instance_size(instance_type)
 
-		security_group_name = LibCloudSettings.security_group
+		security_group_name = cls.Settings.security_group
 		security_group = cls._validate_security_group(security_group_name)
+
+		cls._delete_instances_with_name(name)
 
 		instance = cls.CloudClient().create_node(name=name, image=image, size=size,
 			ex_userdata=cls._default_user_data(vm_username),
 			ex_security_groups=[security_group])
 		return cls(vm_id, instance)
+
+	@classmethod
+	def _delete_instances_with_name(cls, instance_name):
+		'''Openstack gets mad if you try to create two instances with the same name, so delete any offenders first'''
+		while True:
+			instances_with_name = filter(lambda instance: instance.name == instance_name, cls.CloudClient().list_nodes())
+			if not instances_with_name:
+				return
+			for instance in instances_with_name:
+				cls._safe_terminate(instance)
+			eventlet.sleep(3)
 
 	@classmethod
 	def _default_user_data(cls, vm_username=VM_USERNAME):
@@ -102,10 +115,10 @@ class OpenstackVm(VirtualMachine):
 				int(rule.to_port) >= 22):
 				if rule.ip_range == cidr_ip:
 					cls.logger.debug('Found ssh authorization rule on security group "%s" for ip "%s"' % (security_group, cidr_ip))
-					return
-				elif rule.group['name'] in own_security_groups and rule.group['tenant_id'] == group.tenant_id:
+					return group
+				elif rule.group and rule.group['name'] in own_security_groups and rule.group['tenant_id'] == group.tenant_id:
 					cls.logger.debug('Found ssh authorization rule on security group "%s" for security group "%s"' % (security_group, rule.group['name']))
-					return
+					return group
 		cls.logger.info('Adding ssh authorization rule to security group "%s" for ip "%s"' % (security_group, cidr_ip))
 		cls.CloudClient().ex_create_security_group_rule(group, 'tcp', 22, 22, cidr_ip, None)
 		return group
@@ -231,18 +244,17 @@ class OpenstackVm(VirtualMachine):
 
 	def delete(self):
 		if self.instance.name:
-			instances = filter(lambda instance: instance.name == self.instance.name, self.instance.driver.list_nodes())
-			for instance in instances:  # Clean up rogue VMs
-				self._safe_terminate(instance)
+			self._delete_instances_with_name(self.instance.name)
 		else:
 			self._safe_terminate(self.instance)
 		self.remove_vm_info()
 
-	def _safe_terminate(self, instance):
+	@classmethod
+	def _safe_terminate(cls, instance):
 		try:
 			instance.destroy()
 		except:
-			self.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
+			cls.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
 
 
 class InstanceTypes(object):
