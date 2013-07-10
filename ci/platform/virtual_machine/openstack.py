@@ -189,7 +189,7 @@ class OpenstackVm(VirtualMachine):
 			timeout=3600, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.instance.public_ips[-1])
+		login = "%s@%s" % (self.vm_username, self.instance.private_ips[-1])
 		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):

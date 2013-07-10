@@ -43,11 +43,8 @@ class HpCloudVm(openstack.OpenstackVm):
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		# For some reason, hpcloud returns [<private ip>, <public ip>] as the private ips, and the private ips begin with 10.*
-		if self.instance.public_ips:
-			public_ip = self.instance.public_ips[0]
-		else:
-			public_ip = filter(lambda ip: not ip.startswith('10.'), self.instance.private_ips)[0]
-		login = "%s@%s" % (self.vm_username, public_ip)
+		private_ip = filter(lambda ip_address: ip_address.startswith('10.'), self.instance.private_ips)[0]
+		login = "%s@%s" % (self.vm_username, private_ip)
 		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	@classmethod
