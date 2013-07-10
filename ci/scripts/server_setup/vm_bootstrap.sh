@@ -193,6 +193,34 @@ function setup_java () {
 		sudo mkdir -p /usr/lib/jvm
 		sudo mv jdk1.5.0_22 /usr/lib/jvm/java-1.5.0-sun
 	fi
+	if [ ! $(which sbt) ]; then
+		if [ $PACKAGE_MANAGER == 'apt-get' ]; then
+			wget http://scalasbt.artifactoryonline.com/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.12.4/sbt.deb
+			sudo dpkg -i sbt.deb
+			rm sbt.deb
+		elif [ $PACKAGE_MANAGER == 'yum' ]; then
+			wget http://scalasbt.artifactoryonline.com/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.12.4/sbt.rpm
+			sudo yum install -y sbt.rpm
+			rm sbt.rpm
+		fi
+	fi
+	if [ ! $(which mvn) ]; then
+		if [ $PACKAGE_MANAGER == 'apt-get' ]; then
+			sudo apt-get install -y maven
+		elif [ $PACKAGE_MANAGER == 'yum' ]; then
+			wget http://mirror.cogentco.com/pub/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz
+			tar xzf apache-maven-3.0.5-bin.tar.gz
+			rm apache-maven-3.0.5-bin.tar.gz
+			sudo mv apache-maven-3.0.5 /usr/local/maven
+			cat > maven.sh <<-'EOF'
+				export M2_HOME=/usr/local/maven
+				export PATH=$M2_HOME/bin:$PATH
+			EOF
+			chmod 0644 maven.sh
+			sudo chown root:root maven.sh
+			sudo mv maven.sh /etc/profile.d/maven.sh
+		fi
+	fi
 }
 
 function prompt_github_credentials () {
