@@ -195,7 +195,7 @@ class Snapshotter(object):
 		images = self.vm_class.get_all_images()
 		local_images = sorted(filter(lambda image: self.vm_class.get_image_version(image)[1] >= 0, images), key=self.vm_class.get_image_version, reverse=True)
 
-		stale_images = local_images[2:]
+		stale_images = local_images[3:]
 		for image in stale_images:
 			self.logger.info('Removing snapshot %s' % image.name)
 			delete_image(image)
