@@ -177,21 +177,21 @@ function setup_nodejs () {
 
 function setup_java () {
 	if [ ! -d /usr/lib/jvm/java-6-sun ]; then
-		wget --no-cookies --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F" http://download.oracle.com/otn-pub/java/jdk/6u45-b06/jdk-6u45-linux-x64.bin
+		wget --no-cookies --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F" --no-check-certificate -O jdk-6u45-linux-x64.bin http://download.oracle.com/otn-pub/java/jdk/6u45-b06/jdk-6u45-linux-x64.bin
 		chmod u+x jdk-6u45-linux-x64.bin
 		./jdk-6u45-linux-x64.bin
 		rm jdk-6u45-linux-x64.bin
-		mkdir -p /usr/lib/jvm
-		mv jdk1.6.0_45 /usr/lib/jvm/java-6-sun
+		sudo mkdir -p /usr/lib/jvm
+		sudo mv jdk1.6.0_45 /usr/lib/jvm/java-6-sun
 	fi
 	if [ ! -d /usr/lib/jvm/java-1.5.0-sun ]; then
-		wget --no-cookies --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F" http://download.oracle.com/otn-pub/java/jdk/1.5.0_22/jdk-1_5_0_22-linux-amd64.bin
+		wget --no-cookies --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F" --no-check-certificate -O jdk-1_5_0_22-linux-amd64.bin http://download.oracle.com/otn-pub/java/jdk/1.5.0_22/jdk-1_5_0_22-linux-amd64.bin
 		chmod u+x jdk-1_5_0_22-linux-amd64.bin
 		sed -i.bak 's/more <<"EOF"/true <<"EOF"/g' jdk-1_5_0_22-linux-amd64.bin
 		echo yes | ./jdk-1_5_0_22-linux-amd64.bin
 		rm jdk-1_5_0_22-linux-amd64.bin*
-		mkdir -p /usr/lib/jvm
-		mv jdk1.5.0_22 /usr/lib/jvm/java-1.5.0-sun
+		sudo mkdir -p /usr/lib/jvm
+		sudo mv jdk1.5.0_22 /usr/lib/jvm/java-1.5.0-sun
 	fi
 }
 
