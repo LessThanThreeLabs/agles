@@ -94,8 +94,11 @@ class ReposReadHandler(ModelServerRpcHandler):
 		query = repo.select().where(repo.c.id == repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-		assert row is not None
-		return to_dict(row, repo.columns)
+
+		if row:
+			return to_dict(row, repo.columns)
+		else:
+			raise NoSuchRepositoryError(repo_id)
 
 	def can_hear_repository_events(self, user_id, id_to_listen_to):
 		return True
@@ -111,3 +114,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			return row[repo.c.forward_url] if row else None
+
+
+class NoSuchRepositoryError(Exception):
+	pass
