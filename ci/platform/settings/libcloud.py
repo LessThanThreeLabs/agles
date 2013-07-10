@@ -10,4 +10,5 @@ class LibCloudSettings(DatabaseBackedSettings):
 			extra_credentials={},
 			instance_type='',
 			vm_image_name_prefix='koality_verification_0.1',
-			largest_instance_type=None)
+			largest_instance_type=None,
+			security_group='koality_verification')

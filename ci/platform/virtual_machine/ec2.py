@@ -1,5 +1,6 @@
 import logging
 import pipes
+import platform
 import re
 import socket
 
@@ -96,29 +97,36 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _validate_security_group(cls, security_group):
 		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
-		own_security_groups = Ec2Vm._call(['ec2metadata', '--security-groups']).output.split('\n')
+		if platform.system() == 'Darwin':
+			own_security_groups = []
+		else:
+			own_security_groups = cls._call(['ec2metadata', '--security-groups']).output.split('\n')
 		group = cls._get_or_create_security_group(security_group)
 		for rule in group.rules:
 			if (rule.ip_protocol == 'tcp' and
-				rule.from_port == '22' and
-				rule.to_port == '22'):
+				int(rule.from_port) <= 22 and
+				int(rule.to_port) >= 22):
 				for grant in rule.grants:
-					if grant.cidr_ip == cidr_ip or grant.name in own_security_groups:
-						cls.logger.debug('Found ssh authorization rule on security group "%s"' % security_group)
+					if grant.cidr_ip == cidr_ip:
+						cls.logger.debug('Found ssh authorization rule on security group "%s" for ip "%s"' % (security_group, cidr_ip))
 						return
-		cls.logger.info('Adding ssh authorization rule to security group "%s"' % security_group)
+					elif grant.name in own_security_groups:
+						cls.logger.debug('Found ssh authorization rule on security group "%s" for security group "%s"' % (security_group, grant.name))
+						return
+		cls.logger.info('Adding ssh authorization rule to security group "%s" for ip "%s"' % (security_group, cidr_ip))
 		group.authorize('tcp', '22', '22', cidr_ip, None)
+		return group
 
 	@classmethod
 	def _get_or_create_security_group(cls, security_group):
 		ec2_client = cls.CloudClient()
 		groups = filter(lambda group: group.name == security_group, ec2_client.get_all_security_groups())
 		if groups:
-			cls.logger.debug('Found existing security_group "%s"' % security_group)
+			cls.logger.debug('Found existing security group "%s"' % security_group)
 			group = groups[0]
 		else:
 			cls.logger.info('Creating new security group "%s"' % security_group)
-			group = ec2_client.create_security_group(security_group, "Auto-generated Koality verification security group")
+			group = ec2_client.create_security_group(security_group, 'Auto-generated Koality verification security group')
 		return group
 
 	@classmethod

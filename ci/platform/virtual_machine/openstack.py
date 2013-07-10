@@ -1,3 +1,4 @@
+import platform
 import socket
 
 import eventlet
@@ -12,8 +13,6 @@ from virtual_machine import VirtualMachine
 
 
 class OpenstackClient(object):
-	import platform
-
 	if platform.system() == 'Darwin':
 		import libcloud.security
 		libcloud.security.VERIFY_SSL_CERT_STRICT = False
@@ -62,14 +61,18 @@ class OpenstackVm(VirtualMachine):
 		if not name:
 			name = "koality:%s:%s" % (socket.gethostname(), vm_id)
 		if image_id:
-			image = filter(lambda image: image.id == image_id, cls.get_all_images())[0]
+			image = filter(lambda image: str(image.id) == str(image_id), cls.get_all_images())[0]
 		else:
 			image = cls.get_newest_image()
 		instance_type = instance_type or LibCloudSettings.instance_type
 		size = cls._get_instance_size(instance_type)
 
+		security_group_name = LibCloudSettings.security_group
+		security_group = cls._validate_security_group(security_group_name)
+
 		instance = cls.CloudClient().create_node(name=name, image=image, size=size,
-			ex_userdata=cls._default_user_data(vm_username))
+			ex_userdata=cls._default_user_data(vm_username),
+			ex_security_groups=[security_group])
 		return cls(vm_id, instance)
 
 	@classmethod
@@ -85,6 +88,41 @@ class OpenstackVm(VirtualMachine):
 			"chown -R %s:%s /home/%s/.ssh" % (vm_username, vm_username, vm_username)))
 
 	@classmethod
+	def _validate_security_group(cls, security_group):
+		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
+		# TODO: make this more generalized, but ec2metadata is usually provided for openstack clouds
+		if platform.system() == 'Darwin':
+			own_security_groups = []
+		else:
+			own_security_groups = cls._call(['ec2metadata', '--security-groups']).output.split('\n')
+		group = cls._get_or_create_security_group(security_group)
+		for rule in group.rules:
+			if (rule.ip_protocol == 'tcp' and
+				int(rule.from_port) <= 22 and
+				int(rule.to_port) >= 22):
+				if rule.ip_range == cidr_ip:
+					cls.logger.debug('Found ssh authorization rule on security group "%s" for ip "%s"' % (security_group, cidr_ip))
+					return
+				elif rule.group['name'] in own_security_groups and rule.group['tenant_id'] == group.tenant_id:
+					cls.logger.debug('Found ssh authorization rule on security group "%s" for security group "%s"' % (security_group, rule.group['name']))
+					return
+		cls.logger.info('Adding ssh authorization rule to security group "%s" for ip "%s"' % (security_group, cidr_ip))
+		cls.CloudClient().ex_create_security_group_rule(group, 'tcp', 22, 22, cidr_ip, None)
+		return group
+
+	@classmethod
+	def _get_or_create_security_group(cls, security_group):
+		client = cls.CloudClient()
+		groups = filter(lambda group: group.name == security_group, client.ex_list_security_groups())
+		if groups:
+			cls.logger.debug('Found existing security group "%s"' % security_group)
+			group = groups[0]
+		else:
+			cls.logger.info('Creating new security group "%s"' % security_group)
+			group = client.ex_create_security_group(security_group, 'Auto-generated Koality verification security group')
+		return group
+
+	@classmethod
 	def from_vm_id(cls, vm_id):
 		try:
 			vm_info = cls.load_vm_info(vm_id)
@@ -97,7 +135,7 @@ class OpenstackVm(VirtualMachine):
 	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
 		try:
 			client = cls.CloudClient()
-			instance = filter(lambda instance: instance.id == instance_id, client.list_nodes())[0]
+			instance = filter(lambda instance: str(instance.id) == str(instance_id), client.list_nodes())[0]
 			vm = cls(vm_id, instance, vm_username)
 			if vm.instance.state == NodeState.REBOOTING:
 				cls.logger.warn("Found VM (%s, %s) in REBOOTING state" % (vm_id, vm.instance.state, instance_id))
@@ -153,7 +191,7 @@ class OpenstackVm(VirtualMachine):
 
 	def rebuild(self, image_id=None):
 		if image_id:
-			image = filter(lambda image: image.id == image_id, self.get_all_images())[0]
+			image = filter(lambda image: str(image.id) == str(image_id), self.get_all_images())[0]
 		else:
 			image = self.get_newest_image()
 		size = self.instance.size
@@ -163,6 +201,9 @@ class OpenstackVm(VirtualMachine):
 				size = self._get_instance_size(flavorId, 'id')
 
 		instance_name = self.instance.name
+
+		security_group_name = self.Settings.security_group
+		security_group = self._validate_security_group(security_group_name)
 
 		self.delete()
 		driver = self.instance.driver
@@ -175,7 +216,8 @@ class OpenstackVm(VirtualMachine):
 		for attempt in xrange(5):
 			try:
 				self.instance = driver.create_node(name=instance_name, image=image, size=size,
-					ex_userdata=self._default_user_data(self.vm_username))
+					ex_userdata=self._default_user_data(self.vm_username),
+					ex_security_groups=[security_group])
 			except:
 				if attempt < 4:
 					eventlet.sleep(3)
