@@ -51,6 +51,9 @@ class Ec2Vm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
 	VM_USERNAME = "lt3"
 
+	CloudClient = Ec2Client.get_client
+	Settings = AwsSettings
+
 	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
 		super(Ec2Vm, self).__init__(vm_id)
 		self.instance = instance
@@ -73,7 +76,7 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
-		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type,
+		instance = cls.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
 			user_data=cls._default_user_data(vm_username)).instances[0]
 		cls._name_instance(instance, name)
@@ -108,7 +111,7 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _get_or_create_security_group(cls, security_group):
-		ec2_client = Ec2Client.get_client()
+		ec2_client = cls.CloudClient()
 		groups = filter(lambda group: group.name == security_group, ec2_client.get_all_security_groups())
 		if groups:
 			cls.logger.debug('Found existing security_group "%s"' % security_group)
@@ -130,7 +133,7 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
 		try:
-			client = Ec2Client.get_client()
+			client = cls.CloudClient()
 			reservations = client.get_all_instances(filters={'instance-id': instance_id})
 			if not reservations:
 				return None
@@ -154,7 +157,7 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _name_instance(cls, instance, name):
-		ec2_client = Ec2Client.get_client()
+		ec2_client = cls.CloudClient()
 		#  Wait until EC2 recognizes that the instance exists
 		while True:
 			if ec2_client.get_all_instances(filters={'instance-id': instance.id}):
@@ -216,7 +219,7 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def get_all_images(cls):
-		return Ec2Client.get_client().get_all_images(
+		return cls.CloudClient().get_all_images(
 			filters={
 				'name': AwsSettings.vm_image_name_prefix + '*',
 				'state': 'available'
@@ -224,7 +227,7 @@ class Ec2Vm(VirtualMachine):
 		)
 
 	def create_image(self, name, description=None):
-		return Ec2Client.get_client().create_image(self.instance.id, name, description)
+		return self.CloudClient().create_image(self.instance.id, name, description)
 
 	def rebuild(self, ami_image_id=None):
 		if not ami_image_id:
@@ -236,7 +239,7 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		self._validate_security_group(security_group)
 
-		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type,
+		self.instance = self.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
 			user_data=self._default_user_data(self.vm_username)).instances[0]
 		self._name_instance(self.instance, instance_name)
@@ -246,7 +249,7 @@ class Ec2Vm(VirtualMachine):
 
 	def delete(self):
 		if 'Name' in self.instance.tags:
-			instances = [reservation.instances[0] for reservation in Ec2Client.get_client().get_all_instances(
+			instances = [reservation.instances[0] for reservation in self.CloudClient().get_all_instances(
 				filters={'tag:Name': self.instance.tags['Name']})]
 			for instance in instances:  # Clean up rogue VMs
 				self._safe_terminate(instance)

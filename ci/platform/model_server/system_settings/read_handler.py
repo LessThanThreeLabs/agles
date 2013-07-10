@@ -56,6 +56,10 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		return WebServerSettings.domain_name
 
 	@AdminApi
+	def get_cloud_provider(self, user_id):
+		return VerificationServerSettings.cloud_provider
+
+	@AdminApi
 	def get_aws_keys(self, user_id):
 		return {
 			'access_key': AwsSettings.aws_access_key_id,

@@ -45,6 +45,7 @@ class OpenstackVm(VirtualMachine):
 	VM_USERNAME = "lt3"
 
 	CloudClient = OpenstackClient.get_client
+	Settings = LibCloudSettings
 
 	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
 		super(OpenstackVm, self).__init__(vm_id)
@@ -65,7 +66,7 @@ class OpenstackVm(VirtualMachine):
 		else:
 			image = cls.get_newest_image()
 		instance_type = instance_type or LibCloudSettings.instance_type
-		size = filter(lambda size: size.id == instance_type, cls.CloudClient().list_sizes())[0]
+		size = cls._get_instance_size(instance_type)
 
 		instance = cls.CloudClient().create_node(name=name, image=image, size=size,
 			ex_userdata=cls._default_user_data(vm_username))
@@ -115,6 +116,10 @@ class OpenstackVm(VirtualMachine):
 		except:
 			return None
 
+	@classmethod
+	def _get_instance_size(cls, instance_type, matching_attribute='id'):
+		return filter(lambda size: getattr(size, matching_attribute) == instance_type, cls.CloudClient().list_sizes())[0]
+
 	def wait_until_ready(self):
 		instance, ip = self.instance.driver.wait_until_running([self.instance])[0]
 		self.instance = instance
@@ -155,7 +160,7 @@ class OpenstackVm(VirtualMachine):
 		if size is None:
 			if 'flavorId' in self.instance.extra:
 				flavorId = self.instance.extra['flavorId']
-				size = filter(lambda size: size.id == flavorId, self.instance.driver.list_sizes())[0]
+				size = self._get_instance_size(flavorId, 'id')
 
 		instance_name = self.instance.name
 

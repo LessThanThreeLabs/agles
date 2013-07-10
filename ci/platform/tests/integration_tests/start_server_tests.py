@@ -55,7 +55,7 @@ class StartServerTests(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, R
 			return retcode is None
 
 		def start_verification_server():
-			start_verification_server_p = subprocess.Popen(['python', '-m', 'scripts.server.start_verification_server', '-t', 'mock'])
+			start_verification_server_p = subprocess.Popen(['python', '-m', 'scripts.server.start_verification_server', '--provider', 'mock'])
 			eventlet.sleep(5)
 			retcode = start_verification_server_p.poll()
 			try:

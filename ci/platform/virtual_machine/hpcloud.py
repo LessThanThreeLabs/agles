@@ -50,6 +50,19 @@ class HpCloudVm(openstack.OpenstackVm):
 		login = "%s@%s" % (self.vm_username, public_ip)
 		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
+	@classmethod
+	def _get_instance_size(cls, instance_type, matching_attribute='name'):
+		return filter(lambda size: getattr(size, matching_attribute) == instance_type, cls.CloudClient().list_sizes())[0]
+
 
 class InstanceTypes(openstack.InstanceTypes):
 	CloudClient = HpCloudClient.get_client
+
+	@classmethod
+	def get_allowed_instance_types(cls):
+		largest_instance_type = LibCloudSettings.largest_instance_type
+		ordered_types = map(lambda size: size.name, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		if largest_instance_type in ordered_types:
+			return ordered_types[:ordered_types.index(largest_instance_type) + 1]
+		else:
+			return ordered_types

@@ -93,6 +93,10 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		WebServerSettings.domain_name = domain_name
 
 	@AdminApi
+	def set_cloud_provider(self, user_id, cloud_provider):
+		VerificationServerSettings.cloud_provider = cloud_provider
+
+	@AdminApi
 	def set_aws_keys(self, user_id, access_key, secret_key, validate=True):
 		if validate and not Ec2Client.validate_credentials(access_key, secret_key):
 			raise InvalidConfigurationException(access_key, secret_key)
