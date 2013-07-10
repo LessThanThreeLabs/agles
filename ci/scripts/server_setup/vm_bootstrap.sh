@@ -314,6 +314,12 @@ function vm_setup () {
 	popd
 	rm -rf koality-provisioner
 
+	clone github.com/LessThanThreeLabs/libcloud.git libcloud
+	pushd libcloud
+	python setup.py install
+	popd
+	rm -rf libcloud
+
 	clone github.com/LessThanThreeLabs/exporter.git exporter
 	pushd exporter
 	pip install -r requirements.txt
