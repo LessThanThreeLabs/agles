@@ -115,13 +115,25 @@ class LicensePermissionsHandler(object):
 				StoreSettings.max_repository_count = max_repository_count
 				with model_server.rpc_connect('repos', 'delete') as repos_delete_rpc:
 					repos_delete_rpc.truncate_repositories(max_repository_count)
+			else:
+				StoreSettings.max_repository_count = None
+
+		def handle_admin_api_allowed(value):
+			if value is None:
+				DeploymentSettings.admin_api_active = True
+			else:
+				DeploymentSettings.admin_api_active = bool(value)
 
 		self._permissions_handlers = {
 			'largestInstanceType': handle_largest_instance_type,
 			'parallelizationCap': handle_parallelization_cap,
-			'maxRepositoryCount': handle_max_repository_count
+			'maxRepositoryCount': handle_max_repository_count,
+			'adminApiAllowed': handle_admin_api_allowed
 		}
 
 	def handle_permissions(self, permissions):
-		for key, value in permissions.items():
-			self._permissions_handlers.get(key, lambda value: None)(value)
+		for key, handler in self._permissions_handlers.items():
+			try:
+				handler(permissions.get(key))
+			except:
+				self.logger.error('Error while handling license permissions: %s' % permissions, exc_info=True)
