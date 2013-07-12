@@ -219,16 +219,18 @@ class OpenstackVm(VirtualMachine):
 		security_group = self._validate_security_group(security_group_name)
 
 		self.delete()
-		driver = self.instance.driver
+
+		# Use a new connection to avoid connections becoming stale and unauthorized
+		client = self.CloudClient()
 		old_instance = self.instance
 		instance_id = old_instance.id
 		while old_instance is not None and old_instance.state != NodeState.TERMINATED:
-			instances = filter(lambda instance: instance.id == instance_id, driver.list_nodes())
+			instances = filter(lambda instance: instance.id == instance_id, client.list_nodes())
 			old_instance = instances[0] if instances else None
 
 		for attempt in xrange(5):
 			try:
-				self.instance = driver.create_node(name=instance_name, image=image, size=size,
+				self.instance = client.create_node(name=instance_name, image=image, size=size,
 					ex_userdata=self._default_user_data(self.vm_username),
 					ex_security_groups=[security_group])
 			except:
