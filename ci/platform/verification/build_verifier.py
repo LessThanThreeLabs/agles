@@ -1,5 +1,4 @@
 import os
-import socket
 import yaml
 
 import model_server

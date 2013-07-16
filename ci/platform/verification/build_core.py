@@ -1,3 +1,5 @@
+import sys
+
 import yaml
 
 from model_server.build_consoles import ConsoleType
@@ -120,11 +122,16 @@ class CloudBuildCore(VirtualMachineBuildCore):
 		super(CloudBuildCore, self).__init__(cloud_vm, uri_translator)
 
 	def setup(self):
-		while True:
+		max_attempts = 8
+		for attempt in range(max_attempts):
 			try:
 				self.virtual_machine.wait_until_ready()
 			except:
-				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_id, self.virtual_machine.instance.id), exc_info=True)
+				exc_info = sys.exc_info()
+				if attempt == max_attempts - 1:
+					self.logger.error("Failed to set up virtual machine (%s, %s)" % (self.virtual_machine.vm_id, self.virtual_machine.instance.id), exc_info=exc_info)
+					raise exc_info
+				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_id, self.virtual_machine.instance.id), exc_info=exc_info)
 			else:
 				break
 

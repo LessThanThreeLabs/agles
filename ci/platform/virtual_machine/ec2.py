@@ -3,6 +3,7 @@ import pipes
 import platform
 import re
 import socket
+import sys
 
 import boto.ec2
 import eventlet
@@ -184,20 +185,26 @@ class Ec2Vm(VirtualMachine):
 				eventlet.sleep(1)  # Sometimes EC2 doesn't recognize that an instance exists yet
 
 	def wait_until_ready(self):
-		self.instance.update()
-		while not self.instance.state == 'running':
-			eventlet.sleep(3)
+		def handle_error(exc_info=None):
+			self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_id, self.instance.id), exc_info=exc_info)
+			self.rebuild()
+
+		try:
 			self.instance.update()
-			if self.instance.state == 'terminated' or self.instance.state == 'stopped':
-				self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_id, self.instance.id))
-				self.rebuild()
-		for remaining_attempts in range(24, 0, -1):
-			if remaining_attempts <= 3:
-				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
-			if self.ssh_call("true", timeout=30).returncode == 0:
-				return
-			eventlet.sleep(3)
-			self.instance.update()
+			while not self.instance.state == 'running':
+				eventlet.sleep(3)
+				self.instance.update()
+				if self.instance.state in ['stopped', 'terminated']:
+					handle_error()
+			for remaining_attempts in reversed(range(6)):
+				if remaining_attempts <= 2:
+					self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
+				if self.ssh_call("true", timeout=30).returncode == 0:
+					return
+				eventlet.sleep(3)
+				self.instance.update()
+		except:
+			handle_error(sys.exc_info())
 		# Failed to ssh into machine, try again
 		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
 		self.rebuild()
