@@ -172,17 +172,22 @@ class OpenstackVm(VirtualMachine):
 		return filter(lambda size: getattr(size, matching_attribute) == instance_type, cls.CloudClient().list_sizes())[0]
 
 	def wait_until_ready(self):
-		instance, ip = self.instance.driver.wait_until_running([self.instance])[0]
-		self.instance = instance
-		for remaining_attempts in range(24, 0, -1):
-			if remaining_attempts <= 3:
-				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
-			if self.ssh_call("true").returncode == 0:
-				return
-			eventlet.sleep(3)
-		# Failed to ssh into machine, try again
-		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
-		self.rebuild()
+		try:
+			instance, ip = self.instance.driver.wait_until_running([self.instance], timeout=240, ssh_interface='private_ips')[0]
+		except:
+			self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_id, self.instance.id), exc_info=True)
+			self.rebuild()
+		else:
+			self.instance = instance
+			for remaining_attempts in reversed(range(6)):
+				if remaining_attempts <= 2:
+					self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
+				if self.ssh_call("true", timeout=30).returncode == 0:
+					return
+				eventlet.sleep(3)
+			# Failed to ssh into machine, try again
+			self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
+			self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,

@@ -205,9 +205,10 @@ class Ec2Vm(VirtualMachine):
 				self.instance.update()
 		except:
 			handle_error(sys.exc_info())
-		# Failed to ssh into machine, try again
-		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
-		self.rebuild()
+		else:
+			# Failed to ssh into machine, try again
+			self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
+			self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
