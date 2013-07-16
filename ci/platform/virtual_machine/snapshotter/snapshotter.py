@@ -15,17 +15,18 @@ from virtual_machine.openstack import OpenstackVm
 
 @Logged()
 class SnapshotDaemon(object):
-	def __init__(self, snapshotter, next_snapshot, snapshot_frequency):
+	def __init__(self, snapshotter, first_snapshot_time, snapshot_period):
 		self.snapshotter = snapshotter
-		self.next_snapshot = next_snapshot
-		self.snapshot_frequency = snapshot_frequency
+		self.first_snapshot_time = first_snapshot_time
+		self.snapshot_period = snapshot_period
 		self.last_snapshot_time = None
 
 	def run(self):
 		while True:
 			next_snapshot_time = self.next_snapshot_time()
-			self.logger.debug('Taking next scheduled snapshot at %s' % next_snapshot_time)
+			self.logger.info('Taking next scheduled snapshot at %s' % next_snapshot_time)
 			self.sleep_until(next_snapshot_time)
+			self.last_snapshot_time = next_snapshot_time
 			try:
 				self.logger.info('Taking scheduled snapshot')
 				self.snapshotter.snapshot()
@@ -40,16 +41,16 @@ class SnapshotDaemon(object):
 		time.sleep((wake_time - datetime.datetime.now()).total_seconds())
 
 	def next_snapshot_time(self):
-		now = datetime.datetime.now()
-		then = datetime.datetime(now.year, now.month, now.day, 3)
-		if now.hour >= 3:
-			then += datetime.timedelta(days=1)
-		return then
+		if self.last_snapshot_time is None:
+			return self.first_snapshot_time
+		else:
+			return datetime.datetime(self.last_snapshot_time) + datetime.timedelta(seconds=self.snapshot_period)
 
 
 @Logged()
 class Snapshotter(object):
 	def __init__(self, vm_class):
+		assert issubclass(vm_class, (Ec2Vm, OpenstackVm))
 		self.vm_class = vm_class
 
 	def snapshot(self):
@@ -67,10 +68,10 @@ class Snapshotter(object):
 			return
 
 		with model_server.rpc_connect('changes', 'read') as model_rpc:
-			changes = model_rpc.get_changes_between_timestamps(VerificationUser.id, map(lambda repo: repo['id'], repositories), self._one_week_ago())
+			changes = model_rpc.get_changes_between_timestamps(VerificationUser.id, map(lambda repo: repo['id'], repositories), self._30_days_ago())
 
 		if not changes:
-			self.logger.warn('No changes found in the last week, skipping snapshotting.')
+			self.logger.warn('No changes found in the last 30 days, skipping snapshotting.')
 			return
 
 		self.logger.info('Creating new instance named "%s" based on image "%s"' % (instance_name, newest_global_image.name))
@@ -79,18 +80,15 @@ class Snapshotter(object):
 		try:
 			virtual_machine.wait_until_ready()
 
-			repo_change_counter = Counter(map(lambda change: change['repo_id'], changes))
-			primary_repository_id = repo_change_counter.most_common(1)[0][0]
-			primary_repository = filter(lambda repo: repo['id'] == primary_repository_id, repositories)[0]
-			self.logger.debug('Primary repository is "%s"' % primary_repository['name'])
-
-			branch_counter = Counter(map(lambda change: change['merge_target'], filter(lambda change: change['repo_id'] == primary_repository_id, changes)))
-			primary_branch = branch_counter.most_common(1)[0][0]
-			self.logger.debug('Primary branch is "%s"' % primary_branch)
-
 			uri_translator = RepositoryUriTranslator()
 			self.clone_repositories(virtual_machine, repositories, uri_translator)
-			self.provision_for_branch(virtual_machine, primary_repository, primary_branch, uri_translator)
+
+			repo_change_counter = Counter(map(lambda change: change['repo_id'], changes))
+
+			# Provision in order of increasing repository push frequency
+			for repository_id in map(lambda count: count[0], reversed(repo_change_counter.most_common())):
+				repository = filter(lambda repo: repo['id'] == repository_id, repositories)[0]
+				self.provision_for_repository(virtual_machine, repository, changes, uri_translator)
 
 			new_image_name = self.get_image_name(snapshot_version)
 
@@ -103,15 +101,22 @@ class Snapshotter(object):
 			virtual_machine.delete()
 
 	def clone_repositories(self, virtual_machine, repositories, uri_translator):
-		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R lt3:lt3 /repositories/cached')
+		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
 		for repository in repositories:
-			self.logger.debug('Cloning repository "%s"' % repository['name'])
+			self.logger.info('Cloning repository "%s"' % repository['name'])
 			if virtual_machine.remote_clone(uri_translator.translate(repository['uri'])).returncode != 0:
 				raise Exception('Failed to clone repository "%s"' % repository['name'])
 			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv source /repositories/cached/%s' % (repository['name'], repository['name']))
 
+	def provision_for_repository(self, virtual_machine, repository, changes, uri_translator):
+		branch_counter = Counter(map(lambda change: change['merge_target'], filter(lambda change: change['repo_id'] == repository['id'], changes)))
+		if not branch_counter.most_common():
+			return
+		primary_branch = branch_counter.most_common(1)[0][0]
+		self.provision_for_branch(virtual_machine, repository, primary_branch, uri_translator)
+
 	def provision_for_branch(self, virtual_machine, repository, branch, uri_translator):
-		self.logger.debug('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
+		self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
 		if virtual_machine.remote_checkout(repository['name'], uri_translator.translate(repository['uri']), branch).returncode != 0:
 			raise Exception('Failed to checkout branch "%s" for repository "%s%' % (branch, repository['name']))
 		provision_results = virtual_machine.provision(StoreSettings.ssh_private_key)
@@ -200,5 +205,5 @@ class Snapshotter(object):
 			self.logger.info('Removing snapshot %s' % image.name)
 			delete_image(image)
 
-	def _one_week_ago(self):
-		return int(time.time()) - 60 * 60 * 24 * 7 * 4
+	def _30_days_ago(self):
+		return int(time.time()) - 60 * 60 * 24 * 30

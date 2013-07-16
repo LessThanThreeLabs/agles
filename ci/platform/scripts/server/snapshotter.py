@@ -59,8 +59,8 @@ def snapshot(snapshotter):
 
 def run_snapshot_daemon(snapshotter):
 	next_snapshot = _next_3am()
-	snapshot_frequency = 60 * 60 * 24  # DAILY
-	snapshot_daemon = SnapshotDaemon(snapshotter, next_snapshot, snapshot_frequency)
+	snapshot_period = 60 * 60 * 24  # DAILY
+	snapshot_daemon = SnapshotDaemon(snapshotter, next_snapshot, snapshot_period)
 	snapshot_daemon.run()
 
 
