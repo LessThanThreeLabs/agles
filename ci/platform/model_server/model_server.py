@@ -63,12 +63,11 @@ class ModelServer(object):
 		UsersDeleteHandler
 	]
 
-	def __init__(self, channel=None):
-		if channel:
-			self.channel = channel
+	def __init__(self, connection=None):
+		if connection:
+			self.connection = connection
 		else:
-			connection = Connection(RabbitSettings.kombu_connection_info)
-			self.channel = connection.channel()
+			self.connection = Connection(RabbitSettings.kombu_connection_info)
 
 	def start(self, license_verifier=True):
 		greenlets_started_event = eventlet.event.Event()
@@ -86,14 +85,14 @@ class ModelServer(object):
 				event.send_exception(*args)
 
 		def ioloop_link(greenlet):
-			self.channel.connection.close()
+			self.connection.close()
 			try:
 				greenlet.wait()
 			except:
 				send_if_unset(model_server_start_event, *sys.exc_info())
 			send_if_unset(model_server_start_event, ModelServerError)
 
-		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.channel),
+		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.connection.channel()),
 			self.rpc_handler_classes)
 		ioloop_greenlet = eventlet.spawn(self._ioloop)
 		ioloop_greenlet.link(ioloop_link)
@@ -123,7 +122,7 @@ class ModelServer(object):
 	def _ioloop(self):
 		try:
 			while True:
-				self.channel.connection.drain_events()
+				self.connection.drain_events()
 		except:
 			self.logger.critical("Model server IOloop exited", exc_info=True)
 			raise
