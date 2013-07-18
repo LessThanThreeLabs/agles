@@ -14,6 +14,7 @@ user = Table('user', metadata,
 	Column('last_name', String, nullable=False),
 	Column('password_hash', String(88), nullable=False),
 	Column('salt', String(24), nullable=False),
+	Column('github_oauth', String, nullable=True),
 	Column('admin', Boolean, nullable=False, default=False),
 	Column('created', Integer, nullable=False),
 	Column('deleted', Integer, nullable=False, default=0),  # when deleted, set this column to the id
