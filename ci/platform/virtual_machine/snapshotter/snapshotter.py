@@ -38,13 +38,15 @@ class SnapshotDaemon(object):
 				self.logger.error('Failed to remove stale snapshots', exc_info=True)
 
 	def sleep_until(self, wake_time):
-		time.sleep((wake_time - datetime.datetime.now()).total_seconds())
+		sleep_time = (wake_time - datetime.datetime.now()).total_seconds()
+		sleep_time = max(sleep_time, 0)
+		time.sleep(sleep_time)
 
 	def next_snapshot_time(self):
 		if self.last_snapshot_time is None:
 			return self.first_snapshot_time
 		else:
-			return datetime.datetime(self.last_snapshot_time) + datetime.timedelta(seconds=self.snapshot_period)
+			return self.last_snapshot_time + datetime.timedelta(seconds=self.snapshot_period)
 
 
 @Logged()
