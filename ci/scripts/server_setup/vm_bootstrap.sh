@@ -1,8 +1,19 @@
 #!/bin/bash
 
+set -o nounset
+set -o errexit
+
 function platform_configure () {
 	if [ $(which apt-get) ]; then
 		PACKAGE_MANAGER='apt-get'
+		sudo locale-gen en_US.UTF-8
+		sudo update-locale LANG=en_US.UTF-8
+		sudo su -c "echo 127.0.0.1 localhost $(hostname) >> /etc/hosts"
+		if [ -f /sbin/initctl ]; then
+			sudo rm /sbin/initctl
+		fi
+		sudo dpkg-divert --local --rename --add /sbin/initctl
+		sudo ln -s /bin/true /sbin/initctl
 	elif [ $(which yum) ]; then
 		PACKAGE_MANAGER='yum'
 		sudo yum install -y wget
@@ -20,16 +31,14 @@ function platform_configure () {
 }
 
 function check_sudo () {
-	sudo true
-	if [ $? -ne "0" ]; then
+	sudo true || {
 		echo "Failed to get root permissions"
 		exit 1
-	fi
+	}
 }
 
 function add_user () {
-	cat /etc/passwd | grep $1 > /dev/null
-	if [ $? -ne "0" ]; then
+	cat /etc/passwd | grep $1 > /dev/null || {
 		echo "Creating user $1"
 		read -s -p "Enter password for user $1: " password
 		if [ $PACKAGE_MANAGER == 'apt-get' ]; then
@@ -39,7 +48,7 @@ function add_user () {
 		fi
 		echo -e "$password\n$password" | sudo passwd "$1"
 		echo "$1 ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers >/dev/null
-	fi
+	}
 }
 
 function bootstrap () {
@@ -63,17 +72,19 @@ function keygen () {
 }
 
 function setup_path () {
-	cat ~/.bash_profile | grep "/usr/local/bin" > /dev/null
-	if [ $? -ne "0" ]; then
+	set +o errexit
+	cat ~/.bash_profile | grep "/usr/local/bin" > /dev/null || {
 		echo "PATH=/usr/local/bin:\$PATH" >> ~/.bash_profile
-	fi
+	}
 
-	cat ~/.bashrc | grep "/usr/local/bin" > /dev/null
-	if [ $? -ne "0" ]; then
+	cat ~/.bashrc | grep "/usr/local/bin" > /dev/null || {
 		echo "PATH=/usr/local/bin:\$PATH" >> ~/.bashrc
-	fi
+	}
+	set -o errexit
 
+	set +o nounset
 	source ~/.bashrc
+	set -o nounset
 }
 
 function setup_rabbitmq () {
@@ -90,7 +101,7 @@ function setup_rabbitmq () {
 			rm rabbitmq-server-3.1.2-1.noarch.rpm
 		fi
 	fi
-	sudo mkdir /etc/rabbitmq/rabbitmq.conf.d
+	sudo mkdir -p /etc/rabbitmq/rabbitmq.conf.d
 	sudo rabbitmq-plugins enable rabbitmq_management
 	sudo service rabbitmq-server restart
 	wget --http-user=guest --http-password=guest localhost:55672/cli/rabbitmqadmin
@@ -130,8 +141,10 @@ function setup_python () {
 	makedir ~/virtualenvs
 	if [ ! $(which pythonz) ]; then
 		curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | sudo bash
+		set +o nounset
 		source ~/.bashrc
 		source /etc/profile
+		set -o nounset
 	fi
 	for p in 2.5.6 2.6.8 2.7.5 3.2.5 3.3.2; do
 		if [ ! -f "$PYTHONZ_ROOT/pythons/*$p*/python" ]; then
@@ -148,31 +161,29 @@ function setup_python () {
 }
 
 function setup_ruby () {
-	which rvm > /dev/null
-	if [ $? -ne "0" ]; then
+	set +o nounset
+	which rvm > /dev/null || {
 		curl -L https://get.rvm.io | bash -s stable
 		source .bash_profile
-	fi
+	}
 	rvm get stable
 	rvm install 1.9.3
 	rvm --default use 1.9.3
-	cat ~/.bash_profile | grep "export rvmsudo_secure_path=1" > /dev/null
-	if [ $? -ne "0" ]; then
+	cat ~/.bash_profile | grep "export rvmsudo_secure_path=1" > /dev/null || {
 		echo "export rvmsudo_secure_path=1" >> ~/.bash_profile
-	fi
-	cat ~/.bashrc | grep "export rvmsudo_secure_path=1" > /dev/null
-	if [ $? -ne "0" ]; then
+	}
+	cat ~/.bashrc | grep "export rvmsudo_secure_path=1" > /dev/null || {
 		echo "export rvmsudo_secure_path=1" >> ~/.bashrc
-	fi
+	}
+	set -o nounset
 }
 
 function setup_nodejs () {
 	makedir ~/nvm
 	wget -P ~/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
-	cat ~/.bash_profile | grep "source ~/nvm/nvm.sh" > /dev/null
-	if [ $? -ne "0" ]; then
+	cat ~/.bash_profile | grep "source ~/nvm/nvm.sh" > /dev/null || {
 		echo "source ~/nvm/nvm.sh" >> ~/.bash_profile
-	fi
+	}
 }
 
 function setup_java () {
@@ -196,7 +207,7 @@ function setup_java () {
 	if [ ! $(which sbt) ]; then
 		if [ $PACKAGE_MANAGER == 'apt-get' ]; then
 			wget http://scalasbt.artifactoryonline.com/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.12.4/sbt.deb
-			sudo dpkg -i sbt.deb
+			sudo dpkg -i sbt.deb || sudo apt-get install -f -y
 			rm sbt.deb
 		elif [ $PACKAGE_MANAGER == 'yum' ]; then
 			wget http://scalasbt.artifactoryonline.com/scalasbt/sbt-native-packages/org/scala-sbt/sbt/0.12.4/sbt.rpm
@@ -230,10 +241,10 @@ function prompt_github_credentials () {
 		GITHUB_USERNAME=$(([ $GITHUB_USERNAME ] && echo $GITHUB_USERNAME) || ([ $gh_username ] && echo $gh_username))
 		GITHUB_PASSWORD=$(([ $GITHUB_PASSWORD ] && echo $GITHUB_PASSWORD) || ([ $gh_password ] && echo $gh_password))
 	fi
-	if [ -z $GITHUB_USERNAME ]; then
+	if [ -z ${GITHUB_USERNAME:-} ]; then
 		read -p "Github username: " GITHUB_USERNAME
 	fi
-	if [ -z $GITHUB_PASSWORD ]; then
+	if [ -z ${GITHUB_PASSWORD:-} ]; then
 		read -s -p "Github password: " GITHUB_PASSWORD
 	fi
 	echo -e "$GITHUB_USERNAME\n$GITHUB_PASSWORD" > ~/.gh
@@ -278,7 +289,11 @@ function vm_setup () {
 	setup_ruby
 	setup_nodejs
 
-	sudo $PACKAGE_MANAGER install -y python-dev python-devel
+	if [ $PACKAGE_MANAGER == 'apt-get' ]; then
+		sudo apt-get install -y python-dev
+	elif [ $PACKAGE_MANAGER == 'yum' ]; then
+		sudo yum install -y python-devel
+	fi
 	sudo pip install virtualenv
 
 	# mysql must be explicitly installed noninteractively
@@ -296,7 +311,9 @@ function vm_setup () {
 	setup_java
 
 	# TODO: make this use our custom python
+	set +o nounset
 	source ~/virtualenvs/2.7/bin/activate
+	set -o nounset
 
 	clone github.com/LessThanThreeLabs/koality-streaming-executor.git koality-streaming-executor
 	pushd koality-streaming-executor
@@ -338,8 +355,8 @@ function build_vm_image () {
 	read -p 'Please construct a VM image named "precise64_box_1", then press enter to continue this script'
 }
 
-
-case "$1" in
+ARG1=${1:-}
+case "$ARG1" in
 	_vm_setup )
 		vm_setup ;;
 	* )
