@@ -57,9 +57,7 @@ class Ec2Vm(VirtualMachine):
 	Settings = AwsSettings
 
 	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
-		super(Ec2Vm, self).__init__(vm_id)
-		self.instance = instance
-		self.vm_username = vm_username
+		super(Ec2Vm, self).__init__(vm_id, instance, vm_username)
 		self.store_vm_info()
 
 	@classmethod
@@ -148,7 +146,7 @@ class Ec2Vm(VirtualMachine):
 				return None
 			vm = Ec2Vm(vm_id, reservations[0].instances[0], vm_username)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
-				cls.logger.warn("Found VM (%s, %s) in %s state" % (vm_id, vm.instance.state, instance_id))
+				cls.logger.warn("Found VM %s in %s state" % (vm, vm.instance.state))
 				vm.delete()
 				return None
 			elif vm.instance.state == 'shutting-down' or vm.instance.state == 'terminated':
@@ -157,7 +155,7 @@ class Ec2Vm(VirtualMachine):
 				vm.delete()
 				return None
 			elif vm.instance.state not in ('running', 'pending'):
-				cls.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_id, instance_id, vm.instance.state))
+				cls.logger.critical("Found VM %s in unexpected %s state" % (vm, vm.instance.state))
 				vm.delete()
 				return None
 			return vm
@@ -186,7 +184,7 @@ class Ec2Vm(VirtualMachine):
 
 	def wait_until_ready(self):
 		def handle_error(exc_info=None):
-			self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_id, self.instance.id), exc_info=exc_info)
+			self.logger.warn("VM %s in error state while waiting for startup" % self, exc_info=exc_info)
 			self.rebuild()
 
 		try:
@@ -198,7 +196,7 @@ class Ec2Vm(VirtualMachine):
 					handle_error()
 			for remaining_attempts in reversed(range(6)):
 				if remaining_attempts <= 2:
-					self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
+					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
 				if self.ssh_call("true", timeout=30).returncode == 0:
 					return
 				eventlet.sleep(3)
@@ -207,7 +205,7 @@ class Ec2Vm(VirtualMachine):
 			handle_error(sys.exc_info())
 		else:
 			# Failed to ssh into machine, try again
-			self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
+			self.logger.warn("Unable to ssh into VM %s" % self)
 			self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
@@ -245,9 +243,8 @@ class Ec2Vm(VirtualMachine):
 	def create_image(self, name, description=None):
 		return self.CloudClient().create_image(self.instance.id, name, description)
 
-	def rebuild(self, ami_image_id=None):
-		if not ami_image_id:
-			ami_image_id = self.get_newest_image().id
+	def rebuild(self):
+		ami_image_id = self.get_newest_image().id
 		instance_type = self.instance.instance_type
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')

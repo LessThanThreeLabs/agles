@@ -1,5 +1,3 @@
-import os
-
 import eventlet
 
 from eventlet import queue
@@ -8,6 +6,7 @@ from build_core import CloudBuildCore
 from build_verifier import BuildVerifier
 from settings.verification_server import VerificationServerSettings
 from util.log import Logged
+from virtual_machine.docker import DockerVm
 
 
 @Logged()
@@ -210,3 +209,13 @@ class VirtualMachineVerifierPool(VerifierPool):
 
 	def spawn_virtual_machine(self, virtual_machine_number):
 		return self.virtual_machine_class.from_id_or_construct(virtual_machine_number)
+
+
+class DockerVirtualMachineVerifierPool(VirtualMachineVerifierPool):
+	def __init__(self, virtual_machine_class, directory, max_verifiers=None, min_unallocated=None, uri_translator=None):
+		super(DockerVirtualMachineVerifierPool, self).__init__(virtual_machine_class, directory, max_verifiers, min_unallocated, uri_translator)
+
+	def spawn_verifier(self, verifier_number):
+		virtual_machine = self.spawn_virtual_machine(verifier_number)
+		docker_vm = DockerVm(virtual_machine)
+		return BuildVerifier(CloudBuildCore(docker_vm, self.uri_translator))

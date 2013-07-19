@@ -47,9 +47,7 @@ class OpenstackVm(VirtualMachine):
 	Settings = LibCloudSettings
 
 	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
-		super(OpenstackVm, self).__init__(vm_id)
-		self.instance = instance
-		self.vm_username = vm_username
+		super(OpenstackVm, self).__init__(vm_id, instance, vm_username)
 		self.store_vm_info()
 
 	@classmethod
@@ -151,7 +149,7 @@ class OpenstackVm(VirtualMachine):
 			instance = filter(lambda instance: str(instance.id) == str(instance_id), client.list_nodes())[0]
 			vm = cls(vm_id, instance, vm_username)
 			if vm.instance.state == NodeState.REBOOTING:
-				cls.logger.warn("Found VM (%s, %s) in REBOOTING state" % (vm_id, vm.instance.state, instance_id))
+				cls.logger.warn("Found VM %s in REBOOTING state" % (vm, instance_id))
 				vm.delete()
 				return None
 			elif vm.instance.state == NodeState.TERMINATED:
@@ -160,7 +158,7 @@ class OpenstackVm(VirtualMachine):
 				vm.delete()
 				return None
 			elif vm.instance.state not in (NodeState.RUNNING, NodeState.PENDING):
-				cls.logger.critical("Found VM (%s, %s) in unexpected %s state.\nState map: %s" % (vm_id, instance_id, vm.instance.state, client.NODE_STATE_MAP))
+				cls.logger.critical("Found VM %s in unexpected %s state.\nState map: %s" % (vm, vm.instance.state, client.NODE_STATE_MAP))
 				vm.delete()
 				return None
 			return vm
@@ -175,18 +173,18 @@ class OpenstackVm(VirtualMachine):
 		try:
 			instance, ip = self.instance.driver.wait_until_running([self.instance], timeout=240, ssh_interface='private_ips')[0]
 		except:
-			self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_id, self.instance.id), exc_info=True)
+			self.logger.warn("VM %s in error state while waiting for startup" % self, exc_info=True)
 			self.rebuild()
 		else:
 			self.instance = instance
 			for remaining_attempts in reversed(range(6)):
 				if remaining_attempts <= 2:
-					self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
+					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
 				if self.ssh_call("true", timeout=30).returncode == 0:
 					return
 				eventlet.sleep(3)
 			# Failed to ssh into machine, try again
-			self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
+			self.logger.warn("Unable to ssh into VM %s" % self)
 			self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
@@ -207,11 +205,8 @@ class OpenstackVm(VirtualMachine):
 	def create_image(self, name, description=None):
 		self.instance.driver.ex_save_image(self.instance, name, metadata={'description': description})
 
-	def rebuild(self, image_id=None):
-		if image_id:
-			image = filter(lambda image: str(image.id) == str(image_id), self.get_all_images())[0]
-		else:
-			image = self.get_newest_image()
+	def rebuild(self):
+		image = self.get_newest_image()
 		size = self.instance.size
 		if size is None:
 			if 'flavorId' in self.instance.extra:

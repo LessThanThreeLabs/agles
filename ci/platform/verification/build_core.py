@@ -129,9 +129,9 @@ class CloudBuildCore(VirtualMachineBuildCore):
 			except:
 				exc_info = sys.exc_info()
 				if attempt == max_attempts - 1:
-					self.logger.error("Failed to set up virtual machine (%s, %s)" % (self.virtual_machine.vm_id, self.virtual_machine.instance.id), exc_info=exc_info)
+					self.logger.error("Failed to set up virtual machine %s" % self.virtual_machine, exc_info=exc_info)
 					raise exc_info
-				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_id, self.virtual_machine.instance.id), exc_info=exc_info)
+				self.logger.warn("Failed to set up virtual machine %s, trying again" % self.virtual_machine, exc_info=exc_info)
 			else:
 				break
 
