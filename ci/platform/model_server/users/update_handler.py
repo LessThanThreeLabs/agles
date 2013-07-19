@@ -14,17 +14,30 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(UsersUpdateHandler, self).__init__("users", "update")
 
-	def add_ssh_pubkey(self, user_id, alias, ssh_key):
-		ssh_key = " ".join(ssh_key.split()[:2])  # Retain only type and key
-		ssh_pubkey = schema.ssh_pubkey
+	def add_ssh_pubkeys(self, user_id, alias_to_pubkey_map):
 		timestamp = int(time.time())
-		ins = ssh_pubkey.insert().values(user_id=user_id, alias=alias, ssh_key=ssh_key, timestamp=timestamp)
+		errors = []
+		ids = []
+		for alias, pubkey in alias_to_pubkey_map.items():
+			try:
+				ids.append(self._add_ssh_pubkey(user_id, alias, pubkey, timestamp))
+			except (KeyAlreadyInUseError, AliasAlreadyInUseError) as e:
+				errors.append(e)
+		if len(errors) > 0:
+			raise errors[0]
+		else:
+			return ids
+
+	def _add_ssh_pubkey(self, user_id, alias, pubkey, timestamp):
+		pubkey = ' '.join(pubkey.split()[:2])
+		ssh_pubkey = schema.ssh_pubkey
+		ins = ssh_pubkey.insert().values(user_id=user_id, alias=alias, ssh_key=pubkey, timestamp=timestamp)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			try:
 				result = sqlconn.execute(ins)
 			except IntegrityError:
-				if sqlconn.execute(ssh_pubkey.select().where(ssh_pubkey.c.ssh_key == ssh_key)).first():
-					raise KeyAlreadyInUseError(ssh_key)
+				if sqlconn.execute(ssh_pubkey.select().where(ssh_pubkey.c.ssh_key == pubkey)).first():
+					raise KeyAlreadyInUseError(pubkey)
 				if sqlconn.execute(ssh_pubkey.select().where(
 					and_(
 						ssh_pubkey.c.user_id == user_id,
@@ -32,7 +45,7 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 					raise AliasAlreadyInUseError("user_id: %s, alias: %s" % (user_id, alias))
 				raise
 		pubkey_id = result.inserted_primary_key[0]
-		self.publish_event("users", user_id, "ssh pubkey added", id=pubkey_id, alias=alias, ssh_key=ssh_key, timestamp=timestamp)
+		self.publish_event("users", user_id, "ssh pubkey added", id=pubkey_id, alias=alias, ssh_key=pubkey, timestamp=timestamp)
 		return pubkey_id
 
 	def remove_ssh_pubkey(self, user_id, key_id):
