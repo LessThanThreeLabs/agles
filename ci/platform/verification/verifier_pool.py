@@ -50,7 +50,7 @@ class VerifierPool(object):
 		old_max = self._get_max_verifiers()
 		self.max_verifiers = max_verifiers
 		self.min_unallocated = min_unallocated
-		self._decrease_pool_size(old_max)
+		self._trim_pool_size(old_max)
 		self._increase_pool_size()
 		self._fill_to_min_unallocated()
 		if self._initialize_continuation:
@@ -93,6 +93,7 @@ class VerifierPool(object):
 		slot = self._get_slot(verifier)
 		self.unallocated_slots.append(slot)
 		self.allocated_slots.remove(slot)
+		self._trim_pool_size()
 
 	def remove(self, verifier):
 		slot = self._get_slot(verifier)
@@ -159,9 +160,12 @@ class VerifierPool(object):
 			else:
 				break
 
-	def _decrease_pool_size(self, old_max):
+	def _trim_pool_size(self, old_max=None):
 		new_min = self._get_min_unallocated()
 		new_max = self._get_max_verifiers()
+
+		if old_max is None:
+			old_max = new_max
 
 		for i in xrange(new_min, old_max):
 			if i >= new_max and i in set(self.free_slots.queue):
@@ -198,9 +202,8 @@ class VerifierPool(object):
 
 
 class VirtualMachineVerifierPool(VerifierPool):
-	def __init__(self, virtual_machine_class, directory, max_verifiers=None, min_unallocated=None, uri_translator=None):
+	def __init__(self, virtual_machine_class, max_verifiers=None, min_unallocated=None, uri_translator=None):
 		self.virtual_machine_class = virtual_machine_class
-		self.directory = directory
 		super(VirtualMachineVerifierPool, self).__init__(max_verifiers, min_unallocated, uri_translator)
 
 	def spawn_verifier(self, verifier_number):
@@ -212,10 +215,14 @@ class VirtualMachineVerifierPool(VerifierPool):
 
 
 class DockerVirtualMachineVerifierPool(VirtualMachineVerifierPool):
-	def __init__(self, virtual_machine_class, directory, max_verifiers=None, min_unallocated=None, uri_translator=None):
-		super(DockerVirtualMachineVerifierPool, self).__init__(virtual_machine_class, directory, max_verifiers, min_unallocated, uri_translator)
+	def __init__(self, virtual_machine_class, max_verifiers=None, min_unallocated=None, uri_translator=None):
+		super(DockerVirtualMachineVerifierPool, self).__init__(virtual_machine_class, max_verifiers, min_unallocated, uri_translator)
 
 	def spawn_verifier(self, verifier_number):
 		virtual_machine = self.spawn_virtual_machine(verifier_number)
 		docker_vm = DockerVm(virtual_machine)
 		return BuildVerifier(CloudBuildCore(docker_vm, self.uri_translator))
+
+	def put(self, verifier):
+		verifier.rebuild()
+		return super(DockerVirtualMachineVerifierPool, self).put(verifier)

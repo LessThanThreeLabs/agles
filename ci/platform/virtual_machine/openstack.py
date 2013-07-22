@@ -73,7 +73,7 @@ class OpenstackVm(VirtualMachine):
 		instance = cls.CloudClient().create_node(name=name, image=image, size=size,
 			ex_userdata=cls._default_user_data(vm_username),
 			ex_security_groups=[security_group])
-		return cls(vm_id, instance)
+		return cls(vm_id, instance, vm_username)
 
 	@classmethod
 	def _delete_instances_with_name(cls, instance_name):

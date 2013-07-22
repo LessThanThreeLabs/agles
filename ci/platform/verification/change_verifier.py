@@ -83,17 +83,6 @@ class ChangeVerifier(EventSubscriber):
 		change_started = event.Event()
 		change_done = event.Event()
 
-		def cleanup_greenlet(greenlet, verifier):
-			workers_alive.pop()
-			if not workers_alive:
-				task_queue.clear_remaining_tasks()
-			if VerificationServerSettings.teardown_after_build:
-				verifier.teardown()
-				self.verifier_pool.remove(verifier)
-			else:
-				self.verifier_pool.put(verifier)
-			raise greenlet.throw()
-
 		def start_change():
 			change_started.send(True)
 			with model_server.rpc_connect("changes", "update") as model_server_rpc:
@@ -134,7 +123,15 @@ class ChangeVerifier(EventSubscriber):
 			workers_alive.append(1)
 			build_id = self._create_build(change_id)
 			worker_greenlet = spawn(verifier.verify_build(build_id, verification_config, task_queue, artifact_export_event))
-			worker_greenlet.link(cleanup_greenlet, verifier)
+
+			def cleanup_greenlet(greenlet):
+				workers_alive.pop()
+				if not workers_alive:
+					task_queue.clear_remaining_tasks()
+				self.verifier_pool.put(verifier)
+				raise greenlet.throw()
+
+			worker_greenlet.link(cleanup_greenlet)
 
 		for worker in range(num_workers):
 			spawn_n(setup_worker)

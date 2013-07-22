@@ -80,7 +80,7 @@ class Ec2Vm(VirtualMachine):
 			security_groups=[security_group],
 			user_data=cls._default_user_data(vm_username)).instances[0]
 		cls._name_instance(instance, name)
-		return Ec2Vm(vm_id, instance)
+		return Ec2Vm(vm_id, instance, vm_username)
 
 	@classmethod
 	def _default_user_data(cls, vm_username=VM_USERNAME):
