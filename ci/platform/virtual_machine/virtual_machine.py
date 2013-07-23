@@ -82,7 +82,7 @@ class VirtualMachine(object):
 				'git checkout FETCH_HEAD'])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
-				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, git_url, results), exc_info=True)
+				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, git_url, results))
 			return results
 		return self._ssh_authorized(_remote_fetch, output_handler)
 
@@ -95,7 +95,7 @@ class VirtualMachine(object):
 				'git clone %s source' % git_url])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
-				self.logger.error("Failed to clone %s, results: %s" % (git_url, results), exc_info=True)
+				self.logger.error("Failed to clone %s, results: %s" % (git_url, results))
 			return results
 		return self._ssh_authorized(_remote_clone, output_handler)
 
