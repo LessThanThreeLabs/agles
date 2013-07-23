@@ -274,7 +274,7 @@ function vm_setup () {
 	prompt_github_credentials
 	# Install dependencies
 	sudo $PACKAGE_MANAGER update -y
-	sudo $PACKAGE_MANAGER install -y python-pip make postgresql python-software-properties git build-essential curl libyaml-dev
+	sudo $PACKAGE_MANAGER install -y python-pip make postgresql python-software-properties git mercurial build-essential curl libyaml-dev
 
 	if [ $PACKAGE_MANAGER == 'yum' ]; then
 		sudo $PACKAGE_MANAGER groupinstall -y "Development Tools"
