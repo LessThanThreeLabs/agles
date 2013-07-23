@@ -192,8 +192,8 @@ class ChangeVerifier(EventSubscriber):
 		elif repo_type == 'hg':
 			if self.uri_translator:
 				checkout_url = self.uri_translator.translate(repo_uri)
-				host_url = checkout_url[:checkout_url.find(":")]
-				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "hg show-koality", sha]
+				host_url, _, repo_uri = checkout_url.split('://')[1].partition('/')
+				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "hg show-koality", repo_uri, sha]
 			else:
 				# TODO(andrey) Test this case!
 				show_command = ["bash", "-c", "cat %s" % os.path.join(repo_uri, ".hg", "strip-backup", sha + "-koality.yml")]
