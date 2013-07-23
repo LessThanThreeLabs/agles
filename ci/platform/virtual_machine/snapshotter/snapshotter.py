@@ -10,6 +10,7 @@ from shared.constants import VerificationUser
 from util.log import Logged
 from util.uri_translator import RepositoryUriTranslator
 from virtual_machine.ec2 import Ec2Vm
+from virtual_machine.docker import DockerVm
 from virtual_machine.openstack import OpenstackVm
 
 
@@ -77,7 +78,7 @@ class Snapshotter(object):
 			return
 
 		self.logger.info('Creating new instance named "%s" based on image "%s"' % (instance_name, newest_global_image.name))
-		virtual_machine = self.vm_class.from_id_or_construct('cached:%s_%s' % snapshot_version, instance_name, newest_global_image.id)
+		virtual_machine = self.spawn_virtual_machine(snapshot_version, instance_name, newest_global_image)
 
 		try:
 			virtual_machine.wait_until_ready()
@@ -101,6 +102,9 @@ class Snapshotter(object):
 		finally:
 			self.logger.info('Deleting instance "%s"' % instance_name)
 			virtual_machine.delete()
+
+	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
+		return self.vm_class.from_id_or_construct('cached:%s_%s' % snapshot_version, instance_name, image.id)
 
 	def clone_repositories(self, virtual_machine, repositories, uri_translator):
 		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
@@ -209,3 +213,10 @@ class Snapshotter(object):
 
 	def _30_days_ago(self):
 		return int(time.time()) - 60 * 60 * 24 * 30
+
+
+@Logged()
+class DockerSnapshotter(Snapshotter):
+	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
+		virtual_machine = self.vm_class.from_id_or_construct('cached:%s_%s' % snapshot_version, instance_name, image.id)
+		return DockerVm(virtual_machine)
