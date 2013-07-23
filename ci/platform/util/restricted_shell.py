@@ -3,6 +3,7 @@ import os
 import re
 
 import model_server
+import pipes
 
 from settings.store import StoreSettings
 from shared.constants import VerificationUser
@@ -185,7 +186,7 @@ class RestrictedHgShell(RestrictedShell):
 		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 
 		bundle_path = os.path.join(remote_filesystem_path, ".hg", "strip-backup", sha + ".hg")
-		full_command = "cat %s | base64" % bundle_path
+		full_command = "sh -c %s" % pipes.quote("cat %s | base64" % bundle_path)
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", full_command)
 
 	def _validate(self, repo_path):
@@ -194,10 +195,9 @@ class RestrictedHgShell(RestrictedShell):
 
 	# TODO(andrey) modularize this function
 	def handle_command(self, full_ssh_command):
-		if command_parts.len() < 4:
-			raise InvalidCommandError(full_ssh_command)
-
 		command_parts = full_ssh_command.split()
+		if len(command_parts) < 4:
+			raise InvalidCommandError(full_ssh_command)
 
 		repo_path = command_parts[2]
 		self._validate(repo_path)
@@ -208,7 +208,7 @@ class RestrictedHgShell(RestrictedShell):
 		elif command_parts[:2] == ['hg', 'show-koality']:
 			self.handle_show(repo_path, command_parts[3], command_parts[2])
 		elif command_parts[:2] == ['hg', 'cat-bundle']:
-			self.handle_cat_bundle(repo_path, command_parts[3], command_parts[2])
+			self.handle_cat_bundle(repo_path, command_parts[4], command_parts[2])
 		else:
 			raise InvalidCommandError(full_ssh_command)
 
