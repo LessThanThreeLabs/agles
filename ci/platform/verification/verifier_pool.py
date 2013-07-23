@@ -1,3 +1,5 @@
+import sys
+
 import eventlet
 
 from eventlet import queue
@@ -129,12 +131,17 @@ class VerifierPool(object):
 			slot = self.free_slots.get(block=block)
 		return slot
 
-	def _spawn_verifier(self, verifier_number, allocated=True):
+	def _lock_verifier_slot(self, verifier_number, allocated):
 		assert verifier_number not in self.verifiers
 
 		limbo_slots = self.to_allocate if allocated else self.to_unallocate
 		limbo_slots.append(verifier_number)
 
+	def _unlock_verifier_slot(self, verifier_number, allocated):
+		limbo_slots = self.to_allocate if allocated else self.to_unallocate
+		limbo_slots.remove(verifier_number)
+
+	def _spawn_verifier_unsafe(self, verifier_number, allocated):
 		self.verifiers[verifier_number] = self.spawn_verifier(verifier_number)
 		if allocated:
 			self.allocated_slots.append(verifier_number)
@@ -143,22 +150,37 @@ class VerifierPool(object):
 				self.remove_verifier(verifier_number)
 			else:
 				self.unallocated_slots.append(verifier_number)
-		limbo_slots.remove(verifier_number)
+
+	def _spawn_verifier(self, verifier_number, allocated=True):
+		self._lock_verifier_slot(verifier_number, allocated)
+		try:
+			self._spawn_verifier_unsafe(verifier_number, allocated)
+		finally:
+			self._unlock_verifier_slot(verifier_number, allocated)
 
 	def _spawn_verifier_multiple_attempts(self, verifier_number, allocated=True, attempts=10):
-		for remaining_attempts in reversed(range(attempts)):
-			try:
-				self._spawn_verifier(verifier_number, allocated)
-			except:
-				if remaining_attempts == 0:
-					self.free_slots.put(verifier_number)
-					self.logger.error("Failed to spawn verifier %d" % verifier_number, exc_info=True)
-					raise
+		self._lock_verifier_slot(verifier_number, allocated)
+
+		def try_spawn_and_retry():
+			for remaining_attempts in reversed(range(attempts)):
+				try:
+					self._spawn_verifier_unsafe(verifier_number, allocated)
+				except:
+					if remaining_attempts == 0:
+						self.free_slots.put(verifier_number)
+						exc_info = sys.exc_info()
+						self.logger.error("Failed to spawn verifier %d" % verifier_number, exc_info=exc_info)
+						raise exc_info
+					else:
+						self.logger.info("Failed to spawn verifier %d, %d attempts remaining" % (verifier_number, remaining_attempts), exc_info=True)
+					eventlet.sleep(10)
 				else:
-					self.logger.debug("Failed to spawn verifier %d, %d attempts remaining" % (verifier_number, remaining_attempts), exc_info=True)
-				eventlet.sleep(10)
-			else:
-				break
+					break
+
+		def unlock_link(greenlet):
+			self._unlock_verifier_slot(verifier_number, allocated)
+
+		eventlet.spawn(try_spawn_and_retry).link(unlock_link)
 
 	def _trim_pool_size(self, old_max=None):
 		new_min = self._get_min_unallocated()
@@ -208,6 +230,7 @@ class VirtualMachineVerifierPool(VerifierPool):
 
 	def spawn_verifier(self, verifier_number):
 		virtual_machine = self.spawn_virtual_machine(verifier_number)
+		virtual_machine.wait_until_ready()
 		return BuildVerifier(CloudBuildCore(virtual_machine, self.uri_translator))
 
 	def spawn_virtual_machine(self, virtual_machine_number):
@@ -218,10 +241,9 @@ class DockerVirtualMachineVerifierPool(VirtualMachineVerifierPool):
 	def __init__(self, virtual_machine_class, max_verifiers=None, min_unallocated=None, uri_translator=None):
 		super(DockerVirtualMachineVerifierPool, self).__init__(virtual_machine_class, max_verifiers, min_unallocated, uri_translator)
 
-	def spawn_verifier(self, verifier_number):
-		virtual_machine = self.spawn_virtual_machine(verifier_number)
-		docker_vm = DockerVm(virtual_machine)
-		return BuildVerifier(CloudBuildCore(docker_vm, self.uri_translator))
+	def spawn_virtual_machine(self, virtual_machine_number):
+		virtual_machine = super(DockerVirtualMachineVerifierPool, self).spawn_virtual_machine(virtual_machine_number)
+		return DockerVm(virtual_machine)
 
 	def put(self, verifier):
 		verifier.rebuild()

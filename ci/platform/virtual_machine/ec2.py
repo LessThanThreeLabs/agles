@@ -51,7 +51,7 @@ class Ec2Client(object):
 @Logged()
 class Ec2Vm(VirtualMachine):
 	VM_INFO_FILE = ".virtualmachine"
-	VM_USERNAME = "lt3"
+	VM_USERNAME = "ubuntu"
 
 	CloudClient = Ec2Client.get_client
 	Settings = AwsSettings
@@ -226,7 +226,7 @@ class Ec2Vm(VirtualMachine):
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		login = "%s@%s" % (self.vm_username, self.instance.private_ip_address)
-		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
+		return self.call(["ssh", "-oLogLevel=error", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
 		self.instance.reboot()

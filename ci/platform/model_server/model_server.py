@@ -124,8 +124,9 @@ class ModelServer(object):
 			while True:
 				self.connection.drain_events()
 		except:
-			self.logger.critical("Model server IOloop exited", exc_info=True)
-			raise
+			exc_info = sys.exc_info()
+			self.logger.critical("Model server IOloop exited", exc_info=exc_info)
+			raise exc_info
 
 
 class ModelServerError(Exception):

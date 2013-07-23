@@ -44,7 +44,7 @@ class DockerVm(VirtualMachine):
 		if self.container_id is None:
 			self._containerize_vm()
 		retrieve_ssh_port_command = 'docker port %s 22' % self.container_id
-		docker_command = 'ssh %s@localhost -oStrictHostKeyChecking=no -q -p $(%s) %s' % (self.container_username, retrieve_ssh_port_command, pipes.quote(command))
+		docker_command = 'ssh %s@localhost -oStrictHostKeyChecking=no -oLogLevel=error -p $(%s) %s' % (self.container_username, retrieve_ssh_port_command, pipes.quote(command))
 		return self.virtual_machine.ssh_call(docker_command, output_handler, timeout)
 
 	def delete(self):
@@ -52,6 +52,7 @@ class DockerVm(VirtualMachine):
 
 	def rebuild(self):
 		self._uncontainerize_vm()
+		self._containerize_vm()
 
 	def create_image(self, name, description=None):
 		assert self.container_id is not None
@@ -70,13 +71,16 @@ class DockerVm(VirtualMachine):
 			raise Exception()
 		self.container_id = container_construction_result.output.strip()
 
-		for attempt in range(10):
+		for attempt in range(20):
 			results = self.ssh_call('true', timeout=10)
 			if results.returncode == 0:
 				return
 			else:
-				eventlet.sleep(2)
-		raise Exception('Failed to initialize ssh daemon for container %s' % self)
+				eventlet.sleep(3)
+		try:
+			self._uncontainerize_vm()
+		finally:
+			raise Exception('Failed to initialize ssh daemon for container %s' % self)
 
 	def _uncontainerize_vm(self):
 		if self.container_id is not None:

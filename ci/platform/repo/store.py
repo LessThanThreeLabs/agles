@@ -284,10 +284,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 			return original_head
 		except GitCommandError:
-			stacktrace = sys.exc_info()[2]
+			exc_info = sys.exc_info()
+			stacktrace = exc_info[2]
 			error_msg = "Merge failed for repo_slave (potential to retry): %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
 				repo_slave, ref_to_merge, ref_to_merge_into)
-			self.logger.info(error_msg, exc_info=True)
+			self.logger.info(error_msg, exc_info=exc_info)
 			raise MergeError, error_msg, stacktrace
 		finally:
 			repo_slave.git.reset(hard=True)
@@ -310,9 +311,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 				repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 				repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 			except GitCommandError:
-				stacktrace = sys.exc_info()[2]
+				exc_info = sys.exc_info()
+				stacktrace = exc_info[2]
 				error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_merge_into)
-				self.logger.info(error_msg, exc_info=True)
+				self.logger.info(error_msg, exc_info=exc_info)
 				self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
 				raise MergeError, error_msg, stacktrace
 			except:
@@ -327,17 +329,19 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self._push_with_private_key(repo, remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
 			except GitCommandError:
 				if i >= self.NUM_RETRIES:
-					stacktrace = sys.exc_info()[2]
+					exc_info = sys.exc_info()
+					stacktrace = exc_info[2]
 					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
-					self.logger.warn(error_msg, exc_info=True)
+					self.logger.warn(error_msg, exc_info=exc_info)
 					self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				update_from_forward_url()
 			except:
-				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
+				exc_info = sys.exc_info()
+				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=exc_info)
 				self._reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
-				raise
+				raise exc_info
 			else:
 				break
 
@@ -437,15 +441,16 @@ class FileSystemRepositoryStore(RepositoryStore):
 		try:
 			self._push_with_private_key(repo, remote_repo, ':'.join([from_target, to_target]), force=force)
 		except GitCommandError:
-			self.logger.warn("A git error occurred on force push", exc_info=True)
-			raise
+			exc_info = sys.exc_info()
+			self.logger.warn("A git error occurred on force push", exc_info=exc_info)
+			raise exc_info
 
 	def force_delete(self, repo_id, repo_name, target):
 		if self._remote_branch_exists:
 			try:
 				self.push(repo_id, repo_name, "", target, force=True)
 			except GitCommandError as e:
-				self.logger.warn("Force delete encountered an error", exc_info=True)
+				self.logger.warn("Force delete encountered an error", exc_info=e)
 				self._update_branch(repo_id, repo_name, target)
 				return e.stderr
 		self._delete_branch(repo_id, repo_name, target)
@@ -498,8 +503,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 		try:
 			refs.SymbolicReference.create(repo, 'refs/pending/%d' % commit_id, sha)
 		except:
-			self.logger.critical("Failed to create pending ref %d for sha %s" % (commit_id, sha), exc_info=True)
-			raise
+			exc_info = sys.exc_info()
+			self.logger.critical("Failed to create pending ref %d for sha %s" % (commit_id, sha), exc_info=exc_info)
+			raise exc_info
 
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.

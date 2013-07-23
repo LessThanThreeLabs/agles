@@ -45,7 +45,7 @@ class HpCloudVm(openstack.OpenstackVm):
 		# For some reason, hpcloud returns [<private ip>, <public ip>] as the private ips, and the private ips begin with 10.*
 		private_ip = filter(lambda ip_address: ip_address.startswith('10.'), self.instance.private_ips)[0]
 		login = "%s@%s" % (self.vm_username, private_ip)
-		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
+		return self.call(["ssh", "-oLogLevel=error", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	@classmethod
 	def _get_instance_size(cls, instance_type, matching_attribute='name'):
