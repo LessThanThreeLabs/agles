@@ -108,7 +108,7 @@ class RestrictedGitShell(RestrictedShell):
 		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 
 		uri = "git@%s" % stored_repos_base_path
-		full_command = "sh -c 'cd %s && git show %s'" % (remote_filesystem_path, show_ref_file)
+		full_command = "sh -c %s" % pipes.quote("cd %s && git show %s'" % (remote_filesystem_path, show_ref_file))
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
 	def _up_pullthrough_args(self, private_key, forward_url, user_id):
@@ -177,7 +177,7 @@ class RestrictedHgShell(RestrictedShell):
 
 		yml_path = os.path.join(remote_filesystem_path, ".hg", "strip-backup", sha + "-koality.yml")
 		uri = "git@%s" % stored_repos_base_path
-		full_command = "cat %s" % yml_path
+		full_command = "sh -c %s" % pipes.quote("cat %s" % yml_path)
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
 	def handle_cat_bundle(self, requested_repo_uri, user_id, sha):
@@ -209,7 +209,7 @@ class RestrictedHgShell(RestrictedShell):
 		if command_parts[:2] == ['hg', '-R'] and command_parts[3:5] == ['serve', '--stdio']:
 			self.handle_push(repo_path, command_parts[5])
 		elif command_parts[:2] == ['hg', 'show-koality']:
-			self.handle_show(repo_path, command_parts[3], command_parts[2])
+			self.handle_show_koality(repo_path, command_parts[4], command_parts[3])
 		elif command_parts[:2] == ['hg', 'cat-bundle']:
 			self.handle_cat_bundle(repo_path, command_parts[4], command_parts[3])
 		else:

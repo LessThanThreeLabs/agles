@@ -2,6 +2,7 @@ import subprocess
 import sys
 
 import yaml
+import os
 
 from eventlet import event, spawn, spawn_n, queue
 from kombu.messaging import Producer
@@ -179,6 +180,8 @@ class ChangeVerifier(EventSubscriber):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
 
+		config_dict = {}
+
 		if repo_type == 'git':
 			ref = pathgen.hidden_ref(commit_id)
 
@@ -186,29 +189,33 @@ class ChangeVerifier(EventSubscriber):
 				checkout_url = self.uri_translator.translate(repo_uri)
 				host_url = checkout_url[:checkout_url.find(":")]
 				repo_path = checkout_url[checkout_url.find(":") + 1:]
-				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
+				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
 			else:
 				show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
+
+			for file_name in ['koality.yml', '.koality.yml']:
+				try:
+					config_dict = yaml.safe_load(subprocess.check_output(show_command(file_name)))
+				except:
+					pass
+				else:
+					break
 		elif repo_type == 'hg':
 			if self.uri_translator:
 				checkout_url = self.uri_translator.translate(repo_uri)
-				host_url = checkout_url[:checkout_url.find(":")]
-				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", "%s" % host_url, "hg show-koality", sha]
+				host_url, _, repo_uri = checkout_url.split('://')[1].partition('/')
+				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "hg", "show-koality", repo_uri, sha]
 			else:
 				# TODO(andrey) Test this case!
 				show_command = ["bash", "-c", "cat %s" % os.path.join(repo_uri, ".hg", "strip-backup", sha + "-koality.yml")]
+			try:
+				config_dict = yaml.safe_load(subprocess.check_output(show_command))
+			except:
+				pass
+
 		else:
 			# TODO(andrey) Proper failure
 			assert False
-
-		config_dict = {}
-		for file_name in ['koality.yml', '.koality.yml']:
-			try:
-				config_dict = yaml.safe_load(subprocess.check_output(show_command(file_name)))
-			except:
-				pass
-			else:
-				break
 
 		try:
 			return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))
