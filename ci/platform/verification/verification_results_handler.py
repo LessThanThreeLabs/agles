@@ -5,6 +5,7 @@ from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeErr
 from shared.constants import BuildStatus, MergeStatus
 from util import pathgen
 from util.log import Logged
+from hglib.error import CommandError
 
 
 @Logged()
