@@ -108,7 +108,7 @@ class RestrictedGitShell(RestrictedShell):
 		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
 
 		uri = "git@%s" % stored_repos_base_path
-		full_command = "sh -c %s" % pipes.quote("cd %s && git show %s'" % (remote_filesystem_path, show_ref_file))
+		full_command = "sh -c %s" % pipes.quote("cd %s && git show %s" % (remote_filesystem_path, show_ref_file))
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
 	def _up_pullthrough_args(self, private_key, forward_url, user_id):

@@ -31,7 +31,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		return row[repo.c.uri] if row else None
-		
+
 	def get_repo_type(self, repo_id):
 		repo = database.schema.repo
 

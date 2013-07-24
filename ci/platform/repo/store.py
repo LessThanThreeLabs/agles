@@ -11,14 +11,12 @@ import socket
 import sys
 import time
 import yaml
-
 import eventlet
-
 import model_server
-
 import hglib
 
 from git import GitCommandError, Repo, refs
+from hglib.error import CommandError
 
 from bunnyrpc.client import Client
 from settings.store import StoreSettings
@@ -343,6 +341,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 				break
 
 	def _hg_push_merge_retry(self, repo, remote_repo):
+		remote_repo = "ssh://%s" %remote_repo
 		def update_from_forward_url():
 			repo.pull(remote_repo)
 
@@ -372,8 +371,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			env={'GIT_SSH': self.SSH_WITH_PRIVATE_KEY_SCRIPT, 'GIT_PRIVATE_KEY_PATH': self._get_private_key_path(), 'GIT_SSH_TIMEOUT': '120'}
 		)
 
-	def _hg_push_with_private_key(self, repo, *args, **kwargs):
-		repo.push(ssh="Environmental_variables %s -o ConnectTimeout=%s" % (self.SSH_WITH_PRIVATE_KEY_SCRIPT, 120))
+	def _hg_push_with_private_key(self, repo, remote_repo):
+		repo.push(remote_repo, ssh="GIT_PRIVATE_KEY_PATH=%s %s" % (self._get_private_key_path(), self.SSH_WITH_PRIVATE_KEY_SCRIPT))
 
 	def _fetch_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to fetch to repo %s" % repo)
@@ -427,7 +426,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		elif repo_type == "hg":
 			repo = hglib.open(repo_path)
-			repo.unbundle(os.path.join(repo_path, ".hg", "strip-backup", ref_to_merge + ".hg"))
+			repo.pull(os.path.join(repo_path, ".hg", "strip-backup", ref_to_merge + ".hg"))
 			self._hg_push_merge_retry(repo, remote_repo)
 		else:
 			return
@@ -492,8 +491,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self.logger.warn("A git error occurred on a push", exc_info=True)
 				raise
 		else:
-			# TODO(andrey) proper error handling
-			raise
+			self.logger.critical("Bad repository type %s" % repo_type)
+			#TODO(andrey) exception?
 
 	def force_delete(self, repo_id, repo_name, target):
 		repo_type = self._get_repo_type(repo_id)
