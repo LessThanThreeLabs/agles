@@ -50,6 +50,7 @@ class VerificationResultsHandler(object):
 
 		ref = pathgen.hidden_ref(commit_id)
 		try:
+
 			self.remote_repo_manager.merge_changeset(
 				repostore_id, repo_id,
 				repo_name, ref, merge_target)
