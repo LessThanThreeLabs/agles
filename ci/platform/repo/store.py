@@ -294,7 +294,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def _git_update_branch_from_forward_url(self, repo_slave, remote_repo, ref_to_update):
 		# branch has to exist on the non-slave (not forward url) because we're trying to push it
 		remote_branch = "origin/%s" % ref_to_update  # origin/master or whatever
-		self._fetch_with_private_key(repo_slave, remote_repo, ref_to_update)
+		self._git_fetch_with_private_key(repo_slave, remote_repo, ref_to_update)
 		repo_slave.git.checkout("FETCH_HEAD")
 		ref_sha = repo_slave.head.commit.hexsha
 		repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
@@ -341,9 +341,19 @@ class FileSystemRepositoryStore(RepositoryStore):
 				break
 
 	def _hg_push_merge_retry(self, repo, remote_repo):
-		remote_repo = "ssh://%s" %remote_repo
+		remote_repo = "ssh://%s" % remote_repo
+
 		def update_from_forward_url():
-			repo.pull(remote_repo)
+			try:
+				self._hg_fetch_with_private_key(repo, remote_repo)
+				_, sha = repo.merge()
+				repo.commit("Merging in %s" % sha[:12])
+				repo.update(sha)
+			except CommandError:
+				stacktrace = sys.exc_info()[2]
+				error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_merge_into)
+				self.logger.info(error_msg, exc_info=True)
+				raise MergeError, error_msg, stacktrace
 
 		i = 0
 		while True:
@@ -372,14 +382,19 @@ class FileSystemRepositoryStore(RepositoryStore):
 		)
 
 	def _hg_push_with_private_key(self, repo, remote_repo):
+		self.logger.info("Attempting to push repo %s to forward url %s" % remote_repo)
 		repo.push(remote_repo, ssh="GIT_PRIVATE_KEY_PATH=%s %s" % (self._get_private_key_path(), self.SSH_WITH_PRIVATE_KEY_SCRIPT))
 
-	def _fetch_with_private_key(self, repo, *args, **kwargs):
+	def _git_fetch_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to fetch to repo %s" % repo)
 		execute_args = ['git', 'fetch'] + list(args) + repo.git.transform_kwargs(**kwargs)
 		repo.git.execute(execute_args,
 			env={'GIT_SSH': self.SSH_WITH_PRIVATE_KEY_SCRIPT, 'GIT_PRIVATE_KEY_PATH': self._get_private_key_path(), 'GIT_SSH_TIMEOUT': '120'}
 		)
+
+	def _hg_fetch_with_private_key(self, repo, remote_repo):
+		self.logger.info("Attempting to fetch to repo %s" % repo)
+		repo.pull(remote_repo, ssh="GIT_PRIVATE_KEY_PATH=%s %s" % (self._get_private_key_path(), self.SSH_WITH_PRIVATE_KEY_SCRIPT))
 
 	def _get_private_key_path(self):
 		with model_server.rpc_connect("repos", "read") as conn:
@@ -550,7 +565,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		with model_server.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
 
-		self._fetch_with_private_key(repo, remote_repo)
+		self._git_fetch_with_private_key(repo, remote_repo)
 
 		try:
 			refs.SymbolicReference.create(repo, 'refs/pending/%d' % commit_id, sha)
