@@ -50,8 +50,7 @@ class Ec2Client(object):
 
 @Logged()
 class Ec2Vm(VirtualMachine):
-	VM_INFO_FILE = ".virtualmachine"
-	VM_USERNAME = "ubuntu"
+	VM_USERNAME = 'lt3'
 
 	CloudClient = Ec2Client.get_client
 	Settings = AwsSettings

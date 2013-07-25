@@ -124,7 +124,7 @@ class Snapshotter(object):
 	def provision_for_branch(self, virtual_machine, repository, branch, uri_translator):
 		self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
 		if virtual_machine.remote_checkout(repository['name'], uri_translator.translate(repository['uri']), branch).returncode != 0:
-			raise Exception('Failed to checkout branch "%s" for repository "%s%' % (branch, repository['name']))
+			raise Exception('Failed to checkout branch "%s" for repository "%s"' % (branch, repository['name']))
 		provision_results = virtual_machine.provision(StoreSettings.ssh_private_key)
 		if provision_results.returncode != 0:
 			failure_message = 'Provisioning failed with returncode %d' % provision_results.returncode
@@ -138,10 +138,13 @@ class Snapshotter(object):
 			image_name = '%s_%s' % (image_name_prefix, snapshot_version[1])
 		elif image_name_prefix.endswith('%s_' % snapshot_version[0]):
 			image_name = '%s%s' % (image_name_prefix, snapshot_version[1])
+		elif snapshot_version[0] == -1:
+			image_name = '%s_0_%s' % (image_name_prefix, snapshot_version[1])
 		else:
 			image_name = '%s%s_%s' % (image_name_prefix, snapshot_version[0], snapshot_version[1])
 		return image_name
 
+	# TODO (bbland): move this stuff into the vm wrapper implementations
 	def wait_for_image(self, image_name):
 		def wait_for_ec2_image():
 			while True:
@@ -218,5 +221,5 @@ class Snapshotter(object):
 @Logged()
 class DockerSnapshotter(Snapshotter):
 	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
-		virtual_machine = self.vm_class.from_id_or_construct('cached:%s_%s' % snapshot_version, instance_name, image.id)
+		virtual_machine = super(DockerSnapshotter, self).spawn_virtual_machine(snapshot_version, instance_name, image)
 		return DockerVm(virtual_machine)

@@ -40,8 +40,7 @@ class OpenstackClient(object):
 
 @Logged()
 class OpenstackVm(VirtualMachine):
-	VM_INFO_FILE = ".virtualmachine"
-	VM_USERNAME = "lt3"
+	VM_USERNAME = 'lt3'
 
 	CloudClient = OpenstackClient.get_client
 	Settings = LibCloudSettings
