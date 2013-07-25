@@ -19,6 +19,9 @@ class VirtualMachineBuildCore(object):
 	def teardown(self):
 		raise NotImplementedError()
 
+	def rebuild(self):
+		raise NotImplementedError()
+
 	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
 		self.setup_virtual_machine(private_key, console_appender)
 
@@ -116,6 +119,9 @@ class VagrantBuildCore(VirtualMachineBuildCore):
 	def teardown(self):
 		self.virtual_machine.teardown()
 
+	def rebuild(self):
+		self.virtual.rebuild()
+
 
 class CloudBuildCore(VirtualMachineBuildCore):
 	def __init__(self, cloud_vm, uri_translator=None):
@@ -137,6 +143,9 @@ class CloudBuildCore(VirtualMachineBuildCore):
 
 	def teardown(self):
 		self.virtual_machine.delete()
+
+	def rebuild(self):
+		self.virtual_machine.rebuild()
 
 	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
 		self.setup_virtual_machine(repo_uri, ref, private_key, console_appender)

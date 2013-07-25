@@ -1,1 +1,1 @@
-from snapshotter import Snapshotter, SnapshotDaemon
+from snapshotter import DockerSnapshotter, Snapshotter, SnapshotDaemon

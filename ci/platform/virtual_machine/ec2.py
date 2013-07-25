@@ -50,8 +50,7 @@ class Ec2Client(object):
 
 @Logged()
 class Ec2Vm(VirtualMachine):
-	VM_INFO_FILE = ".virtualmachine"
-	VM_USERNAME = "lt3"
+	VM_USERNAME = 'lt3'
 
 	CloudClient = Ec2Client.get_client
 	Settings = AwsSettings
@@ -80,7 +79,7 @@ class Ec2Vm(VirtualMachine):
 			security_groups=[security_group],
 			user_data=cls._default_user_data(vm_username)).instances[0]
 		cls._name_instance(instance, name)
-		return Ec2Vm(vm_id, instance)
+		return Ec2Vm(vm_id, instance, vm_username)
 
 	@classmethod
 	def _default_user_data(cls, vm_username=VM_USERNAME):
@@ -194,10 +193,10 @@ class Ec2Vm(VirtualMachine):
 				self.instance.update()
 				if self.instance.state in ['stopped', 'terminated']:
 					handle_error()
-			for remaining_attempts in reversed(range(6)):
+			for remaining_attempts in reversed(range(20)):
 				if remaining_attempts <= 2:
 					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
-				if self.ssh_call("true", timeout=30).returncode == 0:
+				if self.ssh_call("true", timeout=10).returncode == 0:
 					return
 				eventlet.sleep(3)
 				self.instance.update()
@@ -226,7 +225,7 @@ class Ec2Vm(VirtualMachine):
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		login = "%s@%s" % (self.vm_username, self.instance.private_ip_address)
-		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
+		return self.call(["ssh", "-oLogLevel=error", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
 		self.instance.reboot()

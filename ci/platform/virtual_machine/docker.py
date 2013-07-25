@@ -11,6 +11,7 @@ from virtual_machine import VirtualMachine
 @Logged()
 class DockerVm(VirtualMachine):
 	CONTAINER_USERNAME = 'lt3'
+	CONTAINER_NAME = 'koality/verification'
 
 	def __init__(self, virtual_machine, container_username=CONTAINER_USERNAME):
 		super(DockerVm, self).__init__(virtual_machine.vm_id, virtual_machine.instance, virtual_machine.vm_username)
@@ -43,7 +44,7 @@ class DockerVm(VirtualMachine):
 		if self.container_id is None:
 			self._containerize_vm()
 		retrieve_ssh_port_command = 'docker port %s 22' % self.container_id
-		docker_command = 'ssh %s@localhost -oStrictHostKeyChecking=no -q -p $(%s) %s' % (self.container_username, retrieve_ssh_port_command, pipes.quote(command))
+		docker_command = 'ssh %s@localhost -oStrictHostKeyChecking=no -oLogLevel=error -p $(%s) %s' % (self.container_username, retrieve_ssh_port_command, pipes.quote(command))
 		return self.virtual_machine.ssh_call(docker_command, output_handler, timeout)
 
 	def delete(self):
@@ -51,26 +52,36 @@ class DockerVm(VirtualMachine):
 
 	def rebuild(self):
 		self._uncontainerize_vm()
+		self._containerize_vm()
+
+	def create_image(self, name, description=None):
+		assert name is not None
+		assert self.container_id is not None
+		if description is None:
+			description = ''
+		commit_results = self.virtual_machine.ssh_call('docker commit %s -m=%s %s' % (self.container_id, pipes.quote(description), pipes.quote(name)))
+		assert commit_results.returncode == 0
+		return self.virtual_machine.create_image(name, description)
 
 	def _containerize_vm(self):
-		container_name = 'koality/verification'  # TEMPORARY
-		docker_construction_command = ';'.join((
-			'pubkey=$(cat ~/.ssh/id_rsa.pub)',
-			'docker run -d -p 22 %s /init %s "$pubkey"' % (container_name, self.container_username)
-		))
+		print_public_key_command = 'cat ~/.ssh/id_rsa.pub'
+		docker_construction_command = 'docker run -d -p 22 %s /init %s "$(%s)"' % (self.CONTAINER_NAME, self.container_username, print_public_key_command)
 		container_construction_result = self.virtual_machine.ssh_call('bash -c %s' % pipes.quote(docker_construction_command))
 		if container_construction_result.returncode != 0:
-			self.logger.warn('Failed to construct a a docker container inside VM %s' % self.virtual_machine)
-			raise Exception()
+			error_message = 'Failed to construct a a docker container inside VM %s' % self.virtual_machine
+			self.logger.warn(error_message)
+			raise Exception(error_message)
 		self.container_id = container_construction_result.output.strip()
 
-		for attempt in range(5):
-			results = self.ssh_call('true')
-			if results.returncode == 0:
+		for attempt in range(12):
+			if self.ssh_call('true', timeout=10).returncode == 0:
 				return
 			else:
-				eventlet.sleep(3)
-		raise Exception('Failed to initialize ssh daemon for container %s' % self)
+				eventlet.sleep(10)
+		try:
+			raise Exception('Failed to initialize ssh daemon for container %s' % self)
+		finally:
+			self._uncontainerize_vm()
 
 	def _uncontainerize_vm(self):
 		if self.container_id is not None:

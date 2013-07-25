@@ -59,6 +59,9 @@ class BuildVerifier(object):
 	def teardown(self):
 		self.build_core.teardown()
 
+	def rebuild(self):
+		self.build_core.rebuild()
+
 	def verify_build(self, build_id, verification_config, test_queue, artifact_export_event):
 		results = []
 		setup_result = self._setup(build_id, verification_config)

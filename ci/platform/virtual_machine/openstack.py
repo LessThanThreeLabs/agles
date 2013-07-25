@@ -40,8 +40,7 @@ class OpenstackClient(object):
 
 @Logged()
 class OpenstackVm(VirtualMachine):
-	VM_INFO_FILE = ".virtualmachine"
-	VM_USERNAME = "lt3"
+	VM_USERNAME = 'lt3'
 
 	CloudClient = OpenstackClient.get_client
 	Settings = LibCloudSettings
@@ -73,7 +72,7 @@ class OpenstackVm(VirtualMachine):
 		instance = cls.CloudClient().create_node(name=name, image=image, size=size,
 			ex_userdata=cls._default_user_data(vm_username),
 			ex_security_groups=[security_group])
-		return cls(vm_id, instance)
+		return cls(vm_id, instance, vm_username)
 
 	@classmethod
 	def _delete_instances_with_name(cls, instance_name):
@@ -193,7 +192,7 @@ class OpenstackVm(VirtualMachine):
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		login = "%s@%s" % (self.vm_username, self.instance.private_ips[-1])
-		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
+		return self.call(["ssh", "-oLogLevel=error", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
 		self.instance.reboot()

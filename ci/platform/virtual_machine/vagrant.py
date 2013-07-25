@@ -45,7 +45,7 @@ class Vagrant(VirtualMachine):
 	def ssh_call(self, command, output_handler=None):
 		if not self.ssh_config:
 			self._generate_ssh_config()
-		return self.call(["ssh", "default", "-q", "-F", self.ssh_config, command], output_handler=output_handler)
+		return self.call(["ssh", "default", "-oLogLevel=error", "-F", self.ssh_config, command], output_handler=output_handler)
 
 	def vbox_call(self, command, output_handler=None):
 		vbox_id = self._get_vbox_id()
