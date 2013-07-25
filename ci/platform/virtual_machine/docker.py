@@ -64,8 +64,11 @@ class DockerVm(VirtualMachine):
 		return self.virtual_machine.create_image(name, description)
 
 	def _containerize_vm(self):
-		print_public_key_command = 'cat ~/.ssh/id_rsa.pub'
-		docker_construction_command = 'docker run -d -p 22 %s /init %s "$(%s)"' % (self.CONTAINER_NAME, self.container_username, print_public_key_command)
+		docker_construction_command = '&&'.join((
+			'[ -f ~/.ssh/id_rsa.pub ] || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa > /dev/null 2>&1',
+			'SSH_PUBLIC_KEY=$(cat ~/.ssh/id_rsa.pub',
+			'docker run -d -p 22 %s /init %s "$SSH_PUBLIC_KEY"' % (self.CONTAINER_NAME, self.container_username)
+		))
 		container_construction_result = self.virtual_machine.ssh_call('bash -c %s' % pipes.quote(docker_construction_command))
 		if container_construction_result.returncode != 0:
 			error_message = 'Failed to construct a a docker container inside VM %s' % self.virtual_machine
