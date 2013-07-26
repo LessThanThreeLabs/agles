@@ -184,7 +184,6 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 	def test_get_ip_address(self):
 		ip_address = self.store._get_ip_address()
 		assert_not_equals(ip_address, 'localhost')
-		assert_not_equals(ip_address, '127.0.0.1')
 
 		numbers = ip_address.split('.')
 		assert_equals(len(numbers), 4)
