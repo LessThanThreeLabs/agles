@@ -60,6 +60,9 @@ class VerificationResultsHandler(object):
 		except MergeError:
 			self._mark_change_merge_failure(change_id, verification_status)
 			self.logger.info("Failed to merge change %d" % change_id, exc_info=True)
+		except CommandError:
+			self._mark_change_merge_failure(change_id, verification_status)
+			self.logger.info("Failed to merge change %d" % change_id, exc_info=True)
 		except PushForwardError:
 			self._mark_change_pushforward_failure(change_id, verification_status)
 			self.logger.warn("Failed to forward push change %d" % change_id, exc_info=True)

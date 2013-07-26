@@ -353,7 +353,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 				stacktrace = sys.exc_info()[2]
 				error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_merge_into)
 				self.logger.info(error_msg, exc_info=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
 				raise MergeError, error_msg, stacktrace
+			except:
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
 
 		i = 0
 		while True:
@@ -365,11 +368,13 @@ class FileSystemRepositoryStore(RepositoryStore):
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s" % (repo)
 					self.logger.warn(error_msg, exc_info=True)
+					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				update_from_forward_url()
 			except:
 				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
 				raise
 			else:
 				break
