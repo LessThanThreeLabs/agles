@@ -340,7 +340,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			else:
 				break
 
-	def _hg_push_merge_retry(self, repo, remote_repo):
+	def _hg_push_merge_retry(self, repo, remote_repo, ref_to_merge_into):
 		remote_repo = "ssh://%s" % remote_repo
 
 		def update_from_forward_url():
@@ -351,9 +351,12 @@ class FileSystemRepositoryStore(RepositoryStore):
 				repo.update(sha)
 			except CommandError:
 				stacktrace = sys.exc_info()[2]
-				error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_merge_into)
+				error_msg = "Attempting to update/merge from forward url. ref_to_update: %s" % (ref_to_merge_into)
 				self.logger.info(error_msg, exc_info=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
 				raise MergeError, error_msg, stacktrace
+			except:
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
 
 		i = 0
 		while True:
@@ -365,11 +368,13 @@ class FileSystemRepositoryStore(RepositoryStore):
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s" % (repo)
 					self.logger.warn(error_msg, exc_info=True)
+					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				update_from_forward_url()
 			except:
 				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
 				raise
 			else:
 				break
@@ -442,7 +447,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		elif repo_type == "hg":
 			repo = hglib.open(repo_path)
 			repo.pull(os.path.join(repo_path, ".hg", "strip-backup", ref_to_merge + ".hg"))
-			self._hg_push_merge_retry(repo, remote_repo)
+			self._hg_push_merge_retry(repo, remote_repo, ref_to_merge_into)
 		else:
 			return
 
