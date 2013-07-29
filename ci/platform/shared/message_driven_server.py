@@ -1,3 +1,5 @@
+import sys
+
 import eventlet
 
 from kombu.connection import Connection
