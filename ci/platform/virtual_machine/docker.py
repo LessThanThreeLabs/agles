@@ -43,8 +43,11 @@ class DockerVm(VirtualMachine):
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		if self.container_id is None:
 			self._containerize_vm()
+		ssh_options = '-oLogLevel=error -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null'
 		retrieve_ssh_port_command = 'docker port %s 22' % self.container_id
-		docker_command = 'ssh %s@localhost -oStrictHostKeyChecking=no -oLogLevel=error -p $(%s) %s' % (self.container_username, retrieve_ssh_port_command, pipes.quote(command))
+		docker_command = 'ssh %s@localhost %s -p $(%s) %s' % (
+			self.container_username, ssh_options, retrieve_ssh_port_command, pipes.quote(command)
+		)
 		return self.virtual_machine.ssh_call(docker_command, output_handler, timeout)
 
 	def delete(self):
