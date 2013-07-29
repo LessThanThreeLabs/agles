@@ -17,7 +17,7 @@ class VirtualMachineBuildCore(object):
 	def teardown(self):
 		raise NotImplementedError()
 
-	def setup_build(self, repo_uri, repo_type,  ref, private_key, console_appender=None):
+	def setup_build(self, repo_uri, repo_type, ref, private_key, console_appender=None):
 		self.setup_virtual_machine(private_key, console_appender)
 
 	def _get_output_handler(self, console_appender, type, subtype=""):

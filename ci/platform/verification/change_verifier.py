@@ -56,7 +56,7 @@ class ChangeVerifier(EventSubscriber):
 			workers_spawned = event.Event()
 			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned)
 			workers_spawned.wait()
-		except Exception as e:
+		except:
 			self.logger.critical("Unexpected failure while verifying change %d, commit %d. Failing change." % (change_id, commit_id), exc_info=True)
 			self.results_handler.fail_change(change_id)
 
@@ -119,7 +119,7 @@ class ChangeVerifier(EventSubscriber):
 			'''
 			if not change_started.ready():
 				change_started.send(False)
-				self.logger.error("Prematurely failed change %d" % 3, exc_info=exc_info)
+				self.logger.error("Prematurely failed change %d" % change_id, exc_info=exc_info)
 				fail_change()
 
 		def setup_worker():
