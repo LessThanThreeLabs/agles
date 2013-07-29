@@ -552,7 +552,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo = Repo(repo_path)
 		repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
 		try:
-			self._git_push_with_private_key(repo_slave, "git", "origin", ':'.join(["", target]), force=True)
+			self._git_push_with_private_key(repo_slave, "origin", ':'.join(["", target]), force=True)
 		except GitCommandError:
 			self.logger.warn("Failed to delete local branch", exc_info=True)
 
