@@ -14,10 +14,7 @@ import database.schema
 from database.engine import ConnectionFactory
 from license.verifier import HttpLicenseKeyVerifier, LicenseVerifier, LicensePermissionsHandler
 from model_server.rpc_handler import ModelServerRpcHandler
-from settings.aws import AwsSettings
 from settings.deployment import DeploymentSettings
-from settings.verification_server import VerificationServerSettings
-from settings.web_server import WebServerSettings
 from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi
@@ -30,15 +27,12 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def initialize_deployment(self, user_id, test_mode=False):
-		private_key = RSA.generate(2048)
-		public_key = private_key.publickey()
 		server_id = str(uuid.uuid1())
 
 		self.update_setting("mail", "test_mode", test_mode)
 		self.update_setting("deployment", "initialized", True)
 		self.update_setting("deployment", "server_id", server_id)
-		self.update_setting("store", "ssh_private_key", private_key.exportKey())
-		self.update_setting("store", "ssh_public_key", public_key.exportKey('OpenSSH'))
+		self.regenerate_ssh_key()
 		if not test_mode:
 			LicenseVerifier(HttpLicenseKeyVerifier(), LicensePermissionsHandler()).handle_once()
 
@@ -90,28 +84,28 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def set_website_domain_name(self, user_id, domain_name):
-		WebServerSettings.domain_name = domain_name
+		self.update_setting("web_server", "domain_name", domain_name)
 
 	@AdminApi
 	def set_cloud_provider(self, user_id, cloud_provider):
-		VerificationServerSettings.cloud_provider = cloud_provider
+		self.update_setting("verification_server", "cloud_provider", cloud_provider)
 
 	@AdminApi
 	def set_aws_keys(self, user_id, access_key, secret_key, validate=True):
 		if validate and not Ec2Client.validate_credentials(access_key, secret_key):
 			raise InvalidConfigurationException(access_key, secret_key)
-		AwsSettings.aws_access_key_id = access_key
-		AwsSettings.aws_secret_access_key = secret_key
+		self.update_setting("aws", "aws_access_key_id", access_key)
+		self.update_setting("aws", "aws_secret_access_key", secret_key)
 
 	@AdminApi
 	def set_s3_bucket_name(self, user_id, bucket_name):
-		AwsSettings.s3_bucket_name = bucket_name
+		self.update_setting("aws", "s3_bucket_name", bucket_name)
 
 	@AdminApi
 	def set_instance_settings(self, user_id, instance_size, min_unallocated, max_verifiers):
-		AwsSettings.instance_type = instance_size
-		VerificationServerSettings.static_pool_size = min_unallocated
-		VerificationServerSettings.max_virtual_machine_count = max_verifiers
+		self.update_setting("aws", "instance_type", instance_size)
+		self.update_setting("verification_server", "static_pool_size", min_unallocated)
+		self.update_setting("verification_server", "max_virtual_machine_count", max_verifiers)
 		self.publish_event("system_settings", None, "instance settings updated",
 			instance_size=instance_size,
 			min_unallocated=min_unallocated,
@@ -123,13 +117,20 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def set_license_key(self, user_id, license_key):
-		DeploymentSettings.license_key = license_key
+		self.update_setting("deployment", "license_key", license_key)
 
 	@AdminApi
 	def regenerate_api_key(self, user_id):
 		new_admin_api_key = ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(32))
-		DeploymentSettings.admin_api_key = new_admin_api_key
+		self.update_setting("deployment", "admin_api_key", new_admin_api_key)
 		return new_admin_api_key
+
+	@AdminApi
+	def regenerate_ssh_key(self, user_id):
+		private_key = RSA.generate(2048)
+		public_key = private_key.publickey()
+		self.update_setting("store", "ssh_private_key", private_key.exportKey())
+		self.update_setting("store", "ssh_public_key", public_key.exportKey('OpenSSH'))
 
 	@AdminApi
 	def upgrade_deployment(self, user_id):
