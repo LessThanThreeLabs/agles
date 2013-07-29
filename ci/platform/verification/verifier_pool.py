@@ -230,7 +230,11 @@ class VirtualMachineVerifierPool(VerifierPool):
 
 	def spawn_verifier(self, verifier_number):
 		virtual_machine = self.spawn_virtual_machine(verifier_number)
-		virtual_machine.wait_until_ready()
+		try:
+			virtual_machine.wait_until_ready()
+		except:
+			virtual_machine.delete()
+			raise
 		return BuildVerifier(CloudBuildCore(virtual_machine, self.uri_translator))
 
 	def spawn_virtual_machine(self, virtual_machine_number):
