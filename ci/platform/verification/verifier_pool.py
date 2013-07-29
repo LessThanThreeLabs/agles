@@ -199,7 +199,7 @@ class VerifierPool(object):
 		excess_unallocated = len(self.unallocated_slots) - new_min
 		for i in xrange(excess_unallocated):
 			to_free = self.unallocated_slots.pop()
-			del self.verifiers[to_free]
+			self.remove_verifier(to_free)
 			self.free_slots.put(to_free)
 
 	def _increase_pool_size(self):
