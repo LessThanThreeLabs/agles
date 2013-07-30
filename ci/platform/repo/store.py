@@ -391,7 +391,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def _hg_push_with_private_key(self, repo, remote_repo):
 		self.logger.info("Attempting to push repo to forward url %s" % remote_repo)
-		repo.push(remote_repo, ssh="GIT_PRIVATE_KEY_PATH=%s %s" % (self._get_private_key_path(), self.SSH_WITH_PRIVATE_KEY_SCRIPT))
+		repo.push(remote_repo, newbranch=True, ssh="GIT_PRIVATE_KEY_PATH=%s %s" % (self._get_private_key_path(), self.SSH_WITH_PRIVATE_KEY_SCRIPT))
 
 	def _git_fetch_with_private_key(self, repo, *args, **kwargs):
 		self.logger.info("Attempting to fetch to repo %s" % repo)
