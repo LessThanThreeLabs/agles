@@ -173,6 +173,9 @@ class ChangeVerifier(EventSubscriber):
 	def _get_verification_config(self, commit_id):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
+			attributes = model_server_rpc.get_repo_attributes(repo_uri)
+
+		repo_name = attributes['repo']['name']
 		ref = pathgen.hidden_ref(commit_id)
 
 		if self.uri_translator:
@@ -193,10 +196,10 @@ class ChangeVerifier(EventSubscriber):
 				break
 
 		try:
-			return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))
+			return VerificationConfig(repo_name, config_dict.get("compile", {}), config_dict.get("test", {}))
 		except:
 			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=True)
-			return VerificationConfig({}, {})
+			return VerificationConfig(repo_name, {}, {})
 
 	def _is_result_failed(self, result):
 		return isinstance(result, Exception)

@@ -27,9 +27,10 @@ class NullRemoteCommand(RemoteCommand):
 
 
 class RemoteShellCommand(RemoteCommand):
-	def __init__(self, type, step_info, advertise_commands=True):
+	def __init__(self, type, repo_name, step_info, advertise_commands=True):
 		super(RemoteShellCommand, self).__init__()
 		self.type = type
+		self.repo_name = repo_name
 		self.advertise_commands = advertise_commands
 		self.name, self.path, self.commands, self.timeout, self.export = self._parse_step(step_info)
 
@@ -101,7 +102,7 @@ class RemoteShellCommand(RemoteCommand):
 
 	def _to_executed_script(self):
 		full_command = "&&\n".join(map(self._advertised_command, self.commands))
-		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join('source', self.path) if self.path else 'source'))
+		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join(self.repo_name, self.path) if self.path else self.repo_name))
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
 		script += "timeout -s KILL %d timeout -s INT %d bash --login -c %s\n" % (self.timeout + 3, self.timeout, pipes.quote(full_command))
 		script += "_r=$?\n"
@@ -117,8 +118,8 @@ class RemoteShellCommand(RemoteCommand):
 
 
 class RemoteCompileCommand(RemoteShellCommand):
-	def __init__(self, compile_step):
-		super(RemoteCompileCommand, self).__init__("compile", compile_step)
+	def __init__(self, repo_name, compile_step):
+		super(RemoteCompileCommand, self).__init__("compile", repo_name, compile_step)
 
 	def _to_script(self):
 		script = self._to_executed_script()
@@ -129,7 +130,7 @@ class RemoteCompileCommand(RemoteShellCommand):
 				export_parent = os.path.dirname(export.strip(os.path.sep))
 				script += "cd; mkdir -p %s\n" % pipes.quote(os.path.join(export_directory, export_parent))
 				script += "ln -s $(pwd)/%s %s\n" % (
-					pipes.quote(os.path.join('source', export)),
+					pipes.quote(os.path.join(self.repo_name, export)),
 					pipes.quote(os.path.join(export_directory, export))
 				)
 
@@ -138,8 +139,8 @@ class RemoteCompileCommand(RemoteShellCommand):
 
 
 class RemoteTestCommand(RemoteShellCommand):
-	def __init__(self, test_step):
-		super(RemoteTestCommand, self).__init__("test", test_step)
+	def __init__(self, repo_name, test_step):
+		super(RemoteTestCommand, self).__init__("test", repo_name, test_step)
 
 	def _to_script(self):
 		script = self._to_executed_script()
@@ -150,12 +151,12 @@ class RemoteTestCommand(RemoteShellCommand):
 				export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name)
 				script += "cd; mkdir -p %s\n" % pipes.quote(os.path.join(export_directory, export_parent))
 				script += "if [ -d %s ]; then mv %s %s; mkdir -p %s\n" % (
-					pipes.quote(os.path.join('source', export)),
-					pipes.quote(os.path.join('source', export)), pipes.quote(os.path.join(export_directory, export)),
-					pipes.quote(os.path.join('source', export))
+					pipes.quote(os.path.join(self.repo_name, export)),
+					pipes.quote(os.path.join(self.repo_name, export)), pipes.quote(os.path.join(export_directory, export)),
+					pipes.quote(os.path.join(self.repo_name, export))
 				)
 				script += "else mv %s %s; fi\n" % (
-					pipes.quote(os.path.join('source', export)),
+					pipes.quote(os.path.join(self.repo_name, export)),
 					pipes.quote(os.path.join(export_directory, export))
 				)
 
@@ -164,8 +165,8 @@ class RemoteTestCommand(RemoteShellCommand):
 
 
 class RemoteTestFactoryCommand(RemoteShellCommand):
-	def __init__(self, partition_step):
-		super(RemoteTestFactoryCommand, self).__init__("partition", partition_step, advertise_commands=False)
+	def __init__(self, repo_name, test_factory_step):
+		super(RemoteTestFactoryCommand, self).__init__("test factory", repo_name, test_factory_step, advertise_commands=False)
 
 
 class RemoteSetupCommand(RemoteCommand):
@@ -186,12 +187,13 @@ class RemoteCheckoutCommand(RemoteSetupCommand):
 
 
 class RemoteProvisionCommand(RemoteSetupCommand):
-	def __init__(self, private_key):
+	def __init__(self, repo_name, private_key):
 		super(RemoteProvisionCommand, self).__init__("provision")
+		self.repo_name = repo_name
 		self.private_key = private_key
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.provision(self.private_key, output_handler=output_handler)
+		return virtual_machine.provision(self.repo_name, self.private_key, output_handler=output_handler)
 
 
 class RemoteExportCommand(RemoteCommand):

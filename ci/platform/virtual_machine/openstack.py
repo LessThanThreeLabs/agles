@@ -1,3 +1,4 @@
+import pipes
 import platform
 import socket
 
@@ -153,9 +154,6 @@ class OpenstackVm(VirtualMachine):
 				return None
 			elif vm.instance.state == NodeState.TERMINATED:
 				return None
-			elif vm.instance.state == NodeState.RUNNING and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
-				vm.delete()
-				return None
 			elif vm.instance.state not in (NodeState.RUNNING, NodeState.PENDING):
 				cls.logger.critical("Found VM %s in unexpected %s state.\nState map: %s" % (vm, vm.instance.state, client.NODE_STATE_MAP))
 				vm.delete()
@@ -186,8 +184,8 @@ class OpenstackVm(VirtualMachine):
 			self.logger.warn("Unable to ssh into VM %s" % self)
 			self.rebuild()
 
-	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
+	def provision(self, repo_name, private_key, output_handler=None):
+		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision %s %s" % (pipes.quote(repo_name), pipes.quote(private_key)),
 			timeout=3600, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):

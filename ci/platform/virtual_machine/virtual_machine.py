@@ -16,7 +16,7 @@ class VirtualMachine(object):
 		self.vm_username = vm_username
 		self._redis_conn = redis_connection or ConnectionFactory.get_redis_connection('virtual_machine')
 
-	def provision(self, private_key, output_handler=None):
+	def provision(self, repo_name, private_key, output_handler=None):
 		raise NotImplementedError()
 
 	def export(self, export_prefix, files, output_handler=None):
@@ -75,9 +75,9 @@ class VirtualMachine(object):
 		def _remote_fetch():
 			host_url = git_url[:git_url.find(":")]
 			command = ' && '.join([
-				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; git init source))' % repo_name,
+				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; git init %s))' % (repo_name, repo_name, repo_name, repo_name),
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				'cd source',
+				'cd %s' % repo_name,
 				'git fetch %s %s -n --depth 1' % (git_url, ref),
 				'git checkout FETCH_HEAD'])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
@@ -86,13 +86,13 @@ class VirtualMachine(object):
 			return results
 		return self._ssh_authorized(_remote_fetch, output_handler)
 
-	def remote_clone(self, git_url, output_handler=None):
+	def remote_clone(self, repo_name, git_url, output_handler=None):
 		def _remote_clone():
 			host_url = git_url[:git_url.find(":")]
 			command = ' && '.join([
-				'if [ -e source ]; then rm -rf source; fi',  # Make sure there's no "source" directory. Especially important for retries
+				'if [ -e %s ]; then rm -rf %s; fi' % (repo_name, repo_name),
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				'git clone %s source' % git_url])
+				'git clone %s %s' % (git_url, repo_name)])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to clone %s, results: %s" % (git_url, results))
@@ -117,8 +117,8 @@ class VirtualMachine(object):
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 
 	def cache_repository(self, repo_name, output_handler=None):
-		return self.ssh_call(';'.join(('sudo chown -R %s:%s source' % (self.vm_username, self.vm_username),
-			'mv source /repositories/cached/%s || rm -rf source' % repo_name)), output_handler)
+		return self.ssh_call(';'.join(('sudo chown -R %s:%s %s' % (self.vm_username, self.vm_username, repo_name),
+			'mv %s /repositories/cached/%s || rm -rf %s' % (repo_name, repo_name, repo_name))), output_handler)
 
 	@classmethod
 	def get_newest_image(cls):
