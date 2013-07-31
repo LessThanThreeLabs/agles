@@ -103,13 +103,13 @@ class VirtualMachine(object):
 			self.logger.error("Unknown repository type in remote_checkout %s." % repo_type)
 
 	# TODO(andrey) make this work for hg (easy)
-	def remote_clone(self, repo_url, output_handler=None):
+	def remote_clone(self, repo_type, repo_url, output_handler=None):
 		def _remote_clone():
 			host_url = repo_url[:repo_url.find(":")]
 			command = ' && '.join([
 				'if [ -e source ]; then rm -rf source; fi',  # Make sure there's no "source" directory. Especially important for retries
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				'git clone %s source' % repo_url])
+				'%s clone %s source' % (repo_type, repo_url)])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to clone %s, results: %s" % (repo_url, results), exc_info=True)

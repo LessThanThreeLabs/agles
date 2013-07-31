@@ -81,7 +81,7 @@ def snapshot():
 		uri_translator = RepositoryUriTranslator()
 		for repository in repositories:
 			print 'Cloning repository "%s"' % repository['name']
-			if virtual_machine.remote_clone(uri_translator.translate(repository['uri'])).returncode != 0:
+			if virtual_machine.remote_clone(repository['type'], uri_translator.translate(repository['uri'])).returncode != 0:
 				raise Exception('Failed to clone repository "%s"' % repository['name'])
 			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv source /repositories/cached/%s' % (repository['name'], repository['name']))
 
