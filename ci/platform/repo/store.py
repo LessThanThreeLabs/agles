@@ -124,14 +124,14 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{str(repostore_id): num_repos})
 
 	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
-		assert repo_name.endswith(".git")
+		repo_name += '.git'
 		assert isinstance(repo_id, int)
 
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.merge_changeset(repo_id, repo_name, ref_to_merge, ref_to_merge_into)
 
 	def create_repository(self, repostore_id, repo_id, repo_name):
-		assert repo_name.endswith(".git")
+		repo_name += '.git'
 		assert isinstance(repo_id, int)
 
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
@@ -139,7 +139,7 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		self._update_store_repo_count(repostore_id)
 
 	def delete_repository(self, repostore_id, repo_id, repo_name):
-		assert repo_name.endswith(".git")
+		repo_name += '.git'
 		assert isinstance(repo_id, int)
 
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id)) as client:
@@ -159,8 +159,8 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 			return client.store_pending(repo_id, repo_name, sha, commit_id)
 
 	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
-		assert old_repo_name.endswith(".git")
-		assert new_repo_name.endswith(".git")
+		old_repo_name += '.git'
+		new_repo_name += '.git'
 		assert isinstance(repo_id, int)
 
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:

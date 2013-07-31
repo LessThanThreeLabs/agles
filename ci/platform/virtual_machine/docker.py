@@ -24,8 +24,8 @@ class DockerVm(VirtualMachine):
 		if self.container_id is None:
 			self._containerize_vm()
 
-	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
+	def provision(self, repo_name, private_key, output_handler=None):
+		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision %s %s" % (pipes.quote(repo_name), pipes.quote(private_key)),
 			timeout=3600, output_handler=output_handler)
 
 	def export(self, export_prefix, filepath, output_handler=None):

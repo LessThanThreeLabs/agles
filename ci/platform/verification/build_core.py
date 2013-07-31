@@ -9,7 +9,7 @@ from virtual_machine.remote_command import RemoteCheckoutCommand, RemoteExportCo
 
 @Logged()
 class VirtualMachineBuildCore(object):
-	def __init__(self, virtual_machine, uri_translator=None):
+	def __init__(self, virtual_machine, uri_translator):
 		self.virtual_machine = virtual_machine
 		self.uri_translator = uri_translator
 
@@ -23,14 +23,15 @@ class VirtualMachineBuildCore(object):
 		raise NotImplementedError()
 
 	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
-		self.setup_virtual_machine(private_key, console_appender)
+		repo_name = self.uri_translator.extract_repo_name(repo_uri)
+		self.setup_virtual_machine(repo_name, private_key, console_appender)
 
 	def _get_output_handler(self, console_appender, type, subtype=""):
 		return console_appender(type, subtype) if console_appender else None
 
-	def setup_virtual_machine(self, private_key, console_appender, setup_commands=[]):
+	def setup_virtual_machine(self, repo_name, private_key, console_appender, setup_commands=[]):
 		"""Provisions the contained virtual machine for analysis and test running"""
-		provision_command = RemoteProvisionCommand(private_key)
+		provision_command = RemoteProvisionCommand(repo_name, private_key)
 		setup_commands = setup_commands + [provision_command]
 		for setup_command in setup_commands:
 			self.run_setup_command(setup_command, console_appender)
@@ -124,7 +125,7 @@ class VagrantBuildCore(VirtualMachineBuildCore):
 
 
 class CloudBuildCore(VirtualMachineBuildCore):
-	def __init__(self, cloud_vm, uri_translator=None):
+	def __init__(self, cloud_vm, uri_translator):
 		super(CloudBuildCore, self).__init__(cloud_vm, uri_translator)
 
 	def setup(self):
@@ -154,7 +155,7 @@ class CloudBuildCore(VirtualMachineBuildCore):
 		checkout_url = self.uri_translator.translate(repo_uri)
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		checkout_command = RemoteCheckoutCommand(repo_name, checkout_url, ref)
-		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
+		super(CloudBuildCore, self).setup_virtual_machine(repo_name, private_key, console_appender, [checkout_command])
 
 
 class VerificationException(Exception):

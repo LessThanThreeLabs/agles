@@ -30,10 +30,9 @@ class ReposCreateHandler(ModelServerRpcHandler):
 					repo_count = sqlconn.execute(query).rowcount
 				if repo_count >= max_repo_count:
 					raise RepositoryCreateError("Already have the maximum allowed number of repositories (%d)" % max_repo_count)
-			repo_name += ".git"
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 			repostore_id = manager.get_least_loaded_store()
-			uri = repo_name  # email addresses in uri don't make sense anymore
+			uri = repo_name + '.git'  # email addresses in uri don't make sense anymore
 			current_time = int(time.time())
 
 			# Set entries in db

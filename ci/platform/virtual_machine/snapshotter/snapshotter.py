@@ -112,7 +112,7 @@ class Snapshotter(object):
 			self.logger.info('Cloning repository "%s"' % repository['name'])
 			if virtual_machine.remote_clone(uri_translator.translate(repository['uri'])).returncode != 0:
 				raise Exception('Failed to clone repository "%s"' % repository['name'])
-			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv source /repositories/cached/%s' % (repository['name'], repository['name']))
+			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv %s /repositories/cached/%s' % (repository['name'], repository['name'], repository['name']))
 
 	def provision_for_repository(self, virtual_machine, repository, changes, uri_translator):
 		branch_counter = Counter(map(lambda change: change['merge_target'], filter(lambda change: change['repo_id'] == repository['id'], changes)))
