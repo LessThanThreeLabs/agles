@@ -8,7 +8,7 @@ from settings.store import StoreSettings
 from shared.constants import VerificationUser
 from util import pathgen
 from util.permissions import InvalidPermissionsError
-REPO_PATH_PATTERN = r"[^ \t\n\r\f\v']*\.git"
+REPO_PATH_PATTERN = r"\S+\.git"
 
 
 class RestrictedGitShell(object):
@@ -47,11 +47,12 @@ class RestrictedGitShell(object):
 			except:
 				raise InvalidPermissionsError("User %s does not have the necessary permissions to run %s on repository %d" % (user_id, command, repo_id))
 
-	def _validate(self, repo_path):
-		if not repo_path.endswith(".git"):
-			raise MalformedCommandError('repo_path: %s. Repositories must end in ".git".' % repo_path)
+	def _validate_repo_path(self, repo_path):
 		if ".." in repo_path:
 			raise MalformedCommandError('repo_path: %s. Repository path cannot contain "..".' % repo_path)
+		if not repo_path.endswith('.git'):
+			repo_path = repo_path + '.git'
+		return repo_path
 
 	def rp_new_sshargs(self, command, requested_repo_uri, user_id):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
@@ -75,7 +76,7 @@ class RestrictedGitShell(object):
 			if attributes is None:
 				raise RepositoryNotFoundError(requested_repo_uri)
 
-		self.verify_user_exists("jgit upload-pack", user_id, attributes['repo']['id'])
+		self.verify_user_exists("git upload-pack", user_id, attributes['repo']['id'])
 
 		if int(user_id) == VerificationUser.id:
 			remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
@@ -118,7 +119,7 @@ class RestrictedGitShell(object):
 			raise InvalidCommandError(full_ssh_command)
 
 		repo_path = command_parts[1].strip("'")  # command_parts[1] should always be a repo path in any command
-		self._validate(repo_path)
+		repo_path = self._validate_repo_path(repo_path)
 		command_parts[1] = self._get_requested_repo_uri(repo_path)
 		self._git_command_handlers[command_parts[0]](*command_parts[1:])
 
