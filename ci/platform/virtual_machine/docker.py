@@ -69,7 +69,7 @@ class DockerVm(VirtualMachine):
 	def _containerize_vm(self):
 		docker_construction_command = '&&'.join((
 			'[ -f ~/.ssh/id_rsa.pub ] || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa > /dev/null 2>&1',
-			'SSH_PUBLIC_KEY=$(cat ~/.ssh/id_rsa.pub',
+			'SSH_PUBLIC_KEY=$(cat ~/.ssh/id_rsa.pub)',
 			'docker run -d -p 22 %s /init %s "$SSH_PUBLIC_KEY"' % (self.CONTAINER_NAME, self.container_username)
 		))
 		container_construction_result = self.virtual_machine.ssh_call('bash -c %s' % pipes.quote(docker_construction_command))
