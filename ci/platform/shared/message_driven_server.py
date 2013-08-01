@@ -1,3 +1,5 @@
+import sys
+
 import eventlet
 
 from kombu.connection import Connection
@@ -33,5 +35,6 @@ class MessageDrivenServer(object):
 			while True:
 				connection.drain_events()
 		except:
-			self.logger.critical("Server IOloop exited", exc_info=True)
-			raise
+			exc_info = sys.exc_info()
+			self.logger.critical("Server IOloop exited", exc_info=exc_info)
+			raise exc_info

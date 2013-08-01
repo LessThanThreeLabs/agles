@@ -6,7 +6,6 @@ import database.schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from util.sql import to_dict, load_temp_strings
-from util.permissions import InvalidPermissionsError
 
 
 class ChangesReadHandler(ModelServerRpcHandler):
@@ -64,7 +63,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				'commit': commit_dict,
 			}
 
-		raise InvalidPermissionsError(user_id, change_id)
+		raise NoSuchChangeError(change_id)
 
 	def get_visible_builds_from_change_id(self, user_id, change_id):
 		build = database.schema.build
@@ -163,7 +162,11 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			export_uris = [row[change_export_uri.c.uri] for row in sqlconn.execute(query)]
-		return export_uris
+		return sorted(export_uris)
 
 	def can_hear_change_events(self, user_id, id_to_listen_to):
 		return True
+
+
+class NoSuchChangeError(Exception):
+	pass

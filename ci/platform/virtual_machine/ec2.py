@@ -1,7 +1,9 @@
 import logging
 import pipes
+import platform
 import re
 import socket
+import sys
 
 import boto.ec2
 import eventlet
@@ -48,13 +50,13 @@ class Ec2Client(object):
 
 @Logged()
 class Ec2Vm(VirtualMachine):
-	VM_INFO_FILE = ".virtualmachine"
-	VM_USERNAME = "lt3"
+	VM_USERNAME = 'lt3'
+
+	CloudClient = Ec2Client.get_client
+	Settings = AwsSettings
 
 	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
-		super(Ec2Vm, self).__init__(vm_id)
-		self.instance = instance
-		self.vm_username = vm_username
+		super(Ec2Vm, self).__init__(vm_id, instance, vm_username)
 		self.store_vm_info()
 
 	@classmethod
@@ -73,11 +75,11 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
-		instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type,
+		instance = cls.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
 			user_data=cls._default_user_data(vm_username)).instances[0]
 		cls._name_instance(instance, name)
-		return Ec2Vm(vm_id, instance)
+		return Ec2Vm(vm_id, instance, vm_username)
 
 	@classmethod
 	def _default_user_data(cls, vm_username=VM_USERNAME):
@@ -93,29 +95,36 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _validate_security_group(cls, security_group):
 		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
-		own_security_groups = Ec2Vm._call(['ec2metadata', '--security-groups']).output.split('\n')
+		if platform.system() == 'Darwin':
+			own_security_groups = []
+		else:
+			own_security_groups = cls._call(['ec2metadata', '--security-groups']).output.split('\n')
 		group = cls._get_or_create_security_group(security_group)
 		for rule in group.rules:
 			if (rule.ip_protocol == 'tcp' and
-				rule.from_port == '22' and
-				rule.to_port == '22'):
+				int(rule.from_port) <= 22 and
+				int(rule.to_port) >= 22):
 				for grant in rule.grants:
-					if grant.cidr_ip == cidr_ip or grant.name in own_security_groups:
-						cls.logger.debug('Found ssh authorization rule on security group "%s"' % security_group)
+					if grant.cidr_ip == cidr_ip:
+						cls.logger.debug('Found ssh authorization rule on security group "%s" for ip "%s"' % (security_group, cidr_ip))
 						return
-		cls.logger.info('Adding ssh authorization rule to security group "%s"' % security_group)
+					elif grant.name in own_security_groups:
+						cls.logger.debug('Found ssh authorization rule on security group "%s" for security group "%s"' % (security_group, grant.name))
+						return
+		cls.logger.info('Adding ssh authorization rule to security group "%s" for ip "%s"' % (security_group, cidr_ip))
 		group.authorize('tcp', '22', '22', cidr_ip, None)
+		return group
 
 	@classmethod
 	def _get_or_create_security_group(cls, security_group):
-		ec2_client = Ec2Client.get_client()
+		ec2_client = cls.CloudClient()
 		groups = filter(lambda group: group.name == security_group, ec2_client.get_all_security_groups())
 		if groups:
-			cls.logger.debug('Found existing security_group "%s"' % security_group)
+			cls.logger.debug('Found existing security group "%s"' % security_group)
 			group = groups[0]
 		else:
 			cls.logger.info('Creating new security group "%s"' % security_group)
-			group = ec2_client.create_security_group(security_group, "Auto-generated Koality verification security group")
+			group = ec2_client.create_security_group(security_group, 'Auto-generated Koality verification security group')
 		return group
 
 	@classmethod
@@ -130,13 +139,13 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
 		try:
-			client = Ec2Client.get_client()
+			client = cls.CloudClient()
 			reservations = client.get_all_instances(filters={'instance-id': instance_id})
 			if not reservations:
 				return None
 			vm = Ec2Vm(vm_id, reservations[0].instances[0], vm_username)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
-				cls.logger.warn("Found VM (%s, %s) in %s state" % (vm_id, vm.instance.state, instance_id))
+				cls.logger.warn("Found VM %s in %s state" % (vm, vm.instance.state))
 				vm.delete()
 				return None
 			elif vm.instance.state == 'shutting-down' or vm.instance.state == 'terminated':
@@ -145,7 +154,7 @@ class Ec2Vm(VirtualMachine):
 				vm.delete()
 				return None
 			elif vm.instance.state not in ('running', 'pending'):
-				cls.logger.critical("Found VM (%s, %s) in unexpected %s state" % (vm_id, instance_id, vm.instance.state))
+				cls.logger.critical("Found VM %s in unexpected %s state" % (vm, vm.instance.state))
 				vm.delete()
 				return None
 			return vm
@@ -154,7 +163,7 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _name_instance(cls, instance, name):
-		ec2_client = Ec2Client.get_client()
+		ec2_client = cls.CloudClient()
 		#  Wait until EC2 recognizes that the instance exists
 		while True:
 			if ec2_client.get_all_instances(filters={'instance-id': instance.id}):
@@ -173,23 +182,30 @@ class Ec2Vm(VirtualMachine):
 				eventlet.sleep(1)  # Sometimes EC2 doesn't recognize that an instance exists yet
 
 	def wait_until_ready(self):
-		self.instance.update()
-		while not self.instance.state == 'running':
-			eventlet.sleep(3)
+		def handle_error(exc_info=None):
+			self.logger.warn("VM %s in error state while waiting for startup" % self, exc_info=exc_info)
+			self.rebuild()
+
+		try:
 			self.instance.update()
-			if self.instance.state == 'terminated' or self.instance.state == 'stopped':
-				self.logger.warn("VM (%s, %s) in error state while waiting for startup" % (self.vm_id, self.instance.id))
-				self.rebuild()
-		for remaining_attempts in range(24, 0, -1):
-			if remaining_attempts <= 3:
-				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
-			if self.ssh_call("true", timeout=30).returncode == 0:
-				return
-			eventlet.sleep(3)
-			self.instance.update()
-		# Failed to ssh into machine, try again
-		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
-		self.rebuild()
+			while not self.instance.state == 'running':
+				eventlet.sleep(3)
+				self.instance.update()
+				if self.instance.state in ['stopped', 'terminated']:
+					handle_error()
+			for remaining_attempts in reversed(range(20)):
+				if remaining_attempts <= 2:
+					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
+				if self.ssh_call("true", timeout=10).returncode == 0:
+					return
+				eventlet.sleep(3)
+				self.instance.update()
+		except:
+			handle_error(sys.exc_info())
+		else:
+			# Failed to ssh into machine, try again
+			self.logger.warn("Unable to ssh into VM %s" % self)
+			self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
@@ -209,14 +225,16 @@ class Ec2Vm(VirtualMachine):
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		login = "%s@%s" % (self.vm_username, self.instance.private_ip_address)
-		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
+		return self.call(["ssh",
+			"-oLogLevel=error", "-oStrictHostKeyChecking=no", "-oUserKnownHostsFile=/dev/null",
+			login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
 		self.instance.reboot()
 
 	@classmethod
 	def get_all_images(cls):
-		return Ec2Client.get_client().get_all_images(
+		return cls.CloudClient().get_all_images(
 			filters={
 				'name': AwsSettings.vm_image_name_prefix + '*',
 				'state': 'available'
@@ -224,19 +242,18 @@ class Ec2Vm(VirtualMachine):
 		)
 
 	def create_image(self, name, description=None):
-		return Ec2Client.get_client().create_image(self.instance.id, name, description)
+		return self.CloudClient().create_image(self.instance.id, name, description)
 
-	def rebuild(self, ami_image_id=None):
-		if not ami_image_id:
-			ami_image_id = self.get_newest_image().id
+	def rebuild(self):
+		ami_image_id = self.get_newest_image().id
 		instance_type = self.instance.instance_type
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')
 
 		security_group = AwsSettings.security_group
-		cls._validate_security_group(security_group)
+		self._validate_security_group(security_group)
 
-		self.instance = Ec2Client.get_client().run_instances(ami_image_id, instance_type=instance_type,
+		self.instance = self.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
 			user_data=self._default_user_data(self.vm_username)).instances[0]
 		self._name_instance(self.instance, instance_name)
@@ -246,7 +263,7 @@ class Ec2Vm(VirtualMachine):
 
 	def delete(self):
 		if 'Name' in self.instance.tags:
-			instances = [reservation.instances[0] for reservation in Ec2Client.get_client().get_all_instances(
+			instances = [reservation.instances[0] for reservation in self.CloudClient().get_all_instances(
 				filters={'tag:Name': self.instance.tags['Name']})]
 			for instance in instances:  # Clean up rogue VMs
 				self._safe_terminate(instance)

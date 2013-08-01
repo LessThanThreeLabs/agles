@@ -58,10 +58,14 @@ class ReposReadHandler(ModelServerRpcHandler):
 			)
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row_result = sqlconn.execute(query).first()
-		if not row_result:
+			row = sqlconn.execute(query).first()
+		if row:
+			return {
+				'repo': to_dict(row, repo.columns, tablename=repo.name),
+				'repostore': to_dict(row, repostore.columns, tablename=repostore.name)
+			}
+		else:
 			return None
-		return row_result[repostore.c.id], row_result[repostore.c.ip_address], row_result[repostore.c.repositories_path], row_result[repo.c.id], row_result[repo.c.name], row_result[repo.c.type]
 
 	def get_user_id_from_public_key(self, key):
 		ssh_pubkey = database.schema.ssh_pubkey
@@ -106,8 +110,11 @@ class ReposReadHandler(ModelServerRpcHandler):
 		query = repo.select().where(repo.c.id == repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-		assert row is not None
-		return to_dict(row, repo.columns)
+
+		if row:
+			return to_dict(row, repo.columns)
+		else:
+			raise NoSuchRepositoryError(repo_id)
 
 	def can_hear_repository_events(self, user_id, id_to_listen_to):
 		return True
@@ -123,3 +130,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			return row[repo.c.forward_url] if row else None
+
+
+class NoSuchRepositoryError(Exception):
+	pass

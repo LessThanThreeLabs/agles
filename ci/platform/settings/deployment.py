@@ -9,6 +9,7 @@ class DeploymentSettings(DatabaseBackedSettings):
 			active=False,
 			server_id=None,
 			admin_api_key=None,
+			admin_api_active=None,
 			initialized=False,
 			upgrade_status=None,
 			license_key=None,

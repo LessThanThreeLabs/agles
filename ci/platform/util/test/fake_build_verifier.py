@@ -24,9 +24,7 @@ class FakeVirtualMachine(VirtualMachine):
 			self.id = id
 
 	def __init__(self, vm_id):
-		super(FakeVirtualMachine, self).__init__(vm_id)
-		self.instance = FakeVirtualMachine.Instance(vm_id)
-		self.vm_username = 'fakeusername'
+		super(FakeVirtualMachine, self).__init__(vm_id, FakeVirtualMachine.Instance(vm_id), 'fakeusername')
 
 	def provision(self, private_key, output_handler=None):
 		return self.call(["true"])

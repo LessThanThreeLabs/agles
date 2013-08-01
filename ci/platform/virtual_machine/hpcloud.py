@@ -43,13 +43,25 @@ class HpCloudVm(openstack.OpenstackVm):
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		# For some reason, hpcloud returns [<private ip>, <public ip>] as the private ips, and the private ips begin with 10.*
-		if self.instance.public_ips:
-			public_ip = self.instance.public_ips[0]
-		else:
-			public_ip = filter(lambda ip: not ip.startswith('10.'), self.instance.private_ips)[0]
-		login = "%s@%s" % (self.vm_username, public_ip)
-		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
+		private_ip = filter(lambda ip_address: ip_address.startswith('10.'), self.instance.private_ips)[0]
+		login = "%s@%s" % (self.vm_username, private_ip)
+		return self.call(["ssh",
+			"-oLogLevel=error", "-oStrictHostKeyChecking=no", "-oUserKnownHostsFile=/dev/null",
+			login, command], timeout=timeout, output_handler=output_handler)
+
+	@classmethod
+	def _get_instance_size(cls, instance_type, matching_attribute='name'):
+		return filter(lambda size: getattr(size, matching_attribute) == instance_type, cls.CloudClient().list_sizes())[0]
 
 
 class InstanceTypes(openstack.InstanceTypes):
 	CloudClient = HpCloudClient.get_client
+
+	@classmethod
+	def get_allowed_instance_types(cls):
+		largest_instance_type = LibCloudSettings.largest_instance_type
+		ordered_types = map(lambda size: size.name, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		if largest_instance_type in ordered_types:
+			return ordered_types[:ordered_types.index(largest_instance_type) + 1]
+		else:
+			return ordered_types

@@ -1,3 +1,4 @@
+import platform
 import socket
 
 import eventlet
@@ -12,8 +13,6 @@ from virtual_machine import VirtualMachine
 
 
 class OpenstackClient(object):
-	import platform
-
 	if platform.system() == 'Darwin':
 		import libcloud.security
 		libcloud.security.VERIFY_SSL_CERT_STRICT = False
@@ -41,15 +40,13 @@ class OpenstackClient(object):
 
 @Logged()
 class OpenstackVm(VirtualMachine):
-	VM_INFO_FILE = ".virtualmachine"
-	VM_USERNAME = "lt3"
+	VM_USERNAME = 'lt3'
 
 	CloudClient = OpenstackClient.get_client
+	Settings = LibCloudSettings
 
 	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
-		super(OpenstackVm, self).__init__(vm_id)
-		self.instance = instance
-		self.vm_username = vm_username
+		super(OpenstackVm, self).__init__(vm_id, instance, vm_username)
 		self.store_vm_info()
 
 	@classmethod
@@ -61,15 +58,32 @@ class OpenstackVm(VirtualMachine):
 		if not name:
 			name = "koality:%s:%s" % (socket.gethostname(), vm_id)
 		if image_id:
-			image = filter(lambda image: image.id == image_id, cls.get_all_images())[0]
+			image = filter(lambda image: str(image.id) == str(image_id), cls.get_all_images())[0]
 		else:
 			image = cls.get_newest_image()
-		instance_type = instance_type or LibCloudSettings.instance_type
-		size = filter(lambda size: size.id == instance_type, cls.CloudClient().list_sizes())[0]
+		instance_type = instance_type or cls.Settings.instance_type
+		size = cls._get_instance_size(instance_type)
+
+		security_group_name = cls.Settings.security_group
+		security_group = cls._validate_security_group(security_group_name)
+
+		cls._delete_instances_with_name(name)
 
 		instance = cls.CloudClient().create_node(name=name, image=image, size=size,
-			ex_userdata=cls._default_user_data(vm_username))
-		return cls(vm_id, instance)
+			ex_userdata=cls._default_user_data(vm_username),
+			ex_security_groups=[security_group])
+		return cls(vm_id, instance, vm_username)
+
+	@classmethod
+	def _delete_instances_with_name(cls, instance_name):
+		'''Openstack gets mad if you try to create two instances with the same name, so delete any offenders first'''
+		while True:
+			instances_with_name = filter(lambda instance: instance.name == instance_name, cls.CloudClient().list_nodes())
+			if not instances_with_name:
+				return
+			for instance in instances_with_name:
+				cls._safe_terminate(instance)
+			eventlet.sleep(3)
 
 	@classmethod
 	def _default_user_data(cls, vm_username=VM_USERNAME):
@@ -84,6 +98,41 @@ class OpenstackVm(VirtualMachine):
 			"chown -R %s:%s /home/%s/.ssh" % (vm_username, vm_username, vm_username)))
 
 	@classmethod
+	def _validate_security_group(cls, security_group):
+		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
+		# TODO: make this more generalized, but ec2metadata is usually provided for openstack clouds
+		if platform.system() == 'Darwin':
+			own_security_groups = []
+		else:
+			own_security_groups = cls._call(['ec2metadata', '--security-groups']).output.split('\n')
+		group = cls._get_or_create_security_group(security_group)
+		for rule in group.rules:
+			if (rule.ip_protocol == 'tcp' and
+				int(rule.from_port) <= 22 and
+				int(rule.to_port) >= 22):
+				if rule.ip_range == cidr_ip:
+					cls.logger.debug('Found ssh authorization rule on security group "%s" for ip "%s"' % (security_group, cidr_ip))
+					return group
+				elif rule.group and rule.group['name'] in own_security_groups and rule.group['tenant_id'] == group.tenant_id:
+					cls.logger.debug('Found ssh authorization rule on security group "%s" for security group "%s"' % (security_group, rule.group['name']))
+					return group
+		cls.logger.info('Adding ssh authorization rule to security group "%s" for ip "%s"' % (security_group, cidr_ip))
+		cls.CloudClient().ex_create_security_group_rule(group, 'tcp', 22, 22, cidr_ip, None)
+		return group
+
+	@classmethod
+	def _get_or_create_security_group(cls, security_group):
+		client = cls.CloudClient()
+		groups = filter(lambda group: group.name == security_group, client.ex_list_security_groups())
+		if groups:
+			cls.logger.debug('Found existing security group "%s"' % security_group)
+			group = groups[0]
+		else:
+			cls.logger.info('Creating new security group "%s"' % security_group)
+			group = client.ex_create_security_group(security_group, 'Auto-generated Koality verification security group')
+		return group
+
+	@classmethod
 	def from_vm_id(cls, vm_id):
 		try:
 			vm_info = cls.load_vm_info(vm_id)
@@ -96,10 +145,10 @@ class OpenstackVm(VirtualMachine):
 	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
 		try:
 			client = cls.CloudClient()
-			instance = filter(lambda instance: instance.id == instance_id, client.list_nodes())[0]
+			instance = filter(lambda instance: str(instance.id) == str(instance_id), client.list_nodes())[0]
 			vm = cls(vm_id, instance, vm_username)
 			if vm.instance.state == NodeState.REBOOTING:
-				cls.logger.warn("Found VM (%s, %s) in REBOOTING state" % (vm_id, vm.instance.state, instance_id))
+				cls.logger.warn("Found VM %s in REBOOTING state" % (vm, instance_id))
 				vm.delete()
 				return None
 			elif vm.instance.state == NodeState.TERMINATED:
@@ -108,33 +157,44 @@ class OpenstackVm(VirtualMachine):
 				vm.delete()
 				return None
 			elif vm.instance.state not in (NodeState.RUNNING, NodeState.PENDING):
-				cls.logger.critical("Found VM (%s, %s) in unexpected %s state.\nState map: %s" % (vm_id, instance_id, vm.instance.state, client.NODE_STATE_MAP))
+				cls.logger.critical("Found VM %s in unexpected %s state.\nState map: %s" % (vm, vm.instance.state, client.NODE_STATE_MAP))
 				vm.delete()
 				return None
 			return vm
 		except:
 			return None
 
+	@classmethod
+	def _get_instance_size(cls, instance_type, matching_attribute='id'):
+		return filter(lambda size: getattr(size, matching_attribute) == instance_type, cls.CloudClient().list_sizes())[0]
+
 	def wait_until_ready(self):
-		instance, ip = self.instance.driver.wait_until_running([self.instance])[0]
-		self.instance = instance
-		for remaining_attempts in range(24, 0, -1):
-			if remaining_attempts <= 3:
-				self.logger.info("Checking VM (%s, %s) for ssh access, %s attempts remaining" % (self.vm_id, self.instance.id, remaining_attempts))
-			if self.ssh_call("true").returncode == 0:
-				return
-			eventlet.sleep(3)
-		# Failed to ssh into machine, try again
-		self.logger.warn("Unable to ssh into VM (%s, %s)" % (self.vm_id, self.instance.id))
-		self.rebuild()
+		try:
+			instance, ip = self.instance.driver.wait_until_running([self.instance], timeout=240, ssh_interface='private_ips')[0]
+		except:
+			self.logger.warn("VM %s in error state while waiting for startup" % self, exc_info=True)
+			self.rebuild()
+		else:
+			self.instance = instance
+			for remaining_attempts in reversed(range(6)):
+				if remaining_attempts <= 2:
+					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
+				if self.ssh_call("true", timeout=30).returncode == 0:
+					return
+				eventlet.sleep(3)
+			# Failed to ssh into machine, try again
+			self.logger.warn("Unable to ssh into VM %s" % self)
+			self.rebuild()
 
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
 			timeout=3600, output_handler=output_handler)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.instance.public_ips[-1])
-		return self.call(["ssh", "-q", "-oStrictHostKeyChecking=no", login, command], timeout=timeout, output_handler=output_handler)
+		login = "%s@%s" % (self.vm_username, self.instance.private_ips[-1])
+		return self.call(["ssh",
+			"-oLogLevel=error", "-oStrictHostKeyChecking=no", "-oUserKnownHostsFile=/dev/null",
+			login, command], timeout=timeout, output_handler=output_handler)
 
 	def reboot(self, force=False):
 		self.instance.reboot()
@@ -146,31 +206,34 @@ class OpenstackVm(VirtualMachine):
 	def create_image(self, name, description=None):
 		self.instance.driver.ex_save_image(self.instance, name, metadata={'description': description})
 
-	def rebuild(self, image_id=None):
-		if image_id:
-			image = filter(lambda image: image.id == image_id, self.get_all_images())[0]
-		else:
-			image = self.get_newest_image()
+	def rebuild(self):
+		image = self.get_newest_image()
 		size = self.instance.size
 		if size is None:
 			if 'flavorId' in self.instance.extra:
 				flavorId = self.instance.extra['flavorId']
-				size = filter(lambda size: size.id == flavorId, self.instance.driver.list_sizes())[0]
+				size = self._get_instance_size(flavorId, 'id')
 
 		instance_name = self.instance.name
 
+		security_group_name = self.Settings.security_group
+		security_group = self._validate_security_group(security_group_name)
+
 		self.delete()
-		driver = self.instance.driver
+
+		# Use a new connection to avoid connections becoming stale and unauthorized
+		client = self.CloudClient()
 		old_instance = self.instance
 		instance_id = old_instance.id
 		while old_instance is not None and old_instance.state != NodeState.TERMINATED:
-			instances = filter(lambda instance: instance.id == instance_id, driver.list_nodes())
+			instances = filter(lambda instance: instance.id == instance_id, client.list_nodes())
 			old_instance = instances[0] if instances else None
 
 		for attempt in xrange(5):
 			try:
-				self.instance = driver.create_node(name=instance_name, image=image, size=size,
-					ex_userdata=self._default_user_data(self.vm_username))
+				self.instance = client.create_node(name=instance_name, image=image, size=size,
+					ex_userdata=self._default_user_data(self.vm_username),
+					ex_security_groups=[security_group])
 			except:
 				if attempt < 4:
 					eventlet.sleep(3)
@@ -184,18 +247,17 @@ class OpenstackVm(VirtualMachine):
 
 	def delete(self):
 		if self.instance.name:
-			instances = filter(lambda instance: instance.name == self.instance.name, self.instance.driver.list_nodes())
-			for instance in instances:  # Clean up rogue VMs
-				self._safe_terminate(instance)
+			self._delete_instances_with_name(self.instance.name)
 		else:
 			self._safe_terminate(self.instance)
 		self.remove_vm_info()
 
-	def _safe_terminate(self, instance):
+	@classmethod
+	def _safe_terminate(cls, instance):
 		try:
 			instance.destroy()
 		except:
-			self.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
+			cls.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
 
 
 class InstanceTypes(object):

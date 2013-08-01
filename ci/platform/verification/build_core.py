@@ -1,3 +1,5 @@
+import sys
+
 import yaml
 
 from model_server.build_consoles import ConsoleType
@@ -15,6 +17,9 @@ class VirtualMachineBuildCore(object):
 		raise NotImplementedError()
 
 	def teardown(self):
+		raise NotImplementedError()
+
+	def rebuild(self):
 		raise NotImplementedError()
 
 	def setup_build(self, repo_uri, repo_type, ref, private_key, console_appender=None):
@@ -114,22 +119,33 @@ class VagrantBuildCore(VirtualMachineBuildCore):
 	def teardown(self):
 		self.virtual_machine.teardown()
 
+	def rebuild(self):
+		self.virtual.rebuild()
+
 
 class CloudBuildCore(VirtualMachineBuildCore):
 	def __init__(self, cloud_vm, uri_translator=None):
 		super(CloudBuildCore, self).__init__(cloud_vm, uri_translator)
 
 	def setup(self):
-		while True:
+		max_attempts = 8
+		for attempt in range(max_attempts):
 			try:
 				self.virtual_machine.wait_until_ready()
 			except:
-				self.logger.warn("Failed to set up virtual machine (%s, %s), trying again" % (self.virtual_machine.vm_id, self.virtual_machine.instance.id), exc_info=True)
+				exc_info = sys.exc_info()
+				if attempt == max_attempts - 1:
+					self.logger.error("Failed to set up virtual machine %s" % self.virtual_machine, exc_info=exc_info)
+					raise exc_info
+				self.logger.warn("Failed to set up virtual machine %s, trying again" % self.virtual_machine, exc_info=exc_info)
 			else:
 				break
 
 	def teardown(self):
 		self.virtual_machine.delete()
+
+	def rebuild(self):
+		self.virtual_machine.rebuild()
 
 	def setup_build(self, repo_uri, repo_type, ref, private_key, console_appender=None):
 		self.setup_virtual_machine(repo_uri, repo_type, ref, private_key, console_appender)

@@ -214,7 +214,7 @@ class ChangeVerifier(EventSubscriber):
 				pass
 
 		else:
-			# TODO(andrey) Proper failure
+			self.logger.critical()
 			assert False
 
 		try:

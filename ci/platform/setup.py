@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name="koality",
-	version="0.1",
+	version="0.2",
 	description="Production code for koality",
 	packages=find_packages(exclude=[
 		"bin",
@@ -26,7 +26,7 @@ setup(
 			'koality-start-filesystem-repo-server = scripts.server.start_filesystem_repo_server:main',
 			'koality-start-model-server = scripts.server.start_model_server:main',
 			'koality-start-verification-server = scripts.server.start_verification_server:main',
-			'koality-ec2-snapshotter = scripts.server.ec2_snapshotter:main',
+			'koality-snapshotter = scripts.server.snapshotter:main',
 			'koality-upgrade = scripts.server.upgrader:main',
 		],
 	},
