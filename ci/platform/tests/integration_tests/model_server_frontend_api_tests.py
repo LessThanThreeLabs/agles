@@ -51,16 +51,15 @@ from database.engine import ConnectionFactory
 from settings.mail import MailSettings
 from settings.deployment import DeploymentSettings
 from settings.store import StoreSettings
-from util.pathgen import to_clone_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
 
 
 class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 
-	EMAIL = "jchu@lt3.com"
-	REPO_NAME = "TestRepository"
-	REPO_URI = to_clone_path(EMAIL, REPO_NAME)
+	EMAIL = 'jchu@lt3.com'
+	REPO_NAME = 'TestRepository'
+	REPO_URI = REPO_NAME + '.git'
 
 	@classmethod
 	def setup_class(cls):
