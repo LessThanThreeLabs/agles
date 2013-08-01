@@ -22,6 +22,8 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 
 		if row:
 			return to_dict(row, build_console.columns)
+		else:
+			raise NoSuchBuildConsoleError(build_console_id)
 
 	def get_build_consoles(self, user_id, change_id):
 		build = database.schema.build
@@ -59,3 +61,7 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 
 	def can_hear_build_console_events(self, user_id, id_to_listen_to):
 		return True
+
+
+class NoSuchBuildConsoleError(Exception):
+	pass

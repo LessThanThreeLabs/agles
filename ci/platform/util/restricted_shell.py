@@ -71,12 +71,15 @@ class RestrictedGitShell(RestrictedShell):
 
 	def rp_new_sshargs(self, command, requested_repo_uri, user_id):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, stored_repos_base_path, repos_path, repo_id, repo_name, repo_type = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
-		self.verify_user_exists(command, user_id, repo_id)
+		if attributes is None:
+			raise RepositoryNotFoundError(requested_repo_uri)
 
-		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
-		return self._create_ssh_exec_args(stored_repos_base_path, command, remote_filesystem_path, user_id)
+		self.verify_user_exists(command, user_id, attributes['repo']['id'])
+
+		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
+		return self._create_ssh_exec_args(attributes['repostore']['ip_address'], command, remote_filesystem_path, user_id)
 
 	def handle_receive_pack(self, requested_repo_uri, user_id):
 		args = self.rp_new_sshargs("jgit receive-pack", requested_repo_uri, user_id)
@@ -84,30 +87,31 @@ class RestrictedGitShell(RestrictedShell):
 
 	def handle_upload_pack(self, requested_repo_uri, user_id):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repo_attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
-			if repo_attributes is None:
+			attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			if attributes is None:
 				raise RepositoryNotFoundError(requested_repo_uri)
-			repostore_id, stored_repos_base_path, repos_path, repo_id, repo_name, repo_type = repo_attributes
-			forward_url = modelserver_rpc_conn.get_repo_forward_url(repo_id)
 
-		self.verify_user_exists("jgit upload-pack", user_id, repo_id)
+		self.verify_user_exists("git upload-pack", user_id, attributes['repo']['id'])
 
 		if int(user_id) == VerificationUser.id:
-			remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
-			args = self._create_ssh_exec_args(stored_repos_base_path, "git upload-pack", remote_filesystem_path, user_id)
+			remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
+			args = self._create_ssh_exec_args(attributes['repostore']['ip_address'], "git upload-pack", remote_filesystem_path, user_id)
 		else:
 			private_key = StoreSettings.ssh_private_key
-			args = self._up_pullthrough_args(private_key, forward_url, user_id)
+			args = self._up_pullthrough_args(private_key, attributes['repo']['forward_url'], user_id)
 		os.execlp(*args)
 
 	def handle_git_show(self, requested_repo_uri, show_ref_file, user_id):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, stored_repos_base_path, repos_path, repo_id, repo_name, repo_type = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
-		self.verify_user_exists("git-show", user_id, repo_id)
-		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
+		if attributes is None:
+			raise RepositoryNotFoundError(requested_repo_uri)
 
-		uri = "git@%s" % stored_repos_base_path
+		self.verify_user_exists("git-show", user_id, attributes['repo']['id'])
+		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
+
+		uri = "git@%s" % attributes['repostore']['ip_address']
 		full_command = "sh -c %s" % pipes.quote("cd %s && git show %s" % (remote_filesystem_path, show_ref_file))
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
@@ -135,28 +139,28 @@ class RestrictedGitShell(RestrictedShell):
 		self._git_command_handlers[command_parts[0]](*command_parts[1:])
 
 
-# TODO(andrey) Clean up this code.
 class RestrictedHgShell(RestrictedShell):
 	def __init__(self):
 		super(RestrictedHgShell, self).__init__()
 
 	def _create_ssh_exec_args(self, route, command, path, user_id):
-		# TODO(andrey) this should be hg@ (should add hg user?)
 		uri = "git@%s" % route
 		path = "%s" % path
-		# TODO(andrey) Refactor in some way so that you don't have to add "serve --stdio" here
 		command_parts = ["USERID=" + user_id, command, path, "serve --stdio"]
 		full_command = ' '.join(command_parts)
 		return "ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command
 
 	def rp_new_sshargs(self, command, requested_repo_uri, user_id):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, stored_repos_base_path, repos_path, repo_id, repo_name, repo_type = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
-		self.verify_user_exists(command, user_id, repo_id)
+		if attributes is None:
+			raise RepositoryNotFoundError(requested_repo_uri)
 
-		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
-		return self._create_ssh_exec_args(stored_repos_base_path, command, remote_filesystem_path, user_id)
+		self.verify_user_exists(command, user_id, attributes['repo']['id'])
+
+		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
+		return self._create_ssh_exec_args(attributes['repostore']['ip_address'], command, remote_filesystem_path, user_id)
 
 	def _get_requested_repo_uri(self, cmd_args_str):
 		match = re.search(HG_REPO_PATH_PATTERN, cmd_args_str)
@@ -167,28 +171,33 @@ class RestrictedHgShell(RestrictedShell):
 		args = self.rp_new_sshargs("hg -R", requested_repo_uri, user_id)
 		os.execlp(*args)
 
-	# TODO(andrey) uri's should be hg@...
 	def handle_show_koality(self, requested_repo_uri, user_id, sha):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, stored_repos_base_path, repos_path, repo_id, repo_name, repo_type = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
-		self.verify_user_exists("hg show-koality", user_id, repo_id)
-		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
+		if attributes is None:
+			raise RepositoryNotFoundError(requested_repo_uri)
+
+		self.verify_user_exists("git-show", user_id, attributes['repo']['id'])
+		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
 
 		yml_path = os.path.join(remote_filesystem_path, ".hg", "strip-backup", sha + "-koality.yml")
-		uri = "git@%s" % stored_repos_base_path
+		uri = "git@%s" % attributes['repostore']['ip_address']
 		full_command = "sh -c %s" % pipes.quote("cat %s" % yml_path)
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
 	def handle_cat_bundle(self, requested_repo_uri, user_id, sha):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
-			repostore_id, stored_repos_base_path, repos_path, repo_id, repo_name, repo_type = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
+			attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
-		self.verify_user_exists("hg cat-bundle", user_id, repo_id)
-		remote_filesystem_path = os.path.join(repos_path, pathgen.to_path(repo_id, repo_name))
+		if attributes is None:
+			raise RepositoryNotFoundError(requested_repo_uri)
+
+		self.verify_user_exists("git-show", user_id, attributes['repo']['id'])
+		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
 
 		bundle_path = os.path.join(remote_filesystem_path, ".hg", "strip-backup", sha + ".hg")
-		uri = "git@%s" % stored_repos_base_path
+		uri = "git@%s" % attributes['repostore']['ip_address']
 		full_command = "sh -c %s" % pipes.quote("cat %s | base64" % bundle_path)
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
@@ -196,7 +205,6 @@ class RestrictedHgShell(RestrictedShell):
 		if ".." in repo_path:
 			raise MalformedCommandError('repo_path: %s. Repository path cannot contain "..".' % repo_path)
 
-	# TODO(andrey) modularize this function
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
 		if len(command_parts) < 4:

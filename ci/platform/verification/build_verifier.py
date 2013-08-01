@@ -1,5 +1,4 @@
 import os
-import socket
 import yaml
 
 import model_server
@@ -59,6 +58,9 @@ class BuildVerifier(object):
 
 	def teardown(self):
 		self.build_core.teardown()
+
+	def rebuild(self):
+		self.build_core.rebuild()
 
 	def verify_build(self, build_id, repo_type, verification_config, test_queue, artifact_export_event):
 		results = []
@@ -203,6 +205,7 @@ class BuildVerifier(object):
 				self.build_consoles_update_rpc.set_return_code(self.build_id, return_code, self.type, self.subtype)
 
 		return ConsoleAppender
+
 
 class NoSuchRepoTypeError(Exception):
 	pass

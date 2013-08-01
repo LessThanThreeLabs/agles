@@ -10,8 +10,10 @@ from verification.pubkey_registrar import PubkeyRegistrar
 @Logged()
 class VirtualMachine(object):
 	"""A minimal virtual machine representation"""
-	def __init__(self, vm_id, redis_connection=None):
+	def __init__(self, vm_id, instance, vm_username, redis_connection=None):
 		self.vm_id = vm_id
+		self.instance = instance
+		self.vm_username = vm_username
 		self._redis_conn = redis_connection or ConnectionFactory.get_redis_connection('virtual_machine')
 
 	def provision(self, private_key, output_handler=None):
@@ -21,6 +23,12 @@ class VirtualMachine(object):
 		raise NotImplementedError("Currently only supported for EC2 VMs")
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
+		raise NotImplementedError()
+
+	def delete(self):
+		raise NotImplementedError()
+
+	def rebuild(self):
 		raise NotImplementedError()
 
 	@classmethod
@@ -73,7 +81,7 @@ class VirtualMachine(object):
 				'git checkout FETCH_HEAD'])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
-				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, repo_url, results), exc_info=True)
+				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, repo_url, results))
 			return results
 
 		def _remote_update():
@@ -89,7 +97,7 @@ class VirtualMachine(object):
 				'hg update %s' % ref])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
-				self.logger.error("Failed to check out bundle %s from %s, results: %s" % (ref, repo_url, results), exc_info=True)
+				self.logger.error("Failed to check out bundle %s from %s, results: %s" % (ref, repo_url, results))
 			return results
 
 		if repo_type == 'git':
@@ -109,7 +117,7 @@ class VirtualMachine(object):
 				'%s clone %s source' % (repo_type, repo_url)])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
-				self.logger.error("Failed to clone %s, results: %s" % (repo_url, results), exc_info=True)
+				self.logger.error("Failed to clone %s, results: %s" % (git_url, results))
 			return results
 		return self._ssh_authorized(_remote_clone, output_handler)
 
@@ -131,7 +139,8 @@ class VirtualMachine(object):
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 
 	def cache_repository(self, repo_name, output_handler=None):
-		return self.ssh_call('mv source /repositories/cached/%s || rm -rf source' % repo_name, output_handler)
+		return self.ssh_call(';'.join(('sudo chown -R %s:%s source' % (self.vm_username, self.vm_username),
+			'mv source /repositories/cached/%s || rm -rf source' % repo_name)), output_handler)
 
 	@classmethod
 	def get_newest_image(cls):
@@ -158,3 +167,6 @@ class VirtualMachine(object):
 			except:
 				major_version, minor_version = -1, -1
 		return major_version, minor_version
+
+	def __repr__(self):
+		return '%s(%r, %r, %r)' % (type(self).__name__, self.vm_id, self.instance, self.vm_username)

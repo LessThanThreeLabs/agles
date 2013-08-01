@@ -124,11 +124,14 @@ class RemoteCompileCommand(RemoteShellCommand):
 		script = self._to_executed_script()
 
 		if self.export:
-			export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'compile', self.name))
-			script += "cd; mkdir -p %s\n" % export_directory
+			export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'compile', self.name)
 			for export in self.export:
-				export = pipes.quote(export)
-				script += "ln -s $(pwd)/%s %s\n" % (os.path.join('source', export), os.path.join(export_directory, export))
+				export_parent = os.path.dirname(export.strip(os.path.sep))
+				script += "cd; mkdir -p %s\n" % pipes.quote(os.path.join(export_directory, export_parent))
+				script += "ln -s $(pwd)/%s %s\n" % (
+					pipes.quote(os.path.join('source', export)),
+					pipes.quote(os.path.join(export_directory, export))
+				)
 
 		script = script + "exit $_r"
 		return script
@@ -143,11 +146,18 @@ class RemoteTestCommand(RemoteShellCommand):
 
 		if self.export:
 			for export in self.export:
-				export = pipes.quote(os.path.join('source', export))
-				export_directory = pipes.quote(os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name))
-				script += "cd; mkdir -p %s;" % export_directory
-				script += "if [ -d %s ]; then mv %s %s; mkdir -p %s\n" % (export, export, export_directory, export)
-				script += "else mv %s %s; fi\n" % (export, export_directory)
+				export_parent = os.path.dirname(export.strip(os.path.sep))
+				export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name)
+				script += "cd; mkdir -p %s\n" % pipes.quote(os.path.join(export_directory, export_parent))
+				script += "if [ -d %s ]; then mv %s %s; mkdir -p %s\n" % (
+					pipes.quote(os.path.join('source', export)),
+					pipes.quote(os.path.join('source', export)), pipes.quote(os.path.join(export_directory, export)),
+					pipes.quote(os.path.join('source', export))
+				)
+				script += "else mv %s %s; fi\n" % (
+					pipes.quote(os.path.join('source', export)),
+					pipes.quote(os.path.join(export_directory, export))
+				)
 
 		script = script + "exit $_r"
 		return script
