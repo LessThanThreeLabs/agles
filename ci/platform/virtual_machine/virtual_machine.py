@@ -76,11 +76,9 @@ class VirtualMachine(object):
 				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, repo_url, results), exc_info=True)
 			return results
 
-		# TODO(andrey) decide on name of ssh function.
 		def _remote_update():
 			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			command = ' && '.join([
-				# TODO(andrey) very bad! fix me!
 				'sudo apt-get install -y mercurial',
 				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; hg init source))' % repo_name,
 				'cd source',
@@ -102,7 +100,6 @@ class VirtualMachine(object):
 		else:
 			self.logger.error("Unknown repository type in remote_checkout %s." % repo_type)
 
-	# TODO(andrey) make this work for hg (easy)
 	def remote_clone(self, repo_type, repo_url, output_handler=None):
 		def _remote_clone():
 			host_url = repo_url[:repo_url.find(":")]

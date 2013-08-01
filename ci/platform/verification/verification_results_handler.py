@@ -41,7 +41,6 @@ class VerificationResultsHandler(object):
 		commit_id = change_attributes['commit_id']
 		merge_target = change_attributes['merge_target']
 
-		# TODO(andrey) make this work for Hg
 		if merge_target == 'verify only':
 			return True
 

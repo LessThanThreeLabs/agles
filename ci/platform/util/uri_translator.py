@@ -9,7 +9,6 @@ class RepositoryUriTranslator(object):
 			return "git@%s:%s" % (route, repo_uri)
 		elif repo_type == 'hg':
 			# Note that we are making the assumption that the route will never contain any slashes.
-			# TODO(andrey) Fix this to be hg@
 			return "ssh://git@%s/%s" % (route, repo_uri)
 
 	def extract_repo_name(self, repo_uri):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-"""gitserve - Similar to git-shell. A custom git command execution
-environment that restricts the shell user to only git commands and
+"""serve - Similar to git-shell. A custom command execution
+environment that restricts the shell user to only git and hg commands and
 replaces certain commands with other actions."""
 
 import logging
@@ -14,6 +14,7 @@ import util.log
 from util.permissions import InvalidPermissionsError
 from util.restricted_shell import RestrictedGitShell, RestrictedHgShell, InvalidCommandError, RepositoryNotFoundError
 
+
 def main():
 	user_id = sys.argv[1]
 	try:
@@ -21,7 +22,6 @@ def main():
 			command = os.environ["SSH_ORIGINAL_COMMAND"] + ' ' + user_id
 			if command.split()[0] == 'hg':
 				rsh = RestrictedHgShell()
-			# TODO(andrey) This code needs to be cleaner with definitive third case!
 			else:
 				rsh = RestrictedGitShell()
 			rsh.handle_command(command)

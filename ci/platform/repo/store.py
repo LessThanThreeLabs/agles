@@ -516,7 +516,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self.logger.warn("A git error occurred on a push", exc_info=True)
 				raise
 		else:
-			self.logger.critical("Bad repository type %s" % repo_type)
+			self.logger.critical("Unknown repository type %s" % repo_type)
 			#TODO(andrey) exception?
 
 	def force_delete(self, repo_id, repo_name, target):
