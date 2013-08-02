@@ -258,5 +258,9 @@ class DockerVirtualMachineVerifierPool(VirtualMachineVerifierPool):
 		return DockerVm(virtual_machine)
 
 	def put(self, verifier):
-		verifier.rebuild()
-		return super(DockerVirtualMachineVerifierPool, self).put(verifier)
+		try:
+			verifier.rebuild()
+		except:
+			self.remove(verifier)
+		else:
+			return super(DockerVirtualMachineVerifierPool, self).put(verifier)
