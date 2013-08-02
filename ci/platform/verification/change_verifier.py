@@ -114,6 +114,8 @@ class ChangeVerifier(EventSubscriber):
 				verifier.setup()
 			except:
 				prematurely_fail_change(sys.exc_info())
+				if verifier is not None:
+					self.verifier_pool.remove(verifier)
 				return
 			if not change_started.ready():
 				start_change()
