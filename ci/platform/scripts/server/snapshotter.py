@@ -5,7 +5,7 @@ import sys
 import util.log
 
 from settings.verification_server import VerificationServerSettings
-from virtual_machine.snapshotter import DockerSnapshotter, SnapshotDaemon
+from virtual_machine.snapshotter import Snapshotter, SnapshotDaemon
 from virtual_machine.ec2 import Ec2Vm
 from virtual_machine.hpcloud import HpCloudVm
 from virtual_machine.rackspace import RackspaceVm
@@ -33,7 +33,7 @@ def main():
 			else:
 				print 'Cloud provider not specified; defaulting to the stored settings value (%s)' % cloud_provider
 
-		snapshotter = DockerSnapshotter({
+		snapshotter = Snapshotter({
 			'aws': Ec2Vm,
 			'hpcloud': HpCloudVm,
 			'rackspace': RackspaceVm

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import argparse
-import os
 import sys
 
 import util.log
@@ -9,7 +8,7 @@ from settings.verification_server import VerificationServerSettings
 from util.uri_translator import RepositoryUriTranslator
 from verification.change_verifier import ChangeVerifier
 from verification.verification_server import VerificationServer
-from verification.verifier_pool import VerifierPool, DockerVirtualMachineVerifierPool
+from verification.verifier_pool import VerifierPool, VirtualMachineVerifierPool
 from verification.virtual_machine_cleanup_tool import VirtualMachineCleanupTool
 from virtual_machine.ec2 import Ec2Vm
 from virtual_machine.hpcloud import HpCloudVm
@@ -68,7 +67,7 @@ def main():
 
 	try:
 		if vm_class is not None:
-			verifier_pool = DockerVirtualMachineVerifierPool(vm_class, max_verifiers=max_vm_count, uri_translator=RepositoryUriTranslator())
+			verifier_pool = VirtualMachineVerifierPool(vm_class, max_verifiers=max_vm_count, uri_translator=RepositoryUriTranslator())
 		else:
 			verifier_pool = VerifierPool(max_vm_count, 0)
 		change_verifier = ChangeVerifier(verifier_pool, RepositoryUriTranslator())

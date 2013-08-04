@@ -130,7 +130,7 @@ class ChangeVerifier(EventSubscriber):
 				workers_alive.pop()
 				if not workers_alive:
 					task_queue.clear_remaining_tasks()
-				self.verifier_pool.put(verifier)
+				self.verifier_pool.remove(verifier)
 				raise greenlet.throw()
 
 			worker_greenlet.link(cleanup_greenlet)
