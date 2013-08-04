@@ -63,7 +63,7 @@ class RestrictedGitShell(object):
 
 		self.verify_user_exists(command, user_id, attributes['repo']['id'])
 
-		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
+		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name'] + '.git'))
 		return self._create_ssh_exec_args(attributes['repostore']['ip_address'], command, remote_filesystem_path, user_id)
 
 	def handle_receive_pack(self, requested_repo_uri, user_id):
@@ -79,7 +79,7 @@ class RestrictedGitShell(object):
 		self.verify_user_exists("git upload-pack", user_id, attributes['repo']['id'])
 
 		if int(user_id) == VerificationUser.id:
-			remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
+			remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name'] + '.git'))
 			args = self._create_ssh_exec_args(attributes['repostore']['ip_address'], "git upload-pack", remote_filesystem_path, user_id)
 		else:
 			private_key = StoreSettings.ssh_private_key
@@ -94,7 +94,7 @@ class RestrictedGitShell(object):
 			raise RepositoryNotFoundError(requested_repo_uri)
 
 		self.verify_user_exists("git-show", user_id, attributes['repo']['id'])
-		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
+		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name'] + '.git'))
 
 		uri = "git@%s" % attributes['repostore']['ip_address']
 		full_command = "sh -c 'cd %s && git show %s'" % (remote_filesystem_path, show_ref_file)

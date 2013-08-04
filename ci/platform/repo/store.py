@@ -147,14 +147,17 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		self._update_store_repo_count(repostore_id, -1)
 
 	def push(self, repostore_id, repo_id, repo_name, from_target, to_target, force):
+		repo_name += '.git'
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.push(repo_id, repo_name, from_target, to_target, force)
 
 	def force_delete(self, repostore_id, repo_id, repo_name, target):
+		repo_name += '.git'
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			return client.force_delete(repo_id, repo_name, target)
 
 	def store_pending(self, repostore_id, repo_id, repo_name, sha, commit_id):
+		repo_name += '.git'
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			return client.store_pending(repo_id, repo_name, sha, commit_id)
 
