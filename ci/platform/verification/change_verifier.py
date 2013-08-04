@@ -114,6 +114,8 @@ class ChangeVerifier(EventSubscriber):
 				verifier.setup()
 			except:
 				prematurely_fail_change(sys.exc_info())
+				if verifier is not None:
+					self.verifier_pool.remove(verifier)
 				return
 			if not change_started.ready():
 				start_change()
@@ -128,7 +130,7 @@ class ChangeVerifier(EventSubscriber):
 				workers_alive.pop()
 				if not workers_alive:
 					task_queue.clear_remaining_tasks()
-				self.verifier_pool.put(verifier)
+				self.verifier_pool.remove(verifier)
 				raise greenlet.throw()
 
 			worker_greenlet.link(cleanup_greenlet)
