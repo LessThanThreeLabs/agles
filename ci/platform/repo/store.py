@@ -279,12 +279,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 			return original_head
 		except GitCommandError:
-			exc_info = sys.exc_info()
-			stacktrace = exc_info[2]
 			error_msg = "Merge failed for repo_slave (potential to retry): %s, ref_to_merge: %s, ref_to_merge_into: %s" % (
 				repo_slave, ref_to_merge, ref_to_merge_into)
-			self.logger.info(error_msg, exc_info=exc_info)
-			raise MergeError, error_msg, stacktrace
+			self.logger.info(error_msg, exc_info=True)
+			raise MergeError, error_msg, sys.exc_info()[2]
 		finally:
 			repo_slave.git.reset(hard=True)
 
@@ -310,12 +308,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 				repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 				repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 			except GitCommandError:
-				exc_info = sys.exc_info()
-				stacktrace = exc_info[2]
 				error_msg = "Attempting to update/merge from forward url. repo_slave: %s, ref_to_update: %s" % (repo_slave, ref_to_merge_into)
-				self.logger.info(error_msg, exc_info=exc_info)
+				self.logger.info(error_msg, exc_info=True)
 				self._git_reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
-				raise MergeError, error_msg, stacktrace
+				raise MergeError, error_msg, sys.exc_info()[2]
 			except:
 				self._git_reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
 			finally:
@@ -328,19 +324,16 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self._git_push_with_private_key(repo, remote_repo, ':'.join([ref_to_merge_into, ref_to_merge_into]))
 			except GitCommandError:
 				if i >= self.NUM_RETRIES:
-					exc_info = sys.exc_info()
-					stacktrace = exc_info[2]
 					error_msg = "Retried too many times, repo: %s, ref_to_merge_into: %s" % (repo, ref_to_merge_into)
-					self.logger.warn(error_msg, exc_info=exc_info)
+					self.logger.warn(error_msg, exc_info=True)
 					self._git_reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
-					raise PushForwardError, error_msg, stacktrace
+					raise PushForwardError, error_msg, sys.exc_info()[2]
 				time.sleep(1)
 				update_from_forward_url()
 			except:
-				exc_info = sys.exc_info()
-				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=exc_info)
+				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
 				self._git_reset_repository_head(repo, repo_slave, ref_to_merge_into, original_head)
-				raise exc_info
+				raise sys.exc_info()
 			else:
 				break
 
@@ -351,23 +344,22 @@ class FileSystemRepositoryStore(RepositoryStore):
 		def update_from_forward_url(sha):
 			try:
 				self._hg_fetch_with_private_key(repo, remote_repo)
-				repo.merge()
+				repo.merge(tool="internal:fail")
 				rev, sha = repo.commit("Merging in %s" % sha[:12])
 				return sha
 			except CommandError:
-				exc_info = sys.exc_info()
-				stacktrace = exc_info()[2]
 				error_msg = "Attempting to update/merge from forward url. ref_to_merge: %s" % (ref_to_merge)
-				self.logger.info(error_msg, exc_info=exc_info)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
+				self.logger.info(error_msg, exc_info=True)
+				repo.update(rev=ref_to_merge_into, clean=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
 				self._hg_fetch_with_private_key(repo, remote_repo)
-				raise MergeError, error_msg, stacktrace
+				raise MergeError, error_msg, sys.exc_info()[2]
 			except:
-				exc_info = sys.exc_info()
-				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=exc_info)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
+				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
+				repo.update(rev=ref_to_merge_into, clean=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
 				self.hg_fetch_with_private_key(repo, remote_repo)
-				raise exc_info
+				raise
 
 		i = 0
 		while True:
@@ -376,11 +368,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self._hg_push_with_private_key(repo, remote_repo)
 			except CommandError:
 				if i >= self.NUM_RETRIES:
-					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s" % (repo)
 					self.logger.warn(error_msg, exc_info=True)
 					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
-					raise PushForwardError, error_msg, stacktrace
+					raise PushForwardError, error_msg, sys.exc_info()[2]
 				time.sleep(1)
 				sha = update_from_forward_url(sha)
 			except:
