@@ -50,7 +50,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self.repostore_id = self._create_repo_store()
 		self.remote_repo_path = os.path.join(self.repodir, "remote_repo.git")
 		with model_server.rpc_connect("repos", "create") as model_rpc:
-			model_rpc._create_repo_in_db(self.repo_id, "repo.git", "repo_uri", self.repostore_id, self.remote_repo_path, 0, "git")
+			model_rpc._create_repo_in_db(self.repo_id, "repo", "repo_uri", self.repostore_id, self.remote_repo_path, 0, "git")
 
 	def tearDown(self):
 		super(RepoStoreTests, self).tearDown()
@@ -68,17 +68,17 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 
 	def test_repo_create(self):
 		assert_false(exists(self.repo_path), msg="Repository should not exist.")
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo")
 		assert_true(exists(self.repo_path), msg="Repository does not exist.")
 
 	def test_repo_create_remove(self):
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo")
 		assert_true(exists(self.repo_path), msg="Repository was not deleted.")
-		self.store.delete_repository(self.repo_id, "repo.git")
+		self.store.delete_repository(self.repo_id, "repo")
 		assert_false(exists(self.repo_path), msg="Repository was not deleted.")
 
 	def test_merge_pass(self):
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
@@ -92,7 +92,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self.store.git_merge_refs(repo_slave, "refs/pending/1", "master")
 
 	def test_merge_fail(self):
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
@@ -106,12 +106,12 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self._modify_commit_push(work_repo, "test.txt", "c3",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
-		assert_raises(MergeError, self.store.merge_changeset, self.repo_id, "repo.git", "refs/pending/1", "master")
+		assert_raises(MergeError, self.store.merge_changeset, self.repo_id, "repo", "refs/pending/1", "master")
 		clone_repo = bare_repo.clone(bare_repo.working_dir + ".clone2")
 		assert_equals(master_sha, clone_repo.heads.master.commit.hexsha)  # Makes sure the repository has reset
 
 	def test_push_forwarding_fail_repo_reset(self):
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "repo")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
@@ -123,7 +123,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self._modify_commit_push(work_repo, "test.txt", "c2",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
-		assert_raises(Exception, self.store.merge_changeset, self.repo_id, "repo.git", "refs/pending/1", "master")
+		assert_raises(Exception, self.store.merge_changeset, self.repo_id, "repo", "refs/pending/1", "master")
 		clone_repo = bare_repo.clone(bare_repo.working_dir + ".clone2")
 		assert_equals(master_sha, clone_repo.heads.master.commit.hexsha)  # Makes sure the repository has reset
 
@@ -149,8 +149,8 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 	'''
 
 	def test_store_remote_commit_as_pending(self):
-		self.store.create_repository(self.repo_id, "remote_repo.git")
-		self.store.create_repository(self.repo_id, "repo.git")
+		self.store.create_repository(self.repo_id, "remote_repo")
+		self.store.create_repository(self.repo_id, "repo")
 
 		remote_repo_path = os.path.join(self.repodir, "remote_repo.git")
 
@@ -167,7 +167,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		assert_items_equal([], bare_repo.heads)
 
 		# Store commit into main repo
-		self.store.store_pending(self.repo_id, "repo.git", master_sha, 42)
+		self.store.store_pending(self.repo_id, "repo", master_sha, 42)
 
 		work_repo.git.fetch("origin", "refs/pending/42:pending")
 

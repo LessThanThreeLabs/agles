@@ -144,17 +144,14 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		self._update_store_repo_count(repostore_id, -1)
 
 	def push(self, repostore_id, repo_id, repo_name, from_target, to_target, force):
-		repo_name += '.git'
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.push(repo_id, repo_name, from_target, to_target, force)
 
 	def force_delete(self, repostore_id, repo_id, repo_name, target):
-		repo_name += '.git'
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			return client.force_delete(repo_id, repo_name, target)
 
 	def store_pending(self, repostore_id, repo_id, repo_name, sha, commit_id):
-		repo_name += '.git'
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			return client.store_pending(repo_id, repo_name, sha, commit_id)
 
@@ -380,11 +377,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self._hg_push_with_private_key(repo, remote_repo)
 			except CommandError:
 				if i >= self.NUM_RETRIES:
-					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s" % (repo)
 					self.logger.warn(error_msg, exc_info=True)
 					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
-					raise PushForwardError, error_msg, stacktrace
+					raise PushForwardError, error_msg, sys.exc_info()[2]
 				time.sleep(1)
 				sha = update_from_forward_url(sha)
 			except:
@@ -445,21 +441,21 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
 		assert isinstance(repo_id, int)
 
-		repo_path = self._resolve_path(repo_id, repo_name)
-
 		repo_type = self._get_repo_type(repo_id)
 
 		with model_server.rpc_connect("repos", "read") as conn:
 				remote_repo = conn.get_repo_forward_url(repo_id)
 
 		if repo_type == "git":
-			assert repo_name.endswith(".git")
+			repo_name += '.git'
+			repo_path = self._resolve_path(repo_id, repo_name)
 			repo = Repo(repo_path)
 			repo_slave = repo.clone(repo_path + ".slave") if not os.path.exists(repo_path + ".slave") else Repo(repo_path + ".slave")
 			original_head = self.git_merge_refs(repo_slave, ref_to_merge, ref_to_merge_into)
 			self._git_push_merge_retry(repo, repo_slave, remote_repo, ref_to_merge_into, original_head)
 
 		elif repo_type == "hg":
+			repo_path = self._resolve_path(repo_id, repo_name)
 			repo = hglib.open(repo_path)
 
 			# The rev argument is to make sure that we only pull the revision and it's dependencies into the repository.
@@ -478,19 +474,23 @@ class FileSystemRepositoryStore(RepositoryStore):
 		"""
 
 		assert isinstance(repo_id, int)
-
-		repo_path = self._resolve_path(repo_id, repo_name)
-		if not os.path.exists(repo_path):
-			os.makedirs(repo_path)
-		else:
-			raise RepositoryAlreadyExistsException(repo_id, repo_path)
-
 		repo_type = self._get_repo_type(repo_id)
 
+		def make_repo_dirs():
+			if not os.path.exists(repo_path):
+				os.makedirs(repo_path)
+			else:
+				raise RepositoryAlreadyExistsException(repo_id, repo_path)
+
 		if repo_type == "git":
+			repo_name += '.git'
+			repo_path = self._resolve_path(repo_id, repo_name)
+			make_repo_dirs()
 			assert repo_name.endswith(".git")
 			Repo.init(repo_path, bare=True)
 		elif repo_type == "hg":
+			repo_path = self._resolve_path(repo_id, repo_name)
+			make_repo_dirs()
 			hglib.init(repo_path)
 		else:
 			# TODO(andrey) the correct thing to do here?
@@ -505,6 +505,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 		"""
 		assert isinstance(repo_id, int)
 
+		repo_type = self._get_repo_type(repo_id)
+		if repo_type == 'git':
+			repo_name += '.git'
+
 		repo_path = self._resolve_path(repo_id, repo_name)
 		shutil.rmtree(repo_path)
 
@@ -514,6 +518,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		if repo_type == 'hg':
 			return
 		elif repo_type == 'git':
+			repo_name += '.git'
 			repo_path = self._resolve_path(repo_id, repo_name)
 
 			with model_server.rpc_connect("repos", "read") as conn:
@@ -535,8 +540,9 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def force_delete(self, repo_id, repo_name, target):
 		repo_type = self._get_repo_type(repo_id)
 		assert(repo_type == "git")
+		repo_name += '.git'
 
-		if self._git_remote_branch_exists(repo_id, repo_name, branch):
+		if self._git_remote_branch_exists(repo_id, repo_name, target):
 			try:
 				self.push(repo_id, repo_name, "", target, force=True)
 			except GitCommandError as e:
@@ -582,6 +588,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 		return remote_branch_exists
 
 	def store_pending(self, repo_id, repo_name, sha, commit_id):
+		repo_name += '.git'
+		repo_type = self._get_repo_type(repo_id)
+		assert(repo_type == "git")
+
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
 
@@ -606,6 +616,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 		:param new_name: The new repository name.
 		"""
 		assert isinstance(repo_id, int)
+
+		repo_type = self._get_repo_type(repo_id)
+		if repo_type == 'git':
+			old_name += '.git'
+			new_name += '.git'
 
 		old_repo_path = self._resolve_path(repo_id, old_name)
 		new_repo_path = self._resolve_path(repo_id, new_name)
