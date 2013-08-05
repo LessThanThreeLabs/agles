@@ -351,7 +351,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		def update_from_forward_url(sha):
 			try:
 				self._hg_fetch_with_private_key(repo, remote_repo)
-				repo.merge()
+				repo.merge(tool="internal:fail")
 				rev, sha = repo.commit("Merging in %s" % sha[:12])
 				return sha
 			except CommandError:
@@ -359,13 +359,15 @@ class FileSystemRepositoryStore(RepositoryStore):
 				stacktrace = exc_info()[2]
 				error_msg = "Attempting to update/merge from forward url. ref_to_merge: %s" % (ref_to_merge)
 				self.logger.info(error_msg, exc_info=exc_info)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
+				repo.update(rev=ref_to_merge_into, clean=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
 				self._hg_fetch_with_private_key(repo, remote_repo)
 				raise MergeError, error_msg, stacktrace
 			except:
 				exc_info = sys.exc_info()
 				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=exc_info)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
+				repo.update(rev=ref_to_merge_into, clean=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
 				self.hg_fetch_with_private_key(repo, remote_repo)
 				raise exc_info
 
@@ -379,13 +381,13 @@ class FileSystemRepositoryStore(RepositoryStore):
 					stacktrace = sys.exc_info()[2]
 					error_msg = "Retried too many times, repo: %s" % (repo)
 					self.logger.warn(error_msg, exc_info=True)
-					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
+					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
 					raise PushForwardError, error_msg, stacktrace
 				time.sleep(1)
 				sha = update_from_forward_url(sha)
 			except:
 				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into))
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
 				raise
 			else:
 				break
