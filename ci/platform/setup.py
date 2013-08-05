@@ -1,18 +1,5 @@
 from setuptools import setup, find_packages
 
-with open('requirements.txt') as requirements_file:
-	requires = requirements_file.read().split('\n')
-
-requirements = []
-dependency_links = []
-
-for require in requires:
-	if '#egg=' in require:
-		dependency_links.append(require)
-		require = require[require.index('#egg=') + 5:]
-	if require:
-		requirements.append(require)
-
 setup(
 	name="koality",
 	version="0.2",
@@ -43,6 +30,4 @@ setup(
 			'koality-upgrade = scripts.server.upgrader:main',
 		],
 	},
-	install_requires=requirements,
-	dependency_links=dependency_links,
 )
