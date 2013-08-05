@@ -458,6 +458,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_path = self._resolve_path(repo_id, repo_name)
 			repo = hglib.open(repo_path)
 
+			self._hg_fetch_with_private_key(repo, remote_repo)
 			# The rev argument is to make sure that we only pull the revision and it's dependencies into the repository.
 			repo.pull(os.path.join(repo_path, ".hg", "strip-backup", ref_to_merge + ".hg"), rev=ref_to_merge, update=True)
 			self._hg_push_merge_retry(repo, remote_repo, ref_to_merge, ref_to_merge_into)
