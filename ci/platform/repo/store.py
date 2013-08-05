@@ -356,13 +356,12 @@ class FileSystemRepositoryStore(RepositoryStore):
 				return sha
 			except CommandError:
 				exc_info = sys.exc_info()
-				stacktrace = exc_info()[2]
 				error_msg = "Attempting to update/merge from forward url. ref_to_merge: %s" % (ref_to_merge)
 				self.logger.info(error_msg, exc_info=exc_info)
 				repo.update(rev=ref_to_merge_into, clean=True)
 				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
 				self._hg_fetch_with_private_key(repo, remote_repo)
-				raise MergeError, error_msg, stacktrace
+				raise MergeError, error_msg, exc_info[2]
 			except:
 				exc_info = sys.exc_info()
 				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=exc_info)
