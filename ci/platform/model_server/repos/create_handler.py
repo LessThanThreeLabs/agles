@@ -3,11 +3,12 @@ import time
 import database.schema
 import repo.store
 
+from sqlalchemy import and_
+
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.store import StoreSettings
 from util.log import Logged
-from util.pathgen import to_clone_path
 from util.permissions import AdminApi
 
 
@@ -67,7 +68,12 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		repostore_query = repostore.select().where(repostore.c.id == repostore_id)
-		existing_repo_query = repo.select().where(repo.c.name == repo_name)
+		existing_repo_query = repo.select().where(
+			and_(
+				repo.c.name == repo_name,
+				repo.c.deleted == 0
+			)
+		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repostore_id = sqlconn.execute(repostore_query).first()[repostore.c.id]
@@ -84,14 +90,6 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 		repo_id = result.inserted_primary_key[0]
 		return repo_id
-
-	def _transpose_to_uri(self, user_id, repo_name):
-		user = database.schema.user
-		query = user.select().where(user.c.id == user_id)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			email = sqlconn.execute(query).first()[user.c.email]
-
-		return to_clone_path(email, repo_name)
 
 	def register_repostore(self, ip_address, root_dir):
 		repostore = database.schema.repostore

@@ -71,7 +71,7 @@ class RabbitMixin(BaseTestMixin):
 		from settings.rabbit import RabbitSettings
 		command = """rabbitmqadmin -u %s -p %s -f tsv -q list queues name messages|
 			while read queue count;
-			do if [ ${count} -gt "0" ];
+			do if [ ${count:-1} -gt "0" ];
 				then rabbitmqadmin -u %s -p %s -q purge queue name=${queue};
 			fi;
 			done""" % (RabbitSettings.rabbit_username, RabbitSettings.rabbit_password,
