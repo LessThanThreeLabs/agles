@@ -1,15 +1,13 @@
 import collections
 import logging
 import os
-import sys
-import logging.handlers
 
 import eventlet
 
 from settings.deployment import DeploymentSettings
 from settings.web_server import WebServerSettings
 
-LOG_HOME = '/tmp'
+LOG_HOME = './log'
 CONFIGURED = False
 
 
@@ -27,10 +25,9 @@ def _configure(log_home, filepath):
 	if not os.access(log_home, os.F_OK):
 		os.makedirs(log_home)
 	# handlers
-	#default_handler = TimedBufferedMailHandler()  
-	default_handler = logging.handlers.RotatingFileHandler(filename=log_home + filepath, maxBytes=8388608, backupCount=4)
+	default_handler = TimedBufferedMailHandler()  # logging.handlers.RotatingFileHandler(filename=log_home + filepath, maxBytes=8388608, backupCount=4)
 	default_handler.setFormatter(simple_formatter)
-	default_handler.setLevel(logging.DEBUG)
+	default_handler.setLevel(logging.WARN)
 	# loggers
 	root_logger = logging.getLogger()
 	root_logger.addHandler(default_handler)
