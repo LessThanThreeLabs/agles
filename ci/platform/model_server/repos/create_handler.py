@@ -20,7 +20,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		super(ReposCreateHandler, self).__init__("repos", "create")
 
 	@AdminApi
-	def create_repo(self, user_id, repo_name, forward_url):
+	def create_repo(self, user_id, repo_name, forward_url, repo_type):
 		if not repo_name:
 			raise RepositoryCreateError("repo_name cannot be empty")
 		try:
@@ -31,7 +31,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 					repo_count = sqlconn.execute(query).rowcount
 				if repo_count >= max_repo_count:
 					raise RepositoryCreateError("Already have the maximum allowed number of repositories (%d)" % max_repo_count)
-			repo_name += ".git"
+			if repo_type == 'git':
+				repo_name += ".git"
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 			repostore_id = manager.get_least_loaded_store()
 			uri = repo_name  # email addresses in uri don't make sense anymore
@@ -44,7 +45,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				uri,
 				repostore_id,
 				forward_url,
-				current_time)
+				current_time,
+				repo_type)
 			# make filesystem changes
 			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name)
 
@@ -62,7 +64,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 	def _create_repo_on_filesystem(self, manager, repostore_id, repo_id, repo_name):
 		manager.create_repository(repostore_id, repo_id, repo_name)
 
-	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, current_time):
+	def _create_repo_in_db(self, user_id, repo_name, uri, repostore_id, forward_url, current_time, repo_type):
 		repo = database.schema.repo
 		repostore = database.schema.repostore
 		repostore_query = repostore.select().where(repostore.c.id == repostore_id)
@@ -82,7 +84,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				uri=uri,
 				repostore_id=repostore_id,
 				forward_url=forward_url,
-				created=current_time)
+				created=current_time,
+				type=repo_type)
 			result = sqlconn.execute(ins)
 
 		repo_id = result.inserted_primary_key[0]

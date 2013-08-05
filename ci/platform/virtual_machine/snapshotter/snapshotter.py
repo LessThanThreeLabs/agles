@@ -110,7 +110,7 @@ class Snapshotter(object):
 		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
 		for repository in repositories:
 			self.logger.info('Cloning repository "%s"' % repository['name'])
-			if virtual_machine.remote_clone(uri_translator.translate(repository['uri'])).returncode != 0:
+			if virtual_machine.remote_clone(repository['type'], uri_translator.translate(repository['uri'])).returncode != 0:
 				raise Exception('Failed to clone repository "%s"' % repository['name'])
 			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv source /repositories/cached/%s' % (repository['name'], repository['name']))
 

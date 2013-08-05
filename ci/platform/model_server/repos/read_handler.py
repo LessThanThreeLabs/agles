@@ -11,9 +11,9 @@ class ReposReadHandler(ModelServerRpcHandler):
 	def __init__(self):
 		super(ReposReadHandler, self).__init__("repos", "read")
 
-	def get_repo_uri(self, commit_id):
+	# TODO(andrey) fix-up this internal API. It can sometimes be inefficient.
+	def _get_repo_id(self, commit_id):
 		commit = database.schema.commit
-		repo = database.schema.repo
 
 		repo_id_query = commit.select().where(
 			commit.c.id == commit_id)
@@ -21,12 +21,24 @@ class ReposReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(repo_id_query).first()
 		if not row:
 			return None
-		repo_id = row[commit.c.repo_id]
+		return row[commit.c.repo_id]
+
+	def get_repo_uri(self, commit_id):
+		repo = database.schema.repo
+		repo_id = self._get_repo_id(commit_id)
 
 		query = repo.select().where(repo.c.id == repo_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 		return row[repo.c.uri] if row else None
+
+	def get_repo_type(self, repo_id):
+		repo = database.schema.repo
+
+		query = repo.select().where(repo.c.id == repo_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+		return row[repo.c.type] if row else None
 
 	def get_repo_name(self, repo_id):
 		repo = database.schema.repo

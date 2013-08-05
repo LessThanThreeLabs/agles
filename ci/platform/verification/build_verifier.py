@@ -62,9 +62,9 @@ class BuildVerifier(object):
 	def rebuild(self):
 		self.build_core.rebuild()
 
-	def verify_build(self, build_id, verification_config, test_queue, artifact_export_event):
+	def verify_build(self, build_id, repo_type, verification_config, test_queue, artifact_export_event):
 		results = []
-		setup_result = self._setup(build_id, verification_config)
+		setup_result = self._setup(build_id, repo_type, verification_config)
 		results.append(setup_result)
 		test_queue.add_other_result(setup_result)
 		if isinstance(setup_result, Exception):
@@ -89,16 +89,24 @@ class BuildVerifier(object):
 		self._cleanup(build_id, results, artifact_export_event)
 
 	@ReturnException
-	def _setup(self, build_id, verification_config):
-		commit_id = self._get_build(build_id)['commit_id']
+	def _setup(self, build_id, repo_type, verification_config):
+		build = self._get_build(build_id)
+		commit_id = build['commit_id']
 		self.logger.info("Worker %s processing verification request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
 		self._start_build(build_id)
 		repo_uri = self._get_repo_uri(commit_id)
-		ref = pathgen.hidden_ref(commit_id)
+
+		if repo_type == "git":
+			ref = pathgen.hidden_ref(commit_id)
+		elif repo_type == "hg":
+			ref = self._get_commit(commit_id)['sha']
+		else:
+			raise NoSuchRepoTypeError("Unknown repository type %s." % repo_type)
+
 		private_key = StoreSettings.ssh_private_key
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
-			self.build_core.setup_build(repo_uri, ref, private_key, console_appender)
+			self.build_core.setup_build(repo_uri, repo_type, ref, private_key, console_appender)
 			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
 
 	@ReturnException
@@ -197,3 +205,7 @@ class BuildVerifier(object):
 				self.build_consoles_update_rpc.set_return_code(self.build_id, return_code, self.type, self.subtype)
 
 		return ConsoleAppender
+
+
+class NoSuchRepoTypeError(Exception):
+	pass

@@ -2,6 +2,7 @@ import subprocess
 import sys
 
 import yaml
+import os
 
 from eventlet import event, spawn, spawn_n, queue
 from kombu.messaging import Producer
@@ -43,15 +44,17 @@ class ChangeVerifier(EventSubscriber):
 		try:
 			change_id = contents['change_id']
 			commit_id = contents['commit_id']
+			repo_type = contents['repo_type']
+			sha = contents['sha']
 
 			if not DeploymentSettings.active:
 				self.skip_change(change_id)
 				return
 
-			verification_config = self._get_verification_config(commit_id)
+			verification_config = self._get_verification_config(commit_id, sha, repo_type)
 
 			workers_spawned = event.Event()
-			spawn_n(self.verify_change, verification_config, change_id, workers_spawned)
+			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned)
 			workers_spawned.wait()
 		except:
 			self.logger.critical("Unexpected failure while verifying change %d, commit %d. Failing change." % (change_id, commit_id), exc_info=True)
@@ -68,7 +71,7 @@ class ChangeVerifier(EventSubscriber):
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)
 
-	def verify_change(self, verification_config, change_id, workers_spawned):
+	def verify_change(self, verification_config, change_id, repo_type, workers_spawned):
 		task_queue = TaskQueue()
 		artifact_export_event = event.Event()
 
@@ -82,6 +85,17 @@ class ChangeVerifier(EventSubscriber):
 		workers_alive = []
 		change_started = event.Event()
 		change_done = event.Event()
+
+		def cleanup_greenlet(greenlet, verifier):
+			workers_alive.pop()
+			if not workers_alive:
+				task_queue.clear_remaining_tasks()
+			if VerificationServerSettings.teardown_after_build:
+				verifier.teardown()
+				self.verifier_pool.remove(verifier)
+			else:
+				self.verifier_pool.put(verifier)
+			raise greenlet.throw()
 
 		def start_change():
 			change_started.send(True)
@@ -124,7 +138,7 @@ class ChangeVerifier(EventSubscriber):
 				return
 			workers_alive.append(1)
 			build_id = self._create_build(change_id)
-			worker_greenlet = spawn(verifier.verify_build(build_id, verification_config, task_queue, artifact_export_event))
+			worker_greenlet = spawn(verifier.verify_build(build_id, repo_type, verification_config, task_queue, artifact_export_event))
 
 			def cleanup_greenlet(greenlet):
 				workers_alive.pop()
@@ -172,27 +186,46 @@ class ChangeVerifier(EventSubscriber):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:
 			return model_server_rpc.create_build(change_id)
 
-	def _get_verification_config(self, commit_id):
+	def _get_verification_config(self, commit_id, sha, repo_type):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
-		ref = pathgen.hidden_ref(commit_id)
-
-		if self.uri_translator:
-			checkout_url = self.uri_translator.translate(repo_uri)
-			host_url = checkout_url[:checkout_url.find(":")]
-			repo_path = checkout_url[checkout_url.find(":") + 1:]
-			show_command = lambda file_name: ["ssh", "-oLogLevel=error", "-oStrictHostKeyChecking=no", "%s" % host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
-		else:
-			show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
 
 		config_dict = {}
-		for file_name in ['koality.yml', '.koality.yml']:
+
+		if repo_type == 'git':
+			ref = pathgen.hidden_ref(commit_id)
+
+			if self.uri_translator:
+				checkout_url = self.uri_translator.translate(repo_uri)
+				host_url = checkout_url[:checkout_url.find(":")]
+				repo_path = checkout_url[checkout_url.find(":") + 1:]
+				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
+			else:
+				show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
+
+			for file_name in ['koality.yml', '.koality.yml']:
+				try:
+					config_dict = yaml.safe_load(subprocess.check_output(show_command(file_name)))
+				except:
+					pass
+				else:
+					break
+		elif repo_type == 'hg':
+			if self.uri_translator:
+				checkout_url = self.uri_translator.translate(repo_uri)
+				host_url, _, repo_uri = checkout_url.split('://')[1].partition('/')
+				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "hg", "show-koality", repo_uri, sha]
+			else:
+				# TODO(andrey) Test this case!
+				show_command = ["bash", "-c", "cat %s" % os.path.join(repo_uri, ".hg", "strip-backup", sha + "-koality.yml")]
 			try:
-				config_dict = yaml.safe_load(subprocess.check_output(show_command(file_name)))
+				config_dict = yaml.safe_load(subprocess.check_output(show_command))
 			except:
 				pass
-			else:
-				break
+
+		else:
+			self.logger.critical()
+			assert False
 
 		try:
 			return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))

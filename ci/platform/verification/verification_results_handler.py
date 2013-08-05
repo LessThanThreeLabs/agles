@@ -5,6 +5,7 @@ from repo.store import DistributedLoadBalancingRemoteRepositoryManager, MergeErr
 from shared.constants import BuildStatus, MergeStatus
 from util import pathgen
 from util.log import Logged
+from hglib.error import CommandError
 
 
 @Logged()
@@ -45,15 +46,17 @@ class VerificationResultsHandler(object):
 
 		with model_server.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)
+			sha = client.get_commit_attributes(commit_id)['sha']
 			attributes = client.get_repo_attributes(repo_uri)
 
-		ref = pathgen.hidden_ref(commit_id)
+		ref = pathgen.hidden_ref(commit_id) if attributes['repo']['type'] == "git" else sha
 		try:
+
 			self.remote_repo_manager.merge_changeset(
 				attributes['repostore']['id'], attributes['repo']['id'],
 				attributes['repo']['name'], ref, merge_target)
 			return True
-		except MergeError:
+		except MergeError, CommandError:
 			self._mark_change_merge_failure(change_id, verification_status)
 			self.logger.info("Failed to merge change %d" % change_id, exc_info=True)
 		except PushForwardError:
