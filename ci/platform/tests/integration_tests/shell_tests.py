@@ -68,7 +68,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		assert_equal('2222', sshargs[3])
 		assert_equal('-oStrictHostKeyChecking=no', sshargs[4])
 		assert_equal('git@127.0.0.1', sshargs[5])
-		assert_is_not_none(re.match("USERID=%d hg -R .+/.+/.+/repo.git serve --stdio" % self.user_id, sshargs[6]),
+		assert_is_not_none(re.match("USERID=%d hg -R .+/.+/.+/repo serve --stdio" % self.user_id, sshargs[6]),
 			msg='Created ssh command: "%s" is not well formed.' % sshargs[6])
 
 	def test_invalid_permissions(self):
