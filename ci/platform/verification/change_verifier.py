@@ -144,7 +144,11 @@ class ChangeVerifier(EventSubscriber):
 				workers_alive.pop()
 				if not workers_alive:
 					task_queue.clear_remaining_tasks()
-				self.verifier_pool.remove(verifier)
+				if VerificationServerSettings.teardown_after_build:
+					verifier.teardown()
+					self.verifier_pool.remove(verifier)
+				else:
+					self.verifier_pool.put(verifier)
 				raise greenlet.throw()
 
 			worker_greenlet.link(cleanup_greenlet)
