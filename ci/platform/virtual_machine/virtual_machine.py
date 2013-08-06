@@ -163,13 +163,66 @@ class VirtualMachine(object):
 	def get_image_version(cls, image):
 		name_parts = image.name.split('_')
 		try:
-			major_version, minor_version = float(name_parts[-2]), float(name_parts[-1])
+			major_version, minor_version = VirtualMachine.ImageVersion(name_parts[-2]), VirtualMachine.ImageVersion(name_parts[-1])
 		except (IndexError, ValueError):
 			try:
-				major_version, minor_version = float(name_parts[-1]), -1
+				major_version, minor_version = VirtualMachine.ImageVersion(name_parts[-1]), -1
 			except:
 				major_version, minor_version = -1, -1
 		return major_version, minor_version
 
 	def __repr__(self):
 		return '%s(%r, %r, %r)' % (type(self).__name__, self.vm_id, self.instance, self.vm_username)
+
+	class ImageVersion(object):
+		"""A multiple decimal-place version string (such as 1.0.4)"""
+		def __init__(self, string_representation):
+			string_representation = str(string_representation)
+			self.sub_versions = [int(sub_version) for sub_version in string_representation.split('.')]
+
+		def __eq__(self, other):
+			if not isinstance(other, VirtualMachine.ImageVersion):
+				try:
+					other = VirtualMachine.ImageVersion(other)
+				except:
+					return False
+
+			return self.sub_versions == other.sub_versions
+
+		def __cmp__(self, other):
+			if not isinstance(other, VirtualMachine.ImageVersion):
+				other = VirtualMachine.ImageVersion(other)
+
+			for version_index in xrange(len(self.sub_versions)):
+				if version_index >= len(other.sub_versions):
+					return 1
+				else:
+					comparison = cmp(self.sub_versions[version_index], other.sub_versions[version_index])
+					if comparison != 0:
+						return comparison
+			if len(self.sub_versions) < len(other.sub_versions):
+				return -1
+			return 0
+
+		def __add__(self, other):
+			if not isinstance(other, VirtualMachine.ImageVersion):
+				other = VirtualMachine.ImageVersion(other)
+
+			sub_versions = [0] * max(len(self.sub_versions), len(other.sub_versions))
+
+			for version_index in xrange(len(self.sub_versions)):
+				sub_versions[version_index] += self.sub_versions[version_index]
+
+			for version_index in xrange(len(other.sub_versions)):
+				sub_versions[version_index] += other.sub_versions[version_index]
+
+			return VirtualMachine.ImageVersion(self._from_sub_versions(sub_versions))
+
+		def __str__(self):
+			return self._from_sub_versions(self.sub_versions)
+
+		def __repr__(self):
+			return '%s(%s)' % (type(self).__name__, self)
+
+		def _from_sub_versions(self, sub_versions):
+			return '.'.join([str(sub_version) for sub_version in sub_versions])
