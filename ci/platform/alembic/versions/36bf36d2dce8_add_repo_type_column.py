@@ -1,14 +1,14 @@
 """Add repo type column
 
 Revision ID: 36bf36d2dce8
-Revises: 28eecd3a1b82
+Revises: 1fc8dfcd1f5d
 Create Date: 2013-08-05 15:31:44.749289
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '36bf36d2dce8'
-down_revision = '28eecd3a1b82'
+down_revision = '1fc8dfcd1f5d'
 
 from alembic import op
 import sqlalchemy as sa
