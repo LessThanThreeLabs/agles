@@ -3,7 +3,6 @@
 
 Repository management for git is done using gitpython.
 """
-from __future__ import print_function
 import os
 import re
 import shutil
@@ -425,7 +424,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			private_key = StoreSettings.ssh_private_key
 			with open(private_key_path, 'w') as private_key_file:
 				os.chmod(private_key_path, 0600)
-				print(private_key, file=private_key_file)
+				private_key_file.write(private_key)
 
 		return private_key_path
 
@@ -482,17 +481,24 @@ class FileSystemRepositoryStore(RepositoryStore):
 			else:
 				raise RepositoryAlreadyExistsException(repo_id, repo_path)
 
+		with model_server.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+
 		if repo_type == "git":
 			repo_name += '.git'
 			repo_path = self._resolve_path(repo_id, repo_name)
 			make_repo_dirs()
 			assert repo_name.endswith(".git")
-			Repo.init(repo_path, bare=True)
+			repo = Repo.init(repo_path, bare=True)
+			try:
+				# The explicit refspec pulls down all heads and sets them as the local heads
+				self._git_fetch_with_private_key(repo, remote_repo, 'refs/heads/*:refs/heads/*')
+			except GitCommandError:
+				error_msg = "Pull failed for repo with id %s and forward url %s" % (repo_id, remote_repo)
+				self.logger.warn(error_msg, exc_info=True)
+				raise BadRepositorySetupError, error_msg, sys.exc_info()[2]
 		elif repo_type == "hg":
 			repo_path = self._resolve_path(repo_id, repo_name)
-
-			with model_server.rpc_connect("repos", "read") as conn:
-				remote_repo = conn.get_repo_forward_url(repo_id)
 
 			make_repo_dirs()
 			hglib.init(repo_path)
@@ -653,11 +659,13 @@ class RepositoryOperationException(Exception):
 	def __init__(self, msg=''):
 		super(RepositoryOperationException, self).__init__(msg)
 
+
 class BadRepositorySetupError(RepositoryOperationException):
 	"""Indicates that a repository was not properly set up (either due to a missing ssh key on the master repository or due to a bad forward url)"""
 
 	def __init__(self, msg=''):
 		super(BadRepositorySetupError, self).__init__(msg)
+
 
 class PushForwardError(RepositoryOperationException):
 	"""Indicates that an error occured while attempting to push to a forward url"""

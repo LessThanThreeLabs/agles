@@ -11,6 +11,7 @@ from repo.store import FileSystemRepositoryStore, MergeError
 
 from database import schema
 from database.engine import ConnectionFactory
+from settings.store import StoreSettings
 from util.pathgen import to_path
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RepoStoreTestMixin, RabbitMixin
@@ -47,8 +48,11 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 			to_path(self.repo_id, "repo.git"))
 		self._start_model_server()
 
+		StoreSettings.ssh_private_key = 'NotARealPrivateKey'
+
 		self.repostore_id = self._create_repo_store()
 		self.remote_repo_path = os.path.join(self.repodir, "remote_repo.git")
+		Repo.init(self.remote_repo_path, bare=True)
 		with model_server.rpc_connect("repos", "create") as model_rpc:
 			model_rpc._create_repo_in_db(self.repo_id, "repo", "repo_uri", self.repostore_id, self.remote_repo_path, 0, "git")
 
@@ -115,8 +119,11 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
-
 		init_commit = self._modify_commit_push(work_repo, "test.txt", "c1")
+
+		# The conflict commit goes back to the forward repo first, simulating a user pushing without Koality
+		conflict_repo = Repo(self.remote_repo_path).clone(bare_repo.working_dir + ".conflict")
+		self._modify_commit_push(conflict_repo, "test.txt", "a conflict")
 
 		master_sha = bare_repo.heads.master.commit.hexsha
 

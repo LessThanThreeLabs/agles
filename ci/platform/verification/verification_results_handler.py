@@ -56,7 +56,7 @@ class VerificationResultsHandler(object):
 				attributes['repostore']['id'], attributes['repo']['id'],
 				attributes['repo']['name'], ref, merge_target)
 			return True
-		except MergeError, CommandError:
+		except (MergeError, CommandError):
 			self._mark_change_merge_failure(change_id, verification_status)
 			self.logger.info("Failed to merge change %d" % change_id, exc_info=True)
 		except PushForwardError:
