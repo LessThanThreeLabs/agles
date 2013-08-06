@@ -20,7 +20,10 @@ def upgrade():
 	repositories = op.get_bind().execute(repo.select())
 	for repository in repositories:
 		old_name = repository[repo.c.name]
-		new_name = old_name.rstrip('.git')
+		if old_name.endswith('.git'):
+			new_name = old_name[:old_name.rfind('.git')]
+		else:
+			new_name = old_name
 		op.get_bind().execute(
 			repo.update().values(name=new_name).where(repo.c.id == repository[repo.c.id])
 		)
