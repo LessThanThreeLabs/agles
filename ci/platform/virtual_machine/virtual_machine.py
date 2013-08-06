@@ -69,33 +69,58 @@ class VirtualMachine(object):
 				return results
 		return results
 
-	def remote_checkout(self, repo_name, git_url, ref, output_handler=None):
-		assert isinstance(ref, str)
-
+	# TODO(andrey) fix this function
+	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		def _remote_fetch():
-			host_url = git_url[:git_url.find(":")]
+			host_url = repo_url[:repo_url.find(":")]
 			command = ' && '.join([
 				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; git init %s))' % (repo_name, repo_name, repo_name, repo_name),
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
 				'cd %s' % repo_name,
-				'git fetch %s %s -n --depth 1' % (git_url, ref),
+				'git fetch %s %s -n --depth 1' % (repo_url, ref),
 				'git checkout FETCH_HEAD'])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
-				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, git_url, results))
+				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, repo_url, results))
 			return results
-		return self._ssh_authorized(_remote_fetch, output_handler)
 
-	def remote_clone(self, repo_name, git_url, output_handler=None):
+		def _remote_update():
+			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
+			command = ' && '.join([
+				'sudo apt-get install -y mercurial',
+				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; hg init source))' % repo_name,
+				'cd source',
+				'mkdir .hg/strip-backup',
+				'ssh -oStrictHostKeyChecking=no -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
+				'hg pull %s' % repo_url,
+				'hg unbundle .hg/strip-backup/%s.hg' % ref,
+				'hg update %s' % ref])
+			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
+			if results.returncode != 0:
+				self.logger.error("Failed to check out bundle %s from %s, results: %s" % (ref, repo_url, results))
+			return results
+
+		if repo_type == 'git':
+			assert isinstance(ref, str)
+			return self._ssh_authorized(_remote_fetch, output_handler)
+		elif repo_type == 'hg':
+			return self._ssh_authorized(_remote_update, output_handler)
+		else:
+			self.logger.error("Unknown repository type in remote_checkout %s." % repo_type)
+
+	def remote_clone(self, repo_type, repo_name, repo_url, output_handler=None):
 		def _remote_clone():
-			host_url = git_url[:git_url.find(":")]
+			if repo_type == 'git':
+				host_url = repo_url[:repo_url.find(":")]
+			elif repo_type == 'hg':
+				host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			command = ' && '.join([
 				'if [ -e %s ]; then rm -rf %s; fi' % (repo_name, repo_name),
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				'git clone %s %s' % (git_url, repo_name)])
+				'%s clone %s %s' % (repo_type, repo_url, repo_name)])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
-				self.logger.error("Failed to clone %s, results: %s" % (git_url, results))
+				self.logger.error("Failed to clone %s, results: %s" % (repo_url, results))
 			return results
 		return self._ssh_authorized(_remote_clone, output_handler)
 

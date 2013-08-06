@@ -22,7 +22,7 @@ class VirtualMachineBuildCore(object):
 	def rebuild(self):
 		raise NotImplementedError()
 
-	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
+	def setup_build(self, repo_uri, repo_type, ref, private_key, console_appender=None):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		self.setup_virtual_machine(repo_name, private_key, console_appender)
 
@@ -148,13 +148,13 @@ class CloudBuildCore(VirtualMachineBuildCore):
 	def rebuild(self):
 		self.virtual_machine.rebuild()
 
-	def setup_build(self, repo_uri, ref, private_key, console_appender=None):
-		self.setup_virtual_machine(repo_uri, ref, private_key, console_appender)
+	def setup_build(self, repo_uri, repo_type, ref, private_key, console_appender=None):
+		self.setup_virtual_machine(repo_uri, repo_type, ref, private_key, console_appender)
 
-	def setup_virtual_machine(self, repo_uri, ref, private_key, console_appender):
+	def setup_virtual_machine(self, repo_uri, repo_type, ref, private_key, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
-		checkout_command = RemoteCheckoutCommand(repo_name, checkout_url, ref)
+		checkout_command = RemoteCheckoutCommand(repo_name, checkout_url, repo_type, ref)
 		super(CloudBuildCore, self).setup_virtual_machine(repo_name, private_key, console_appender, [checkout_command])
 
 

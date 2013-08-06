@@ -5,16 +5,9 @@ import model_server
 from util.test import BaseIntegrationTest
 from util.test.mixins import ModelServerTestMixin, RabbitMixin
 from util.permissions import InvalidPermissionsError
-from util.shell import *
+from util.restricted_shell import *
 from database.engine import ConnectionFactory
 from database import schema
-
-VALID_COMMANDS = [
-	'git-receive-pack',
-	'git-upload-pack'
-]
-
-USER_ID_COMMANDS = ['git-receive-pack']
 
 NON_EXISTANT_USER_ID = "0"
 
@@ -44,7 +37,7 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 	def _setup_db_entries(self, REPO_URI):
 		repostore_id = self._create_repo_store()
 		with model_server.rpc_connect("repos", "create") as rpc_conn:
-			rpc_conn._create_repo_in_db(1, "repo", REPO_URI, repostore_id, "forwardurl", 0)
+			rpc_conn._create_repo_in_db(1, "repo", REPO_URI, repostore_id, "forwardurl", 0, "git")
 		with model_server.rpc_connect("users", "create") as rpc_conn:
 			self.user_id = rpc_conn.create_user("email", "first_name", "last_name", "hash", "salt")
 
@@ -52,8 +45,8 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		REPO_URI = "schacon/repo.git"
 		self._setup_db_entries(REPO_URI)
 
-		rsh = RestrictedGitShell(VALID_COMMANDS, USER_ID_COMMANDS)
-		sshargs = rsh.rp_new_sshargs('git-receive-pack', REPO_URI, str(self.user_id))
+		rsh = RestrictedGitShell()
+		sshargs = rsh.rp_new_sshargs('jgit receive-pack', REPO_URI, str(self.user_id))
 
 		assert_equal(len(sshargs), 7)
 		assert_equal('ssh', sshargs[0])
@@ -62,12 +55,28 @@ class ShellTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		assert_equal('2222', sshargs[3])
 		assert_equal('-oStrictHostKeyChecking=no', sshargs[4])
 		assert_equal('git@127.0.0.1', sshargs[5])
-		assert_is_not_none(re.match("git-receive-pack '.+/.+/.+/repo.git' %d" % self.user_id, sshargs[6]),
+		assert_is_not_none(re.match("jgit receive-pack '.+/.+/.+/repo.git' %d" % self.user_id, sshargs[6]),
+			msg='Created ssh command: "%s" is not well formed.' % sshargs[6])
+
+		rsh = RestrictedHgShell()
+		sshargs = rsh.rp_new_sshargs('hg -R', REPO_URI, str(self.user_id))
+
+		assert_equal(len(sshargs), 7)
+		assert_equal('ssh', sshargs[0])
+		assert_equal('ssh', sshargs[1])
+		assert_equal('-p', sshargs[2])
+		assert_equal('2222', sshargs[3])
+		assert_equal('-oStrictHostKeyChecking=no', sshargs[4])
+		assert_equal('git@127.0.0.1', sshargs[5])
+		assert_is_not_none(re.match("USERID=%d hg -R .+/.+/.+/repo serve --stdio" % self.user_id, sshargs[6]),
 			msg='Created ssh command: "%s" is not well formed.' % sshargs[6])
 
 	def test_invalid_permissions(self):
 		REPO_URI = "schacon/repo.git"
 		self._setup_db_entries(REPO_URI)
 
-		rsh = RestrictedGitShell(VALID_COMMANDS, USER_ID_COMMANDS)
+		rsh = RestrictedGitShell()
 		assert_raises(InvalidPermissionsError, rsh.rp_new_sshargs, 'git-upload-pack', REPO_URI, NON_EXISTANT_USER_ID)
+
+		rsh = RestrictedHgShell()
+		assert_raises(InvalidPermissionsError, rsh.rp_new_sshargs, 'hg -R', REPO_URI, NON_EXISTANT_USER_ID)

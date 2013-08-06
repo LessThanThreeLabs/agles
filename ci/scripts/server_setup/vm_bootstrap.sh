@@ -256,9 +256,13 @@ function remove_github_credentials () {
 
 function clone () {
 	prompt_github_credentials
-	git clone https://"$GITHUB_USERNAME":"$GITHUB_PASSWORD"@"$1" $2
-	pushd $2
-	git remote set-url origin https://"$1"
+	url=$1
+	name=$2
+	shift
+	shift
+	git clone https://"$GITHUB_USERNAME":"$GITHUB_PASSWORD"@"$url" $name $*
+	pushd $name
+	git remote set-url origin https://"$url"
 	popd
 }
 
@@ -315,14 +319,8 @@ function vm_setup () {
 	source ~/virtualenvs/2.7/bin/activate
 	set -o nounset
 
-	clone github.com/LessThanThreeLabs/koality-streaming-executor.git koality-streaming-executor
-	pushd koality-streaming-executor
-	pip install -r requirements.txt
-	python setup.py install
-	popd
-	rm -rf koality-streaming-executor
 
-	clone github.com/LessThanThreeLabs/koality-provisioner.git koality-provisioner
+	clone github.com/LessThanThreeLabs/koality-provisioner.git koality-provisioner -b 0.2
 	pushd koality-provisioner
 	pip install -r requirements.txt
 	python setup.py install
@@ -331,13 +329,7 @@ function vm_setup () {
 	popd
 	rm -rf koality-provisioner
 
-	clone github.com/LessThanThreeLabs/libcloud.git libcloud
-	pushd libcloud
-	python setup.py install
-	popd
-	rm -rf libcloud
-
-	clone github.com/LessThanThreeLabs/exporter.git exporter
+	clone github.com/LessThanThreeLabs/exporter.git exporter -b 0.2
 	pushd exporter
 	pip install -r requirements.txt
 	python setup.py install

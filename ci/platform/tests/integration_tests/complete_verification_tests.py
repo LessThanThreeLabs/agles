@@ -46,13 +46,17 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			super(VerificationRoundTripTest.TestChangeVerifier, self).__init__(verifier_pool, None)
 			self._change_finished = eventlet.event.Event()
 
-		def verify_change(self, verification_config, change_id, workers_spawned):
-			super(VerificationRoundTripTest.TestChangeVerifier, self).verify_change(verification_config, change_id, workers_spawned)
-			self._change_finished.send()
+		def verify_change(self, verification_config, change_id, repo_type, workers_spawned):
+			try:
+				super(VerificationRoundTripTest.TestChangeVerifier, self).verify_change(verification_config, change_id, repo_type, workers_spawned)
+			finally:
+				self._change_finished.send()
 
 		def skip_change(self, change_id):
-			super(VerificationRoundTripTest.TestChangeVerifier, self).skip_change(change_id)
-			self._change_finished.send()
+			try:
+				super(VerificationRoundTripTest.TestChangeVerifier, self).skip_change(change_id)
+			finally:
+				self._change_finished.send()
 
 	@classmethod
 	def setup_class(cls):
@@ -109,7 +113,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			ins_machine = schema.repostore.insert().values(ip_address="127.0.0.1", repositories_path=self.repo_dir)
 			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
 			ins_repo = schema.repo.insert().values(id=self.repo_id, name="repo", repostore_id=repostore_key, uri=repo_uri,
-				forward_url=self.forward_repo_url, created=120929)
+				forward_url=self.forward_repo_url, created=120929, type="git")
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			return repo_key
 
@@ -138,16 +142,16 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			return [{'pass_%s' % x: {'script': 'true'}} for x in xrange(num_commands - 1)] + [{'fail_%s' % (num_commands - 1): {'script': 'false'}}]
 
 	def _repo_roundtrip(self, modfile, contents, passes=True):
+		repo_id = self._insert_repo_info(self.repo_path)
+		commit_id = self._insert_commit_info()
+
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
-			client.create_repository(self.repo_id, "repo.git")
+			client.create_repository(self.repo_id, "repo")
 
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
 		init_commit = self._modify_commit_push(work_repo, modfile, contents)
-
-		repo_id = self._insert_repo_info(self.repo_path)
-		commit_id = self._insert_commit_info()
 
 		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
 			yaml.safe_dump({'test': {'scripts': self._test_commands(passes)}}),
@@ -157,7 +161,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
 			events_broker = EventsBroker(connection)
 			events_broker.publish("repos", repo_id, "change added",
-				change_id=commit_id, commit_id=commit_id, merge_target="master")
+				change_id=commit_id, commit_id=commit_id, merge_target="master", repo_type="git", sha='0')
 			with events_broker.subscribe("repos", callback=self._on_response) as consumer:
 				self.verification_status = None
 				start_time = time.time()
