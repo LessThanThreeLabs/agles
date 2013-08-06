@@ -1,6 +1,7 @@
 import time
 
 import database.schema
+import model_server
 import repo.store
 
 from sqlalchemy import and_
@@ -56,6 +57,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name, forward_url=forward_url, created=current_time)
 			return repo_id
 		except repo.store.BadRepositorySetupError:
+			with model_server.rpc_connect('repos', 'delete') as repos_delete_handler:
+				repos_delete_handler.delete_repo(user_id, repo_id)
 			raise
 		except RepositoryCreateError as e:
 			error_msg = "failed to create repo: [user_id: %d, repo_name: %s]" % (user_id, repo_name)
