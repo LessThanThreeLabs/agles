@@ -110,14 +110,17 @@ class VirtualMachine(object):
 
 	def remote_clone(self, repo_type, repo_url, output_handler=None):
 		def _remote_clone():
-			host_url = repo_url[:repo_url.find(":")]
+			if repo_type == 'git':
+				host_url = repo_url[:repo_url.find(":")]
+			elif repo_type == 'hg':
+				host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			command = ' && '.join([
 				'if [ -e source ]; then rm -rf source; fi',  # Make sure there's no "source" directory. Especially important for retries
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
 				'%s clone %s source' % (repo_type, repo_url)])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
-				self.logger.error("Failed to clone %s, results: %s" % (git_url, results))
+				self.logger.error("Failed to clone %s, results: %s" % (repo_url, results))
 			return results
 		return self._ssh_authorized(_remote_clone, output_handler)
 
