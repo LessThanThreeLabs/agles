@@ -33,6 +33,9 @@ class ReposCreateHandler(ModelServerRpcHandler):
 					raise RepositoryCreateError("Already have the maximum allowed number of repositories (%d)" % max_repo_count)
 			if repo_type == 'git':
 				repo_name += ".git"
+			elif repo_type == 'hg':
+				if not repo_type.startswith('ssh://'):
+					repo_type = 'ssh://%s' % repo_type
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 			repostore_id = manager.get_least_loaded_store()
 			uri = repo_name  # email addresses in uri don't make sense anymore

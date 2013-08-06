@@ -345,7 +345,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 				break
 
 	def _hg_push_merge_retry(self, repo, remote_repo, ref_to_merge, ref_to_merge_into):
-		remote_repo = "ssh://%s" % remote_repo
 		sha = ref_to_merge
 
 		def update_from_forward_url(sha):
@@ -498,7 +497,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			make_repo_dirs()
 			hglib.init(repo_path)
 			try:
-				self._hg_fetch_with_private_key(hglib.open("repo_path"), remote_repo)
+				self._hg_fetch_with_private_key(hglib.open(repo_path), remote_repo)
 			except CommandError:
 				error_msg = "Pull failed for repo with id %s and forward url %s" % (repo_id, remote_repo)
 				self.logger.warn(error_msg, exc_info=True)
