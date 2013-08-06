@@ -32,14 +32,14 @@ class ReposCreateHandler(ModelServerRpcHandler):
 					repo_count = sqlconn.execute(query).rowcount
 				if repo_count >= max_repo_count:
 					raise RepositoryCreateError("Already have the maximum allowed number of repositories (%d)" % max_repo_count)
+			uri = repo_name  # email addresses in uri don't make sense anymore
 			if repo_type == 'git':
-				repo_name += ".git"
+				uri += '.git'
 			elif repo_type == 'hg':
 				if not forward_url.startswith('ssh://'):
 					forward_url = 'ssh://%s' % forward_url
 			manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 			repostore_id = manager.get_least_loaded_store()
-			uri = repo_name  # email addresses in uri don't make sense anymore
 			current_time = int(time.time())
 
 			# Set entries in db
