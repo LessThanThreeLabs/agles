@@ -60,7 +60,6 @@ class Snapshotter(object):
 		newest_global_image = self.vm_class.get_newest_global_image()
 		newest_image_version = self.vm_class.get_image_version(self.vm_class.get_newest_image())
 		snapshot_version = newest_image_version[0], newest_image_version[1] + 1
-		snapshot_version = self._truncate_decimal(snapshot_version[0]), self._truncate_decimal(snapshot_version[1])
 		instance_name = 'koality_snapshot_%s_%s' % snapshot_version
 
 		with model_server.rpc_connect('repos', 'read') as model_rpc:
@@ -185,11 +184,6 @@ class Snapshotter(object):
 			wait_for_openstack_image()
 		else:
 			self.logger.error('Unsupported VM class provided for snapshotter')
-
-	def _truncate_decimal(self, value):
-		if value == int(value):
-			return int(value)
-		return value
 
 	def remove_stale_snapshots(self):
 		def delete_image(image):
