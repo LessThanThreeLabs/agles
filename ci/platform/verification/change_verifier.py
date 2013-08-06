@@ -231,6 +231,9 @@ class ChangeVerifier(EventSubscriber):
 			self.logger.critical()
 			assert False
 
+		if not isinstance(config, dict):
+			config = {}
+
 		try:
 			return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))
 		except:
