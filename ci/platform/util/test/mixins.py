@@ -84,7 +84,7 @@ class RepoStoreTestMixin(BaseTestMixin):
 		with open(os.path.join(repo.working_dir, filename), "w") as f:
 			f.write(contents)
 		repo.index.add([filename])
-		commit = repo.index.commit("", parent_commits=parent_commits)
+		commit = repo.index.commit("Updated %s" % filename, parent_commits=parent_commits)
 		repo.remotes.origin.push(refspec=refspec)
 		return commit
 

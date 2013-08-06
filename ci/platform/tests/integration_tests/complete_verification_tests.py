@@ -151,7 +151,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
-		init_commit = self._modify_commit_push(work_repo, modfile, contents)
+		init_commit = self._modify_commit_push(work_repo, modfile, contents, parent_commits=[])
 
 		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
 			yaml.safe_dump({'test': {'scripts': self._test_commands(passes)}}),
@@ -206,10 +206,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		forward_repo = Repo(self.forward_repo_url)
 		work_repo = forward_repo.clone(forward_repo.working_dir + ".clone")
 
-		self._modify_commit_push(work_repo, "conflict.txt", "c2")
+		conflict_sha = self._modify_commit_push(work_repo, "conflict.txt", "c2").hexsha
 		self._repo_roundtrip("conflict.txt", "conflict")
 		assert_equal(BuildStatus.PASSED, self.verification_status)
 		assert_equal(MergeStatus.FAILED, self.merge_status)
+		assert_equal(conflict_sha, work_repo.head.commit.hexsha)
 
 	def test_skip_roundtrip(self):
 		DeploymentSettings.active = False
