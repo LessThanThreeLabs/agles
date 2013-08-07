@@ -88,11 +88,21 @@ class BuildVerifier(object):
 
 		self._cleanup(build_id, results, artifact_export_event)
 
+	def launch_build(self, build_id, repo_type, verification_config):
+		setup_result = self._setup(build_id, repo_type, verification_config)
+
+		if isinstance(setup_result, Exception):
+			self._cleanup(build_id, [], None)
+			return
+
+		# TODO(andrey) after ~55 minutes
+		self._cleanup(build_id, [], None)
+
 	@ReturnException
 	def _setup(self, build_id, repo_type, verification_config):
 		build = self._get_build(build_id)
 		commit_id = build['commit_id']
-		self.logger.info("Worker %s processing verification request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
+		self.logger.info("Worker %s processing build request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
 		self._start_build(build_id)
 		repo_uri = self._get_repo_uri(commit_id)
 
@@ -138,28 +148,30 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 
 		build = self._get_build(build_id)
-		export_prefix = "repo_%d/change_%d" % (build['repo_id'], build['change_id'])
 
-		def parse_export_uris(export_results):
-			if export_results.returncode == 0:
+		if not artifact_export_event == None:
+			export_prefix = "repo_%d/change_%d" % (build['repo_id'], build['change_id'])
+
+			def parse_export_uris(export_results):
+				if export_results.returncode == 0:
+					try:
+						return yaml.safe_load(export_results.output)['uris']
+					except:
+						pass
+				return []
+
+			try:
+				export_uris = parse_export_uris(self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test")))
+			except:
+				export_uris = []
+
+			if not artifact_export_event.ready():
+				artifact_export_event.send()
 				try:
-					return yaml.safe_load(export_results.output)['uris']
+					results = self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
+					export_uris += parse_export_uris(results)
 				except:
 					pass
-			return []
-
-		try:
-			export_uris = parse_export_uris(self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test")))
-		except:
-			export_uris = []
-
-		if not artifact_export_event.ready():
-			artifact_export_event.send()
-			try:
-				results = self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
-				export_uris += parse_export_uris(results)
-			except:
-				pass
 
 		with model_server.rpc_connect("changes", "update") as changes_update_rpc:
 			changes_update_rpc.add_export_uris(build['change_id'], export_uris)
