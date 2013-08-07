@@ -87,7 +87,6 @@ class VirtualMachine(object):
 		def _remote_update():
 			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			command = ' && '.join([
-				'sudo apt-get install -y mercurial',
 				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; hg init source))' % repo_name,
 				'cd source',
 				'mkdir .hg/strip-backup',
