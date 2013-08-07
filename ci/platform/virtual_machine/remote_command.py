@@ -100,7 +100,7 @@ class RemoteShellCommand(RemoteCommand):
 		return script
 
 	def _to_executed_script(self):
-		full_command = "&&\n".join(map(self._advertised_command, self.commands))
+		full_command = "bash -c %s" % pipes.quote("&&\n".join(map(self._advertised_command, self.commands)))
 		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join('source', self.path) if self.path else 'source'))
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
 		timeout_command = "timeout -s KILL %d timeout -s INT %d %s" % (self.timeout + 3, self.timeout, full_command)
