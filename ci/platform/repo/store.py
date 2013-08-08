@@ -592,10 +592,12 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
-		self._git_fetch_with_private_key(repo, repo_path)
-		remote_branch = "origin/%s" % branch
-		remote_branch_exists = re.search("\\s+" + remote_branch + "$", repo.git.branch("-r"), re.MULTILINE)
-		return remote_branch_exists
+		try:
+			self._git_fetch_with_private_key(repo, repo_path, branch)
+		except GitCommandError:
+			return False
+		else:
+			return True
 
 	def store_pending(self, repo_id, repo_name, sha, commit_id):
 		repo_name += '.git'
