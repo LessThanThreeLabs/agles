@@ -550,11 +550,12 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def force_delete(self, repo_id, repo_name, target):
 		repo_type = self._get_repo_type(repo_id)
 		assert(repo_type == "git")
+		short_repo_name = repo_name
 		repo_name += '.git'
 
 		if self._git_remote_branch_exists(repo_id, repo_name, target):
 			try:
-				self.push(repo_id, repo_name, "", target, force=True)
+				self.push(repo_id, short_repo_name, "", target, force=True)
 			except GitCommandError as e:
 				self.logger.warn("Force delete encountered an error", exc_info=e)
 				self._git_update_branch(repo_id, repo_name, target)
@@ -593,7 +594,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
 		try:
-			self._git_fetch_with_private_key(repo, repo_path, branch)
+			self._git_fetch_with_private_key(repo, remote_repo, branch)
 		except GitCommandError:
 			return False
 		else:
