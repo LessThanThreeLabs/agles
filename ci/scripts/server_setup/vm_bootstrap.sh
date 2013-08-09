@@ -47,7 +47,10 @@ function add_user () {
 			sudo adduser "$1" --home "/home/$1" --shell /bin/bash
 		fi
 		echo -e "$password\n$password" | sudo passwd "$1"
-		echo "$1 ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers >/dev/null
+		echo "$1 ALL=(ALL) NOPASSWD: ALL" > koality.sudo
+		chmod 0440 koality.sudo
+		sudo chown 0:0 koality.sudo
+		sudo mv koality.sudo /etc/sudoers.d/koality-$1
 	}
 }
 
