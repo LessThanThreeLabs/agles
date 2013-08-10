@@ -38,19 +38,20 @@ function check_sudo () {
 }
 
 function add_user () {
-	cat /etc/passwd | grep $1 > /dev/null || {
-		echo "Creating user $1"
-		read -s -p "Enter password for user $1: " password
+	username=$1
+	cat /etc/passwd | grep $username > /dev/null || {
+		echo "Creating user $username"
+		read -s -p "Enter password for user $username: " password
 		if [ $PACKAGE_MANAGER == 'apt-get' ]; then
-			sudo adduser "$1" --home "/home/$1" --shell /bin/bash --disabled-password --gecos ""
+			sudo adduser "$username" --home "/home/$username" --shell /bin/bash --disabled-password --gecos ""
 		elif [ $PACKAGE_MANAGER == 'yum' ]; then
-			sudo adduser "$1" --home "/home/$1" --shell /bin/bash
+			sudo adduser "$username" --home "/home/$username" --shell /bin/bash
 		fi
-		echo -e "$password\n$password" | sudo passwd "$1"
-		echo "$1 ALL=(ALL) NOPASSWD: ALL" > koality.sudo
+		echo -e "$password\n$password" | sudo passwd "$username"
+		echo "$username ALL=(ALL) NOPASSWD: ALL" > koality.sudo
 		chmod 0440 koality.sudo
 		sudo chown 0:0 koality.sudo
-		sudo mv koality.sudo /etc/sudoers.d/koality-$1
+		sudo mv koality.sudo /etc/sudoers.d/koality-$username
 	}
 }
 
