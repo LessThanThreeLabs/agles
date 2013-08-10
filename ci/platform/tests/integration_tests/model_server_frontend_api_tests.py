@@ -214,22 +214,24 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		assert_less(0, len(allowed_instance_sizes))
 
 	def test_instance_settings(self):
+		security_group_name = "a security group"
 		instance_size = "m1.medium"
 		num_waiting = 42
 		max_running = 69
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_instance_settings(self.user_id, instance_size, num_waiting, max_running)
+			conn.set_instance_settings(self.user_id, instance_size, security_group_name, num_waiting, max_running)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running},
+			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name, "num_waiting": num_waiting, "max_running": max_running},
 				conn.get_instance_settings(self.user_id))
 
+		security_group_name = "a different security group"
 		instance_size = "m2.2xlarge"
 		num_waiting = 1337
 		max_running = 9001
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_instance_settings(self.user_id, instance_size, num_waiting, max_running)
+			conn.set_instance_settings(self.user_id, instance_size, security_group_name, num_waiting, max_running)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "num_waiting": num_waiting, "max_running": max_running},
+			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name, "num_waiting": num_waiting, "max_running": max_running},
 				conn.get_instance_settings(self.user_id))
 
 	def test_deployment_settings(self):

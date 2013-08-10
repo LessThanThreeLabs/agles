@@ -79,9 +79,14 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		return ec2.InstanceTypes.get_allowed_instance_types()
 
 	@AdminApi
+	def get_aws_security_group_names(self, user_id):
+		return ec2.SecurityGroups.get_security_group_names()
+
+	@AdminApi
 	def get_instance_settings(self, user_id):
 		return {
 			'instance_size': AwsSettings.instance_type,
+			'security_group_name': AwsSettings.security_group,
 			'num_waiting': VerificationServerSettings.static_pool_size,
 			'max_running': VerificationServerSettings.max_virtual_machine_count
 		}

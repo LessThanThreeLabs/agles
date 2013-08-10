@@ -278,6 +278,14 @@ class Ec2Vm(VirtualMachine):
 			self.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
 
 
+class SecurityGroups(object):
+	@classmethod
+	def get_security_group_names(cls):
+		existing_groups = map(lambda group: group.name, Ec2Client.get_client().get_all_security_groups())
+		existing_groups_plus_selected = list(set(existing_groups).union([str(AwsSettings.security_group)]))
+		return sorted(existing_groups_plus_selected)
+
+
 class InstanceTypes(object):
 	ordered_types = ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge',
 			'm3.xlarge', 'm3.2xlarge', 'c1.medium', 'c1.xlarge', 'hi1.4xlarge', 'hs1.8xlarge']

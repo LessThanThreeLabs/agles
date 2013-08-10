@@ -102,8 +102,9 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		self.update_setting("aws", "s3_bucket_name", bucket_name)
 
 	@AdminApi
-	def set_instance_settings(self, user_id, instance_size, min_unallocated, max_verifiers):
+	def set_instance_settings(self, user_id, instance_size, security_group_name, min_unallocated, max_verifiers):
 		self.update_setting("aws", "instance_type", instance_size)
+		self.update_setting("aws", "security_group", security_group_name)
 		self.update_setting("verification_server", "static_pool_size", min_unallocated)
 		self.update_setting("verification_server", "max_virtual_machine_count", max_verifiers)
 		self.publish_event("system_settings", None, "instance settings updated",
