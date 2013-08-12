@@ -122,8 +122,15 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	@AdminApi
 	def set_hpcloud_keys(self, user_id, access_key, secret_key, tenant_name, region, validate=True):
 		assert VerificationServerSettings.cloud_provider == 'hpcloud'
-		if validate and not HpCloudClient.validate_credentials(access_key, secret_key):
-			raise InvalidConfigurationException(access_key, secret_key)
+		credentials = {
+			'key': access_key,
+			'secret': secret_key,
+			'ex_tenant_name': tenant_name,
+			'ex_force_service_region': region
+		}
+
+		if validate and not HpCloudClient.validate_credentials(credentials):
+			raise InvalidConfigurationException(access_key, secret_key, tenant_name, region)
 		self.update_setting("lib_cloud", "key", access_key)
 		self.update_setting("lib_cloud", "secret", secret_key)
 		self.update_setting("lib_cloud", "extra_credentials", {
