@@ -93,9 +93,9 @@ class OpenstackVm(VirtualMachine):
 		'''
 		return '\n'.join(("#!/bin/sh",
 			"adduser %s --home /home/%s --shell /bin/bash --disabled-password --gecos ''" % (vm_username, vm_username),
-			"mkdir /home/%s/.ssh" % vm_username,
-			"echo '%s' >> /home/%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
-			"chown -R %s:%s /home/%s/.ssh" % (vm_username, vm_username, vm_username)))
+			"mkdir ~%s/.ssh" % vm_username,
+			"echo '%s' >> ~%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
+			"chown -R %s:%s ~%s/.ssh" % (vm_username, vm_username, vm_username)))
 
 	@classmethod
 	def _validate_security_group(cls, security_group):
@@ -258,6 +258,16 @@ class OpenstackVm(VirtualMachine):
 			instance.destroy()
 		except:
 			cls.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
+
+
+class SecurityGroups(object):
+	CloudClient = OpenstackClient.get_client
+
+	@classmethod
+	def get_security_group_names(cls):
+		existing_groups = map(lambda group: group.name, cls.CloudClient().ex_list_security_groups())
+		existing_groups_plus_selected = list(set(existing_groups).union([str(LibCloudSettings.security_group)]))
+		return sorted(existing_groups_plus_selected)
 
 
 class InstanceTypes(object):

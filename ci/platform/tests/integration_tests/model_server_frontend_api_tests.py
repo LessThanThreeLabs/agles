@@ -207,32 +207,81 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals({"access_key": access_key, "secret_key": secret_key}, conn.get_aws_keys(self.user_id))
 
-	def test_allowed_instance_sizes(self):
+	def test_hpcloud_keys(self):
+		access_key = "access KEY"
+		secret_key = "SUPER_secret"
+		tenant_name = "a tenant"
+		region = "region-1"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_hpcloud_keys(self.user_id, access_key, secret_key, tenant_name, region, False)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			allowed_instance_sizes = conn.get_allowed_instance_sizes(self.user_id)
+			assert_equals({"access_key": access_key, "secret_key": secret_key, "tenant_name": tenant_name, "region": region}, conn.get_hpcloud_keys(self.user_id))
+
+		access_key = "abc123XYZ"
+		secret_key = "#!/\\(0xf ?'"
+		tenant_name = "a different tenant"
+		region = "region-2 west"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_hpcloud_keys(self.user_id, access_key, secret_key, tenant_name, region, False)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"access_key": access_key, "secret_key": secret_key, "tenant_name": tenant_name, "region": region}, conn.get_hpcloud_keys(self.user_id))
+
+	def test_aws_allowed_instance_sizes(self):
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			allowed_instance_sizes = conn.get_aws_allowed_instance_sizes(self.user_id)
 		assert_is_instance(allowed_instance_sizes, list)
 		assert_less(0, len(allowed_instance_sizes))
 
-	def test_instance_settings(self):
+	def test_aws_instance_settings(self):
 		security_group_name = "a security group"
 		instance_size = "m1.medium"
-		num_waiting = 42
-		max_running = 69
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_instance_settings(self.user_id, instance_size, security_group_name, num_waiting, max_running)
+			conn.set_aws_instance_settings(self.user_id, instance_size, security_group_name)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name, "num_waiting": num_waiting, "max_running": max_running},
-				conn.get_instance_settings(self.user_id))
+			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name},
+				conn.get_aws_instance_settings(self.user_id))
 
 		security_group_name = "a different security group"
 		instance_size = "m2.2xlarge"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_aws_instance_settings(self.user_id, instance_size, security_group_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name},
+				conn.get_aws_instance_settings(self.user_id))
+
+	def test_hpcloud_instance_settings(self):
+		security_group_name = "a security group"
+		instance_size = "m1.medium"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_hpcloud_instance_settings(self.user_id, instance_size, security_group_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name},
+				conn.get_hpcloud_instance_settings(self.user_id))
+
+		security_group_name = "a different security group"
+		instance_size = "m2.2xlarge"
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_hpcloud_instance_settings(self.user_id, instance_size, security_group_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name},
+				conn.get_hpcloud_instance_settings(self.user_id))
+
+	def test_verifier_pool_parameters(self):
+		num_waiting = 42
+		max_running = 69
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_verifier_pool_parameters(self.user_id, num_waiting, max_running)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals({"num_waiting": num_waiting, "max_running": max_running},
+				conn.get_verifier_pool_parameters(self.user_id))
+
 		num_waiting = 1337
 		max_running = 9001
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_instance_settings(self.user_id, instance_size, security_group_name, num_waiting, max_running)
+			conn.set_verifier_pool_parameters(self.user_id, num_waiting, max_running)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name, "num_waiting": num_waiting, "max_running": max_running},
-				conn.get_instance_settings(self.user_id))
+			assert_equals({"num_waiting": num_waiting, "max_running": max_running},
+				conn.get_verifier_pool_parameters(self.user_id))
 
 	def test_deployment_settings(self):
 		with model_server.rpc_connect("system_settings", "read") as conn:

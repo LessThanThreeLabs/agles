@@ -25,12 +25,13 @@ class HpCloudClient(openstack.OpenstackClient):
 	@classmethod
 	def connect(cls, credentials):
 		assert 'ex_tenant_name' in credentials
+		region = credentials.get('ex_force_service_region', 'az-1.region-a.geo-1')
 
 		connection_parameters = {
 			'ex_force_auth_url': 'https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/',
 			'ex_force_auth_version': '2.0_keypair',
 			'ex_force_service_name': 'Compute',
-			'ex_force_service_region': 'az-1.region-a.geo-1',
+			'ex_force_service_region': region,
 		}
 		connection_parameters.update(credentials)
 
@@ -52,6 +53,10 @@ class HpCloudVm(openstack.OpenstackVm):
 	@classmethod
 	def _get_instance_size(cls, instance_type, matching_attribute='name'):
 		return filter(lambda size: getattr(size, matching_attribute) == instance_type, cls.CloudClient().list_sizes())[0]
+
+
+class SecurityGroups(openstack.SecurityGroups):
+	CloudClient = HpCloudClient.get_client
 
 
 class InstanceTypes(openstack.InstanceTypes):

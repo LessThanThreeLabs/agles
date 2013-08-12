@@ -19,6 +19,7 @@ from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi
 from virtual_machine.ec2 import Ec2Client
+from virtual_machine.hpcloud import HpCloudClient
 
 
 class SystemSettingsUpdateHandler(ModelServerRpcHandler):
@@ -96,19 +97,53 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			raise InvalidConfigurationException(access_key, secret_key)
 		self.update_setting("aws", "aws_access_key_id", access_key)
 		self.update_setting("aws", "aws_secret_access_key", secret_key)
+		self.publish_event("system_settings", None, "aws keys updated",
+			access_key=access_key,
+			secret_key=secret_key)
+
+	@AdminApi
+	def set_aws_instance_settings(self, user_id, instance_size, security_group_name):
+		self.update_setting("aws", "instance_type", instance_size)
+		self.update_setting("aws", "security_group", security_group_name)
+		self.publish_event("system_settings", None, "aws instance settings updated",
+			instance_size=instance_size,
+			security_group_name=security_group_name)
 
 	@AdminApi
 	def set_s3_bucket_name(self, user_id, bucket_name):
 		self.update_setting("aws", "s3_bucket_name", bucket_name)
+		self.publish_event("system_settings", None, "s3 bucket name updated",
+			bucket_name=bucket_name)
 
 	@AdminApi
-	def set_instance_settings(self, user_id, instance_size, security_group_name, min_unallocated, max_verifiers):
-		self.update_setting("aws", "instance_type", instance_size)
-		self.update_setting("aws", "security_group", security_group_name)
+	def set_hpcloud_keys(self, user_id, access_key, secret_key, tenant_name, region, validate=True):
+		if validate and not HpCloudClient.validate_credentials(access_key, secret_key):
+			raise InvalidConfigurationException(access_key, secret_key)
+		self.update_setting("lib_cloud", "key", access_key)
+		self.update_setting("lib_cloud", "secret", secret_key)
+		self.update_setting("lib_cloud", "extra_credentials", {
+			"ex_tenant_name": tenant_name,
+			"ex_force_service_region": region
+		})
+		self.publish_event("system_settings", None, "hpcloud keys updated",
+			access_key=access_key,
+			secret_key=secret_key,
+			tenant_name=tenant_name,
+			region=region)
+
+	@AdminApi
+	def set_hpcloud_instance_settings(self, user_id, instance_size, security_group_name):
+		self.update_setting("lib_cloud", "instance_type", instance_size)
+		self.update_setting("lib_cloud", "security_group", security_group_name)
+		self.publish_event("system_settings", None, "hpcloud instance settings updated",
+			instance_size=instance_size,
+			security_group_name=security_group_name)
+
+	@AdminApi
+	def set_verifier_pool_parameters(self, user_id, min_unallocated, max_verifiers):
 		self.update_setting("verification_server", "static_pool_size", min_unallocated)
 		self.update_setting("verification_server", "max_virtual_machine_count", max_verifiers)
-		self.publish_event("system_settings", None, "instance settings updated",
-			instance_size=instance_size,
+		self.publish_event("system_settings", None, "verifier pool settings updated",
 			min_unallocated=min_unallocated,
 			max_verifiers=max_verifiers)
 

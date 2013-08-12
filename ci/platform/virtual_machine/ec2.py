@@ -88,9 +88,10 @@ class Ec2Vm(VirtualMachine):
 		This will fail if we use an image which doesn't utilitize EC2 user_data
 		'''
 		return '\n'.join(("#!/bin/sh",
-			"mkdir /home/%s/.ssh" % vm_username,
-			"echo '%s' >> /home/%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
-			"chown -R %s:%s /home/%s/.ssh" % (vm_username, vm_username, vm_username)))
+			"adduser %s --home /home/%s --shell /bin/bash --disabled-password --gecos ''" % (vm_username, vm_username),
+			"mkdir ~%s/.ssh" % vm_username,
+			"echo '%s' >> ~%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
+			"chown -R %s:%s ~%s/.ssh" % (vm_username, vm_username, vm_username)))
 
 	@classmethod
 	def _validate_security_group(cls, security_group):

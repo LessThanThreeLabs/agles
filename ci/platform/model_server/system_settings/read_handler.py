@@ -10,6 +10,7 @@ import database.schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.aws import AwsSettings
+from settings.libcloud import LibCloudSettings
 from settings.verification_server import VerificationServerSettings
 from settings.web_server import WebServerSettings
 from settings.deployment import DeploymentSettings
@@ -18,7 +19,7 @@ from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi, is_admin
 from upgrade import upgrade_check_url
-from virtual_machine import ec2
+from virtual_machine import ec2, hpcloud
 
 
 class SystemSettingsReadHandler(ModelServerRpcHandler):
@@ -71,11 +72,18 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		}
 
 	@AdminApi
+	def get_aws_instance_settings(self, user_id):
+		return {
+			'instance_size': AwsSettings.instance_type,
+			'security_group_name': AwsSettings.security_group
+		}
+
+	@AdminApi
 	def get_s3_bucket_name(self, user_id):
 		return AwsSettings.s3_bucket_name
 
 	@AdminApi
-	def get_allowed_instance_sizes(self, user_id):
+	def get_aws_allowed_instance_sizes(self, user_id):
 		return ec2.InstanceTypes.get_allowed_instance_types()
 
 	@AdminApi
@@ -83,10 +91,33 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		return ec2.SecurityGroups.get_security_group_names()
 
 	@AdminApi
-	def get_instance_settings(self, user_id):
+	def get_hpcloud_keys(self, user_id):
+		extra_credentials = LibCloudSettings.extra_credentials
 		return {
-			'instance_size': AwsSettings.instance_type,
-			'security_group_name': AwsSettings.security_group,
+			'access_key': LibCloudSettings.key,
+			'secret_key': LibCloudSettings.secret,
+			'tenant_name': extra_credentials['ex_tenant_name'],
+			'region': extra_credentials['ex_force_service_region']
+		}
+
+	@AdminApi
+	def get_hpcloud_instance_settings(self, user_id):
+		return {
+			'instance_size': LibCloudSettings.instance_type,
+			'security_group_name': LibCloudSettings.security_group
+		}
+
+	@AdminApi
+	def get_hpcloud_allowed_instance_sizes(self, user_id):
+		return hpcloud.InstanceTypes.get_allowed_instance_types()
+
+	@AdminApi
+	def get_hpcloud_security_group_names(self, user_id):
+		return hpcloud.SecurityGroups.get_security_group_names()
+
+	@AdminApi
+	def get_verifier_pool_parameters(self, user_id):
+		return {
 			'num_waiting': VerificationServerSettings.static_pool_size,
 			'max_running': VerificationServerSettings.max_virtual_machine_count
 		}
