@@ -265,8 +265,11 @@ class SecurityGroups(object):
 
 	@classmethod
 	def get_security_group_names(cls):
-		existing_groups = map(lambda group: group.name, cls.CloudClient().ex_list_security_groups())
-		existing_groups_plus_selected = list(set(existing_groups).union([str(LibCloudSettings.security_group)]))
+		try:
+			existing_groups = map(lambda group: group.name, cls.CloudClient().ex_list_security_groups())
+		except:
+			existing_groups = []
+		existing_groups_plus_selected = list(set(existing_groups).union([str(LibCloudSettings.security_group), str(LibCloudSettings._default_security_group)]))
 		return sorted(existing_groups_plus_selected)
 
 
@@ -284,7 +287,10 @@ class InstanceTypes(object):
 	@classmethod
 	def get_allowed_instance_types(cls):
 		largest_instance_type = LibCloudSettings.largest_instance_type
-		ordered_types = map(lambda size: size.id, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		try:
+			ordered_types = map(lambda size: size.id, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		except:
+			ordered_types = []
 		if largest_instance_type in ordered_types:
 			return ordered_types[:ordered_types.index(largest_instance_type) + 1]
 		else:

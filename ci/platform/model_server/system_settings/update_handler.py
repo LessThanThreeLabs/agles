@@ -15,6 +15,7 @@ from database.engine import ConnectionFactory
 from license.verifier import HttpLicenseKeyVerifier, LicenseVerifier, LicensePermissionsHandler
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.deployment import DeploymentSettings
+from settings.verification_server import VerificationServerSettings
 from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi
@@ -93,6 +94,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def set_aws_keys(self, user_id, access_key, secret_key, validate=True):
+		assert VerificationServerSettings.cloud_provider == 'aws'
 		if validate and not Ec2Client.validate_credentials(access_key, secret_key):
 			raise InvalidConfigurationException(access_key, secret_key)
 		self.update_setting("aws", "aws_access_key_id", access_key)
@@ -103,6 +105,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def set_aws_instance_settings(self, user_id, instance_size, security_group_name):
+		assert VerificationServerSettings.cloud_provider == 'aws'
 		self.update_setting("aws", "instance_type", instance_size)
 		self.update_setting("aws", "security_group", security_group_name)
 		self.publish_event("system_settings", None, "aws instance settings updated",
@@ -111,12 +114,14 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def set_s3_bucket_name(self, user_id, bucket_name):
+		assert VerificationServerSettings.cloud_provider == 'aws'
 		self.update_setting("aws", "s3_bucket_name", bucket_name)
 		self.publish_event("system_settings", None, "s3 bucket name updated",
 			bucket_name=bucket_name)
 
 	@AdminApi
 	def set_hpcloud_keys(self, user_id, access_key, secret_key, tenant_name, region, validate=True):
+		assert VerificationServerSettings.cloud_provider == 'hpcloud'
 		if validate and not HpCloudClient.validate_credentials(access_key, secret_key):
 			raise InvalidConfigurationException(access_key, secret_key)
 		self.update_setting("lib_cloud", "key", access_key)
@@ -133,6 +138,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def set_hpcloud_instance_settings(self, user_id, instance_size, security_group_name):
+		assert VerificationServerSettings.cloud_provider == 'hpcloud'
 		self.update_setting("lib_cloud", "instance_type", instance_size)
 		self.update_setting("lib_cloud", "security_group", security_group_name)
 		self.publish_event("system_settings", None, "hpcloud instance settings updated",

@@ -66,6 +66,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_aws_keys(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'aws'
 		return {
 			'access_key': AwsSettings.aws_access_key_id,
 			'secret_key': AwsSettings.aws_secret_access_key
@@ -73,6 +74,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_aws_instance_settings(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'aws'
 		return {
 			'instance_size': AwsSettings.instance_type,
 			'security_group_name': AwsSettings.security_group
@@ -80,28 +82,33 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_s3_bucket_name(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'aws'
 		return AwsSettings.s3_bucket_name
 
 	@AdminApi
 	def get_aws_allowed_instance_sizes(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'aws'
 		return ec2.InstanceTypes.get_allowed_instance_types()
 
 	@AdminApi
 	def get_aws_security_group_names(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'aws'
 		return ec2.SecurityGroups.get_security_group_names()
 
 	@AdminApi
 	def get_hpcloud_keys(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'hpcloud'
 		extra_credentials = LibCloudSettings.extra_credentials
 		return {
 			'access_key': LibCloudSettings.key,
 			'secret_key': LibCloudSettings.secret,
-			'tenant_name': extra_credentials['ex_tenant_name'],
-			'region': extra_credentials['ex_force_service_region']
+			'tenant_name': extra_credentials.get('ex_tenant_name', ''),
+			'region': extra_credentials.get('ex_force_service_region', '')
 		}
 
 	@AdminApi
 	def get_hpcloud_instance_settings(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'hpcloud'
 		return {
 			'instance_size': LibCloudSettings.instance_type,
 			'security_group_name': LibCloudSettings.security_group
@@ -109,10 +116,12 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_hpcloud_allowed_instance_sizes(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'hpcloud'
 		return hpcloud.InstanceTypes.get_allowed_instance_types()
 
 	@AdminApi
 	def get_hpcloud_security_group_names(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'hpcloud'
 		return hpcloud.SecurityGroups.get_security_group_names()
 
 	@AdminApi

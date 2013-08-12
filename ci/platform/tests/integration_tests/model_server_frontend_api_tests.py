@@ -192,7 +192,32 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals(domain_name, conn.get_website_domain_name(self.user_id))
 
+	def test_s3_bucket_name(self):
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "aws")
+
+		bucket_name = 'ImABukkit'
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_s3_bucket_name(self.user_id, bucket_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals(bucket_name, conn.get_s3_bucket_name(self.user_id))
+
+		bucket_name = 'Nooo-they-be-stealin-mah-bukkit'
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_s3_bucket_name(self.user_id, bucket_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_equals(bucket_name, conn.get_s3_bucket_name(self.user_id))
+
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "hpcloud")
+			assert_raises(AssertionError, conn.set_s3_bucket_name, self.user_id, bucket_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_raises(AssertionError, conn.get_s3_bucket_name, self.user_id)
+
 	def test_aws_keys(self):
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "aws")
+
 		access_key = "access KEY"
 		secret_key = "SUPER_secret"
 		with model_server.rpc_connect("system_settings", "update") as conn:
@@ -207,7 +232,16 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals({"access_key": access_key, "secret_key": secret_key}, conn.get_aws_keys(self.user_id))
 
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "hpcloud")
+			assert_raises(AssertionError, conn.set_aws_keys, self.user_id, access_key, secret_key, False)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_raises(AssertionError, conn.get_aws_keys, self.user_id)
+
 	def test_hpcloud_keys(self):
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "hpcloud")
+
 		access_key = "access KEY"
 		secret_key = "SUPER_secret"
 		tenant_name = "a tenant"
@@ -226,13 +260,30 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals({"access_key": access_key, "secret_key": secret_key, "tenant_name": tenant_name, "region": region}, conn.get_hpcloud_keys(self.user_id))
 
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "aws")
+			assert_raises(AssertionError, conn.set_hpcloud_keys, self.user_id, access_key, secret_key, tenant_name, region, False)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_raises(AssertionError, conn.get_hpcloud_keys, self.user_id)
+
 	def test_aws_allowed_instance_sizes(self):
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "aws")
+
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			allowed_instance_sizes = conn.get_aws_allowed_instance_sizes(self.user_id)
 		assert_is_instance(allowed_instance_sizes, list)
 		assert_less(0, len(allowed_instance_sizes))
 
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "hpcloud")
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_raises(AssertionError, conn.get_aws_allowed_instance_sizes, self.user_id)
+
 	def test_aws_instance_settings(self):
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "aws")
+
 		security_group_name = "a security group"
 		instance_size = "m1.medium"
 		with model_server.rpc_connect("system_settings", "update") as conn:
@@ -248,8 +299,17 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name},
 				conn.get_aws_instance_settings(self.user_id))
+
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "hpcloud")
+			assert_raises(AssertionError, conn.set_aws_instance_settings, self.user_id, instance_size, security_group_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_raises(AssertionError, conn.get_aws_instance_settings, self.user_id)
 
 	def test_hpcloud_instance_settings(self):
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "hpcloud")
+
 		security_group_name = "a security group"
 		instance_size = "m1.medium"
 		with model_server.rpc_connect("system_settings", "update") as conn:
@@ -265,6 +325,12 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name},
 				conn.get_hpcloud_instance_settings(self.user_id))
+
+		with model_server.rpc_connect("system_settings", "update") as conn:
+			conn.set_cloud_provider(self.user_id, "aws")
+			assert_raises(AssertionError, conn.set_hpcloud_instance_settings, self.user_id, instance_size, security_group_name)
+		with model_server.rpc_connect("system_settings", "read") as conn:
+			assert_raises(AssertionError, conn.get_hpcloud_instance_settings, self.user_id)
 
 	def test_verifier_pool_parameters(self):
 		num_waiting = 42

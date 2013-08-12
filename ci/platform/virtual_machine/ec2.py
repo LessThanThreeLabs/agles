@@ -282,8 +282,11 @@ class Ec2Vm(VirtualMachine):
 class SecurityGroups(object):
 	@classmethod
 	def get_security_group_names(cls):
-		existing_groups = map(lambda group: group.name, Ec2Client.get_client().get_all_security_groups())
-		existing_groups_plus_selected = list(set(existing_groups).union([str(AwsSettings.security_group)]))
+		try:
+			existing_groups = map(lambda group: group.name, Ec2Client.get_client().get_all_security_groups())
+		except:
+			existing_groups = []
+		existing_groups_plus_selected = list(set(existing_groups).union([str(AwsSettings.security_group), str(AwsSettings._default_security_group)]))
 		return sorted(existing_groups_plus_selected)
 
 
