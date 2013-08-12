@@ -115,6 +115,11 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		}
 
 	@AdminApi
+	def get_hpcloud_allowed_regions(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'hpcloud'
+		return hpcloud.Regions.get_allowed_regions()
+
+	@AdminApi
 	def get_hpcloud_allowed_instance_sizes(self, user_id):
 		assert VerificationServerSettings.cloud_provider == 'hpcloud'
 		return hpcloud.InstanceTypes.get_allowed_instance_types()

@@ -65,8 +65,19 @@ class InstanceTypes(openstack.InstanceTypes):
 	@classmethod
 	def get_allowed_instance_types(cls):
 		largest_instance_type = LibCloudSettings.largest_instance_type
-		ordered_types = map(lambda size: size.name, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		try:
+			ordered_types = map(lambda size: size.name, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		except:
+			return []
 		if largest_instance_type in ordered_types:
 			return ordered_types[:ordered_types.index(largest_instance_type) + 1]
 		else:
 			return ordered_types
+
+
+class Regions(object):
+	CloudClient = HpCloudClient.get_client
+
+	@classmethod
+	def get_allowed_regions(cls):
+		return ['az-1.region-a.geo-1', 'az-2.region-a.geo-1', 'az-3.region-a.geo-1']
