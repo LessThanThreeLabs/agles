@@ -46,15 +46,19 @@ class VerificationResultsHandler(object):
 
 		with model_server.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)
-			sha = client.get_commit_attributes(commit_id)['sha']
+			commit_attributes = client.get_commit_attributes(commit_id)
 			attributes = client.get_repo_attributes(repo_uri)
 
-		ref = pathgen.hidden_ref(commit_id) if attributes['repo']['type'] == "git" else sha
-		try:
+		sha = commit_attributes['sha']
+		base_sha = commit_attributes['base_sha']
 
+		ref = pathgen.hidden_ref(commit_id) if attributes['repo']['type'] == "git" else sha
+		ref_to_merge_into = merge_target if attributes['repo']['type'] == "git" else base_sha
+
+		try:
 			self.remote_repo_manager.merge_changeset(
 				attributes['repostore']['id'], attributes['repo']['id'],
-				attributes['repo']['name'], ref, merge_target)
+				attributes['repo']['name'], ref, ref_to_merge_into)
 			return True
 		except (MergeError, CommandError):
 			self._mark_change_merge_failure(change_id, verification_status)
