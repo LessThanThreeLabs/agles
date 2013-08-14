@@ -58,7 +58,7 @@ class SchemaDataGenerator(object):
 				last_name = random.choice(['Chu', 'Potter', 'Bland', 'Scott', 'Kostov'])
 
 				ins_user = schema.user.insert().values(first_name=first_name, last_name=last_name,
-					email="%s@address.com" % (first_name[0] + last_name),
+					email="%s%d@address.com" % (first_name[0] + last_name, user),
 					password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1], salt=SALT, created=int(time.time()))
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
