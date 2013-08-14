@@ -96,7 +96,10 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			query = query.where(user.c.id == user_id)
 		query = query.order_by(change.c.number.desc()).limit(num_results).offset(start_index_inclusive)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			changes = map(lambda row: to_dict(row, change.columns, tablename=change.name), sqlconn.execute(query))
+			changes = map(lambda row: dict(to_dict(row, change.columns, tablename=change.name), **{
+				'user': to_dict(row, user.columns, tablename=user.name),
+				'commit': to_dict(row, commit.columns, tablename=commit.name)
+			}), sqlconn.execute(query))
 		return changes
 
 	def query_changes_filter(self, user_id, repo_id, names_filter, start_index_inclusive, num_results):
@@ -125,8 +128,10 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.transaction_context() as sqlconn:
 			load_temp_strings(names_filter)
-			changes = map(lambda row: to_dict(row, change.columns,
-				tablename=change.name), sqlconn.execute(query))
+			changes = map(lambda row: dict(to_dict(row, change.columns, tablename=change.name), **{
+				'user': to_dict(row, user.columns, tablename=user.name),
+				'commit': to_dict(row, commit.columns, tablename=commit.name)
+			}), sqlconn.execute(query))
 		return changes
 
 	def get_changes_between_timestamps(self, user_id, repo_ids, start_timestamp, end_timestamp=None):
