@@ -23,7 +23,7 @@ class SchemaDataGenerator(object):
 	def __init__(self, seed=None):
 		random.seed(seed)
 
-	def generate(self, num_repos=2, num_repo_stores=1, num_users=2, num_commits=20):
+	def generate(self, num_repos=2, num_repo_stores=1, num_users=3, num_commits=20):
 		schema.reseed_db()
 		hash = hashlib.sha512()
 		hash.update(SALT)
@@ -54,8 +54,11 @@ class SchemaDataGenerator(object):
 					repo_ids.append(repo_id)
 
 			for user in range(num_users):
-				ins_user = schema.user.insert().values(first_name="Firstname-%s" % chr(65 + user), last_name="Lastname-%s" % chr(65 + user),
-					email="email-%s@address.com" % chr(65 + user),
+				first_name = random.choice(['John', 'Jordan', 'Brian', 'Ryan', 'Andrey'])
+				last_name = random.choice(['Chu', 'Potter', 'Bland', 'Scott', 'Kostov'])
+
+				ins_user = schema.user.insert().values(first_name=first_name, last_name=last_name,
+					email="%s@address.com" % (first_name[0] + last_name),
 					password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1], salt=SALT, created=int(time.time()))
 				user_id = conn.execute(ins_user).inserted_primary_key[0]
 
@@ -65,8 +68,9 @@ class SchemaDataGenerator(object):
 					repo_id_query = schema.repo.select().where(schema.repo.c.id == repo_id)
 					repo_id = conn.execute(repo_id_query).first()[schema.repo.c.id]
 					repos[repo_id] += 1
+					sha = ''.join(random.choice('0123456789abcdef') for x in range(40))
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
-						message="message-%d" % commit, timestamp=random.randint(1, int(time.time())), sha="thisissha")
+						message="message-%d" % commit, timestamp=random.randint(1, int(time.time())), sha=sha)
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target-%d" % commit,
 						number=repos[repo_id], verification_status=self.get_random_commit_status(), merge_status=self.get_random_merge_status(),
