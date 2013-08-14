@@ -237,7 +237,7 @@ class Ec2Vm(VirtualMachine):
 	def get_all_images(cls):
 		return cls.CloudClient().get_all_images(
 			filters={
-				'name': AwsSettings.vm_image_name_prefix + '*',
+				'name': '%s_%s*' % (AwsSettings.vm_image_name_prefix, AwsSettings.vm_image_name_suffix),
 				'state': 'available'
 			}
 		)

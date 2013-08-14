@@ -201,7 +201,8 @@ class OpenstackVm(VirtualMachine):
 
 	@classmethod
 	def get_all_images(cls):
-		return filter(lambda image: LibCloudSettings.vm_image_name_prefix in image.name, cls.CloudClient().list_images())
+		vm_image_name_search_term = '%s_%s' % (LibCloudSettings.vm_image_name_prefix, LibCloudSettings.vm_image_name_suffix)
+		return filter(lambda image: vm_image_name_search_term in image.name, cls.CloudClient().list_images())
 
 	def create_image(self, name, description=None):
 		self.instance.driver.ex_save_image(self.instance, name, metadata={'description': description})
