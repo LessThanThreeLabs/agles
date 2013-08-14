@@ -107,7 +107,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 	def get_repo_from_id(self, user_id, repo_id):
 		repo = database.schema.repo
 
-		query = repo.select().where(repo.c.id == repo_id)
+		query = repo.select().where(and_(repo.c.id == repo_id, repo.c.deleted == 0))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
