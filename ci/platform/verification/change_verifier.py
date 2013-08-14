@@ -45,6 +45,7 @@ class ChangeVerifier(EventSubscriber):
 			change_id = contents['change_id']
 			commit_id = contents['commit_id']
 			repo_type = contents['repo_type']
+			patch_id = contents['patch_id']
 			sha = contents['sha']
 
 			if not DeploymentSettings.active:
@@ -54,7 +55,7 @@ class ChangeVerifier(EventSubscriber):
 			verification_config = self._get_verification_config(commit_id, sha, repo_type)
 
 			workers_spawned = event.Event()
-			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned)
+			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned, patch_id)
 			workers_spawned.wait()
 		except:
 			self.logger.critical("Unexpected failure while verifying change %d, commit %d. Failing change." % (change_id, commit_id), exc_info=True)
@@ -71,7 +72,7 @@ class ChangeVerifier(EventSubscriber):
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)
 
-	def verify_change(self, verification_config, change_id, repo_type, workers_spawned):
+	def verify_change(self, verification_config, change_id, repo_type, workers_spawned, patch_id=None):
 		task_queue = TaskQueue()
 		artifact_export_event = event.Event()
 
@@ -138,7 +139,7 @@ class ChangeVerifier(EventSubscriber):
 				return
 			workers_alive.append(1)
 			build_id = self._create_build(change_id)
-			worker_greenlet = spawn(verifier.verify_build(build_id, repo_type, verification_config, task_queue, artifact_export_event))
+			worker_greenlet = spawn(verifier.verify_build(build_id, patch_id, repo_type, verification_config, task_queue, artifact_export_event))
 
 			def cleanup_greenlet(greenlet):
 				workers_alive.pop()

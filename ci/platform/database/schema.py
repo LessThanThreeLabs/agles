@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Boolean, Integer, String, Sequence, MetaData, ForeignKey, UniqueConstraint, CheckConstraint
+from sqlalchemy import Table, Column, Boolean, Integer, String, Text, Sequence, MetaData, ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy import event, text, DDL
 from sqlalchemy import select, func
 from sqlalchemy.exc import SQLAlchemyError
@@ -115,6 +115,12 @@ change_export_uri = Table('change_export_uri', metadata,
 	Column('uri', String, nullable=False),
 
 	UniqueConstraint('change_id', 'uri')
+)
+
+patch = Table('patch', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
+	Column('contents', Text)
 )
 
 repostore = Table('repostore', metadata,

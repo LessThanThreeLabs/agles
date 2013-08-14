@@ -1,3 +1,4 @@
+import pipes
 import uuid
 
 from database.engine import ConnectionFactory
@@ -69,8 +70,17 @@ class VirtualMachine(object):
 				return results
 		return results
 
-	# TODO(andrey) fix this function
-	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
+	def remote_patch(self, patch_contents, output_handler=None):
+		command = ' && '.join([
+			'cd source',
+			'%s | patch -p1' % pipes.quote(patch_contents)])
+
+		results = self.ssh_call(command, output_handler)
+		if results.returncode != 0:
+			self.logger.error("Failed to apply patch %s" % pipes.quote(patch_contents))
+		return results
+
+	def remote_checkout(self, repo_name, repo_url, repo_type, ref, patch_contents=None, output_handler=None):
 		def _remote_fetch():
 			host_url = repo_url[:repo_url.find(":")]
 			command = ' && '.join([
@@ -79,6 +89,7 @@ class VirtualMachine(object):
 				'cd source',
 				'git fetch %s %s -n --depth 1' % (repo_url, ref),
 				'git checkout FETCH_HEAD'])
+
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, repo_url, results))
@@ -94,6 +105,7 @@ class VirtualMachine(object):
 				'hg pull %s' % repo_url,
 				'hg unbundle .hg/strip-backup/%s.hg' % ref,
 				'hg update %s' % ref])
+
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out bundle %s from %s, results: %s" % (ref, repo_url, results))

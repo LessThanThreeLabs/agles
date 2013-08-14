@@ -4,7 +4,7 @@ import yaml
 
 from model_server.build_consoles import ConsoleType
 from util.log import Logged
-from virtual_machine.remote_command import RemoteCheckoutCommand, RemoteExportCommand, RemoteProvisionCommand, RemoteTestCommand, InvalidConfigurationException
+from virtual_machine.remote_command import RemoteCheckoutCommand, RemotePatchCommand, RemoteExportCommand, RemoteProvisionCommand, RemoteTestCommand, InvalidConfigurationException
 
 
 @Logged()
@@ -22,7 +22,7 @@ class VirtualMachineBuildCore(object):
 	def rebuild(self):
 		raise NotImplementedError()
 
-	def setup_build(self, repo_uri, repo_type, ref, private_key, console_appender=None):
+	def setup_build(self, repo_uri, repo_type, ref, private_key, patch_id=None, console_appender=None):
 		self.setup_virtual_machine(private_key, console_appender)
 
 	def _get_output_handler(self, console_appender, type, subtype=""):
@@ -147,14 +147,16 @@ class CloudBuildCore(VirtualMachineBuildCore):
 	def rebuild(self):
 		self.virtual_machine.rebuild()
 
-	def setup_build(self, repo_uri, repo_type, ref, private_key, console_appender=None):
-		self.setup_virtual_machine(repo_uri, repo_type, ref, private_key, console_appender)
+	def setup_build(self, repo_uri, repo_type, ref, private_key, patch_id=None, console_appender=None):
+		self.setup_virtual_machine(repo_uri, repo_type, ref, private_key, patch_id, console_appender)
 
-	def setup_virtual_machine(self, repo_uri, repo_type, ref, private_key, console_appender):
+	def setup_virtual_machine(self, repo_uri, repo_type, ref, private_key, patch_id, console_appender):
 		checkout_url = self.uri_translator.translate(repo_uri)
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
-		checkout_command = RemoteCheckoutCommand(repo_name, checkout_url, repo_type, ref)
-		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, [checkout_command])
+		commands = [RemoteCheckoutCommand(repo_name, checkout_url, repo_type, ref)]
+		if patch_id:
+			commands.append(RemotePatchCommand(repo_name, checkout_url, repo_type, ref, patch_id))
+		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, commands)
 
 
 class VerificationException(Exception):

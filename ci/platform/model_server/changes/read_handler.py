@@ -28,6 +28,14 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return [to_dict(row, build.columns) for row in sqlconn.execute(query)]
 
+	def get_patch(self, patch_id):
+		patch = database.schema.patch
+		query = patch.select().where(patch.c.patch_id == patch_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+			if row:
+				return to_dict(row, patch.columns)
+				
 ##########################
 # Front end API
 ##########################
