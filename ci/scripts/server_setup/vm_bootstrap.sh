@@ -108,9 +108,11 @@ function setup_rabbitmq () {
 	sudo mkdir -p /etc/rabbitmq/rabbitmq.conf.d
 	sudo rabbitmq-plugins enable rabbitmq_management
 	sudo service rabbitmq-server restart
-	wget --http-user=guest --http-password=guest localhost:55672/cli/rabbitmqadmin
-	chmod +x rabbitmqadmin
-	sudo mv rabbitmqadmin /usr/local/bin/rabbitmqadmin
+	if [ ! $(which rabbitmqadmin) ]; then
+		wget --http-user=guest --http-password=guest localhost:55672/cli/rabbitmqadmin
+		chmod +x rabbitmqadmin
+		sudo mv rabbitmqadmin /usr/local/bin/rabbitmqadmin
+	fi
 }
 
 function setup_redis () {
@@ -150,7 +152,7 @@ function setup_python () {
 		source /etc/profile
 		set -o nounset
 	fi
-	for p in 2.5.6 2.6.8 2.7.5 3.2.5 3.3.2; do
+	for p in 2.6.8 2.7.5 3.2.5 3.3.2; do
 		if [ ! -f "$PYTHONZ_ROOT/pythons/*$p*/python" ]; then
 			sudo-pythonz install $p
 			if [ ! $? ]; then
@@ -183,8 +185,10 @@ function setup_ruby () {
 }
 
 function setup_nodejs () {
-	makedir ~/nvm
-	wget -P ~/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
+	if [ ! -f ~/nvm/nvm.sh ]; then
+		makedir ~/nvm
+		wget -P ~/nvm https://raw.github.com/creationix/nvm/master/nvm.sh
+	fi
 	cat ~/.bash_profile | grep "source ~/nvm/nvm.sh" > /dev/null || {
 		echo "source ~/nvm/nvm.sh" >> ~/.bash_profile
 	}
