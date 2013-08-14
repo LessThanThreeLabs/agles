@@ -54,7 +54,7 @@ class SchemaDataGenerator(object):
 					repo_ids.append(repo_id)
 
 			for user in range(num_users):
-				first_name = random.choice(['John', 'Jordan', 'Brian', 'Ryan', 'Andrey'])
+				first_name = random.choice(['Jon', 'Jordan', 'Brian', 'Ryan', 'Andrey'])
 				last_name = random.choice(['Chu', 'Potter', 'Bland', 'Scott', 'Kostov'])
 
 				ins_user = schema.user.insert().values(first_name=first_name, last_name=last_name,
