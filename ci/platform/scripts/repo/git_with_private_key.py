@@ -10,11 +10,12 @@ def main():
 
 	timeout = os.environ.get('GIT_SSH_TIMEOUT', 120)
 
-	os.execlp('timeout', 'timeout', str(timeout),
-		'ssh', '-q',
+	os.execlp('ssh', 'ssh',
+		'-q',
 		'-i', private_key,
 		'-oStrictHostKeyChecking=no',
 		'-oUserKnownHostsFile=/dev/null',
+		'-oConnectTimeout=%s' % timeout,
 		*sys.argv[1:])
 
 
