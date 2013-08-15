@@ -273,7 +273,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.checkout("FETCH_HEAD")
 			ref_sha = repo_slave.head.commit.hexsha
 			checkout_branch = remote_branch if remote_branch_exists else "FETCH_HEAD"
-			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
+			repo_slave.git.branch("-f", ref_to_merge_into, checkout_branch)
+			repo_slave.git.checkout(ref_to_merge_into)
 			original_head = repo_slave.head.commit.hexsha
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
@@ -298,7 +299,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self._git_fetch_with_private_key(repo_slave, remote_repo, ref_to_update)
 		repo_slave.git.checkout("FETCH_HEAD")
 		ref_sha = repo_slave.head.commit.hexsha
-		repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
+		repo_slave.git.branch("-f", ref_to_update, remote_branch)
+		repo_slave.git.checkout(ref_to_update)
 		return ref_sha
 
 	def _git_push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into, original_head):
@@ -306,7 +308,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				ref_sha = self._git_update_branch_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 				remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
-				repo_slave.git.checkout(remote_branch, "-B", ref_to_merge_into)
+				repo_slave.git.branch("-f", ref_to_merge_into, remote_branch)
+				repo_slave.git.checkout(ref_to_merge_into)
 				repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 				repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 			except GitCommandError:
