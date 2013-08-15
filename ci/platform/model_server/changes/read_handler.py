@@ -44,7 +44,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			return to_dict(row, change.columns, tablename=change.name)
 		return {}
 
-	def get_change_metadata(self, user_id, change_id):
+	def get_change(self, user_id, change_id):
 		change = database.schema.change
 		commit = database.schema.commit
 		user = database.schema.user
@@ -54,14 +54,10 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 
 		if row:
-			user_dict = to_dict(row, user.columns, tablename=user.name)
-			change_dict = to_dict(row, change.columns, tablename=change.name)
-			commit_dict = to_dict(row, commit.columns, tablename=commit.name)
-			return {
-				'user': user_dict,
-				'change': change_dict,
-				'commit': commit_dict,
-			}
+			return dict(to_dict(row, change.columns, tablename=change.name), **{
+				'user': to_dict(row, user.columns, tablename=user.name),
+				'commit': to_dict(row, commit.columns, tablename=commit.name),
+			})
 
 		raise NoSuchChangeError(change_id)
 
