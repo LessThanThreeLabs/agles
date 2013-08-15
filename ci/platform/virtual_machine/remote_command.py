@@ -187,17 +187,17 @@ class RemoteCheckoutCommand(RemoteSetupCommand):
 	def _run(self, virtual_machine, output_handler=None):
 		return virtual_machine.remote_checkout(self.repo_name, self.repo_url, self.repo_type, self.ref, output_handler=output_handler)
 
+
 class RemotePatchCommand(RemoteSetupCommand):
-	def __init__(self, repo_type, patch_id=None):
-		super(RemotePatchCommand, self).__init__(repo_type)
-		self.patch_contents = None
-		if patch_id:
-			with model_server.rpc_connect('changes', 'read') as client:
-				patch = client.get_patch(patch_id)
-				self.patch_contents = patch['contents'] if patch else None
+	def __init__(self, patch_id):
+		super(RemotePatchCommand, self).__init__('patch')
+		with model_server.rpc_connect('changes', 'read') as client:
+			patch = client.get_patch(patch_id)
+		self.patch_contents = str(patch['contents']) if patch else None
 
 	def _run(self, virtual_machine, output_handler=None):
 		return virtual_machine.remote_patch(self.patch_contents, output_handler=output_handler)
+
 
 class RemoteProvisionCommand(RemoteSetupCommand):
 	def __init__(self, private_key):

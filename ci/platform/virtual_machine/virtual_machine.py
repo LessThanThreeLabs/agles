@@ -71,17 +71,22 @@ class VirtualMachine(object):
 		return results
 
 	def remote_patch(self, patch_contents, output_handler=None):
-		command = ' && '.join([
-			'cd source',
-			'%s | patch -p1' % pipes.quote(patch_contents),
-			'ls'])
+		if patch_contents:
+			command = ' && '.join((
+				'cd source',
+				'echo %s | patch -p1' % pipes.quote(patch_contents)
+			))
+		else:
+			ansi_bright_yellow = '\033[33;1m'
+			ansi_reset = '\033[0m'
+			command = 'echo %sWARNING: No patch contents received.%s' % (ansi_bright_yellow, ansi_reset)
 
 		results = self.ssh_call(command, output_handler)
 		if results.returncode != 0:
 			self.logger.error("Failed to apply patch %s" % pipes.quote(patch_contents))
 		return results
 
-	def remote_checkout(self, repo_name, repo_url, repo_type, ref, patch_contents=None, output_handler=None):
+	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		def _remote_fetch():
 			host_url = repo_url[:repo_url.find(":")]
 			command = ' && '.join([

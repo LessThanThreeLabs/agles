@@ -180,7 +180,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 	def _patch_roundtrip(self, modfile, contents, passes=True):
 		repo_id = self._insert_repo_info(self.repo_path)
-		
+
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			last_commit_id = sqlconn.execute(func.max(schema.commit.c.id)).first()[0]
 			commit_id = last_commit_id + 1 if last_commit_id else 1
@@ -199,9 +199,12 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 		with open(os.path.join(work_repo.working_dir, 'makeapatch'), "w") as f:
 			f.write('patchstuffs')
-			work_repo.index.add(['makeapatch'])
 
-		patch = work_repo.git.diff()
+		work_repo.index.add(['makeapatch'])
+		work_repo.index.commit('temporary patch commit', parent_commits=[commit_sha])
+
+		patch = work_repo.git.format_patch(commit_sha, stdout=True)
+		work_repo.git.reset('HEAD~', hard=True)
 
 		with model_server.rpc_connect("changes", "create") as client:
 			client.create_commit_and_change(self.repo_id, self.user_id, 'commit_message', 'sha', 'master', None, False, patch)

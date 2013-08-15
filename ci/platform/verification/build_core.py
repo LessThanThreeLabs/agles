@@ -155,7 +155,7 @@ class CloudBuildCore(VirtualMachineBuildCore):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		commands = [RemoteCheckoutCommand(repo_name, checkout_url, repo_type, ref)]
 		if patch_id:
-			commands.append(RemotePatchCommand(repo_name, checkout_url, repo_type, ref, patch_id))
+			commands.append(RemotePatchCommand(patch_id))
 		super(CloudBuildCore, self).setup_virtual_machine(private_key, console_appender, commands)
 
 

@@ -35,7 +35,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 			if row:
 				return to_dict(row, patch.columns)
-				
+
 ##########################
 # Front end API
 ##########################
