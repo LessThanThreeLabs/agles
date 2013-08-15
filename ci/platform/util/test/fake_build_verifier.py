@@ -1,5 +1,8 @@
 import shlex
 
+from database import schema
+from database.engine import ConnectionFactory
+
 from verification.build_core import VirtualMachineBuildCore
 from virtual_machine.virtual_machine import VirtualMachine
 
@@ -10,6 +13,15 @@ class FakeBuildCore(VirtualMachineBuildCore):
 
 	def setup(self):
 		pass
+
+	def setup_build(self, repo_uri, repo_type, ref, private_key, patch_id=None, console_appender=None):
+		if patch_id:
+			patch = schema.patch
+			with ConnectionFactory.get_sql_connection() as sqlconn:
+				query = patch.select().where(patch.c.id == patch_id)
+				row = sqlconn.execute(query).first()
+				assert row
+				assert row[patch.c.id] == patch_id
 
 	def teardown(self):
 		pass

@@ -73,7 +73,8 @@ class VirtualMachine(object):
 	def remote_patch(self, patch_contents, output_handler=None):
 		command = ' && '.join([
 			'cd source',
-			'%s | patch -p1' % pipes.quote(patch_contents)])
+			'%s | patch -p1' % pipes.quote(patch_contents),
+			'ls'])
 
 		results = self.ssh_call(command, output_handler)
 		if results.returncode != 0:
