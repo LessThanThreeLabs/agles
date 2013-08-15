@@ -24,6 +24,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		change = database.schema.change
 		repo = database.schema.repo
 		user = database.schema.user
+		commit = database.schema.commit
 
 		prev_change_number = 0
 
@@ -39,18 +40,24 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				number=change_number, verification_status=BuildStatus.QUEUED, create_time=create_time)
 			result = sqlconn.execute(ins)
 			change_id = result.inserted_primary_key[0]
-			repo_id_query = repo.select().where(repo.c.id == repo_id)
-			repo_row = sqlconn.execute(repo_id_query).first()
-			repo_id = repo_row[repo.c.id]
+			repo_type_query = repo.select().where(repo.c.id == repo_id)
+			repo_row = sqlconn.execute(repo_type_query).first()
 			repo_type = repo_row[repo.c.type]
 
 			query = user.select().where(user.c.id == user_id)
 			user_row = sqlconn.execute(query).first()
 
+			# Yes, it's silly to select after inserting this
+			query = commit.select().where(commit.c.id == commit_id)
+			commit_row = sqlconn.execute(query).first()
+
+		user_dict = to_dict(user_row, user.columns)
+		commit_dict = to_dict(commit_row, commit.columns)
 		patch_id = self._store_patch(change_id, patch_contents) if patch_contents else None
-		user = to_dict(user_row, user.columns)
-		self.publish_event("repos", repo_id, "change added", user=user, repo_type=repo_type, change_id=change_id, change_number=change_number,
-			verification_status="queued", commit_id=commit_id, patch_id=patch_id, sha=sha, merge_target=merge_target, base_sha=base_sha, create_time=create_time)
+
+		self.publish_event("repos", repo_id, "change added", user=user_dict, commit=commit_dict,
+			repo_type=repo_type, change_id=change_id, change_number=change_number, verification_status="queued",
+			merge_target=merge_target, create_time=create_time, patch_id=patch_id)
 		return {"change_id": change_id, "commit_id": commit_id}
 
 	def _store_patch(self, change_id, patch_contents):

@@ -43,10 +43,10 @@ class ChangeVerifier(EventSubscriber):
 	def _handle_new_change(self, contents):
 		try:
 			change_id = contents['change_id']
-			commit_id = contents['commit_id']
+			commit_id = contents['commit']['id']
+			sha = contents['commit']['sha']
 			repo_type = contents['repo_type']
 			patch_id = contents['patch_id']
-			sha = contents['sha']
 
 			if not DeploymentSettings.active:
 				self.skip_change(change_id)
