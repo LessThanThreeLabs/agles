@@ -116,6 +116,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	def set_s3_bucket_name(self, user_id, bucket_name):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		self.update_setting("aws", "s3_bucket_name", bucket_name)
+		boto.s3.
 		self.publish_event("system_settings", None, "s3 bucket name updated",
 			bucket_name=bucket_name)
 
@@ -154,6 +155,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def set_verifier_pool_parameters(self, user_id, min_unallocated, max_verifiers):
+		assert min_unallocated <= max_verifiers
 		self.update_setting("verification_server", "static_pool_size", min_unallocated)
 		self.update_setting("verification_server", "max_virtual_machine_count", max_verifiers)
 		self.publish_event("system_settings", None, "verifier pool settings updated",
