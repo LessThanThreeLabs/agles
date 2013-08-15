@@ -100,14 +100,31 @@ class RemoteShellCommand(RemoteCommand):
 		return script
 
 	def _to_executed_script(self):
-		full_command = "&&\n".join(map(self._advertised_command, self.commands))
+		full_command = "eval %s" % pipes.quote("&&\n".join(map(self._advertised_command, self.commands)))
 		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join('source', self.path) if self.path else 'source'))
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
-		timeout_command = "timeout -s KILL %d timeout -s INT %d %s" % (self.timeout + 3, self.timeout, full_command)
-		script += "bash --login -c %s\n" % pipes.quote(timeout_command)
+		timeout_message = "echo %s timed out after %s seconds" % (pipes.quote(self.name), self.timeout)
+		timeout_command = "\n".join((
+			"sleep %s" % self.timeout,
+			"kill -INT $$ > /dev/null 2>&1",
+			"sleep 1",  # let the process die
+			"if kill -0 $$ > /dev/null 2>&1",  # check if the process is still running
+			"then sleep 2; kill -KILL $$ > /dev/null 2>&1; echo; %s; kill -9 0" % timeout_message,  # kill forcefully
+			"else echo; %s; kill -9 0" % timeout_message,
+			"fi"
+		))
+		commands_with_timeout = "\n".join((
+			"(%s) > /dev/null 2>&1 &" % pipes.quote(timeout_command),
+			"watchdogpid=$!",
+			full_command,
+			"_r=$?",
+			"kill -KILL $watchdogpid > /dev/null 2>&1",  # kill our timeout process
+			"pkill -KILL -P $watchdogpid >/dev/null 2>&1",  # kill all children of the timeout process
+			"if [ $_r -ne 0 ]; then echo %s failed with return code $_r; fi" % pipes.quote(self.name),
+			"exit $_r"
+		))
+		script += "(%s)\n" % commands_with_timeout
 		script += "_r=$?\n"
-		script += "if [ $_r -eq 124 ]; then sleep 2; echo; echo %s timed out after %s seconds;\n" % (self.name, self.timeout)
-		script += "elif [ $_r -ne 0 ]; then echo; echo %s failed with return code $_r; fi\n" % self.name
 		return script
 
 	def _advertised_command(self, command):
