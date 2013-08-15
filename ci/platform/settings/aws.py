@@ -10,6 +10,6 @@ class AwsSettings(DatabaseBackedSettings):
 			instance_type='m1.medium',
 			largest_instance_type=None,
 			vm_image_name_prefix='koality_verification_0.3',
-			vm_image_name_suffix='precise',
+			vm_image_name_suffix='lucid',  # this should be changed to 'precise'
 			security_group='koality_verification',
 			s3_bucket_name='')

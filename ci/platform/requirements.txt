@@ -10,7 +10,7 @@ msgpack-python==0.3
 nose
 redis
 eventlet==0.12.1
-gitpython
+gitpython==0.3.2.RC1
 psycopg2
 argparse
 requests
