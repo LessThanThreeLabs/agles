@@ -80,14 +80,30 @@ class RabbitMixin(BaseTestMixin):
 
 
 class RepoStoreTestMixin(BaseTestMixin):
-	def _modify_commit_push(self, repo, filename, contents, parent_commits=None, refspec="HEAD:master"):
-		with open(os.path.join(repo.working_dir, filename), "w") as f:
+	def _modify_file(self, filename, contents, working_dir):
+		with open(os.path.join(working_dir, filename), "w") as f:
 			f.write(contents)
+
+	def _git_modify_commit_push(self, repo, filename, contents, parent_commits=None, refspec="HEAD:master"):
+		self._modify_file(filename, contents, repo.working_dir)
+
 		repo.index.add([filename])
 		commit = repo.index.commit("Updated %s" % filename, parent_commits=parent_commits)
 		repo.remotes.origin.push(refspec=refspec)
 		return commit
 
+	def _hg_modify_commit_push(self, repo, filename, contents):
+		sha = self._hg_modify_commit(repo, filename, contents)
+		repo.push()
+		return sha
+
+	def _hg_modify_commit(self, repo, filename, contents):
+		self._modify_file(filename, contents, repo.root())
+
+		repo.add(os.path.join(repo.root(), filename))
+		rev, sha = repo.commit("Added %s to %s." %(contents, filename))
+
+		return sha
 
 class RedisTestMixin(BaseTestMixin):
 	@classmethod
