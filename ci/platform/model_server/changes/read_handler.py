@@ -87,15 +87,23 @@ class ChangesReadHandler(ModelServerRpcHandler):
 	VALID_GROUPS = ["all", "me"]
 
 	# TODO (jchu): This query is SLOW AS BALLS
-	def query_changes_group(self, user_id, repo_id, group, start_index_inclusive, num_results):
+	def query_changes_group(self, user_id, repo_ids, group, start_index_inclusive, num_results):
+		assert isinstance(repo_ids, collections.Iterable)
+		assert not isinstance(repo_ids, str)
+
 		assert group in self.VALID_GROUPS
+
+		if not repo_ids:
+			return []
 
 		user = database.schema.user
 		change = database.schema.change
 		commit = database.schema.commit
 
 		query = change.join(commit).join(user).select()
-		query = query.apply_labels().where(change.c.repo_id == repo_id)
+		query = query.apply_labels().where(
+			or_(*[change.c.repo_id == repo_id for repo_id in repo_ids])
+		)
 		if group == "me":
 			query = query.where(user.c.id == user_id)
 		query = query.order_by(change.c.number.desc()).limit(num_results).offset(start_index_inclusive)
@@ -106,12 +114,18 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			}), sqlconn.execute(query))
 		return changes
 
-	def query_changes_filter(self, user_id, repo_id, names_filter, start_index_inclusive, num_results):
-		assert isinstance(names_filter, collections.Iterable)
-		assert not isinstance(names_filter, str)
+	def query_changes_filter(self, user_id, repo_ids, filter_query, start_index_inclusive, num_results):
+		assert isinstance(repo_ids, collections.Iterable)
+		assert not isinstance(repo_ids, str)
 
-		if not names_filter:
-			return self.query_changes_group(user_id, repo_id, "all", start_index_inclusive, num_results)
+		assert isinstance(filter_query, str)
+
+		if not repo_ids:
+			return []
+
+		filter_query = filter_query.split()
+		if not filter_query:
+			return self.query_changes_group(user_id, repo_ids, "all", start_index_inclusive, num_results)
 
 		user = database.schema.user
 		change = database.schema.change
@@ -122,20 +136,24 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			temp_string,
 			or_(
 				func.lower(temp_string.c.string) == func.lower(user.c.first_name),
-				func.lower(temp_string.c.string) == func.lower(user.c.last_name)
+				func.lower(temp_string.c.string) == func.lower(user.c.last_name),
+				func.lower(commit.c.sha).startswith(func.lower(temp_string.c.string))
 			)
 		)
 
-		query = query.select().apply_labels().where(change.c.repo_id == repo_id).distinct(change.c.number)
+		query = query.select().apply_labels().where(
+			or_(*[change.c.repo_id == repo_id for repo_id in repo_ids])
+		).distinct(change.c.number)
 		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
 			start_index_inclusive)
 
 		with ConnectionFactory.transaction_context() as sqlconn:
-			load_temp_strings(names_filter)
+			load_temp_strings(filter_query)
 			changes = map(lambda row: dict(to_dict(row, change.columns, tablename=change.name), **{
 				'user': to_dict(row, user.columns, tablename=user.name),
 				'commit': to_dict(row, commit.columns, tablename=commit.name)
 			}), sqlconn.execute(query))
+
 		return changes
 
 	def get_changes_between_timestamps(self, user_id, repo_ids, start_timestamp, end_timestamp=None):
