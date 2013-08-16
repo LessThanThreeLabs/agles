@@ -559,7 +559,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def force_delete(self, repo_id, repo_name, target):
 		repo_type = self._get_repo_type(repo_id)
-		assert(repo_type == "git")
+		assert repo_type == "git"
 		short_repo_name = repo_name
 		repo_name += '.git'
 
@@ -611,9 +611,18 @@ class FileSystemRepositoryStore(RepositoryStore):
 			return True
 
 	def store_pending(self, repo_id, repo_name, sha, commit_id):
-		repo_name += '.git'
 		repo_type = self._get_repo_type(repo_id)
-		assert repo_type == "git"
+		if repo_type == 'git':
+			self._git_store_pending(repo_id, repo_name, sha, commit_id)
+		elif repo_type == 'hg':
+			self._hg_store_pending(repo_id, repo_name, sha, commit_id)
+		else:
+			msg = 'Unknown repository type %s' % repo_type
+			self.logger.critical(msg)
+			raise RepositoryOperationException(msg)
+
+	def _git_store_pending(self, repo_id, repo_name, sha, commit_id):
+		repo_name += '.git'
 
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
@@ -633,6 +642,28 @@ class FileSystemRepositoryStore(RepositoryStore):
 		except:
 			exc_info = sys.exc_info()
 			self.logger.critical("Failed to create pending ref %d for sha %s" % (commit_id, sha), exc_info=exc_info)
+			raise exc_info
+
+	def _hg_store_pending(self, repo_id, repo_name, sha, commit_id):
+		repo_path = self._resolve_path(repo_id, repo_name)
+		repo = hglib.open(repo_path)
+
+		with model_server.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+
+		self._hg_fetch_with_private_key(repo, remote_repo)
+
+		try:
+			repo.update(sha)
+		except CommandError:
+			raise NoSuchCommitError(repo_id, sha)
+
+		try:
+			parent_shas = map(lambda rev: rev.node, repo.log(['parents(%s)' % sha]))
+			repo.bundle(os.path.join(repo_path, '.hg', 'strip-backup', '%s.hg' % sha[:12]), rev=[sha], base=parent_shas)
+		except:
+			exc_info = sys.exc_info()
+			self.logger.critical("Failed to create pending bundle %d for sha %s" % (commit_id, sha), exc_info=exc_info)
 			raise exc_info
 
 	def rename_repository(self, repo_id, old_name, new_name):
