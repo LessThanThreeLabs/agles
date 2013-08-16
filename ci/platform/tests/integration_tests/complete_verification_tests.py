@@ -151,9 +151,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
-		init_commit = self._modify_commit_push(work_repo, modfile, contents, parent_commits=[])
+		init_commit = self._git_modify_commit_push(work_repo, modfile, contents, parent_commits=[])
 
-		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
+		commit_sha = self._git_modify_commit_push(work_repo, "koality.yml",
 			yaml.safe_dump({'test': {'scripts': self._test_commands(passes)}}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
@@ -191,9 +191,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		bare_repo = Repo.init(self.repo_path, bare=True)
 		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
 
-		init_commit = self._modify_commit_push(work_repo, modfile, contents, parent_commits=[])
+		init_commit = self._git_modify_commit_push(work_repo, modfile, contents, parent_commits=[])
 
-		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
+		commit_sha = self._git_modify_commit_push(work_repo, "koality.yml",
 			yaml.safe_dump({'test': {'scripts': self._test_commands(passes)}}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
 
@@ -247,7 +247,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		forward_repo = Repo(self.forward_repo_url)
 		work_repo = forward_repo.clone(forward_repo.working_dir + ".clone")
 
-		self._modify_commit_push(work_repo, "other.txt", "c2")
+		self._git_modify_commit_push(work_repo, "other.txt", "c2")
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
 		assert_equal(BuildStatus.PASSED, self.verification_status)
 		assert_equal(MergeStatus.PASSED, self.merge_status)
@@ -258,7 +258,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		forward_repo = Repo(self.forward_repo_url)
 		work_repo = forward_repo.clone(forward_repo.working_dir + ".clone")
 
-		conflict_sha = self._modify_commit_push(work_repo, "conflict.txt", "c2").hexsha
+		conflict_sha = self._git_modify_commit_push(work_repo, "conflict.txt", "c2").hexsha
 		self._repo_roundtrip("conflict.txt", "conflict")
 		assert_equal(BuildStatus.PASSED, self.verification_status)
 		assert_equal(MergeStatus.FAILED, self.merge_status)
