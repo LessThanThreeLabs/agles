@@ -60,13 +60,13 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			with model_server.rpc_connect('repos', 'delete') as repos_delete_handler:
 				repos_delete_handler.delete_repo(user_id, repo_id)
 			raise e
-		except RepositoryAlreadyExistsError:
+		except RepositoryAlreadyExistsError as e:
 			self.logger.warn('Repository already exists: [user_id %d, repo_name: %s]' % (user_id, repo_name))
-			raise
+			raise e
 		except RepositoryCreateError as e:
 			error_msg = "failed to create repo: [user_id: %d, repo_name: %s]" % (user_id, repo_name)
 			self.logger.exception(error_msg)
-			raise
+			raise e
 		except Exception as e:
 			error_msg = "failed to create repo: [user_id: %d, repo_name: %s]" % (user_id, repo_name)
 			self.logger.exception(error_msg)

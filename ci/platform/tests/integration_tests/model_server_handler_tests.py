@@ -42,11 +42,13 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 
 			self.repo_id = sqlconn.execute(ins_repo).inserted_primary_key[0]
 
+			self.commit_sha = '0123456789abcdef'
+
 			ins_commit = commit.insert().values(
 				repo_id=self.repo_id,
 				user_id=self.user_id,
 				message='a',
-				sha="sha",
+				sha=self.commit_sha,
 				timestamp=1
 			)
 
@@ -101,29 +103,49 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 
 	def test_query_changes_group(self):
 		read_handler = ChangesReadHandler()
-		results = read_handler.query_changes_group(self.user_id, self.repo_id, "all", 0, 100)
+		results = read_handler.query_changes_group(self.user_id, [self.repo_id], "all", 0, 100)
 		assert_equal(len(results), 1)
-		results = read_handler.query_changes_group(self.user_id, self.repo_id, "me", 0, 100)
+		results = read_handler.query_changes_group(self.user_id, [self.repo_id], "me", 0, 100)
+		assert_equal(len(results), 1)
+
+		results = read_handler.query_changes_group(self.user_id, [self.repo_id + 1, self.repo_id + 2], "me", 0, 100)
+		assert_equal(len(results), 0)
+
+		results = read_handler.query_changes_group(self.user_id, [self.repo_id, self.repo_id + 1], "me", 0, 100)
 		assert_equal(len(results), 1)
 
 		fake_user_id = self.user_id + 1
-		results = read_handler.query_changes_group(fake_user_id, self.repo_id, "me", 0, 100)
+		results = read_handler.query_changes_group(fake_user_id, [self.repo_id], "me", 0, 100)
 		assert_equal(len(results), 0)
 
 	def test_query_changes_filter_empty_input(self):
 		read_handler = ChangesReadHandler()
-		results = read_handler.query_changes_filter(self.user_id, self.repo_id, [], 0, 100)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], "", 0, 100)
 		assert_equal(len(results), 1)
+		results = read_handler.query_changes_filter(self.user_id, [], "", 0, 100)
+		assert_equal(len(results), 0)
 
 	def test_query_changes_filter(self):
 		read_handler = ChangesReadHandler()
-		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["first"], 0, 100)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], "first", 0, 100)
 		assert_equal(len(results), 1)
-		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["last"], 0, 100)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], "last", 0, 100)
 		assert_equal(len(results), 1)
-		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["laST"], 0, 100)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], "laST", 0, 100)
 		assert_equal(len(results), 1)
-		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["first", "last"], 0, 100)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], "first last", 0, 100)
 		assert_equal(len(results), 1)
-		results = read_handler.query_changes_filter(self.user_id, self.repo_id, ["no match"], 0, 100)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], "no match", 0, 100)
 		assert_equal(len(results), 0)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], self.commit_sha, 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], self.commit_sha[:4], 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], self.commit_sha[4:], 0, 100)
+		assert_equal(len(results), 0)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], "garbage and fIRSt", 0, 100)
+		assert_equal(len(results), 1)
+		results = read_handler.query_changes_filter(self.user_id, [self.repo_id], "%s and garbage" % self.commit_sha[:7], 0, 100)
+		assert_equal(len(results), 1)
+
+

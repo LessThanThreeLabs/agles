@@ -201,7 +201,7 @@ class OpenstackVm(VirtualMachine):
 
 	@classmethod
 	def get_all_images(cls):
-		vm_image_name_search_term = '%s_%s' % (LibCloudSettings.vm_image_name_prefix, LibCloudSettings.vm_image_name_suffix)
+		vm_image_name_search_term = '%s_%s_%s' % (LibCloudSettings.vm_image_name_prefix, LibCloudSettings.vm_image_name_suffix, LibCloudSettings.vm_image_name_version)
 		return filter(lambda image: vm_image_name_search_term in image.name, cls.CloudClient().list_images())
 
 	def create_image(self, name, description=None):

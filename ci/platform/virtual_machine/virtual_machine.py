@@ -1,3 +1,4 @@
+import pipes
 import uuid
 
 from database.engine import ConnectionFactory
@@ -69,7 +70,30 @@ class VirtualMachine(object):
 				return results
 		return results
 
-	# TODO(andrey) fix this function
+	def remote_patch(self, patch_contents, output_handler=None):
+		ansi_bright_cyan = '\033[36;1m'
+		ansi_bright_yellow = '\033[33;1m'
+		ansi_reset = '\033[0m'
+
+		if patch_contents:
+			command = ' && '.join((
+				'cd source',
+				'echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset)),
+				'echo',
+				'echo %s' % pipes.quote(patch_contents),
+				'echo',
+				'echo %s' % pipes.quote('%sPATCHING:%s' % (ansi_bright_cyan, ansi_reset)),
+				'echo',
+				'echo %s | patch -p1' % pipes.quote(patch_contents)
+			))
+		else:
+			command = 'echo %s' % pipes.quote('%sWARNING: No patch contents received.%s' % (ansi_bright_yellow, ansi_reset))
+
+		results = self.ssh_call(command, output_handler)
+		if results.returncode != 0:
+			self.logger.warn("Failed to apply patch %s\nResults: " % (pipes.quote(patch_contents), results.output))
+		return results
+
 	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		def _remote_fetch():
 			host_url = repo_url[:repo_url.find(":")]
@@ -79,6 +103,7 @@ class VirtualMachine(object):
 				'cd source',
 				'git fetch %s %s -n --depth 1' % (repo_url, ref),
 				'git checkout FETCH_HEAD'])
+
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, repo_url, results))
@@ -89,11 +114,12 @@ class VirtualMachine(object):
 			command = ' && '.join([
 				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; hg init source))' % repo_name,
 				'cd source',
-				'mkdir .hg/strip-backup',
+				'mkdir -p .hg/strip-backup',
 				'ssh -oStrictHostKeyChecking=no -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
 				'hg pull %s' % repo_url,
 				'hg unbundle .hg/strip-backup/%s.hg' % ref,
 				'hg update %s' % ref])
+
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out bundle %s from %s, results: %s" % (ref, repo_url, results))

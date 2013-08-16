@@ -4,6 +4,7 @@ import time
 import binascii
 
 import eventlet
+import model_server
 import yaml
 
 from hashlib import sha512
@@ -19,6 +20,7 @@ from model_server.events_broker import EventsBroker
 from verification.verification_server import VerificationServer
 from settings.deployment import DeploymentSettings
 from settings.rabbit import RabbitSettings
+from sqlalchemy import func
 from shared.constants import BuildStatus, MergeStatus
 from repo.store import FileSystemRepositoryStore, RepositoryStore
 from util.pathgen import to_path
@@ -46,9 +48,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			super(VerificationRoundTripTest.TestChangeVerifier, self).__init__(verifier_pool, None)
 			self._change_finished = eventlet.event.Event()
 
-		def verify_change(self, verification_config, change_id, repo_type, workers_spawned):
+		def verify_change(self, verification_config, change_id, repo_type, workers_spawned, patch_id=None):
 			try:
-				super(VerificationRoundTripTest.TestChangeVerifier, self).verify_change(verification_config, change_id, repo_type, workers_spawned)
+				super(VerificationRoundTripTest.TestChangeVerifier, self).verify_change(verification_config, change_id, repo_type, workers_spawned, patch_id)
 			finally:
 				self._change_finished.send()
 
@@ -120,13 +122,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	def _insert_commit_info(self):
 		commit_id = 0
 		with ConnectionFactory.get_sql_connection() as conn:
-			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id,
-				user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()))
+			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id, user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()))
 			conn.execute(ins_commit)
-			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master",
-				number=1, verification_status=BuildStatus.QUEUED, create_time=int(time.time()))
+			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master", number=1, verification_status=BuildStatus.QUEUED, create_time=int(time.time()))
 			conn.execute(ins_change)
-			return commit_id
+		return commit_id
 
 	def _on_response(self, body, message):
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
@@ -161,7 +161,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
 			events_broker = EventsBroker(connection)
 			events_broker.publish("repos", repo_id, "change added",
-				change_id=commit_id, commit={'id': commit_id, 'sha': '0'}, merge_target="master", repo_type="git")
+				change_id=commit_id, commit={'id': commit_id, 'sha': '0'}, merge_target="master", repo_type="git", patch_id=None)
 			with events_broker.subscribe("repos", callback=self._on_response) as consumer:
 				self.verification_status = None
 				start_time = time.time()
@@ -178,6 +178,53 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		work_repo.git.checkout('origin/master')
 		return commit_sha, work_repo
 
+	def _patch_roundtrip(self, modfile, contents, passes=True):
+		repo_id = self._insert_repo_info(self.repo_path)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			last_commit_id = sqlconn.execute(func.max(schema.commit.c.id)).first()[0]
+			commit_id = last_commit_id + 1 if last_commit_id else 1
+
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
+			client.create_repository(self.repo_id, "repo")
+
+		bare_repo = Repo.init(self.repo_path, bare=True)
+		work_repo = bare_repo.clone(bare_repo.working_dir + ".clone")
+
+		init_commit = self._modify_commit_push(work_repo, modfile, contents, parent_commits=[])
+
+		commit_sha = self._modify_commit_push(work_repo, "koality.yml",
+			yaml.safe_dump({'test': {'scripts': self._test_commands(passes)}}),
+			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
+
+		with open(os.path.join(work_repo.working_dir, 'makeapatch'), "w") as f:
+			f.write('patchstuffs')
+
+		work_repo.index.add(['makeapatch'])
+		work_repo.index.commit('temporary patch commit', parent_commits=[commit_sha])
+
+		patch = work_repo.git.format_patch(commit_sha, stdout=True)
+		work_repo.git.reset('HEAD~', hard=True)
+
+		with model_server.rpc_connect("changes", "create") as client:
+			client.create_commit_and_change(self.repo_id, self.user_id, 'commit_message', 'sha', 'master', None, False, patch)
+
+		with Connection(RabbitSettings.kombu_connection_info) as connection:
+			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
+			events_broker = EventsBroker(connection)
+			with events_broker.subscribe("repos", callback=self._on_response) as consumer:
+				self.verification_status = None
+				start_time = time.time()
+				consumer.consume()
+				while self.verification_status is None:
+					try:
+						connection.drain_events(timeout=1)
+					except socket.timeout:
+						pass
+					assert time.time() - start_time < 120  # 120s timeout
+
+		return commit_sha, work_repo
+
 	def test_passing_roundtrip(self):
 		DeploymentSettings.active = True
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1")
@@ -189,6 +236,11 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		commit_sha, work_repo = self._repo_roundtrip("test.txt", "c1", passes=False)
 		assert_equal(BuildStatus.FAILED, self.verification_status)
 		assert_not_equal(commit_sha, work_repo.head.commit.hexsha)
+
+	def test_roundtrip_with_patch(self):
+		DeploymentSettings.active = True
+		commit_sha, work_repo = self._patch_roundtrip("test.txt", "c1")
+		assert_equal(BuildStatus.PASSED, self.verification_status)
 
 	def test_roundtrip_with_postmerge_success(self):
 		DeploymentSettings.active = True
