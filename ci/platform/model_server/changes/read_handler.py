@@ -30,7 +30,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 	def get_patch(self, patch_id):
 		patch = database.schema.patch
-		query = patch.select().where(patch.c.patch_id == patch_id)
+		query = patch.select().where(patch.c.id == patch_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 			if row:

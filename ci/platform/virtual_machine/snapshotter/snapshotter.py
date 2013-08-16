@@ -132,7 +132,7 @@ class Snapshotter(object):
 		virtual_machine.cache_repository(repository['name'])
 
 	def get_image_name(self, snapshot_version):
-		image_name_base = '%s_%s' % (self.vm_class.Settings.vm_image_name_prefix, self.vm_class.Settings.vm_image_name_suffix)
+		image_name_base = '%s_%s_%s' % (self.vm_class.Settings.vm_image_name_prefix, self.vm_class.Settings.vm_image_name_suffix, self.vm_class.Settings.vm_image_name_version)
 		if image_name_base.endswith(str(snapshot_version[0])):
 			image_name = '%s_%s' % (image_name_base, snapshot_version[1])
 		elif image_name_base.endswith('%s_' % snapshot_version[0]):

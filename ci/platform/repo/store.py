@@ -12,6 +12,7 @@ import time
 import yaml
 import eventlet
 import model_server
+import git.exc
 import hglib
 
 from git import GitCommandError, Repo, refs
@@ -612,7 +613,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def store_pending(self, repo_id, repo_name, sha, commit_id):
 		repo_name += '.git'
 		repo_type = self._get_repo_type(repo_id)
-		assert(repo_type == "git")
+		assert repo_type == "git"
 
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
@@ -621,6 +622,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 			remote_repo = conn.get_repo_forward_url(repo_id)
 
 		self._git_fetch_with_private_key(repo, remote_repo)
+
+		try:
+			repo.commit(sha)
+		except git.exc.BadObject:
+			raise NoSuchCommitError(repo_id, sha)
 
 		try:
 			refs.SymbolicReference.create(repo, 'refs/pending/%d' % commit_id, sha)
@@ -691,3 +697,11 @@ class RepositoryAlreadyExistsException(RepositoryOperationException):
 		if not msg:
 			msg = 'Repository with id %d already exists at path %s' % (repo_id, existing_repo_path)
 		super(RepositoryAlreadyExistsException, self).__init__(msg)
+
+
+class NoSuchCommitError(RepositoryOperationException):
+	"""Indicates an exception occured trying to dereference a given ref."""
+
+	def __init__(self, repo_id, ref):
+		msg = 'Could not find commit %s for repo %d' % (ref, repo_id)
+		super(RepositoryOperationException, self).__init__(msg)
