@@ -1,6 +1,7 @@
 import sys
 
 import yaml
+import model_server
 
 from model_server.build_consoles import ConsoleType
 from util.log import Logged
@@ -59,6 +60,12 @@ class VirtualMachineBuildCore(object):
 		if results.returncode:
 			raise VerificationException("Testing: %s" % test_command.name)
 		return results.output
+
+	def upload_xunit(self, build_id, test_command):
+		xunit_contents = test_command.get_xunit_contents()
+		if xunit_contents:
+			with model_server.rpc_connect("builds", "create") as client:
+				client.store_xunit_contents(build_id, xunit_contents)
 
 	def run_factory_command(self, factory_command, console_appender=None):
 		output_handler = self._get_output_handler(console_appender, ConsoleType.TestFactory, factory_command.name)

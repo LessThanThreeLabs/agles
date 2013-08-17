@@ -1,3 +1,5 @@
+import inspect
+import simplejson
 import os
 import pipes
 import model_server
@@ -159,6 +161,38 @@ class RemoteCompileCommand(RemoteShellCommand):
 class RemoteTestCommand(RemoteShellCommand):
 	def __init__(self, test_step):
 		super(RemoteTestCommand, self).__init__("test", test_step)
+
+	def get_xunit_contents(self):
+		pass
+
+	def _run(self, virtual_machine, output_handler=None):
+		retval = super(RemoteTestCommand, self)._run()
+		if self.xunit:
+			def new_xunit_contents():
+				results = virtual_machine.ssh_call('python -c %s' % pipes.quote(self._get_xunit_contents_script(self.xunit)))
+				return simplejson.loads(results.output)
+			self.xunit_contents = new_xunit_contents
+		return retval
+
+	def _get_xunit_contents_script(self, xunit_path):
+		def print_contents_dict():
+			import os
+			import os.path
+			import json
+
+			files = []
+			for root, dirs, dirfiles in os.walk(xunit_path):
+				files.extend(map(lambda dirfile: os.path.join(root, dirfile), dirfiles))
+
+			contents = {}
+			for file in files:
+				with open(file) as f:
+					contents[file] = f.read()
+
+			print json.dumps(contents)
+
+		pythonc_func = inspect.getsource(print_contents_dict).replace('xunit_path', "'%s'" % xunit_path)
+		return pythonc_func
 
 	def _to_script(self):
 		script = self._to_executed_script()

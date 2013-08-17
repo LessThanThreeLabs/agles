@@ -28,3 +28,8 @@ class BuildsCreateHandler(ModelServerRpcHandler):
 
 		self.publish_event("changes", change_id, "build added", build_id=build_id, create_time=create_time)
 		return build_id
+
+	def store_xunit_contents(self, build_id, xunit_contents):
+		build = database.schema.build
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
