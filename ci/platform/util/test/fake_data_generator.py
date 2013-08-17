@@ -57,6 +57,7 @@ class SchemaDataGenerator(object):
 				first_name = random.choice(['Jon', 'Jordan', 'Brian', 'Ryan', 'Andrey'])
 				last_name = random.choice(['Chu', 'Potter', 'Bland', 'Scott', 'Kostov'])
 
+
 				ins_user = schema.user.insert().values(first_name=first_name, last_name=last_name,
 					email="%s%d@address.com" % (first_name[0] + last_name, user),
 					password_hash=binascii.b2a_base64(hashlib.sha512(SALT + USER_PASSWORD.encode('utf8')).digest())[0:-1], salt=SALT, created=int(time.time()))
@@ -69,8 +70,10 @@ class SchemaDataGenerator(object):
 					repo_id = conn.execute(repo_id_query).first()[schema.repo.c.id]
 					repos[repo_id] += 1
 					sha = ''.join(random.choice('0123456789abcdef') for x in range(40))
+					commit_message = 'Jon %s while %s' % (random.choice(['ate', 'fell', 'exploded', 'watched tv']), 
+							random.choice(['listening to Selena Gomez\n\nBut only on MTV', 'chewing gum\n\nDouble the pleasure, double the fun', 'praying to Raptor Jesus']))
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
-						message="message-%d" % commit, timestamp=random.randint(1, int(time.time())), sha=sha)
+						message=commit_message, timestamp=random.randint(1, int(time.time())), sha=sha)
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target-%d" % commit,
 						number=repos[repo_id], verification_status=self.get_random_commit_status(), merge_status=self.get_random_merge_status(),

@@ -114,7 +114,7 @@ class VirtualMachine(object):
 			command = ' && '.join([
 				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; hg init source))' % repo_name,
 				'cd source',
-				'mkdir .hg/strip-backup',
+				'mkdir -p .hg/strip-backup',
 				'ssh -oStrictHostKeyChecking=no -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
 				'hg pull %s' % repo_url,
 				'hg unbundle .hg/strip-backup/%s.hg' % ref,
