@@ -125,11 +125,11 @@ patch = Table('patch', metadata,
 
 xunit = Table('xunit', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('build_id', Integer, ForeignKey('build.id'), nullable=False),
+	Column('build_consle_id', Integer, ForeignKey('build_console.id'), nullable=False),
 	Column('path', String, nullable=False),
 	Column('contents', Text, nullable=False),
 
-	UniqueConstraint('build_id', 'path')
+	UniqueConstraint('build_console_id', 'path')
 )
 
 repostore = Table('repostore', metadata,

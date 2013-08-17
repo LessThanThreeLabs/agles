@@ -26,7 +26,7 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			raise NoSuchBuildConsoleError(build_console_id)
 
 	def get_build_consoles(self, user_id, change_id):
-		build = database.schema.build
+		build_console = database.schema.build
 		build_console = database.schema.build_console
 
 		query = build_console.join(build).select(use_labels=True).where(
@@ -58,6 +58,16 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			console_metadata = to_dict(sqlconn.execute(metadata_query).first(), build_console.columns)
 			console_metadata[console_output.name] = output
 			return console_metadata
+
+	def get_xunit_from_id(self, user_id, build_console_id):
+		build_console = database.schema.build_console
+		xunit = database.schema.xunit
+
+		query = xunit.select().where(build_console.c.id == build_console_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			rows = sqlconn.execute(query)
+
+		return [to_dict(row, xunit.columns) for row in rows]
 
 	def can_hear_build_console_events(self, user_id, id_to_listen_to):
 		return True
