@@ -61,13 +61,3 @@ class BuildsReadHandler(ModelServerRpcHandler):
 			builds = map(lambda row: to_dict(row, build.columns,
 				tablename=build.name), sqlconn.execute(query))
 			return builds
-
-	def get_xunit_from_id(self, user_id, build_id):
-		build = database.schema.build
-		xunit = database.schema.xunit
-
-		query = xunit.select().where(build.c.id == build_id)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			rows = sqlconn.execute(query)
-
-		return [to_dict(row, xunit.columns) for row in rows]

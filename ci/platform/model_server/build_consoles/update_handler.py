@@ -107,6 +107,31 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			self.publish_event("build_consoles", build_console_id, "new output",
 				**{str(line_number): line for line_number, line in read_lines.items()})
 
+	def _get_build_console_id(self, sqlconn, build_id, type, subtype):
+		build_console = schema.build_console
+		console_output = schema.console_output
+
+		query = build_console.select().where(
+			and_(
+				build_console.c.build_id == build_id,
+				build_console.c.type == type,
+				build_console.c.subtype == subtype,
+			)
+		)
+
+		row = sqlconn.execute(query).first()
+		return row[build_console.c.id] if row else None
+
+	def store_xunit_contents(self, build_id, type, subtype, xunit_contents):
+		xunit = database.schema.xunit
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			build_console_id = self._get_build_console_id(sqlconn, build_id, type, subtype)
+			insert_list = [{'build_console_id': build_console_id, 'path': k, 'contents': v} for k, v in xunit_contents.iteritems()]
+			sqlconn.execute(xunit.insert(), *insert_list)
+
+		self.publish_event("build_consoles", build_console_id, "xunit stored")
+
 	def set_return_code(self, build_id, return_code, type, subtype):
 		build_console = schema.build_console
 		build = schema.build
