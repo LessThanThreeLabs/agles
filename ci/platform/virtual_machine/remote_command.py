@@ -161,12 +161,13 @@ class RemoteCompileCommand(RemoteShellCommand):
 class RemoteTestCommand(RemoteShellCommand):
 	def __init__(self, test_step):
 		super(RemoteTestCommand, self).__init__("test", test_step)
+		self.xunit = None
 
 	def get_xunit_contents(self):
 		pass
 
 	def _run(self, virtual_machine, output_handler=None):
-		retval = super(RemoteTestCommand, self)._run()
+		retval = super(RemoteTestCommand, self)._run(virtual_machine, output_handler)
 		if self.xunit:
 			def new_xunit_contents():
 				results = virtual_machine.ssh_call('python -c %s' % pipes.quote(self._get_xunit_contents_script(self.xunit)))

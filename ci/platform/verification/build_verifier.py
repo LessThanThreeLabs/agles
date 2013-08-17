@@ -22,6 +22,7 @@ class BuildVerifier(object):
 			except VerificationException as e:
 				return e
 			except BaseException as e:
+				# import traceback; traceback.print_exc()	
 				BuildVerifier.logger.critical("Unexpected exception thrown during verification", exc_info=True)
 				return e
 
