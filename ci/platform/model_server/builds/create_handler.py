@@ -30,6 +30,10 @@ class BuildsCreateHandler(ModelServerRpcHandler):
 		return build_id
 
 	def store_xunit_contents(self, build_id, xunit_contents):
-		build = database.schema.build
+		xunit = database.schema.xunit
 
+		insert_list = [{'build_id': build_id, 'path': k, 'contents': v} for k, v in xunit_contents.iteritems()]
 		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(xunit.insert(), *insert_list)
+
+		self.publish_event("builds", build_id, "xunit stored")

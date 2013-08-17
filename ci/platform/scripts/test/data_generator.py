@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""Model server must be up to run this file since it depends on DatabaseBackedSettings"""
+
 import argparse
 from util.test import fake_data_generator
 

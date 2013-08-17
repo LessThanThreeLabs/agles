@@ -120,7 +120,16 @@ change_export_uri = Table('change_export_uri', metadata,
 patch = Table('patch', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
-	Column('contents', Text)
+	Column('contents', Text, nullable=False)
+)
+
+xunit = Table('xunit', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('build_id', Integer, ForeignKey('build.id'), nullable=False),
+	Column('path', String, nullable=False),
+	Column('contents', Text, nullable=False),
+
+	UniqueConstraint('build_id', 'path')
 )
 
 repostore = Table('repostore', metadata,
