@@ -45,7 +45,6 @@ repo = Table('repo', metadata,
 
 	UniqueConstraint('uri', 'deleted'),
 	CheckConstraint('deleted = 0 OR id = deleted')
-
 )
 
 commit = Table('commit', metadata,
@@ -81,6 +80,15 @@ build = Table('build', metadata,
 	Column('create_time', Integer, nullable=False),
 	Column('start_time', Integer, nullable=True),
 	Column('end_time', Integer, nullable=True)
+)
+
+virtual_machine = Table('virtual_machine', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('build_id', Integer, ForeignKey('build.id'), nullable=True),
+	Column('type', String, nullable=False),
+	Column('instance_id', String, nullable=False),
+	Column('pool_slot', Integer, nullable=False),
+	Column('username', String, nullable=False)
 )
 
 build_console = Table('build_console', metadata,
