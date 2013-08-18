@@ -34,7 +34,7 @@ class RemoteShellCommand(RemoteCommand):
 		super(RemoteShellCommand, self).__init__()
 		self.type = type
 		self.advertise_commands = advertise_commands
-		self.name, self.path, self.commands, self.timeout, self.export = self._parse_step(step_info)
+		self.name, self.path, self.commands, self.timeout, self.export, self.xunit = self._parse_step(step_info)
 
 	def _run(self, virtual_machine, output_handler=None):
 		return virtual_machine.ssh_call('bash --login -c %s' % pipes.quote(self._to_script()), output_handler)
@@ -43,6 +43,7 @@ class RemoteShellCommand(RemoteCommand):
 		path = None
 		timeout = 600
 		export = None
+		xunit = None
 		if isinstance(step, str):
 			name = step
 			commands = [step]
@@ -51,20 +52,21 @@ class RemoteShellCommand(RemoteCommand):
 				raise InvalidConfigurationException("Could not parse %s step: %s" % (self.type, step))
 			name = step.keys()[0]
 			try:
-				path, commands, timeout, export = self._parse_step_info(step.values()[0])
+				path, commands, timeout, export, xunit = self._parse_step_info(step.values()[0])
 			except InvalidConfigurationException as e:
 				raise InvalidConfigurationException("%s in step: %s" % (e.message, step))
 			if not commands:
 				commands = [name]
 		else:
 			raise InvalidConfigurationException("Could not parse %s step: %s" % (self.type, step))
-		return name, path, commands, timeout, export
+		return name, path, commands, timeout, export, xunit
 
 	def _parse_step_info(self, step_info):
 		path = None
 		commands = None
 		timeout = 600
 		export = None
+		xunit = None
 		if isinstance(step_info, str):
 			commands = [step_info]
 		elif isinstance(step_info, list):
@@ -79,6 +81,8 @@ class RemoteShellCommand(RemoteCommand):
 					timeout = value
 				elif key == 'export':
 					export = self._listify(value)
+				elif key == 'xunit':
+					xunit = self._listify(value)
 				else:
 					raise InvalidConfigurationException("Invalid %s option: %s" % (self.type, key))
 
@@ -87,7 +91,7 @@ class RemoteShellCommand(RemoteCommand):
 		assert isinstance(timeout, int)
 		assert export is None or all(map(lambda path: isinstance(path, str), export))
 
-		return path, commands, timeout, export
+		return path, commands, timeout, export, xunit
 
 	def _listify(self, value):
 		if isinstance(value, str):
@@ -161,7 +165,6 @@ class RemoteCompileCommand(RemoteShellCommand):
 class RemoteTestCommand(RemoteShellCommand):
 	def __init__(self, test_step):
 		super(RemoteTestCommand, self).__init__("test", test_step)
-		self.xunit = None
 
 	def get_xunit_contents(self):
 		pass
@@ -170,30 +173,27 @@ class RemoteTestCommand(RemoteShellCommand):
 		retval = super(RemoteTestCommand, self)._run(virtual_machine, output_handler)
 		if self.xunit:
 			def new_xunit_contents():
-				results = virtual_machine.ssh_call('python -c %s' % pipes.quote(self._get_xunit_contents_script(self.xunit)))
+				results = virtual_machine.ssh_call(
+					"python - <<'EOF'\n%s\nEOF" % self._get_xunit_contents_script(self.xunit))
 				return simplejson.loads(results.output)
 			self.xunit_contents = new_xunit_contents
 		return retval
 
-	def _get_xunit_contents_script(self, xunit_path):
-		def print_contents_dict():
-			import os
-			import os.path
-			import json
+	def _get_xunit_contents_script(self, xunit_paths):
+		pythonc_func = """import os, os.path, json
 
-			files = []
-			for root, dirs, dirfiles in os.walk(xunit_path):
-				files.extend(map(lambda dirfile: os.path.join(root, dirfile), dirfiles))
+files = []
+for xunit_path in %s:
+	for root, dirs, dirfiles in os.walk(xunit_path):
+		files.extend(map(lambda dirfile: os.path.join(root, dirfile), dirfiles))
 
-			contents = {}
-			for file in files:
-				with open(file) as f:
-					contents[file] = f.read()
+contents = {}
+for file in files:
+	with open(file) as f:
+		contents[file] = f.read()
 
-			print json.dumps(contents)
-
-		pythonc_func = inspect.getsource(print_contents_dict).replace('xunit_path', "'%s'" % xunit_path)
-		return pythonc_func
+print json.dumps(contents)"""
+		return pythonc_func % xunit_paths
 
 	def _to_script(self):
 		script = self._to_executed_script()
