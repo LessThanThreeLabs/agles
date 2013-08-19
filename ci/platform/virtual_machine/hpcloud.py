@@ -47,7 +47,8 @@ class HpCloudVm(openstack.OpenstackVm):
 		private_ip = filter(lambda ip_address: ip_address.startswith('10.'), self.instance.private_ips)[0]
 		login = "%s@%s" % (self.vm_username, private_ip)
 		return self.call(["ssh",
-			"-oLogLevel=error", "-oStrictHostKeyChecking=no", "-oUserKnownHostsFile=/dev/null",
+			"-oLogLevel=error", "-oStrictHostKeyChecking=no",
+			"-oUserKnownHostsFile=/dev/null", "-oServerAliveInterval=20",
 			login, command], timeout=timeout, output_handler=output_handler)
 
 	@classmethod
