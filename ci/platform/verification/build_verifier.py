@@ -15,7 +15,6 @@ from verification_results_handler import VerificationResultsHandler
 @Logged()
 class BuildVerifier(object):
 	def ReturnException(func):
-
 		def wrapper(*args, **kwargs):
 			try:
 				return func(*args, **kwargs)

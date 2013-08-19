@@ -69,6 +69,12 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 
 		return [to_dict(row, xunit.columns) for row in rows]
 
+	# TODO: We should find a smarter way to do this whenever therea lot of different output types
+	def get_valid_output_types(self, user_id, build_console_id):
+		if self.get_xunit_from_id(user_id, build_console_id):
+			return ['stdout', 'xunit']
+		return ['stdout']
+
 	def can_hear_build_console_events(self, user_id, id_to_listen_to):
 		return True
 

@@ -1,4 +1,3 @@
-import inspect
 import simplejson
 import os
 import pipes
@@ -181,7 +180,6 @@ class RemoteTestCommand(RemoteShellCommand):
 
 	def _get_xunit_contents_script(self, xunit_paths):
 		pythonc_func = """import os, os.path, json
-
 files = []
 for xunit_path in %s:
 	for root, dirs, dirfiles in os.walk(xunit_path):
