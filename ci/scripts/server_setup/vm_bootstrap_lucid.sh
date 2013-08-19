@@ -5,13 +5,13 @@ set -o errexit
 
 function platform_configure () {
 	if [ $(which apt-get) ]; then
+		PACKAGE_MANAGER='apt-get'
 		# THIS STUFF IS VERY VERY DANGEROUS
-		# PACKAGE_MANAGER='apt-get'
 		# sudo locale-gen en_US.UTF-8
 		# sudo update-locale LANG=en_US.UTF-8
 		# sudo su -c "echo 127.0.0.1 localhost $(hostname) >> /etc/hosts"
 		# if [ -f /sbin/initctl ]; then
-		# 	sudo rm /sbin/initctl
+			# sudo rm /sbin/initctl
 		# fi
 		# sudo dpkg-divert --local --rename --add /sbin/initctl
 		# sudo ln -s /bin/true /sbin/initctl
@@ -131,8 +131,8 @@ function setup_redis () {
 
 function setup_postgres () {
 	if [ $PACKAGE_MANAGER == 'apt-get' ]; then
-		postgresql_root=/etc/postgresql/9.1/main
-		postgresql_service=postgresql
+		postgresql_root=/etc/postgresql/8.4/main
+		postgresql_service=postgresql-8.4
 	elif [ $PACKAGE_MANAGER == 'yum' ]; then
 		postgresql_root=/var/lib/pgsql/9.1/data
 		postgresql_service=postgresql-9.1
@@ -141,7 +141,7 @@ function setup_postgres () {
 	# Trust postgresql logins
 	sudo sed -i.bak -r 's/^(\w+(\s+\S+){2,3}\s+)\w+$/\1trust/g' $postgresql_root/pg_hba.conf
 	# Turn off fsync on postgresql
-	sudo sed -i.bak -r 's/^.*fsync .*$/fsync off/g' $postgresql_root/postgresql.conf
+	# sudo sed -i.bak -r 's/^.*fsync .*$/fsync off/g' $postgresql_root/postgresql.conf
 	sudo service $postgresql_service restart
 }
 
@@ -227,7 +227,7 @@ function setup_java () {
 	fi
 	if [ ! $(which mvn) ]; then
 		if [ $PACKAGE_MANAGER == 'apt-get' ]; then
-			sudo apt-get install -y maven
+			sudo apt-get install -y maven2
 		elif [ $PACKAGE_MANAGER == 'yum' ]; then
 			wget http://mirror.cogentco.com/pub/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz
 			tar xzf apache-maven-3.0.5-bin.tar.gz
@@ -288,7 +288,7 @@ function vm_setup () {
 	prompt_github_credentials
 	# Install dependencies
 	sudo $PACKAGE_MANAGER update -y
-	sudo $PACKAGE_MANAGER install -y python-pip make postgresql python-software-properties git mercurial build-essential curl libyaml-dev
+	sudo $PACKAGE_MANAGER install -y python-pip make postgresql python-software-properties git-core mercurial build-essential curl libyaml-dev
 
 	if [ $PACKAGE_MANAGER == 'yum' ]; then
 		sudo $PACKAGE_MANAGER groupinstall -y "Development Tools"
@@ -336,7 +336,7 @@ function vm_setup () {
 	popd
 	rm -rf koality-streaming-executor
 
-	clone github.com/LessThanThreeLabs/koality-provisioner.git koality-provisioner -b 0.2
+	clone github.com/LessThanThreeLabs/koality-provisioner.git koality-provisioner -b 0.3
 	pushd koality-provisioner
 	pip install -r requirements.txt
 	python setup.py install

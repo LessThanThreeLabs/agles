@@ -53,7 +53,7 @@ class RestrictedGitShell(RestrictedShell):
 
 	def _create_ssh_exec_args(self, route, command, path, user_id):
 		uri = "git@%s" % route
-		path = "'%s'" % path
+		path = pipes.quote(path)
 		command_parts = [command, path, user_id] if command in self.user_id_commands else [command, path]
 		full_command = ' '.join(command_parts)
 		return "ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command
@@ -134,6 +134,8 @@ class RestrictedGitShell(RestrictedShell):
 			raise InvalidCommandError(full_ssh_command)
 
 		repo_path = command_parts[1].strip("'")  # command_parts[1] should always be a repo path in any command
+		if not repo_path.endswith('.git'):
+			repo_path += '.git'
 		self._validate(repo_path)
 		command_parts[1] = self._get_requested_repo_uri(repo_path)
 		self._git_command_handlers[command_parts[0]](*command_parts[1:])

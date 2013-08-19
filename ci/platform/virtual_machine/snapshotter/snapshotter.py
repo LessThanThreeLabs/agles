@@ -132,15 +132,15 @@ class Snapshotter(object):
 		virtual_machine.cache_repository(repository['name'])
 
 	def get_image_name(self, snapshot_version):
-		image_name_prefix = self.vm_class.Settings.vm_image_name_prefix
-		if image_name_prefix.endswith(str(snapshot_version[0])):
-			image_name = '%s_%s' % (image_name_prefix, snapshot_version[1])
-		elif image_name_prefix.endswith('%s_' % snapshot_version[0]):
-			image_name = '%s%s' % (image_name_prefix, snapshot_version[1])
+		image_name_base = '%s_%s_%s' % (self.vm_class.Settings.vm_image_name_prefix, self.vm_class.Settings.vm_image_name_suffix, self.vm_class.Settings.vm_image_name_version)
+		if image_name_base.endswith(str(snapshot_version[0])):
+			image_name = '%s_%s' % (image_name_base, snapshot_version[1])
+		elif image_name_base.endswith('%s_' % snapshot_version[0]):
+			image_name = '%s%s' % (image_name_base, snapshot_version[1])
 		elif snapshot_version[0] == -1:
-			image_name = '%s_0_%s' % (image_name_prefix, snapshot_version[1])
+			image_name = '%s_0_%s' % (image_name_base, snapshot_version[1])
 		else:
-			image_name = '%s%s_%s' % (image_name_prefix, snapshot_version[0], snapshot_version[1])
+			image_name = '%s%s_%s' % (image_name_base, snapshot_version[0], snapshot_version[1])
 		return image_name
 
 	# TODO (bbland): move this stuff into the vm wrapper implementations

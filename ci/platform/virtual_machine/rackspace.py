@@ -36,5 +36,9 @@ class RackspaceVm(openstack.OpenstackVm):
 	CloudClient = RackspaceClient.get_client
 
 
+class SecurityGroups(openstack.SecurityGroups):
+	CloudClient = RackspaceClient.get_client
+
+
 class InstanceTypes(openstack.InstanceTypes):
 	CloudClient = RackspaceClient.get_client

@@ -8,6 +8,10 @@ class DatabaseBackedSettings(object):
 	class __metaclass__(type):
 		def __getattr__(cls, attr):
 			cls.reinitialize()
+			try:
+				return object.__getattribute__(cls, attr)
+			except:
+				pass
 			if attr == '_resource' or attr.startswith('_'):
 				attrname = attr[len('_default_'):] if attr.startswith('_default_') else attr
 				raise AttributeError("'%s' object has no attribute '%s'" % (cls.__name__, attrname))

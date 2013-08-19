@@ -103,20 +103,14 @@ class UsersUpdateHandler(ModelServerRpcHandler):
 			password_hash=password_hash, salt=salt)
 		return True
 
-	def reset_password(self, email, new_password):
+	def change_github_oauth_token(self, user_id, github_oauth_token):
 		user = schema.user
-		salt_query = user.select().where(user.c.email == email)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row = sqlconn.execute(salt_query).first()
-		if row:
-			salt = row[user.c.salt]
-		else:
-			raise NoSuchUserError(email)
-		# latin-1 is an arbitrary full-byte fixed length character encoding, which thus does not ruin our original salt
-		update = user.update().where(user.c.email == email).values(
-			password_hash=hashlib.sha512(salt.encode('latin-1') + new_password.encode('utf8')).hexdigest())
+		update = user.update().where(user.c.id == user_id).values(github_oauth=github_oauth_token)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
+		self.publish_event("users", user_id, "user github oauth token updated", user_id=user_id,
+			github_oauth_token=github_oauth_token)
+		return True
 
 
 class NoSuchUserError(Exception):

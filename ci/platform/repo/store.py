@@ -3,7 +3,6 @@
 
 Repository management for git is done using gitpython.
 """
-from __future__ import print_function
 import os
 import re
 import shutil
@@ -13,6 +12,7 @@ import time
 import yaml
 import eventlet
 import model_server
+import git.exc
 import hglib
 
 from git import GitCommandError, Repo, refs
@@ -273,7 +273,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_slave.git.checkout("FETCH_HEAD")
 			ref_sha = repo_slave.head.commit.hexsha
 			checkout_branch = remote_branch if remote_branch_exists else "FETCH_HEAD"
-			repo_slave.git.checkout(checkout_branch, "-B", ref_to_merge_into)
+			repo_slave.git.branch("-f", ref_to_merge_into, checkout_branch)
+			repo_slave.git.checkout(ref_to_merge_into)
 			original_head = repo_slave.head.commit.hexsha
 			repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 			repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
@@ -298,7 +299,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self._git_fetch_with_private_key(repo_slave, remote_repo, ref_to_update)
 		repo_slave.git.checkout("FETCH_HEAD")
 		ref_sha = repo_slave.head.commit.hexsha
-		repo_slave.git.checkout(remote_branch, "-B", ref_to_update)
+		repo_slave.git.branch("-f", ref_to_update, remote_branch)
+		repo_slave.git.checkout(ref_to_update)
 		return ref_sha
 
 	def _git_push_merge_retry(self, repo, repo_slave, remote_repo, ref_to_merge_into, original_head):
@@ -306,7 +308,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				ref_sha = self._git_update_branch_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 				remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
-				repo_slave.git.checkout(remote_branch, "-B", ref_to_merge_into)
+				repo_slave.git.branch("-f", ref_to_merge_into, remote_branch)
+				repo_slave.git.checkout(ref_to_merge_into)
 				repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
 				repo_slave.git.push("origin", "HEAD:%s" % ref_to_merge_into)
 			except GitCommandError:
@@ -425,7 +428,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			private_key = StoreSettings.ssh_private_key
 			with open(private_key_path, 'w') as private_key_file:
 				os.chmod(private_key_path, 0600)
-				print(private_key, file=private_key_file)
+				private_key_file.write(private_key)
 
 		return private_key_path
 
@@ -482,17 +485,24 @@ class FileSystemRepositoryStore(RepositoryStore):
 			else:
 				raise RepositoryAlreadyExistsException(repo_id, repo_path)
 
+		with model_server.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+
 		if repo_type == "git":
 			repo_name += '.git'
 			repo_path = self._resolve_path(repo_id, repo_name)
 			make_repo_dirs()
 			assert repo_name.endswith(".git")
-			Repo.init(repo_path, bare=True)
+			repo = Repo.init(repo_path, bare=True)
+			try:
+				# The explicit refspec pulls down all heads and sets them as the local heads
+				self._git_fetch_with_private_key(repo, remote_repo, 'refs/heads/*:refs/heads/*')
+			except GitCommandError:
+				error_msg = "Pull failed for repo with id %s and forward url %s" % (repo_id, remote_repo)
+				self.logger.warn(error_msg, exc_info=True)
+				raise BadRepositorySetupError, error_msg, sys.exc_info()[2]
 		elif repo_type == "hg":
 			repo_path = self._resolve_path(repo_id, repo_name)
-
-			with model_server.rpc_connect("repos", "read") as conn:
-				remote_repo = conn.get_repo_forward_url(repo_id)
 
 			make_repo_dirs()
 			hglib.init(repo_path)
@@ -549,12 +559,13 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def force_delete(self, repo_id, repo_name, target):
 		repo_type = self._get_repo_type(repo_id)
-		assert(repo_type == "git")
+		assert repo_type == "git"
+		short_repo_name = repo_name
 		repo_name += '.git'
 
 		if self._git_remote_branch_exists(repo_id, repo_name, target):
 			try:
-				self.push(repo_id, repo_name, "", target, force=True)
+				self.push(repo_id, short_repo_name, "", target, force=True)
 			except GitCommandError as e:
 				self.logger.warn("Force delete encountered an error", exc_info=e)
 				self._git_update_branch(repo_id, repo_name, target)
@@ -592,15 +603,26 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
-		repo.git.fetch(remote_repo)
-		remote_branch = "origin/%s" % branch
-		remote_branch_exists = re.search("\\s+" + remote_branch + "$", repo.git.branch("-r"), re.MULTILINE)
-		return remote_branch_exists
+		try:
+			self._git_fetch_with_private_key(repo, remote_repo, branch)
+		except GitCommandError:
+			return False
+		else:
+			return True
 
 	def store_pending(self, repo_id, repo_name, sha, commit_id):
-		repo_name += '.git'
 		repo_type = self._get_repo_type(repo_id)
-		assert(repo_type == "git")
+		if repo_type == 'git':
+			self._git_store_pending(repo_id, repo_name, sha, commit_id)
+		elif repo_type == 'hg':
+			self._hg_store_pending(repo_id, repo_name, sha, commit_id)
+		else:
+			msg = 'Unknown repository type %s' % repo_type
+			self.logger.critical(msg)
+			raise RepositoryOperationException(msg)
+
+	def _git_store_pending(self, repo_id, repo_name, sha, commit_id):
+		repo_name += '.git'
 
 		repo_path = self._resolve_path(repo_id, repo_name)
 		repo = Repo(repo_path)
@@ -611,10 +633,37 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self._git_fetch_with_private_key(repo, remote_repo)
 
 		try:
+			repo.commit(sha)
+		except git.exc.BadObject:
+			raise NoSuchCommitError(repo_id, sha)
+
+		try:
 			refs.SymbolicReference.create(repo, 'refs/pending/%d' % commit_id, sha)
 		except:
 			exc_info = sys.exc_info()
 			self.logger.critical("Failed to create pending ref %d for sha %s" % (commit_id, sha), exc_info=exc_info)
+			raise exc_info
+
+	def _hg_store_pending(self, repo_id, repo_name, sha, commit_id):
+		repo_path = self._resolve_path(repo_id, repo_name)
+		repo = hglib.open(repo_path)
+
+		with model_server.rpc_connect("repos", "read") as conn:
+			remote_repo = conn.get_repo_forward_url(repo_id)
+
+		self._hg_fetch_with_private_key(repo, remote_repo)
+
+		try:
+			repo.update(sha)
+		except CommandError:
+			raise NoSuchCommitError(repo_id, sha)
+
+		try:
+			parent_shas = map(lambda rev: rev.node, repo.log(['parents(%s)' % sha]))
+			repo.bundle(os.path.join(repo_path, '.hg', 'strip-backup', '%s.hg' % sha[:12]), rev=[sha], base=parent_shas)
+		except:
+			exc_info = sys.exc_info()
+			self.logger.critical("Failed to create pending bundle %d for sha %s" % (commit_id, sha), exc_info=exc_info)
 			raise exc_info
 
 	def rename_repository(self, repo_id, old_name, new_name):
@@ -650,11 +699,13 @@ class RepositoryOperationException(Exception):
 	def __init__(self, msg=''):
 		super(RepositoryOperationException, self).__init__(msg)
 
+
 class BadRepositorySetupError(RepositoryOperationException):
 	"""Indicates that a repository was not properly set up (either due to a missing ssh key on the master repository or due to a bad forward url)"""
 
 	def __init__(self, msg=''):
 		super(BadRepositorySetupError, self).__init__(msg)
+
 
 class PushForwardError(RepositoryOperationException):
 	"""Indicates that an error occured while attempting to push to a forward url"""
@@ -677,3 +728,11 @@ class RepositoryAlreadyExistsException(RepositoryOperationException):
 		if not msg:
 			msg = 'Repository with id %d already exists at path %s' % (repo_id, existing_repo_path)
 		super(RepositoryAlreadyExistsException, self).__init__(msg)
+
+
+class NoSuchCommitError(RepositoryOperationException):
+	"""Indicates an exception occured trying to dereference a given ref."""
+
+	def __init__(self, repo_id, ref):
+		msg = 'Could not find commit %s for repo %d' % (ref, repo_id)
+		super(RepositoryOperationException, self).__init__(msg)

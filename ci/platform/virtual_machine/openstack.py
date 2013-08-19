@@ -93,9 +93,9 @@ class OpenstackVm(VirtualMachine):
 		'''
 		return '\n'.join(("#!/bin/sh",
 			"adduser %s --home /home/%s --shell /bin/bash --disabled-password --gecos ''" % (vm_username, vm_username),
-			"mkdir /home/%s/.ssh" % vm_username,
-			"echo '%s' >> /home/%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
-			"chown -R %s:%s /home/%s/.ssh" % (vm_username, vm_username, vm_username)))
+			"mkdir ~%s/.ssh" % vm_username,
+			"echo '%s' >> ~%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
+			"chown -R %s:%s ~%s/.ssh" % (vm_username, vm_username, vm_username)))
 
 	@classmethod
 	def _validate_security_group(cls, security_group):
@@ -176,10 +176,10 @@ class OpenstackVm(VirtualMachine):
 			self.rebuild()
 		else:
 			self.instance = instance
-			for remaining_attempts in reversed(range(6)):
+			for remaining_attempts in reversed(range(20)):
 				if remaining_attempts <= 2:
 					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
-				if self.ssh_call("true", timeout=30).returncode == 0:
+				if self.ssh_call("true", timeout=10).returncode == 0:
 					return
 				eventlet.sleep(3)
 			# Failed to ssh into machine, try again
@@ -190,18 +190,19 @@ class OpenstackVm(VirtualMachine):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
 			timeout=3600, output_handler=output_handler)
 
-	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.instance.private_ips[-1])
-		return self.call(["ssh",
-			"-oLogLevel=error", "-oStrictHostKeyChecking=no", "-oUserKnownHostsFile=/dev/null",
-			login, command], timeout=timeout, output_handler=output_handler)
+	def ssh_args(self):
+		return ["ssh",
+			"-oLogLevel=error", "-oStrictHostKeyChecking=no",
+			"-oUserKnownHostsFile=/dev/null", "-oServerAliveInterval=20",
+			"%s@%s" % (self.vm_username, self.instance.private_ips[-1])]
 
 	def reboot(self, force=False):
 		self.instance.reboot()
 
 	@classmethod
 	def get_all_images(cls):
-		return filter(lambda image: LibCloudSettings.vm_image_name_prefix in image.name, cls.CloudClient().list_images())
+		vm_image_name_search_term = '%s_%s_%s' % (LibCloudSettings.vm_image_name_prefix, LibCloudSettings.vm_image_name_suffix, LibCloudSettings.vm_image_name_version)
+		return filter(lambda image: vm_image_name_search_term in image.name, cls.CloudClient().list_images())
 
 	def create_image(self, name, description=None):
 		self.instance.driver.ex_save_image(self.instance, name, metadata={'description': description})
@@ -260,6 +261,19 @@ class OpenstackVm(VirtualMachine):
 			cls.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
 
 
+class SecurityGroups(object):
+	CloudClient = OpenstackClient.get_client
+
+	@classmethod
+	def get_security_group_names(cls):
+		try:
+			existing_groups = map(lambda group: group.name, cls.CloudClient().ex_list_security_groups())
+		except:
+			existing_groups = []
+		existing_groups_plus_selected = list(set(existing_groups).union([str(LibCloudSettings.security_group), str(LibCloudSettings._default_security_group)]))
+		return sorted(existing_groups_plus_selected)
+
+
 class InstanceTypes(object):
 	CloudClient = OpenstackClient.get_client
 
@@ -274,7 +288,10 @@ class InstanceTypes(object):
 	@classmethod
 	def get_allowed_instance_types(cls):
 		largest_instance_type = LibCloudSettings.largest_instance_type
-		ordered_types = map(lambda size: size.id, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		try:
+			ordered_types = map(lambda size: size.id, sorted(cls.CloudClient().list_sizes(), key=lambda size: size.ram))
+		except:
+			ordered_types = []
 		if largest_instance_type in ordered_types:
 			return ordered_types[:ordered_types.index(largest_instance_type) + 1]
 		else:
