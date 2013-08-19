@@ -23,8 +23,11 @@ class VirtualMachine(object):
 	def export(self, export_prefix, files, output_handler=None):
 		raise NotImplementedError("Currently only supported for EC2 VMs")
 
-	def ssh_call(self, command, output_handler=None, timeout=None):
+	def ssh_args(self):
 		raise NotImplementedError()
+
+	def ssh_call(self, command, output_handler=None, timeout=None):
+		return self.call(self.ssh_args() + [command], timeout=timeout, output_handler=output_handler)
 
 	def delete(self):
 		raise NotImplementedError()
