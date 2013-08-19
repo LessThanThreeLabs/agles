@@ -89,7 +89,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 	# TODO (jchu): This query is SLOW AS BALLS
 	def query_changes_group(self, user_id, repo_ids, group, start_index_inclusive, num_results):
 		assert isinstance(repo_ids, collections.Iterable)
-		assert not isinstance(repo_ids, str)
+		assert not isinstance(repo_ids, (str, unicode))
 
 		assert group in self.VALID_GROUPS
 
@@ -116,9 +116,9 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 	def query_changes_filter(self, user_id, repo_ids, filter_query, start_index_inclusive, num_results):
 		assert isinstance(repo_ids, collections.Iterable)
-		assert not isinstance(repo_ids, str)
+		assert not isinstance(repo_ids, (str, unicode))
 
-		assert isinstance(filter_query, str)
+		assert isinstance(filter_query, (str, unicode))
 
 		if not repo_ids:
 			return []
