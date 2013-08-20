@@ -25,7 +25,7 @@ class Upgrader(object):
 			))]
 
 	def _get_revert_script(self):
-		return "/tmp/koalityupgrade/%s/*/revert_script" % self._to_version
+		return ['bash', '-c', '/tmp/koalityupgrade/%s/*/revert_script' % self._to_version]
 
 	def _set_upgrade_status(self, status, attempts=10):
 		for attempt in xrange(attempts):
@@ -34,6 +34,7 @@ class Upgrader(object):
 			except:
 				if attempt < attempts - 1:
 					eventlet.sleep(3)
+					RabbitSettings.reinitialize()
 				else:
 					raise
 
@@ -47,13 +48,7 @@ class Upgrader(object):
 			if returncode:
 				self.revert_upgrade()
 			else:
-				for attempt in xrange(10):
-					try:
-						self._set_upgrade_status('passed', attempts=1)
-						del DeploymentSettings.version
-					except:  # Model server might not be up again yet
-						eventlet.sleep(3)
-						RabbitSettings.reinitialize()
+				self._set_upgrade_status('passed')
 		except:
 			self._set_upgrade_status('failed')
 
@@ -72,13 +67,14 @@ class Upgrader(object):
 			finally:
 				raise FatalUpgradeException()
 
-		returncode = self._install_version(self._to_version, self._from_version)
-		if returncode:
-			try:
-				# log here
-				self._set_upgrade_status('failed')
-			finally:
-				raise FatalUpgradeException()
+		if self._to_version != 'latest':
+			returncode = self._install_version(self._to_version, self._from_version)
+			if returncode:
+				try:
+					# log here
+					self._set_upgrade_status('failed')
+				finally:
+					raise FatalUpgradeException()
 		self._set_upgrade_status('rolled back')
 
 	def download_upgrade_files(self, license_key, server_id, from_version, to_version, to_path):
