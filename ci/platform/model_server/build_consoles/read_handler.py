@@ -26,7 +26,7 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			raise NoSuchBuildConsoleError(build_console_id)
 
 	def get_build_consoles(self, user_id, change_id):
-		build_console = database.schema.build
+		build = database.schema.build
 		build_console = database.schema.build_console
 
 		query = build_console.join(build).select(use_labels=True).where(
