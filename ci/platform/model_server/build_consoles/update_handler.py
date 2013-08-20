@@ -134,7 +134,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		return row[build_console.c.id] if row else None
 
 	def store_xunit_contents(self, build_id, type, subtype, xunit_contents):
-		xunit = database.schema.xunit
+		xunit = schema.xunit
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			build_console_id = self._get_build_console_id(sqlconn, build_id, type, subtype)
