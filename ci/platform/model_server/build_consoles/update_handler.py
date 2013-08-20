@@ -98,7 +98,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 					console_output.update().where(
 						and_(
 							console_output.c.build_console_id == build_console_id,
-							console_output.c.line_number == bindparam('line_id')
+							console_output.c.line_number == bindparam('line_number')
 						)
 					).values(line=bindparam('line')),
 					[{'line_number': line_number, 'line': read_lines[line_number]} for line_number in existing_lines]
