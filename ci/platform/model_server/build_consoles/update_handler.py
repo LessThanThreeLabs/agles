@@ -98,10 +98,10 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 					console_output.update().where(
 						and_(
 							console_output.c.build_console_id == build_console_id,
-							console_output.c.line_number == bindparam('line_id')
+							console_output.c.line_number == bindparam('b_line_number')
 						)
-					).values(line=bindparam('line')),
-					[{'line_number': line_number, 'line': read_lines[line_number]} for line_number in existing_lines]
+					).values(line=bindparam('b_line')),
+					[{'b_line_number': line_number, 'b_line': read_lines[line_number]} for line_number in existing_lines]
 				)
 			new_lines = read_lines
 			for line_number in existing_lines:
@@ -110,10 +110,10 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 				sqlconn.execute(
 					console_output.insert().values(
 						build_console_id=build_console_id,
-						line_number=bindparam('line_number'),
-						line=bindparam('line')
+						line_number=bindparam('b_line_number'),
+						line=bindparam('b_line')
 					),
-					[{'line_number': line_number, 'line': line} for line_number, line in read_lines.items()]
+					[{'b_line_number': line_number, 'b_line': line} for line_number, line in read_lines.items()]
 				)
 			self.publish_event("build_consoles", build_console_id, "new output",
 				**{str(line_number): line for line_number, line in read_lines.items()})
