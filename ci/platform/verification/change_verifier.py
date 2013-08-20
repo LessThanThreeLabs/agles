@@ -4,7 +4,7 @@ import sys
 import yaml
 import os
 
-from eventlet import event, spawn, spawn_n, queue
+from eventlet import event, spawn, spawn_n, spawn_after, queue
 from kombu.messaging import Producer
 
 import model_server
@@ -12,17 +12,19 @@ import model_server
 from shared.handler import EventSubscriber, ResourceBinding
 from settings.deployment import DeploymentSettings
 from settings.verification_server import VerificationServerSettings
-from util import greenlets, pathgen
+from util import pathgen
 from util.log import Logged
 from verification_config import VerificationConfig
 from verification_results_handler import VerificationResultsHandler
 
+TIMEOUT_TIME = 15*60 #15 minutes currently
 
 @Logged()
 class ChangeVerifier(EventSubscriber):
 	def __init__(self, verifier_pool, uri_translator):
 		super(ChangeVerifier, self).__init__([
 			ResourceBinding('repos', 'verification:repos.update'),
+			ResourceBinding('changes', 'instance_launching'),
 			ResourceBinding('system_settings', None)
 		])
 		self.verifier_pool = verifier_pool
@@ -38,6 +40,8 @@ class ChangeVerifier(EventSubscriber):
 			self._handle_new_change(body['contents'])
 		elif body['type'] == 'instance settings updated':
 			self._handle_verifier_settings_update(body['contents'])
+		elif body['type'] == 'launch qa instance':
+			self._handle_launch_instance(body['contents'])
 		message.ack()
 
 	def _handle_new_change(self, contents):
@@ -68,6 +72,50 @@ class ChangeVerifier(EventSubscriber):
 			self.verifier_pool.reinitialize(max_verifiers=max_verifiers, min_unallocated=min_unallocated)
 		except:
 			self.logger.critical("Unexpected failure while updating verifier pool to max_verifiers: %s, min_unallocated: %s." % (max_verifiers, min_unallocated), exc_info=True)
+
+	# TODO(andrey) Add virtual_machine addition to verify_change
+	# Add build_id to database entry for virtual machine
+	def _handle_launch_instance(self, contents):
+		try:
+			change_id = contents['change_id']
+
+			with model_server.rpc_connect("changes", "read") as client:
+				change_attributes = client.get_change_attributes(change_id)
+
+			commit_id = change_attributes['commit_id']
+
+			with model_server.rpc_connect("repos", "read") as client:
+				repo_type = client.get_repo_type(change_attributes['repo_id'])
+				sha = client.get_commit_attributes(commit_id)['sha']
+			
+			user_id = contents['user_id']
+
+			verification_config = self._get_verification_config(commit_id, sha, repo_type)
+
+			try:
+				verifier = self.verifier_pool.get()
+				verifier.setup()
+			except:
+				if verifier is not None:
+					self.verifier_pool.remove(verifier)
+				return
+
+			def _scrap_vm():
+				verifier.teardown()
+				self.verifier_pool.remove(verifier)
+
+			build_id = self._create_build(change_id)
+			machine_provisioned_event = event.Event()
+			spawn(verifier.launch_build, build_id, repo_type, verification_config, machine_provisioned_event)
+
+			machine_provisioned_event.wait()
+
+			spawn_after(TIMEOUT_TIME, _scrap_vm)
+		except:
+			self.logger.critical("Unexpected failure while trying to luanch a qa instance for change %s and user %s." % (change_id, user_id), exc_info=True)
+
+		with model_server.rpc_connect("changes", "update") as changes_update_rpc:
+			changes_update_rpc.mark_qa_build_launched(build_id, change_id)
 
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)
@@ -231,9 +279,6 @@ class ChangeVerifier(EventSubscriber):
 		else:
 			self.logger.critical()
 			assert False
-
-		if not isinstance(config_dict, dict):
-			config_dict = {}
 
 		try:
 			return VerificationConfig(config_dict.get("compile", {}), config_dict.get("test", {}))

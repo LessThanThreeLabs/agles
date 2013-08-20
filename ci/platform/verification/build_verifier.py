@@ -88,15 +88,9 @@ class BuildVerifier(object):
 
 		self._cleanup(build_id, results, artifact_export_event)
 
-	def launch_build(self, build_id, repo_type, verification_config):
+	def launch_build(self, build_id, repo_type, verification_config, machine_provisioned_event):
 		setup_result = self._setup(build_id, repo_type, verification_config)
-
-		if isinstance(setup_result, Exception):
-			self._cleanup(build_id, [], None)
-			return
-
-		# TODO(andrey) after ~55 minutes
-		self._cleanup(build_id, [], None)
+		machine_provisioned_event.send(setup_result)
 
 	@ReturnException
 	def _setup(self, build_id, patch_id, repo_type, verification_config):
