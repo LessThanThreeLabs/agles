@@ -175,7 +175,7 @@ class RemoteTestCommand(RemoteShellCommand):
 				results = virtual_machine.ssh_call(
 					"python - <<'EOF'\n%s\nEOF" % self._get_xunit_contents_script(self.xunit))
 				return simplejson.loads(results.output)
-			self.xunit_contents = new_xunit_contents
+			self.get_xunit_contents = new_xunit_contents
 		return retval
 
 	def _get_xunit_contents_script(self, xunit_paths):

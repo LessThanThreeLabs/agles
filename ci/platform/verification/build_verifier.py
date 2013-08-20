@@ -127,8 +127,8 @@ class BuildVerifier(object):
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id, test_number)
 			retval = self.build_core.run_test_command(test_command, console_appender)
-			self.build_core.upload_xunit(build_id, test_command)
-			return retval
+		self.build_core.upload_xunit(build_id, test_command)
+		return retval
 
 	@ReturnException
 	def _cleanup(self, build_id, results, artifact_export_event):
