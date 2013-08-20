@@ -180,10 +180,14 @@ class RemoteTestCommand(RemoteShellCommand):
 
 	def _get_xunit_contents_script(self, xunit_paths):
 		pythonc_func = """import os, os.path, json
+
 files = []
 for xunit_path in %s:
-	for root, dirs, dirfiles in os.walk(xunit_path):
-		files.extend(map(lambda dirfile: os.path.join(root, dirfile), dirfiles))
+	if os.path.isfile(xunit_path):
+		files.append(xunit_path)
+	else:
+		for root, dirs, dirfiles in os.walk(xunit_path):
+			files.extend([os.path.join(root, dirfile) for dirfile in dirfiles if dirfile.endswith('.xml')])
 
 contents = {}
 for file in files:
