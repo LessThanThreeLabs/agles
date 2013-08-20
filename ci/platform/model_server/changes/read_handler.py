@@ -89,7 +89,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 	# TODO (jchu): This query is SLOW AS BALLS
 	def query_changes_group(self, user_id, repo_ids, group, start_index_inclusive, num_results):
 		assert isinstance(repo_ids, collections.Iterable)
-		assert not isinstance(repo_ids, str)
+		assert not isinstance(repo_ids, (str, unicode))
 
 		assert group in self.VALID_GROUPS
 
@@ -106,7 +106,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		)
 		if group == "me":
 			query = query.where(user.c.id == user_id)
-		query = query.order_by(change.c.number.desc()).limit(num_results).offset(start_index_inclusive)
+		query = query.order_by(change.c.id.desc()).limit(num_results).offset(start_index_inclusive)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			changes = map(lambda row: dict(to_dict(row, change.columns, tablename=change.name), **{
 				'user': to_dict(row, user.columns, tablename=user.name),
@@ -116,9 +116,9 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 	def query_changes_filter(self, user_id, repo_ids, filter_query, start_index_inclusive, num_results):
 		assert isinstance(repo_ids, collections.Iterable)
-		assert not isinstance(repo_ids, str)
+		assert not isinstance(repo_ids, (str, unicode))
 
-		assert isinstance(filter_query, str)
+		assert isinstance(filter_query, (str, unicode))
 
 		if not repo_ids:
 			return []
@@ -143,8 +143,8 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		query = query.select().apply_labels().where(
 			or_(*[change.c.repo_id == repo_id for repo_id in repo_ids])
-		).distinct(change.c.number)
-		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
+		).distinct(change.c.id)
+		query = query.order_by(change.c.id.desc()).limit(num_results).offset(
 			start_index_inclusive)
 
 		with ConnectionFactory.transaction_context() as sqlconn:

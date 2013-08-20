@@ -28,12 +28,12 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, 
 		self._stop_model_server()
 		self._purge_queues()
 
-	def _insert_repo_info(self, repo_id):
+	def _insert_repo_info(self, repo_id, repo_type):
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_machine = schema.repostore.insert().values(ip_address="127.0.0.1", repositories_path='/repos/path')
 			repostore_key = conn.execute(ins_machine).inserted_primary_key[0]
 			ins_repo = schema.repo.insert().values(id=repo_id, name="repo.git", repostore_id=repostore_key, uri='repo/uri',
-				forward_url='forward/url', created=120929, type="git")
+				forward_url='forward/url', created=120929, type=repo_type)
 			conn.execute(ins_repo)
 
 	def _insert_commit_info(self, commit_id, change_id, repo_id):
@@ -45,10 +45,16 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, 
 				number=1, verification_status=BuildStatus.QUEUED, create_time=8675309)
 			conn.execute(ins_change)
 
-	def test_handle_interrupted_queued_build(self):
+	def test_handle_interrupted_queued_build_git(self):
+		self._test_handle_interrupted_queued_build("git")
+
+	def test_handle_interrupted_queued_build_hg(self):
+		self._test_handle_interrupted_queued_build("hg")
+
+	def _test_handle_interrupted_queued_build(self, repo_type):
 		commit_id, change_id, repo_id = 42, 69, 13
 
-		self._insert_repo_info(repo_id)
+		self._insert_repo_info(repo_id, repo_type)
 		self._insert_commit_info(commit_id, change_id, repo_id)
 
 		with model_server.rpc_connect("builds", "create") as builds_create_rpc:
@@ -66,10 +72,16 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, 
 		self._assert_build_status(build_id, BuildStatus.FAILED)
 		self._assert_change_verification_status(change_id, BuildStatus.FAILED)
 
-	def test_handle_interrupted_running_build(self):
+	def test_handle_interrupted_running_build_git(self):
+		self._test_handle_interrupted_running_build("git")
+
+	def test_handle_interrupted_running_build_hg(self):
+		self._test_handle_interrupted_running_build("hg")
+
+	def _test_handle_interrupted_running_build(self, repo_type):
 		commit_id, change_id, repo_id = 42, 69, 13
 
-		self._insert_repo_info(repo_id)
+		self._insert_repo_info(repo_id, repo_type)
 		self._insert_commit_info(commit_id, change_id, repo_id)
 
 		with model_server.rpc_connect("builds", "create") as builds_create_rpc:
@@ -96,10 +108,16 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, 
 		self._assert_build_status(build_id, BuildStatus.FAILED)
 		self._assert_change_verification_status(change_id, BuildStatus.FAILED)
 
-	def test_handle_interrupted_build_on_passed_change(self):
+	def test_handle_interrupted_build_on_passed_change_git(self):
+		self._test_handle_interrupted_build_on_passed_change("git")
+
+	def test_handle_interrupted_build_on_passed_change_hg(self):
+		self._test_handle_interrupted_build_on_passed_change("hg")
+
+	def _test_handle_interrupted_build_on_passed_change(self, repo_type):
 		commit_id, change_id, repo_id = 42, 69, 13
 
-		self._insert_repo_info(repo_id)
+		self._insert_repo_info(repo_id, repo_type)
 		self._insert_commit_info(commit_id, change_id, repo_id)
 
 		with model_server.rpc_connect("builds", "create") as builds_create_rpc:

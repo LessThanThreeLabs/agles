@@ -23,8 +23,11 @@ class VirtualMachine(object):
 	def export(self, export_prefix, files, output_handler=None):
 		raise NotImplementedError("Currently only supported for EC2 VMs")
 
-	def ssh_call(self, command, output_handler=None, timeout=None):
+	def ssh_args(self):
 		raise NotImplementedError()
+
+	def ssh_call(self, command, output_handler=None, timeout=None):
+		return self.call(self.ssh_args() + [command], timeout=timeout, output_handler=output_handler)
 
 	def delete(self):
 		raise NotImplementedError()
@@ -114,9 +117,12 @@ class VirtualMachine(object):
 			command = ' && '.join([
 				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; hg init source))' % repo_name,
 				'cd source',
-				'mkdir -p .hg/strip-backup',
-				'ssh -oStrictHostKeyChecking=no -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
+				'export PYTHONUNBUFFERED=true',
 				'hg pull %s' % repo_url,
+				'hg update %s 2> /dev/null; r=$?; true' % ref,  # first try to check out the ref
+				'if [ "$r" == 0 ]; then exit 0; fi',
+				'mkdir -p .hg/strip-backup',  # otherwise try to get the ref from a bundle
+				'ssh -oStrictHostKeyChecking=no -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
 				'hg unbundle .hg/strip-backup/%s.hg' % ref,
 				'hg update %s' % ref])
 

@@ -1,7 +1,8 @@
 import collections
 import time
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
+from sqlalchemy import bindparam
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
@@ -73,7 +74,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		build_console = schema.build_console
 		console_output = schema.console_output
 
-		query = build_console.select().where(
+		build_console_query = build_console.select().where(
 			and_(
 				build_console.c.build_id == build_id,
 				build_console.c.type == type,
@@ -82,28 +83,38 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row = sqlconn.execute(query).first()
+			row = sqlconn.execute(build_console_query).first()
 			assert row is not None
 
 			build_console_id = row[build_console.c.id]
-			for line_number, line in sorted(read_lines.items()):
-				try:
-					sqlconn.execute(
-						console_output.insert().values(
-							build_console_id=build_console_id,
-							line_number=line_number,
-							line=line
+			existing_lines_query = console_output.select().where(
+				and_(console_output.c.build_console_id == build_console_id,
+					or_(*(console_output.c.line_number == line_number for line_number in read_lines.iterkeys()))
+				)
+			)
+			existing_lines = [row[console_output.c.line_number] for row in sqlconn.execute(existing_lines_query)]
+			if existing_lines:
+				sqlconn.execute(
+					console_output.update().where(
+						and_(
+							console_output.c.build_console_id == build_console_id,
+							console_output.c.line_number == bindparam('b_line_number')
 						)
-					)
-				except IntegrityError:
-					sqlconn.execute(
-						console_output.update().where(
-							and_(
-								console_output.c.build_console_id == build_console_id,
-								console_output.c.line_number == line_number
-							)
-						).values(line=line)
-					)
+					).values(line=bindparam('b_line')),
+					[{'b_line_number': line_number, 'b_line': read_lines[line_number]} for line_number in existing_lines]
+				)
+			new_lines = read_lines
+			for line_number in existing_lines:
+				del new_lines[line_number]
+			if new_lines:
+				sqlconn.execute(
+					console_output.insert().values(
+						build_console_id=build_console_id,
+						line_number=bindparam('b_line_number'),
+						line=bindparam('b_line')
+					),
+					[{'b_line_number': line_number, 'b_line': line} for line_number, line in read_lines.items()]
+				)
 			self.publish_event("build_consoles", build_console_id, "new output",
 				**{str(line_number): line for line_number, line in read_lines.items()})
 

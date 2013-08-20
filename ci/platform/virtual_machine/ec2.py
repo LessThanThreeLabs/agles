@@ -224,11 +224,11 @@ class Ec2Vm(VirtualMachine):
 			output_handler=output_handler
 		)
 
-	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.instance.private_ip_address)
-		return self.call(["ssh",
-			"-oLogLevel=error", "-oStrictHostKeyChecking=no", "-oUserKnownHostsFile=/dev/null",
-			login, command], timeout=timeout, output_handler=output_handler)
+	def ssh_args(self):
+		return ["ssh",
+			"-oLogLevel=error", "-oStrictHostKeyChecking=no",
+			"-oUserKnownHostsFile=/dev/null", "-oServerAliveInterval=20",
+			"%s@%s" % (self.vm_username, self.instance.private_ip_address)]
 
 	def reboot(self, force=False):
 		self.instance.reboot()

@@ -190,11 +190,11 @@ class OpenstackVm(VirtualMachine):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
 			timeout=3600, output_handler=output_handler)
 
-	def ssh_call(self, command, output_handler=None, timeout=None):
-		login = "%s@%s" % (self.vm_username, self.instance.private_ips[-1])
-		return self.call(["ssh",
-			"-oLogLevel=error", "-oStrictHostKeyChecking=no", "-oUserKnownHostsFile=/dev/null",
-			login, command], timeout=timeout, output_handler=output_handler)
+	def ssh_args(self):
+		return ["ssh",
+			"-oLogLevel=error", "-oStrictHostKeyChecking=no",
+			"-oUserKnownHostsFile=/dev/null", "-oServerAliveInterval=20",
+			"%s@%s" % (self.vm_username, self.instance.private_ips[-1])]
 
 	def reboot(self, force=False):
 		self.instance.reboot()
