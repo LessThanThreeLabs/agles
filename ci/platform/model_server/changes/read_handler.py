@@ -106,7 +106,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		)
 		if group == "me":
 			query = query.where(user.c.id == user_id)
-		query = query.order_by(change.c.create_time.desc()).limit(num_results).offset(start_index_inclusive)
+		query = query.order_by(change.c.id.desc()).limit(num_results).offset(start_index_inclusive)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			changes = map(lambda row: dict(to_dict(row, change.columns, tablename=change.name), **{
 				'user': to_dict(row, user.columns, tablename=user.name),
@@ -143,8 +143,8 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		query = query.select().apply_labels().where(
 			or_(*[change.c.repo_id == repo_id for repo_id in repo_ids])
-		)
-		query = query.order_by(change.c.create_time.desc()).limit(num_results).offset(
+		).distinct(change.c.id)
+		query = query.order_by(change.c.id.desc()).limit(num_results).offset(
 			start_index_inclusive)
 
 		with ConnectionFactory.transaction_context() as sqlconn:

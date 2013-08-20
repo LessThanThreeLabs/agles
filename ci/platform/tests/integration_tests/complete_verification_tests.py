@@ -137,7 +137,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	def _test_commands(self, passes):
 		num_commands = 5
 		if passes:
-			return [{'pass_%s' % x: {'script': 'true'}} for x in xrange(num_commands)]
+			return [{'pass_%s' % x: {'script': ['echo hi', 'echo bye', 'true']}} for x in xrange(num_commands)]
 		else:
 			return [{'pass_%s' % x: {'script': 'true'}} for x in xrange(num_commands - 1)] + [{'fail_%s' % (num_commands - 1): {'script': 'false'}}]
 
