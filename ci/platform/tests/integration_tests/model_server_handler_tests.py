@@ -5,6 +5,7 @@ from database.schema import *
 from model_server.build_consoles import ConsoleType
 from model_server.build_consoles.update_handler import BuildConsolesUpdateHandler
 from model_server.changes.read_handler import ChangesReadHandler
+from model_server.changes.create_handler import ChangesCreateHandler
 from util.test import BaseIntegrationTest
 
 
@@ -65,11 +66,11 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 				end_time=1
 			)
 
-			change_id = sqlconn.execute(ins_change).inserted_primary_key[0]
+			self.change_id = sqlconn.execute(ins_change).inserted_primary_key[0]
 
 			ins_build = build.insert().values(
 				commit_id=commit_id,
-				change_id=change_id,
+				change_id=self.change_id,
 				repo_id=self.repo_id,
 				status='a',
 				create_time=1,
@@ -100,6 +101,18 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 				test_lines[line_num] = "build:%s, line:%s, console:test" % (i, line_num)
 			update_handler.append_console_lines(i, test_lines,
 				type=ConsoleType.Test, subtype="unittest")
+
+	def test_store_xunit_contents(self):
+		update_handler = BuildConsolesUpdateHandler()
+
+		for i in self.build_ids:
+			update_handler.add_subtype(i, ConsoleType.Test, "unittest")
+			update_handler.store_xunit_contents(i, ConsoleType.Test, "unittest", 
+				{"file": "contents1", "file2": "contents2"})
+
+	def test_store_patch(self):
+		create_handler = ChangesCreateHandler()
+		create_handler.store_patch(self.change_id, "contents")
 
 	def test_query_changes_group(self):
 		read_handler = ChangesReadHandler()
