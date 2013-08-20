@@ -141,7 +141,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			insert_list = [{'build_console_id': build_console_id, 'path': k, 'contents': v} for k, v in xunit_contents.iteritems()]
 			sqlconn.execute(xunit.insert(), *insert_list)
 
-		self.publish_event("build_consoles", build_console_id, "xunit stored")
+		self.publish_event("build_consoles", build_console_id, "output types updated")
 
 	def set_return_code(self, build_id, return_code, type, subtype):
 		build_console = schema.build_console
