@@ -157,7 +157,7 @@ class Client(ClientBase):
 		return self._process_result(result)
 
 	def _process_result(self, proto):
-		assert isinstance(proto, dict)
+		assert isinstance(proto, dict), proto
 
 		if proto["error"]:
 			assert isinstance(proto["error"], dict)
