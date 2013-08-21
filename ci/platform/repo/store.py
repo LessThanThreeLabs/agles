@@ -308,6 +308,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				ref_sha = self._git_update_branch_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 				remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
+				repo_slave.git.checkout(remote_branch)
 				repo_slave.git.branch("-f", ref_to_merge_into, remote_branch)
 				repo_slave.git.checkout(ref_to_merge_into)
 				repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
