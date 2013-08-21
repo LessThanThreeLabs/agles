@@ -18,3 +18,5 @@ class RemoteCommandTest(BaseUnitTest):
 
 		assert_not_equal(original_get_xunit_contents, cmd.get_xunit_contents)
 
+	def test_breakin_ma_buildz(self):
+		assert_equal(True, False)
