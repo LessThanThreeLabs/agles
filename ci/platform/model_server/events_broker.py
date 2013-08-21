@@ -15,7 +15,7 @@ class EventsBroker(object):
 			subscriber_queue = Queue(exchange=self.events_exchange, routing_key=event, exclusive=True, durable=False)
 		return self.channel.Consumer(queues=subscriber_queue, callbacks=[greenlets.spawn_wrap(callback)])
 
-	def publish(self, _resource, _id, _event_type, **contents):
+	def publish(self, _publish_lock, _resource, _id, _event_type, **contents):
 		"""Publishes a message to a specific event channel.
 
 		:param _resource: The event channel to publish msg to.
@@ -25,6 +25,9 @@ class EventsBroker(object):
 		"""
 		producer = self.channel.Producer(serializer="msgpack", exchange=self.events_exchange)
 		message = {'id': _id, 'type': _event_type, 'contents': contents}
+
+		_publish_lock.acquire()
 		producer.publish(message,
 			routing_key=_resource,
 			delivery_mode=2)
+		_publish_lock.release()

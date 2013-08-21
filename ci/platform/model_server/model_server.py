@@ -116,8 +116,11 @@ class ModelServer(object):
 			started_event.send()
 			model_server_exit_event.wait()
 		finally:
-			for g in server_greenlets:
-				g.kill()
+			try:
+				for g in server_greenlets:
+					g.kill()
+			except:
+				sys.exit(1)
 
 	def _ioloop(self):
 		try:

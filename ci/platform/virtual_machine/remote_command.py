@@ -172,8 +172,12 @@ class RemoteTestCommand(RemoteShellCommand):
 		retval = super(RemoteTestCommand, self)._run(virtual_machine, output_handler)
 		if self.xunit:
 			def new_xunit_contents():
+				if self.path:
+					xunit_paths = [os.path.join('source', self.path, xunit) for xunit in self.xunit]
+				else:
+					xunit_paths = [os.path.join('source', xunit) for xunit in self.xunit]
 				results = virtual_machine.ssh_call(
-					"python - <<'EOF'\n%s\nEOF" % self._get_xunit_contents_script(self.xunit))
+					"python - <<'EOF'\n%s\nEOF" % self._get_xunit_contents_script(xunit_paths))
 				return simplejson.loads(results.output)
 			self.get_xunit_contents = new_xunit_contents
 		return retval

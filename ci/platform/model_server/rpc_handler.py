@@ -1,4 +1,5 @@
 import database.schema
+import eventlet
 
 from sqlalchemy import and_
 
@@ -18,10 +19,11 @@ class ModelServerRpcHandler(object):
 		self.rpc_noun = rpc_noun
 		self.rpc_verb = rpc_verb
 		self.rpc_queue_name = "rpc:%s.%s" % (rpc_noun, rpc_verb)
+		self.producer_lock = eventlet.semaphore.Semaphore()
 
 	def get_server(self, channel=None):
 		rpc_handler = Server(self)
-		rpc_handler.bind("model:rpc", [self.rpc_queue_name], channel=channel)
+		rpc_handler.bind("model:rpc", [self.rpc_queue_name], channel=channel, response_lock=self.producer_lock)
 		return rpc_handler
 
 	def start(self):
@@ -34,7 +36,7 @@ class ModelServerRpcHandler(object):
 		"""
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
 			broker = EventsBroker(connection)
-			broker.publish(_resource, _id, _event_type, **_contents)
+			broker.publish(self.producer_lock, _resource, _id, _event_type, **_contents)
 
 	def publish_event_to_admins(self, _resource, _event_type, **_contents):
 		user = database.schema.user
