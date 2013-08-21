@@ -57,7 +57,7 @@ class Server(object):
 		self.queue_names = None
 		self.chan = None
 
-	def bind(self, exchange_name, queue_names, channel=None, message_ttl=10000, auto_delete=False):
+	def bind(self, exchange_name, queue_names, channel=None, message_ttl=10000, auto_delete=False, response_lock=None):
 		""" Binds this RPC server to listen for calls from <exchange_name>
 		routed to <queue_names>.
 
@@ -69,7 +69,7 @@ class Server(object):
 		assert isinstance(exchange_name, str)
 		assert isinstance(queue_names, list)
 
-		self.response_lock = eventlet.semaphore.Semaphore()
+		self.response_lock = eventlet.semaphore.Semaphore() if response_lock is None else response_lock
 
 		self.exchange_name = exchange_name
 		self.queue_names = set(queue_names)
