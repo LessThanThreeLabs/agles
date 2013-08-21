@@ -20,9 +20,6 @@ setup:
     - postgres:
       - name: koality
         username: lt3
-    - mysql:
-      - name: koality
-        username: lt3
   - scripts:
     - git config --global user.email "koality@koalitycode.com"
     - git config --global user.name "Koality"
@@ -34,7 +31,7 @@ compile:
     - python setup.py install:
         path: ci/platform
 test:
-  machines: 3
+  machines: 4
   scripts:
     - platform unit tests:
         path: ci/platform
