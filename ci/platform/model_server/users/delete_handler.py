@@ -6,8 +6,8 @@ from util.permissions import AdminApi, InvalidPermissionsError
 
 
 class UsersDeleteHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(UsersDeleteHandler, self).__init__("users", "delete")
+	def __init__(self, channel=None):
+		super(UsersDeleteHandler, self).__init__("users", "delete", channel)
 
 	@AdminApi
 	def delete_user(self, user_id, user_to_delete_id):

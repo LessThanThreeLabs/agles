@@ -8,8 +8,8 @@ from model_server.rpc_handler import ModelServerRpcHandler
 
 
 class BuildsCreateHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(BuildsCreateHandler, self).__init__("builds", "create")
+	def __init__(self, channel=None):
+		super(BuildsCreateHandler, self).__init__("builds", "create", channel)
 
 	def create_build(self, change_id):
 		build = database.schema.build

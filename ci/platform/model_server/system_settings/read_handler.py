@@ -24,8 +24,8 @@ from virtual_machine import ec2, hpcloud
 
 class SystemSettingsReadHandler(ModelServerRpcHandler):
 
-	def __init__(self):
-		super(SystemSettingsReadHandler, self).__init__("system_settings", "read")
+	def __init__(self, channel=None):
+		super(SystemSettingsReadHandler, self).__init__("system_settings", "read", channel)
 
 	def is_deployment_initialized(self):
 		result = self.get_setting("deployment", "initialized")

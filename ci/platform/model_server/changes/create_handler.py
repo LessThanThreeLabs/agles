@@ -15,8 +15,8 @@ from util.sql import to_dict
 
 @Logged()
 class ChangesCreateHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(ChangesCreateHandler, self).__init__("changes", "create")
+	def __init__(self, channel=None):
+		super(ChangesCreateHandler, self).__init__("changes", "create", channel)
 
 	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target, base_sha, store_pending=False, patch_contents=None):
 		commit_id = self._create_commit(repo_id, user_id, commit_message, sha, base_sha, store_pending)

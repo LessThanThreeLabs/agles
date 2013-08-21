@@ -10,8 +10,8 @@ from util.permissions import AdminApi
 
 
 class UsersReadHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(UsersReadHandler, self).__init__("users", "read")
+	def __init__(self, channel=None):
+		super(UsersReadHandler, self).__init__("users", "read", channel)
 
 	def get_password_hash_and_salt(self, user_id):
 		user = database.schema.user

@@ -9,8 +9,8 @@ from util.sql import to_dict, load_temp_strings, load_temp_ids
 
 
 class ChangesReadHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(ChangesReadHandler, self).__init__("changes", "read")
+	def __init__(self, channel=None):
+		super(ChangesReadHandler, self).__init__("changes", "read", channel)
 
 	def get_change_attributes(self, change_id):
 		change = database.schema.change
