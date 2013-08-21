@@ -21,7 +21,6 @@ class BuildVerifier(object):
 			except VerificationException as e:
 				return e
 			except BaseException as e:
-				# import traceback; traceback.print_exc()	
 				BuildVerifier.logger.critical("Unexpected exception thrown during verification", exc_info=True)
 				return e
 
@@ -107,20 +106,30 @@ class BuildVerifier(object):
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 			self.build_core.setup_build(repo_uri, repo_type, ref, private_key, patch_id, console_appender)
-			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
+			self.build_core.run_compile_step(self._dedupe_step_names(verification_config.compile_commands), console_appender)
 
 	@ReturnException
 	def _populate_tests(self, build_id, verification_config, test_queue):
 		test_queue.begin_populating_tasks()
 		try:
+			test_commands = verification_config.test_commands
 			for factory_command in verification_config.test_factory_commands:
 				with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 					console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 					generated_test_commands = self.build_core.run_factory_command(factory_command, console_appender)
-				test_queue.populate_tasks(*generated_test_commands)
-			test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
+				test_commands += generated_test_commands
+			test_queue.populate_tasks(*self._dedupe_step_names(test_commands))
 		finally:
 			test_queue.finish_populating_tasks()
+
+	def _dedupe_step_names(self, steps):
+		for step in steps:
+			step_name = step.name
+			steps_with_name = filter(lambda command: command.name == step_name, steps)
+			if len(steps_with_name) > 1:
+				for index, command in enumerate(steps_with_name):
+					command.name = '%s #%d' % (step_name, index + 1)
+		return steps
 
 	@ReturnException
 	def _do_test(self, build_id, test_number, test_command):
