@@ -42,6 +42,9 @@ class TimedBufferedMailHandler(logging.Handler):
 		self.buffer_time = buffer_time
 		self.send_level = send_level
 		self.timer_greenlet = None
+		self.version = None
+		self.license_key = None
+		self.domain_name = None
 
 	def emit(self, record):
 		self.buffered_records.append(record)
@@ -68,8 +71,14 @@ class TimedBufferedMailHandler(logging.Handler):
 
 	def _send_log_mail(self, output_string):
 		try:
-			deployment_info = "%s @ %s" % (DeploymentSettings.license_key, DeploymentSettings.version)
-			send_from = "logmailer@%s" % WebServerSettings.domain_name
+			if self.license_key is None:
+				self.license_key = DeploymentSettings.license_key
+			if self.version is None:
+				self.version = DeploymentSettings.version
+			if self.domain_name is None:
+				self.domain_name = WebServerSettings.domain_name
+			deployment_info = "%s @ %s" % (self.license_key, self.version)
+			send_from = "logmailer@%s" % self.domain_name
 		except Exception as e:
 			deployment_info = "FATAL"
 			send_from = "logmailer@koality.error.com"
