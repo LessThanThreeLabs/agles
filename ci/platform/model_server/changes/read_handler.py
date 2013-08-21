@@ -5,7 +5,7 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from util.sql import to_dict, load_temp_strings
+from util.sql import to_dict, load_temp_strings, load_temp_ids
 
 
 class ChangesReadHandler(ModelServerRpcHandler):
@@ -131,8 +131,9 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		change = database.schema.change
 		commit = database.schema.commit
 		temp_string = database.schema.temp_string
+		temp_id = database.schema.temp_id
 
-		query = change.join(commit).join(user).join(
+		query = change.join(temp_id, change.c.repo_id == temp_id.c.value).join(commit).join(user).join(
 			temp_string,
 			or_(
 				func.lower(temp_string.c.value) == func.lower(user.c.first_name),
@@ -141,14 +142,13 @@ class ChangesReadHandler(ModelServerRpcHandler):
 			)
 		)
 
-		query = query.select().apply_labels().where(
-			or_(*[change.c.repo_id == repo_id for repo_id in repo_ids])
-		).distinct(change.c.id)
+		query = query.select().apply_labels().distinct(change.c.id)
 		query = query.order_by(change.c.id.desc()).limit(num_results).offset(
 			start_index_inclusive)
 
 		with ConnectionFactory.transaction_context() as sqlconn:
 			load_temp_strings(filter_query)
+			load_temp_ids(repo_ids)
 			changes = map(lambda row: dict(to_dict(row, change.columns, tablename=change.name), **{
 				'user': to_dict(row, user.columns, tablename=user.name),
 				'commit': to_dict(row, commit.columns, tablename=commit.name)
