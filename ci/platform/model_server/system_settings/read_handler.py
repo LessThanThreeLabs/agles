@@ -77,6 +77,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		return {
 			'instance_size': AwsSettings.instance_type,
+			'root_drive_size': AwsSettings.root_drive_size,
 			'security_group_name': AwsSettings.security_group
 		}
 
