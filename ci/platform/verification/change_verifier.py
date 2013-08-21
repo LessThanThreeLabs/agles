@@ -138,7 +138,7 @@ class ChangeVerifier(EventSubscriber):
 				return
 			workers_alive.append(1)
 			build_id = self._create_build(change_id)
-			worker_greenlet = spawn(verifier.verify_build(build_id, repo_type, verification_config, task_queue, artifact_export_event))
+			worker_greenlet = spawn(verifier.verify_build, build_id, repo_type, verification_config, task_queue, artifact_export_event)
 
 			def cleanup_greenlet(greenlet):
 				workers_alive.pop()

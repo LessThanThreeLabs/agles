@@ -160,7 +160,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
 			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
 			events_broker = EventsBroker(connection)
-			events_broker.publish("repos", repo_id, "change added",
+			events_broker.publish(eventlet.semaphore.Semaphore(), "repos", repo_id, "change added",
 				change_id=commit_id, commit_id=commit_id, merge_target="master", repo_type="git", sha='0')
 			with events_broker.subscribe("repos", callback=self._on_response) as consumer:
 				self.verification_status = None
