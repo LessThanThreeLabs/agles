@@ -20,8 +20,8 @@ Details for your change are available here: %s
 
 class ChangesUpdateHandler(ModelServerRpcHandler):
 
-	def __init__(self):
-		super(ChangesUpdateHandler, self).__init__("changes", "update")
+	def __init__(self, channel=None):
+		super(ChangesUpdateHandler, self).__init__("changes", "update", channel)
 
 	def mark_change_started(self, change_id):
 		self._update_change_status(change_id, BuildStatus.RUNNING,

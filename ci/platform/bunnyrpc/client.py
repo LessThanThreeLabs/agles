@@ -120,7 +120,7 @@ class Client(ClientBase):
 		was_deadlettered = props.headers and "x-death" in props.headers
 		if was_deadlettered and props.reply_to == self.response_mq:
 			# Greenlets do not propogate errors to the parent, so we send it over as an Exception
-			queue_result = RPCRequestError("The server failed to process your call\nBody: %s" % body)
+			queue_result = RPCRequestError("The server failed to process your call\nBody: %s" % msgpack.unpackb(body))
 		elif not was_deadlettered:
 			queue_result = msgpack.unpackb(body)
 		else:  # Not my deadlettered message

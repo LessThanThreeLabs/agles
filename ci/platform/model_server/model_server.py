@@ -92,7 +92,7 @@ class ModelServer(object):
 				send_if_unset(model_server_exit_event, *sys.exc_info())
 			send_if_unset(model_server_exit_event, ModelServerError)
 
-		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.connection.channel()),
+		map(lambda rpc_handler_class: rpc_handler_class(self.connection.channel()).get_server(),
 			self.rpc_handler_classes)
 		ioloop_greenlet = eventlet.spawn(self._ioloop)
 		ioloop_greenlet.link(ioloop_link)

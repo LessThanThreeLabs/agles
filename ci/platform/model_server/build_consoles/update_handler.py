@@ -16,8 +16,8 @@ from util import sql
 
 class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 
-	def __init__(self):
-		super(BuildConsolesUpdateHandler, self).__init__("build_consoles", "update")
+	def __init__(self, channel=None):
+		super(BuildConsolesUpdateHandler, self).__init__("build_consoles", "update", channel)
 
 	def add_subtype(self, build_id, type, subtype, priority=None):
 		assert type in ConsoleType.valid_types
