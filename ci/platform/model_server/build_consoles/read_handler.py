@@ -8,8 +8,8 @@ from util.sql import to_dict
 
 
 class BuildConsolesReadHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(BuildConsolesReadHandler, self).__init__("build_consoles", "read")
+	def __init__(self, channel=None):
+		super(BuildConsolesReadHandler, self).__init__("build_consoles", "read", channel)
 
 	def get_build_console_from_id(self, user_id, build_console_id):
 		build_console = database.schema.build_console

@@ -92,7 +92,7 @@ class ModelServer(object):
 				send_if_unset(model_server_start_event, *sys.exc_info())
 			send_if_unset(model_server_start_event, ModelServerError)
 
-		map(lambda rpc_handler_class: rpc_handler_class().get_server(self.connection.channel()),
+		map(lambda rpc_handler_class: rpc_handler_class(self.connection.channel()).get_server(),
 			self.rpc_handler_classes)
 		ioloop_greenlet = eventlet.spawn(self._ioloop)
 		ioloop_greenlet.link(ioloop_link)
@@ -129,7 +129,7 @@ class ModelServer(object):
 		except:
 			exc_info = sys.exc_info()
 			self.logger.critical("Model server IOloop exited", exc_info=exc_info)
-			raise exc_info
+			raise
 
 
 class ModelServerError(Exception):

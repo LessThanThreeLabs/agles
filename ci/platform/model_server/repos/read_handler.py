@@ -8,8 +8,8 @@ from util.sql import to_dict
 
 
 class ReposReadHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(ReposReadHandler, self).__init__("repos", "read")
+	def __init__(self, channel=None):
+		super(ReposReadHandler, self).__init__("repos", "read", channel)
 
 	# TODO(andrey) fix-up this internal API. It can sometimes be inefficient.
 	def _get_repo_id(self, commit_id):

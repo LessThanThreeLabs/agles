@@ -17,8 +17,8 @@ from util.permissions import AdminApi
 class ReposCreateHandler(ModelServerRpcHandler):
 	KEYBITS = 1024
 
-	def __init__(self):
-		super(ReposCreateHandler, self).__init__("repos", "create")
+	def __init__(self, channel=None):
+		super(ReposCreateHandler, self).__init__("repos", "create", channel)
 
 	@AdminApi
 	def create_repo(self, user_id, repo_name, forward_url, repo_type):

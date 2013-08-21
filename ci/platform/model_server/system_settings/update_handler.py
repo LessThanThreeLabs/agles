@@ -22,8 +22,8 @@ from virtual_machine.ec2 import Ec2Client
 
 
 class SystemSettingsUpdateHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(SystemSettingsUpdateHandler, self).__init__("system_settings", "update")
+	def __init__(self, channel=None):
+		super(SystemSettingsUpdateHandler, self).__init__("system_settings", "update", channel)
 
 	@AdminApi
 	def initialize_deployment(self, user_id, test_mode=False):
