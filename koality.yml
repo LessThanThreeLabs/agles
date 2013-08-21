@@ -29,12 +29,13 @@ setup:
     - bash -c 'echo -e "[ui]\\nusername = Koality <koality@koalitycode.com>\\n\\n[extensions]\\nmq =" > ~/.hgrc'
     - path: ci/scripts
       script: ./rabbitmq_setup.sh
+    - for x in {0..30000}; do echo qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890 $x; done
 compile:
   scripts:
     - python setup.py install:
         path: ci/platform
 test:
-  machines: 3
+  machines: 1
   scripts:
     - platform unit tests:
         path: ci/platform
