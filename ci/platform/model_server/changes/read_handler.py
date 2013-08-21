@@ -135,9 +135,9 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		query = change.join(commit).join(user).join(
 			temp_string,
 			or_(
-				func.lower(temp_string.c.string) == func.lower(user.c.first_name),
-				func.lower(temp_string.c.string) == func.lower(user.c.last_name),
-				func.lower(commit.c.sha).startswith(func.lower(temp_string.c.string))
+				func.lower(temp_string.c.value) == func.lower(user.c.first_name),
+				func.lower(temp_string.c.value) == func.lower(user.c.last_name),
+				func.lower(commit.c.sha).startswith(func.lower(temp_string.c.value))
 			)
 		)
 
@@ -165,7 +165,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		query = change.join(
 			temp_string,
-			cast(temp_string.c.string, Integer) == change.c.repo_id
+			cast(temp_string.c.value, Integer) == change.c.repo_id
 		)
 		range_query = change.c.end_time > start_timestamp
 		if end_timestamp is not None:

@@ -159,11 +159,15 @@ system_setting = Table('system_setting', metadata,
 	UniqueConstraint('resource', 'key')
 )
 
-temp_string = Table('temp', metadata,
+temp_string = Table('temp_string', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('string', String, nullable=False)
+	Column('value', String, nullable=False)
 )
 
+temp_id = Table('temp_id', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('value', Integer, nullable=False)
+)
 
 def _create_and_initialize(engine):
 	metadata.create_all(engine)

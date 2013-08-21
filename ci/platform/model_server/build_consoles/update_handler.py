@@ -11,6 +11,7 @@ from database import schema
 from database.engine import ConnectionFactory
 from model_server.build_consoles import ConsoleType
 from model_server.rpc_handler import ModelServerRpcHandler
+from util import sql
 
 
 class BuildConsolesUpdateHandler(ModelServerRpcHandler):
@@ -73,6 +74,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		"""
 		build_console = schema.build_console
 		console_output = schema.console_output
+		temp_id = schema.temp_id
 
 		build_console_query = build_console.select().where(
 			and_(
@@ -87,11 +89,12 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			assert row is not None
 
 			build_console_id = row[build_console.c.id]
-			existing_lines_query = console_output.select().where(
-				and_(console_output.c.build_console_id == build_console_id,
-					or_(*(console_output.c.line_number == line_number for line_number in read_lines.iterkeys()))
-				)
-			)
+
+			sql.load_temp_ids([line_number for line_number in read_lines.iterkeys()])
+			existing_lines_query = console_output.join(
+				temp_id, temp_id.c.value == console_output.c.line_number
+			).select().where(console_output.c.build_console_id == build_console_id)
+
 			existing_lines = [row[console_output.c.line_number] for row in sqlconn.execute(existing_lines_query)]
 			if existing_lines:
 				sqlconn.execute(
