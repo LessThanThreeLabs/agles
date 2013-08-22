@@ -43,6 +43,9 @@ class RemoteShellCommand(RemoteCommand):
 		timeout = 600
 		export = None
 		xunit = None
+		if isinstance(step, bool):
+			step = self._bool_to_str(step)
+
 		if isinstance(step, str):
 			name = step
 			commands = [step]
@@ -73,15 +76,15 @@ class RemoteShellCommand(RemoteCommand):
 		elif isinstance(step_info, dict):
 			for key, value in step_info.items():
 				if key == 'script':
-					commands = self._listify(value)
+					commands = map(self._bool_to_str, self._listify(value))
 				elif key == 'path':
 					path = value
 				elif key == 'timeout':
 					timeout = value
 				elif key == 'export':
-					export = self._listify(value)
+					export = map(self._bool_to_str, self._listify(value))
 				elif key == 'xunit':
-					xunit = self._listify(value)
+					xunit = map(self._bool_to_str, self._listify(value))
 				else:
 					raise InvalidConfigurationException("Invalid %s option: %s" % (self.type, key))
 
@@ -99,6 +102,15 @@ class RemoteShellCommand(RemoteCommand):
 			return value
 		else:
 			raise InvalidConfigurationException("Could not parse %s value: %s" % (self.type, value))
+
+	def _bool_to_str(self, value):
+		assert isinstance(value, (str, bool))
+		if isinstance(value, str):
+			return str(value)
+		elif isinstance(value, bool):
+			return str(value).lower()
+		else:
+			assert False, "Invalid type (%s) for value %s" % (type(value).__name__, value)
 
 	def _to_script(self):
 		script = self._to_executed_script()
