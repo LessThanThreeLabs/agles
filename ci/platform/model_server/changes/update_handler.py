@@ -15,6 +15,12 @@ Please fix the change and resubmit it.
 
 Details for your change are available here: %s
 
+Branch:
+%s
+
+Commit Message:
+%s
+
 -The Koality Team"""
 
 
@@ -67,11 +73,13 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		first_name = row[user.c.first_name]
 		last_name = row[user.c.last_name]
 		repo_id = row[change.c.repo_id]
-		change_number = row[change.c.number]
+		target = row[change.c.merge_target]
+		sha = row[commit.c.sha]
+		message = row[commit.c.message]
 		change_link = "https://%s/repository/%d?change=%d" % (WebServerSettings.domain_name, repo_id, change_id)
 
-		subject = "There was an issue with your change (#%d)" % change_number
-		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link)
+		subject = "There was an issue with your change (%s)" % sha
+		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link, target, message)
 
 		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)
 
