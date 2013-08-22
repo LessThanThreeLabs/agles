@@ -39,7 +39,7 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			build_consoles = [to_dict(row, build_console.columns, tablename=build_console.name) for row in sqlconn.execute(query)]
 
 		for console in build_consoles:
-			console['output_types'] = self.get_valid_output_types(user_id, console[build_console.c.id])
+			console['output_types'] = self.get_valid_output_types(user_id, console[build_console.c.id.name])
 
 		return build_consoles
 
