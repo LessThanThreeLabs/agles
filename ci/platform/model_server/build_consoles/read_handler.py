@@ -21,7 +21,9 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 
 		if row:
-			return to_dict(row, build_console.columns)
+			console = to_dict(row, build_console.columns)
+			console['output_types'] = self.get_valid_output_types(user_id, build_console_id)
+			return console
 		else:
 			raise NoSuchBuildConsoleError(build_console_id)
 
@@ -34,7 +36,12 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 		)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			return [to_dict(row, build_console.columns, tablename=build_console.name) for row in sqlconn.execute(query)]
+			build_consoles = [to_dict(row, build_console.columns, tablename=build_console.name) for row in sqlconn.execute(query)]
+
+		for console in build_consoles:
+			console['output_types'] = self.get_valid_output_types(user_id, console[build_console.c.id])
+
+		return build_consoles
 
 	def get_output_lines(self, user_id, build_console_id, offset=0, num_results=1000):
 		console_output = database.schema.console_output
@@ -75,8 +82,8 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 	# TODO: We should find a smarter way to do this whenever there are a lot of different output types
 	def get_valid_output_types(self, user_id, build_console_id):
 		if self.get_xunit_from_id(user_id, build_console_id):
-			return ['stdout', 'xunit']
-		return ['stdout']
+			return ['console', 'xunit']
+		return ['console']
 
 	def can_hear_build_console_events(self, user_id, id_to_listen_to):
 		return True
