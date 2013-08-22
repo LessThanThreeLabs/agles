@@ -106,7 +106,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 					).values(line=bindparam('b_line')),
 					[{'b_line_number': line_number, 'b_line': read_lines[line_number]} for line_number in existing_lines]
 				)
-			new_lines = read_lines
+			new_lines = read_lines.copy()
 			for line_number in existing_lines:
 				del new_lines[line_number]
 			if new_lines:
