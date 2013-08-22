@@ -123,7 +123,6 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 
 	def _get_build_console_id(self, sqlconn, build_id, type, subtype):
 		build_console = schema.build_console
-		console_output = schema.console_output
 
 		query = build_console.select().where(
 			and_(
@@ -138,13 +137,20 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 
 	def store_xunit_contents(self, build_id, type, subtype, xunit_contents):
 		xunit = schema.xunit
+		build_console = schema.build_console
+		build = schema.build
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			build_console_id = self._get_build_console_id(sqlconn, build_id, type, subtype)
 			insert_list = [{'build_console_id': build_console_id, 'path': k, 'contents': v} for k, v in xunit_contents.iteritems()]
 			sqlconn.execute(xunit.insert(), *insert_list)
 
-		self.publish_event("build_consoles", build_console_id, "output type added", type="xunit")
+			build_query = build_console.join(
+				build, build.c.id == build_console.c.build_id
+			).select().where(build_console.c.id == build_console_id)
+			change_id = sqlconn.execute(build_query).first()[build.c.change_id]
+
+		self.publish_event("changes", change_id, "output type added", type="xunit")
 
 	def set_return_code(self, build_id, return_code, type, subtype):
 		build_console = schema.build_console
