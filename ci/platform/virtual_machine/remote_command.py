@@ -118,6 +118,7 @@ class RemoteShellCommand(RemoteCommand):
 			"watchdogpid=$!",
 			full_command,
 			"_r=$?",
+			"exec 2>/dev/null",  # goodbye stderr stream
 			"kill -KILL $watchdogpid > /dev/null 2>&1",  # kill our timeout process
 			"pkill -KILL -P $watchdogpid >/dev/null 2>&1",  # kill all children of the timeout process
 			"if [ $_r -ne 0 ]; then echo %s failed with return code $_r; fi" % pipes.quote(self.name),
