@@ -150,7 +150,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			).select().where(build_console.c.id == build_console_id)
 			change_id = sqlconn.execute(build_query).first()[build.c.change_id]
 
-		self.publish_event("changes", change_id, "output type added", output_type="xunit")
+		self.publish_event("changes", change_id, "output type added", build_console_id=build_console_id, output_type="xunit")
 
 	def set_return_code(self, build_id, return_code, type, subtype):
 		build_console = schema.build_console
