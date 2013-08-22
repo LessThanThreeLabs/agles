@@ -75,7 +75,7 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
-		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType()
+		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType(delete_on_termination=True)
 		dev_sda1.size = AwsSettings.root_drive_size # size in Gigabytes
 		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
 		bdm['/dev/sda1'] = dev_sda1
@@ -260,7 +260,7 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		self._validate_security_group(security_group)
 
-		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType()
+		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType(delete_on_termination=True)
 		dev_sda1.size = AwsSettings.root_drive_size # size in Gigabytes
 		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
 		bdm['/dev/sda1'] = dev_sda1
