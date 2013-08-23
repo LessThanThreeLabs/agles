@@ -64,10 +64,10 @@ class ChangeVerifier(EventSubscriber):
 	def _handle_verifier_settings_update(self, contents):
 		try:
 			max_verifiers = contents["max_verifiers"]
-			min_unallocated = contents["min_unallocated"]
-			self.verifier_pool.reinitialize(max_verifiers=max_verifiers, min_unallocated=min_unallocated)
+			min_ready = contents["min_ready"]
+			self.verifier_pool.reinitialize(max_verifiers=max_verifiers, min_ready=min_ready)
 		except:
-			self.logger.critical("Unexpected failure while updating verifier pool to max_verifiers: %s, min_unallocated: %s." % (max_verifiers, min_unallocated), exc_info=True)
+			self.logger.critical("Unexpected failure while updating verifier pool to max_verifiers: %s, min_ready: %s." % (max_verifiers, min_ready), exc_info=True)
 
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)

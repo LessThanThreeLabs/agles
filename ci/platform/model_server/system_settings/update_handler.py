@@ -153,12 +153,12 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			security_group_name=security_group_name)
 
 	@AdminApi
-	def set_verifier_pool_parameters(self, user_id, min_unallocated, max_verifiers):
-		assert min_unallocated <= max_verifiers
-		self.update_setting("verification_server", "static_pool_size", min_unallocated)
+	def set_verifier_pool_parameters(self, user_id, min_ready, max_verifiers):
+		assert min_ready <= max_verifiers
+		self.update_setting("verification_server", "static_pool_size", min_ready)
 		self.update_setting("verification_server", "max_virtual_machine_count", max_verifiers)
 		self.publish_event("system_settings", None, "verifier pool settings updated",
-			min_unallocated=min_unallocated,
+			min_ready=min_ready,
 			max_verifiers=max_verifiers)
 
 	@AdminApi
