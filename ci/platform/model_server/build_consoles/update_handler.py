@@ -116,7 +116,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 						line_number=bindparam('b_line_number'),
 						line=bindparam('b_line')
 					),
-					[{'b_line_number': line_number, 'b_line': line} for line_number, line in read_lines.items()]
+					[{'b_line_number': line_number, 'b_line': line} for line_number, line in new_lines.items()]
 				)
 			self.publish_event("build_consoles", build_console_id, "new output",
 				**{str(line_number): line for line_number, line in read_lines.items()})

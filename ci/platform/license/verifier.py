@@ -70,7 +70,6 @@ class LicenseVerifier(object):
 	def license_check_failed(self, reason='Unknown license check error'):
 		failures = DeploymentSettings.license_validation_failures + 1
 		DeploymentSettings.license_validation_failures = failures
-
 		if failures > MAX_FAILURES:
 			DeploymentSettings.active = False
 			DeploymentSettings.license_failure_reason = reason
