@@ -21,9 +21,11 @@ REPOSITORIES_PATH = 'repos'
 FAKE_XUNIT_RESULTS = ['<?xml version="1.0" encoding="UTF-8" ?>' +
 '<testsuites>' +
 '<testsuite name="accountInformationValidator" errors="0" tests="6" failures="0" time="0.002" timestamp="2013-08-15T14:10:47">' +
-  '<testcase classname="accountInformationValidator" name="should correctly check email validity" time="0"></testcase>' +
-  '<testcase classname="accountInformationValidator" name="should correctly check password validity" time="0.001"></testcase>' +
-  '<testcase classname="accountInformationValidator" name="should correctly check first name validity" time="0"></testcase>' +
+  '<testcase classname="accountInformationValidator" name="should correctly check email validity" time="0" />' +
+  '<testcase classname="accountInformationValidator" name="should correctly check password validity" time="0.001"/>' +
+  '<testcase classname="accountInformationValidator" name="should correctly check first name validity" time="0">' +
+	'<system-err>some error message</system-err>' +
+  '</testcase>' +
   '<testcase classname="accountInformationValidator" name="should correctly check last name validity" time="0"></testcase>' +
   '<testcase classname="accountInformationValidator" name="should correctly check ssh alias validity" time="0"></testcase>' +
   '<testcase classname="accountInformationValidator" name="should correctly check ssh key validity" time="0.001"></testcase>' +
