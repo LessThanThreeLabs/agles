@@ -77,6 +77,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		return {
 			'instance_size': AwsSettings.instance_type,
+			'root_drive_size': AwsSettings.root_drive_size,
 			'security_group_name': AwsSettings.security_group
 		}
 
@@ -132,7 +133,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	@AdminApi
 	def get_verifier_pool_parameters(self, user_id):
 		return {
-			'num_waiting': VerificationServerSettings.static_pool_size,
+			'min_ready': VerificationServerSettings.static_pool_size,
 			'max_running': VerificationServerSettings.max_virtual_machine_count
 		}
 

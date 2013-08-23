@@ -75,9 +75,15 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
+		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType(delete_on_termination=True)
+		dev_sda1.size = AwsSettings.root_drive_size # size in Gigabytes
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		bdm['/dev/sda1'] = dev_sda1
+
 		instance = cls.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
-			user_data=cls._default_user_data(vm_username)).instances[0]
+			user_data=cls._default_user_data(vm_username),
+			block_device_map=bdm).instances[0]
 		cls._name_instance(instance, name)
 		return Ec2Vm(vm_id, instance, vm_username)
 
@@ -254,9 +260,15 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		self._validate_security_group(security_group)
 
+		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType(delete_on_termination=True)
+		dev_sda1.size = AwsSettings.root_drive_size # size in Gigabytes
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		bdm['/dev/sda1'] = dev_sda1
+
 		self.instance = self.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
-			user_data=self._default_user_data(self.vm_username)).instances[0]
+			user_data=self._default_user_data(self.vm_username),
+			block_device_map=bdm).instances[0]
 		self._name_instance(self.instance, instance_name)
 
 		self.store_vm_info()

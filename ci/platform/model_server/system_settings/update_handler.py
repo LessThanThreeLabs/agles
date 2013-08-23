@@ -14,6 +14,7 @@ import database.schema
 from database.engine import ConnectionFactory
 from license.verifier import HttpLicenseKeyVerifier, LicenseVerifier, LicensePermissionsHandler
 from model_server.rpc_handler import ModelServerRpcHandler
+from settings.aws import AwsSettings
 from settings.deployment import DeploymentSettings
 from settings.verification_server import VerificationServerSettings
 from model_server.system_settings import system_settings_cipher
@@ -30,7 +31,6 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	@AdminApi
 	def initialize_deployment(self, user_id, test_mode=False):
 		server_id = str(uuid.uuid1())
-
 		self.update_setting("mail", "test_mode", test_mode)
 		self.update_setting("deployment", "initialized", True)
 		self.update_setting("deployment", "server_id", server_id)
@@ -104,9 +104,12 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			secret_key=secret_key)
 
 	@AdminApi
-	def set_aws_instance_settings(self, user_id, instance_size, security_group_name):
+	def set_aws_instance_settings(self, user_id, instance_size, root_drive_size, security_group_name):
 		assert VerificationServerSettings.cloud_provider == 'aws'
+		assert isinstance(root_drive_size, int)
+		assert root_drive_size >= AwsSettings._default_root_drive_size
 		self.update_setting("aws", "instance_type", instance_size)
+		self.update_setting("aws", "root_drive_size", root_drive_size)
 		self.update_setting("aws", "security_group", security_group_name)
 		self.publish_event("system_settings", None, "aws instance settings updated",
 			instance_size=instance_size,

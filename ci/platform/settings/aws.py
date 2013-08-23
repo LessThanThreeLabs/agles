@@ -13,4 +13,5 @@ class AwsSettings(DatabaseBackedSettings):
 			vm_image_name_suffix='lucid',  # this should be changed to 'precise'
 			vm_image_name_version='0.3',
 			security_group='koality_verification',
+			root_drive_size=8,
 			s3_bucket_name='')

@@ -285,24 +285,26 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			conn.set_cloud_provider(self.user_id, "aws")
 
 		security_group_name = "a security group"
+		root_drive_size = 42
 		instance_size = "m1.medium"
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_aws_instance_settings(self.user_id, instance_size, security_group_name)
+			conn.set_aws_instance_settings(self.user_id, instance_size, root_drive_size, security_group_name)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name},
+			assert_equals({"instance_size": instance_size, "root_drive_size": root_drive_size, "security_group_name": security_group_name},
 				conn.get_aws_instance_settings(self.user_id))
 
 		security_group_name = "a different security group"
+		root_drive_size = 1337
 		instance_size = "m2.2xlarge"
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_aws_instance_settings(self.user_id, instance_size, security_group_name)
+			conn.set_aws_instance_settings(self.user_id, instance_size, root_drive_size, security_group_name)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "security_group_name": security_group_name},
+			assert_equals({"instance_size": instance_size, "root_drive_size": root_drive_size, "security_group_name": security_group_name},
 				conn.get_aws_instance_settings(self.user_id))
 
 		with model_server.rpc_connect("system_settings", "update") as conn:
 			conn.set_cloud_provider(self.user_id, "hpcloud")
-			assert_raises(AssertionError, conn.set_aws_instance_settings, self.user_id, instance_size, security_group_name)
+			assert_raises(AssertionError, conn.set_aws_instance_settings, self.user_id, instance_size, root_drive_size, security_group_name)
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_raises(AssertionError, conn.get_aws_instance_settings, self.user_id)
 
@@ -333,20 +335,20 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			assert_raises(AssertionError, conn.get_hpcloud_instance_settings, self.user_id)
 
 	def test_verifier_pool_parameters(self):
-		num_waiting = 42
+		min_ready = 42
 		max_running = 69
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_verifier_pool_parameters(self.user_id, num_waiting, max_running)
+			conn.set_verifier_pool_parameters(self.user_id, min_ready, max_running)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"num_waiting": num_waiting, "max_running": max_running},
+			assert_equals({"min_ready": min_ready, "max_running": max_running},
 				conn.get_verifier_pool_parameters(self.user_id))
 
-		num_waiting = 1337
+		min_ready = 1337
 		max_running = 9001
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_verifier_pool_parameters(self.user_id, num_waiting, max_running)
+			conn.set_verifier_pool_parameters(self.user_id, min_ready, max_running)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"num_waiting": num_waiting, "max_running": max_running},
+			assert_equals({"min_ready": min_ready, "max_running": max_running},
 				conn.get_verifier_pool_parameters(self.user_id))
 
 	def test_deployment_settings(self):
@@ -356,13 +358,15 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 		assert_is_none(StoreSettings.ssh_private_key)
 		assert_is_none(StoreSettings.ssh_public_key)
 
+		MailSettings.test_mode = False
+
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.initialize_deployment(self.user_id)
+			conn.initialize_deployment(self.user_id, True)
 
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_true(conn.is_deployment_initialized())
 			assert_is_not_none(conn.get_admin_api_key(self.user_id))
-		assert_false(MailSettings.test_mode)
+		assert_true(MailSettings.test_mode)
 		assert_is_not_none(DeploymentSettings.admin_api_key)
 		assert_is_not_none(DeploymentSettings.server_id)
 		assert_is_not_none(StoreSettings.ssh_private_key)
@@ -370,7 +374,7 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 
 	def test_recreate_admin_api_key(self):
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.initialize_deployment(self.user_id)
+			conn.initialize_deployment(self.user_id, True)
 
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_true(conn.is_deployment_initialized())
