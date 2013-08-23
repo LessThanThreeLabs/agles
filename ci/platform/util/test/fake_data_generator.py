@@ -18,6 +18,40 @@ USER_PASSWORD = 'user123'
 
 REPOSITORIES_PATH = 'repos'
 
+FAKE_XUNIT_RESULTS = ['<?xml version="1.0" encoding="UTF-8" ?>' +
+'<testsuites>' +
+'<testsuite name="accountInformationValidator" errors="0" tests="6" failures="0" time="0.002" timestamp="2013-08-15T14:10:47">' +
+  '<testcase classname="accountInformationValidator" name="should correctly check email validity" time="0"></testcase>' +
+  '<testcase classname="accountInformationValidator" name="should correctly check password validity" time="0.001"></testcase>' +
+  '<testcase classname="accountInformationValidator" name="should correctly check first name validity" time="0"></testcase>' +
+  '<testcase classname="accountInformationValidator" name="should correctly check last name validity" time="0"></testcase>' +
+  '<testcase classname="accountInformationValidator" name="should correctly check ssh alias validity" time="0"></testcase>' +
+  '<testcase classname="accountInformationValidator" name="should correctly check ssh key validity" time="0.001"></testcase>' +
+'</testsuite>' +
+'</testsuites>',
+'<?xml version="1.0" encoding="UTF-8" ?>' +
+'<testsuites>' +
+'<testsuite name="resourceHandler" errors="0" tests="0" failures="0" time="0" timestamp="2013-08-15T14:10:47">' +
+'</testsuite>' +
+'<testsuite name="resourceHandler.constructor" errors="0" tests="1" failures="1" time="0.001" timestamp="2013-08-15T14:10:47">' +
+  '<testcase classname="resourceHandler.constructor" name="should only accept valid params" time="0.001"><failure message="collection failure">some failure here</failure></testcase>' +
+'</testsuite>' +
+'</testsuites>',
+'<?xml version="1.0" encoding="UTF-8" ?>' +
+'<testsuites>' +
+'<testsuite name="systemSettingsInformationValidator" errors="0" tests="9" failures="0" time="0.002" timestamp="2013-08-15T14:10:47">' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check domain name validity" time="0.001"></testcase>' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check aws access key validity" time="0"></testcase>' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check aws secret validity" time="0"></testcase>' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check hp cloud access key validity" time="0"></testcase>' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check hp cloud secret validity" time="0.001"></testcase>' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check hp cloud tenant name validity" time="0"></testcase>' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check num waiting instances validity" time="0"></testcase>' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check max running instances validity" time="0"></testcase>' +
+  '<testcase classname="systemSettingsInformationValidator" name="should correctly check bucket name validity" time="0"></testcase>' +
+'</testsuite>' +
+'</testsuites>']
+
 
 class SchemaDataGenerator(object):
 	def __init__(self, seed=None):
@@ -98,6 +132,11 @@ class SchemaDataGenerator(object):
 							subtype="subtype2", subtype_priority=1, start_time=int(time.time()))
 						console_id = conn.execute(ins_console).inserted_primary_key[0]
 						self.generate_console_output(conn, console_id)
+
+						if console_type == 'test':
+							for index in range(random.randint(0, 3)):
+								ins_xunit = schema.xunit.insert().values(build_console_id=console_id, path='some/path/%d' % index, contents=FAKE_XUNIT_RESULTS[index])
+								conn.execute(ins_xunit)
 
 			SystemSettingsUpdateHandler().initialize_deployment(1, True)
 

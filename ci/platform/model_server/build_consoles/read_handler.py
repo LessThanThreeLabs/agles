@@ -73,7 +73,7 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 		build_console = database.schema.build_console
 		xunit = database.schema.xunit
 
-		query = xunit.select().where(build_console.c.id == build_console_id)
+		query = xunit.select().where(xunit.c.build_console_id == build_console_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			rows = sqlconn.execute(query)
 
