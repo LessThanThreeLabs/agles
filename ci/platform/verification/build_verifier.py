@@ -6,7 +6,7 @@ import model_server
 from build_core import VerificationException
 from pubkey_registrar import PubkeyRegistrar
 from settings.store import StoreSettings
-from shared.constants import BuildStatus, VerificationUser, KOALITY_EXPORT_PATH
+from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
 from util.log import Logged
 from verification_results_handler import VerificationResultsHandler
@@ -61,7 +61,7 @@ class BuildVerifier(object):
 	def rebuild(self):
 		self.build_core.rebuild()
 
-	def verify_build(self, build_id, patch_id, repo_type, verification_config, test_queue, artifact_export_event):
+	def verify_build(self, build_id, patch_id, repo_type, verification_config, test_queue, change_index):
 		results = []
 		setup_result = self._setup(build_id, patch_id, repo_type, verification_config)
 		results.append(setup_result)
@@ -70,7 +70,7 @@ class BuildVerifier(object):
 			if test_queue.can_populate_tasks():
 				test_queue.begin_populating_tasks()
 				test_queue.finish_populating_tasks()
-			self._cleanup(build_id, results, artifact_export_event)
+			self._cleanup(build_id, results, verification_config.export_paths, change_index)
 			return
 
 		if test_queue.can_populate_tasks():
@@ -85,7 +85,7 @@ class BuildVerifier(object):
 			results.append(test_result)
 			test_queue.add_task_result(test_result)
 
-		self._cleanup(build_id, results, artifact_export_event)
+		self._cleanup(build_id, results, verification_config.export_paths, change_index)
 
 	@ReturnException
 	def _setup(self, build_id, patch_id, repo_type, verification_config):
@@ -140,7 +140,7 @@ class BuildVerifier(object):
 		return retval
 
 	@ReturnException
-	def _cleanup(self, build_id, results, artifact_export_event):
+	def _cleanup(self, build_id, results, export_paths, change_index):
 		# check that no results are exceptions
 		success = not any(map(lambda result: isinstance(result, Exception), results))
 		build_status = BuildStatus.PASSED if success else BuildStatus.FAILED
@@ -149,7 +149,7 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 
 		build = self._get_build(build_id)
-		export_prefix = "repo_%d/change_%d" % (build['repo_id'], build['change_id'])
+		export_prefix = "repo_%d/change_%d/%d/" % (build['repo_id'], build['change_id'], change_index)
 
 		def parse_export_uris(export_results):
 			if export_results.returncode == 0:
@@ -160,20 +160,19 @@ class BuildVerifier(object):
 			return []
 
 		try:
-			export_uris = parse_export_uris(self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test")))
+			export_uris = parse_export_uris(self.build_core.export_files(export_prefix, export_paths))
 		except:
 			export_uris = []
 
-		if not artifact_export_event.ready():
-			artifact_export_event.send()
-			try:
-				results = self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
-				export_uris += parse_export_uris(results)
-			except:
-				pass
+		def uri_to_metadata(export_uri):
+			uri_suffix = export_uri.partition(export_prefix)[2]
+			path = uri_suffix[1:]
+			return {'uri': export_uri, 'path': path}
 
-		with model_server.rpc_connect("changes", "update") as changes_update_rpc:
-			changes_update_rpc.add_export_uris(build['change_id'], export_uris)
+		export_metadata = map(uri_to_metadata, export_uris)
+
+		with model_server.rpc_connect("builds", "update") as changes_update_rpc:
+			builds_update_rpc.add_export_metadata(build['id'], export_metadata)
 
 		commit_id = build['commit_id']
 		repo_uri = self._get_repo_uri(commit_id)

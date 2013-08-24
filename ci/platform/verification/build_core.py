@@ -111,8 +111,8 @@ class VirtualMachineBuildCore(object):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		return self.virtual_machine.cache_repository(repo_name, console_appender)
 
-	def export_path(self, export_prefix, filepath):
-		export_command = RemoteExportCommand(export_prefix, filepath)
+	def export_files(self, export_prefix, file_paths):
+		export_command = RemoteExportCommand(export_prefix, file_paths)
 		return export_command.run(self.virtual_machine)
 
 
