@@ -293,7 +293,6 @@ class VerifierPoolTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin):
 		for x in range(10):
 			verifier_pool.reinitialize(max_verifiers=x+1, min_ready=0)
 			verifier_pool._fill_to_min_ready()
-			print verifier_pool.available.get_free_slots()
 
 			while len(results) == x:
 				eventlet.sleep()
