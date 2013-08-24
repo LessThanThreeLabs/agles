@@ -157,9 +157,6 @@ class Ec2Vm(VirtualMachine):
 				return None
 			elif vm.instance.state == 'shutting-down' or vm.instance.state == 'terminated':
 				return None
-			elif vm.instance.state == 'running' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
-				vm.delete()
-				return None
 			elif vm.instance.state not in ('running', 'pending'):
 				cls.logger.critical("Found VM %s in unexpected %s state" % (vm, vm.instance.state))
 				vm.delete()
@@ -214,8 +211,8 @@ class Ec2Vm(VirtualMachine):
 			self.logger.warn("Unable to ssh into VM %s" % self)
 			self.rebuild()
 
-	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
+	def provision(self, repo_name, private_key, output_handler=None):
+		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision %s %s" % (pipes.quote(repo_name), pipes.quote(private_key)),
 			timeout=3600, output_handler=output_handler)
 
 	def export(self, export_prefix, file_paths, output_handler=None):

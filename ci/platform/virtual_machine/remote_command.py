@@ -28,9 +28,10 @@ class NullRemoteCommand(RemoteCommand):
 
 
 class RemoteShellCommand(RemoteCommand):
-	def __init__(self, type, step_info, advertise_commands=True):
+	def __init__(self, type, repo_name, step_info, advertise_commands=True):
 		super(RemoteShellCommand, self).__init__()
 		self.type = type
+		self.repo_name = repo_name
 		self.advertise_commands = advertise_commands
 		self.name, self.path, self.commands, self.timeout, self.xunit = self._parse_step(step_info)
 
@@ -108,7 +109,7 @@ class RemoteShellCommand(RemoteCommand):
 
 	def _to_script(self):
 		full_command = "eval %s" % pipes.quote("&&\n".join(map(self._advertised_command, self.commands)))
-		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join('source', self.path) if self.path else 'source'))
+		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join(self.repo_name, self.path) if self.path else self.repo_name))
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
 		timeout_message = "echo %s timed out after %s seconds" % (pipes.quote(self.name), self.timeout)
 		timeout_command = "\n".join((
@@ -142,13 +143,13 @@ class RemoteShellCommand(RemoteCommand):
 
 
 class RemoteCompileCommand(RemoteShellCommand):
-	def __init__(self, compile_step):
-		super(RemoteCompileCommand, self).__init__("compile", compile_step)
+	def __init__(self, repo_name, compile_step):
+		super(RemoteCompileCommand, self).__init__("compile", repo_name, compile_step)
 
 
 class RemoteTestCommand(RemoteShellCommand):
-	def __init__(self, test_step):
-		super(RemoteTestCommand, self).__init__("test", test_step)
+	def __init__(self, repo_name, test_step):
+		super(RemoteTestCommand, self).__init__("test", repo_name, test_step)
 
 	def get_xunit_contents(self):
 		pass
@@ -188,8 +189,8 @@ print json.dumps(contents)"""
 
 
 class RemoteTestFactoryCommand(RemoteShellCommand):
-	def __init__(self, partition_step):
-		super(RemoteTestFactoryCommand, self).__init__("partition", partition_step, advertise_commands=False)
+	def __init__(self, repo_name, test_factory_step):
+		super(RemoteTestFactoryCommand, self).__init__("test factory", repo_name, test_factory_step, advertise_commands=False)
 
 
 class RemoteSetupCommand(RemoteCommand):
@@ -222,12 +223,13 @@ class RemotePatchCommand(RemoteSetupCommand):
 
 
 class RemoteProvisionCommand(RemoteSetupCommand):
-	def __init__(self, private_key):
+	def __init__(self, repo_name, private_key):
 		super(RemoteProvisionCommand, self).__init__("provision")
+		self.repo_name = repo_name
 		self.private_key = private_key
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.provision(self.private_key, output_handler=output_handler)
+		return virtual_machine.provision(self.repo_name, self.private_key, output_handler=output_handler)
 
 
 class RemoteExportCommand(RemoteCommand):

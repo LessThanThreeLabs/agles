@@ -10,7 +10,7 @@ class RemoteCommandTest(BaseUnitTest):
 		self._xunit_function_replacement_for_step({'mycommand': {'script': 'true', 'xunit': ['some/path', 'some/path/2']}})
 
 	def _xunit_function_replacement_for_step(self, step):
-		cmd = remote_command.RemoteTestCommand(step)
+		cmd = remote_command.RemoteTestCommand('a_repo_name', step)
 		original_get_xunit_contents = cmd.get_xunit_contents
 
 		assert_is_not_none(cmd.xunit)

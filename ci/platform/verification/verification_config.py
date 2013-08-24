@@ -2,8 +2,9 @@ from virtual_machine.remote_command import RemoteCompileCommand, RemoteTestComma
 
 
 class VerificationConfig(object):
-	def __init__(self, compile_section, test_section, export_section):
+	def __init__(self, repo_name, compile_section, test_section, export_section):
 		try:
+			self.repo_name = repo_name
 			self.machines = test_section.get('machines')
 			compile_commands = compile_section.get('scripts') if compile_section else None
 			test_commands = test_section.get('scripts') if test_section else None
@@ -31,7 +32,7 @@ class VerificationConfig(object):
 		if not commands:
 			return []
 		if isinstance(commands, str):
-			return command_class(commands)
+			return command_class(self.repo_name, commands)
 		if isinstance(commands, list):
 			return self._convert_list(command_class, commands)
 		if isinstance(commands, dict):
@@ -39,7 +40,7 @@ class VerificationConfig(object):
 		raise InvalidConfigurationException("Unexpected type found while trying to construct %ss" % command_class.__name__)
 
 	def _convert_list(self, command_class, commands):
-		return [command_class(command) for command in commands]
+		return [command_class(self.repo_name, command) for command in commands]
 
 	def _convert_dict(self, command_class, commands):
 		return self._convert_list(command_class, map(lambda entry: dict((entry,)), commands.iteritems()))
