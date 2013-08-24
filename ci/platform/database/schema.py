@@ -109,12 +109,14 @@ console_output = Table('console_output', metadata,
 	UniqueConstraint('build_console_id', 'line_number')
 )
 
-change_export_uri = Table('change_export_uri', metadata,
+build_export_metadata = Table('build_export_metadata', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
+	Column('build_id', Integer, ForeignKey('build.id'), nullable=False),
 	Column('uri', String, nullable=False),
+	Column('path', String, nullable=False),
 
-	UniqueConstraint('change_id', 'uri')
+	UniqueConstraint('build_id', 'uri'),
+	UniqueConstraint('build_id', 'path')
 )
 
 patch = Table('patch', metadata,

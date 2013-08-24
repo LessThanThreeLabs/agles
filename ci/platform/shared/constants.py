@@ -1,7 +1,5 @@
 VERSION = '0.3'
 
-KOALITY_EXPORT_PATH = '/koality/export'
-
 
 class VerificationUser(object):
 	id = 1

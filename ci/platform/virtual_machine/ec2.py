@@ -4,6 +4,7 @@ import platform
 import re
 import socket
 import sys
+import yaml
 
 import boto.ec2
 import eventlet
@@ -218,15 +219,17 @@ class Ec2Vm(VirtualMachine):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
 			timeout=3600, output_handler=output_handler)
 
-	def export(self, export_prefix, filepath, output_handler=None):
-		return self.ssh_call("cd %s && koality-export s3 %s %s %s %s %s; rm -rf %s" % (
-			KOALITY_EXPORT_PATH,
-			pipes.quote(AwsSettings.aws_access_key_id),
-			pipes.quote(AwsSettings.aws_secret_access_key),
-			pipes.quote(AwsSettings.s3_bucket_name),
-			pipes.quote(export_prefix),
-			pipes.quote(filepath),
-			pipes.quote(filepath)),
+	def export(self, export_prefix, file_paths, output_handler=None):
+		export_options = {
+			'provider': 's3',
+			'key': AwsSettings.aws_access_key_id,
+			'secret': AwsSettings.aws_secret_access_key,
+			'container_name': AwsSettings.s3_bucket_name,
+			'export_prefix': export_prefix,
+			'file_paths': file_paths
+		}
+		return self.ssh_call(
+			"cd source && koality-export %s" % (pipes.quote(yaml.safe_dump(export_options))),
 			output_handler=output_handler
 		)
 

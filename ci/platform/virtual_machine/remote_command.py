@@ -3,7 +3,6 @@ import os
 import pipes
 import model_server
 
-from shared import constants
 from streaming_executor import CommandResults
 
 
@@ -33,7 +32,7 @@ class RemoteShellCommand(RemoteCommand):
 		super(RemoteShellCommand, self).__init__()
 		self.type = type
 		self.advertise_commands = advertise_commands
-		self.name, self.path, self.commands, self.timeout, self.export, self.xunit = self._parse_step(step_info)
+		self.name, self.path, self.commands, self.timeout, self.xunit = self._parse_step(step_info)
 
 	def _run(self, virtual_machine, output_handler=None):
 		return virtual_machine.ssh_call('bash --login -c %s' % pipes.quote(self._to_script()), output_handler)
@@ -41,7 +40,6 @@ class RemoteShellCommand(RemoteCommand):
 	def _parse_step(self, step):
 		path = None
 		timeout = 600
-		export = None
 		xunit = None
 		if isinstance(step, bool):
 			step = self._bool_to_str(step)
@@ -54,20 +52,19 @@ class RemoteShellCommand(RemoteCommand):
 				raise InvalidConfigurationException("Could not parse %s step: %s" % (self.type, step))
 			name = step.keys()[0]
 			try:
-				path, commands, timeout, export, xunit = self._parse_step_info(step.values()[0])
+				path, commands, timeout, xunit = self._parse_step_info(step.values()[0])
 			except InvalidConfigurationException as e:
 				raise InvalidConfigurationException("%s in step: %s" % (e.message, step))
 			if not commands:
 				commands = [name]
 		else:
 			raise InvalidConfigurationException("Could not parse %s step: %s" % (self.type, step))
-		return name, path, commands, timeout, export, xunit
+		return name, path, commands, timeout, xunit
 
 	def _parse_step_info(self, step_info):
 		path = None
 		commands = None
 		timeout = 600
-		export = None
 		xunit = None
 		if isinstance(step_info, str):
 			commands = [step_info]
@@ -81,8 +78,6 @@ class RemoteShellCommand(RemoteCommand):
 					path = value
 				elif key == 'timeout':
 					timeout = value
-				elif key == 'export':
-					export = map(self._bool_to_str, self._listify(value))
 				elif key == 'xunit':
 					xunit = map(self._bool_to_str, self._listify(value))
 				else:
@@ -91,9 +86,8 @@ class RemoteShellCommand(RemoteCommand):
 		assert path is None or isinstance(path, str)
 		assert commands is None or all(map(lambda command: isinstance(command, str), commands))
 		assert isinstance(timeout, int)
-		assert export is None or all(map(lambda path: isinstance(path, str), export))
 
-		return path, commands, timeout, export, xunit
+		return path, commands, timeout, xunit
 
 	def _listify(self, value):
 		if isinstance(value, str):
@@ -113,11 +107,6 @@ class RemoteShellCommand(RemoteCommand):
 			assert False, "Invalid type (%s) for value %s" % (type(value).__name__, value)
 
 	def _to_script(self):
-		script = self._to_executed_script()
-		script += "exit $_r"
-		return script
-
-	def _to_executed_script(self):
 		full_command = "eval %s" % pipes.quote("&&\n".join(map(self._advertised_command, self.commands)))
 		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join('source', self.path) if self.path else 'source'))
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
@@ -143,7 +132,6 @@ class RemoteShellCommand(RemoteCommand):
 			"exit $_r"
 		))
 		script += "(%s)\n" % commands_with_timeout
-		script += "_r=$?\n"
 		return script
 
 	def _advertised_command(self, command):
@@ -156,22 +144,6 @@ class RemoteShellCommand(RemoteCommand):
 class RemoteCompileCommand(RemoteShellCommand):
 	def __init__(self, compile_step):
 		super(RemoteCompileCommand, self).__init__("compile", compile_step)
-
-	def _to_script(self):
-		script = self._to_executed_script()
-
-		if self.export:
-			export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'compile', self.name)
-			for export in self.export:
-				export_parent = os.path.dirname(export.strip(os.path.sep))
-				script += "cd; mkdir -p %s\n" % pipes.quote(os.path.join(export_directory, export_parent))
-				script += "ln -s $(pwd)/%s %s\n" % (
-					pipes.quote(os.path.join('source', export)),
-					pipes.quote(os.path.join(export_directory, export))
-				)
-
-		script = script + "exit $_r"
-		return script
 
 
 class RemoteTestCommand(RemoteShellCommand):
@@ -213,27 +185,6 @@ for file in files:
 
 print json.dumps(contents)"""
 		return pythonc_func % xunit_paths
-
-	def _to_script(self):
-		script = self._to_executed_script()
-
-		if self.export:
-			for export in self.export:
-				export_parent = os.path.dirname(export.strip(os.path.sep))
-				export_directory = os.path.join(constants.KOALITY_EXPORT_PATH, 'test', self.name)
-				script += "cd; mkdir -p %s\n" % pipes.quote(os.path.join(export_directory, export_parent))
-				script += "if [ -d %s ]; then mv %s %s; mkdir -p %s\n" % (
-					pipes.quote(os.path.join('source', export)),
-					pipes.quote(os.path.join('source', export)), pipes.quote(os.path.join(export_directory, export)),
-					pipes.quote(os.path.join('source', export))
-				)
-				script += "else mv %s %s; fi\n" % (
-					pipes.quote(os.path.join('source', export)),
-					pipes.quote(os.path.join(export_directory, export))
-				)
-
-		script = script + "exit $_r"
-		return script
 
 
 class RemoteTestFactoryCommand(RemoteShellCommand):
@@ -280,14 +231,14 @@ class RemoteProvisionCommand(RemoteSetupCommand):
 
 
 class RemoteExportCommand(RemoteCommand):
-	def __init__(self, export_prefix, filepath):
+	def __init__(self, export_prefix, file_paths):
 		super(RemoteCommand, self).__init__()
 		self.name = 'export'
 		self.export_prefix = export_prefix
-		self.filepath = filepath
+		self.file_paths = file_paths
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.export(self.export_prefix, self.filepath, output_handler=output_handler)
+		return virtual_machine.export(self.export_prefix, self.file_paths, output_handler=output_handler)
 
 
 class RemoteErrorCommand(RemoteCommand):
