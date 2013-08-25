@@ -92,7 +92,7 @@ class OpenstackVm(VirtualMachine):
 		This will fail if we use an image which doesn't utilitize EC2 user_data
 		'''
 		return '\n'.join(("#!/bin/sh",
-			"adduser %s --home /home/%s --shell /bin/bash --disabled-password --gecos ''" % (vm_username, vm_username),
+			"useradd --create-home %s" % vm_username,
 			"mkdir ~%s/.ssh" % vm_username,
 			"echo '%s' >> ~%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
 			"chown -R %s:%s ~%s/.ssh" % (vm_username, vm_username, vm_username)))
