@@ -172,7 +172,12 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 			upgrade_available = False
 			upgrade_version = None
 
-		return {'last_upgrade_status': DeploymentSettings.upgrade_status, 'upgrade_available': upgrade_available, 'upgrade_version': upgrade_version}
+		return {
+			'last_upgrade_status': DeploymentSettings.upgrade_status,
+			'upgrade_available': upgrade_available,
+			'current_version': DeploymentSettings.version,
+			'upgrade_version': upgrade_version
+		}
 
 	def can_hear_system_settings_events(self, user_id, id_to_listen_to):
 		return is_admin(user_id)
