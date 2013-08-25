@@ -55,7 +55,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		change_number = row[change.c.number]
 
 		user = to_dict(row, user.columns, tablename=user.name)
-		commit = to_dict(commit, commit.columns, tablename=commit.name)
+		commit = to_dict(row, commit.columns, tablename=commit.name)
 
 		if "merge_status" in kwargs:
 			self.publish_event("changes", change_id, "merge completed", merge_status=kwargs["merge_status"])
