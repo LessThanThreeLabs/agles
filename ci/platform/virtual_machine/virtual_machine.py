@@ -105,7 +105,7 @@ class VirtualMachine(object):
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
 				'cd source',
 				'git fetch %s %s -n --depth 1' % (repo_url, ref),
-				'git checkout FETCH_HEAD'])
+				'git checkout --force FETCH_HEAD'])
 
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
@@ -119,12 +119,12 @@ class VirtualMachine(object):
 				'cd source',
 				'export PYTHONUNBUFFERED=true',
 				'hg pull %s' % repo_url,
-				'hg update %s 2> /dev/null; r=$?; true' % ref,  # first try to check out the ref
+				'hg update --clean %s 2> /dev/null; r=$?; true' % ref,  # first try to check out the ref
 				'if [ "$r" == 0 ]; then exit 0; fi',
 				'mkdir -p .hg/strip-backup',  # otherwise try to get the ref from a bundle
 				'ssh -oStrictHostKeyChecking=no -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
 				'hg unbundle .hg/strip-backup/%s.hg' % ref,
-				'hg update %s' % ref])
+				'hg update --clean %s' % ref])
 
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
