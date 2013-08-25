@@ -88,7 +88,7 @@ class BuildVerifier(object):
 
 		self._cleanup(build_id, results, artifact_export_event)
 
-	def launch_build(self, build_id, repo_type, verification_config, machine_provisioned_event):
+	def launch_build(self, build_id, repo_type, verification_config):
 		setup_result = self._setup(build_id, repo_type, verification_config)
 		machine_provisioned_event.send(setup_result)
 

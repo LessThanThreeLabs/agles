@@ -17,7 +17,7 @@ from util.log import Logged
 from verification_config import VerificationConfig
 from verification_results_handler import VerificationResultsHandler
 
-TIMEOUT_TIME = 15*60 #15 minutes currently
+TIMEOUT_TIME = 20*60 #20 minutes currently
 
 @Logged()
 class ChangeVerifier(EventSubscriber):
@@ -40,8 +40,8 @@ class ChangeVerifier(EventSubscriber):
 			self._handle_new_change(body['contents'])
 		elif body['type'] == 'instance settings updated':
 			self._handle_verifier_settings_update(body['contents'])
-		elif body['type'] == 'launch qa instance':
-			self._handle_launch_instance(body['contents'])
+		elif body['type'] == 'launch debug machine':
+			self._handle_launch_debug(body['contents'])
 		message.ack()
 
 	def _handle_new_change(self, contents):
@@ -73,9 +73,8 @@ class ChangeVerifier(EventSubscriber):
 		except:
 			self.logger.critical("Unexpected failure while updating verifier pool to max_verifiers: %s, min_unallocated: %s." % (max_verifiers, min_unallocated), exc_info=True)
 
-	# TODO(andrey) Add virtual_machine addition to verify_change
-	# Add build_id to database entry for virtual machine
-	def _handle_launch_instance(self, contents):
+	# TODO(andrey) This should eventually not be in change_verifier.
+	def _handle_launch_debug(self, contents):
 		try:
 			change_id = contents['change_id']
 
@@ -100,17 +99,22 @@ class ChangeVerifier(EventSubscriber):
 					self.verifier_pool.remove(verifier)
 				return
 
-			def _scrap_vm():
+			def _scrap_instance():
 				verifier.teardown()
 				self.verifier_pool.remove(verifier)
 
 			build_id = self._create_build(change_id)
-			machine_provisioned_event = event.Event()
-			spawn(verifier.launch_build, build_id, repo_type, verification_config, machine_provisioned_event)
+
+			vm = verifier.build_core.virtual_machine
+			x = spawn(verifier.launch_build, build_id, repo_type, verification_config)
+
+			return_val = x.wait()
+
+			update_vm_in_db()			
 
 			machine_provisioned_event.wait()
 
-			spawn_after(TIMEOUT_TIME, _scrap_vm)
+			spawn_after(TIMEOUT_TIME, _scrap_instance)
 		except:
 			self.logger.critical("Unexpected failure while trying to luanch a qa instance for change %s and user %s." % (change_id, user_id), exc_info=True)
 
