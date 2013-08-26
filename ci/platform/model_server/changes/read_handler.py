@@ -188,12 +188,16 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		query = build.join(
 			build_export_metadata,
-			build.c.id == build_export_metadata.build_id
-		).select().where(build.c.change_id == change_id)
+			build.c.id == build_export_metadata.c.build_id
+		).select(use_labels=True).where(build.c.change_id == change_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			export_metadata = [to_dict(row, build_export_metadata.columns) for row in sqlconn.execute(query)]
+			export_metadata = [to_dict(row, build_export_metadata.columns, tablename=build_export_metadata.name) for row in sqlconn.execute(query)]
 		return sorted(export_metadata, key=lambda metadata: metadata['uri'])
+
+	# TODO (bbland): remove this method, only here for backcompat
+	def get_export_uris(self, user_id, change_id):
+		return map(lambda meta: meta['uri'], self.get_export_metadata(user_id, change_id))
 
 	def can_hear_change_events(self, user_id, id_to_listen_to):
 		return True

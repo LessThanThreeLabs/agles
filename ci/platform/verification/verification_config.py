@@ -15,15 +15,14 @@ class VerificationConfig(object):
 			self.test_commands = self._convert(RemoteTestCommand, test_commands)
 			self.test_factory_commands = self._convert(RemoteTestFactoryCommand, test_factory_commands)
 			if export_section is None:
-				export_paths = []
+				self.export_paths = []
 			elif isinstance(export_section, str):
-				export_paths = [export_section]
+				self.export_paths = [export_section]
 			elif isinstance(export_section, list):
-				export_paths = export_section
+				self.export_paths = export_section
 			else:
 				assert False, 'Export section must be a string or list of strings'
-			assert all(map(lambda path: isinstance(path, str), export_paths)), 'Export section must be a string or list of strings'
-			self.export_paths = map(lambda path: os.path.join(repo_name, path), export_paths)
+			assert all(map(lambda path: isinstance(path, str), self.export_paths)), 'Export section must be a string or list of strings'
 		except:
 			self.machines = 1
 			self.compile_commands = []

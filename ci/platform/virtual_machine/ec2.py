@@ -215,7 +215,7 @@ class Ec2Vm(VirtualMachine):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision %s %s" % (pipes.quote(repo_name), pipes.quote(private_key)),
 			timeout=3600, output_handler=output_handler)
 
-	def export(self, export_prefix, file_paths, output_handler=None):
+	def export(self, repo_name, export_prefix, file_paths, output_handler=None):
 		export_options = {
 			'provider': 's3',
 			'key': AwsSettings.aws_access_key_id,
@@ -225,7 +225,7 @@ class Ec2Vm(VirtualMachine):
 			'file_paths': file_paths
 		}
 		return self.ssh_call(
-			"cd source && koality-export %s" % (pipes.quote(yaml.safe_dump(export_options))),
+			"cd %s && koality-export %s" % (repo_name, pipes.quote(yaml.safe_dump(export_options))),
 			output_handler=output_handler
 		)
 

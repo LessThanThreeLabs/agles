@@ -101,7 +101,7 @@ class VirtualMachineBuildCore(object):
 
 		for test_section in test_sections:
 			try:
-				commands.append(RemoteTestCommand(test_section))
+				commands.append(RemoteTestCommand(factory_command.repo_name, test_section))
 			except InvalidConfigurationException as e:
 				failures.append(e)
 		if failures:
@@ -112,8 +112,8 @@ class VirtualMachineBuildCore(object):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		return self.virtual_machine.cache_repository(repo_name, console_appender)
 
-	def export_files(self, export_prefix, file_paths):
-		export_command = RemoteExportCommand(export_prefix, file_paths)
+	def export_files(self, repo_name, export_prefix, file_paths):
+		export_command = RemoteExportCommand(repo_name, export_prefix, file_paths)
 		return export_command.run(self.virtual_machine)
 
 
