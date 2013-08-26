@@ -39,8 +39,9 @@ test:
     - platform unit tests:
         path: ci/platform
         script:
-          - nosetests -sv tests/unit_tests
+          - nosetests --with-xunit -sv tests/unit_tests
         timeout: 3
+        xunit: nosetests.xml
   factories:
     - integration test factory:
         path: ci/platform

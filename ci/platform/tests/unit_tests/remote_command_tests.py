@@ -18,3 +18,4 @@ class RemoteCommandTest(BaseUnitTest):
 
 		assert_not_equal(original_get_xunit_contents, cmd.get_xunit_contents)
 
+		assert_true(False)
