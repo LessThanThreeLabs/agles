@@ -83,17 +83,3 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link, target, message)
 
 		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)
-
-	def add_export_uris(self, change_id, export_uris):
-		if not export_uris:
-			return
-
-		change_export_uri = schema.change_export_uri
-
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(
-				change_export_uri.insert(),
-				[{'change_id': change_id, 'uri': uri} for uri in export_uris]
-			)
-
-		self.publish_event("changes", change_id, "export uris added", export_uris=export_uris)

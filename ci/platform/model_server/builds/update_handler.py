@@ -31,6 +31,24 @@ class BuildsUpdateHandler(ModelServerRpcHandler):
 			raise NoSuchBuildError(build_id)
 		self.publish_event("builds", build_id, "build finished", status=status)
 
+	def add_export_metadata(self, build_id, export_metadata):
+		if not export_metadata:
+			return
+
+		build = schema.build
+		build_export_metadata = schema.build_export_metadata
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(
+				build_export_metadata.insert(),
+				[{'build_id': build_id, 'uri': metadata['uri'], 'path': metadata['path']} for metadata in export_metadata]
+			)
+			change_id = sqlconn.execute(
+				build.select().where(build.c.id == build_id)
+			).first()[build.c.change_id]
+
+		self.publish_event("changes", change_id, "export metadata added", export_metadata=export_metadata)
+
 
 class NoSuchBuildError(Exception):
 	pass

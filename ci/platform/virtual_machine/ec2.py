@@ -4,12 +4,12 @@ import platform
 import re
 import socket
 import sys
+import yaml
 
 import boto.ec2
 import eventlet
 
 from settings.aws import AwsSettings
-from shared.constants import KOALITY_EXPORT_PATH
 from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
@@ -157,9 +157,6 @@ class Ec2Vm(VirtualMachine):
 				return None
 			elif vm.instance.state == 'shutting-down' or vm.instance.state == 'terminated':
 				return None
-			elif vm.instance.state == 'running' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
-				vm.delete()
-				return None
 			elif vm.instance.state not in ('running', 'pending'):
 				cls.logger.critical("Found VM %s in unexpected %s state" % (vm, vm.instance.state))
 				vm.delete()
@@ -214,19 +211,21 @@ class Ec2Vm(VirtualMachine):
 			self.logger.warn("Unable to ssh into VM %s" % self)
 			self.rebuild()
 
-	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
+	def provision(self, repo_name, private_key, output_handler=None):
+		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision %s %s" % (pipes.quote(repo_name), pipes.quote(private_key)),
 			timeout=3600, output_handler=output_handler)
 
-	def export(self, export_prefix, filepath, output_handler=None):
-		return self.ssh_call("cd %s && koality-export s3 %s %s %s %s %s; rm -rf %s" % (
-			KOALITY_EXPORT_PATH,
-			pipes.quote(AwsSettings.aws_access_key_id),
-			pipes.quote(AwsSettings.aws_secret_access_key),
-			pipes.quote(AwsSettings.s3_bucket_name),
-			pipes.quote(export_prefix),
-			pipes.quote(filepath),
-			pipes.quote(filepath)),
+	def export(self, repo_name, export_prefix, file_paths, output_handler=None):
+		export_options = {
+			'provider': 's3',
+			'key': AwsSettings.aws_access_key_id,
+			'secret': AwsSettings.aws_secret_access_key,
+			'container_name': AwsSettings.s3_bucket_name,
+			'export_prefix': export_prefix,
+			'file_paths': file_paths
+		}
+		return self.ssh_call(
+			"cd %s && koality-export %s" % (repo_name, pipes.quote(yaml.safe_dump(export_options))),
 			output_handler=output_handler
 		)
 
