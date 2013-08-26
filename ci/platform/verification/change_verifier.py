@@ -103,23 +103,16 @@ class ChangeVerifier(EventSubscriber):
 				verifier.teardown()
 				self.verifier_pool.remove(verifier)
 
-			build_id = self._create_build(change_id)
+			debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
 
-			vm = verifier.build_core.virtual_machine
-			x = spawn(verifier.launch_build, build_id, repo_type, verification_config)
-
-			return_val = x.wait()
-
-			update_vm_in_db()			
-
-			machine_provisioned_event.wait()
+			debug_instance.wait() # Make sure that the instance has launched before we start the cleanup timer and inform the user.
 
 			spawn_after(TIMEOUT_TIME, _scrap_instance)
 		except:
-			self.logger.critical("Unexpected failure while trying to luanch a qa instance for change %s and user %s." % (change_id, user_id), exc_info=True)
+			self.logger.critical("Unexpected failure while trying to luanch a debug instance for change %s and user %s." % (change_id, user_id), exc_info=True)
 
-		with model_server.rpc_connect("changes", "update") as changes_update_rpc:
-			changes_update_rpc.mark_qa_build_launched(build_id, change_id)
+		with model_server.rpc_connect("debug_instances", "update") as changes_update_rpc:
+			changes_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, change_id)
 
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)

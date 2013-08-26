@@ -19,8 +19,8 @@ class DebugInstancesUpdateHandler(ModelServerRpcHandler):
 		super(DebugInstancesUpdateHandler, self).__init__("debug_instances", "update")
 
 	# TODO(andrey) Eventually there needs to be a page in the front end ui containing the currently running QA vm's.
-	def mark_qa_build_launched(self, build_id, change_id):
-		self._notify_instance_spawned(build_id, change_id)
+	def mark_debug_instance_launched(self, instance_id, change_id):
+		self._notify_instance_spawned(instance_id, change_id)
 
 	def _get_user_row(self, change_id):
 		change = schema.change
@@ -31,7 +31,7 @@ class DebugInstancesUpdateHandler(ModelServerRpcHandler):
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return sqlconn.execute(query).first()
 
-	def _notify_instance_spawned(self, build_id, change_id):
+	def _notify_instance_spawned(self, instance_id, change_id):
 		row = self._get_user_row(change_id)
 		user = schema.user
 
@@ -40,6 +40,6 @@ class DebugInstancesUpdateHandler(ModelServerRpcHandler):
 		last_name = row[user.c.last_name]
 
 		subject = "Your debug instance has launched"
-		text = LAUNCH_TEMPLATE % (first_name, last_name, WebServerSettings.domain_name, build_id)
+		text = LAUNCH_TEMPLATE % (first_name, last_name, WebServerSettings.domain_name, vm_id)
 
 		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)

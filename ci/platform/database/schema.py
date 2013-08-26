@@ -87,7 +87,6 @@ build = Table('build', metadata,
 
 virtual_machine = Table('virtual_machine', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('build_id', Integer, ForeignKey('build.id'), nullable=True),
 	Column('type', String, nullable=False),
 	Column('instance_id', String, nullable=False),
 	Column('pool_slot', Integer, nullable=False),

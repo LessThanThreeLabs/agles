@@ -211,8 +211,8 @@ class Ec2Vm(VirtualMachine):
 
 	def store_vm_info(self):
 		super(Ec2Vm, self).store_vm_info()
-		with model_server.rpc_connect("builds", "update") as builds_update_rpc:
-			builds_update_rpc.create_vm_in_db("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
+		with model_server.rpc_connect("debug_instances", "create") as debug_create_rpc:
+			debug_create_rpc.create_debug_instance("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
 
 	def provision(self, private_key, output_handler=None):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
