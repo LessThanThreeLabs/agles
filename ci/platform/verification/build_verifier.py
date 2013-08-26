@@ -171,7 +171,7 @@ class BuildVerifier(object):
 
 		export_metadata = map(uri_to_metadata, export_uris)
 
-		with model_server.rpc_connect("builds", "update") as changes_update_rpc:
+		with model_server.rpc_connect("builds", "update") as builds_update_rpc:
 			builds_update_rpc.add_export_metadata(build['id'], export_metadata)
 
 		commit_id = build['commit_id']
