@@ -70,7 +70,7 @@ class BuildVerifier(object):
 			if test_queue.can_populate_tasks():
 				test_queue.begin_populating_tasks()
 				test_queue.finish_populating_tasks()
-			self._cleanup(build_id, results, verification_config.export_paths, change_index)
+			self._cleanup(build_id, results, verification_config, change_index)
 			return
 
 		if test_queue.can_populate_tasks():
@@ -85,7 +85,7 @@ class BuildVerifier(object):
 			results.append(test_result)
 			test_queue.add_task_result(test_result)
 
-		self._cleanup(build_id, results, verification_config.export_paths, change_index)
+		self._cleanup(build_id, results, verification_config, change_index)
 
 	@ReturnException
 	def _setup(self, build_id, patch_id, repo_type, verification_config):
@@ -140,7 +140,7 @@ class BuildVerifier(object):
 		return retval
 
 	@ReturnException
-	def _cleanup(self, build_id, results, export_paths, change_index):
+	def _cleanup(self, build_id, results, verification_config, change_index):
 		# check that no results are exceptions
 		success = not any(map(lambda result: isinstance(result, Exception), results))
 		build_status = BuildStatus.PASSED if success else BuildStatus.FAILED
@@ -149,7 +149,7 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 
 		build = self._get_build(build_id)
-		export_prefix = "repo_%d/change_%d/%d/" % (build['repo_id'], build['change_id'], change_index)
+		export_prefix = "repo_%d/change_%d/%d" % (build['repo_id'], build['change_id'], change_index)
 
 		def parse_export_uris(export_results):
 			if export_results.returncode == 0:
@@ -160,7 +160,11 @@ class BuildVerifier(object):
 			return []
 
 		try:
-			export_uris = parse_export_uris(self.build_core.export_files(export_prefix, export_paths))
+			export_uris = parse_export_uris(self.build_core.export_files(
+				verification_config.repo_name,
+				export_prefix,
+				verification_config.export_paths
+			))
 		except:
 			export_uris = []
 
