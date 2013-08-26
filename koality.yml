@@ -38,9 +38,9 @@ test:
   scripts:
     - platform unit tests:
         path: ci/platform
-        script:
-          - nosetests -sv tests/unit_tests
+        script: nosetests -sv --with-xunit tests/unit_tests
         timeout: 3
+        xunit: nosetests.xml
   factories:
     - integration test factory:
         path: ci/platform
@@ -50,6 +50,7 @@ test:
               shortname=${test##*/}
               shortname=${shortname%.py}
               echo - $shortname:
-              echo "    script: nosetests -sv $test"
+              echo "    script: nosetests -sv --with-xunit $test"
               echo "    path: ci/platform"
+              echo "    xunit: nosetests.xml"
             done
