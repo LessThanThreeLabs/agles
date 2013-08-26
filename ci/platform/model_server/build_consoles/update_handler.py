@@ -63,7 +63,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			console_id = sqlconn.execute(ins).inserted_primary_key[0]
 			# TODO: This is firing to changes as a hack for the front end. Needs to go back to builds in the future
 			self.publish_event("changes", change_id, "new build console", id=console_id, type=type, subtype=subtype,
-				subtype_priority=priority, start_time=start_time, return_code=None)
+				subtype_priority=priority, start_time=start_time, return_code=None, output_types=["console"])
 
 	def append_console_lines(self, build_id, read_lines, type, subtype):
 		"""

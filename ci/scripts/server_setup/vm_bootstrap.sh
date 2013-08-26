@@ -336,12 +336,12 @@ function vm_setup () {
 	popd
 	rm -rf koality-streaming-executor
 
-	clone github.com/LessThanThreeLabs/koality-provisioner.git koality-provisioner -b 0.2
+	clone github.com/LessThanThreeLabs/koality-provisioner.git koality-provisioner -b 0.3
 	pushd koality-provisioner
 	pip install -r requirements.txt
 	python setup.py install
-	sudo rm -f /usr/bin/koality-provision
-	sudo ln -s $(which koality-provision) /usr/bin/koality-provision
+	sudo rm -f /usr/local/bin/koality-provision
+	sudo ln -s $(which koality-provision) /usr/local/bin/koality-provision
 	popd
 	rm -rf koality-provisioner
 
@@ -355,8 +355,8 @@ function vm_setup () {
 	pushd exporter
 	pip install -r requirements.txt
 	python setup.py install
-	sudo rm -f /usr/bin/koality-export
-	sudo ln -s $(which koality-export) /usr/bin/koality-export
+	sudo rm -f /usr/local/bin/koality-export
+	sudo ln -s $(which koality-export) /usr/local/bin/koality-export
 	popd
 	rm -rf exporter
 
