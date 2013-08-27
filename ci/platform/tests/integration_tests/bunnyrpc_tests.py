@@ -1,5 +1,5 @@
+import eventlet
 import string
-import random
 
 from eventlet.event import Event
 
@@ -104,16 +104,24 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 			assert_raises(RPCRequestError, client.incr)
 
 	def test_large_message_stress(self):
-		with Client("exchange", "queue0") as client:
-			for message in xrange(50):
-				s = string.ascii_letters * 10000 * message
+		clients = [Client("exchange", "queue0") for index in xrange(20)]
+		def send_large_messages(client):
+			for message in xrange(10):
+				s = string.ascii_letters * 20000 * message
 				assert_equal(len(s), len(client.return_string(s)))
+		send_greenlets = map(lambda client: eventlet.spawn(send_large_messages, client), clients)
+		map(lambda greenlet: greenlet.wait(), send_greenlets)
+		map(lambda client: client.close(), clients)
 
 	def test_high_volume_stress(self):
-		with Client("exchange", "queue0") as client:
-			for message in xrange(10000):
+		clients = [Client("exchange", "queue0") for index in range(20)]
+		def send_many_messages(client):
+			for message in xrange(500):
 				s = string.ascii_letters * message
 				assert_equal(len(s), len(client.return_string(s)))
+		send_greenlets = map(lambda client: eventlet.spawn(send_many_messages, client), clients)
+		map(lambda greenlet: greenlet.wait(), send_greenlets)
+		map(lambda client: client.close(), clients)
 
 	class _TestRPCServer(object):
 		def __init__(self):
