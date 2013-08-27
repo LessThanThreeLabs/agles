@@ -59,7 +59,7 @@ class SchemaDataGenerator(object):
 	def __init__(self, seed=None):
 		random.seed(seed)
 
-	def generate(self, num_repos=2, num_repo_stores=1, num_users=3, num_commits=20):
+	def generate(self, num_repos=2, num_repo_stores=1, num_users=3, num_commits=20, num_exports=3):
 		schema.reseed_db()
 		hash = hashlib.sha512()
 		hash.update(SALT)
@@ -106,7 +106,7 @@ class SchemaDataGenerator(object):
 					repo_id = conn.execute(repo_id_query).first()[schema.repo.c.id]
 					repos[repo_id] += 1
 					sha = ''.join(random.choice('0123456789abcdef') for x in range(40))
-					commit_message = 'Jon %s while %s' % (random.choice(['ate', 'fell', 'exploded', 'watched tv']), 
+					commit_message = 'Jon %s while %s' % (random.choice(['ate', 'fell', 'exploded', 'watched tv']),
 							random.choice(['listening to Selena Gomez\n\nBut only on MTV', 'chewing gum\n\nDouble the pleasure, double the fun', 'praying to Raptor Jesus']))
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
 						message=commit_message, timestamp=random.randint(1, int(time.time())), sha=sha)
@@ -139,6 +139,9 @@ class SchemaDataGenerator(object):
 							for index in range(random.randint(0, 3)):
 								ins_xunit = schema.xunit.insert().values(build_console_id=console_id, path='some/path/%d' % index, contents=FAKE_XUNIT_RESULTS[index])
 								conn.execute(ins_xunit)
+
+					for export_id in range(num_exports):
+						conn.execute(schema.build_export_metadata.insert().values(build_id=build_id, uri='https://someuri/0/file_%s.jpg' % export_id, path='file_%s.jpg' % export_id))
 
 			SystemSettingsUpdateHandler().initialize_deployment(1, True)
 
