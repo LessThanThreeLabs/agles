@@ -14,7 +14,7 @@ def main():
 	message = sys.argv[3]
 	sha = sys.argv[4]
 	merge_target = sys.argv[5]
-	base_sha = sys.argv[6]
+	base_sha = sys.argv[6] if len(sys.argv) == 7 else None
 	if not DeploymentSettings.active:
 		print >> sys.stderr, '\033[33;1m' + 'Koality is currently deactivated.\nYour change will not be verified.' + '\033[0m'
 	pending_change_ref = store_pending_ref_and_trigger_build(user_id, repo_id, message, sha, merge_target, base_sha)
