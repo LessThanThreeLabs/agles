@@ -79,8 +79,7 @@ class Client(ClientBase):
 		self.channel = self.connection.channel()
 
 		self.consumer = self.channel.Consumer(callbacks=[self._on_response], auto_declare=False)
-		self.producer = self.channel.Producer(serializer="msgpack")
-		self.channel.events['basic_return'].add(self._on_return)
+		self.producer = self.channel.Producer(serializer="msgpack", on_return=self._on_return)
 
 		self.exchange = Exchange(self.exchange_name,
 			"direct", channel=self.channel, durable=False)
