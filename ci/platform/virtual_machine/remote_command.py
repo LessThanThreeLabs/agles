@@ -159,9 +159,9 @@ class RemoteTestCommand(RemoteShellCommand):
 		if self.xunit:
 			def new_xunit_contents():
 				if self.path:
-					xunit_paths = [os.path.join('source', self.path, xunit) for xunit in self.xunit]
+					xunit_paths = [os.path.join(self.repo_name, self.path, xunit) for xunit in self.xunit]
 				else:
-					xunit_paths = [os.path.join('source', xunit) for xunit in self.xunit]
+					xunit_paths = [os.path.join(self.repo_name, xunit) for xunit in self.xunit]
 				results = virtual_machine.ssh_call(
 					"python - <<'EOF'\n%s\nEOF" % self._get_xunit_contents_script(xunit_paths))
 				try:
