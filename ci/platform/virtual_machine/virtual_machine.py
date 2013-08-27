@@ -73,14 +73,14 @@ class VirtualMachine(object):
 				return results
 		return results
 
-	def remote_patch(self, patch_contents, output_handler=None):
+	def remote_patch(self, repo_name, patch_contents, output_handler=None):
 		ansi_bright_cyan = '\033[36;1m'
 		ansi_bright_yellow = '\033[33;1m'
 		ansi_reset = '\033[0m'
 
 		if patch_contents:
 			command = ' && '.join((
-				'cd source',
+				'cd %s' % repo_name,
 				'echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset)),
 				'echo',
 				'echo %s' % pipes.quote(patch_contents),
@@ -115,8 +115,8 @@ class VirtualMachine(object):
 		def _remote_update():
 			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			command = ' && '.join([
-				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; hg init source))' % repo_name,
-				'cd source',
+				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; hg init %s))' % (repo_name, repo_name, repo_name, repo_name),
+				'cd %s' % repo_name,
 				'export PYTHONUNBUFFERED=true',
 				'hg pull %s' % repo_url,
 				'hg update --clean %s 2> /dev/null; r=$?; true' % ref,  # first try to check out the ref
@@ -132,7 +132,7 @@ class VirtualMachine(object):
 			return results
 
 		if repo_type == 'git':
-			assert isinstance(ref, str)
+			assert isinstance(ref, (str, unicode))
 			return self._ssh_authorized(_remote_fetch, output_handler)
 		elif repo_type == 'hg':
 			return self._ssh_authorized(_remote_update, output_handler)
@@ -143,12 +143,16 @@ class VirtualMachine(object):
 		def _remote_clone():
 			if repo_type == 'git':
 				host_url = repo_url[:repo_url.find(":")]
+				clone_flags = ''
 			elif repo_type == 'hg':
 				host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
+				clone_flags = '--uncompressed'
+
+			clone_command = '%s clone %s %s %s' % (repo_type, clone_flags, repo_url, repo_name)
 			command = ' && '.join([
 				'if [ -e %s ]; then rm -rf %s; fi' % (repo_name, repo_name),
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				'%s clone %s %s' % (repo_type, repo_url, repo_name)])
+				clone_command])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to clone %s, results: %s" % (repo_url, results))

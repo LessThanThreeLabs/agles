@@ -215,14 +215,15 @@ class RemoteCheckoutCommand(RemoteSetupCommand):
 
 
 class RemotePatchCommand(RemoteSetupCommand):
-	def __init__(self, patch_id):
+	def __init__(self, repo_name, patch_id):
 		super(RemotePatchCommand, self).__init__('patch')
 		with model_server.rpc_connect('changes', 'read') as client:
 			patch = client.get_patch(patch_id)
 		self.patch_contents = str(patch['contents']) if patch else None
+		self.repo_name = repo_name
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.remote_patch(self.patch_contents, output_handler=output_handler)
+		return virtual_machine.remote_patch(self.repo_name, self.patch_contents, output_handler=output_handler)
 
 
 class RemoteProvisionCommand(RemoteSetupCommand):
