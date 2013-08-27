@@ -51,7 +51,7 @@ class FakeVirtualMachine(VirtualMachine):
 		return self.call(["true"])
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		return self.call(shlex.split('bash -c %s' % pipes.quote('mkdir -p %s; cd %s; %s' % (self.vm_working_dir, self.vm_working_dir, command))), output_handler, timeout=timeout)
+		return self.call(shlex.split('bash -c %s' % pipes.quote('mkdir -p %s; cd %s; %s' % (self.vm_working_dir, self.vm_working_dir, str(command)))), output_handler, timeout=timeout)
 
 	def export(self, export_prefix, files, output_handler=None):
 		return self.call(["true"])
