@@ -329,7 +329,7 @@ function vm_setup () {
 	source ~/virtualenvs/2.7/bin/activate
 	set -o nounset
 
-	clone github.com/LessThanThreeLabs/koality-streaming-executor.git koality-streaming-executor
+	clone github.com/LessThanThreeLabs/koality-streaming-executor.git koality-streaming-executor -b 0.3
 	pushd koality-streaming-executor
 	pip install -r requirements.txt
 	python setup.py install
@@ -351,7 +351,7 @@ function vm_setup () {
 	popd
 	rm -rf libcloud
 
-	clone github.com/LessThanThreeLabs/exporter.git exporter -b 0.2
+	clone github.com/LessThanThreeLabs/exporter.git exporter -b 0.3
 	pushd exporter
 	pip install -r requirements.txt
 	python setup.py install
