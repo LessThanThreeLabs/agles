@@ -1,3 +1,6 @@
+import string
+import random
+
 from eventlet.event import Event
 
 from nose.tools import *
@@ -100,6 +103,18 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		with Client("returned_exchange", "queue") as client:
 			assert_raises(RPCRequestError, client.incr)
 
+	def test_large_message_stress(self):
+		with Client("exchange", "queue0") as client:
+			for message in xrange(50):
+				s = string.ascii_letters * 10000 * message
+				assert_equal(len(s), len(client.return_string(s)))
+
+	def test_high_volume_stress(self):
+		with Client("exchange", "queue0") as client:
+			for message in xrange(10000):
+				s = string.ascii_letters * message
+				assert_equal(len(s), len(client.return_string(s)))
+
 	class _TestRPCServer(object):
 		def __init__(self):
 			self.count = 0
@@ -110,6 +125,9 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 
 		def div(self, a, b):
 			return a / b
+
+		def return_string(self, s):
+			return s
 
 		def raise_my_error(self):
 			raise MyError

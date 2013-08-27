@@ -27,7 +27,7 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		return self.call(self.ssh_args() + [command], timeout=timeout, output_handler=output_handler)
+		return self.call(self.ssh_args() + [str(command)], timeout=timeout, output_handler=output_handler)
 
 	def delete(self):
 		raise NotImplementedError()
