@@ -91,8 +91,6 @@ class Client(ClientBase):
 
 		self.response_mq = Queue(exchange=self.exchange, durable=False, exclusive=True, auto_delete=True, channel=self.channel)
 		self.response_mq.declare()
-		self.response_mq.queue_unbind()
-		self.response_mq.purge()
 		self.response_mq.routing_key = self.response_mq.name
 		self.response_mq.queue_bind()
 		self.consumer.add_queue(self.response_mq)
