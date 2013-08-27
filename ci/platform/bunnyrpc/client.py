@@ -78,7 +78,10 @@ class Client(ClientBase):
 		self.connection = Connection(RabbitSettings.kombu_connection_info)
 		self.channel = self.connection.channel()
 
-		self.consumer = self.channel.Consumer(callbacks=[self._on_response], auto_declare=False)
+		self.consumer = self.channel.Consumer(
+			callbacks=[self._on_response],
+			on_decode_error=self._on_decode_error,
+			auto_declare=False)
 		self.producer = self.channel.Producer(serializer="msgpack", on_return=self._on_return)
 
 		self.exchange = Exchange(self.exchange_name,
@@ -110,6 +113,9 @@ class Client(ClientBase):
 		else:  # Not my deadlettered message
 			return
 		self.message_result = queue_result
+
+	def _on_decode_error(self, message, exc):
+		self._on_response("ttl failure", message)
 
 	def _on_return(self, *args):
 		# Greenlets do not propogate errors to the parent, so we send it over as an Exception
