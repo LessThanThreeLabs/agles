@@ -87,6 +87,8 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	@AdminApi
 	def set_website_domain_name(self, user_id, domain_name):
 		self.update_setting("web_server", "domain_name", domain_name)
+		self.publish_event("system_settings", None, "domain name updated",
+			domain_name=domain_name)
 
 	@AdminApi
 	def set_cloud_provider(self, user_id, cloud_provider):
@@ -113,6 +115,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		self.update_setting("aws", "security_group", security_group_name)
 		self.publish_event("system_settings", None, "aws instance settings updated",
 			instance_size=instance_size,
+			root_drive_size=root_drive_size,
 			security_group_name=security_group_name)
 
 	@AdminApi
@@ -156,13 +159,13 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			security_group_name=security_group_name)
 
 	@AdminApi
-	def set_verifier_pool_parameters(self, user_id, min_ready, max_verifiers):
-		assert min_ready <= max_verifiers
+	def set_verifier_pool_parameters(self, user_id, min_ready, max_running):
+		assert min_ready <= max_running
 		self.update_setting("verification_server", "static_pool_size", min_ready)
-		self.update_setting("verification_server", "max_virtual_machine_count", max_verifiers)
+		self.update_setting("verification_server", "max_virtual_machine_count", max_running)
 		self.publish_event("system_settings", None, "verifier pool settings updated",
 			min_ready=min_ready,
-			max_verifiers=max_verifiers)
+			max_running=max_running)
 
 	@AdminApi
 	def validate_license_key(self, user_id, license_key):
@@ -176,6 +179,8 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	def regenerate_api_key(self, user_id):
 		new_admin_api_key = ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(32))
 		self.update_setting("deployment", "admin_api_key", new_admin_api_key)
+		self.publish_event("system_settings", None, "admin api key updated",
+			api_key=new_admin_api_key)
 		return new_admin_api_key
 
 	@AdminApi
