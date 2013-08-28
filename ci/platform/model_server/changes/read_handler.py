@@ -198,9 +198,6 @@ class ChangesReadHandler(ModelServerRpcHandler):
 	def can_hear_change_events(self, user_id, id_to_listen_to):
 		return True
 
-	def launch_debug_instance(self, user_id, change_id):
-		self.publish_event("changes", change_id, "launch debug machine", user_id=user_id, change_id=change_id)
-
 
 class NoSuchChangeError(Exception):
 	pass

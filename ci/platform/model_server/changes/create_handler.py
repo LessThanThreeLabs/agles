@@ -60,6 +60,9 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			merge_target=merge_target, create_time=create_time, patch_id=patch_id)
 		return {"change_id": change_id, "commit_id": commit_id}
 
+	def launch_debug_instance(self, user_id, change_id):
+		self.publish_event("changes", change_id, "launch debug machine", user_id=user_id, change_id=change_id)
+
 	def store_patch(self, change_id, patch_contents):
 		patch = database.schema.patch
 
