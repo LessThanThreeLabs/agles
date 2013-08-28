@@ -15,8 +15,8 @@ ssh verification@%s "ssh %s"
 
 class DebugInstancesUpdateHandler(ModelServerRpcHandler):
 
-	def __init__(self):
-		super(DebugInstancesUpdateHandler, self).__init__("debug_instances", "update")
+	def __init__(self, channel=None):
+		super(DebugInstancesUpdateHandler, self).__init__("debug_instances", "update", channel)
 
 	# TODO(andrey) Eventually there needs to be a page in the front end ui containing the currently running QA vm's.
 	def mark_debug_instance_launched(self, instance_id, change_id):

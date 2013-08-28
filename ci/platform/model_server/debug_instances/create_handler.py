@@ -5,8 +5,8 @@ from model_server.rpc_handler import ModelServerRpcHandler
 
 
 class DebugInstancesCreateHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(DebugInstancesCreateHandler, self).__init__("debug_instances", "create")
+	def __init__(self, channel=None):
+		super(DebugInstancesCreateHandler, self).__init__("debug_instances", "create", channel)
 
 	def create_debug_instance(self, vm_type, instance_id, pool_slot, username):
 		virtual_machine = database.schema.virtual_machine

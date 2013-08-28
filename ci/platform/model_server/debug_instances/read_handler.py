@@ -6,8 +6,8 @@ from util.sql import to_dict
 
 
 class DebugInstancesReadHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(DebugInstancesReadHandler, self).__init__("debug_instances", "read")
+	def __init__(self, channel=None):
+		super(DebugInstancesReadHandler, self).__init__("debug_instances", "read", channel)
 
 	def get_vm_from_instance_id(self, instance_id):
 		virtual_machine = database.schema.virtual_machine
