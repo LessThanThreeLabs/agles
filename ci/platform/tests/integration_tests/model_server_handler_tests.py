@@ -4,6 +4,7 @@ from database.engine import ConnectionFactory
 from database.schema import *
 from model_server.build_consoles import ConsoleType
 from model_server.build_consoles.update_handler import BuildConsolesUpdateHandler
+from model_server.build_consoles.read_handler import BuildConsolesReadHandler
 from model_server.changes.read_handler import ChangesReadHandler
 from model_server.changes.create_handler import ChangesCreateHandler
 from util.test import BaseIntegrationTest
@@ -162,3 +163,28 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 		assert_equal(1, len(results))
 
 
+	def _create_lines(self, build_id, type, subtype):
+		update_handler = BuildConsolesUpdateHandler()
+
+		update_handler.add_subtype(build_id, ConsoleType.Setup, "setup")
+		update_handler.add_subtype(build_id, ConsoleType.Compile, "compile")
+		update_handler.add_subtype(build_id, ConsoleType.TestFactory, "my factory")
+		update_handler.add_subtype(build_id, ConsoleType.Test, "unittest")
+
+		test_lines = {}
+		for line_num in range(5):
+			test_lines[line_num] = "build:%s, line:%s, console:test" % (build_id, line_num)
+		update_handler.append_console_lines(build_id, test_lines, type=type, subtype=subtype)
+		for line_num in range(5):
+			test_lines[line_num] = "second line"
+		update_handler.append_console_lines(build_id, test_lines, type=type, subtype=subtype)
+
+	def test_get_output_lines_multi_number(self):
+		self._create_lines(self.build_ids[0], ConsoleType.Test, 'unittest')
+
+		read_handler = BuildConsolesReadHandler()
+		build_console_id = read_handler.get_build_console_id(self.user_id, self.build_ids[0], ConsoleType.Test, 'unittest')
+		lines = read_handler.get_output_lines(self.user_id, build_console_id)
+
+		for line in lines.itervalues():
+			assert_equal(line, "second line")

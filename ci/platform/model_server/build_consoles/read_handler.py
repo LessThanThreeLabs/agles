@@ -50,11 +50,27 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 		output_query = console_output.select().where(
 			console_output.c.build_console_id == build_console_id
 		).order_by(
-			console_output.c.line_number.desc()
+			console_output.c.line_number.desc(),
+			console_output.c.id.asc()
 		).limit(num_results).offset(offset)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return {row[console_output.c.line_number]: row[console_output.c.line] for row in sqlconn.execute(output_query)}
+
+	def get_build_console_id(self, user_id, build_id, type, subtype):
+		build_console = database.schema.build_console
+
+		query = build_console.select().where(
+			and_(
+				build_console.c.build_id == build_id,
+				build_console.c.type == type,
+				build_console.c.subtype == subtype
+			)
+		)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+		return row[build_console.c.id] if row else None
 
 	def get_xunit_from_id(self, user_id, build_console_id):
 		build_console = database.schema.build_console

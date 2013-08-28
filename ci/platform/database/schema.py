@@ -105,8 +105,6 @@ console_output = Table('console_output', metadata,
 	Column('build_console_id', Integer, ForeignKey('build_console.id'), nullable=False),
 	Column('line_number', Integer, nullable=False),
 	Column('line', String, nullable=False),
-
-	UniqueConstraint('build_console_id', 'line_number')
 )
 
 build_export_metadata = Table('build_export_metadata', metadata,

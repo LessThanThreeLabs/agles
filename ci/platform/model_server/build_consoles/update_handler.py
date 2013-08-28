@@ -72,6 +72,11 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		:param type: The console type we are appending to.
 		:param subtype: The console subtype we are appending to.
 		"""
+		if not read_lines:
+			self.publish_event("build_consoles", build_console_id, "new output",
+				**{str(line_number): line for line_number, line in read_lines.items()})
+			return
+
 		build_console = schema.build_console
 		console_output = schema.console_output
 		temp_id = schema.temp_id
@@ -90,36 +95,17 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 
 			build_console_id = row[build_console.c.id]
 
-			sql.load_temp_ids([line_number for line_number in read_lines.iterkeys()])
-			existing_lines_query = console_output.join(
-				temp_id, temp_id.c.value == console_output.c.line_number
-			).select().where(console_output.c.build_console_id == build_console_id)
+			sqlconn.execute(
+				console_output.insert().values(
+					build_console_id=build_console_id,
+					line_number=bindparam('b_line_number'),
+					line=bindparam('b_line')
+				),
+				[{'b_line_number': line_number, 'b_line': line} for line_number, line in read_lines.items()]
+			)
 
-			existing_lines = [row[console_output.c.line_number] for row in sqlconn.execute(existing_lines_query)]
-			if existing_lines:
-				sqlconn.execute(
-					console_output.update().where(
-						and_(
-							console_output.c.build_console_id == build_console_id,
-							console_output.c.line_number == bindparam('b_line_number')
-						)
-					).values(line=bindparam('b_line')),
-					[{'b_line_number': line_number, 'b_line': read_lines[line_number]} for line_number in existing_lines]
-				)
-			new_lines = read_lines.copy()
-			for line_number in existing_lines:
-				del new_lines[line_number]
-			if new_lines:
-				sqlconn.execute(
-					console_output.insert().values(
-						build_console_id=build_console_id,
-						line_number=bindparam('b_line_number'),
-						line=bindparam('b_line')
-					),
-					[{'b_line_number': line_number, 'b_line': line} for line_number, line in new_lines.items()]
-				)
-			self.publish_event("build_consoles", build_console_id, "new output",
-				**{str(line_number): line for line_number, line in read_lines.items()})
+		self.publish_event("build_consoles", build_console_id, "new output",
+			**{str(line_number): line for line_number, line in read_lines.items()})
 
 	def _get_build_console_id(self, sqlconn, build_id, type, subtype):
 		build_console = schema.build_console
