@@ -18,7 +18,18 @@ USER_PASSWORD = 'user123'
 
 REPOSITORIES_PATH = 'repos'
 
-FAKE_XUNIT_RESULTS = ['<?xml version="1.0" encoding="UTF-8" ?>' +
+FAKE_XUNIT_RESULTS = ['<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="9" errors="0" failures="1" skip="0"><testcase classname="pathgen_tests.ShellTest" name="test_directory_treeify" time="0.000"></testcase><testcase classname="pathgen_tests.ShellTest" name="test_to_path" time="0.000"></testcase><testcase classname="remote_command_tests.RemoteCommandTest" name="test_xunit_function_replacement" time="0.513"><failure type="exceptions.AssertionError" message="False is not true"><![CDATA[Traceback (most recent call last):' +
+  'File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/case.py", line 327, in run' +
+'    testMethod()' +
+'  File "/Users/jchu/code/koality/core/ci/platform/tests/unit_tests/remote_command_tests.py", line 9, in test_xunit_function_replacement' +
+'    self._xunit_function_replacement_for_step({"mycommand": {"script": "true", "xunit": "some/path"}})' +
+'  File "/Users/jchu/code/koality/core/ci/platform/tests/unit_tests/remote_command_tests.py", line 21, in _xunit_function_replacement_for_step' +
+'    assert_true(False)' +
+'  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/case.py", line 420, in assertTrue' +
+'    raise self.failureException(msg)' +
+'AssertionError: False is not true' +
+']]></failure></testcase><testcase classname="shell_tests.ShellTest" name="test_command_mutation" time="0.001"></testcase><testcase classname="shell_tests.ShellTest" name="test_invalid_command" time="0.000"></testcase><testcase classname="virtual_machine_util_tests.VirtualMachineUtilTest" name="test_add" time="0.000"></testcase><testcase classname="virtual_machine_util_tests.VirtualMachineUtilTest" name="test_image_version_comparison" time="0.000"></testcase><testcase classname="virtual_machine_util_tests.VirtualMachineUtilTest" name="test_image_version_equality" time="0.000"></testcase><testcase classname="virtual_machine_util_tests.VirtualMachineUtilTest" name="test_to_string" time="0.000"></testcase></testsuite>',
+'<?xml version="1.0" encoding="UTF-8" ?>' +
 '<testsuites>' +
 '<testsuite name="accountInformationValidator" errors="0" tests="6" failures="0" time="0.002" timestamp="2013-08-15T14:10:47">' +
   '<testcase classname="accountInformationValidator" name="should correctly check email validity" time="0" />' +
