@@ -91,6 +91,7 @@ virtual_machine = Table('virtual_machine', metadata,
 	Column('instance_id', String, nullable=False),
 	Column('pool_slot', Integer, nullable=False),
 	Column('username', String, nullable=False)
+	#TODO(andrey) deleted column necessary if instance_id is not unique
 )
 
 build_console = Table('build_console', metadata,
