@@ -1,5 +1,7 @@
 import database.schema
 
+from sqlalchemy import and_
+
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 
