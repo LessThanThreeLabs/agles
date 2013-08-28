@@ -115,14 +115,15 @@ class VirtualMachine(object):
 		def _remote_update():
 			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			command = ' && '.join([
-				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; hg init %s))' % (repo_name, repo_name, repo_name, repo_name),
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,
+				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; hg clone --uncompressed %s %s))' % (repo_name, repo_name, repo_name, repo_url, repo_name),
 				'cd %s' % repo_name,
 				'export PYTHONUNBUFFERED=true',
 				'hg pull %s' % repo_url,
 				'hg update --clean %s 2> /dev/null; r=$?; true' % ref,  # first try to check out the ref
 				'if [ "$r" == 0 ]; then exit 0; fi',
 				'mkdir -p .hg/strip-backup',  # otherwise try to get the ref from a bundle
-				'ssh -oStrictHostKeyChecking=no -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
+				'ssh -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
 				'hg unbundle .hg/strip-backup/%s.hg' % ref,
 				'hg update --clean %s' % ref])
 
