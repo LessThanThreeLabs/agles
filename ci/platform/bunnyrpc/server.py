@@ -23,6 +23,7 @@ from util import greenlets
 import sys
 import traceback
 
+import amqp
 import eventlet
 
 from kombu.connection import Connection
@@ -57,7 +58,7 @@ class Server(object):
 		self.queue_names = None
 		self.chan = None
 
-	def bind(self, exchange_name, queue_names, channel=None, message_ttl=10000, auto_delete=False):
+	def bind(self, exchange_name, queue_names, channel=None, message_ttl=10000, auto_delete=False, response_lock=None):
 		""" Binds this RPC server to listen for calls from <exchange_name>
 		routed to <queue_names>.
 
@@ -69,7 +70,7 @@ class Server(object):
 		assert isinstance(exchange_name, str)
 		assert isinstance(queue_names, list)
 
-		self.response_lock = eventlet.semaphore.Semaphore()
+		self.response_lock = eventlet.semaphore.Semaphore() if response_lock is None else response_lock
 
 		self.exchange_name = exchange_name
 		self.queue_names = set(queue_names)
@@ -104,12 +105,17 @@ class Server(object):
 		correlation_id = message.properties.get("correlation_id")
 
 		self.response_lock.acquire()
-		self.producer.publish(message_proto,
-			routing_key=message.properties["reply_to"],
-			correlation_id=correlation_id,
-			delivery_mode=2
-		)
-		message.channel.basic_ack(delivery_tag=message.delivery_tag)
+
+		try:
+			self.producer.publish(message_proto,
+				routing_key=message.properties["reply_to"],
+				correlation_id=correlation_id,
+				delivery_mode=2
+			)
+			message.channel.basic_ack(delivery_tag=message.delivery_tag)
+		except amqp.exceptions.RecoverableConnectionError:
+			pass  # This will only happen if we cleanly closed the connection already, like in tests
+
 		self.response_lock.release()
 
 	def _call(self, method_name, args):

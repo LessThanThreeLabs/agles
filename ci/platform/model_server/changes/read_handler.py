@@ -5,12 +5,12 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from util.sql import to_dict, load_temp_strings
+from util.sql import to_dict, load_temp_strings, load_temp_ids
 
 
 class ChangesReadHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(ChangesReadHandler, self).__init__("changes", "read")
+	def __init__(self, channel=None):
+		super(ChangesReadHandler, self).__init__("changes", "read", channel)
 
 	def get_change_attributes(self, change_id):
 		change = database.schema.change
@@ -106,7 +106,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		)
 		if group == "me":
 			query = query.where(user.c.id == user_id)
-		query = query.order_by(change.c.number.desc()).limit(num_results).offset(start_index_inclusive)
+		query = query.order_by(change.c.id.desc()).limit(num_results).offset(start_index_inclusive)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			changes = map(lambda row: dict(to_dict(row, change.columns, tablename=change.name), **{
 				'user': to_dict(row, user.columns, tablename=user.name),
@@ -131,24 +131,24 @@ class ChangesReadHandler(ModelServerRpcHandler):
 		change = database.schema.change
 		commit = database.schema.commit
 		temp_string = database.schema.temp_string
+		temp_id = database.schema.temp_id
 
-		query = change.join(commit).join(user).join(
+		query = change.join(temp_id, change.c.repo_id == temp_id.c.value).join(commit).join(user).join(
 			temp_string,
 			or_(
-				func.lower(temp_string.c.string) == func.lower(user.c.first_name),
-				func.lower(temp_string.c.string) == func.lower(user.c.last_name),
-				func.lower(commit.c.sha).startswith(func.lower(temp_string.c.string))
+				func.lower(temp_string.c.value) == func.lower(user.c.first_name),
+				func.lower(temp_string.c.value) == func.lower(user.c.last_name),
+				func.lower(commit.c.sha).startswith(func.lower(temp_string.c.value))
 			)
 		)
 
-		query = query.select().apply_labels().where(
-			or_(*[change.c.repo_id == repo_id for repo_id in repo_ids])
-		).distinct(change.c.number)
-		query = query.order_by(change.c.number.desc()).limit(num_results).offset(
+		query = query.select().apply_labels().distinct(change.c.id)
+		query = query.order_by(change.c.id.desc()).limit(num_results).offset(
 			start_index_inclusive)
 
 		with ConnectionFactory.transaction_context() as sqlconn:
 			load_temp_strings(filter_query)
+			load_temp_ids(repo_ids)
 			changes = map(lambda row: dict(to_dict(row, change.columns, tablename=change.name), **{
 				'user': to_dict(row, user.columns, tablename=user.name),
 				'commit': to_dict(row, commit.columns, tablename=commit.name)
@@ -165,7 +165,7 @@ class ChangesReadHandler(ModelServerRpcHandler):
 
 		query = change.join(
 			temp_string,
-			cast(temp_string.c.string, Integer) == change.c.repo_id
+			cast(temp_string.c.value, Integer) == change.c.repo_id
 		)
 		range_query = change.c.end_time > start_timestamp
 		if end_timestamp is not None:
@@ -182,19 +182,23 @@ class ChangesReadHandler(ModelServerRpcHandler):
 				tablename=change.name), sqlconn.execute(query))
 		return changes
 
-	def get_export_uris(self, user_id, change_id):
-		change_export_uri = database.schema.change_export_uri
+	def get_export_metadata(self, user_id, change_id):
+		build = database.schema.build
+		build_export_metadata = database.schema.build_export_metadata
 
-		query = change_export_uri.select().where(change_export_uri.c.change_id == change_id)
+		query = build.join(
+			build_export_metadata,
+			build.c.id == build_export_metadata.c.build_id
+		).select(use_labels=True).where(build.c.change_id == change_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			export_uris = [row[change_export_uri.c.uri] for row in sqlconn.execute(query)]
-		return sorted(export_uris)
+			export_metadata = [to_dict(row, build_export_metadata.columns, tablename=build_export_metadata.name) for row in sqlconn.execute(query)]
+		return sorted(export_metadata, key=lambda metadata: metadata['uri'])
 
 	def can_hear_change_events(self, user_id, id_to_listen_to):
 		return True
 
-	def launch_debug_machine(self, user_id, change_id):
+	def launch_debug_instance(self, user_id, change_id):
 		self.publish_event("changes", change_id, "launch debug machine", user_id=user_id, change_id=change_id)
 
 

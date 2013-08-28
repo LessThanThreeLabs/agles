@@ -6,7 +6,7 @@ import model_server
 from build_core import VerificationException
 from pubkey_registrar import PubkeyRegistrar
 from settings.store import StoreSettings
-from shared.constants import BuildStatus, VerificationUser, KOALITY_EXPORT_PATH
+from shared.constants import BuildStatus, VerificationUser
 from util import pathgen
 from util.log import Logged
 from verification_results_handler import VerificationResultsHandler
@@ -15,7 +15,6 @@ from verification_results_handler import VerificationResultsHandler
 @Logged()
 class BuildVerifier(object):
 	def ReturnException(func):
-
 		def wrapper(*args, **kwargs):
 			try:
 				return func(*args, **kwargs)
@@ -62,7 +61,7 @@ class BuildVerifier(object):
 	def rebuild(self):
 		self.build_core.rebuild()
 
-	def verify_build(self, build_id, patch_id, repo_type, verification_config, test_queue, artifact_export_event):
+	def verify_build(self, build_id, patch_id, repo_type, verification_config, test_queue, change_index):
 		results = []
 		setup_result = self._setup(build_id, patch_id, repo_type, verification_config)
 		results.append(setup_result)
@@ -71,7 +70,7 @@ class BuildVerifier(object):
 			if test_queue.can_populate_tasks():
 				test_queue.begin_populating_tasks()
 				test_queue.finish_populating_tasks()
-			self._cleanup(build_id, results, artifact_export_event)
+			self._cleanup(build_id, results, verification_config, change_index)
 			return
 
 		if test_queue.can_populate_tasks():
@@ -86,7 +85,7 @@ class BuildVerifier(object):
 			results.append(test_result)
 			test_queue.add_task_result(test_result)
 
-		self._cleanup(build_id, results, artifact_export_event)
+		self._cleanup(build_id, results, verification_config, change_index)
 
 	# TODO(andrey) This should eventually be moved.
 	def launch_build(self, commit_id, repo_type, verification_config):
@@ -110,7 +109,7 @@ class BuildVerifier(object):
 	def _setup(self, build_id, patch_id, repo_type, verification_config):
 		build = self._get_build(build_id)
 		commit_id = build['commit_id']
-		self.logger.info("Worker %s processing build request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
+		self.logger.info("Worker %s processing verification request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
 		self._start_build(build_id)
 		repo_uri = self._get_repo_uri(commit_id)
 
@@ -125,29 +124,43 @@ class BuildVerifier(object):
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 			self.build_core.setup_build(repo_uri, repo_type, ref, private_key, patch_id, console_appender)
-			self.build_core.run_compile_step(verification_config.compile_commands, console_appender)
+			self.build_core.run_compile_step(self._dedupe_step_names(verification_config.compile_commands), console_appender)
 
 	@ReturnException
 	def _populate_tests(self, build_id, verification_config, test_queue):
 		test_queue.begin_populating_tasks()
 		try:
+			test_commands = verification_config.test_commands
 			for factory_command in verification_config.test_factory_commands:
 				with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 					console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 					generated_test_commands = self.build_core.run_factory_command(factory_command, console_appender)
-				test_queue.populate_tasks(*generated_test_commands)
-			test_queue.populate_tasks(*[test_command for test_command in verification_config.test_commands])
+				test_commands += generated_test_commands
+			test_queue.populate_tasks(*self._dedupe_step_names(test_commands))
 		finally:
 			test_queue.finish_populating_tasks()
 
-	@ReturnException
-	def _do_test(self, build_id, test_number, test_command):
-		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
-			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id, test_number)
-			return self.build_core.run_test_command(test_command, console_appender)
+	def _dedupe_step_names(self, steps):
+		for step in steps:
+			step_name = step.name
+			steps_with_name = filter(lambda command: command.name == step_name, steps)
+			if len(steps_with_name) > 1:
+				for index, command in enumerate(steps_with_name):
+					command.name = '%s #%d' % (step_name, index + 1)
+		return steps
 
 	@ReturnException
-	def _cleanup(self, build_id, results, artifact_export_event):
+	def _do_test(self, build_id, test_number, test_command):
+		try:
+			with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
+				console_appender = self._make_console_appender(build_consoles_update_rpc, build_id, test_number)
+				retval = self.build_core.run_test_command(test_command, console_appender)
+		finally:
+			self.build_core.upload_xunit(build_id, test_command)
+		return retval
+
+	@ReturnException
+	def _cleanup(self, build_id, results, verification_config, change_index):
 		# check that no results are exceptions
 		success = not any(map(lambda result: isinstance(result, Exception), results))
 		build_status = BuildStatus.PASSED if success else BuildStatus.FAILED
@@ -156,33 +169,34 @@ class BuildVerifier(object):
 		self.logger.debug("Worker %s cleaning up before next run" % self.worker_id)
 
 		build = self._get_build(build_id)
+		export_prefix = "repo_%d/change_%d/%d" % (build['repo_id'], build['change_id'], change_index)
 
-		if not artifact_export_event == None:
-			export_prefix = "repo_%d/change_%d" % (build['repo_id'], build['change_id'])
-
-			def parse_export_uris(export_results):
-				if export_results.returncode == 0:
-					try:
-						return yaml.safe_load(export_results.output)['uris']
-					except:
-						pass
-				return []
-
-			try:
-				export_uris = parse_export_uris(self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "test")))
-			except:
-				export_uris = []
-
-			if not artifact_export_event.ready():
-				artifact_export_event.send()
+		def parse_export_uris(export_results):
+			if export_results.returncode == 0:
 				try:
-					results = self.build_core.export_path(export_prefix, os.path.join(KOALITY_EXPORT_PATH, "compile"))
-					export_uris += parse_export_uris(results)
+					return yaml.safe_load(export_results.output)['uris']
 				except:
 					pass
+			return []
 
-		with model_server.rpc_connect("changes", "update") as changes_update_rpc:
-			changes_update_rpc.add_export_uris(build['change_id'], export_uris)
+		try:
+			export_uris = parse_export_uris(self.build_core.export_files(
+				verification_config.repo_name,
+				export_prefix,
+				verification_config.export_paths
+			))
+		except:
+			export_uris = []
+
+		def uri_to_metadata(export_uri):
+			uri_suffix = export_uri.partition(export_prefix)[2]
+			path = uri_suffix[1:]
+			return {'uri': export_uri, 'path': path}
+
+		export_metadata = map(uri_to_metadata, export_uris)
+
+		with model_server.rpc_connect("builds", "update") as builds_update_rpc:
+			builds_update_rpc.add_export_metadata(build['id'], export_metadata)
 
 		commit_id = build['commit_id']
 		repo_uri = self._get_repo_uri(commit_id)

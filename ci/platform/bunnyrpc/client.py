@@ -4,9 +4,8 @@ See server.py for the RPC protocol definition.
 """
 import sys
 
-import msgpack
-import eventlet
-pika = eventlet.import_patched('pika')
+from kombu.connection import Connection
+from kombu.entity import Exchange, Queue
 
 from bunnyrpc.exceptions import RPCRequestError
 from settings.rabbit import RabbitSettings
@@ -67,8 +66,8 @@ class Client(ClientBase):
 		self.result = None
 		self.connection = None
 		self.channel = None
-		self.ioloop_greenlet = None
 		self.response_mq = None
+		self.message_result = None
 		self._connect()
 
 	def __getattr__(self, remote_method):
@@ -76,80 +75,67 @@ class Client(ClientBase):
 			remote_method, *args, **kwargs)
 
 	def _connect(self):
-		self.connection = pika.SelectConnection(RabbitSettings.pika_connection_parameters,
-			self._on_connected)
-		self.connection.ioloop.start()
+		self.connection = Connection(RabbitSettings.kombu_connection_info)
+		self.channel = self.connection.channel()
 
-	def _on_connected(self, connection):
-		connection.channel(self._on_chan_open)
+		self.consumer = self.channel.Consumer(
+			callbacks=[self._on_response],
+			on_decode_error=self._on_decode_error,
+			auto_declare=False)
+		self.producer = self.channel.Producer(serializer="msgpack", on_return=self._on_return)
 
-	def _on_chan_open(self, chan):
-		self.channel = chan
-		self.channel.add_on_return_callback(self._on_return)
-		self.channel.exchange_declare(exchange=self.exchange_name,
-			type="direct", callback=self._on_exchange_declare)
+		self.exchange = Exchange(self.exchange_name,
+			"direct", channel=self.channel, durable=False)
+		self.deadletter_exchange = Exchange(self.deadletter_exchange_name,
+			"fanout", channel=self.channel, durable=False)
 
-	def _on_exchange_declare(self, frame):
-		self.channel.exchange_declare(exchange=self.deadletter_exchange_name,
-			type="fanout", callback=self._on_dlx_exchange_declare)
+		self.exchange.declare()
+		self.deadletter_exchange.declare()
 
-	def _on_dlx_exchange_declare(self, frame):
-		self.channel.queue_declare(
-			exclusive=True,
-			auto_delete=True,
-			callback=self._on_queue_declare)
+		self.response_mq = Queue(exchange=self.exchange, durable=False, exclusive=True, auto_delete=True, channel=self.channel)
+		self.response_mq.declare()
+		self.response_mq.routing_key = self.response_mq.name
+		self.response_mq.queue_bind()
+		self.consumer.add_queue(self.response_mq)
+		self.consumer.consume()
 
-	def _on_queue_declare(self, frame):
-		self.response_mq = frame.method.queue
-		self.channel.queue_bind(
-			queue=self.response_mq,
-			exchange=self.deadletter_exchange_name)
-		self.channel.queue_bind(
-			callback=self._on_queue_bind,
-			queue=self.response_mq,
-			exchange=self.exchange_name,
-			routing_key=self.response_mq)
+		self.response_mq.bind_to(exchange=self.deadletter_exchange)
 
-	def _on_queue_bind(self, frame):
-		self.channel.basic_consume(self._on_response, queue=self.response_mq)
-		self.connection.ioloop.poller.open = False
+	def _on_response(self, body, message):
+		message.ack()
 
-	def _on_response(self, ch, method, props, body):
-		ch.basic_ack(delivery_tag=method.delivery_tag)
-
-		was_deadlettered = props.headers and "x-death" in props.headers
-		if was_deadlettered and props.reply_to == self.response_mq:
+		was_deadlettered = message.headers and "x-death" in message.headers
+		if was_deadlettered and message.properties.get('reply_to') == self.response_mq.name:
 			# Greenlets do not propogate errors to the parent, so we send it over as an Exception
-			queue_result = RPCRequestError("The server failed to process your call")
+			queue_result = RPCRequestError("The server failed to process your call\nBody: %s" % body)
 		elif not was_deadlettered:
-			queue_result = msgpack.unpackb(body)
+			queue_result = body
 		else:  # Not my deadlettered message
 			return
 		self.message_result = queue_result
-		self.connection.ioloop.poller.open = False
 
-	def _on_return(self, method, props, body):
+	def _on_decode_error(self, message, exc):
+		self._on_response("ttl failure", message)
+
+	def _on_return(self, *args):
 		# Greenlets do not propogate errors to the parent, so we send it over as an Exception
 		error = RPCRequestError("The request was rejected and returned without being processed.")
 		self.message_result = error
-		self.connection.ioloop.poller.open = False
 
 	def _remote_call(self, remote_method, *args, **kwargs):
 		"""Calls the remote method on the server.
 		NOTE: Currently does not support **kwargs"""
 		assert not kwargs
 		proto = dict(method=remote_method, args=args)
-		self.channel.basic_publish(
-			exchange=self.exchange_name,
+		self.producer.publish(proto,
 			routing_key=self.routing_key,
-			properties=pika.BasicProperties(reply_to=self.response_mq,
-				content_encoding="binary",
-				content_type="application/x-msgpack"),
-			body=msgpack.packb(proto),
+			reply_to=self.response_mq.name,
 			mandatory=True)
-		self.connection.ioloop.poller.open = True
-		self.connection.ioloop.start()
+		while self.message_result is None:
+			self.connection.drain_events()
+
 		result = self.message_result
+		self.message_result = None
 		# result is an Exception if the greenlet raised. Process the result,
 		# or reraise the Exception in the parent if it is an Exception
 		if isinstance(result, Exception):
@@ -157,7 +143,7 @@ class Client(ClientBase):
 		return self._process_result(result)
 
 	def _process_result(self, proto):
-		assert isinstance(proto, dict)
+		assert isinstance(proto, dict), proto
 
 		if proto["error"]:
 			assert isinstance(proto["error"], dict)
@@ -177,5 +163,4 @@ class Client(ClientBase):
 
 	def close(self):
 		"""Closes the rabbit connection and cleans up resources."""
-		self.connection.ioloop.poller.open = False
 		self.connection.close()

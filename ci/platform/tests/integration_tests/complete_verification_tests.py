@@ -119,15 +119,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			repo_key = conn.execute(ins_repo).inserted_primary_key[0]
 			return repo_key
 
-	def _insert_commit_info(self):
-		commit_id = 0
-		with ConnectionFactory.get_sql_connection() as conn:
-			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=self.repo_id, user_id=self.user_id, message="commit message", sha="sha", timestamp=int(time.time()))
-			conn.execute(ins_commit)
-			ins_change = schema.change.insert().values(id=commit_id, commit_id=commit_id, repo_id=self.repo_id, merge_target="master", number=1, verification_status=BuildStatus.QUEUED, create_time=int(time.time()))
-			conn.execute(ins_change)
-		return commit_id
-
 	def _on_response(self, body, message):
 		message.channel.basic_ack(delivery_tag=message.delivery_tag)
 		if body["type"] == "change finished":
@@ -137,13 +128,12 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 	def _test_commands(self, passes):
 		num_commands = 5
 		if passes:
-			return [{'pass_%s' % x: {'script': 'true'}} for x in xrange(num_commands)]
+			return [{'pass': {'script': ['echo hi', 'echo bye', 'true']}} for x in xrange(num_commands)]
 		else:
-			return [{'pass_%s' % x: {'script': 'true'}} for x in xrange(num_commands - 1)] + [{'fail_%s' % (num_commands - 1): {'script': 'false'}}]
+			return [{'pass': {'script': 'true'}} for x in xrange(num_commands - 1)] + [{'fail': {'script': 'false'}}]
 
 	def _repo_roundtrip(self, modfile, contents, passes=True):
 		repo_id = self._insert_repo_info(self.repo_path)
-		commit_id = self._insert_commit_info()
 
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(self.repostore_id)) as client:
 			client.create_repository(self.repo_id, "repo")
@@ -153,6 +143,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 		init_commit = self._git_modify_commit_push(work_repo, modfile, contents, parent_commits=[])
 
+		with model_server.rpc_connect("changes", "create") as client:
+			commit_id = client.create_commit_and_change(self.repo_id, self.user_id, 'commit_message', 'sha', 'master', None, False)['commit_id']
+
 		commit_sha = self._git_modify_commit_push(work_repo, "koality.yml",
 			yaml.safe_dump({'test': {'scripts': self._test_commands(passes)}}),
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/%d" % commit_id).hexsha
@@ -160,8 +153,6 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
 			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
 			events_broker = EventsBroker(connection)
-			events_broker.publish("repos", repo_id, "change added",
-				change_id=commit_id, commit={'id': commit_id, 'sha': '0'}, merge_target="master", repo_type="git", patch_id=None)
 			with events_broker.subscribe("repos", callback=self._on_response) as consumer:
 				self.verification_status = None
 				start_time = time.time()

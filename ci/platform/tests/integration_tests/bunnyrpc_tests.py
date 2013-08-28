@@ -1,3 +1,6 @@
+import eventlet
+import string
+
 from eventlet.event import Event
 
 from nose.tools import *
@@ -100,6 +103,26 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 		with Client("returned_exchange", "queue") as client:
 			assert_raises(RPCRequestError, client.incr)
 
+	def test_large_message_stress(self):
+		clients = [Client("exchange", "queue0") for index in xrange(20)]
+		def send_large_messages(client):
+			for message in xrange(10):
+				s = string.ascii_letters * 20000 * message
+				assert_equal(len(s), len(client.return_string(s)))
+		send_greenlets = map(lambda client: eventlet.spawn(send_large_messages, client), clients)
+		map(lambda greenlet: greenlet.wait(), send_greenlets)
+		map(lambda client: client.close(), clients)
+
+	def test_high_volume_stress(self):
+		clients = [Client("exchange", "queue0") for index in range(20)]
+		def send_many_messages(client):
+			for message in xrange(500):
+				s = string.ascii_letters * message
+				assert_equal(len(s), len(client.return_string(s)))
+		send_greenlets = map(lambda client: eventlet.spawn(send_many_messages, client), clients)
+		map(lambda greenlet: greenlet.wait(), send_greenlets)
+		map(lambda client: client.close(), clients)
+
 	class _TestRPCServer(object):
 		def __init__(self):
 			self.count = 0
@@ -110,6 +133,9 @@ class BunnyRPCTest(BaseIntegrationTest, RabbitMixin):
 
 		def div(self, a, b):
 			return a / b
+
+		def return_string(self, s):
+			return s
 
 		def raise_my_error(self):
 			raise MyError

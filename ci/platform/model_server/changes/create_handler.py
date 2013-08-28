@@ -15,8 +15,8 @@ from util.sql import to_dict
 
 @Logged()
 class ChangesCreateHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(ChangesCreateHandler, self).__init__("changes", "create")
+	def __init__(self, channel=None):
+		super(ChangesCreateHandler, self).__init__("changes", "create", channel)
 
 	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target, base_sha, store_pending=False, patch_contents=None):
 		commit_id = self._create_commit(repo_id, user_id, commit_message, sha, base_sha, store_pending)
@@ -53,14 +53,14 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		user_dict = to_dict(user_row, user.columns)
 		commit_dict = to_dict(commit_row, commit.columns)
-		patch_id = self._store_patch(change_id, patch_contents) if patch_contents else None
+		patch_id = self.store_patch(change_id, patch_contents) if patch_contents else None
 
 		self.publish_event("repos", repo_id, "change added", user=user_dict, commit=commit_dict,
 			repo_type=repo_type, change_id=change_id, change_number=change_number, verification_status="queued",
 			merge_target=merge_target, create_time=create_time, patch_id=patch_id)
 		return {"change_id": change_id, "commit_id": commit_id}
 
-	def _store_patch(self, change_id, patch_contents):
+	def store_patch(self, change_id, patch_contents):
 		patch = database.schema.patch
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:

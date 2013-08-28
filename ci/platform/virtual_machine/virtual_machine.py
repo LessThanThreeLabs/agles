@@ -17,17 +17,17 @@ class VirtualMachine(object):
 		self.vm_username = vm_username
 		self._redis_conn = redis_connection or ConnectionFactory.get_redis_connection('virtual_machine')
 
-	def provision(self, private_key, output_handler=None):
+	def provision(self, repo_name, private_key, output_handler=None):
 		raise NotImplementedError()
 
-	def export(self, export_prefix, files, output_handler=None):
+	def export(self, export_prefix, file_paths, output_handler=None):
 		raise NotImplementedError("Currently only supported for EC2 VMs")
 
 	def ssh_args(self):
 		raise NotImplementedError()
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		return self.call(self.ssh_args() + [command], timeout=timeout, output_handler=output_handler)
+		return self.call(self.ssh_args() + [str(command)], timeout=timeout, output_handler=output_handler)
 
 	def delete(self):
 		raise NotImplementedError()
@@ -73,14 +73,14 @@ class VirtualMachine(object):
 				return results
 		return results
 
-	def remote_patch(self, patch_contents, output_handler=None):
+	def remote_patch(self, repo_name, patch_contents, output_handler=None):
 		ansi_bright_cyan = '\033[36;1m'
 		ansi_bright_yellow = '\033[33;1m'
 		ansi_reset = '\033[0m'
 
 		if patch_contents:
 			command = ' && '.join((
-				'cd source',
+				'cd %s' % repo_name,
 				'echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset)),
 				'echo',
 				'echo %s' % pipes.quote(patch_contents),
@@ -101,11 +101,11 @@ class VirtualMachine(object):
 		def _remote_fetch():
 			host_url = repo_url[:repo_url.find(":")]
 			command = ' && '.join([
-				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; git init source))' % repo_name,
+				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; git init %s))' % (repo_name, repo_name, repo_name, repo_name),
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				'cd source',
+				'cd %s' % repo_name,
 				'git fetch %s %s -n --depth 1' % (repo_url, ref),
-				'git checkout FETCH_HEAD'])
+				'git checkout --force FETCH_HEAD'])
 
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
@@ -115,16 +115,17 @@ class VirtualMachine(object):
 		def _remote_update():
 			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			command = ' && '.join([
-				'(mv /repositories/cached/%s source > /dev/null 2>&1 || (rm -rf source > /dev/null 2>&1; hg init source))' % repo_name,
-				'cd source',
+				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,
 				'export PYTHONUNBUFFERED=true',
+				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; hg clone --uncompressed %s %s))' % (repo_name, repo_name, repo_name, repo_url, repo_name),
+				'cd %s' % repo_name,
 				'hg pull %s' % repo_url,
-				'hg update %s 2> /dev/null; r=$?; true' % ref,  # first try to check out the ref
+				'hg update --clean %s 2> /dev/null; r=$?; true' % ref,  # first try to check out the ref
 				'if [ "$r" == 0 ]; then exit 0; fi',
 				'mkdir -p .hg/strip-backup',  # otherwise try to get the ref from a bundle
-				'ssh -oStrictHostKeyChecking=no -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
+				'ssh -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
 				'hg unbundle .hg/strip-backup/%s.hg' % ref,
-				'hg update %s' % ref])
+				'hg update --clean %s' % ref])
 
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
@@ -132,23 +133,27 @@ class VirtualMachine(object):
 			return results
 
 		if repo_type == 'git':
-			assert isinstance(ref, str)
+			assert isinstance(ref, (str, unicode))
 			return self._ssh_authorized(_remote_fetch, output_handler)
 		elif repo_type == 'hg':
 			return self._ssh_authorized(_remote_update, output_handler)
 		else:
 			self.logger.error("Unknown repository type in remote_checkout %s." % repo_type)
 
-	def remote_clone(self, repo_type, repo_url, output_handler=None):
+	def remote_clone(self, repo_type, repo_name, repo_url, output_handler=None):
 		def _remote_clone():
 			if repo_type == 'git':
 				host_url = repo_url[:repo_url.find(":")]
+				clone_flags = ''
 			elif repo_type == 'hg':
 				host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
+				clone_flags = '--uncompressed'
+
+			clone_command = '%s clone %s %s %s' % (repo_type, clone_flags, repo_url, repo_name)
 			command = ' && '.join([
-				'if [ -e source ]; then rm -rf source; fi',  # Make sure there's no "source" directory. Especially important for retries
+				'if [ -e %s ]; then rm -rf %s; fi' % (repo_name, repo_name),
 				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				'%s clone %s source' % (repo_type, repo_url)])
+				clone_command])
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to clone %s, results: %s" % (repo_url, results))
@@ -173,8 +178,8 @@ class VirtualMachine(object):
 			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
 
 	def cache_repository(self, repo_name, output_handler=None):
-		return self.ssh_call(';'.join(('sudo chown -R %s:%s source' % (self.vm_username, self.vm_username),
-			'mv source /repositories/cached/%s || rm -rf source' % repo_name)), output_handler)
+		return self.ssh_call(';'.join(('sudo chown -R %s:%s %s' % (self.vm_username, self.vm_username, repo_name),
+			'mv %s /repositories/cached/%s || rm -rf %s' % (repo_name, repo_name, repo_name))), output_handler)
 
 	@classmethod
 	def get_newest_image(cls):

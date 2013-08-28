@@ -9,8 +9,8 @@ from model_server.rpc_handler import ModelServerRpcHandler
 
 
 class UsersCreateHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(UsersCreateHandler, self).__init__("users", "create")
+	def __init__(self, channel=None):
+		super(UsersCreateHandler, self).__init__("users", "create", channel)
 
 	def create_user(self, email, first_name, last_name, password_hash, salt, admin=False):
 		user = database.schema.user

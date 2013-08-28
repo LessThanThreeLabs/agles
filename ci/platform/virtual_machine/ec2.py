@@ -4,13 +4,13 @@ import platform
 import re
 import socket
 import sys
+import yaml
 
 import boto.ec2
 import eventlet
 
 import model_server
 from settings.aws import AwsSettings
-from shared.constants import KOALITY_EXPORT_PATH
 from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
@@ -76,9 +76,15 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
+		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType(delete_on_termination=True)
+		dev_sda1.size = AwsSettings.root_drive_size # size in Gigabytes
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		bdm['/dev/sda1'] = dev_sda1
+
 		instance = cls.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
-			user_data=cls._default_user_data(vm_username)).instances[0]
+			user_data=cls._default_user_data(vm_username),
+			block_device_map=bdm).instances[0]
 		cls._name_instance(instance, name)
 		return Ec2Vm(vm_id, instance, vm_username)
 
@@ -89,7 +95,7 @@ class Ec2Vm(VirtualMachine):
 		This will fail if we use an image which doesn't utilitize EC2 user_data
 		'''
 		return '\n'.join(("#!/bin/sh",
-			"adduser %s --home /home/%s --shell /bin/bash --disabled-password --gecos ''" % (vm_username, vm_username),
+			"useradd --create-home %s" % vm_username,
 			"mkdir ~%s/.ssh" % vm_username,
 			"echo '%s' >> ~%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
 			"chown -R %s:%s ~%s/.ssh" % (vm_username, vm_username, vm_username)))
@@ -152,9 +158,6 @@ class Ec2Vm(VirtualMachine):
 				return None
 			elif vm.instance.state == 'shutting-down' or vm.instance.state == 'terminated':
 				return None
-			elif vm.instance.state == 'running' and vm.ssh_call("ls source").returncode == 0:  # VM hasn't been recycled
-				vm.delete()
-				return None
 			elif vm.instance.state not in ('running', 'pending'):
 				cls.logger.critical("Found VM %s in unexpected %s state" % (vm, vm.instance.state))
 				vm.delete()
@@ -195,7 +198,7 @@ class Ec2Vm(VirtualMachine):
 				self.instance.update()
 				if self.instance.state in ['stopped', 'terminated']:
 					handle_error()
-			for remaining_attempts in reversed(range(20)):
+			for remaining_attempts in reversed(range(40)):
 				if remaining_attempts <= 2:
 					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
 				if self.ssh_call("true", timeout=10).returncode == 0:
@@ -214,19 +217,21 @@ class Ec2Vm(VirtualMachine):
 		with model_server.rpc_connect("debug_instances", "create") as debug_create_rpc:
 			debug_create_rpc.create_debug_instance("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
 
-	def provision(self, private_key, output_handler=None):
-		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision '%s'" % private_key,
+	def provision(self, repo_name, private_key, output_handler=None):
+		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision %s %s" % (pipes.quote(repo_name), pipes.quote(private_key)),
 			timeout=3600, output_handler=output_handler)
 
-	def export(self, export_prefix, filepath, output_handler=None):
-		return self.ssh_call("cd %s && koality-export s3 %s %s %s %s %s; rm -rf %s" % (
-			KOALITY_EXPORT_PATH,
-			pipes.quote(AwsSettings.aws_access_key_id),
-			pipes.quote(AwsSettings.aws_secret_access_key),
-			pipes.quote(AwsSettings.s3_bucket_name),
-			pipes.quote(export_prefix),
-			pipes.quote(filepath),
-			pipes.quote(filepath)),
+	def export(self, repo_name, export_prefix, file_paths, output_handler=None):
+		export_options = {
+			'provider': 's3',
+			'key': AwsSettings.aws_access_key_id,
+			'secret': AwsSettings.aws_secret_access_key,
+			'container_name': AwsSettings.s3_bucket_name,
+			'export_prefix': export_prefix,
+			'file_paths': file_paths
+		}
+		return self.ssh_call(
+			"cd %s && koality-export %s" % (repo_name, pipes.quote(yaml.safe_dump(export_options))),
 			output_handler=output_handler
 		)
 
@@ -260,9 +265,15 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		self._validate_security_group(security_group)
 
+		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType(delete_on_termination=True)
+		dev_sda1.size = AwsSettings.root_drive_size # size in Gigabytes
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		bdm['/dev/sda1'] = dev_sda1
+
 		self.instance = self.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
 			security_groups=[security_group],
-			user_data=self._default_user_data(self.vm_username)).instances[0]
+			user_data=self._default_user_data(self.vm_username),
+			block_device_map=bdm).instances[0]
 		self._name_instance(self.instance, instance_name)
 
 		self.store_vm_info()

@@ -1,7 +1,8 @@
 import collections
 import time
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
+from sqlalchemy import bindparam
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
@@ -10,12 +11,13 @@ from database import schema
 from database.engine import ConnectionFactory
 from model_server.build_consoles import ConsoleType
 from model_server.rpc_handler import ModelServerRpcHandler
+from util import sql
 
 
 class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 
-	def __init__(self):
-		super(BuildConsolesUpdateHandler, self).__init__("build_consoles", "update")
+	def __init__(self, channel=None):
+		super(BuildConsolesUpdateHandler, self).__init__("build_consoles", "update", channel)
 
 	def add_subtype(self, build_id, type, subtype, priority=None):
 		assert type in ConsoleType.valid_types
@@ -61,7 +63,7 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			console_id = sqlconn.execute(ins).inserted_primary_key[0]
 			# TODO: This is firing to changes as a hack for the front end. Needs to go back to builds in the future
 			self.publish_event("changes", change_id, "new build console", id=console_id, type=type, subtype=subtype,
-				subtype_priority=priority, start_time=start_time, return_code=None)
+				subtype_priority=priority, start_time=start_time, return_code=None, output_types=["console"])
 
 	def append_console_lines(self, build_id, read_lines, type, subtype):
 		"""
@@ -72,6 +74,55 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		"""
 		build_console = schema.build_console
 		console_output = schema.console_output
+		temp_id = schema.temp_id
+
+		build_console_query = build_console.select().where(
+			and_(
+				build_console.c.build_id == build_id,
+				build_console.c.type == type,
+				build_console.c.subtype == subtype,
+			)
+		)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(build_console_query).first()
+			assert row is not None
+
+			build_console_id = row[build_console.c.id]
+
+			sql.load_temp_ids([line_number for line_number in read_lines.iterkeys()])
+			existing_lines_query = console_output.join(
+				temp_id, temp_id.c.value == console_output.c.line_number
+			).select().where(console_output.c.build_console_id == build_console_id)
+
+			existing_lines = [row[console_output.c.line_number] for row in sqlconn.execute(existing_lines_query)]
+			if existing_lines:
+				sqlconn.execute(
+					console_output.update().where(
+						and_(
+							console_output.c.build_console_id == build_console_id,
+							console_output.c.line_number == bindparam('b_line_number')
+						)
+					).values(line=bindparam('b_line')),
+					[{'b_line_number': line_number, 'b_line': read_lines[line_number]} for line_number in existing_lines]
+				)
+			new_lines = read_lines.copy()
+			for line_number in existing_lines:
+				del new_lines[line_number]
+			if new_lines:
+				sqlconn.execute(
+					console_output.insert().values(
+						build_console_id=build_console_id,
+						line_number=bindparam('b_line_number'),
+						line=bindparam('b_line')
+					),
+					[{'b_line_number': line_number, 'b_line': line} for line_number, line in new_lines.items()]
+				)
+			self.publish_event("build_consoles", build_console_id, "new output",
+				**{str(line_number): line for line_number, line in read_lines.items()})
+
+	def _get_build_console_id(self, sqlconn, build_id, type, subtype):
+		build_console = schema.build_console
 
 		query = build_console.select().where(
 			and_(
@@ -81,31 +132,25 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 			)
 		)
 
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			row = sqlconn.execute(query).first()
-			assert row is not None
+		row = sqlconn.execute(query).first()
+		return row[build_console.c.id] if row else None
 
-			build_console_id = row[build_console.c.id]
-			for line_number, line in sorted(read_lines.items()):
-				try:
-					sqlconn.execute(
-						console_output.insert().values(
-							build_console_id=build_console_id,
-							line_number=line_number,
-							line=line
-						)
-					)
-				except IntegrityError:
-					sqlconn.execute(
-						console_output.update().where(
-							and_(
-								console_output.c.build_console_id == build_console_id,
-								console_output.c.line_number == line_number
-							)
-						).values(line=line)
-					)
-			self.publish_event("build_consoles", build_console_id, "new output",
-				**{str(line_number): line for line_number, line in read_lines.items()})
+	def store_xunit_contents(self, build_id, type, subtype, xunit_contents):
+		xunit = schema.xunit
+		build_console = schema.build_console
+		build = schema.build
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			build_console_id = self._get_build_console_id(sqlconn, build_id, type, subtype)
+			insert_list = [{'build_console_id': build_console_id, 'path': k, 'contents': v} for k, v in xunit_contents.iteritems()]
+			sqlconn.execute(xunit.insert(), *insert_list)
+
+			build_query = build_console.join(
+				build, build.c.id == build_console.c.build_id
+			).select().where(build_console.c.id == build_console_id)
+			change_id = sqlconn.execute(build_query).first()[build.c.change_id]
+
+		self.publish_event("changes", change_id, "output type added", build_console_id=build_console_id, output_type="xunit")
 
 	def set_return_code(self, build_id, return_code, type, subtype):
 		build_console = schema.build_console

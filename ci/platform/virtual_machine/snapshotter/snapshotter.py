@@ -109,9 +109,9 @@ class Snapshotter(object):
 		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
 		for repository in repositories:
 			self.logger.info('Cloning repository "%s"' % repository['name'])
-			if virtual_machine.remote_clone(repository['type'], uri_translator.translate(repository['uri'])).returncode != 0:
+			if virtual_machine.remote_clone(repository['type'], repository['name'], uri_translator.translate(repository['uri'])).returncode != 0:
 				raise Exception('Failed to clone repository "%s"' % repository['name'])
-			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv source /repositories/cached/%s' % (repository['name'], repository['name']))
+			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv %s /repositories/cached/%s' % (repository['name'], repository['name'], repository['name']))
 
 	def provision_for_repository(self, virtual_machine, repository, changes, uri_translator):
 		branch_counter = Counter(map(lambda change: change['merge_target'], filter(lambda change: change['repo_id'] == repository['id'], changes)))
@@ -124,7 +124,7 @@ class Snapshotter(object):
 		self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
 		if virtual_machine.remote_checkout(repository['name'], uri_translator.translate(repository['uri']), repository['type'], branch).returncode != 0:
 			raise Exception('Failed to checkout branch "%s" for repository "%s"' % (branch, repository['name']))
-		provision_results = virtual_machine.provision(StoreSettings.ssh_private_key)
+		provision_results = virtual_machine.provision(repository['name'], StoreSettings.ssh_private_key)
 		if provision_results.returncode != 0:
 			failure_message = 'Provisioning failed with returncode %d' % provision_results.returncode
 			self.logger.error(failure_message + '\nProvision output:\n%s' % provision_results.output)
