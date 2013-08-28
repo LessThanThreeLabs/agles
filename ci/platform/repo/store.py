@@ -308,6 +308,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				ref_sha = self._git_update_branch_from_forward_url(repo_slave, remote_repo, ref_to_merge_into)
 				remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
+				repo_slave.git.checkout(remote_branch)
 				repo_slave.git.branch("-f", ref_to_merge_into, remote_branch)
 				repo_slave.git.checkout(ref_to_merge_into)
 				repo_slave.git.merge("FETCH_HEAD", "-m", "Merging in %s" % ref_sha)
@@ -660,7 +661,10 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		try:
 			parent_shas = map(lambda rev: rev.node, repo.log(['parents(%s)' % sha]))
-			repo.bundle(os.path.join(repo_path, '.hg', 'strip-backup', '%s.hg' % sha[:12]), rev=[sha], base=parent_shas)
+			strip_path = os.path.join(repo_path, ".hg", "strip-backup")
+			if not os.path.exists(strip_path):
+				os.makedirs(os.path.join(strip_path))
+			repo.bundle(os.path.join(strip_path, '%s.hg' % sha[:12]), rev=[sha], base=parent_shas)
 		except:
 			exc_info = sys.exc_info()
 			self.logger.critical("Failed to create pending bundle %d for sha %s" % (commit_id, sha), exc_info=exc_info)

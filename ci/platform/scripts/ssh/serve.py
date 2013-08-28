@@ -20,7 +20,7 @@ def main():
 	try:
 		if "SSH_ORIGINAL_COMMAND" in os.environ:
 			command = os.environ["SSH_ORIGINAL_COMMAND"] + ' ' + user_id
-			if command.split[0] == "ssh":
+			if command.split()[0] == "ssh":
 				rsh = RestrictedSSHForwardingShell()
 			elif command.split()[0] == 'hg':
 				rsh = RestrictedHgShell()

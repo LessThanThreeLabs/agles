@@ -16,12 +16,24 @@ def load_temp_strings(strings):
 	delete = temp_string.delete()
 	ins = temp_string.insert()
 
-	ins_list = [{'string': str(string)} for string in strings]
-	with ConnectionFactory.get_sql_connection() as sqlconn:
+	ins_list = [{'value': str(string)} for string in strings]
+	with ConnectionFactory.transaction_context() as sqlconn:
 		sqlconn.execute(delete)
 		if ins_list:
 			sqlconn.execute(ins, ins_list)
 
+
+def load_temp_ids(ids):
+	temp_id = database.schema.temp_id
+
+	delete = temp_id.delete()
+	ins = temp_id.insert()
+
+	ins_list = [{'value': id} for id in ids]
+	with ConnectionFactory.transaction_context() as sqlconn:
+		sqlconn.execute(delete)
+		if ins_list:
+			sqlconn.execute(ins, ins_list)
 
 class InconsistentDataError(Exception):
 	pass

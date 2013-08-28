@@ -14,6 +14,7 @@ import database.schema
 from database.engine import ConnectionFactory
 from license.verifier import HttpLicenseKeyVerifier, LicenseVerifier, LicensePermissionsHandler
 from model_server.rpc_handler import ModelServerRpcHandler
+from settings.aws import AwsSettings
 from settings.deployment import DeploymentSettings
 from settings.verification_server import VerificationServerSettings
 from model_server.system_settings import system_settings_cipher
@@ -24,13 +25,12 @@ from virtual_machine.hpcloud import HpCloudClient
 
 
 class SystemSettingsUpdateHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(SystemSettingsUpdateHandler, self).__init__("system_settings", "update")
+	def __init__(self, channel=None):
+		super(SystemSettingsUpdateHandler, self).__init__("system_settings", "update", channel)
 
 	@AdminApi
 	def initialize_deployment(self, user_id, test_mode=False):
 		server_id = str(uuid.uuid1())
-
 		self.update_setting("mail", "test_mode", test_mode)
 		self.update_setting("deployment", "initialized", True)
 		self.update_setting("deployment", "server_id", server_id)
@@ -87,6 +87,8 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	@AdminApi
 	def set_website_domain_name(self, user_id, domain_name):
 		self.update_setting("web_server", "domain_name", domain_name)
+		self.publish_event("system_settings", None, "domain name updated",
+			domain_name=domain_name)
 
 	@AdminApi
 	def set_cloud_provider(self, user_id, cloud_provider):
@@ -104,12 +106,16 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			secret_key=secret_key)
 
 	@AdminApi
-	def set_aws_instance_settings(self, user_id, instance_size, security_group_name):
+	def set_aws_instance_settings(self, user_id, instance_size, root_drive_size, security_group_name):
 		assert VerificationServerSettings.cloud_provider == 'aws'
+		assert isinstance(root_drive_size, int)
+		assert root_drive_size >= AwsSettings._default_root_drive_size
 		self.update_setting("aws", "instance_type", instance_size)
+		self.update_setting("aws", "root_drive_size", root_drive_size)
 		self.update_setting("aws", "security_group", security_group_name)
 		self.publish_event("system_settings", None, "aws instance settings updated",
 			instance_size=instance_size,
+			root_drive_size=root_drive_size,
 			security_group_name=security_group_name)
 
 	@AdminApi
@@ -153,13 +159,13 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			security_group_name=security_group_name)
 
 	@AdminApi
-	def set_verifier_pool_parameters(self, user_id, min_unallocated, max_verifiers):
-		assert min_unallocated <= max_verifiers
-		self.update_setting("verification_server", "static_pool_size", min_unallocated)
-		self.update_setting("verification_server", "max_virtual_machine_count", max_verifiers)
+	def set_verifier_pool_parameters(self, user_id, min_ready, max_running):
+		assert min_ready <= max_running
+		self.update_setting("verification_server", "static_pool_size", min_ready)
+		self.update_setting("verification_server", "max_virtual_machine_count", max_running)
 		self.publish_event("system_settings", None, "verifier pool settings updated",
-			min_unallocated=min_unallocated,
-			max_verifiers=max_verifiers)
+			min_ready=min_ready,
+			max_running=max_running)
 
 	@AdminApi
 	def validate_license_key(self, user_id, license_key):
@@ -173,6 +179,8 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	def regenerate_api_key(self, user_id):
 		new_admin_api_key = ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(32))
 		self.update_setting("deployment", "admin_api_key", new_admin_api_key)
+		self.publish_event("system_settings", None, "admin api key updated",
+			api_key=new_admin_api_key)
 		return new_admin_api_key
 
 	@AdminApi

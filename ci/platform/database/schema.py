@@ -116,18 +116,29 @@ console_output = Table('console_output', metadata,
 	UniqueConstraint('build_console_id', 'line_number')
 )
 
-change_export_uri = Table('change_export_uri', metadata,
+build_export_metadata = Table('build_export_metadata', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
+	Column('build_id', Integer, ForeignKey('build.id'), nullable=False),
 	Column('uri', String, nullable=False),
+	Column('path', String, nullable=False),
 
-	UniqueConstraint('change_id', 'uri')
+	UniqueConstraint('build_id', 'uri'),
+	UniqueConstraint('build_id', 'path')
 )
 
 patch = Table('patch', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('change_id', Integer, ForeignKey('change.id'), nullable=False),
-	Column('contents', Text)
+	Column('contents', Text, nullable=False)
+)
+
+xunit = Table('xunit', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('build_console_id', Integer, ForeignKey('build_console.id'), nullable=False),
+	Column('path', String, nullable=False),
+	Column('contents', Text, nullable=False),
+
+	UniqueConstraint('build_console_id', 'path')
 )
 
 repostore = Table('repostore', metadata,
@@ -157,11 +168,15 @@ system_setting = Table('system_setting', metadata,
 	UniqueConstraint('resource', 'key')
 )
 
-temp_string = Table('temp', metadata,
+temp_string = Table('temp_string', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('string', String, nullable=False)
+	Column('value', String, nullable=False)
 )
 
+temp_id = Table('temp_id', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('value', Integer, nullable=False)
+)
 
 def _create_and_initialize(engine):
 	metadata.create_all(engine)

@@ -1,4 +1,3 @@
-import hashlib
 import time
 
 from sqlalchemy import and_
@@ -11,8 +10,8 @@ from util.permissions import AdminApi, InvalidPermissionsError
 
 
 class UsersUpdateHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(UsersUpdateHandler, self).__init__("users", "update")
+	def __init__(self, channel=None):
+		super(UsersUpdateHandler, self).__init__("users", "update", channel)
 
 	def add_ssh_pubkeys(self, user_id, alias_to_pubkey_map):
 		timestamp = int(time.time())

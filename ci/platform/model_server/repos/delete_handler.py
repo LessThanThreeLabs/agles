@@ -7,8 +7,8 @@ from util.sql import to_dict
 
 
 class ReposDeleteHandler(ModelServerRpcHandler):
-	def __init__(self):
-		super(ReposDeleteHandler, self).__init__("repos", "delete")
+	def __init__(self, channel=None):
+		super(ReposDeleteHandler, self).__init__("repos", "delete", channel)
 
 	@AdminApi
 	def delete_repo(self, user_id, repo_id):

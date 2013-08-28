@@ -7,8 +7,8 @@ from model_server.rpc_handler import ModelServerRpcHandler
 
 class ReposUpdateHandler(ModelServerRpcHandler):
 
-	def __init__(self):
-		super(ReposUpdateHandler, self).__init__("repos", "update")
+	def __init__(self, channel=None):
+		super(ReposUpdateHandler, self).__init__("repos", "update", channel)
 
 	def update_repostore(self, repostore_id, ip_address, root_dir, num_repos):
 		self.update_repostore_ip(repostore_id, ip_address)

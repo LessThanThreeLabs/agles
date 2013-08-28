@@ -24,8 +24,8 @@ from virtual_machine import ec2, hpcloud
 
 class SystemSettingsReadHandler(ModelServerRpcHandler):
 
-	def __init__(self):
-		super(SystemSettingsReadHandler, self).__init__("system_settings", "read")
+	def __init__(self, channel=None):
+		super(SystemSettingsReadHandler, self).__init__("system_settings", "read", channel)
 
 	def is_deployment_initialized(self):
 		result = self.get_setting("deployment", "initialized")
@@ -77,6 +77,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		return {
 			'instance_size': AwsSettings.instance_type,
+			'root_drive_size': AwsSettings.root_drive_size,
 			'security_group_name': AwsSettings.security_group
 		}
 
@@ -132,7 +133,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	@AdminApi
 	def get_verifier_pool_parameters(self, user_id):
 		return {
-			'num_waiting': VerificationServerSettings.static_pool_size,
+			'min_ready': VerificationServerSettings.static_pool_size,
 			'max_running': VerificationServerSettings.max_virtual_machine_count
 		}
 
@@ -171,7 +172,12 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 			upgrade_available = False
 			upgrade_version = None
 
-		return {'last_upgrade_status': DeploymentSettings.upgrade_status, 'upgrade_available': upgrade_available, 'upgrade_version': upgrade_version}
+		return {
+			'last_upgrade_status': DeploymentSettings.upgrade_status,
+			'upgrade_available': upgrade_available,
+			'current_version': DeploymentSettings.version,
+			'upgrade_version': upgrade_version
+		}
 
 	def can_hear_system_settings_events(self, user_id, id_to_listen_to):
 		return is_admin(user_id)
