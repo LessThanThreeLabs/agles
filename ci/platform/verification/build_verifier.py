@@ -89,7 +89,7 @@ class BuildVerifier(object):
 
 	# TODO(andrey) This should eventually be moved.
 	def launch_build(self, commit_id, repo_type, verification_config):
-		self.build_core.virtual_machine.store_vm_metadata()
+		self.build_core.virtual_machine.store_vm_metadata(commit_id=commit_id)
 
 		repo_uri = self._get_repo_uri(commit_id)
 
@@ -103,7 +103,7 @@ class BuildVerifier(object):
 		private_key = StoreSettings.ssh_private_key
 
 		self.build_core.setup_build(repo_uri, repo_type, ref, private_key)
-		self.build_core.run_compile_step(verification_config.compile_commands)
+		self.build_core.run_compile_step(self._dedupe_step_names(verification_config.compile_commands))
 
 	@ReturnException
 	def _setup(self, build_id, patch_id, repo_type, verification_config):
