@@ -75,22 +75,7 @@ class ChangeVerifier(EventSubscriber):
 
 	# TODO(andrey) This should eventually not be in change_verifier.
 	def _handle_launch_debug(self, contents):
-		try:
-			change_id = contents['change_id']
-
-			with model_server.rpc_connect("changes", "read") as client:
-				change_attributes = client.get_change_attributes(change_id)
-
-			commit_id = change_attributes['commit_id']
-
-			with model_server.rpc_connect("repos", "read") as client:
-				repo_type = client.get_repo_type(change_attributes['repo_id'])
-				sha = client.get_commit_attributes(commit_id)['sha']
-
-			user_id = contents['user_id']
-
-			verification_config = self._get_verification_config(commit_id, sha, repo_type)
-
+		def launch_debug_instance():
 			try:
 				verifier = self.verifier_pool.get()
 				verifier.setup()
@@ -99,20 +84,39 @@ class ChangeVerifier(EventSubscriber):
 					self.verifier_pool.remove(verifier)
 				return
 
-			def _scrap_instance():
+			def scrap_instance():
 				verifier.teardown()
 				self.verifier_pool.remove(verifier)
 
-			debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
+			try:
+				change_id = contents['change_id']
 
-			debug_instance.wait() # Make sure that the instance has launched before we start the cleanup timer and inform the user.
+				with model_server.rpc_connect("changes", "read") as client:
+					change_attributes = client.get_change_attributes(change_id)
 
-			spawn_after(TIMEOUT_TIME, _scrap_instance)
-		except:
-			self.logger.critical("Unexpected failure while trying to luanch a debug instance for change %s and user %s." % (change_id, user_id), exc_info=True)
+				commit_id = change_attributes['commit_id']
 
-		with model_server.rpc_connect("debug_instances", "update") as changes_update_rpc:
-			changes_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, change_id)
+				with model_server.rpc_connect("repos", "read") as client:
+					repo_type = client.get_repo_type(change_attributes['repo_id'])
+					sha = client.get_commit_attributes(commit_id)['sha']
+
+				user_id = contents['user_id']
+
+				verification_config = self._get_verification_config(commit_id, sha, repo_type)
+
+				debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
+
+				debug_instance.wait() # Make sure that the instance has launched before we start the cleanup timer and inform the user.
+
+				spawn_after(TIMEOUT_TIME, scrap_instance)
+			except:
+				scrap_instance()
+				self.logger.critical("Unexpected failure while trying to luanch a debug instance for change %s and user %s." % (change_id, user_id), exc_info=True)
+
+			with model_server.rpc_connect("debug_instances", "update") as debug_update_rpc:
+				debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, change_id)
+
+		spawn(launch_debug_instance)
 
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)
