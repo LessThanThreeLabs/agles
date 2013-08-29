@@ -21,7 +21,8 @@ Branch:
 Commit Message:
 %s
 
--The Koality Team"""
+-The Koality Team
+https://koalitycode.com"""
 
 
 class ChangesUpdateHandler(ModelServerRpcHandler):
