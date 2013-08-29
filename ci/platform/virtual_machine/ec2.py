@@ -10,6 +10,7 @@ import boto.ec2
 import eventlet
 
 import model_server
+from model_server.debug_instances.create_handler import VirtualMachineAlreadyExistsError
 from settings.aws import AwsSettings
 from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
@@ -214,8 +215,11 @@ class Ec2Vm(VirtualMachine):
 
 	def store_vm_info(self):
 		super(Ec2Vm, self).store_vm_info()
-		with model_server.rpc_connect("debug_instances", "create") as debug_create_rpc:
-			debug_create_rpc.create_debug_instance("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
+		try:
+			with model_server.rpc_connect("debug_instances", "create") as debug_create_rpc:
+				debug_create_rpc.create_debug_instance("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
+		except VirtualMachineAlreadyExistsError:
+			pass
 
 	def provision(self, repo_name, private_key, output_handler=None):
 		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision %s %s" % (pipes.quote(repo_name), pipes.quote(private_key)),

@@ -25,7 +25,7 @@ class DebugInstancesCreateHandler(ModelServerRpcHandler):
 
 		vm_id = result.inserted_primary_key[0]
 		return vm_id
-		
+
 
 class VirtualMachineAlreadyExistsError(Exception):
 	pass
