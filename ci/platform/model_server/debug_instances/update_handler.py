@@ -40,6 +40,6 @@ class DebugInstancesUpdateHandler(ModelServerRpcHandler):
 		last_name = row[user.c.last_name]
 
 		subject = "Your debug instance has launched"
-		text = LAUNCH_TEMPLATE % (first_name, last_name, WebServerSettings.domain_name, vm_id)
+		text = LAUNCH_TEMPLATE % (first_name, last_name, WebServerSettings.domain_name, instance_id)
 
 		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)

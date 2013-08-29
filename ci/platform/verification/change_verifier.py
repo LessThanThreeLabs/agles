@@ -109,12 +109,11 @@ class ChangeVerifier(EventSubscriber):
 				debug_instance.wait() # Make sure that the instance has launched before we start the cleanup timer and inform the user.
 
 				spawn_after(TIMEOUT_TIME, scrap_instance)
+				with model_server.rpc_connect("debug_instances", "update") as debug_update_rpc:
+					debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, change_id)
 			except:
 				scrap_instance()
 				self.logger.critical("Unexpected failure while trying to luanch a debug instance for change %s and user %s." % (change_id, user_id), exc_info=True)
-
-			with model_server.rpc_connect("debug_instances", "update") as debug_update_rpc:
-				debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, change_id)
 
 		spawn(launch_debug_instance)
 
