@@ -10,6 +10,7 @@ import boto.ec2
 import eventlet
 
 import model_server
+from model_server.debug_instances.create_handler import VirtualMachineAlreadyExistsError
 from settings.aws import AwsSettings
 from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar

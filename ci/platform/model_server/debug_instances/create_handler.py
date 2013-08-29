@@ -15,17 +15,14 @@ class DebugInstancesCreateHandler(ModelServerRpcHandler):
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			if sqlconn.execute(existing_vm).rowcount > 0:
-				raise VirtualMachineAlreadyExistsError(instance_id)
+				return
 			ins = virtual_machine.insert().values(
 				type=vm_type,
 				instance_id=instance_id,
 				pool_slot=pool_slot,
 				username=username)
-			result = sqlconn.execute(ins)
+			sqlconn.execute(ins)
 
-		vm_id = result.inserted_primary_key[0]
-		return vm_id
-		
 
 class VirtualMachineAlreadyExistsError(Exception):
 	pass
