@@ -24,9 +24,9 @@ setup:
       - name: koality
         username: lt3
   - scripts:
-    - git config --global user.email "koality@koalitycode.com"
-    - git config --global user.name "Koality"
-    - bash -c 'echo -e "[ui]\\nusername = Koality <koality@koalitycode.com>\\n\\n[extensions]\\nmq =" > ~/.hgrc'
+    - git config --global user.email 'koality@koalitycode.com'
+    - git config --global user.name 'Koality'
+    - echo -e '[ui]\\nusername = Koality <koality@koalitycode.com>\\n\\n[extensions]\\nmq =' > ~/.hgrc
     - path: ci/scripts
       script: ./rabbitmq_setup.sh
 compile:
