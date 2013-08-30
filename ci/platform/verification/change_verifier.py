@@ -17,8 +17,6 @@ from util.log import Logged
 from verification_config import VerificationConfig
 from verification_results_handler import VerificationResultsHandler
 
-TIMEOUT_TIME = 20*60 #20 minutes currently
-
 @Logged()
 class ChangeVerifier(EventSubscriber):
 	def __init__(self, verifier_pool, uri_translator):
@@ -108,9 +106,9 @@ class ChangeVerifier(EventSubscriber):
 
 				debug_instance.wait() # Make sure that the instance has launched before we start the cleanup timer and inform the user.
 
-				spawn_after(TIMEOUT_TIME, scrap_instance)
+				spawn_after(contents['timeout'], scrap_instance)
 				with model_server.rpc_connect("debug_instances", "update") as debug_update_rpc:
-					debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, change_id)
+					debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, user_id)
 			except:
 				scrap_instance()
 				self.logger.critical("Unexpected failure while trying to luanch a debug instance for change %s and user %s." % (change_id, user_id), exc_info=True)
@@ -282,6 +280,9 @@ class ChangeVerifier(EventSubscriber):
 		else:
 			self.logger.critical()
 			assert False
+
+		if not isinstance(config_dict, dict):
+			config_dict = {}
 
 		try:
 			return VerificationConfig(repo_name, config_dict.get("compile"), config_dict.get("test"), config_dict.get("export"))

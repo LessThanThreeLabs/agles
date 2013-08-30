@@ -31,7 +31,7 @@ class RestrictedSSHForwardingShell(RestrictedShell):
 	def __init__(self):
 		super(RestrictedSSHForwardingShell, self).__init__()
 
-	#TODO (andrey) DO THIS!
+	#TODO (andrey) only allow people to ssh to verification (same for hg and git)
 	def handle_command(self, full_ssh_command):
 		command_parts = full_ssh_command.split()
 		if not len(command_parts) == 3:

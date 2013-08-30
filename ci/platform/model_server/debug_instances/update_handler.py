@@ -8,7 +8,7 @@ LAUNCH_TEMPLATE = """%s %s,
 
 To SSH into your debug instance type the following command into your terminal:
 
-ssh verification@%s "ssh %s"
+ssh verification@%s -t "ssh %s"
 
 -The Koality Team"""
 
@@ -18,21 +18,19 @@ class DebugInstancesUpdateHandler(ModelServerRpcHandler):
 	def __init__(self, channel=None):
 		super(DebugInstancesUpdateHandler, self).__init__("debug_instances", "update", channel)
 
-	# TODO(andrey) Eventually there needs to be a page in the front end ui containing the currently running QA vm's.
-	def mark_debug_instance_launched(self, instance_id, change_id):
-		self._notify_instance_spawned(instance_id, change_id)
+	# TODO(andrey) Eventually there needs to be a page in the front end ui containing the currently running debug vm's.
+	def mark_debug_instance_launched(self, instance_id, user_id):
+		self._notify_instance_spawned(instance_id, user_id)
 
-	def _get_user_row(self, change_id):
-		change = schema.change
+	def _get_user_row(self, user_id):
 		user = schema.user
-		commit = schema.commit
 
-		query = change.join(commit).join(user).select(use_labels=True).where(change.c.id == change_id)
+		query = user.select().where(user.c.id == user_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			return sqlconn.execute(query).first()
 
-	def _notify_instance_spawned(self, instance_id, change_id):
-		row = self._get_user_row(change_id)
+	def _notify_instance_spawned(self, instance_id, user_id):
+		row = self._get_user_row(user_id)
 		user = schema.user
 
 		email = row[user.c.email]
