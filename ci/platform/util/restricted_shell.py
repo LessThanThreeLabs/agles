@@ -40,11 +40,12 @@ class RestrictedSSHForwardingShell(RestrictedShell):
 		self.verify_user_exists("", command_parts[2])
 
 		with model_server.rpc_connect("debug_instances", "read") as debug_read_rpc:
-			vm = debug_read_rpc.get_build_from_id(command_parts[1])
+			vm = debug_read_rpc.get_vm_from_instance_id(command_parts[1])
 
-		virtual_machine = Ec2Vm.from_vm_id(vm[command_parts[1]])
+		virtual_machine = Ec2Vm.from_vm_id(vm['pool_slot'])
 
-		os.execlp(virtual_machine.ssh_args())
+		ssh_args = virtual_machine.ssh_args()
+		os.execlp(ssh_args[0], *ssh_args)
 
 class RestrictedGitShell(RestrictedShell):
 	def __init__(self):
