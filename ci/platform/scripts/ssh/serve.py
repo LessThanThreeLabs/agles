@@ -12,7 +12,7 @@ import model_server
 import util.log
 
 from util.permissions import InvalidPermissionsError
-from util.restricted_shell import RestrictedGitShell, RestrictedHgShell, InvalidCommandError, RepositoryNotFoundError
+from util.restricted_shell import RestrictedGitShell, RestrictedHgShell, RestrictedSSHForwardingShell, InvalidCommandError, RepositoryNotFoundError
 
 
 def main():
@@ -20,7 +20,9 @@ def main():
 	try:
 		if "SSH_ORIGINAL_COMMAND" in os.environ:
 			command = os.environ["SSH_ORIGINAL_COMMAND"] + ' ' + user_id
-			if command.split()[0] == 'hg':
+			if command.split()[0] == "ssh":
+				rsh = RestrictedSSHForwardingShell()
+			elif command.split()[0] == 'hg':
 				rsh = RestrictedHgShell()
 			else:
 				rsh = RestrictedGitShell()

@@ -4,7 +4,7 @@ import sys
 import yaml
 import os
 
-from eventlet import event, spawn, spawn_n, queue
+from eventlet import event, spawn, spawn_n, spawn_after, queue
 from kombu.messaging import Producer
 
 import model_server
@@ -12,17 +12,17 @@ import model_server
 from shared.handler import EventSubscriber, ResourceBinding
 from settings.deployment import DeploymentSettings
 from settings.verification_server import VerificationServerSettings
-from util import greenlets, pathgen
+from util import pathgen
 from util.log import Logged
 from verification_config import VerificationConfig
 from verification_results_handler import VerificationResultsHandler
-
 
 @Logged()
 class ChangeVerifier(EventSubscriber):
 	def __init__(self, verifier_pool, uri_translator):
 		super(ChangeVerifier, self).__init__([
 			ResourceBinding('repos', 'verification:repos.update'),
+			ResourceBinding('changes', 'instance_launching'),
 			ResourceBinding('system_settings', None)
 		])
 		self.verifier_pool = verifier_pool
@@ -38,6 +38,8 @@ class ChangeVerifier(EventSubscriber):
 			self._handle_new_change(body['contents'])
 		elif body['type'] == 'instance settings updated':
 			self._handle_verifier_settings_update(body['contents'])
+		elif body['type'] == 'launch debug machine':
+			self._handle_launch_debug(body['contents'])
 		message.ack()
 
 	def _handle_new_change(self, contents):
@@ -68,6 +70,50 @@ class ChangeVerifier(EventSubscriber):
 			self.verifier_pool.reinitialize(max_verifiers=max_verifiers, min_ready=min_ready)
 		except:
 			self.logger.critical("Unexpected failure while updating verifier pool to max_verifiers: %s, min_ready: %s." % (max_verifiers, min_ready), exc_info=True)
+
+	# TODO(andrey) This should eventually not be in change_verifier.
+	def _handle_launch_debug(self, contents):
+		def launch_debug_instance():
+			try:
+				verifier = self.verifier_pool.get()
+				verifier.setup()
+			except:
+				if verifier is not None:
+					self.verifier_pool.remove(verifier)
+				return
+
+			def scrap_instance():
+				verifier.teardown()
+				self.verifier_pool.remove(verifier)
+
+			try:
+				change_id = contents['change_id']
+
+				with model_server.rpc_connect("changes", "read") as client:
+					change_attributes = client.get_change_attributes(change_id)
+
+				commit_id = change_attributes['commit_id']
+
+				with model_server.rpc_connect("repos", "read") as client:
+					repo_type = client.get_repo_type(change_attributes['repo_id'])
+					sha = client.get_commit_attributes(commit_id)['sha']
+
+				user_id = contents['user_id']
+
+				verification_config = self._get_verification_config(commit_id, sha, repo_type)
+
+				debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
+
+				debug_instance.wait() # Make sure that the instance has launched before we start the cleanup timer and inform the user.
+
+				spawn_after(contents['timeout'], scrap_instance)
+				with model_server.rpc_connect("debug_instances", "update") as debug_update_rpc:
+					debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, user_id)
+			except:
+				scrap_instance()
+				self.logger.critical("Unexpected failure while trying to luanch a debug instance for change %s and user %s." % (change_id, user_id), exc_info=True)
+
+		spawn(launch_debug_instance)
 
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)

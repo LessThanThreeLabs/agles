@@ -9,13 +9,14 @@ from settings.store import StoreSettings
 from shared.constants import VerificationUser
 from util import pathgen
 from util.permissions import InvalidPermissionsError
+from virtual_machine.ec2 import Ec2Vm
 
 GIT_REPO_PATH_PATTERN = r"[^\s']+\.git"
 HG_REPO_PATH_PATTERN = r"[^\s']+"
 
 
 class RestrictedShell(object):
-	def verify_user_exists(self, command, user_id, repo_id):
+	def verify_user_exists(self, command, user_id, repo_id=None):
 		with model_server.rpc_connect("users", "read") as client:
 			try:
 				client.get_user_from_id(user_id)
@@ -25,6 +26,26 @@ class RestrictedShell(object):
 	def handle_command(self, full_ssh_command):
 		raise NotImplementedError("Subclasses should override this!")
 
+
+class RestrictedSSHForwardingShell(RestrictedShell):
+	def __init__(self):
+		super(RestrictedSSHForwardingShell, self).__init__()
+
+	#TODO (andrey) only allow people to ssh to verification (same for hg and git)
+	def handle_command(self, full_ssh_command):
+		command_parts = full_ssh_command.split()
+		if not len(command_parts) == 3:
+			raise InvalidCommandError(full_ssh_command)
+
+		self.verify_user_exists("", command_parts[2])
+
+		with model_server.rpc_connect("debug_instances", "read") as debug_read_rpc:
+			vm = debug_read_rpc.get_vm_from_instance_id(command_parts[1])
+
+		virtual_machine = Ec2Vm.from_vm_id(vm['pool_slot'])
+
+		ssh_args = virtual_machine.ssh_args()
+		os.execlp(ssh_args[0], *ssh_args)
 
 class RestrictedGitShell(RestrictedShell):
 	def __init__(self):

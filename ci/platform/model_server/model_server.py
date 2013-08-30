@@ -18,6 +18,9 @@ from build_consoles.update_handler import BuildConsolesUpdateHandler
 from changes.create_handler import ChangesCreateHandler
 from changes.read_handler import ChangesReadHandler
 from changes.update_handler import ChangesUpdateHandler
+from debug_instances.create_handler import DebugInstancesCreateHandler
+from debug_instances.read_handler import DebugInstancesReadHandler
+from debug_instances.update_handler import DebugInstancesUpdateHandler
 from license import verifier
 from repos.create_handler import ReposCreateHandler
 from repos.read_handler import ReposReadHandler
@@ -51,6 +54,9 @@ class ModelServer(object):
 		ChangesCreateHandler,
 		ChangesReadHandler,
 		ChangesUpdateHandler,
+		DebugInstancesCreateHandler,
+		DebugInstancesReadHandler,
+		DebugInstancesUpdateHandler,
 		ReposCreateHandler,
 		ReposReadHandler,
 		ReposUpdateHandler,
