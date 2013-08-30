@@ -107,7 +107,7 @@ class Client(ClientBase):
 		was_deadlettered = message.headers and "x-death" in message.headers
 		if was_deadlettered and message.properties.get('reply_to') == self.response_mq.name:
 			# Greenlets do not propogate errors to the parent, so we send it over as an Exception
-			queue_result = RPCRequestError("The server failed to process your call\nBody: %s" % body)
+			queue_result = RPCRequestError("The server failed to process your call\nBody: %s\nProperties: %s" % (body, message.properties))
 		elif not was_deadlettered:
 			queue_result = body
 		else:  # Not my deadlettered message
@@ -115,12 +115,10 @@ class Client(ClientBase):
 		self.message_result = queue_result
 
 	def _on_decode_error(self, message, exc):
-		self._on_response("ttl failure", message)
+		self._on_response("decode error: %s" % message.body, message)
 
 	def _on_return(self, *args):
-		# Greenlets do not propogate errors to the parent, so we send it over as an Exception
-		error = RPCRequestError("The request was rejected and returned without being processed.")
-		self.message_result = error
+		self.message_result = RPCRequestError("The request was rejected and returned without being processed.")
 
 	def _remote_call(self, remote_method, *args, **kwargs):
 		"""Calls the remote method on the server.

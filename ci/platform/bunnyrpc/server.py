@@ -80,7 +80,9 @@ class Server(object):
 		else:
 			connection = Connection(RabbitSettings.kombu_connection_info)
 			self.channel = connection.channel()
-		self.consumer = self.channel.Consumer(callbacks=[self._handle_call])
+		self.consumer = self.channel.Consumer(
+			callbacks=[self._handle_call],
+			on_decode_error=self._on_decode_error)
 		self.producer = self.channel.Producer(serializer="msgpack")
 
 		self.exchange = Exchange(self.exchange_name, "direct", durable=False)
@@ -99,15 +101,28 @@ class Server(object):
 		map(setup_queue, self.queue_names)
 		self.consumer.consume()
 
+	def _on_decode_error(self, message, exc):
+		self._respond(message, {
+			'value': None,
+			'error': {
+				'type': type(exc).__name__,
+				'message': str(exc),
+				'traceback': ''
+			}
+		})
+
 	@greenlets.spawn_wrap
 	def _handle_call(self, body, message):
 		message_proto = self._call(body["method"], body["args"])
+		self._respond(message, message_proto)
+
+	def _respond(self, message, response):
 		correlation_id = message.properties.get("correlation_id")
 
 		self.response_lock.acquire()
 
 		try:
-			self.producer.publish(message_proto,
+			self.producer.publish(response,
 				routing_key=message.properties["reply_to"],
 				correlation_id=correlation_id,
 				delivery_mode=2
