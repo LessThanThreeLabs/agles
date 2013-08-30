@@ -11,13 +11,13 @@ from virtual_machine.docker import DockerVm
 
 @Logged()
 class VerifierPool(object):
-	def __init__(self, max_verifiers=None, min_ready=None, uri_translator=None):
-		self.max_verifiers = max_verifiers
+	def __init__(self, max_running=None, min_ready=None, uri_translator=None):
+		self.max_running = max_running
 		self.min_ready = min_ready
 
-		max_verifiers = self._get_max_verifiers()
+		max_running = self._get_max_verifiers()
 		min_ready = self._get_min_ready()
-		assert max_verifiers >= min_ready
+		assert max_running >= min_ready
 
 		self.uri_translator = uri_translator
 
@@ -33,20 +33,20 @@ class VerifierPool(object):
 		self._initializing = False
 		self._initialize_continuation = None
 
-		self.reinitialize(max_verifiers=max_verifiers, min_ready=min_ready)
+		self.reinitialize(max_running=max_running, min_ready=min_ready)
 
-	def reinitialize(self, max_verifiers=None, min_ready=None):
+	def reinitialize(self, max_running=None, min_ready=None):
 		# We use self._initializing as a lock for greenlets
 		if not self._initializing:
 			self._initializing = True
-			self._reinitialize(max_verifiers, min_ready)
+			self._reinitialize(max_running, min_ready)
 			self._initializing = False
 		else:
-			self._initialize_continuation = lambda: self._reinitialize(max_verifiers, min_ready)
+			self._initialize_continuation = lambda: self._reinitialize(max_running, min_ready)
 
-	def _reinitialize(self, max_verifiers=None, min_ready=None):
+	def _reinitialize(self, max_running=None, min_ready=None):
 		old_max = self._get_max_verifiers()
-		self.max_verifiers = max_verifiers
+		self.max_running = max_running
 		self.min_ready = min_ready
 		self._trim_pool_size(old_max)
 		self._increase_pool_size()
@@ -57,7 +57,7 @@ class VerifierPool(object):
 			continuation()
 
 	def _get_max_verifiers(self):
-		return self.max_verifiers if self.max_verifiers is not None else VerificationServerSettings.max_virtual_machine_count
+		return self.max_running if self.max_running is not None else VerificationServerSettings.max_virtual_machine_count
 
 	def _get_min_ready(self):
 		return self.min_ready if self.min_ready is not None else VerificationServerSettings.static_pool_size
@@ -217,9 +217,9 @@ class VerifierPool(object):
 
 
 class VirtualMachineVerifierPool(VerifierPool):
-	def __init__(self, virtual_machine_class, max_verifiers=None, min_ready=None, uri_translator=None):
+	def __init__(self, virtual_machine_class, max_running=None, min_ready=None, uri_translator=None):
 		self.virtual_machine_class = virtual_machine_class
-		super(VirtualMachineVerifierPool, self).__init__(max_verifiers, min_ready, uri_translator)
+		super(VirtualMachineVerifierPool, self).__init__(max_running, min_ready, uri_translator)
 
 	def spawn_verifier(self, verifier_number):
 		virtual_machine = self.spawn_virtual_machine(verifier_number)
@@ -235,8 +235,8 @@ class VirtualMachineVerifierPool(VerifierPool):
 
 
 class DockerVirtualMachineVerifierPool(VirtualMachineVerifierPool):
-	def __init__(self, virtual_machine_class, max_verifiers=None, min_ready=None, uri_translator=None):
-		super(DockerVirtualMachineVerifierPool, self).__init__(virtual_machine_class, max_verifiers, min_ready, uri_translator)
+	def __init__(self, virtual_machine_class, max_running=None, min_ready=None, uri_translator=None):
+		super(DockerVirtualMachineVerifierPool, self).__init__(virtual_machine_class, max_running, min_ready, uri_translator)
 
 	def spawn_virtual_machine(self, virtual_machine_number):
 		virtual_machine = super(DockerVirtualMachineVerifierPool, self).spawn_virtual_machine(virtual_machine_number)

@@ -36,7 +36,7 @@ class ChangeVerifier(EventSubscriber):
 	def handle_message(self, body, message):
 		if body['type'] == 'change added':
 			self._handle_new_change(body['contents'])
-		elif body['type'] == 'instance settings updated':
+		elif body['type'] == 'verifier pool settings updated':
 			self._handle_verifier_settings_update(body['contents'])
 		elif body['type'] == 'launch debug machine':
 			self._handle_launch_debug(body['contents'])
@@ -65,11 +65,11 @@ class ChangeVerifier(EventSubscriber):
 
 	def _handle_verifier_settings_update(self, contents):
 		try:
-			max_verifiers = contents["max_verifiers"]
+			max_running = contents["max_running"]
 			min_ready = contents["min_ready"]
-			self.verifier_pool.reinitialize(max_verifiers=max_verifiers, min_ready=min_ready)
+			self.verifier_pool.reinitialize(max_running=max_running, min_ready=min_ready)
 		except:
-			self.logger.critical("Unexpected failure while updating verifier pool to max_verifiers: %s, min_ready: %s." % (max_verifiers, min_ready), exc_info=True)
+			self.logger.critical("Unexpected failure while updating verifier pool to %s." % contents, exc_info=True)
 
 	# TODO(andrey) This should eventually not be in change_verifier.
 	def _handle_launch_debug(self, contents):
