@@ -63,6 +63,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		return {"change_id": change_id, "commit_id": commit_id}
 
 	def launch_debug_instance(self, user_id, change_id, timeout=DEFAULT_TIMEOUT):
+		if not isinstance(timeout, (int, float)) or timeout < 0:
+			timeout = DEFAULT_TIMEOUT
 		self.publish_event("changes", change_id, "launch debug machine", user_id=user_id, change_id=change_id, timeout=timeout)
 
 	def store_patch(self, change_id, patch_contents):
