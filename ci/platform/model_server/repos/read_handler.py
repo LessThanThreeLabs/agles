@@ -96,23 +96,38 @@ class ReposReadHandler(ModelServerRpcHandler):
 	# Front end API #
 	#################
 
+	def _row_to_repo(self, row):
+		repo = database.schema.repo
+		github_repo_metadata = database.schema.github_repo_metadata
+
+		repo_info = to_dict(row, repo.columns, tablename=repo.name)
+		if row[github_repo_metadata.c.id] is not None:
+			repo_info['github'] = to_dict(row, github_repo_metadata.columns, tablename=github_repo_metadata.name)
+		else:
+			repo_info['github'] = None
+		return repo_info
+
+
 	def get_repositories(self, user_id):
 		repo = database.schema.repo
+		github_repo_metadata = database.schema.github_repo_metadata
 
-		query = repo.select().apply_labels().where(repo.c.deleted == 0)  # Check to make sure its not deleted
+		query = repo.outerjoin(github_repo_metadata).select().apply_labels().where(repo.c.deleted == 0)  # Check to make sure its not deleted
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			rows = sqlconn.execute(query)
-		return map(lambda row: to_dict(row, repo.columns, tablename=repo.name), rows)
+
+		return map(self._row_to_repo, rows)
 
 	def get_repo_from_id(self, user_id, repo_id):
 		repo = database.schema.repo
+		github_repo_metadata = database.schema.github_repo_metadata
 
-		query = repo.select().where(and_(repo.c.id == repo_id, repo.c.deleted == 0))
+		query = repo.outerjoin(github_repo_metadata).select().apply_labels().where(and_(repo.c.id == repo_id, repo.c.deleted == 0))
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
 
 		if row:
-			return to_dict(row, repo.columns)
+			return self._row_to_repo(row)
 		else:
 			raise NoSuchRepositoryError(repo_id)
 
