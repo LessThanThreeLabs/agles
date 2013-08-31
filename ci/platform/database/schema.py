@@ -112,7 +112,7 @@ build_console = Table('build_console', metadata,
 
 console_output = Table('console_output', metadata,
 	Column('id', Integer, primary_key=True),
-	Column('build_console_id', Integer, ForeignKey('build_console.id'), nullable=False),
+	Column('build_console_id', Integer, ForeignKey('build_console.id'), index=True, nullable=False),
 	Column('line_number', Integer, nullable=False),
 	Column('line', String, nullable=False),
 )
