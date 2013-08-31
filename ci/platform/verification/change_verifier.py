@@ -9,6 +9,7 @@ from kombu.messaging import Producer
 
 import model_server
 
+from build_core import VerificationException
 from shared.handler import EventSubscriber, ResourceBinding
 from settings.deployment import DeploymentSettings
 from settings.verification_server import VerificationServerSettings
@@ -74,6 +75,7 @@ class ChangeVerifier(EventSubscriber):
 	# TODO(andrey) This should eventually not be in change_verifier.
 	def _handle_launch_debug(self, contents):
 		def launch_debug_instance():
+			verifier = None
 			try:
 				verifier = self.verifier_pool.get()
 				verifier.setup()
@@ -104,14 +106,19 @@ class ChangeVerifier(EventSubscriber):
 
 				debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
 
-				debug_instance.wait() # Make sure that the instance has launched before we start the cleanup timer and inform the user.
+				try:
+					debug_instance.wait() # Make sure that the instance has launched before we start the cleanup timer and inform the user.
+				except VerificationException:
+					pass  # TODO (akostov): tell the user that provisioning failed
 
 				spawn_after(contents['timeout'], scrap_instance)
 				with model_server.rpc_connect("debug_instances", "update") as debug_update_rpc:
 					debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, user_id)
 			except:
+				exc_info = sys.exc_info()
 				scrap_instance()
-				self.logger.critical("Unexpected failure while trying to luanch a debug instance for change %s and user %s." % (change_id, user_id), exc_info=True)
+				self.logger.critical("Unexpected failure while trying to launch a debug instance for change %s and user %s." % (change_id, user_id), exc_info=exc_info)
+				raise exc_info[0], exc_info[1], exc_info[2]
 
 		spawn(launch_debug_instance)
 
@@ -169,6 +176,7 @@ class ChangeVerifier(EventSubscriber):
 				fail_change()
 
 		def setup_worker():
+			verifier = None
 			try:
 				verifier = self.verifier_pool.get()
 				verifier.setup()
