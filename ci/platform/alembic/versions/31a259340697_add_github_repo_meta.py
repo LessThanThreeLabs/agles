@@ -21,6 +21,7 @@ def upgrade():
     sa.Column('repo_id', sa.Integer(), nullable=False),
     sa.Column('github_repo_name', sa.String(), nullable=False),
     sa.Column('hook_id', sa.Integer(), nullable=True),
+    sa.Column('hook_secret', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['repo_id'], ['repo.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('repo_id')

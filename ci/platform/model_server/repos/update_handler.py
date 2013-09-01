@@ -57,13 +57,13 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		self.publish_event('repos', repo_id, 'forward url updated', forward_url=forward_url)
 
 	@AdminApi
-	def set_github_hook_id(self, user_id, repo_id, hook_id):
+	def set_github_hook(self, user_id, repo_id, hook_id, hook_secret):
 		github_repo_metadata = database.schema.github_repo_metadata
 
-		update = github_repo_metadata.update().where(github_repo_metadata.c.repo_id == repo_id).values(hook_id=hook_id)
+		update = github_repo_metadata.update().where(github_repo_metadata.c.repo_id == repo_id).values(hook_id=hook_id, hook_secret=hook_secret)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
-		self.publish_event('repos', repo_id, 'github hook id added', hook_id=hook_id)
+		self.publish_event('repos', repo_id, 'github hook added', hook_id=hook_id, hook_secret=hook_secret)
 
 
 class NoSuchUserError(Exception):

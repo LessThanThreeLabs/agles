@@ -146,7 +146,8 @@ github_repo_metadata = Table('github_repo_metadata', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('repo_id', Integer, ForeignKey('repo.id'), nullable=False, unique=True),
 	Column('github_repo_name', String, nullable=False),
-	Column('hook_id', Integer, nullable=True)
+	Column('hook_id', Integer, nullable=True),
+	Column('hook_secret', String, nullable=True)
 )
 
 repostore = Table('repostore', metadata,
