@@ -103,7 +103,7 @@ class Snapshotter(object):
 			virtual_machine.delete()
 
 	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
-		return self.vm_class.from_id_or_construct('cached:%s_%s' % snapshot_version, instance_name, image.id)
+		return self.vm_class.from_id_or_construct(-snapshot_version[1] or -1, instance_name, image.id)
 
 	def clone_repositories(self, virtual_machine, repositories, uri_translator):
 		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
