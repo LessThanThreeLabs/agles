@@ -3,12 +3,13 @@ import repo.store
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from util.permissions import AdminApi
 
 
 class ReposUpdateHandler(ModelServerRpcHandler):
 
 	def __init__(self, channel=None):
-		super(ReposUpdateHandler, self).__init__("repos", "update", channel)
+		super(ReposUpdateHandler, self).__init__('repos', 'update', channel)
 
 	def update_repostore(self, repostore_id, ip_address, root_dir, num_repos):
 		self.update_repostore_ip(repostore_id, ip_address)
@@ -45,6 +46,7 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		return manager.force_delete(info['repostore_id'], repo_id, info['repo_name'], target)
 
+	@AdminApi
 	def set_forward_url(self, user_id, repo_id, forward_url):
 		repo = database.schema.repo
 
@@ -52,7 +54,16 @@ class ReposUpdateHandler(ModelServerRpcHandler):
 		update = repo.update().where(repo.c.id == repo_id).values(forward_url=forward_url)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(update)
-		self.publish_event("repos", repo_id, "forward url updated", forward_url=forward_url)
+		self.publish_event('repos', repo_id, 'forward url updated', forward_url=forward_url)
+
+	@AdminApi
+	def set_github_hook_id(self, user_id, repo_id, hook_id):
+		github_repo_metadata = database.schema.github_repo_metadata
+
+		update = github_repo_metadata.update().where(github_repo_metadata.c.repo_id == repo_id).values(hook_id=hook_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(update)
+		self.publish_event('repos', repo_id, 'github hook id added', hook_id=hook_id)
 
 
 class NoSuchUserError(Exception):
