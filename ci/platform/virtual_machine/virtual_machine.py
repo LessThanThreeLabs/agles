@@ -260,5 +260,11 @@ class VirtualMachine(object):
 		def __repr__(self):
 			return '%s(%s)' % (type(self).__name__, self)
 
+		def __int__(self):
+			return self.sub_versions[0]
+
+		def __getitem__(self, index):
+			return self.sub_versions[index]
+
 		def _from_sub_versions(self, sub_versions):
 			return '.'.join([str(sub_version) for sub_version in sub_versions])

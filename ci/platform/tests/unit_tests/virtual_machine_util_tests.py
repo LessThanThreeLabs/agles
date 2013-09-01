@@ -53,3 +53,18 @@ class VirtualMachineUtilTest(BaseUnitTest):
 
 		assert_equal('1.2.3.4.5', ImageVersion(1) + ImageVersion(0.1) + ImageVersion('0.1.3') + ImageVersion('0.0.0.4.5'))
 		assert_equal(ImageVersion('1.2.3.4.5'), ImageVersion(1) + ImageVersion(0.1) + ImageVersion('0.1.3') + ImageVersion('0.0.0.4.5'))
+
+	def test_list_index(self):
+		assert_equal(2, ImageVersion(2)[0])
+		assert_equal(3, ImageVersion('1.2.3')[2])
+
+		assert_equal(7, ImageVersion('8.5.4.7')[-1])
+		assert_equal(2, ImageVersion('0.1.2.3')[-2])
+
+		assert_raises(IndexError, lambda: ImageVersion(7.2)[3])
+
+	def test_to_int(self):
+		assert_equal(4, int(ImageVersion(4)))
+		assert_equal(2, int(ImageVersion(2.5)))
+		assert_equal(3, int(ImageVersion('3.0.0.0.1')))
+		assert_equal(3, int(ImageVersion('3.9.9.9.9')))
