@@ -6,7 +6,7 @@ from collections import Counter
 import model_server
 
 from settings.store import StoreSettings
-from shared.constants import VerificationUser
+from shared.constants import BuildStatus, VerificationUser
 from util.log import Logged
 from util.uri_translator import RepositoryUriTranslator
 from virtual_machine.ec2 import Ec2Vm
@@ -116,7 +116,8 @@ class Snapshotter(object):
 	def provision_for_repository(self, virtual_machine, repository, changes, uri_translator):
 		repo_changes = filter(lambda change: change['repo_id'] == repository['id'], changes)
 		valid_changes = filter(lambda change: ' ' not in change['merge_target'], repo_changes)
-		branch_counter = Counter(map(lambda change: change['merge_target'], valid_changes))
+		passed_changes = filter(lambda change: change['verification_status'] == BuildStatus.PASSED, valid_changes)
+		branch_counter = Counter(map(lambda change: change['merge_target'], passed_changes))
 		if not branch_counter.most_common():
 			return
 		primary_branch = branch_counter.most_common(1)[0][0]
