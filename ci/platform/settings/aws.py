@@ -10,7 +10,7 @@ class AwsSettings(DatabaseBackedSettings):
 			instance_type='m1.medium',
 			largest_instance_type=None,
 			vm_image_name_prefix='koality_verification',
-			vm_image_name_suffix='lucid',  # this should be changed to 'precise'
+			vm_image_name_suffix='precise',
 			vm_image_name_version='0.3',
 			security_group='koality_verification',
 			root_drive_size=8,
