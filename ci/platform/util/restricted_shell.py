@@ -45,6 +45,9 @@ class RestrictedSSHForwardingShell(RestrictedShell):
 		with model_server.rpc_connect("debug_instances", "read") as debug_read_rpc:
 			vm = debug_read_rpc.get_vm_from_instance_id(vm_instance_id)
 
+		if vm is None:
+			raise VirtualMachineNotFoundError(vm_instance_id)
+
 		virtual_machine = Ec2Vm.from_vm_id(vm['pool_slot'])
 
 		if virtual_machine is None or virtual_machine.instance.id != vm_instance_id:
