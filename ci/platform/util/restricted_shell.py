@@ -37,12 +37,18 @@ class RestrictedSSHForwardingShell(RestrictedShell):
 		if not len(command_parts) == 3:
 			raise InvalidCommandError(full_ssh_command)
 
-		self.verify_user_exists("", command_parts[2])
+		vm_instance_id = command_parts[1]
+		user_id = command_parts[2]
+
+		self.verify_user_exists("", user_id)
 
 		with model_server.rpc_connect("debug_instances", "read") as debug_read_rpc:
-			vm = debug_read_rpc.get_vm_from_instance_id(command_parts[1])
+			vm = debug_read_rpc.get_vm_from_instance_id(vm_instance_id)
 
 		virtual_machine = Ec2Vm.from_vm_id(vm['pool_slot'])
+
+		if virtual_machine is None or virtual_machine.instance.id != vm_instance_id:
+			raise VirtualMachineNotFoundError(vm_instance_id)
 
 		ssh_args = virtual_machine.ssh_args()
 		os.execlp(ssh_args[0], *ssh_args)
@@ -258,4 +264,8 @@ class RepositoryNotFoundError(Exception):
 
 
 class MalformedCommandError(RepositoryNotFoundError):
+	pass
+
+
+class VirtualMachineNotFoundError(Exception):
 	pass
