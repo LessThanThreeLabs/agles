@@ -117,14 +117,15 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		return repostore_id
 
 	@AdminApi
-	def create_github_repo(self, user_id, repo_name, github_repo_name, forward_url):
+	def create_github_repo(self, user_id, repo_name, github_owner_name, github_repo_name, forward_url):
 		github_repo_metadata = database.schema.github_repo_metadata
 
 		repo_id = self.create_repo(user_id, repo_name, forward_url, 'git')
 
 		insert_github_metadata = github_repo_metadata.insert().values(
 			repo_id=repo_id,
-			github_repo_name=github_repo_name,
+			owner_name=github_owner_name,
+			repo_name=github_repo_name,
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(insert_github_metadata)
