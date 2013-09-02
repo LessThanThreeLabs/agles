@@ -25,7 +25,6 @@ setup:
         username: lt3
   - scripts:
     - git config --global user.email 'koality@koalitycode.com'
-    - exit 0
     - git config --global user.name 'Koality'
     - echo -e "[ui]\\nusername = Koality <koality@koalitycode.com>\\n\\n[extensions]\\nmq =" > ~/.hgrc
     - path: ci/scripts
