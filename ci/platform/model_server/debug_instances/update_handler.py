@@ -11,7 +11,7 @@ Your debug instance has launched and will be accessible for the next 50 minutes.
 
 To SSH into your debug instance type the following command into your terminal:
 
-ssh verification@%s -t "ssh %s"
+ssh verification@%s -Ct "ssh %s"
 
 -The Koality Team"""
 
