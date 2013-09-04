@@ -34,7 +34,7 @@ compile:
     - python setup.py install:
         path: ci/platform
 test:
-  machines: 1
+  machines: 10
   scripts:
     - platform unit tests:
         path: ci/platform
