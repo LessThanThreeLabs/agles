@@ -13,9 +13,8 @@ class VerificationResultsHandler(object):
 	def __init__(self):
 		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 
-	def pass_change(self, change_id):
-		merge_success = self._send_merge_request(change_id, BuildStatus.PASSED)
-		if merge_success:
+	def pass_change(self, change_id, verify_only):
+		if (verify_only | self._send_merge_request(change_id, BuildStatus.PASSED)):
 			self._set_change_status_if_not_finished(change_id, BuildStatus.PASSED, MergeStatus.PASSED)
 
 	def skip_change(self, change_id):
@@ -40,9 +39,6 @@ class VerificationResultsHandler(object):
 
 		commit_id = change_attributes['commit_id']
 		merge_target = change_attributes['merge_target']
-
-		if merge_target == 'verify only':
-			return True
 
 		with model_server.rpc_connect("repos", "read") as client:
 			repo_uri = client.get_repo_uri(commit_id)

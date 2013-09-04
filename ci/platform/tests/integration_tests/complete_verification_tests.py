@@ -48,9 +48,9 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 			super(VerificationRoundTripTest.TestChangeVerifier, self).__init__(verifier_pool, None)
 			self._change_finished = eventlet.event.Event()
 
-		def verify_change(self, verification_config, change_id, repo_type, workers_spawned, patch_id=None):
+		def verify_change(self, verification_config, change_id, repo_type, workers_spawned, verify_only, patch_id=None):
 			try:
-				super(VerificationRoundTripTest.TestChangeVerifier, self).verify_change(verification_config, change_id, repo_type, workers_spawned, patch_id)
+				super(VerificationRoundTripTest.TestChangeVerifier, self).verify_change(verification_config, change_id, repo_type, workers_spawned, False, patch_id)
 			finally:
 				self._change_finished.send()
 

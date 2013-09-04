@@ -50,6 +50,7 @@ class ChangeVerifier(EventSubscriber):
 			sha = contents['commit']['sha']
 			repo_type = contents['repo_type']
 			patch_id = contents['patch_id']
+			verify_only = contents['verify_only']
 
 			if not DeploymentSettings.active:
 				self.skip_change(change_id)
@@ -58,7 +59,7 @@ class ChangeVerifier(EventSubscriber):
 			verification_config = self._get_verification_config(commit_id, sha, repo_type)
 
 			workers_spawned = event.Event()
-			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned, patch_id)
+			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned, verify_only, patch_id)
 			workers_spawned.wait()
 		except:
 			self.logger.critical("Unexpected failure while verifying change %d, commit %d. Failing change." % (change_id, commit_id), exc_info=True)
@@ -125,7 +126,7 @@ class ChangeVerifier(EventSubscriber):
 	def skip_change(self, change_id):
 		self.results_handler.skip_change(change_id)
 
-	def verify_change(self, verification_config, change_id, repo_type, workers_spawned, patch_id=None):
+	def verify_change(self, verification_config, change_id, repo_type, workers_spawned, verify_only, patch_id=None):
 		task_queue = TaskQueue()
 
 		num_workers = self._get_num_workers(verification_config)
@@ -155,9 +156,9 @@ class ChangeVerifier(EventSubscriber):
 			with model_server.rpc_connect("changes", "update") as model_server_rpc:
 				model_server_rpc.mark_change_started(change_id)
 
-		def pass_change():
+		def pass_change(verify_only):
 			change_done.send(True)
-			self.results_handler.pass_change(change_id)
+			self.results_handler.pass_change(change_id, verify_only)
 
 		def fail_change():
 			change_done.send(False)
@@ -225,7 +226,7 @@ class ChangeVerifier(EventSubscriber):
 				fail_change()
 				change_failed = True
 		if not change_failed:
-			pass_change()
+			pass_change(verify_only)
 
 	def _get_num_workers(self, verification_config):
 		if verification_config.test_factory_commands:
