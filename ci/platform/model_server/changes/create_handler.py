@@ -20,8 +20,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def __init__(self, channel=None):
 		super(ChangesCreateHandler, self).__init__("changes", "create", channel)
 
-	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target, base_sha, store_pending=False, patch_contents=None):
-		commit_id = self._create_commit(repo_id, user_id, commit_message, sha, base_sha, store_pending)
+	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target, base_sha, verify_only=False, patch_contents=None):
+		commit_id = self._create_commit(repo_id, user_id, commit_message, sha, base_sha, verify_only)
 
 		change = database.schema.change
 		repo = database.schema.repo
@@ -59,7 +59,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		self.publish_event("repos", repo_id, "change added", user=user_dict, commit=commit_dict,
 			repo_type=repo_type, change_id=change_id, change_number=change_number, verification_status="queued",
-			merge_target=merge_target, create_time=create_time, patch_id=patch_id)
+			merge_target=merge_target, create_time=create_time, patch_id=patch_id, verify_only=verify_only)
 		return {"change_id": change_id, "commit_id": commit_id}
 
 	def launch_debug_instance(self, user_id, change_id, timeout=DEFAULT_TIMEOUT):
@@ -76,7 +76,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			patch_id = result.inserted_primary_key[0]
 		return patch_id
 
-	def _create_commit(self, repo_id, user_id, commit_message, sha, base_sha, store_pending):
+	def _create_commit(self, repo_id, user_id, commit_message, sha, base_sha, verify_only):
 		commit = database.schema.commit
 
 		timestamp = int(time.time())
@@ -86,7 +86,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]
 
-		if store_pending:
+		if verify_only:
 			self._store_pending_commit(repo_id, sha, commit_id)
 
 		self._push_pending_commit(repo_id, sha, commit_id)
