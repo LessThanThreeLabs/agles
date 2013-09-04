@@ -1,6 +1,6 @@
 import database.schema
 
-from sqlalchemy import and_
+from sqlalchemy import and_, func, select
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
@@ -47,15 +47,27 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 		console_output = database.schema.console_output
 		build_console = database.schema.build_console
 
-		output_query = console_output.select().where(
-			console_output.c.build_console_id == build_console_id
-		).order_by(
-			console_output.c.line_number.desc(),
-			console_output.c.id.asc()
-		).limit(num_results).offset(offset)
-
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			return {row[console_output.c.line_number]: row[console_output.c.line] for row in sqlconn.execute(output_query)}
+			max_line_query = select([func.max(console_output.c.line_number)]).where(console_output.c.build_console_id == build_console_id)
+			max_line_row = sqlconn.execute(max_line_query).first()
+			if max_line_row and max_line_row[0] is not None:
+				max_line = max_line_row[0]
+				print max_line
+				print max_line_row
+				output_query = console_output.select().where(
+					console_output.c.build_console_id == build_console_id
+				).order_by(
+					console_output.c.line_number.desc(),
+					console_output.c.id.asc()
+				).where(
+					and_(
+						console_output.c.line_number > max_line - offset - num_results,
+						console_output.c.line_number <= max_line - offset
+					)
+				)
+				return {row[console_output.c.line_number]: row[console_output.c.line] for row in sqlconn.execute(output_query)}
+			else:
+				return {}
 
 	def get_build_console_id(self, user_id, build_id, type, subtype):
 		build_console = database.schema.build_console
