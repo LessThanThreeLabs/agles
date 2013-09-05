@@ -52,8 +52,6 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 			max_line_row = sqlconn.execute(max_line_query).first()
 			if max_line_row and max_line_row[0] is not None:
 				max_line = max_line_row[0]
-				print max_line
-				print max_line_row
 				output_query = console_output.select().where(
 					console_output.c.build_console_id == build_console_id
 				).order_by(
