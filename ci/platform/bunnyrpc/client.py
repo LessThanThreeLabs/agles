@@ -155,7 +155,7 @@ class Client(ClientBase):
 				new_exc_tuple = sys.exc_info()
 				if new_exc_tuple[0].__name__ == exc_tuple[0]:  # If we receive the exception we wanted, everything is good
 					raise
-				raise RPCRequestError(msg=eval_str)  # Otherwise, we don't know how to recreate it, so wrap the info
+				raise RPCRequestError(msg=eval_str, original_type=proto["error"]["type"])  # Otherwise, we don't know how to recreate it, so wrap the info
 		else:
 			return proto["value"]
 
