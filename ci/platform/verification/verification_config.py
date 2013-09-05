@@ -1,5 +1,3 @@
-import os
-
 from virtual_machine.remote_command import RemoteCompileCommand, RemoteTestCommand, RemoteTestFactoryCommand, RemoteErrorCommand
 
 
