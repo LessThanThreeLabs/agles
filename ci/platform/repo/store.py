@@ -612,6 +612,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			return True
 
 	def store_pending(self, repo_id, repo_name, sha, commit_id):
+		raise NoSuchCommitError(repo_id=repo_id, ref=sha)
 		repo_type = self._get_repo_type(repo_id)
 		if repo_type == 'git':
 			self._git_store_pending(repo_id, repo_name, sha, commit_id)
