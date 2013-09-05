@@ -148,12 +148,12 @@ class Client(ClientBase):
 			exc_tuple = (proto["error"]["type"],
 						proto["error"]["message"],
 						proto["error"]["traceback"])
-			eval_str = "%s(r''' %s\n RemoteTraceback (most recent call last):%s ''')" % exc_tuple
+			eval_str = '%s("""%s\n RemoteTraceback (most recent call last):%s""")' % exc_tuple
 			try:
 				raise eval(eval_str, self.caller_globals_dict)
 			except:
 				new_exc_tuple = sys.exc_info()
-				if new_exc_tuple[0].__name__ == exc_tuple[0]:  # If we receive the exception we wanted, everything is good
+				if str(new_exc_tuple[0].__name__) == str(exc_tuple[0]):  # If we receive the exception we wanted, everything is good
 					raise
 				raise RPCRequestError(msg=eval_str, original_type=proto["error"]["type"])  # Otherwise, we don't know how to recreate it, so wrap the info
 		else:

@@ -116,7 +116,3 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			repostore_id = row[schema.repo.c.repostore_id]
 			repo_name = row[schema.repo.c.name]
 		return dict(repostore_id=repostore_id, repo_name=repo_name)
-
-
-class NoSuchCommitError(Exception):
-	pass
