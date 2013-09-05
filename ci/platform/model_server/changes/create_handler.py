@@ -3,6 +3,7 @@ import time
 import database.schema
 import repo.store as repostore
 
+from sqlalchemy import and_
 from shared.constants import BuildStatus
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
@@ -62,6 +63,27 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			merge_target=merge_target, create_time=create_time, patch_id=patch_id, verify_only=verify_only)
 		return {"change_id": change_id, "commit_id": commit_id}
 
+	def create_github_commit_and_change(self, user_id, commit_message, github_owner_name, github_repo_name, base_sha, sha, head_sha, branch_name):
+		github_repo_metadata = database.schema.github_repo_metadata
+		repo = database.schema.repo
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			query = github_repo_metadata.join(repo).apply_labels().select().where(
+				and_(
+					repo.c.deleted == 0,
+					github_repo_metadata.c.repo_name == github_repo_name,
+					github_repo_metadata.c.owner_name == github_owner_name,
+				)
+			)
+			row = sqlconn.execute(query).first()
+			if row is not None:
+				repo_id = row[repo.c.id]
+			else:
+				raise RepositoryNotFoundError(github_repo_name, github_owner_name)
+
+		verify_only = True
+		return self.create_commit_and_change(repo_id, user_id, commit_message, sha, branch_name, base_sha, verify_only)
+
 	def launch_debug_instance(self, user_id, change_id, timeout=DEFAULT_TIMEOUT):
 		if not isinstance(timeout, (int, float)) or timeout < 0:
 			timeout = DEFAULT_TIMEOUT
@@ -119,4 +141,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 
 class NoSuchCommitError(Exception):
+	pass
+
+
+class RepositoryNotFoundError(Exception):
 	pass
