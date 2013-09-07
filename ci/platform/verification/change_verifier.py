@@ -10,6 +10,8 @@ from kombu.messaging import Producer
 import model_server
 
 from build_core import VerificationException
+from pubkey_registrar import PubkeyRegistrar
+from shared.constants import VerificationUser
 from shared.handler import EventSubscriber, ResourceBinding
 from settings.deployment import DeploymentSettings
 from settings.verification_server import VerificationServerSettings
@@ -252,6 +254,8 @@ class ChangeVerifier(EventSubscriber):
 			attributes = model_server_rpc.get_repo_attributes(repo_uri)
 
 		repo_name = attributes['repo']['name']
+
+		PubkeyRegistrar().register_pubkey(VerificationUser.id, "ChangeVerifier")
 
 		config_dict = {}
 

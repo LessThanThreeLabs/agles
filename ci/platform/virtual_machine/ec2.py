@@ -67,7 +67,15 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def construct(cls, vm_id, name=None, ami_image_id=None, instance_type=None, vm_username=VM_USERNAME):
 		if not name:
-			name = "koality:%s:%s" % (socket.gethostname(), vm_id)
+			master_name = None
+			try:
+				master_instance_id = cls._call(['ec2metadata', '--instance-id']).output.strip()
+				master_name = cls.CloudClient().get_all_instances(filters={'instance-id': master_instance_id})[0].instances[0].tags['Name']
+			except:
+				pass
+			if not master_name:
+				master_name = socket.gethostname()
+			name = "koality-worker:%s (%s)" % (vm_id, master_name)
 		if not ami_image_id:
 			ami_image_id = cls.get_newest_image().id
 		if not instance_type:
