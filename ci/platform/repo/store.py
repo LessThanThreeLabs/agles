@@ -355,7 +355,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				self._hg_fetch_with_private_key(repo, remote_repo)
 				repo.merge(tool="internal:fail")
-				rev, sha = repo.commit("Merging in %s" % sha[:12])
+				rev, sha = repo.commit("Merging in %s" % sha)
 				return sha
 			except CommandError:
 				exc_info = sys.exc_info()
@@ -664,7 +664,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			strip_path = os.path.join(repo_path, ".hg", "strip-backup")
 			if not os.path.exists(strip_path):
 				os.makedirs(os.path.join(strip_path))
-			repo.bundle(os.path.join(strip_path, '%s.hg' % sha[:12]), rev=[sha], base=parent_shas)
+			repo.bundle(os.path.join(strip_path, '%s.hg' % sha), rev=[sha], base=parent_shas)
 		except:
 			exc_info = sys.exc_info()
 			self.logger.critical("Failed to create pending bundle %d for sha %s" % (commit_id, sha), exc_info=exc_info)
