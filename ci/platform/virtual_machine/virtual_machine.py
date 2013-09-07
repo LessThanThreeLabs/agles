@@ -94,7 +94,7 @@ class VirtualMachine(object):
 
 		results = self.ssh_call(command, output_handler)
 		if results.returncode != 0:
-			self.logger.warn("Failed to apply patch %s\nResults: " % (pipes.quote(patch_contents), results.output))
+			self.logger.warn("Failed to apply patch %s\nResults: %s" % (patch_contents, results.output))
 		return results
 
 	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
