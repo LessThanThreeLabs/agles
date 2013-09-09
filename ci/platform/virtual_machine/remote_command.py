@@ -3,6 +3,7 @@ import os
 import pipes
 import model_server
 
+from pysh.shell_tools import ShellCommand, ShellSilent, ShellAnd, ShellOr, ShellChain, ShellTest, ShellIf, ShellAdvertised, ShellLogin, ShellBackground, ShellSubshell
 from streaming_executor import CommandResults
 
 
@@ -36,7 +37,7 @@ class RemoteShellCommand(RemoteCommand):
 		self.name, self.path, self.commands, self.timeout, self.xunit = self._parse_step(step_info)
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.ssh_call('bash --login -c %s' % pipes.quote(self._to_script()), output_handler)
+		return virtual_machine.ssh_call(ShellLogin(self._to_script()), output_handler)
 
 	def _parse_step(self, step):
 		path = None
@@ -108,38 +109,51 @@ class RemoteShellCommand(RemoteCommand):
 			assert False, "Invalid type (%s) for value %s" % (type(value).__name__, value)
 
 	def _to_script(self):
-		full_command = "eval %s" % pipes.quote("&&\n".join(map(self._advertised_command, self.commands)))
-		script = "%s\n" % self._advertised_command("cd %s" % (os.path.join(self.repo_name, self.path) if self.path else self.repo_name))
+		given_command = ShellCommand('eval %s' % pipes.quote(str(ShellAnd(*map(ShellAdvertised, self.commands)))))
+
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
 		timeout_message = "echo %s timed out after %s seconds" % (pipes.quote(self.name), self.timeout)
-		timeout_command = "\n".join((
-			"sleep %s" % self.timeout,
-			"kill -INT $$ > /dev/null 2>&1",
-			"sleep 1",  # let the process die
-			"if kill -0 $$ > /dev/null 2>&1",  # check if the process is still running
-			"then sleep 2; kill -KILL $$ > /dev/null 2>&1; echo; %s; kill -9 0" % timeout_message,  # kill forcefully
-			"else echo; %s; kill -9 0" % timeout_message,
-			"fi"
-		))
-		commands_with_timeout = "\n".join((
-			"(%s) > /dev/null 2>&1 &" % pipes.quote(timeout_command),
-			"watchdogpid=$!",
-			full_command,
-			"_r=$?",
-			"exec 2>/dev/null",  # goodbye stderr stream
-			"kill -KILL $watchdogpid > /dev/null 2>&1",  # kill our timeout process
-			"pkill -KILL -P $watchdogpid >/dev/null 2>&1",  # kill all children of the timeout process
-			"if [ $_r -ne 0 ]; then echo %s failed with return code $_r; fi" % pipes.quote(self.name),
-			"exit $_r"
-		))
-		script += "(%s)\n" % commands_with_timeout
-		return script
 
-	def _advertised_command(self, command):
-		if self.advertise_commands:
-			advertised_command = '$ ' + '\n> '.join(command.split('\n'))
-			return "echo -e %s &&\n%s" % (pipes.quote(advertised_command), command)
-		return command
+		timeout_command = ShellChain(
+			ShellCommand('sleep %s' % self.timeout),
+			ShellSilent('kill -INT $$'),
+			ShellCommand('sleep 1'),
+			ShellIf(
+				ShellSilent('kill -0 $$'),
+				ShellChain(
+					ShellCommand('sleep 2'),
+					ShellSilent('kill -KILL $$'),
+					ShellCommand('echo'),
+					timeout_message,
+					ShellCommand('kill -9 0')
+				),
+				ShellChain(
+					ShellCommand('echo'),
+					timeout_message,
+					ShellCommand('kill -9 0')
+				)
+			)
+		)
+
+		commands_with_timeout = ShellChain(
+			ShellBackground(ShellSilent(ShellSubshell(timeout_command))),
+			ShellCommand('watchdogpid=$!'),
+			given_command,
+			ShellCommand('_r=$?'),
+			ShellCommand('exec 2>/dev/null'),  # goodbye stderr stream
+			ShellSilent('kill -KILL $watchdogpid'),  # kill the timeout process
+			ShellSilent('pkill -KILL -P $watchdogpid'),  # kill all children of the timeout process
+			ShellOr(
+				ShellTest('$_r -eq 0'),
+				ShellCommand('echo %s failed with return code $_r' % pipes.quote(self.name))
+			),
+			ShellCommand('exit $_r')
+		)
+
+		return ShellAnd(
+			ShellAdvertised('cd %s' % (os.path.join(self.repo_name, self.path) if self.path else self.repo_name)),
+			commands_with_timeout
+		)
 
 
 class RemoteCompileCommand(RemoteShellCommand):
