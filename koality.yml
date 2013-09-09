@@ -4,6 +4,8 @@ languages:
   ruby: 1.9.3
   nodejs: 0.8.12
 setup:
+  - scripts:
+    - export PYTHONUNBUFFERED=true
   - packages:
     - system:
       - zlib1g
@@ -14,6 +16,8 @@ setup:
       - apache2-utils
       - libevent-dev
       - libpq-dev
+    - scripts:
+      - printenv
     - pip:
       - install requirements: ci/platform/requirements.txt
   - databases:
