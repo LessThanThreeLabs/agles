@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+import time
+import model_server
+
+with open('tc_demo_replay_log', 'r') as f:
+	lines = f.readlines()
+
+commands = map(eval, lines)
+
+for command in commands:
+	for k, v in command.iteritems():
+		if isinstance(v, list):
+			command[k] = [s.replace("$koality$", "\n") if isinstance(s, unicode) else s for s in v]
+
+i = 1
+prev_time = None
+for command in commands:
+	i += 1
+	print i, command
+	if i > 138 and i < 412:
+		waittime = int(command['time']) - prev_time if prev_time is not None else 0
+		prev_time = int(command['time'])
+		time.sleep(waittime/3.85)
+	elif i > 557:
+		waittime = int(command['time']) - prev_time if prev_time is not None else 0
+		prev_time = int(command['time'])
+		time.sleep(waittime/2)
+	elif i > 126:
+		waittime = int(command['time']) - prev_time if prev_time is not None else 0
+		prev_time = int(command['time'])
+		time.sleep(waittime/3)
+
+	routing_info = str(command['routing_key']).replace('rpc:','').split('.')
+	with model_server.rpc_connect(*routing_info) as client:
+		try:
+			getattr(client, command['method'])(*command['args'])
+		except:
+			pass
