@@ -4,7 +4,7 @@ import uuid
 import paramiko
 
 from database.engine import ConnectionFactory
-from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest
+from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest, ShellSudo
 from provisioner import Provisioner
 from shared.constants import VerificationUser
 from streaming_executor import StreamingExecutor, RemoteStreamingExecutor, CommandResults
@@ -54,8 +54,8 @@ class VirtualMachine(object):
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		try:
 			return RemoteStreamingExecutor(self._ssh_connect()).execute(command, output_handler, timeout=timeout)
-		except:
-			failure_message = 'Failed to connect to the testing instance.'
+		except Exception as e:
+			failure_message = 'Failed to connect to the testing instance: %s' % e
 			if output_handler is not None:
 				output_handler.append({1: failure_message})
 			return CommandResults(1, failure_message)

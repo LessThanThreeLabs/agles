@@ -114,7 +114,7 @@ class Ec2Vm(VirtualMachine):
 					ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
 				),
 				ShellCommand('mkdir /etc/sudoers.d'),
-				ShellRedirect("echo '%s ALL=(ALL) NOPASSWD: ALL'", '/etc/sudoers.d/koality-%s' % (vm_username, vm_username)),
+				ShellRedirect("echo '%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
 				ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
 			)
 
