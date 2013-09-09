@@ -109,7 +109,10 @@ class RemoteShellCommand(RemoteCommand):
 			assert False, "Invalid type (%s) for value %s" % (type(value).__name__, value)
 
 	def _to_script(self):
-		given_command = ShellCommand('eval %s' % pipes.quote(str(ShellAnd(*map(ShellAdvertised, self.commands)))))
+		def advertise(command):
+			return ShellAdvertised(command) if self.advertise_commands else ShellCommand(command)
+
+		given_command = ShellCommand('eval %s' % pipes.quote(str(ShellAnd(*map(advertise, self.commands)))))
 
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
 		timeout_message = "echo %s timed out after %s seconds" % (pipes.quote(self.name), self.timeout)
@@ -151,7 +154,7 @@ class RemoteShellCommand(RemoteCommand):
 		)
 
 		return ShellAnd(
-			ShellAdvertised('cd %s' % (os.path.join(self.repo_name, self.path) if self.path else self.repo_name)),
+			advertise('cd %s' % (os.path.join(self.repo_name, self.path) if self.path else self.repo_name)),
 			commands_with_timeout
 		)
 
