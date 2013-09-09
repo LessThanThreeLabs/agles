@@ -189,10 +189,13 @@ class OpenstackVm(VirtualMachine):
 			timeout=3600, output_handler=output_handler)
 
 	def ssh_args(self):
-		return ["ssh",
-			"-oLogLevel=error", "-oStrictHostKeyChecking=no",
-			"-oUserKnownHostsFile=/dev/null", "-oServerAliveInterval=20",
-			"%s@%s" % (self.vm_username, self.instance.private_ips[-1])]
+		options = {
+			'LogLevel': 'error',
+			'StrictHostKeyChecking': 'no',
+			'UserKnownHostsFile': '/dev/null',
+			'ServerAliveInterval': '20'
+		}
+		return self.SshArgs(self.vm_username, self.instance.private_ips[-1], options=options)
 
 	def reboot(self, force=False):
 		self.instance.reboot()

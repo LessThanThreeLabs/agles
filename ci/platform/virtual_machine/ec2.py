@@ -10,6 +10,8 @@ import boto.ec2
 import eventlet
 
 import model_server
+
+from pysh.shell_tools import ShellCommand, ShellChain, ShellAppend, ShellRedirect, ShellOr
 from settings.aws import AwsSettings
 from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
@@ -102,11 +104,19 @@ class Ec2Vm(VirtualMachine):
 		when it finishes first boot.
 		This will fail if we use an image which doesn't utilitize EC2 user_data
 		'''
-		return '\n'.join(("#!/bin/sh",
-			"useradd --create-home %s" % vm_username,
-			"mkdir ~%s/.ssh" % vm_username,
-			"echo '%s' >> ~%s/.ssh/authorized_keys" % (PubkeyRegistrar().get_ssh_pubkey(), vm_username),
-			"chown -R %s:%s ~%s/.ssh" % (vm_username, vm_username, vm_username)))
+		return '#!/bin/sh\n%s' % ShellChain(
+				ShellCommand('useradd --create-home %s' % vm_username),
+				ShellCommand('mkdir ~%s/.ssh' % vm_username),
+				ShellAppend('echo %s' % pipes.quote(PubkeyRegistrar().get_ssh_pubkey()), '~%s/.ssh/authorized_keys' % vm_username),
+				ShellCommand('chown -R %s:%s ~%s/.ssh' % (vm_username, vm_username, vm_username)),
+				ShellOr(
+					ShellCommand("grep '#includedir /etc/sudoers.d' /etc/sudoers"),
+					ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
+				),
+				ShellCommand('mkdir /etc/sudoers.d'),
+				ShellRedirect("echo '%s ALL=(ALL) NOPASSWD: ALL'", '/etc/sudoers.d/koality-%s' % (vm_username, vm_username)),
+				ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
+			)
 
 	@classmethod
 	def _validate_security_group(cls, security_group):
@@ -225,10 +235,6 @@ class Ec2Vm(VirtualMachine):
 		with model_server.rpc_connect("debug_instances", "create") as debug_create_rpc:
 			debug_create_rpc.create_vm_in_db("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
 
-	def provision(self, repo_name, private_key, output_handler=None):
-		return self.ssh_call("PYTHONUNBUFFERED=true koality-provision %s %s" % (pipes.quote(repo_name), pipes.quote(private_key)),
-			timeout=3600, output_handler=output_handler)
-
 	def export(self, repo_name, export_prefix, file_paths, output_handler=None):
 		export_options = {
 			'provider': 's3',
@@ -244,10 +250,13 @@ class Ec2Vm(VirtualMachine):
 		)
 
 	def ssh_args(self):
-		return ["ssh",
-			"-oLogLevel=error", "-oStrictHostKeyChecking=no",
-			"-oUserKnownHostsFile=/dev/null", "-oServerAliveInterval=20",
-			"%s@%s" % (self.vm_username, self.instance.private_ip_address)]
+		options = {
+			'LogLevel': 'error',
+			'StrictHostKeyChecking': 'no',
+			'UserKnownHostsFile': '/dev/null',
+			'ServerAliveInterval': '20'
+		}
+		return self.SshArgs(self.vm_username, self.instance.ip_address, options=options)
 
 	def reboot(self, force=False):
 		self.instance.reboot()

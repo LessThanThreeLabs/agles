@@ -1,11 +1,14 @@
 import pipes
 import uuid
 
+import paramiko
+
 from database.engine import ConnectionFactory
+from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest
+from provisioner import Provisioner
 from shared.constants import VerificationUser
-from streaming_executor import StreamingExecutor
+from streaming_executor import StreamingExecutor, RemoteStreamingExecutor, CommandResults
 from util.log import Logged
-from verification.pubkey_registrar import PubkeyRegistrar
 
 
 @Logged()
@@ -16,9 +19,22 @@ class VirtualMachine(object):
 		self.instance = instance
 		self.vm_username = vm_username
 		self._redis_conn = redis_connection or ConnectionFactory.get_redis_connection('virtual_machine')
+		self._ssh_conn = None
 
-	def provision(self, repo_name, private_key, output_handler=None):
-		raise NotImplementedError()
+	def provision(self, repo_name, language_config, setup_config, output_handler=None):
+		try:
+			provisioner = Provisioner(self._ssh_connect())
+			return provisioner.provision(
+				'~/%s' % repo_name,
+				language_config=language_config,
+				setup_config=setup_config,
+				output_handler=output_handler
+			)
+		except:
+			failure_message = 'Failed to provision, could not connect to the testing instance.'
+			if output_handler is not None:
+				output_handler.append({1: failure_message})
+			return CommandResults(1, failure_message)
 
 	def export(self, export_prefix, file_paths, output_handler=None):
 		raise NotImplementedError("Currently only supported for EC2 VMs")
@@ -26,8 +42,23 @@ class VirtualMachine(object):
 	def ssh_args(self):
 		raise NotImplementedError()
 
+	def _ssh_connect(self):
+		if not self._ssh_conn:
+			ssh_conn = paramiko.SSHClient()
+			ssh_conn.set_missing_host_key_policy(paramiko.WarningPolicy())
+			ssh_args = self.ssh_args()
+			ssh_conn.connect(ssh_args.hostname, ssh_args.port, ssh_args.username)
+			self._ssh_conn = ssh_conn
+		return self._ssh_conn
+
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		return self.call(self.ssh_args() + [str(command)], timeout=timeout, output_handler=output_handler)
+		try:
+			return RemoteStreamingExecutor(self._ssh_connect()).execute(command, output_handler, timeout=timeout)
+		except:
+			failure_message = 'Failed to connect to the testing instance.'
+			if output_handler is not None:
+				output_handler.append({1: failure_message})
+			return CommandResults(1, failure_message)
 
 	def delete(self):
 		raise NotImplementedError()
@@ -79,16 +110,16 @@ class VirtualMachine(object):
 		ansi_reset = '\033[0m'
 
 		if patch_contents:
-			command = ' && '.join((
-				'cd %s' % repo_name,
-				'echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset)),
-				'echo',
-				'echo %s' % pipes.quote(patch_contents),
-				'echo',
-				'echo %s' % pipes.quote('%sPATCHING:%s' % (ansi_bright_cyan, ansi_reset)),
-				'echo',
-				'echo %s | patch -p1' % pipes.quote(patch_contents)
-			))
+			command = ShellAnd(
+				ShellCommand('echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset))),
+				ShellCommand('echo'),
+				ShellCommand('echo %s' % pipes.quote(patch_contents)),
+				ShellCommand('echo'),
+				ShellCommand('echo %s' % pipes.quote('%sPATCHING:%s' % (ansi_bright_cyan, ansi_reset))),
+				ShellCommand('echo'),
+				ShellAdvertised('cd %s' % repo_name),
+				ShellAdvertised('patch -p1 ...', actual_command=ShellPipe('echo %s' % pipes.quote(patch_contents), 'patch -p1'))
+			)
 		else:
 			command = 'echo %s' % pipes.quote('%sWARNING: No patch contents received.%s' % (ansi_bright_yellow, ansi_reset))
 
@@ -97,15 +128,47 @@ class VirtualMachine(object):
 			self.logger.warn("Failed to apply patch %s\nResults: %s" % (patch_contents, results.output))
 		return results
 
+	def configure_ssh(self, private_key, output_handler=None):
+		try:
+			provisioner = Provisioner(self._ssh_connect())
+			return provisioner.set_private_key(
+				private_key,
+				output_handler=output_handler
+			)
+		except:
+			failure_message = 'Failed to provision, could not connect to the testing instance.'
+			if output_handler is not None:
+				output_handler.append({1: failure_message})
+			return CommandResults(1, failure_message)
+
+	def _get_host_access_check_command(self, host_url):
+		return ShellAnd(
+			ShellCommand('echo Testing ssh connection to master instance...'),
+			ShellOr(
+				ShellSilent('ssh -oStrictHostKeyChecking=no %s true' % host_url),
+				ShellAnd(
+					ShellCommand('echo Failed to access the master instance. Please check to make sure your security groups are configured correctly.'),
+					ShellCommand('false')
+				)
+			),
+		)
+
 	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		def _remote_fetch():
 			host_url = repo_url[:repo_url.find(":")]
-			command = ' && '.join([
-				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; git init %s))' % (repo_name, repo_name, repo_name, repo_name),
-				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				'cd %s' % repo_name,
-				'git fetch %s %s -n --depth 1' % (repo_url, ref),
-				'git checkout --force FETCH_HEAD'])
+			command = ShellAnd(
+				self._get_host_access_check_command(host_url),
+				ShellOr(
+					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
+					ShellChain(
+						ShellSilent('rm -rf %s' % repo_name),
+						ShellAdvertised('git init %s' % repo_name)
+					)
+				),
+				ShellAdvertised('cd %s' % repo_name),
+				ShellAdvertised('git fetch %s %s -n --depth 1' % (repo_url, ref)),
+				ShellAdvertised('git checkout --force FETCH_HEAD')
+			)
 
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
@@ -114,18 +177,35 @@ class VirtualMachine(object):
 
 		def _remote_update():
 			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
-			command = ' && '.join([
-				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,
-				'export PYTHONUNBUFFERED=true',
-				'(mv /repositories/cached/%s %s > /dev/null 2>&1 || (rm -rf %s > /dev/null 2>&1; hg clone --uncompressed %s %s))' % (repo_name, repo_name, repo_name, repo_url, repo_name),
-				'cd %s' % repo_name,
-				'hg pull %s' % repo_url,
-				'hg update --clean %s 2> /dev/null; r=$?; true' % ref,  # first try to check out the ref
-				'if [ "$r" == 0 ]; then exit 0; fi',
-				'mkdir -p .hg/strip-backup',  # otherwise try to get the ref from a bundle
-				'ssh -q %s \"hg cat-bundle %s %s\" | base64 -d > .hg/strip-backup/%s.hg' % (host_url, repo_uri, ref, ref),
-				'hg unbundle .hg/strip-backup/%s.hg' % ref,
-				'hg update --clean %s' % ref])
+
+			get_ref_command = ShellOr(
+				ShellAdvertised('hg update --clean %s' % ref),
+				ShellAnd(
+					ShellCommand('mkdir -p .hg/strip-backup'),
+					ShellCommand('echo Downloading bundle file for %s' % ref),
+					ShellPipe('ssh -q %s "hg cat-bundle %s %s"' % (host_url, repo_uri, ref), ShellRedirect('base64 -d', '.hg/strip-backup/%s.hg' % ref)),
+					ShellAdvertised('hg unbundle .hg/strip-backup/%s.hg' % ref),
+					ShellAdvertised('hg update --clean %s' % ref)
+				)
+			)
+
+			command = ShellAnd(
+				self._get_host_access_check_command(host_url),
+				ShellIf(
+					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
+					ShellAnd(
+						ShellAdvertised('cd %s' % repo_name),
+						ShellAdvertised('hg pull %s' % repo_url),
+						get_ref_command
+					),
+					ShellChain(
+						ShellSilent('rm -rf %s' % repo_name),
+						ShellAdvertised('hg clone --uncompressed %s %s' % (repo_url, repo_name)),
+						get_ref_command
+					)
+				),
+
+			)
 
 			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
 			if results.returncode != 0:
@@ -134,52 +214,42 @@ class VirtualMachine(object):
 
 		if repo_type == 'git':
 			assert isinstance(ref, (str, unicode))
-			return self._ssh_authorized(_remote_fetch, output_handler)
+			return _remote_fetch()
 		elif repo_type == 'hg':
-			return self._ssh_authorized(_remote_update, output_handler)
+			return _remote_update()
 		else:
 			self.logger.error("Unknown repository type in remote_checkout %s." % repo_type)
 
 	def remote_clone(self, repo_type, repo_name, repo_url, output_handler=None):
-		def _remote_clone():
-			if repo_type == 'git':
-				host_url = repo_url[:repo_url.find(":")]
-				clone_flags = ''
-			elif repo_type == 'hg':
-				host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
-				clone_flags = '--uncompressed'
+		if repo_type == 'git':
+			host_url = repo_url[:repo_url.find(":")]
+			clone_flags = ''
+		elif repo_type == 'hg':
+			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
+			clone_flags = '--uncompressed'
 
-			clone_command = '%s clone %s %s %s' % (repo_type, clone_flags, repo_url, repo_name)
-			command = ' && '.join([
-				'if [ -e %s ]; then rm -rf %s; fi' % (repo_name, repo_name),
-				'ssh -oStrictHostKeyChecking=no %s true > /dev/null 2>&1' % host_url,  # Bypass the ssh yes/no prompt
-				clone_command])
-			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
-			if results.returncode != 0:
-				self.logger.error("Failed to clone %s, results: %s" % (repo_url, results))
-			return results
-		return self._ssh_authorized(_remote_clone, output_handler)
-
-	def _ssh_authorized(self, authorized_command, output_handler=None):
-		generate_key = "mkdir ~/.ssh; yes | ssh-keygen -t rsa -N \"\" -f ~/.ssh/id_rsa"
-		retrieve_key = "(%s) > /dev/null 2>&1; cat ~/.ssh/id_rsa.pub" % generate_key
-		pubkey_results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, retrieve_key, timeout=20)
-		if pubkey_results.returncode != 0:
-			if output_handler:
-				output_handler.append({1: "Failed to connect to the testing instance. Please try again."})
-			self.logger.error("Failed to set up ssh on vm at %s, results: %s" % (self.vm_id, pubkey_results))
-			return pubkey_results
-		pubkey = pubkey_results.output
-		alias = '__vm_%s:%s' % (self.vm_id, uuid.uuid1())
-		PubkeyRegistrar().register_pubkey(VerificationUser.id, alias, pubkey)
-		try:
-			return authorized_command()
-		finally:
-			PubkeyRegistrar().unregister_pubkey(VerificationUser.id, alias)
+		command = ShellAnd(
+			ShellOr(
+				ShellNot(ShellTest('-e %s' % repo_name)),
+				ShellAdvertised('rm -rf %s' % repo_name)
+			),
+			self._get_host_access_check_command(host_url),
+			ShellAdvertised('%s clone %s %s %s' % (repo_type, clone_flags, repo_url, repo_name))
+		)
+		results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
+		if results.returncode != 0:
+			self.logger.error("Failed to clone %s, results: %s" % (repo_url, results))
+		return results
 
 	def cache_repository(self, repo_name, output_handler=None):
-		return self.ssh_call(';'.join(('sudo chown -R %s:%s %s' % (self.vm_username, self.vm_username, repo_name),
-			'mv %s /repositories/cached/%s || rm -rf %s' % (repo_name, repo_name, repo_name))), output_handler)
+		command = ShellChain(
+			ShellSudo(ShellCommand('chown -R %s:%s %s' % (self.vm_username, self.vm_username, repo_name))),
+			ShellOr(
+				ShellCommand('mv %s /repositories/cached/%s' % (repo_name, repo_name)),
+				ShellCommand('rm -rf %s' % repo_name)
+			)
+		)
+		return self.ssh_call(command, output_handler)
 
 	@classmethod
 	def get_newest_image(cls):
@@ -209,6 +279,17 @@ class VirtualMachine(object):
 
 	def __repr__(self):
 		return '%s(%r, %r, %r)' % (type(self).__name__, self.vm_id, self.instance, self.vm_username)
+
+	class SshArgs(object):
+		def __init__(self, username, hostname, port=22, options={}):
+			self.username = username
+			self.hostname = hostname
+			self.port = port
+			self.options = options
+
+		def to_arg_list(self):
+			return ['ssh'] + map(lambda option: '-o%s=%s' % option, self.options.iteritems()) + ['%s@%s' % (self.username, self.hostname), '-p', str(self.port)]
+
 
 	class ImageVersion(object):
 		"""A multiple decimal-place version string (such as 1.0.4)"""

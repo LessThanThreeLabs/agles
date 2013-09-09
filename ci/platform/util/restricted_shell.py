@@ -44,7 +44,7 @@ class RestrictedSSHForwardingShell(RestrictedShell):
 
 		virtual_machine = Ec2Vm.from_vm_id(vm['pool_slot'])
 
-		ssh_args = virtual_machine.ssh_args()
+		ssh_args = virtual_machine.ssh_args().to_arg_list()
 		os.execlp(ssh_args[0], *ssh_args)
 
 class RestrictedGitShell(RestrictedShell):

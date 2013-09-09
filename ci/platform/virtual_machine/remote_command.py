@@ -202,6 +202,15 @@ class RemoteSetupCommand(RemoteCommand):
 		self.name = name
 
 
+class RemoteSshConfigCommand(RemoteSetupCommand):
+	def __init__(self, private_key):
+		super(RemoteSshConfigCommand, self).__init__('ssh-config')
+		self.private_key = private_key
+
+	def _run(self, virtual_machine, output_handler=None):
+		return virtual_machine.configure_ssh(self.private_key, output_handler=output_handler)
+
+
 class RemoteCheckoutCommand(RemoteSetupCommand):
 	def __init__(self, repo_name, repo_url, repo_type, ref):
 		super(RemoteCheckoutCommand, self).__init__(repo_type)
@@ -227,13 +236,14 @@ class RemotePatchCommand(RemoteSetupCommand):
 
 
 class RemoteProvisionCommand(RemoteSetupCommand):
-	def __init__(self, repo_name, private_key):
-		super(RemoteProvisionCommand, self).__init__("provision")
+	def __init__(self, repo_name, language_config, setup_config):
+		super(RemoteProvisionCommand, self).__init__('provision')
 		self.repo_name = repo_name
-		self.private_key = private_key
+		self.language_config = language_config
+		self.setup_config = setup_config
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.provision(self.repo_name, self.private_key, output_handler=output_handler)
+		return virtual_machine.provision(self.repo_name, self.language_config, self.setup_config, output_handler=output_handler)
 
 
 class RemoteExportCommand(RemoteCommand):

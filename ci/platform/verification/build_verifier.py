@@ -19,8 +19,10 @@ class BuildVerifier(object):
 			try:
 				return func(*args, **kwargs)
 			except VerificationException as e:
+				print e
 				return e
 			except BaseException as e:
+				print e
 				BuildVerifier.logger.critical("Unexpected exception thrown during verification", exc_info=True)
 				return e
 
@@ -102,7 +104,7 @@ class BuildVerifier(object):
 
 		private_key = StoreSettings.ssh_private_key
 
-		self.build_core.setup_build(repo_uri, repo_type, ref, private_key)
+		self.build_core.run_setup_step(verification_config.setup_commands)
 		self.build_core.run_compile_step(self._dedupe_step_names(verification_config.compile_commands))
 
 	@ReturnException
@@ -123,7 +125,7 @@ class BuildVerifier(object):
 		private_key = StoreSettings.ssh_private_key
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
-			self.build_core.setup_build(repo_uri, repo_type, ref, private_key, patch_id, console_appender)
+			self.build_core.run_setup_step(verification_config.setup_commands, console_appender)
 			self.build_core.run_compile_step(self._dedupe_step_names(verification_config.compile_commands), console_appender)
 
 	@ReturnException

@@ -14,6 +14,7 @@ from pubkey_registrar import PubkeyRegistrar
 from shared.constants import VerificationUser
 from shared.handler import EventSubscriber, ResourceBinding
 from settings.deployment import DeploymentSettings
+from settings.store import StoreSettings
 from settings.verification_server import VerificationServerSettings
 from util import pathgen
 from util.log import Logged
@@ -58,7 +59,7 @@ class ChangeVerifier(EventSubscriber):
 				self.skip_change(change_id)
 				return
 
-			verification_config = self._get_verification_config(commit_id, sha, repo_type)
+			verification_config = self._get_verification_config(commit_id, sha, repo_type, patch_id)
 
 			workers_spawned = event.Event()
 			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned, verify_only, patch_id)
@@ -105,7 +106,7 @@ class ChangeVerifier(EventSubscriber):
 
 				user_id = contents['user_id']
 
-				verification_config = self._get_verification_config(commit_id, sha, repo_type)
+				verification_config = self._get_verification_config(commit_id, sha, repo_type, patch_id=None)
 
 				debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
 
@@ -248,7 +249,7 @@ class ChangeVerifier(EventSubscriber):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:
 			return model_server_rpc.create_build(change_id)
 
-	def _get_verification_config(self, commit_id, sha, repo_type):
+	def _get_verification_config(self, commit_id, sha, repo_type, patch_id):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
 			attributes = model_server_rpc.get_repo_attributes(repo_uri)
@@ -256,6 +257,7 @@ class ChangeVerifier(EventSubscriber):
 		repo_name = attributes['repo']['name']
 
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, "ChangeVerifier")
+		PubkeyRegistrar().register_pubkey(VerificationUser.id, "Koality Keypair", StoreSettings.ssh_public_key)
 
 		config_dict = {}
 
@@ -268,6 +270,7 @@ class ChangeVerifier(EventSubscriber):
 				repo_path = checkout_url[checkout_url.find(":") + 1:]
 				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
 			else:
+				checkout_url = repo_uri
 				show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
 
 			for file_name in ['koality.yml', '.koality.yml']:
@@ -284,7 +287,8 @@ class ChangeVerifier(EventSubscriber):
 				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "hg", "show-koality", repo_uri, sha]
 			else:
 				# TODO(andrey) Test this case!
-				show_command = ["bash", "-c", "cat %s" % os.path.join(repo_uri, ".hg", "strip-backup", sha + "-koality.yml")]
+				checkout_url = repo_uri
+				show_command = ["bash", "-c", "cd %s && hg -R %s cat * -I koality.yml -I .koality.yml" % (repo_uri, os.path.join(repo_uri, ".hg", "strip-backup", sha + ".hg"))]
 			try:
 				config_dict = yaml.safe_load(subprocess.check_output(show_command))
 			except:
@@ -298,10 +302,10 @@ class ChangeVerifier(EventSubscriber):
 			config_dict = {}
 
 		try:
-			return VerificationConfig(repo_name, config_dict.get("compile"), config_dict.get("test"), config_dict.get("export"))
+			return VerificationConfig(repo_type, repo_name, checkout_url, ref, config_dict, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
 		except:
 			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=True)
-			return VerificationConfig(repo_name, {}, {})
+			return VerificationConfig(repo_type, repo_name, checkout_url, ref, {})
 
 	def _is_result_failed(self, result):
 		return isinstance(result, Exception)
