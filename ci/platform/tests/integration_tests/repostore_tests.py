@@ -135,7 +135,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 
 		self.store.merge_changeset(self.hg_repo_id, "hgrepo", new_sha, new_sha)
 
-		assert_equals(hglib.open(self.hg_repo_path).tip()[5], "Merging in %s" % new_sha)
+		assert_equals(hglib.open(self.hg_repo_path).tip()[5], "Merging in LOL %s" % new_sha)
 
 	def test_git_merge_fail(self):
 		self.store.create_repository(self.git_repo_id, "gitrepo")
