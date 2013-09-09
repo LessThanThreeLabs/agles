@@ -225,7 +225,8 @@ class RemoteSshConfigCommand(RemoteSetupCommand):
 		self.private_key = private_key
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.configure_ssh(self.private_key, output_handler=output_handler)
+		# Explicitly ignore the output handler. We don't want to display this to the users.
+		return virtual_machine.configure_ssh(self.private_key)
 
 
 class RemoteCheckoutCommand(RemoteSetupCommand):
