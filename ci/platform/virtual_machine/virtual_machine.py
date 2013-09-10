@@ -163,7 +163,7 @@ class VirtualMachine(object):
 		return ShellAnd(
 			ShellCommand('echo Testing ssh connection to master instance...'),
 			ShellOr(
-				ShellSilent('ssh -oStrictHostKeyChecking=no %s true' % host_url),
+				ShellAdvertised('ssh -oStrictHostKeyChecking=no %s true' % host_url),
 				ShellAnd(
 					ShellCommand('echo Failed to access the master instance. Please check to make sure your security groups are configured correctly.'),
 					ShellCommand('false')
