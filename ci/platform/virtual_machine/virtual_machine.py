@@ -1,12 +1,10 @@
 import pipes
-import uuid
 
 import paramiko
 
 from database.engine import ConnectionFactory
 from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest, ShellSudo
 from provisioner import Provisioner
-from shared.constants import VerificationUser
 from streaming_executor import StreamingExecutor, RemoteStreamingExecutor, CommandResults
 from util.log import Logged
 
@@ -163,7 +161,7 @@ class VirtualMachine(object):
 		return ShellAnd(
 			ShellCommand('echo Testing ssh connection to master instance...'),
 			ShellOr(
-				ShellAdvertised('ssh -oStrictHostKeyChecking=no %s true' % host_url),
+				ShellAdvertised('ssh %s true' % host_url),
 				ShellAnd(
 					ShellCommand('echo Failed to access the master instance. Please check to make sure your security groups are configured correctly.'),
 					ShellCommand('false')
