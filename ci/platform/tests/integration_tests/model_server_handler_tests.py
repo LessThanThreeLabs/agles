@@ -45,13 +45,17 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 			self.repo_id = sqlconn.execute(ins_repo).inserted_primary_key[0]
 
 			self.commit_sha = '0123456789abcdef'
+			self.commit_owner = "Max Power"
+			self.commit_email = "MaxPower's email"
 
 			ins_commit = commit.insert().values(
 				repo_id=self.repo_id,
 				user_id=self.user_id,
 				message='a',
 				sha=self.commit_sha,
-				timestamp=1
+				timestamp=1,
+				submitter_name=self.commit_owner,
+				submitter_email=self.commit_email
 			)
 
 			commit_id = sqlconn.execute(ins_commit).inserted_primary_key[0]
