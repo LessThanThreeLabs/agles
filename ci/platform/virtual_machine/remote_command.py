@@ -139,7 +139,7 @@ class RemoteShellCommand(RemoteCommand):
 		)
 
 		commands_with_timeout = ShellChain(
-			ShellBackground(ShellSilent(ShellSubshell(timeout_command))),
+			ShellBackground(ShellSubshell(timeout_command)),
 			ShellCommand('watchdogpid=$!'),
 			given_command,
 			ShellCommand('_r=$?'),
