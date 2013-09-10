@@ -224,6 +224,7 @@ class VirtualMachineVerifierPool(VerifierPool):
 		virtual_machine = self.spawn_virtual_machine(verifier_number)
 		try:
 			virtual_machine.wait_until_ready()
+			virtual_machine.close_connection()  # don't leave a pointless connection lying around
 		except:
 			virtual_machine.delete()
 			raise

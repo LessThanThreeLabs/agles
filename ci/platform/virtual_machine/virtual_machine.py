@@ -43,7 +43,7 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	def _ssh_connect(self):
-		if not self._ssh_conn:
+		if not self._ssh_conn or not self._ssh_conn.get_transport():
 			ssh_conn = paramiko.SSHClient()
 			ssh_conn.set_missing_host_key_policy(paramiko.WarningPolicy())
 			ssh_args = self.ssh_args()
@@ -60,8 +60,12 @@ class VirtualMachine(object):
 				output_handler.append({1: failure_message})
 			return CommandResults(1, failure_message)
 
+	def close_connection(self):
+		if self._ssh_conn:
+			self._ssh_conn.close()
+
 	def delete(self):
-		raise NotImplementedError()
+		self.close_connection()
 
 	def rebuild(self):
 		raise NotImplementedError()
@@ -98,10 +102,24 @@ class VirtualMachine(object):
 		return {'instance_id': instance_id, 'username': username}
 
 	def _try_multiple_times(self, num_attempts, success_check, method, *args, **kwargs):
+		def shift_output_handler(output_handler, line_count_shift):
+			if output_handler is None:
+				return None
+
+			class ShiftedConsoleAppender(object):
+				def append(self, read_lines):
+					shifted_lines = dict(map(lambda item: (item[0] + line_count_shift, item[1]), read_lines.iteritems()))
+					output_handler.append(shifted_lines)
+
+			return ShiftedConsoleAppender()
+
+		output_handler = kwargs.get('output_handler')
 		for x in xrange(num_attempts):
+			kwargs['output_handler'] = output_handler
 			results = method(*args, **kwargs)
 			if success_check(results):
 				return results
+			output_handler = shift_output_handler(output_handler, results.output.count('\n') + 1)
 		return results
 
 	def remote_patch(self, repo_name, patch_contents, output_handler=None):
@@ -170,7 +188,7 @@ class VirtualMachine(object):
 				ShellAdvertised('git checkout --force FETCH_HEAD')
 			)
 
-			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
+			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler=output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, repo_url, results))
 			return results
@@ -207,7 +225,7 @@ class VirtualMachine(object):
 
 			)
 
-			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
+			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler=output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out bundle %s from %s, results: %s" % (ref, repo_url, results))
 			return results
@@ -236,7 +254,7 @@ class VirtualMachine(object):
 			self._get_host_access_check_command(host_url),
 			ShellAdvertised('%s clone %s %s %s' % (repo_type, clone_flags, repo_url, repo_name))
 		)
-		results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler)
+		results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler=output_handler)
 		if results.returncode != 0:
 			self.logger.error("Failed to clone %s, results: %s" % (repo_url, results))
 		return results

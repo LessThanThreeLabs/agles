@@ -305,6 +305,7 @@ class Ec2Vm(VirtualMachine):
 		else:
 			self._safe_terminate(self.instance)
 		self.remove_vm_info()
+		super(Ec2Vm, self).delete()
 
 	def _safe_terminate(self, instance):
 		try:

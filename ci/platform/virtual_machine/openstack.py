@@ -253,6 +253,7 @@ class OpenstackVm(VirtualMachine):
 		else:
 			self._safe_terminate(self.instance)
 		self.remove_vm_info()
+		super(OpenstackVm, self).delete()
 
 	@classmethod
 	def _safe_terminate(cls, instance):
