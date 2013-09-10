@@ -202,7 +202,9 @@ for xunit_path in %s:
 contents = {}
 for file in files:
 	with open(file) as f:
-		contents[file] = f.read()
+		file_contents = f.read().strip()
+		if file_contents:
+			contents[file] = file_contents
 
 print json.dumps(contents)"""
 		return pythonc_func % xunit_paths
