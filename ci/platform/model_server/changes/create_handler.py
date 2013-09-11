@@ -12,6 +12,7 @@ from sqlalchemy.sql import func
 from util import pathgen
 from util.log import Logged
 from util.sql import to_dict
+from repo.store import DistributedLoadBalancingRemoteRepositoryManager
 
 # Debug instance default timeout is 50 minutes (less than one hour with boot)
 DEFAULT_TIMEOUT = 50*60
@@ -21,13 +22,24 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def __init__(self, channel=None):
 		super(ChangesCreateHandler, self).__init__("changes", "create", channel)
 
-	def create_commit_and_change(self, repo_id, user_id, commit_message, sha, merge_target, base_sha, verify_only=False, patch_contents=None):
-		commit_id = self._create_commit(repo_id, user_id, commit_message, sha, base_sha, verify_only)
-
+	def create_commit_and_change(self, repo_id, user_id, base_sha, head_sha, merge_target, verify_only=False, patch_contents=None):
 		change = database.schema.change
 		repo = database.schema.repo
 		user = database.schema.user
 		commit = database.schema.commit
+
+		remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			repo_type_query = repo.select().where(repo.c.id == repo_id)
+			repo_row = sqlconn.execute(repo_type_query).first()
+			repo_type = repo_row[repo.c.type]
+			repostore_id = repo_row[repo.c.repostore_id]
+			repo_name = repo_row[repo.c.name]
+
+		commit_attributes = remote_repo_manager.get_commit_attributes(repostore_id, repo_id, repo_name, head_sha)
+
+		commit_id = self._create_commit(repo_id, user_id, commit_attributes, base_sha, head_sha, verify_only)
 
 		prev_change_number = 0
 
@@ -43,9 +55,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				number=change_number, verification_status=BuildStatus.QUEUED, create_time=create_time)
 			result = sqlconn.execute(ins)
 			change_id = result.inserted_primary_key[0]
-			repo_type_query = repo.select().where(repo.c.id == repo_id)
-			repo_row = sqlconn.execute(repo_type_query).first()
-			repo_type = repo_row[repo.c.type]
+
 
 			query = user.select().where(user.c.id == user_id)
 			user_row = sqlconn.execute(query).first()
@@ -58,12 +68,15 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		commit_dict = to_dict(commit_row, commit.columns)
 		patch_id = self.store_patch(change_id, patch_contents) if patch_contents else None
 
+		if repo_type == 'hg':
+			merge_target = commit_attributes['branch']
+
 		self.publish_event("repos", repo_id, "change added", user=user_dict, commit=commit_dict,
 			repo_type=repo_type, change_id=change_id, change_number=change_number, verification_status="queued",
 			merge_target=merge_target, create_time=create_time, patch_id=patch_id, verify_only=verify_only)
 		return {"change_id": change_id, "commit_id": commit_id}
 
-	def create_github_commit_and_change(self, user_id, commit_message, github_owner_name, github_repo_name, base_sha, sha, head_sha, branch_name):
+	def create_github_commit_and_change(self, user_id, github_owner_name, github_repo_name, base_sha, head_sha, branch_name):
 		github_repo_metadata = database.schema.github_repo_metadata
 		repo = database.schema.repo
 
@@ -82,7 +95,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				raise RepositoryNotFoundError(github_repo_name, github_owner_name)
 
 		verify_only = True
-		return self.create_commit_and_change(repo_id, user_id, commit_message, sha, branch_name, base_sha, verify_only)
+		return self.create_commit_and_change(repo_id, user_id, base_sha, head_sha, branch_name, verify_only)
 
 	def launch_debug_instance(self, user_id, change_id, timeout=DEFAULT_TIMEOUT):
 		if not isinstance(timeout, (int, float)) or timeout < 0:
@@ -98,20 +111,21 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			patch_id = result.inserted_primary_key[0]
 		return patch_id
 
-	def _create_commit(self, repo_id, user_id, commit_message, sha, base_sha, verify_only):
+	def _create_commit(self, repo_id, user_id, commit_attributes, base_sha, head_sha, verify_only):
 		commit = database.schema.commit
 
 		timestamp = int(time.time())
 		ins = commit.insert().values(repo_id=repo_id, user_id=user_id,
-			message=commit_message, sha=sha, base_sha=base_sha, timestamp=timestamp)
+			message=commit_attributes['message'], sha=head_sha, base_sha=base_sha, timestamp=timestamp,
+			submitter_name=commit_attributes['username'], submitter_email=commit_attributes['email'])
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]
 
 		if verify_only:
-			self._store_pending_commit(repo_id, sha, commit_id)
+			self._store_pending_commit(repo_id, head_sha, commit_id)
 
-		self._push_pending_commit(repo_id, sha, commit_id)
+		self._push_pending_commit(repo_id, head_sha, commit_id)
 
 		return commit_id
 

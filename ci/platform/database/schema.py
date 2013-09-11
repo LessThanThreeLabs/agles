@@ -57,7 +57,7 @@ commit = Table('commit', metadata,
 	Column('base_sha', String, nullable=True),
 	Column('message', String, nullable=False),
 	Column('timestamp', Integer, nullable=False),
-	Column('submitter_name', String, nullable=False),
+	Column('submitter_name', String, nullable=True),
 	Column('submitter_email', String, nullable=True)
 )
 
