@@ -121,12 +121,9 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self.store.create_repository(self.hg_repo_id, "hgrepo")
 
 		hglib.clone(source=self.remote_hg_repo_path, dest=self.hg_repo_path + ".first_clone")
-		direct_repo = hglib.open(self.hg_repo_path + ".first_clone")
 	
 		hglib.clone(source=self.hg_repo_path, dest=self.hg_repo_path + ".second_clone")
 		second_repo = hglib.open(self.hg_repo_path + ".second_clone")
-
-		initial_sha = self._hg_modify_commit_push(direct_repo, "a.txt", "a")
 
 		new_sha = self._hg_modify_commit(second_repo, "b.txt", "b")
 
@@ -135,7 +132,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 
 		self.store.merge_changeset(self.hg_repo_id, "hgrepo", new_sha, new_sha)
 
-		assert_equals(hglib.open(self.hg_repo_path).tip()[5], "Merging in %s" % new_sha[:12])
+		assert_equals(hglib.open(self.hg_repo_path).tip()[5], "Merging in %s" % new_sha)
 
 	def test_git_merge_fail(self):
 		self.store.create_repository(self.git_repo_id, "gitrepo")

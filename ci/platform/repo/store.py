@@ -20,94 +20,38 @@ from hglib.error import CommandError
 
 from bunnyrpc.client import Client
 from settings.store import StoreSettings
-from util import greenlets, pathgen
 from util.log import Logged
+from util import pathgen
 
 MINUTE = 60
 
 
 class RemoteRepositoryManager(object):
 	def register_remote_store(self, repostore_id, num_repos):
-		"""Registers a remote store as a managed store of this manager
-
-		:param repostore_id: The identifier of the remote store the repository is on
-		:param num_repos: The number of repos to initialize it with
-		"""
 		raise NotImplementedError("Subclasses should override this!")
 
 	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
-		"""Merges a changeset on the remote repository with a ref.
-
-		:param repostore_id: The identifier of the local store(machine) the
-							repository is on.
-		:param repo_id: The unique identifier for the repository being created.
-		:param repo_name: The name of the repository.
-		:param ref_to_merge: The sha ref of the changeset on the remote
-							repository we want to merge.
-		:param ref_to_merge_into: The ref we want to merge into.
-		"""
 		raise NotImplementedError("Subclasses should override this!")
 
 	def create_repository(self, repostore_id, repo_id, repo_name):
-		"""Creates a repository on the given local store.
-
-		:param repostore_id: The identifier of the local store(machine) to create the repository on.
-		:param repo_id: The unique identifier for the repository being created.
-		:param repo_name: The name of the new repository.
-		"""
 		raise NotImplementedError("Subclasses should override this!")
 
 	def delete_repository(self, repostore_id, repo_id, repo_name):
-		"""Deletes a repository on the given local store.
-
-		:param repostore_id: The identifier of the local store(machine) to create the repository on.
-		:param repo_id: The unique identifier for the repository being created.
-		:param repo_name: The name of the new repository.
-		"""
 		raise NotImplementedError("Subclasses should override this!")
 
 	def push(self, repostore_id, repo_id, repo_name, from_target, to_target, force):
-		"""Pushes the repository to the forwarding url
-
-		:param repostore_id: The identifier of the local machine the repo is on
-		:param repo_id: The unique id of the RepositoryStore
-		:param repo_name: The name of the repo
-		:param from_target: The ref we're pushing to target
-		:param to_target: The ref to push
-		:param force: Whether or not to force push
-		"""
 		raise NotImplementedError("Subclasses should override this!")
 
 	def force_delete(self, repostore_id, repo_id, repo_name, target):
-		"""Force pushes the repository to the forwarding url
-
-		:param repostore_id: The identifier of the local machine the repo is on
-		:param repo_id: The unique id of the RepositoryStore
-		:param repo_name: The name of the repo
-		:param target: The ref to delete
-		"""
 		raise NotImplementedError("Subclasses should override this!")
 
 	def store_pending(self, repostore_id, repo_id, repo_name, sha, commit_id):
-		"""Stores the given sha as a pending ref based on the commit id
-
-		:param repostore_id: The identifier of the local machine the repo is on
-		:param repo_id: The unique id of the RepositoryStore
-		:param repo_name: The name of the repo
-		:param sha: The SHA-1 ref of the commit to store
-		:param commit_id: The pending id to store the SHA-1 ref at
-		"""
-
 		raise NotImplementedError("Subclasses should override this!")
 
 	def rename_repository(self, repostore_id, repo_id, old_repo_name, new_repo_name):
-		"""Renames a repository on the given local store.
+		raise NotImplementedError("Subclasses should override this!")
 
-		:param repostore_id: The identifier of the local store(machine) to create the repository on.
-		:param repo_id: The unique identifier for the repository being created.
-		:param old_repo_name: The name of the old repository.
-		:param new_repo_name: The name of the new repository.
-		"""
+	def get_commit_attributes(self, repostore_id, repo_id, repo_name, sha):
 		raise NotImplementedError("Subclasses should override this!")
 
 
@@ -144,14 +88,20 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 		self._update_store_repo_count(repostore_id, -1)
 
 	def push(self, repostore_id, repo_id, repo_name, from_target, to_target, force):
+		assert isinstance(repo_id, int)
+
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.push(repo_id, repo_name, from_target, to_target, force)
 
 	def force_delete(self, repostore_id, repo_id, repo_name, target):
+		assert isinstance(repo_id, int)
+
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			return client.force_delete(repo_id, repo_name, target)
 
 	def store_pending(self, repostore_id, repo_id, repo_name, sha, commit_id):
+		assert isinstance(repo_id, int)
+
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			return client.store_pending(repo_id, repo_name, sha, commit_id)
 
@@ -160,6 +110,12 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
 			client.rename_repository(repo_id, old_repo_name, new_repo_name)
+
+	def get_commit_attributes(self, repostore_id, repo_id, repo_name, sha):
+		assert isinstance(repo_id, int)
+
+		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
+			return client.get_commit_attributes(repo_id, repo_name, sha)
 
 	def get_least_loaded_store(self):
 		"""Identifies the local store that is being least utilized. For this particular class
@@ -247,6 +203,9 @@ class RepositoryStore(object):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def rename_repository(self, repo_id, old_repo_name, new_repo_name):
+		raise NotImplementedError("Subclasses should override this!")
+
+	def get_commit_attributes(self, repo_id, repo_name, sha):
 		raise NotImplementedError("Subclasses should override this!")
 
 
@@ -355,7 +314,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			try:
 				self._hg_fetch_with_private_key(repo, remote_repo)
 				repo.merge(tool="internal:fail")
-				rev, sha = repo.commit("Merging in %s" % sha[:12])
+				rev, sha = repo.commit("Merging in %s" % sha)
 				return sha
 			except CommandError:
 				exc_info = sys.exc_info()
@@ -691,6 +650,49 @@ class FileSystemRepositoryStore(RepositoryStore):
 			shutil.move(old_repo_path, new_repo_path)
 		else:
 			raise RepositoryAlreadyExistsException(repo_id, new_repo_path)
+
+	def get_commit_attributes(self, repo_id, repo_name, sha):
+		assert isinstance(repo_id, int)
+		commit_attributes = dict()
+
+		repo_type = self._get_repo_type(repo_id)
+
+		with model_server.rpc_connect("repos", "read") as conn:
+				remote_repo = conn.get_repo_forward_url(repo_id)
+
+		if repo_type == "git":
+			repo_name += '.git'
+			repo_path = self._resolve_path(repo_id, repo_name)
+			repo = Repo(repo_path)
+
+			try:
+				commit = repo.commit(sha)
+			except git.exc.BadObject:
+				raise NoSuchCommitError(repo_id, sha)
+
+			commit_attributes["message"] = commit.message
+			commit_attributes["username"] = commit.author.name
+			commit_attributes["email"] = commit.author.email
+
+		elif repo_type == "hg":
+			repo_path = self._resolve_path(repo_id, repo_name)
+			repo = hglib.open(repo_path)
+
+			self._hg_fetch_with_private_key(repo, remote_repo)
+
+			try:
+				log = repo.log(sha)
+			except CommandError:
+				raise NoSuchCommitError(repo_id, sha)
+
+			commit_attributes["message"] = log[5]
+			commit_attributes["username"] = log[4].split('<')[0].strip()
+			commit_attributes["email"] = log[4].split('<')[1].strip('> ')
+			commit_attributes["branch"] = log[3]
+		else:
+			return 
+
+		return commit_attributes
 
 	def _resolve_path(self, repo_id, repo_name):
 		repo_path = os.path.join(self._root_path, pathgen.to_path(repo_id, repo_name))
