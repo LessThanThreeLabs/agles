@@ -73,9 +73,9 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		skip = False
 
-		if (verify_only == False) & ('[ci skip]' in commit_attributes['message']):
+		if (verify_only == False) and ('[ci skip]' in commit_attributes['message']):
 			skip = True
-		elif ('[ci verify_only]' in commit_attributes['message']):
+		elif ('[ci test_only]' in commit_attributes['message']):
 			verify_only = True
 
 		self.publish_event("repos", repo_id, "change added", user=user_dict, commit=commit_dict,

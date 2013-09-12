@@ -14,7 +14,9 @@ class VerificationResultsHandler(object):
 		self.remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 
 	def pass_change(self, change_id, verify_only):
-		if (verify_only | self._send_merge_request(change_id, BuildStatus.PASSED)):
+		if (verify_only):
+			self._set_change_status_if_not_finished(change_id, BuildStatus.PASSED)
+		if self._send_merge_request(change_id, BuildStatus.PASSED):
 			self._set_change_status_if_not_finished(change_id, BuildStatus.PASSED, MergeStatus.PASSED)
 
 	def skip_change(self, change_id):
