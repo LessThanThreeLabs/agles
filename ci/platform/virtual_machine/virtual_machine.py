@@ -269,30 +269,57 @@ class VirtualMachine(object):
 		return self.ssh_call(command, output_handler)
 
 	@classmethod
-	def get_newest_image(cls):
-		images = cls.get_all_images()
-		return max(images, key=cls.get_image_version)  # get image with greatest version
+	def get_active_image(cls):
+		base_image = cls.get_base_image()
+		snapshots = cls.get_snapshots(base_image)
+		if snapshots:
+			return max(snapshots, key=cls.get_snapshot_version)
+		return base_image
 
 	@classmethod
-	def get_newest_global_image(cls):
-		images = cls.get_all_images()
-		return max(filter(lambda image: cls.get_image_version(image)[1] == -1, images), key=lambda image: cls.get_image_version(image)[0])
-
-	@classmethod
-	def get_all_images(cls):
+	def get_base_image(cls):
 		raise NotImplementedError()
 
 	@classmethod
-	def get_image_version(cls, image):
-		name_parts = image.name.split('_')
-		try:
-			major_version, minor_version = VirtualMachine.ImageVersion(name_parts[-2]), VirtualMachine.ImageVersion(name_parts[-1])
-		except (IndexError, ValueError):
+	def get_available_base_images(cls):
+		raise NotImplementedError()
+
+	@classmethod
+	def get_snapshots(cls, base_image):
+		raise NotImplementedError()
+
+	@classmethod
+	def get_image_id(cls, image):
+		raise NotImplementedError()
+
+	@classmethod
+	def get_image_name(cls, image):
+		raise NotImplementedError()
+
+	@classmethod
+	def serialize_image(cls, image):
+		return {
+			'id': cls.get_image_id(image),
+			'name': cls.get_image_name(image)
+		}
+
+	@classmethod
+	def serialize_images(cls, images):
+		return map(cls.serialize_image, images)
+
+	@classmethod
+	def format_snapshot_name(cls, base_image, snapshot_version):
+		return 'koality-snapshot-(%s)-v%s' % (cls.get_image_name(base_image), snapshot_version)
+
+	@classmethod
+	def get_snapshot_version(cls, image):
+		image_name = cls.get_image_name(image)
+		if image_name.startswith('koality-snapshot-'):
 			try:
-				major_version, minor_version = VirtualMachine.ImageVersion(name_parts[-1]), -1
+				return int(image_name[image_name.rfind('v')])
 			except:
-				major_version, minor_version = -1, -1
-		return major_version, minor_version
+				pass
+		return None
 
 	def __repr__(self):
 		return '%s(%r, %r, %r)' % (type(self).__name__, self.vm_id, self.instance, self.vm_username)
@@ -306,57 +333,3 @@ class VirtualMachine(object):
 
 		def to_arg_list(self):
 			return ['ssh'] + map(lambda option: '-o%s=%s' % option, self.options.iteritems()) + ['%s@%s' % (self.username, self.hostname), '-p', str(self.port)]
-
-
-	class ImageVersion(object):
-		"""A multiple decimal-place version string (such as 1.0.4)"""
-		def __init__(self, string_representation):
-			string_representation = str(string_representation)
-			self.sub_versions = [int(sub_version) for sub_version in string_representation.split('.')]
-
-		def __eq__(self, other):
-			if not isinstance(other, VirtualMachine.ImageVersion):
-				try:
-					other = VirtualMachine.ImageVersion(other)
-				except:
-					return False
-
-			return self.sub_versions == other.sub_versions
-
-		def __cmp__(self, other):
-			if not isinstance(other, VirtualMachine.ImageVersion):
-				other = VirtualMachine.ImageVersion(other)
-
-			for version_index in xrange(len(self.sub_versions)):
-				if version_index >= len(other.sub_versions):
-					return 1
-				else:
-					comparison = cmp(self.sub_versions[version_index], other.sub_versions[version_index])
-					if comparison != 0:
-						return comparison
-			if len(self.sub_versions) < len(other.sub_versions):
-				return -1
-			return 0
-
-		def __add__(self, other):
-			if not isinstance(other, VirtualMachine.ImageVersion):
-				other = VirtualMachine.ImageVersion(other)
-
-			sub_versions = [0] * max(len(self.sub_versions), len(other.sub_versions))
-
-			for version_index in xrange(len(self.sub_versions)):
-				sub_versions[version_index] += self.sub_versions[version_index]
-
-			for version_index in xrange(len(other.sub_versions)):
-				sub_versions[version_index] += other.sub_versions[version_index]
-
-			return VirtualMachine.ImageVersion(self._from_sub_versions(sub_versions))
-
-		def __str__(self):
-			return self._from_sub_versions(self.sub_versions)
-
-		def __repr__(self):
-			return '%s(%s)' % (type(self).__name__, self)
-
-		def _from_sub_versions(self, sub_versions):
-			return '.'.join([str(sub_version) for sub_version in sub_versions])

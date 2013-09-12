@@ -262,13 +262,37 @@ class Ec2Vm(VirtualMachine):
 		self.instance.reboot()
 
 	@classmethod
-	def get_all_images(cls):
-		return cls.CloudClient().get_all_images(
-			filters={
-				'name': '%s_%s_%s*' % (AwsSettings.vm_image_name_prefix, AwsSettings.vm_image_name_suffix, AwsSettings.vm_image_name_version),
+	def get_base_image(cls):
+		image_id = AwsSettings.vm_image_id
+		if image_id:
+			try:
+				return cls.CloudClient().get_image(image_id)
+			except:
+				cls.logger.exception('Invalid image id specified, using default instead')
+		return cls.CloudClient().get_all_images(filters={
+				'name': 'koality_verification_0.3', # to be changed
+				'state': 'available',
+				'owner': '600991114254'  # must be changed if our ec2 info changes
+			})[0]
+
+	@classmethod
+	def get_available_base_images(cls):
+		return cls.CloudClient().get_all_images(owners=['self'])
+
+	@classmethod
+	def get_snapshots(cls, base_image):
+		return cls.CloudClient().get_all_images(filters={
+				'name': cls.format_snapshot_name(base_image, '*'),
 				'state': 'available'
-			}
-		)
+			})
+
+	@classmethod
+	def get_image_id(cls, image):
+		return image.id
+
+	@classmethod
+	def get_image_name(cls, image):
+		return image.name
 
 	def create_image(self, name, description=None):
 		return self.CloudClient().create_image(self.instance.id, name, description)

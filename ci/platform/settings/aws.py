@@ -9,9 +9,7 @@ class AwsSettings(DatabaseBackedSettings):
 			aws_secret_access_key='',
 			instance_type='m1.medium',
 			largest_instance_type=None,
-			vm_image_name_prefix='koality_verification',
-			vm_image_name_suffix='lucid',  # this should be changed to 'precise'
-			vm_image_name_version='0.3',
+			vm_image_id=None,  # default to our 12.04 AMI
 			security_group='koality_verification',
 			root_drive_size=8,
 			s3_bucket_name='')
