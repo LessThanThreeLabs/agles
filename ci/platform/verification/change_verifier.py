@@ -55,7 +55,7 @@ class ChangeVerifier(EventSubscriber):
 			patch_id = contents['patch_id']
 			verify_only = contents['verify_only']
 
-			if not DeploymentSettings.active:
+			if contents['skip'] | (not DeploymentSettings.active):
 				self.skip_change(change_id)
 				return
 

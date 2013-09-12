@@ -71,9 +71,16 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		if repo_type == 'hg':
 			merge_target = commit_attributes['branch']
 
+		skip = False
+
+		if (verify_only == False) & ('[ci skip]' in commit_attributes['message']):
+			skip = True
+		elif ('[ci verify_only]' in commit_attributes['message']):
+			verify_only = True
+
 		self.publish_event("repos", repo_id, "change added", user=user_dict, commit=commit_dict,
 			repo_type=repo_type, change_id=change_id, change_number=change_number, verification_status="queued",
-			merge_target=merge_target, create_time=create_time, patch_id=patch_id, verify_only=verify_only)
+			merge_target=merge_target, create_time=create_time, patch_id=patch_id, verify_only=verify_only, skip=skip)
 		return {"change_id": change_id, "commit_id": commit_id}
 
 	def create_github_commit_and_change(self, user_id, github_owner_name, github_repo_name, base_sha, head_sha, branch_name):
