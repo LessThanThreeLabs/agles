@@ -1,6 +1,7 @@
 import pipes
 
-import paramiko
+import eventlet
+paramiko = eventlet.import_patched('paramiko')
 
 from database.engine import ConnectionFactory
 from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest, ShellSudo
