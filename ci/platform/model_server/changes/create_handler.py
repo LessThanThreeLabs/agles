@@ -88,7 +88,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		repo = database.schema.repo
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			query = github_repo_metadata.join(repo).apply_labels().select().where(
+			query = github_repo_metadata.join(repo).select().apply_labels().where(
 				and_(
 					repo.c.deleted == 0,
 					github_repo_metadata.c.repo_name == github_repo_name,
