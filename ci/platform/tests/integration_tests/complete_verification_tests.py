@@ -144,7 +144,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		init_commit = self._git_modify_commit_push(work_repo, modfile, contents, parent_commits=[])
 
 		with model_server.rpc_connect("changes", "create") as client:
-			commit_id = client.create_commit_and_change(self.repo_id, self.user_id, 'commit_message', 'sha', 'master', None, False)['commit_id']
+			commit_id = client.create_commit_and_change(self.repo_id, self.user_id, None, bare_repo.head.commit.hexsha, 'master', False)['commit_id']
 
 		commit_sha = self._git_modify_commit_push(work_repo, "koality.yml",
 			yaml.safe_dump({'test': {'scripts': self._test_commands(passes)}}),
@@ -198,7 +198,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		work_repo.git.reset('HEAD~', hard=True)
 
 		with model_server.rpc_connect("changes", "create") as client:
-			client.create_commit_and_change(self.repo_id, self.user_id, 'commit_message', 'sha', 'master', None, False, patch)
+			client.create_commit_and_change(self.repo_id, self.user_id, None, bare_repo.head.commit.hexsha, 'master', False, patch)
 
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
 			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
