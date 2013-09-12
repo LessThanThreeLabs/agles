@@ -231,6 +231,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 			return result.inserted_primary_key[0]
 
 	def test_get_ip_address(self):
+		assert(False)
 		ip_address = self.store._get_ip_address()
 		assert_not_equals(ip_address, 'localhost')
 
