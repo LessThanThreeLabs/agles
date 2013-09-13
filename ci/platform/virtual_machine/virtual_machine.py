@@ -114,12 +114,17 @@ class VirtualMachine(object):
 			return ShiftedConsoleAppender()
 
 		output_handler = kwargs.get('output_handler')
-		for x in xrange(num_attempts):
+		sleep_time = kwargs.get('sleep_time', 1)
+		for attempt in xrange(num_attempts):
 			kwargs['output_handler'] = output_handler
 			results = method(*args, **kwargs)
 			if success_check(results):
 				return results
-			output_handler = shift_output_handler(output_handler, results.output.count('\n') + 1)
+			if attempt < num_attempts - 1:
+				output_handler = shift_output_handler(output_handler, results.output.count('\n') + 1)
+				self.logger.info('Sleeping %d seconds before retrying...' % sleep_time)
+				eventlet.sleep(sleep_time)
+				sleep_time *= 2
 		return results
 
 	def remote_patch(self, repo_name, patch_contents, output_handler=None):
