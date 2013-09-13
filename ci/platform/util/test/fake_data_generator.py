@@ -122,7 +122,7 @@ class SchemaDataGenerator(object):
 					commit_email = user_email
 					ins_commit = schema.commit.insert().values(repo_id=repo_id, user_id=user_id,
 						message=commit_message, timestamp=random.randint(1, int(time.time())), sha=sha,
-						submitter_name=commit_owner, submitter_email=commit_email)
+						committer_name=commit_owner, committer_email=commit_email)
 					commit_id = conn.execute(ins_commit).inserted_primary_key[0]
 					ins_change = schema.change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target="target-%d" % commit,
 						number=repos[repo_id], verification_status=self.get_random_commit_status(), merge_status=self.get_random_merge_status(),

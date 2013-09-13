@@ -124,7 +124,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		timestamp = int(time.time())
 		ins = commit.insert().values(repo_id=repo_id, user_id=user_id,
 			message=commit_attributes['message'], sha=head_sha, base_sha=base_sha, timestamp=timestamp,
-			submitter_name=commit_attributes['username'], submitter_email=commit_attributes['email'])
+			committer_name=commit_attributes['username'], committer_email=commit_attributes['email'])
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]

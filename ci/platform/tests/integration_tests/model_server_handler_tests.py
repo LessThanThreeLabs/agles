@@ -54,8 +54,8 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 				message='a',
 				sha=self.commit_sha,
 				timestamp=1,
-				submitter_name=self.commit_owner,
-				submitter_email=self.commit_email
+				committer_name=self.commit_owner,
+				committer_email=self.commit_email
 			)
 
 			commit_id = sqlconn.execute(ins_commit).inserted_primary_key[0]
@@ -112,7 +112,7 @@ class ModelServerHandlerTest(BaseIntegrationTest):
 
 		for i in self.build_ids:
 			update_handler.add_subtype(i, ConsoleType.Test, "unittest")
-			update_handler.store_xunit_contents(i, ConsoleType.Test, "unittest", 
+			update_handler.store_xunit_contents(i, ConsoleType.Test, "unittest",
 				{"file": "contents1", "file2": "contents2"})
 
 	def test_store_patch(self):
