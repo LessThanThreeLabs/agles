@@ -50,8 +50,10 @@ class ChangeVerifier(EventSubscriber):
 		try:
 			change_id = contents['change_id']
 			commit_id = contents['commit']['id']
-			sha = contents['commit']['sha']
+			head_sha = contents['commit']['sha']
+			base_sha = contents['commit'].get('base_sha')
 			repo_type = contents['repo_type']
+			merge_target = contents['merge_target']
 			patch_id = contents['patch_id']
 			verify_only = contents['verify_only']
 
@@ -59,7 +61,7 @@ class ChangeVerifier(EventSubscriber):
 				self.skip_change(change_id)
 				return
 
-			verification_config = self._get_verification_config(commit_id, sha, repo_type, patch_id)
+			verification_config = self._get_verification_config(commit_id, head_sha, base_sha, merge_target, repo_type, patch_id)
 
 			workers_spawned = event.Event()
 			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned, verify_only, patch_id)
@@ -102,11 +104,11 @@ class ChangeVerifier(EventSubscriber):
 
 				with model_server.rpc_connect("repos", "read") as client:
 					repo_type = client.get_repo_type(change_attributes['repo_id'])
-					sha = client.get_commit_attributes(commit_id)['sha']
+					head_sha = client.get_commit_attributes(commit_id)['sha']
 
 				user_id = contents['user_id']
 
-				verification_config = self._get_verification_config(commit_id, sha, repo_type, patch_id=None)
+				verification_config = self._get_verification_config(commit_id, head_sha, repo_type, patch_id=None)
 
 				debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
 
@@ -249,7 +251,7 @@ class ChangeVerifier(EventSubscriber):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:
 			return model_server_rpc.create_build(change_id)
 
-	def _get_verification_config(self, commit_id, sha, repo_type, patch_id):
+	def _get_verification_config(self, commit_id, head_sha, base_sha, merge_target, repo_type, patch_id):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
 			attributes = model_server_rpc.get_repo_attributes(repo_uri)
@@ -284,11 +286,11 @@ class ChangeVerifier(EventSubscriber):
 			if self.uri_translator:
 				checkout_url = self.uri_translator.translate(repo_uri)
 				host_url, _, repo_uri = checkout_url.split('://')[1].partition('/')
-				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "hg", "show-koality", repo_uri, sha]
+				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "hg", "show-koality", repo_uri, head_sha]
 			else:
 				# TODO(andrey) Test this case!
 				checkout_url = repo_uri
-				show_command = ["bash", "-c", "cd %s && hg -R %s cat * -I koality.yml -I .koality.yml" % (repo_uri, os.path.join(repo_uri, ".hg", "strip-backup", sha + ".hg"))]
+				show_command = ["bash", "-c", "cd %s && hg -R %s cat * -I koality.yml -I .koality.yml" % (repo_uri, os.path.join(repo_uri, ".hg", "strip-backup", head_sha + ".hg"))]
 			try:
 				config_dict = yaml.safe_load(subprocess.check_output(show_command))
 			except:
@@ -301,11 +303,20 @@ class ChangeVerifier(EventSubscriber):
 		if not isinstance(config_dict, dict):
 			config_dict = {}
 
+		environment = {
+			'KOALITY': 'true',
+			'KOALITY_HEAD_SHA': head_sha,
+			'KOALITY_BRANCH': merge_target,
+			'KOALITY_REPOSITORY': repo_name
+		}
+		if base_sha:
+			environment['KOALITY_BASE_SHA'] = base_sha
+
 		try:
-			return VerificationConfig(repo_type, repo_name, checkout_url, ref, config_dict, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
+			return VerificationConfig(repo_type, repo_name, checkout_url, ref, environment, config_dict, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
 		except:
 			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=True)
-			return VerificationConfig(repo_type, repo_name, checkout_url, ref, {})
+			return VerificationConfig(repo_type, repo_name, checkout_url, ref, environment, {})
 
 	def _is_result_failed(self, result):
 		return isinstance(result, Exception)

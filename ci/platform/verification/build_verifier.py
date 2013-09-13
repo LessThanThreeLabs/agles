@@ -1,13 +1,10 @@
-import os
 import yaml
 
 import model_server
 
 from build_core import VerificationException
 from pubkey_registrar import PubkeyRegistrar
-from settings.store import StoreSettings
 from shared.constants import BuildStatus, VerificationUser
-from util import pathgen
 from util.log import Logged
 from verification_results_handler import VerificationResultsHandler
 
@@ -91,17 +88,6 @@ class BuildVerifier(object):
 	def launch_build(self, commit_id, repo_type, verification_config):
 		self.build_core.virtual_machine.store_vm_metadata(commit_id=commit_id)
 
-		repo_uri = self._get_repo_uri(commit_id)
-
-		if repo_type == "git":
-			ref = pathgen.hidden_ref(commit_id)
-		elif repo_type == "hg":
-			ref = self._get_commit(commit_id)['sha']
-		else:
-			raise NoSuchRepoTypeError("Unknown repository type %s." % repo_type)
-
-		private_key = StoreSettings.ssh_private_key
-
 		self.build_core.run_setup_step(verification_config.setup_commands)
 		self.build_core.run_compile_step(self._dedupe_step_names(verification_config.compile_commands))
 
@@ -111,16 +97,7 @@ class BuildVerifier(object):
 		commit_id = build['commit_id']
 		self.logger.info("Worker %s processing verification request: (build id: %s, commit id: %s)" % (self.worker_id, build_id, commit_id))
 		self._start_build(build_id)
-		repo_uri = self._get_repo_uri(commit_id)
 
-		if repo_type == "git":
-			ref = pathgen.hidden_ref(commit_id)
-		elif repo_type == "hg":
-			ref = self._get_commit(commit_id)['sha']
-		else:
-			raise NoSuchRepoTypeError("Unknown repository type %s." % repo_type)
-
-		private_key = StoreSettings.ssh_private_key
 		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 			self.build_core.run_setup_step(verification_config.setup_commands, console_appender)

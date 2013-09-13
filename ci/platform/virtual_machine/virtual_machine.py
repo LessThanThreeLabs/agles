@@ -20,11 +20,12 @@ class VirtualMachine(object):
 		self._redis_conn = redis_connection or ConnectionFactory.get_redis_connection('virtual_machine')
 		self._ssh_conn = None
 
-	def provision(self, repo_name, language_config, setup_config, output_handler=None):
+	def provision(self, repo_name, environment, language_config, setup_config, output_handler=None):
 		try:
 			provisioner = Provisioner(self._ssh_connect())
 			return provisioner.provision(
 				'~/%s' % repo_name,
+				environment=environment,
 				language_config=language_config,
 				setup_config=setup_config,
 				output_handler=output_handler

@@ -2,7 +2,7 @@ from virtual_machine.remote_command import RemoteProvisionCommand, RemoteCompile
 
 
 class VerificationConfig(object):
-	def __init__(self, repo_type, repo_name, repo_url, ref, configuration, private_key=None, patch_id=None):
+	def __init__(self, repo_type, repo_name, repo_url, ref, environment, configuration, private_key=None, patch_id=None):
 		try:
 			self.repo_name = repo_name
 
@@ -19,7 +19,7 @@ class VerificationConfig(object):
 			setup_commands.append(RemoteCheckoutCommand(repo_name, repo_url, repo_type, ref))
 			if patch_id is not None:
 				setup_commands.append(RemotePatchCommand(repo_name, patch_id))
-			setup_commands.append(RemoteProvisionCommand(repo_name, language_section, setup_section))
+			setup_commands.append(RemoteProvisionCommand(repo_name, environment, language_section, setup_section))
 
 			self.setup_commands = setup_commands
 

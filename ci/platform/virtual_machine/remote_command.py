@@ -259,14 +259,15 @@ class RemotePatchCommand(RemoteSetupCommand):
 
 
 class RemoteProvisionCommand(RemoteSetupCommand):
-	def __init__(self, repo_name, language_config, setup_config):
+	def __init__(self, repo_name, environment, language_config, setup_config):
 		super(RemoteProvisionCommand, self).__init__('provision')
 		self.repo_name = repo_name
+		self.environment = environment
 		self.language_config = language_config
 		self.setup_config = setup_config
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.provision(self.repo_name, self.language_config, self.setup_config, output_handler=output_handler)
+		return virtual_machine.provision(self.repo_name, self.environment, self.language_config, self.setup_config, output_handler=output_handler)
 
 
 class RemoteExportCommand(RemoteCommand):
