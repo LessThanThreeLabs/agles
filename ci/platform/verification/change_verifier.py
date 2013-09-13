@@ -1,8 +1,9 @@
+import collections
+import os
 import subprocess
 import sys
 
 import yaml
-import os
 
 from eventlet import event, spawn, spawn_n, spawn_after, queue
 from kombu.messaging import Producer
@@ -303,12 +304,12 @@ class ChangeVerifier(EventSubscriber):
 		if not isinstance(config_dict, dict):
 			config_dict = {}
 
-		environment = {
-			'KOALITY': 'true',
-			'KOALITY_HEAD_SHA': head_sha,
-			'KOALITY_BRANCH': merge_target,
-			'KOALITY_REPOSITORY': repo_name
-		}
+		environment = collections.OrderedDict([
+			('KOALITY', 'true'),
+			('KOALITY_HEAD_SHA', head_sha),
+			('KOALITY_BRANCH', merge_target),
+			('KOALITY_REPOSITORY', repo_name)
+		])
 		if base_sha:
 			environment['KOALITY_BASE_SHA'] = base_sha
 
