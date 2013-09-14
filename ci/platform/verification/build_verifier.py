@@ -108,7 +108,7 @@ class BuildVerifier(object):
 		test_queue.begin_populating_tasks()
 		try:
 			test_commands = verification_config.test_commands
-			for factory_command in verification_config.test_factory_commands:
+			for factory_command in self._dedupe_step_names(verification_config.test_factory_commands):
 				with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
 					console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 					generated_test_commands = self.build_core.run_factory_command(factory_command, console_appender)
