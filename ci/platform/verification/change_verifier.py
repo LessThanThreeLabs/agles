@@ -102,14 +102,18 @@ class ChangeVerifier(EventSubscriber):
 					change_attributes = client.get_change_attributes(change_id)
 
 				commit_id = change_attributes['commit_id']
+				merge_target = change_attributes['merge_target']
 
 				with model_server.rpc_connect("repos", "read") as client:
 					repo_type = client.get_repo_type(change_attributes['repo_id'])
-					head_sha = client.get_commit_attributes(commit_id)['sha']
+					commit_attributes = client.get_commit_attributes(commit_id)
+
+				head_sha = commit_attributes['sha']
+				base_sha = commit_attributes['base_sha']
 
 				user_id = contents['user_id']
 
-				verification_config = self._get_verification_config(commit_id, head_sha, repo_type, patch_id=None)
+				verification_config = self._get_verification_config(commit_id, head_sha, base_sha, merge_target, repo_type, None)
 
 				debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
 
