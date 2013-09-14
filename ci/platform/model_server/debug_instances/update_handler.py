@@ -4,11 +4,14 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from settings.web_server import WebServerSettings
 from util.mail import sendmail
 
+# TODO (akostov): make this timeout not hardcoded
 LAUNCH_TEMPLATE = """%s %s,
+
+Your debug instance has launched and will be accessible for the next 50 minutes.
 
 To SSH into your debug instance type the following command into your terminal:
 
-ssh verification@%s -t "ssh %s"
+ssh verification@%s -Ct "ssh %s"
 
 -The Koality Team"""
 
@@ -40,4 +43,4 @@ class DebugInstancesUpdateHandler(ModelServerRpcHandler):
 		subject = "Your debug instance has launched"
 		text = LAUNCH_TEMPLATE % (first_name, last_name, WebServerSettings.domain_name, instance_id)
 
-		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)
+		return sendmail("koality@%s" % WebServerSettings.domain_name, [email], subject, text)

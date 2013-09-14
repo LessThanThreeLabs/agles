@@ -7,5 +7,6 @@ class RPCError(Exception):
 
 
 class RPCRequestError(RPCError):
-	def __init__(self, msg=''):
+	def __init__(self, msg='', original_type=None):
+		self.original_type = original_type
 		super(RPCRequestError, self).__init__(msg)

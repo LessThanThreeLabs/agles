@@ -37,12 +37,21 @@ class RestrictedSSHForwardingShell(RestrictedShell):
 		if not len(command_parts) == 3:
 			raise InvalidCommandError(full_ssh_command)
 
-		self.verify_user_exists("", command_parts[2])
+		vm_instance_id = command_parts[1]
+		user_id = command_parts[2]
+
+		self.verify_user_exists("", user_id)
 
 		with model_server.rpc_connect("debug_instances", "read") as debug_read_rpc:
-			vm = debug_read_rpc.get_vm_from_instance_id(command_parts[1])
+			vm = debug_read_rpc.get_vm_from_instance_id(vm_instance_id)
+
+		if vm is None:
+			raise VirtualMachineNotFoundError(vm_instance_id)
 
 		virtual_machine = Ec2Vm.from_vm_id(vm['pool_slot'])
+
+		if virtual_machine is None or virtual_machine.instance.id != vm_instance_id:
+			raise VirtualMachineNotFoundError(vm_instance_id)
 
 		ssh_args = virtual_machine.ssh_args().to_arg_list()
 		os.execlp(ssh_args[0], *ssh_args)
@@ -194,6 +203,7 @@ class RestrictedHgShell(RestrictedShell):
 		args = self.rp_new_sshargs("hg -R", requested_repo_uri, user_id)
 		os.execlp(*args)
 
+	# TODO(andrey) refactor this and cat-bundle
 	def handle_show_koality(self, requested_repo_uri, user_id, sha):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
 			attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
@@ -204,9 +214,9 @@ class RestrictedHgShell(RestrictedShell):
 		self.verify_user_exists("git-show", user_id, attributes['repo']['id'])
 		remote_filesystem_path = os.path.join(attributes['repostore']['repositories_path'], pathgen.to_path(attributes['repo']['id'], attributes['repo']['name']))
 
-		yml_path = os.path.join(remote_filesystem_path, ".hg", "strip-backup", sha + "-koality.yml")
+		bundle_path = os.path.join(remote_filesystem_path, ".hg", "strip-backup", sha + ".hg")
 		uri = "git@%s" % attributes['repostore']['ip_address']
-		full_command = "sh -c %s" % pipes.quote("cat %s" % yml_path)
+		full_command = "sh -c %s" % pipes.quote("cd %s && hg -R %s cat * -I koality.yml -I .koality.yml" % (remote_filesystem_path, bundle_path))
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
 	def handle_cat_bundle(self, requested_repo_uri, user_id, sha):
@@ -258,4 +268,8 @@ class RepositoryNotFoundError(Exception):
 
 
 class MalformedCommandError(RepositoryNotFoundError):
+	pass
+
+
+class VirtualMachineNotFoundError(Exception):
 	pass

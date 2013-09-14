@@ -571,6 +571,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			return True
 
 	def store_pending(self, repo_id, repo_name, sha, commit_id):
+		raise NoSuchCommitError(repo_id=repo_id, ref=sha)
 		repo_type = self._get_repo_type(repo_id)
 		if repo_type == 'git':
 			self._git_store_pending(repo_id, repo_name, sha, commit_id)
@@ -595,7 +596,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		try:
 			repo.commit(sha)
 		except git.exc.BadObject:
-			raise NoSuchCommitError(repo_id, sha)
+			raise NoSuchCommitError(repo_id=repo_id, ref=sha)
 
 		try:
 			refs.SymbolicReference.create(repo, 'refs/pending/%d' % commit_id, sha)
@@ -616,7 +617,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		try:
 			repo.update(sha)
 		except CommandError:
-			raise NoSuchCommitError(repo_id, sha)
+			raise NoSuchCommitError(repo_id=repo_id, ref=sha)
 
 		try:
 			parent_shas = map(lambda rev: rev.node, repo.log(['parents(%s)' % sha]))
@@ -739,6 +740,7 @@ class RepositoryAlreadyExistsException(RepositoryOperationException):
 class NoSuchCommitError(RepositoryOperationException):
 	"""Indicates an exception occured trying to dereference a given ref."""
 
-	def __init__(self, repo_id, ref):
-		msg = 'Could not find commit %s for repo %d' % (ref, repo_id)
+	def __init__(self, msg='', repo_id=None, ref=None):
+		if not msg:
+			msg = 'Could not find commit %s for repo %d' % (ref, repo_id)
 		super(RepositoryOperationException, self).__init__(msg)

@@ -83,4 +83,4 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		subject = "There was an issue with your change (%s)" % sha
 		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link, target, message)
 
-		return sendmail("buildbuddy@koalitycode.com", [email], subject, text)
+		return sendmail("koality@%s" % WebServerSettings.domain_name, [email], subject, text)

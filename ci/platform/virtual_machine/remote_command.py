@@ -292,6 +292,8 @@ class RemoteErrorCommand(RemoteCommand):
 		full_message = 'Error: %s' % self.error_message
 		return virtual_machine.ssh_call("echo -e %s; exit 1" % pipes.quote(full_message), output_handler=output_handler)
 
+	def get_xunit_contents(self):
+		pass
 
 class InvalidConfigurationException(Exception):
 	pass

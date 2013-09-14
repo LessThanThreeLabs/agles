@@ -23,6 +23,9 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		super(ChangesCreateHandler, self).__init__("changes", "create", channel)
 
 	def create_commit_and_change(self, repo_id, user_id, base_sha, head_sha, merge_target, verify_only=False, patch_contents=None):
+		repo_id = int(repo_id)
+		user_id = int(user_id)
+
 		change = database.schema.change
 		repo = database.schema.repo
 		user = database.schema.user
