@@ -308,14 +308,13 @@ class ChangeVerifier(EventSubscriber):
 		if not isinstance(config_dict, dict):
 			config_dict = {}
 
-		environment = collections.OrderedDict([
-			('KOALITY', 'true'),
-			('KOALITY_HEAD_SHA', head_sha),
-			('KOALITY_BRANCH', merge_target),
-			('KOALITY_REPOSITORY', repo_name)
-		])
+		environment = collections.OrderedDict()
+		environment['KOALITY']  = 'true'
+		environment['KOALITY_HEAD_SHA'] = head_sha
 		if base_sha:
 			environment['KOALITY_BASE_SHA'] = base_sha
+		environment['KOALITY_BRANCH'] = merge_target
+		environment['KOALITY_REPOSITORY'] = repo_name
 
 		try:
 			return VerificationConfig(repo_type, repo_name, checkout_url, ref, environment, config_dict, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
