@@ -114,7 +114,7 @@ class VirtualMachine(object):
 			return ShiftedConsoleAppender()
 
 		output_handler = kwargs.get('output_handler')
-		sleep_time = kwargs.get('sleep_time', 1)
+		sleep_time = kwargs.get('sleep_time', 5)
 		for attempt in xrange(num_attempts):
 			kwargs['output_handler'] = output_handler
 			results = method(*args, **kwargs)
