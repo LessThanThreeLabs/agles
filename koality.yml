@@ -4,6 +4,9 @@ languages:
   ruby: 1.9.3
   nodejs: 0.8.12
 setup:
+  - scripts:
+    # This is a temporary hack because pip is dumb
+    - rm -rf $VIRTUAL_ENV/lib/python2.7/site-packages/streaming_executor*
   - packages:
     - system:
       - zlib1g
