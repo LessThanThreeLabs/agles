@@ -34,7 +34,7 @@ setup:
       script: ./rabbitmq_setup.sh
 compile:
   scripts:
-    - python setup.py install:
+    - pip install --upgrade .:
         path: ci/platform
 test:
   machines: 3
