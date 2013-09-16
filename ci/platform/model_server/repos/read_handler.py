@@ -109,7 +109,7 @@ class ReposReadHandler(ModelServerRpcHandler):
 			with ConnectionFactory.get_sql_connection() as sqlconn:
 				user_row = sqlconn.execute(query).first()
 
-			repo_info['github']['added_by_user'] = to_dict(user_row)
+			repo_info['github']['added_by_user'] = to_dict(user_row, user.columns)
 		else:
 			repo_info['github'] = None
 		return repo_info
