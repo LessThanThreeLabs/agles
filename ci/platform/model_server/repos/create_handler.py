@@ -38,6 +38,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 			repo_id=repo_id,
 			owner_name=github_owner_name,
 			repo_name=github_repo_name,
+			added_by_user_id=user_id
 		)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			sqlconn.execute(insert_github_metadata)
