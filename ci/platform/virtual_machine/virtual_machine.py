@@ -1,6 +1,7 @@
 import pipes
 
 import eventlet
+import eventlet.pools
 paramiko = eventlet.import_patched('paramiko')
 
 from database.engine import ConnectionFactory
@@ -18,17 +19,19 @@ class VirtualMachine(object):
 		self.instance = instance
 		self.vm_username = vm_username
 		self._redis_conn = redis_connection or ConnectionFactory.get_redis_connection('virtual_machine')
-		self._ssh_conn = None
+		self.ssh_pool = eventlet.pools.Pool(create=self._ssh_connect)
 
-	def provision(self, repo_name, language_config, setup_config, output_handler=None):
+	def provision(self, repo_name, environment, language_config, setup_config, output_handler=None):
 		try:
-			provisioner = Provisioner(self._ssh_connect())
-			return provisioner.provision(
-				'~/%s' % repo_name,
-				language_config=language_config,
-				setup_config=setup_config,
-				output_handler=output_handler
-			)
+			with self.ssh_pool.item() as ssh_conn:
+				provisioner = Provisioner(ssh_conn)
+				return provisioner.provision(
+					'~/%s' % repo_name,
+					environment=environment,
+					language_config=language_config,
+					setup_config=setup_config,
+					output_handler=output_handler
+				)
 		except:
 			failure_message = 'Failed to provision, could not connect to the testing instance.'
 			if output_handler is not None:
@@ -42,29 +45,24 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	def _ssh_connect(self):
-		if not self._ssh_conn or not self._ssh_conn.get_transport():
-			ssh_conn = paramiko.SSHClient()
-			ssh_conn.set_missing_host_key_policy(paramiko.WarningPolicy())
-			ssh_args = self.ssh_args()
-			ssh_conn.connect(ssh_args.hostname, ssh_args.port, ssh_args.username)
-			self._ssh_conn = ssh_conn
-		return self._ssh_conn
+		ssh_conn = paramiko.SSHClient()
+		ssh_conn.set_missing_host_key_policy(paramiko.WarningPolicy())
+		ssh_args = self.ssh_args()
+		ssh_conn.connect(ssh_args.hostname, ssh_args.port, ssh_args.username)
+		return ssh_conn
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		try:
-			return RemoteStreamingExecutor(self._ssh_connect()).execute(command, output_handler, timeout=timeout)
+			with self.ssh_pool.item() as ssh_conn:
+				return RemoteStreamingExecutor(ssh_conn).execute(command, output_handler, timeout=timeout)
 		except Exception as e:
 			failure_message = 'Failed to connect to the testing instance: %s' % e
 			if output_handler is not None:
 				output_handler.append({1: failure_message})
 			return CommandResults(1, failure_message)
 
-	def close_connection(self):
-		if self._ssh_conn:
-			self._ssh_conn.close()
-
 	def delete(self):
-		self.close_connection()
+		pass
 
 	def rebuild(self):
 		raise NotImplementedError()
@@ -113,12 +111,17 @@ class VirtualMachine(object):
 			return ShiftedConsoleAppender()
 
 		output_handler = kwargs.get('output_handler')
-		for x in xrange(num_attempts):
+		sleep_time = kwargs.get('sleep_time', 5)
+		for attempt in xrange(num_attempts):
 			kwargs['output_handler'] = output_handler
 			results = method(*args, **kwargs)
 			if success_check(results):
 				return results
-			output_handler = shift_output_handler(output_handler, results.output.count('\n') + 1)
+			if attempt < num_attempts - 1:
+				output_handler = shift_output_handler(output_handler, results.output.count('\n') + 1)
+				self.logger.info('Sleeping %d seconds before retrying...' % sleep_time)
+				eventlet.sleep(sleep_time)
+				sleep_time *= 2
 		return results
 
 	def remote_patch(self, repo_name, patch_contents, output_handler=None):
@@ -147,11 +150,12 @@ class VirtualMachine(object):
 
 	def configure_ssh(self, private_key, output_handler=None):
 		try:
-			provisioner = Provisioner(self._ssh_connect())
-			return provisioner.set_private_key(
-				private_key,
-				output_handler=output_handler
-			)
+			with self.ssh_pool.item() as ssh_conn:
+				provisioner = Provisioner(ssh_conn)
+				return provisioner.set_private_key(
+					private_key,
+					output_handler=output_handler
+				)
 		except:
 			failure_message = 'Failed to provision, could not connect to the testing instance.'
 			if output_handler is not None:

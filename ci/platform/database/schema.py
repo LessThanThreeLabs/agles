@@ -57,8 +57,8 @@ commit = Table('commit', metadata,
 	Column('base_sha', String, nullable=True),
 	Column('message', String, nullable=False),
 	Column('timestamp', Integer, nullable=False),
-	Column('submitter_name', String, nullable=True),
-	Column('submitter_email', String, nullable=True)
+	Column('committer_name', String, nullable=True),
+	Column('committer_email', String, nullable=True)
 )
 
 change = Table('change', metadata,
@@ -150,7 +150,8 @@ github_repo_metadata = Table('github_repo_metadata', metadata,
 	Column('owner_name', String, nullable=False),
 	Column('repo_name', String, nullable=False),
 	Column('hook_id', Integer, nullable=True),
-	Column('hook_secret', String, nullable=True)
+	Column('hook_secret', String, nullable=True),
+	Column('added_by_user_id', Integer, ForeignKey('user.id'), nullable=False)
 )
 
 repostore = Table('repostore', metadata,

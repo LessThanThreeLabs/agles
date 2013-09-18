@@ -4,9 +4,10 @@ import time
 from collections import Counter
 
 import model_server
+import yaml
 
 from settings.store import StoreSettings
-from shared.constants import VerificationUser
+from shared.constants import BuildStatus, VerificationUser
 from util.log import Logged
 from util.uri_translator import RepositoryUriTranslator
 from virtual_machine.ec2 import Ec2Vm
@@ -82,6 +83,8 @@ class Snapshotter(object):
 		try:
 			virtual_machine.wait_until_ready()
 
+			virtual_machine.configure_ssh(StoreSettings.ssh_private_key)
+
 			uri_translator = RepositoryUriTranslator()
 			self.clone_repositories(virtual_machine, repositories, uri_translator)
 
@@ -103,7 +106,7 @@ class Snapshotter(object):
 			virtual_machine.delete()
 
 	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
-		return self.vm_class.from_id_or_construct('cached:%s_%s' % snapshot_version, instance_name, image.id)
+		return self.vm_class.from_id_or_construct(-int(snapshot_version[1]) or -1, instance_name, image.id)
 
 	def clone_repositories(self, virtual_machine, repositories, uri_translator):
 		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
@@ -114,7 +117,10 @@ class Snapshotter(object):
 			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv %s /repositories/cached/%s' % (repository['name'], repository['name'], repository['name']))
 
 	def provision_for_repository(self, virtual_machine, repository, changes, uri_translator):
-		branch_counter = Counter(map(lambda change: change['merge_target'], filter(lambda change: change['repo_id'] == repository['id'], changes)))
+		repo_changes = filter(lambda change: change['repo_id'] == repository['id'], changes)
+		valid_changes = filter(lambda change: ' ' not in change['merge_target'], repo_changes)
+		passed_changes = filter(lambda change: change['verification_status'] == BuildStatus.PASSED, valid_changes)
+		branch_counter = Counter(map(lambda change: change['merge_target'], passed_changes))
 		if not branch_counter.most_common():
 			return
 		primary_branch = branch_counter.most_common(1)[0][0]
@@ -124,7 +130,11 @@ class Snapshotter(object):
 		self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
 		if virtual_machine.remote_checkout(repository['name'], uri_translator.translate(repository['uri']), repository['type'], branch).returncode != 0:
 			raise Exception('Failed to checkout branch "%s" for repository "%s"' % (branch, repository['name']))
-		provision_results = virtual_machine.provision(repository['name'], StoreSettings.ssh_private_key)
+		config_contents_results = virtual_machine.ssh_call('cat ~/%s/*koality.yml' % repository['name'])
+		if config_contents_results.returncode != 0:
+			raise Exception('Could not find a koality.yml or .koality.yml file for branch "%s" for repository "%s"' % (branch, repository['name']))
+		config_contents = yaml.safe_load(config_contents_results.output)
+		provision_results = virtual_machine.provision(repository['name'], {}, config_contents.get('languages'), config_contents.get('setup'))
 		if provision_results.returncode != 0:
 			failure_message = 'Provisioning failed with returncode %d' % provision_results.returncode
 			self.logger.error(failure_message + '\nProvision output:\n%s' % provision_results.output)

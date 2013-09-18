@@ -23,6 +23,36 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def create_repo(self, user_id, repo_name, forward_url, repo_type):
+		repo_id, current_time = self._create_repo()
+
+		self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name, forward_url=forward_url, created=current_time)
+		return repo_id
+
+	@AdminApi
+	def create_github_repo(self, user_id, repo_name, github_owner_name, github_repo_name, forward_url):
+		github_repo_metadata = database.schema.github_repo_metadata
+
+		repo_id, current_time = self._create_repo(user_id, repo_name, forward_url, 'git')
+
+		insert_github_metadata = github_repo_metadata.insert().values(
+			repo_id=repo_id,
+			owner_name=github_owner_name,
+			repo_name=github_repo_name,
+			added_by_user_id=user_id
+		)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(insert_github_metadata)
+
+		github_object = {
+			'owner_name': github_owner_name,
+			'repo_name': github_repo_name
+		}
+
+		self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name, forward_url=forward_url, created=current_time, github=github_object)
+
+		return repo_id
+
+	def _create_repo(self, user_id, repo_name, forward_url, repo_type):
 		if not repo_name:
 			raise RepositoryCreateError("repo_name cannot be empty")
 		elif re.match('^[-_a-zA-Z0-9]+$', repo_name) is None:
@@ -56,9 +86,8 @@ class ReposCreateHandler(ModelServerRpcHandler):
 				repo_type)
 			# make filesystem changes
 			self._create_repo_on_filesystem(manager, repostore_id, repo_id, repo_name)
+			return repo_id, current_time
 
-			self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name, forward_url=forward_url, created=current_time)
-			return repo_id
 		except repo.store.BadRepositorySetupError as e:
 			with model_server.rpc_connect('repos', 'delete') as repos_delete_handler:
 				repos_delete_handler.delete_repo(user_id, repo_id)
@@ -115,22 +144,6 @@ class ReposCreateHandler(ModelServerRpcHandler):
 		manager = repo.store.DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 		manager.register_remote_store(repostore_id)
 		return repostore_id
-
-	@AdminApi
-	def create_github_repo(self, user_id, repo_name, github_owner_name, github_repo_name, forward_url):
-		github_repo_metadata = database.schema.github_repo_metadata
-
-		repo_id = self.create_repo(user_id, repo_name, forward_url, 'git')
-
-		insert_github_metadata = github_repo_metadata.insert().values(
-			repo_id=repo_id,
-			owner_name=github_owner_name,
-			repo_name=github_repo_name,
-		)
-		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(insert_github_metadata)
-
-		return repo_id
 
 
 class RepositoryCreateError(Exception):

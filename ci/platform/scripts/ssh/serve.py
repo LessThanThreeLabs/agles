@@ -12,7 +12,7 @@ import model_server
 import util.log
 
 from util.permissions import InvalidPermissionsError
-from util.restricted_shell import RestrictedGitShell, RestrictedHgShell, RestrictedSSHForwardingShell, InvalidCommandError, RepositoryNotFoundError
+from util.restricted_shell import RestrictedGitShell, RestrictedHgShell, RestrictedSSHForwardingShell, InvalidCommandError, RepositoryNotFoundError, VirtualMachineNotFoundError
 
 
 def main():
@@ -39,6 +39,8 @@ def main():
 		print >> sys.stderr, "You do not have the necessary permissions to perform this action."
 	except RepositoryNotFoundError:
 		print >> sys.stderr, "Repository not found. Please check your VCS' configuration."
+	except VirtualMachineNotFoundError:
+		print >> sys.stderr, "Debug instance not found. Check that the instance hasn't expired and that you provided the correct command."
 	except:
 		util.log.configure()
 		logger = logging.getLogger("gitserve")

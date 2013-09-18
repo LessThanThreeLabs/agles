@@ -67,7 +67,7 @@ def main():
 
 	try:
 		if vm_class is not None:
-			verifier_pool = VirtualMachineVerifierPool(vm_class, max_verifiers=max_vm_count, uri_translator=RepositoryUriTranslator())
+			verifier_pool = VirtualMachineVerifierPool(vm_class, max_running=max_vm_count, uri_translator=RepositoryUriTranslator())
 		else:
 			verifier_pool = VerifierPool(max_vm_count, 0)
 		change_verifier = ChangeVerifier(verifier_pool, RepositoryUriTranslator())

@@ -58,6 +58,8 @@ class LicenseVerifier(object):
 		DeploymentSettings.license_validation_failures = 0
 		DeploymentSettings.license_failure_reason = None
 		DeploymentSettings.active = True
+		if DeploymentSettings.upgrade_status == 'running':
+			DeploymentSettings.upgrade_status = 'failed'
 
 	def license_check_passed(self, response):
 		DeploymentSettings.license_type = response['licenseType']

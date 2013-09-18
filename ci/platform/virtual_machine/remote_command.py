@@ -1,3 +1,4 @@
+import inspect
 import simplejson
 import os
 import pipes
@@ -180,7 +181,7 @@ class RemoteTestCommand(RemoteShellCommand):
 				else:
 					xunit_paths = [os.path.join(self.repo_name, xunit) for xunit in self.xunit]
 				results = virtual_machine.ssh_call(
-					"python - <<'EOF'\n%s\nEOF" % self._get_xunit_contents_script(xunit_paths))
+					'python -c %s' % pipes.quote(self._get_xunit_contents_script(xunit_paths)))
 				try:
 					return simplejson.loads(results.output)
 				except:
@@ -189,25 +190,30 @@ class RemoteTestCommand(RemoteShellCommand):
 		return retval
 
 	def _get_xunit_contents_script(self, xunit_paths):
-		pythonc_func = """import os, os.path, json
+		def read_xunit_contents(xunit_paths):
+			import os, os.path, json
 
-files = []
-for xunit_path in %s:
-	if os.path.isfile(xunit_path):
-		files.append(xunit_path)
-	else:
-		for root, dirs, dirfiles in os.walk(xunit_path):
-			files.extend([os.path.join(root, dirfile) for dirfile in dirfiles if dirfile.endswith('.xml')])
+			files = []
+			for xunit_path in xunit_paths:
+				if os.path.isfile(xunit_path):
+					files.append(xunit_path)
+				else:
+					for root, dirs, dirfiles in os.walk(xunit_path):
+						files.extend([os.path.join(root, dirfile) for dirfile in dirfiles if dirfile.endswith('.xml')])
 
-contents = {}
-for file in files:
-	with open(file) as f:
-		file_contents = f.read().strip()
-		if file_contents:
-			contents[file] = file_contents
+			contents = {}
+			for file in files:
+				with open(file) as f:
+					file_contents = f.read().strip()
+					if file_contents:
+						contents[file] = file_contents
 
-print json.dumps(contents)"""
-		return pythonc_func % xunit_paths
+			print json.dumps(contents)
+
+		function_source = inspect.getsource(read_xunit_contents)
+		leading_spaces = len(function_source) - len(function_source.lstrip())
+		sanitized_source = '\n'.join(map(lambda line: line[leading_spaces:], function_source.split('\n')))
+		return '%s\n%s(%s)' % (sanitized_source, read_xunit_contents.func_name, xunit_paths)
 
 
 class RemoteTestFactoryCommand(RemoteShellCommand):
@@ -259,14 +265,15 @@ class RemotePatchCommand(RemoteSetupCommand):
 
 
 class RemoteProvisionCommand(RemoteSetupCommand):
-	def __init__(self, repo_name, language_config, setup_config):
+	def __init__(self, repo_name, environment, language_config, setup_config):
 		super(RemoteProvisionCommand, self).__init__('provision')
 		self.repo_name = repo_name
+		self.environment = environment
 		self.language_config = language_config
 		self.setup_config = setup_config
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.provision(self.repo_name, self.language_config, self.setup_config, output_handler=output_handler)
+		return virtual_machine.provision(self.repo_name, self.environment, self.language_config, self.setup_config, output_handler=output_handler)
 
 
 class RemoteExportCommand(RemoteCommand):
@@ -291,6 +298,8 @@ class RemoteErrorCommand(RemoteCommand):
 		full_message = 'Error: %s' % self.error_message
 		return virtual_machine.ssh_call("echo -e %s; exit 1" % pipes.quote(full_message), output_handler=output_handler)
 
+	def get_xunit_contents(self):
+		pass
 
 class InvalidConfigurationException(Exception):
 	pass

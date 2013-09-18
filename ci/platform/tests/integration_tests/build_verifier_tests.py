@@ -40,7 +40,7 @@ class BuildVerifierTest(BaseIntegrationTest, ModelServerTestMixin, RabbitMixin, 
 		with ConnectionFactory.get_sql_connection() as conn:
 			ins_commit = schema.commit.insert().values(id=commit_id, repo_id=repo_id,
 				user_id=1, message="commit message", sha="sha", timestamp=8675309,
-				submitter_name="submitter name", submitter_email="submitter email")
+				committer_name="committer name", committer_email="committer email")
 			conn.execute(ins_commit)
 			ins_change = schema.change.insert().values(id=change_id, commit_id=commit_id, repo_id=repo_id, merge_target="master",
 				number=1, verification_status=BuildStatus.QUEUED, create_time=8675309)

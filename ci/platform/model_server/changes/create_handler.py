@@ -23,6 +23,9 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		super(ChangesCreateHandler, self).__init__("changes", "create", channel)
 
 	def create_commit_and_change(self, repo_id, user_id, base_sha, head_sha, merge_target, verify_only=False, patch_contents=None):
+		repo_id = int(repo_id)
+		user_id = int(user_id)
+
 		change = database.schema.change
 		repo = database.schema.repo
 		user = database.schema.user
@@ -73,9 +76,9 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		skip = False
 
-		if (verify_only == False) and ('[ci skip]' in commit_attributes['message']):
+		if '[ci skip]' in commit_attributes['message']:
 			skip = True
-		elif ('[ci test_only]' in commit_attributes['message']):
+		elif '[ci test_only]' in commit_attributes['message']:
 			verify_only = True
 
 		self.publish_event("repos", repo_id, "change added", user=user_dict, commit=commit_dict,
@@ -124,7 +127,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		timestamp = int(time.time())
 		ins = commit.insert().values(repo_id=repo_id, user_id=user_id,
 			message=commit_attributes['message'], sha=head_sha, base_sha=base_sha, timestamp=timestamp,
-			submitter_name=commit_attributes['username'], submitter_email=commit_attributes['email'])
+			committer_name=commit_attributes['username'], committer_email=commit_attributes['email'])
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]

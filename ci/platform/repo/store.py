@@ -456,7 +456,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo = Repo.init(repo_path, bare=True)
 			try:
 				# The explicit refspec pulls down all heads and sets them as the local heads
-				self._git_fetch_with_private_key(repo, remote_repo, 'refs/heads/*:refs/heads/*')
+				self._git_fetch_with_private_key(repo, remote_repo, '+refs/heads/*:refs/heads/*')
 			except GitCommandError:
 				error_msg = "Pull failed for repo with id %s and forward url %s" % (repo_id, remote_repo)
 				self.logger.warn(error_msg, exc_info=True)
@@ -590,12 +590,12 @@ class FileSystemRepositoryStore(RepositoryStore):
 		with model_server.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
 
-		self._git_fetch_with_private_key(repo, remote_repo)
+		self._git_fetch_with_private_key(repo, remote_repo, '+refs/heads/*:refs/heads/*')
 
 		try:
 			repo.commit(sha)
 		except git.exc.BadObject:
-			raise NoSuchCommitError(repo_id, sha)
+			raise NoSuchCommitError(repo_id=repo_id, ref=sha)
 
 		try:
 			refs.SymbolicReference.create(repo, 'refs/pending/%d' % commit_id, sha)
@@ -616,7 +616,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		try:
 			repo.update(sha)
 		except CommandError:
-			raise NoSuchCommitError(repo_id, sha)
+			raise NoSuchCommitError(repo_id=repo_id, ref=sha)
 
 		try:
 			parent_shas = map(lambda rev: rev.node, repo.log(['parents(%s)' % sha]))
@@ -664,6 +664,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_name += '.git'
 			repo_path = self._resolve_path(repo_id, repo_name)
 			repo = Repo(repo_path)
+
+			self._git_fetch_with_private_key(repo, remote_repo, '+refs/heads/*:refs/heads/*')
 
 			try:
 				commit = repo.commit(sha)
@@ -739,6 +741,7 @@ class RepositoryAlreadyExistsException(RepositoryOperationException):
 class NoSuchCommitError(RepositoryOperationException):
 	"""Indicates an exception occured trying to dereference a given ref."""
 
-	def __init__(self, repo_id, ref):
-		msg = 'Could not find commit %s for repo %d' % (ref, repo_id)
+	def __init__(self, msg='', repo_id=None, ref=None):
+		if not msg:
+			msg = 'Could not find commit %s for repo %d' % (ref, repo_id)
 		super(RepositoryOperationException, self).__init__(msg)

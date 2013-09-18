@@ -103,6 +103,13 @@ class ReposReadHandler(ModelServerRpcHandler):
 		repo_info = to_dict(row, repo.columns, tablename=repo.name)
 		if row[github_repo_metadata.c.id] is not None:
 			repo_info['github'] = to_dict(row, github_repo_metadata.columns, tablename=github_repo_metadata.name)
+
+			user = database.schema.user
+			query = user.select().where(user.c.id == repo_info['github']['added_by_user_id'])
+			with ConnectionFactory.get_sql_connection() as sqlconn:
+				user_row = sqlconn.execute(query).first()
+
+			repo_info['github']['added_by_user'] = to_dict(user_row, user.columns)
 		else:
 			repo_info['github'] = None
 		return repo_info

@@ -37,7 +37,7 @@ class FakeVirtualMachine(VirtualMachine):
 	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		return self.ssh_call('git init %s; cd %s; git fetch %s %s; git checkout FETCH_HEAD' % (repo_name, repo_name, repo_url, ref))
 
-	def provision(self, repo_name, language_config, setup_config, output_handler=None):
+	def provision(self, repo_name, environment, language_config, setup_config, output_handler=None):
 		return self.call('true')
 
 	def ssh_call(self, command, output_handler=None, timeout=None):

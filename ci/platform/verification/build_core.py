@@ -87,6 +87,11 @@ class VirtualMachineBuildCore(object):
 		except yaml.YAMLError as e:
 			factory_failures(e)
 
+		if test_sections is None:
+			if output_handler:
+				output_handler.append({1: 'No test sections generated'})
+			return []
+
 		if not isinstance(test_sections, list):
 			test_sections = [test_sections]
 
