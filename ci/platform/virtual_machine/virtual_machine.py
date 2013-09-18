@@ -222,6 +222,7 @@ class VirtualMachine(object):
 					ShellChain(
 						ShellSilent('rm -rf %s' % repo_name),
 						ShellAdvertised('hg clone --uncompressed %s %s' % (repo_url, repo_name)),
+						ShellCommand('cd %s' % repo_name),
 						get_ref_command
 					)
 				),

@@ -650,7 +650,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			shutil.move(old_repo_path, new_repo_path)
 		else:
 			raise RepositoryAlreadyExistsException(repo_id, new_repo_path)
-
+	# TODO (akostov) unify with overlapping parts of store-pending
 	def get_commit_attributes(self, repo_id, repo_name, sha):
 		assert isinstance(repo_id, int)
 		commit_attributes = dict()
@@ -678,14 +678,18 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		elif repo_type == "hg":
 			repo_path = self._resolve_path(repo_id, repo_name)
-			repo = hglib.open(repo_path)
+			bundle_path = os.path.join(repo_path, ".hg", "strip-backup", sha + ".hg")
 
-			self._hg_fetch_with_private_key(repo, remote_repo)
-
-			try:
-				log = repo.log(sha)
-			except CommandError:
-				raise NoSuchCommitError(repo_id, sha)
+			if os.path.exists(bundle_path):
+				repo = hglib.open('bundle:%s+%s' % (repo_path, bundle_path))
+				log = repo.log(sha)[0]
+			else:
+				repo = hglib.open(repo_path)
+				self._hg_fetch_with_private_key(repo, remote_repo)
+				try:
+					log = repo.log(sha)[0]
+				except CommandError:
+					raise NoSuchCommitError(repo_id, sha)
 
 			commit_attributes["message"] = log[5]
 			commit_attributes["username"] = log[4].split('<')[0].strip()

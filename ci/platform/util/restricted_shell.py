@@ -204,7 +204,7 @@ class RestrictedHgShell(RestrictedShell):
 		os.execlp(*args)
 
 	# TODO(andrey) refactor this and cat-bundle
-	def handle_show_koality(self, requested_repo_uri, user_id, sha):
+	def handle_show_koality(self, requested_repo_uri, user_id, sha, file_name):
 		with model_server.rpc_connect("repos", "read") as modelserver_rpc_conn:
 			attributes = modelserver_rpc_conn.get_repo_attributes(requested_repo_uri)
 
@@ -216,7 +216,7 @@ class RestrictedHgShell(RestrictedShell):
 
 		bundle_path = os.path.join(remote_filesystem_path, ".hg", "strip-backup", sha + ".hg")
 		uri = "git@%s" % attributes['repostore']['ip_address']
-		full_command = "sh -c %s" % pipes.quote("cd %s && hg -R %s cat * -I koality.yml -I .koality.yml" % (remote_filesystem_path, bundle_path))
+		full_command = "sh -c %s" % pipes.quote("cd %s && hg -R %s cat -r tip %s" % (remote_filesystem_path, bundle_path, file_name))
 		os.execlp("ssh", "ssh", "-p", "2222", "-oStrictHostKeyChecking=no", uri, full_command)
 
 	def handle_cat_bundle(self, requested_repo_uri, user_id, sha):
@@ -250,7 +250,7 @@ class RestrictedHgShell(RestrictedShell):
 		if command_parts[:2] == ['hg', '-R'] and command_parts[3:5] == ['serve', '--stdio']:
 			self.handle_push(repo_path, command_parts[5])
 		elif command_parts[:2] == ['hg', 'show-koality']:
-			self.handle_show_koality(repo_path, command_parts[4], command_parts[3])
+			self.handle_show_koality(repo_path, command_parts[5], command_parts[3], command_parts[4])
 		elif command_parts[:2] == ['hg', 'cat-bundle']:
 			self.handle_cat_bundle(repo_path, command_parts[4], command_parts[3])
 		else:
