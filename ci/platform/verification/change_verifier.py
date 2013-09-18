@@ -3,8 +3,6 @@ import os
 import subprocess
 import sys
 
-import yaml
-
 from eventlet import event, spawn, spawn_n, spawn_after, queue
 from kombu.messaging import Producer
 
@@ -19,7 +17,7 @@ from settings.store import StoreSettings
 from settings.verification_server import VerificationServerSettings
 from util import pathgen
 from util.log import Logged
-from verification_config import VerificationConfig
+from verification_config import VerificationConfig, ParseErrorVerificationConfig
 from verification_results_handler import VerificationResultsHandler
 
 @Logged()
@@ -266,7 +264,7 @@ class ChangeVerifier(EventSubscriber):
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, "ChangeVerifier")
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, "Koality Keypair", StoreSettings.ssh_public_key)
 
-		config_dict = {}
+		config_yaml = None
 
 		if repo_type == 'git':
 			ref = pathgen.hidden_ref(commit_id)
@@ -282,7 +280,7 @@ class ChangeVerifier(EventSubscriber):
 
 			for file_name in ['koality.yml', '.koality.yml']:
 				try:
-					config_dict = yaml.safe_load(subprocess.check_output(show_command(file_name)))
+					config_yaml = subprocess.check_output(show_command(file_name), stderr=subprocess.STDOUT)
 				except:
 					pass
 				else:
@@ -297,16 +295,13 @@ class ChangeVerifier(EventSubscriber):
 				checkout_url = repo_uri
 				show_command = ["bash", "-c", "cd %s && hg -R %s cat * -I koality.yml -I .koality.yml" % (repo_uri, os.path.join(repo_uri, ".hg", "strip-backup", head_sha + ".hg"))]
 			try:
-				config_dict = yaml.safe_load(subprocess.check_output(show_command))
+				config_yaml = subprocess.check_output(show_command)
 			except:
 				pass
 
 		else:
-			self.logger.critical()
+			self.logger.critical('Unexpected repo type specified for verification: %s' % repo_type)
 			assert False
-
-		if not isinstance(config_dict, dict):
-			config_dict = {}
 
 		environment = collections.OrderedDict()
 		environment['KOALITY']  = 'true'
@@ -317,10 +312,11 @@ class ChangeVerifier(EventSubscriber):
 		environment['KOALITY_REPOSITORY'] = repo_name
 
 		try:
-			return VerificationConfig(repo_type, repo_name, checkout_url, ref, environment, config_dict, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
+			return VerificationConfig.from_yaml(repo_type, repo_name, checkout_url, ref, environment, config_yaml, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
 		except:
-			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=True)
-			return VerificationConfig(repo_type, repo_name, checkout_url, ref, environment, {})
+			exc_info = sys.exc_info()
+			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=exc_info)
+			return ParseErrorVerificationConfig(exc_info[1])
 
 	def _is_result_failed(self, result):
 		return isinstance(result, Exception)
