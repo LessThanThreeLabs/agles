@@ -418,13 +418,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 		elif repo_type == "hg":
 			repo_path = self._resolve_path(repo_id, repo_name)
-			repo = hglib.open(repo_path)
-
-			self._hg_fetch_with_private_key(repo, remote_repo)
-			# The rev argument is to make sure that we only pull the revision and it's dependencies into the repository.
-			repo.pull(os.path.join(repo_path, ".hg", "strip-backup", ref_to_merge + ".hg"), rev=ref_to_merge, update=True)
-			self._hg_push_merge_retry(repo, remote_repo, ref_to_merge, ref_to_merge_into)
-			repo.close()
+			with hglib.open(repo_path) as repo:
+				self._hg_fetch_with_private_key(repo, remote_repo)
+				# The rev argument is to make sure that we only pull the revision and it's dependencies into the repository.
+				repo.pull(os.path.join(repo_path, ".hg", "strip-backup", ref_to_merge + ".hg"), rev=ref_to_merge, update=True)
+				self._hg_push_merge_retry(repo, remote_repo, ref_to_merge, ref_to_merge_into)
 		else:
 			return
 
@@ -468,9 +466,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			make_repo_dirs()
 			hglib.init(repo_path)
 			try:
-				repo = hglib.open(repo_path)
-				self._hg_fetch_with_private_key(repo, remote_repo)
-				repo.close()
+				with hglib.open(repo_path) as repo:
+					self._hg_fetch_with_private_key(repo, remote_repo)
 			except CommandError:
 				error_msg = "Pull failed for repo with id %s and forward url %s" % (repo_id, remote_repo)
 				self.logger.warn(error_msg, exc_info=True)
@@ -609,31 +606,28 @@ class FileSystemRepositoryStore(RepositoryStore):
 
 	def _hg_store_pending(self, repo_id, repo_name, sha, commit_id):
 		repo_path = self._resolve_path(repo_id, repo_name)
-		repo = hglib.open(repo_path)
 
-		with model_server.rpc_connect("repos", "read") as conn:
-			remote_repo = conn.get_repo_forward_url(repo_id)
+		with hglib.open(repo_path) as repo:
+			with model_server.rpc_connect("repos", "read") as conn:
+				remote_repo = conn.get_repo_forward_url(repo_id)
 
-		self._hg_fetch_with_private_key(repo, remote_repo)
+			self._hg_fetch_with_private_key(repo, remote_repo)
 
-		try:
-			repo.update(sha)
-		except CommandError:
-			repo.close()
-			raise NoSuchCommitError(repo_id=repo_id, ref=sha)
+			try:
+				repo.update(sha)
+			except CommandError:
+				raise NoSuchCommitError(repo_id=repo_id, ref=sha)
 
-		try:
-			parent_shas = map(lambda rev: rev.node, repo.log(['parents(%s)' % sha]))
-			strip_path = os.path.join(repo_path, ".hg", "strip-backup")
-			if not os.path.exists(strip_path):
-				os.makedirs(os.path.join(strip_path))
-			repo.bundle(os.path.join(strip_path, '%s.hg' % sha), rev=[sha], base=parent_shas)
-		except:
-			exc_info = sys.exc_info()
-			self.logger.critical("Failed to create pending bundle %d for sha %s" % (commit_id, sha), exc_info=exc_info)
-			raise exc_info
-		finally:
-			repo.close()
+			try:
+				parent_shas = map(lambda rev: rev.node, repo.log(['parents(%s)' % sha]))
+				strip_path = os.path.join(repo_path, ".hg", "strip-backup")
+				if not os.path.exists(strip_path):
+					os.makedirs(os.path.join(strip_path))
+				repo.bundle(os.path.join(strip_path, '%s.hg' % sha), rev=[sha], base=parent_shas)
+			except:
+				exc_info = sys.exc_info()
+				self.logger.critical("Failed to create pending bundle %d for sha %s" % (commit_id, sha), exc_info=exc_info)
+				raise exc_info
 
 	def rename_repository(self, repo_id, old_name, new_name):
 		"""Renames a repository. Raises an exception on failure.
@@ -687,19 +681,16 @@ class FileSystemRepositoryStore(RepositoryStore):
 			bundle_path = os.path.join(repo_path, ".hg", "strip-backup", sha + ".hg")
 
 			if os.path.exists(bundle_path):
-				repo = hglib.open('bundle:%s+%s' % (repo_path, bundle_path))
-				log = repo.log(sha)[0]
-			else:
-				repo = hglib.open(repo_path)
-				self._hg_fetch_with_private_key(repo, remote_repo)
-				try:
+				with hglib.open('bundle:%s+%s' % (repo_path, bundle_path)) as repo:
 					log = repo.log(sha)[0]
-				except CommandError:
-					repo.close()
-					raise NoSuchCommitError(repo_id, sha)
+			else:
+				with hglib.open(repo_path) as repo:
+					self._hg_fetch_with_private_key(repo, remote_repo)
+					try:
+						log = repo.log(sha)[0]
+					except CommandError:
+						raise NoSuchCommitError(repo_id, sha)
 
-			repo.close()
-			
 			commit_attributes["message"] = log[5]
 			commit_attributes["username"] = log[4].split('<')[0].strip()
 			commit_attributes["email"] = log[4].split('<')[1].strip('> ')
