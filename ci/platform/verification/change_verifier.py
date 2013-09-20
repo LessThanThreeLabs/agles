@@ -292,15 +292,12 @@ class ChangeVerifier(EventSubscriber):
 			assert False
 
 		for file_name in ['koality.yml', '.koality.yml']:
-				try:
-					config_dict =  yaml.safe_load(subprocess.check_output(show_command(file_name)), stderr=subprocess.STDOUT)
-				except:
-					pass
-				else:
-					break
-
-		if not isinstance(config_dict, dict):
-			config_dict = {}
+			try:
+				config_yaml = subprocess.check_output(show_command(file_name), stderr=subprocess.STDOUT)
+			except:
+				pass
+			else:
+				break
 
 		environment = collections.OrderedDict()
 		environment['KOALITY']  = 'true'
