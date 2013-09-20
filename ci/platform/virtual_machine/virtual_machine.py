@@ -1,5 +1,7 @@
 import pipes
 
+from util import greenlets
+
 import eventlet
 import eventlet.pools
 paramiko = eventlet.import_patched('paramiko')
