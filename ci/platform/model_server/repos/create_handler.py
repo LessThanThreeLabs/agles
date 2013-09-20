@@ -23,7 +23,7 @@ class ReposCreateHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def create_repo(self, user_id, repo_name, forward_url, repo_type):
-		repo_id, current_time = self._create_repo()
+		repo_id, current_time = self._create_repo(user_id, repo_name, forward_url, repo_type)
 
 		self.publish_event_to_all("users", "repository added", repo_id=repo_id, repo_name=repo_name, forward_url=forward_url, created=current_time)
 		return repo_id

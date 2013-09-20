@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name="koality",
-	version="0.4.2",
+	version="0.4.3",
 	description="Production code for koality",
 	packages=find_packages(exclude=[
 		"bin",
