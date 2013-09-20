@@ -256,7 +256,7 @@ class Ec2Vm(VirtualMachine):
 			'UserKnownHostsFile': '/dev/null',
 			'ServerAliveInterval': '20'
 		}
-		return self.SshArgs(self.vm_username, self.instance.ip_address, options=options)
+		return self.SshArgs(self.vm_username, self.instance.private_ip_address, options=options)
 
 	def reboot(self, force=False):
 		self.instance.reboot()
