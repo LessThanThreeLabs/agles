@@ -3,6 +3,8 @@
 
 Repository management for git is done using gitpython.
 """
+from util import greenlets
+
 import os
 import re
 import shutil
