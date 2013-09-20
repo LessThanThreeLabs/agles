@@ -279,31 +279,27 @@ class ChangeVerifier(EventSubscriber):
 			else:
 				checkout_url = repo_uri
 				show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]
+		elif repo_type == 'hg':
+			ref = head_sha
+			if self.uri_translator:
+				checkout_url = self.uri_translator.translate(repo_uri)
+				host_url, _, repo_uri = checkout_url.split('://')[1].partition('/')
+				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "hg", "show-koality", repo_uri, ref, file_name]
+			else:
+				# TODO(andrey) Test this case!
+				checkout_url = repo_uri
+				show_command = lambda file_name: ["bash", "-c", "cd %s && hg -R %s cat -r tip %s" % ((repo_uri, os.path.join(repo_uri, ".hg", "strip-backup", head_sha + ".hg")), file_name)]
+		else:
+			self.logger.critical()
+			assert False
 
-			for file_name in ['koality.yml', '.koality.yml']:
+		for file_name in ['koality.yml', '.koality.yml']:
 				try:
-					config_dict = yaml.safe_load(subprocess.check_output(show_command(file_name)))
+					config_dict =  yaml.safe_load(subprocess.check_output(show_command(file_name)))
 				except:
 					pass
 				else:
 					break
-		elif repo_type == 'hg':
-			if self.uri_translator:
-				checkout_url = self.uri_translator.translate(repo_uri)
-				host_url, _, repo_uri = checkout_url.split('://')[1].partition('/')
-				show_command = ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "hg", "show-koality", repo_uri, head_sha]
-			else:
-				# TODO(andrey) Test this case!
-				checkout_url = repo_uri
-				show_command = ["bash", "-c", "cd %s && hg -R %s cat * -I koality.yml -I .koality.yml" % (repo_uri, os.path.join(repo_uri, ".hg", "strip-backup", head_sha + ".hg"))]
-			try:
-				config_dict = yaml.safe_load(subprocess.check_output(show_command))
-			except:
-				pass
-
-		else:
-			self.logger.critical()
-			assert False
 
 		if not isinstance(config_dict, dict):
 			config_dict = {}
