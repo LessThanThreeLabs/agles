@@ -11,7 +11,7 @@ import eventlet
 
 import model_server
 
-from pysh.shell_tools import ShellCommand, ShellChain, ShellAppend, ShellRedirect, ShellOr
+from pysh.shell_tools import ShellCommand, ShellChain, ShellAppend, ShellRedirect, ShellOr, ShellAnd, ShellSilent, ShellCapture
 from settings.aws import AwsSettings
 from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
@@ -121,18 +121,16 @@ class Ec2Vm(VirtualMachine):
 				ShellSilent(
 					ShellAnd(
 						ShellCommand('koalitydata=%s' % ShellCapture('mktemp')),
-						ShellRedirect('echo %s' % koality_config, '$koalitydata'),
+						ShellRedirect('echo %s' % pipes.quote(koality_config), '$koalitydata'),
 						ShellCommand('userdata=%s' % ShellCapture('mktemp')),
-						ShellRedirect('echo %s' % given_user_data, '$userdata'),
-						ShellCommand('fulldata=%s' % ShellCapture('mktemp'))
+						ShellRedirect('echo %s' % pipes.quote(given_user_data), '$userdata')
 					)
 				),
-				ShellCommand('write-mime-multipart $koalitydata:$userdata'),
+				ShellCommand('write-mime-multipart "$koalitydata" "$userdata"'),
 				ShellSilent('rm $koalitydata'),
-				ShellSilent('rm $userdata'),
-				ShellSilent('rm $fulldata')
+				ShellSilent('rm $userdata')
 			)
-			results = cls._call(generate_user_data)
+			results = cls._call('bash -c %s' % pipes.quote(str(generate_user_data)))
 			if results.returncode == 0:
 				return results.output
 		return koality_config
