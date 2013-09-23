@@ -78,7 +78,8 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		return {
 			'instance_size': AwsSettings.instance_type,
 			'root_drive_size': AwsSettings.root_drive_size,
-			'security_group_name': AwsSettings.security_group
+			'security_group_name': AwsSettings.security_group,
+			'user_data': AwsSettings.user_data
 		}
 
 	@AdminApi
