@@ -104,19 +104,40 @@ class Ec2Vm(VirtualMachine):
 		when it finishes first boot.
 		This will fail if we use an image which doesn't utilitize EC2 user_data
 		'''
-		return '#!/bin/sh\n%s' % ShellChain(
-				ShellCommand('useradd --create-home %s' % vm_username),
-				ShellCommand('mkdir ~%s/.ssh' % vm_username),
-				ShellAppend('echo %s' % pipes.quote(PubkeyRegistrar().get_ssh_pubkey()), '~%s/.ssh/authorized_keys' % vm_username),
-				ShellCommand('chown -R %s:%s ~%s/.ssh' % (vm_username, vm_username, vm_username)),
-				ShellOr(
-					ShellCommand("grep '#includedir /etc/sudoers.d' /etc/sudoers"),
-					ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
+		koality_config = '#!/bin/sh\n%s' % ShellChain(
+			ShellCommand('useradd --create-home %s' % vm_username),
+			ShellCommand('mkdir ~%s/.ssh' % vm_username),
+			ShellAppend('echo %s' % pipes.quote(PubkeyRegistrar().get_ssh_pubkey()), '~%s/.ssh/authorized_keys' % vm_username),
+			ShellCommand('chown -R %s:%s ~%s/.ssh' % (vm_username, vm_username, vm_username)),
+			ShellOr(
+				ShellCommand("grep '#includedir /etc/sudoers.d' /etc/sudoers"),
+				ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
+			),
+			ShellCommand('mkdir /etc/sudoers.d'),
+			ShellRedirect("echo '%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
+			ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
+		)
+		given_user_data = AwsSettings.user_data
+		if given_user_data:
+			generate_user_data = ShellAnd(
+				ShellSilent(
+					ShellAnd(
+						ShellCommand('koalitydata=%s' % ShellCapture('mktemp')),
+						ShellRedirect('echo %s' % koality_config, '$koalitydata'),
+						ShellCommand('userdata=%s' % ShellCapture('mktemp')),
+						ShellRedirect('echo %s' % given_user_data, '$userdata'),
+						ShellCommand('fulldata=%s' % ShellCapture('mktemp'))
+					)
 				),
-				ShellCommand('mkdir /etc/sudoers.d'),
-				ShellRedirect("echo '%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
-				ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
+				ShellCommand('write-mime-multipart $koalitydata:$userdata'),
+				ShellSilent('rm $koalitydata'),
+				ShellSilent('rm $userdata'),
+				ShellSilent('rm $fulldata')
 			)
+			results = cls._call(generate_user_data)
+			if results.returncode == 0:
+				return results.output
+		return koality_config
 
 	@classmethod
 	def _validate_security_group(cls, security_group):
