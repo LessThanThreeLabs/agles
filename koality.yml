@@ -5,8 +5,8 @@ languages:
   nodejs: 0.8.12
 setup:
   - scripts:
-    # This is a temporary hack because pip is dumb
-    - rm -rf $VIRTUAL_ENV/lib/python2.7/site-packages/streaming_executor*
+    - ls ~
+    - cat ~/ohai
   - packages:
     - system:
       - zlib1g
