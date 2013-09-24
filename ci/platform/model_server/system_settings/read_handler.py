@@ -9,6 +9,7 @@ import database.schema
 
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from settings.authentication import AuthenticationSettings
 from settings.aws import AwsSettings
 from settings.libcloud import LibCloudSettings
 from settings.verification_server import VerificationServerSettings
@@ -23,7 +24,6 @@ from virtual_machine import ec2, hpcloud
 
 
 class SystemSettingsReadHandler(ModelServerRpcHandler):
-
 	def __init__(self, channel=None):
 		super(SystemSettingsReadHandler, self).__init__("system_settings", "read", channel)
 
@@ -59,6 +59,14 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	@AdminApi
 	def get_website_domain_name(self, user_id):
 		return WebServerSettings.domain_name
+
+	@AdminApi
+	def get_allowed_connection_types(self, user_id):
+		return AuthenticationSettings.allowed_connection_types
+
+	@AdminApi
+	def get_allowed_email_domains(self, user_id):
+		return AuthenticationSettings.allowed_email_domains
 
 	@AdminApi
 	def get_cloud_provider(self, user_id):

@@ -91,6 +91,24 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			domain_name=domain_name)
 
 	@AdminApi
+	def set_allowed_connection_types(self, user_id, allowed_connection_types):
+		valid_connection_types = ['default', 'google']
+		assert isinstance(allowed_connection_types, list)
+		assert set(allowed_connection_types).issubset(valid_connection_types)
+		self.update_setting("authentication", "allowed_connection_types", allowed_connection_types)
+		self.publish_event("system_settings", None, "allowed connection types updated",
+			allowed_connection_types=allowed_connection_types)
+
+	@AdminApi
+	def set_allowed_email_domains(self, user_id, allowed_email_domains):
+		assert isinstance(allowed_email_domains, list)
+		for domain in allowed_email_domains:
+			assert isinstance(domain, (str, unicode))
+		self.update_setting("authentication", "allowed_email_domains", allowed_email_domains)
+		self.publish_event("system_settings", None, "allowed email domains updated",
+			allowed_email_domains=allowed_email_domains)
+
+	@AdminApi
 	def set_cloud_provider(self, user_id, cloud_provider):
 		self.update_setting("verification_server", "cloud_provider", cloud_provider)
 
