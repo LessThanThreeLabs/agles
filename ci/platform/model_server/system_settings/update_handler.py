@@ -135,7 +135,8 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		self.publish_event("system_settings", None, "aws instance settings updated",
 			instance_size=instance_size,
 			root_drive_size=root_drive_size,
-			security_group_name=security_group_name)
+			security_group_name=security_group_name,
+			user_data=user_data)
 
 	@AdminApi
 	def set_s3_bucket_name(self, user_id, bucket_name):
