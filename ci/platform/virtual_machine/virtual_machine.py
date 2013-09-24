@@ -3,8 +3,6 @@ import pipes
 from util import greenlets
 
 import eventlet
-import eventlet.pools
-paramiko = eventlet.import_patched('paramiko')
 
 from database.engine import ConnectionFactory
 from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest, ShellSudo
@@ -21,19 +19,17 @@ class VirtualMachine(object):
 		self.instance = instance
 		self.vm_username = vm_username
 		self._redis_conn = redis_connection or ConnectionFactory.get_redis_connection('virtual_machine')
-		self.ssh_pool = eventlet.pools.Pool(create=self._ssh_connect)
 
 	def provision(self, repo_name, environment, language_config, setup_config, output_handler=None):
 		try:
-			with self.ssh_pool.item() as ssh_conn:
-				provisioner = Provisioner(ssh_conn)
-				return provisioner.provision(
-					'~/%s' % repo_name,
-					environment=environment,
-					language_config=language_config,
-					setup_config=setup_config,
-					output_handler=output_handler
-				)
+			provisioner = Provisioner(ssh_args=self.ssh_args().to_arg_list())
+			return provisioner.provision(
+				'~/%s' % repo_name,
+				environment=environment,
+				language_config=language_config,
+				setup_config=setup_config,
+				output_handler=output_handler
+			)
 		except:
 			failure_message = 'Failed to provision, could not connect to the testing instance.'
 			if output_handler is not None:
@@ -46,17 +42,9 @@ class VirtualMachine(object):
 	def ssh_args(self):
 		raise NotImplementedError()
 
-	def _ssh_connect(self):
-		ssh_conn = paramiko.SSHClient()
-		ssh_conn.set_missing_host_key_policy(paramiko.WarningPolicy())
-		ssh_args = self.ssh_args()
-		ssh_conn.connect(ssh_args.hostname, ssh_args.port, ssh_args.username)
-		return ssh_conn
-
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		try:
-			with self.ssh_pool.item() as ssh_conn:
-				return RemoteStreamingExecutor(ssh_conn).execute(command, output_handler, timeout=timeout)
+			return StreamingExecutor().execute(self.ssh_args().to_arg_list() + [str(command)], output_handler, timeout=timeout)
 		except Exception as e:
 			failure_message = 'Failed to connect to the testing instance: %s' % e
 			if output_handler is not None:
@@ -152,12 +140,11 @@ class VirtualMachine(object):
 
 	def configure_ssh(self, private_key, output_handler=None):
 		try:
-			with self.ssh_pool.item() as ssh_conn:
-				provisioner = Provisioner(ssh_conn)
-				return provisioner.set_private_key(
-					private_key,
-					output_handler=output_handler
-				)
+			provisioner = Provisioner(ssh_args=self.ssh_args().to_arg_list())
+			return provisioner.set_private_key(
+				private_key,
+				output_handler=output_handler
+			)
 		except:
 			failure_message = 'Failed to provision, could not connect to the testing instance.'
 			if output_handler is not None:
