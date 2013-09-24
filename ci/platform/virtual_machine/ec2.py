@@ -53,21 +53,19 @@ class Ec2Client(object):
 
 @Logged()
 class Ec2Vm(VirtualMachine):
-	VM_USERNAME = 'lt3'
-
 	CloudClient = Ec2Client.get_client
 	Settings = AwsSettings
 
-	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
+	def __init__(self, vm_id, instance, vm_username):
 		super(Ec2Vm, self).__init__(vm_id, instance, vm_username)
 		self.store_vm_info()
 
 	@classmethod
-	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=VM_USERNAME):
+	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None):
 		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, ami, instance_type, vm_username)
 
 	@classmethod
-	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=VM_USERNAME):
+	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None):
 		if not name:
 			master_name = None
 			try:
@@ -83,6 +81,8 @@ class Ec2Vm(VirtualMachine):
 		if not instance_type:
 			instance_type = AwsSettings.instance_type
 
+		vm_username = vm_username or AwsSettings.vm_username
+
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
@@ -97,7 +97,7 @@ class Ec2Vm(VirtualMachine):
 		return Ec2Vm(vm_id, instance, vm_username)
 
 	@classmethod
-	def _default_user_data(cls, vm_username=VM_USERNAME):
+	def _default_user_data(cls, vm_username):
 		'''This utilizes Ubuntu cloud-init, which runs this script at "rc.local-like" time
 		when it finishes first boot.
 		This will fail if we use an image which doesn't utilitize EC2 user_data
@@ -180,7 +180,7 @@ class Ec2Vm(VirtualMachine):
 			return cls._from_instance_id(vm_id, vm_info['instance_id'], vm_info['username'])
 
 	@classmethod
-	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
+	def _from_instance_id(cls, vm_id, instance_id, vm_username):
 		try:
 			client = cls.CloudClient()
 			reservations = client.get_all_instances(filters={'instance-id': instance_id})
