@@ -44,7 +44,7 @@ class VirtualMachine(object):
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		try:
-			return StreamingExecutor().execute(self.ssh_args().to_arg_list() + [command], output_handler, timeout=timeout)
+			return StreamingExecutor().execute(self.ssh_args().to_arg_list() + [str(command)], output_handler, timeout=timeout)
 		except Exception as e:
 			failure_message = 'Failed to connect to the testing instance: %s' % e
 			if output_handler is not None:
