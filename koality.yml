@@ -37,7 +37,7 @@ compile:
     - pip install --upgrade .:
         path: ci/platform
 test:
-  machines: 3
+  machines: 15
   scripts:
     - platform unit tests:
         path: ci/platform
