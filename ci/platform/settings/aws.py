@@ -11,7 +11,7 @@ class AwsSettings(DatabaseBackedSettings):
 			largest_instance_type=None,
 			vm_image_name_prefix='koality_verification',
 			vm_image_name_suffix='precise',
-			vm_image_name_version='0.4',
+			vm_image_name_version='0.3',
 			security_group='koality_verification',
 			root_drive_size=8,
 			s3_bucket_name='')
