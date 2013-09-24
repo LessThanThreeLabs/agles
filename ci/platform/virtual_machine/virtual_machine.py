@@ -1,5 +1,4 @@
 import pipes
-import subprocess
 import tempfile
 
 from util import greenlets
@@ -43,6 +42,9 @@ class VirtualMachine(object):
 
 	def ssh_args(self):
 		raise NotImplementedError()
+
+	def scp_call(self, src_fpath, dest_fpath, output_handler=None, timeout=None):
+		self.call(self.ssh_args().to_scp_arg_list(src_fpath, dest_fpath), output_handler=output_handler, timeout=timeout)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		try:
@@ -125,7 +127,7 @@ class VirtualMachine(object):
 			with tempfile.NamedTemporaryFile(mode='w') as tmp:
 				tmp.write(patch_contents)
 				tmp.flush()
-				self.call(self.ssh_args().to_scp_arg_list(tmp.name, '~/.koality_patch'))
+				self.scp_call(tmp.name, '~/.koality_patch')
 
 			command = ShellAnd(
 				ShellCommand('echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset))),
@@ -135,7 +137,7 @@ class VirtualMachine(object):
 				ShellCommand('echo %s' % pipes.quote('%sPATCHING:%s' % (ansi_bright_cyan, ansi_reset))),
 				ShellCommand('echo'),
 				ShellAdvertised('cd %s' % repo_name),
-				ShellAdvertised('patch -p1 ~/.koality_patch', actual_command=ShellCommand('patch -p1 ~/.koality_patch'))
+				ShellAdvertised('patch -p1 < ~/.koality_patch', actual_command=ShellCommand('patch -p1 < ~/.koality_patch'))
 			)
 		else:
 			command = 'echo %s' % pipes.quote('%sWARNING: No patch contents received.%s' % (ansi_bright_yellow, ansi_reset))
