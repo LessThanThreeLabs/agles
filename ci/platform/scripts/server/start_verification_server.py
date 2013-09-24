@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-from util import greenlets
-
 import argparse
 import sys
 
