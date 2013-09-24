@@ -12,4 +12,5 @@ class AwsSettings(DatabaseBackedSettings):
 			vm_image_id=None,  # default to our 12.04 AMI
 			security_group='koality_verification',
 			root_drive_size=8,
-			s3_bucket_name='')
+			s3_bucket_name='',
+			user_data='')

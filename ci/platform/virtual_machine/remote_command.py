@@ -116,7 +116,7 @@ class RemoteShellCommand(RemoteCommand):
 		given_command = ShellCommand('eval %s' % pipes.quote(str(ShellAnd(*map(advertise, self.commands)))))
 
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
-		timeout_message = "echo %s timed out after %s seconds" % (pipes.quote(self.name), self.timeout)
+		timeout_message = "\\x1b[31;1m%s timed out after %s seconds\\x1b[0m" % (pipes.quote(self.name), self.timeout)
 
 		timeout_command = ShellChain(
 			ShellCommand('sleep %s' % self.timeout),
@@ -128,12 +128,12 @@ class RemoteShellCommand(RemoteCommand):
 					ShellCommand('sleep 2'),
 					ShellSilent('kill -KILL $$'),
 					ShellCommand('echo'),
-					timeout_message,
+					ShellCommand('echo %s' % pipes.quote(timeout_message)),
 					ShellCommand('kill -9 0')
 				),
 				ShellChain(
 					ShellCommand('echo'),
-					timeout_message,
+					ShellCommand('echo %s' % pipes.quote(timeout_message)),
 					ShellCommand('kill -9 0')
 				)
 			)

@@ -138,6 +138,26 @@ class ReposReadHandler(ModelServerRpcHandler):
 		else:
 			raise NoSuchRepositoryError(repo_id)
 
+	def get_github_repo(self, user_id, github_owner_name, github_repo_name):
+		repo = database.schema.repo
+		github_repo_metadata = database.schema.github_repo_metadata
+
+		query = repo.join(github_repo_metadata).select().apply_labels().where(
+			and_(
+				github_repo_metadata.c.owner_name == github_owner_name,
+				github_repo_metadata.c.repo_name == github_repo_name,
+				repo.c.deleted == 0
+			)
+		)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+
+		if row:
+			return self._row_to_repo(row)
+		else:
+			raise NoSuchRepositoryError(github_owner_name, github_repo_name)
+
+
 	def can_hear_repository_events(self, user_id, id_to_listen_to):
 		return True
 

@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from shared.constants import VERSION
 
 setup(
 	name="koality",
-	version="0.4.0",
+	version=VERSION,
 	description="Production code for koality",
 	packages=find_packages(exclude=[
 		"bin",

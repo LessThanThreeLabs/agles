@@ -11,7 +11,7 @@ import eventlet
 
 import model_server
 
-from pysh.shell_tools import ShellCommand, ShellChain, ShellAppend, ShellRedirect, ShellOr
+from pysh.shell_tools import ShellCommand, ShellChain, ShellAppend, ShellRedirect, ShellOr, ShellAnd, ShellSilent, ShellCapture
 from settings.aws import AwsSettings
 from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
@@ -63,11 +63,11 @@ class Ec2Vm(VirtualMachine):
 		self.store_vm_info()
 
 	@classmethod
-	def from_id_or_construct(cls, vm_id, name=None, ami_image_id=None, instance_type=None, vm_username=VM_USERNAME):
-		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, ami_image_id, instance_type, vm_username)
+	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=VM_USERNAME):
+		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, ami, instance_type, vm_username)
 
 	@classmethod
-	def construct(cls, vm_id, name=None, ami_image_id=None, instance_type=None, vm_username=VM_USERNAME):
+	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=VM_USERNAME):
 		if not name:
 			master_name = None
 			try:
@@ -78,20 +78,18 @@ class Ec2Vm(VirtualMachine):
 			if not master_name:
 				master_name = socket.gethostname()
 			name = "koality-worker:%s (%s)" % (vm_id, master_name)
-		if not ami_image_id:
-			ami_image_id = cls.get_newest_image().id
+		if not ami:
+			ami = cls.get_newest_image()
 		if not instance_type:
 			instance_type = AwsSettings.instance_type
 
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
-		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType(delete_on_termination=True)
-		dev_sda1.size = AwsSettings.root_drive_size # size in Gigabytes
-		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
-		bdm['/dev/sda1'] = dev_sda1
+		bdm = ami.block_device_mapping.copy()
+		bdm['/dev/sda1'].size = max(bdm['/dev/sda1'].size, AwsSettings.root_drive_size)
 
-		instance = cls.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
+		instance = cls.CloudClient().run_instances(ami.id, instance_type=instance_type,
 			security_groups=[security_group],
 			user_data=cls._default_user_data(vm_username),
 			block_device_map=bdm).instances[0]
@@ -104,19 +102,38 @@ class Ec2Vm(VirtualMachine):
 		when it finishes first boot.
 		This will fail if we use an image which doesn't utilitize EC2 user_data
 		'''
-		return '#!/bin/sh\n%s' % ShellChain(
-				ShellCommand('useradd --create-home %s' % vm_username),
-				ShellCommand('mkdir ~%s/.ssh' % vm_username),
-				ShellAppend('echo %s' % pipes.quote(PubkeyRegistrar().get_ssh_pubkey()), '~%s/.ssh/authorized_keys' % vm_username),
-				ShellCommand('chown -R %s:%s ~%s/.ssh' % (vm_username, vm_username, vm_username)),
-				ShellOr(
-					ShellCommand("grep '#includedir /etc/sudoers.d' /etc/sudoers"),
-					ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
+		koality_config = '#!/bin/sh\n%s' % ShellChain(
+			ShellCommand('useradd --create-home %s' % vm_username),
+			ShellCommand('mkdir ~%s/.ssh' % vm_username),
+			ShellAppend('echo %s' % pipes.quote(PubkeyRegistrar().get_ssh_pubkey()), '~%s/.ssh/authorized_keys' % vm_username),
+			ShellCommand('chown -R %s:%s ~%s/.ssh' % (vm_username, vm_username, vm_username)),
+			ShellOr(
+				ShellCommand("grep '#includedir /etc/sudoers.d' /etc/sudoers"),
+				ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
+			),
+			ShellCommand('mkdir /etc/sudoers.d'),
+			ShellRedirect("echo '%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
+			ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
+		)
+		given_user_data = AwsSettings.user_data
+		if given_user_data:
+			generate_user_data = ShellAnd(
+				ShellSilent(
+					ShellAnd(
+						ShellCommand('koalitydata=%s' % ShellCapture('mktemp')),
+						ShellRedirect('echo %s' % pipes.quote(koality_config), '$koalitydata'),
+						ShellCommand('userdata=%s' % ShellCapture('mktemp')),
+						ShellRedirect('echo %s' % pipes.quote(given_user_data), '$userdata')
+					)
 				),
-				ShellCommand('mkdir /etc/sudoers.d'),
-				ShellRedirect("echo '%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
-				ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
+				ShellCommand('write-mime-multipart "$koalitydata" "$userdata"'),
+				ShellSilent('rm $koalitydata'),
+				ShellSilent('rm $userdata')
 			)
+			results = cls._call('bash -c %s' % pipes.quote(str(generate_user_data)))
+			if results.returncode == 0:
+				return results.output
+		return koality_config
 
 	@classmethod
 	def _validate_security_group(cls, security_group):
@@ -256,7 +273,7 @@ class Ec2Vm(VirtualMachine):
 			'UserKnownHostsFile': '/dev/null',
 			'ServerAliveInterval': '20'
 		}
-		return self.SshArgs(self.vm_username, self.instance.ip_address, options=options)
+		return self.SshArgs(self.vm_username, self.instance.private_ip_address, options=options)
 
 	def reboot(self, force=False):
 		self.instance.reboot()
@@ -298,7 +315,7 @@ class Ec2Vm(VirtualMachine):
 		return self.CloudClient().create_image(self.instance.id, name, description)
 
 	def rebuild(self):
-		ami_image_id = self.get_newest_image().id
+		ami = self.get_newest_image()
 		instance_type = self.instance.instance_type
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')
@@ -306,12 +323,10 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		self._validate_security_group(security_group)
 
-		dev_sda1 = boto.ec2.blockdevicemapping.EBSBlockDeviceType(delete_on_termination=True)
-		dev_sda1.size = AwsSettings.root_drive_size # size in Gigabytes
-		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
-		bdm['/dev/sda1'] = dev_sda1
+		bdm = ami.block_device_mapping.copy()
+		bdm['/dev/sda1'].size = max(bdm['/dev/sda1'].size, AwsSettings.root_drive_size)
 
-		self.instance = self.CloudClient().run_instances(ami_image_id, instance_type=instance_type,
+		self.instance = self.CloudClient().run_instances(ami.id, instance_type=instance_type,
 			security_groups=[security_group],
 			user_data=self._default_user_data(self.vm_username),
 			block_device_map=bdm).instances[0]
