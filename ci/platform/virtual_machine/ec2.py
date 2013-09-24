@@ -235,20 +235,6 @@ class Ec2Vm(VirtualMachine):
 		with model_server.rpc_connect("debug_instances", "create") as debug_create_rpc:
 			debug_create_rpc.create_vm_in_db("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
 
-	def export(self, repo_name, export_prefix, file_paths, output_handler=None):
-		export_options = {
-			'provider': 's3',
-			'key': AwsSettings.aws_access_key_id,
-			'secret': AwsSettings.aws_secret_access_key,
-			'container_name': AwsSettings.s3_bucket_name,
-			'export_prefix': export_prefix,
-			'file_paths': file_paths
-		}
-		return self.ssh_call(
-			"cd %s && koality-export %s" % (repo_name, pipes.quote(yaml.safe_dump(export_options))),
-			output_handler=output_handler
-		)
-
 	def ssh_args(self):
 		options = {
 			'LogLevel': 'error',

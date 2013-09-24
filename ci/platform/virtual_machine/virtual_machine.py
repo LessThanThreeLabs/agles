@@ -36,9 +36,6 @@ class VirtualMachine(object):
 				output_handler.append({1: failure_message})
 			return CommandResults(1, failure_message)
 
-	def export(self, export_prefix, file_paths, output_handler=None):
-		raise NotImplementedError("Currently only supported for EC2 VMs")
-
 	def ssh_args(self):
 		raise NotImplementedError()
 
