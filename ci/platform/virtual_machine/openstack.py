@@ -51,16 +51,14 @@ class OpenstackVm(VirtualMachine):
 		self.store_vm_info()
 
 	@classmethod
-	def from_id_or_construct(cls, vm_id, name=None, image_id=None, instance_type=None, vm_username=VM_USERNAME):
-		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, image_id, instance_type, vm_username)
+	def from_id_or_construct(cls, vm_id, name=None, image=None, instance_type=None, vm_username=VM_USERNAME):
+		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, image, instance_type, vm_username)
 
 	@classmethod
-	def construct(cls, vm_id, name=None, image_id=None, instance_type=None, vm_username=VM_USERNAME):
+	def construct(cls, vm_id, name=None, image=None, instance_type=None, vm_username=VM_USERNAME):
 		if not name:
 			name = "koality:%s:%s" % (socket.gethostname(), vm_id)
-		if image_id:
-			image = filter(lambda image: str(image.id) == str(image_id), cls.get_all_images())[0]
-		else:
+		if not image:
 			image = cls.get_newest_image()
 		instance_type = instance_type or cls.Settings.instance_type
 		size = cls._get_instance_size(instance_type)
