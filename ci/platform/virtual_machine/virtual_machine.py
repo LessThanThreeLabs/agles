@@ -1,4 +1,5 @@
 import pipes
+import tempfile
 
 from util import greenlets
 
@@ -41,6 +42,9 @@ class VirtualMachine(object):
 
 	def ssh_args(self):
 		raise NotImplementedError()
+
+	def scp_call(self, src_fpath, dest_fpath, output_handler=None, timeout=None):
+		self.call(self.ssh_args().to_scp_arg_list(src_fpath, dest_fpath), output_handler=output_handler, timeout=timeout)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		try:
@@ -120,15 +124,20 @@ class VirtualMachine(object):
 		ansi_reset = '\033[0m'
 
 		if patch_contents:
+			with tempfile.NamedTemporaryFile(mode='w') as tmp:
+				tmp.write(patch_contents)
+				tmp.flush()
+				self.scp_call(tmp.name, '~/.koality_patch')
+
 			command = ShellAnd(
 				ShellCommand('echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset))),
 				ShellCommand('echo'),
-				ShellCommand('echo %s' % pipes.quote(patch_contents)),
+				ShellCommand('cat ~/.koality_patch'),
 				ShellCommand('echo'),
 				ShellCommand('echo %s' % pipes.quote('%sPATCHING:%s' % (ansi_bright_cyan, ansi_reset))),
 				ShellCommand('echo'),
 				ShellAdvertised('cd %s' % repo_name),
-				ShellAdvertised('patch -p1 ...', actual_command=ShellPipe('echo %s' % pipes.quote(patch_contents), 'patch -p1'))
+				ShellAdvertised('patch -p1 < ~/.koality_patch', actual_command=ShellCommand('patch -p1 < ~/.koality_patch'))
 			)
 		else:
 			command = 'echo %s' % pipes.quote('%sWARNING: No patch contents received.%s' % (ansi_bright_yellow, ansi_reset))
@@ -291,6 +300,7 @@ class VirtualMachine(object):
 	def __repr__(self):
 		return '%s(%r, %r, %r)' % (type(self).__name__, self.vm_id, self.instance, self.vm_username)
 
+
 	class SshArgs(object):
 		def __init__(self, username, hostname, port=22, options={}):
 			self.username = username
@@ -300,6 +310,11 @@ class VirtualMachine(object):
 
 		def to_arg_list(self):
 			return ['ssh'] + map(lambda option: '-o%s=%s' % option, self.options.iteritems()) + ['%s@%s' % (self.username, self.hostname), '-p', str(self.port)]
+
+		def to_scp_arg_list(self, src_fpath, dest_fpath):
+			src_fpath = pipes.quote(src_fpath)
+			dest_fpath = pipes.quote(dest_fpath)
+			return ['scp'] + map(lambda option: '-o%s=%s' % option, self.options.iteritems()) + ['-P', str(self.port), src_fpath, '%s@%s:%s' % (self.username, self.hostname, dest_fpath)]
 
 
 	class ImageVersion(object):
