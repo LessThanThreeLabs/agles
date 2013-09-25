@@ -4,6 +4,7 @@ See server.py for the RPC protocol definition.
 """
 import sys
 
+import eventlet
 import kombu.pools
 
 from kombu.connection import BrokerConnection
@@ -81,8 +82,23 @@ class Client(ClientBase):
 			remote_method, *args, **kwargs)
 
 	def _connect(self):
-		self.connection = kombu.pools.connections[BrokerConnection(RabbitSettings.kombu_connection_info)].acquire(block=True, timeout=30)
-		self.channel = self.connection.channel()
+		def establish_connection():
+			self.connection = kombu.pools.connections[BrokerConnection(RabbitSettings.kombu_connection_info)].acquire(block=True, timeout=30)
+			self.channel = self.connection.default_channel
+
+		max_attempts = 3
+		for attempt in xrange(1, max_attempts + 1):
+			try:
+				establish_connection()
+			except Exception as e:
+				if attempt < max_attempts:
+					if self.connection:
+						self.connection.release()
+					eventlet.sleep(2**attempt)
+				else:
+					raise e
+			else:
+				break
 
 		self.consumer = self.channel.Consumer(
 			callbacks=[self._on_response],
@@ -95,13 +111,13 @@ class Client(ClientBase):
 		self.deadletter_exchange = Exchange(self.deadletter_exchange_name,
 			"fanout", channel=self.channel, durable=False)
 
-		self.exchange.declare()
-		self.deadletter_exchange.declare()
+		self.exchange.declare(nowait=True)
+		self.deadletter_exchange.declare(nowait=True)
 
 		self.response_mq = Queue(exchange=self.exchange, durable=False, exclusive=True, auto_delete=True, channel=self.channel)
 		self.response_mq.declare()
 		self.response_mq.routing_key = self.response_mq.name
-		self.response_mq.queue_bind()
+		self.response_mq.queue_bind(nowait=True)
 		self.consumer.add_queue(self.response_mq)
 		self.consumer.consume()
 
@@ -167,5 +183,6 @@ class Client(ClientBase):
 
 	def close(self):
 		"""Closes the rabbit connection and cleans up resources."""
-		self.consumer.cancel_by_queue(self.response_mq.name)
+		if self.response_mq and self.consumer:
+			self.consumer.cancel_by_queue(self.response_mq.name)
 		self.connection.release()

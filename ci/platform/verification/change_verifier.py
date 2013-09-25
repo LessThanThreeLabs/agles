@@ -1,6 +1,5 @@
 import collections
 import os
-import subprocess
 import sys
 
 import yaml
@@ -17,6 +16,7 @@ from shared.handler import EventSubscriber, ResourceBinding
 from settings.deployment import DeploymentSettings
 from settings.store import StoreSettings
 from settings.verification_server import VerificationServerSettings
+from streaming_executor import StreamingExecutor
 from util import pathgen
 from util.log import Logged
 from verification_config import VerificationConfig
@@ -294,8 +294,10 @@ class ChangeVerifier(EventSubscriber):
 			assert False
 
 		for file_name in ['koality.yml', '.koality.yml']:
+			results = StreamingExecutor().execute(show_command(file_name))
+			if results.returncode == 0:
 				try:
-					config_dict =  yaml.safe_load(subprocess.check_output(show_command(file_name)))
+					config_dict = yaml.safe_load(results.output)
 				except:
 					pass
 				else:
