@@ -1,6 +1,5 @@
 import collections
 import os
-import subprocess
 import sys
 
 from eventlet import event, spawn, spawn_n, spawn_after, queue
@@ -15,6 +14,7 @@ from shared.handler import EventSubscriber, ResourceBinding
 from settings.deployment import DeploymentSettings
 from settings.store import StoreSettings
 from settings.verification_server import VerificationServerSettings
+from streaming_executor import StreamingExecutor
 from util import pathgen
 from util.log import Logged
 from verification_config import VerificationConfig, ParseErrorVerificationConfig
@@ -292,12 +292,14 @@ class ChangeVerifier(EventSubscriber):
 			assert False
 
 		for file_name in ['koality.yml', '.koality.yml']:
-			try:
-				config_yaml = subprocess.check_output(show_command(file_name), stderr=subprocess.STDOUT)
-			except:
-				pass
-			else:
-				break
+			results = StreamingExecutor().execute(show_command(file_name))
+			if results.returncode == 0:
+				try:
+					config_yaml = results.output
+				except:
+					pass
+				else:
+					break
 
 		environment = collections.OrderedDict()
 		environment['KOALITY']  = 'true'
