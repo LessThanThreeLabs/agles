@@ -167,4 +167,5 @@ class Client(ClientBase):
 
 	def close(self):
 		"""Closes the rabbit connection and cleans up resources."""
+		self.consumer.cancel_by_queue(self.response_mq.name)
 		self.connection.release()
