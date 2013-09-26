@@ -154,7 +154,7 @@ class VirtualMachine(object):
 			ShellOr(
 				ShellAdvertised('ssh %s true' % host_url),
 				ShellAnd(
-					ShellCommand('echo Failed to access the master instance. Please check to make sure your security groups are configured correctly.'),
+					ShellCommand('echo -e %s' % pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
 					ShellCommand('false')
 				)
 			),
@@ -165,6 +165,10 @@ class VirtualMachine(object):
 			host_url = repo_url[:repo_url.find(":")]
 			command = ShellAnd(
 				self._get_host_access_check_command(host_url),
+				ShellOr(
+					ShellSilent(ShellCommand('which git')),
+					ShellSudo(ShellAdvertised('apt-get install -y git'))  # TODO (bbland): make this platform agnostic
+				),
 				ShellOr(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
 					ShellChain(
@@ -198,6 +202,10 @@ class VirtualMachine(object):
 
 			command = ShellAnd(
 				self._get_host_access_check_command(host_url),
+				ShellOr(
+					ShellSilent(ShellCommand('which hg')),
+					ShellSudo(ShellAdvertised('apt-get install -y mercurial'))  # TODO (bbland): make this platform agnostic
+				),
 				ShellIf(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
 					ShellAnd(

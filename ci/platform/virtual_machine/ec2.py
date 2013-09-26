@@ -4,7 +4,6 @@ import platform
 import re
 import socket
 import sys
-import yaml
 
 import boto.ec2
 import eventlet
@@ -77,7 +76,7 @@ class Ec2Vm(VirtualMachine):
 				master_name = socket.gethostname()
 			name = "koality-worker:%s (%s)" % (vm_id, master_name)
 		if not ami:
-			ami = cls.get_newest_image()
+			ami = cls.get_active_image()
 		if not instance_type:
 			instance_type = AwsSettings.instance_type
 
@@ -86,8 +85,11 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
-		bdm = ami.block_device_mapping.copy()
-		bdm['/dev/sda1'].size = max(bdm['/dev/sda1'].size, AwsSettings.root_drive_size)
+		bdm_dict = ami.block_device_mapping.copy()
+		bdm_dict['/dev/sda1'].size = max(bdm_dict['/dev/sda1'].size, AwsSettings.root_drive_size)
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		for key, value in bdm_dict.iteritems():
+			bdm[key] = value
 
 		instance = cls.CloudClient().run_instances(ami.id, instance_type=instance_type,
 			security_groups=[security_group],
@@ -103,7 +105,7 @@ class Ec2Vm(VirtualMachine):
 		This will fail if we use an image which doesn't utilitize EC2 user_data
 		'''
 		koality_config = '#!/bin/sh\n%s' % ShellChain(
-			ShellCommand('useradd --create-home %s' % vm_username),
+			ShellCommand('useradd --create-home -s /bin/bash %s' % vm_username),
 			ShellCommand('mkdir ~%s/.ssh' % vm_username),
 			ShellAppend('echo %s' % pipes.quote(PubkeyRegistrar().get_ssh_pubkey()), '~%s/.ssh/authorized_keys' % vm_username),
 			ShellCommand('chown -R %s:%s ~%s/.ssh' % (vm_username, vm_username, vm_username)),
@@ -272,10 +274,11 @@ class Ec2Vm(VirtualMachine):
 				return cls.CloudClient().get_image(image_id)
 			except:
 				cls.logger.exception('Invalid image id specified, using default instead')
-		return cls.CloudClient().get_all_images(filters={
-				'name': 'koality_verification_0.3', # to be changed
-				'state': 'available',
-				'owner': '600991114254'  # must be changed if our ec2 info changes
+		return cls.CloudClient().get_all_images(
+			owners=['600991114254'],  # must be changed if our ec2 info changes
+			filters={
+				'name': 'koality_verification_precise_0.3', # to be changed
+				'state': 'available'
 			})[0]
 
 	@classmethod
@@ -301,7 +304,7 @@ class Ec2Vm(VirtualMachine):
 		return self.CloudClient().create_image(self.instance.id, name, description)
 
 	def rebuild(self):
-		ami = self.get_newest_image()
+		ami = self.get_active_image()
 		instance_type = self.instance.instance_type
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')
@@ -309,8 +312,11 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		self._validate_security_group(security_group)
 
-		bdm = ami.block_device_mapping.copy()
-		bdm['/dev/sda1'].size = max(bdm['/dev/sda1'].size, AwsSettings.root_drive_size)
+		bdm_dict = ami.block_device_mapping.copy()
+		bdm_dict['/dev/sda1'].size = max(bdm_dict['/dev/sda1'].size, AwsSettings.root_drive_size)
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		for key, value in bdm_dict.iteritems():
+			bdm[key] = value
 
 		self.instance = self.CloudClient().run_instances(ami.id, instance_type=instance_type,
 			security_groups=[security_group],

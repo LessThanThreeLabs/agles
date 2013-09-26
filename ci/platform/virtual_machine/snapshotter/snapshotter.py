@@ -106,7 +106,7 @@ class Snapshotter(object):
 			virtual_machine.delete()
 
 	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
-		return self.vm_class.from_id_or_construct(-int(snapshot_version[1]) or -1, instance_name, image)
+		return self.vm_class.from_id_or_construct(-int(snapshot_version) or -1, instance_name, image)
 
 	def clone_repositories(self, virtual_machine, repositories, uri_translator):
 		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
@@ -198,8 +198,8 @@ class Snapshotter(object):
 			else:
 				self.logger.error('Unsupported VM class provided for snapshotter')
 
-		images = self.vm_class.get_all_images()
-		local_images = sorted(filter(lambda image: self.vm_class.get_image_version(image)[1] >= 0, images), key=self.vm_class.get_image_version, reverse=True)
+		images = self.vm_class.get_snapshots(self.vm_class.get_base_image())
+		local_images = sorted(images, key=self.vm_class.get_snapshot_version, reverse=True)
 
 		stale_images = local_images[3:]
 		for image in stale_images:

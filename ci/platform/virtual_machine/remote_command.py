@@ -4,7 +4,7 @@ import os
 import pipes
 import model_server
 
-from pysh.shell_tools import ShellCommand, ShellSilent, ShellAnd, ShellOr, ShellChain, ShellTest, ShellIf, ShellAdvertised, ShellLogin, ShellBackground, ShellSubshell
+from pysh.shell_tools import ShellCommand, ShellSilent, ShellAnd, ShellOr, ShellChain, ShellTest, ShellIf, ShellAdvertised, ShellLogin, ShellBackground, ShellSubshell, ShellCapture
 from settings.aws import AwsSettings
 from streaming_executor import CommandResults
 
@@ -129,13 +129,13 @@ class RemoteShellCommand(RemoteCommand):
 					ShellCommand('sleep 2'),
 					ShellSilent('kill -KILL $$'),
 					ShellCommand('echo'),
-					ShellCommand('echo %s' % pipes.quote(timeout_message)),
-					ShellCommand('kill -9 0')
+					ShellCommand('echo -e %s' % pipes.quote(timeout_message)),
+					ShellCommand('kill -KILL 0')
 				),
 				ShellChain(
 					ShellCommand('echo'),
-					ShellCommand('echo %s' % pipes.quote(timeout_message)),
-					ShellCommand('kill -9 0')
+					ShellCommand('echo -e %s' % pipes.quote(timeout_message)),
+					ShellCommand('kill -KILL 0')
 				)
 			)
 		)
@@ -146,8 +146,9 @@ class RemoteShellCommand(RemoteCommand):
 			given_command,
 			ShellCommand('_r=$?'),
 			ShellCommand('exec 2>/dev/null'),  # goodbye stderr stream
-			ShellSilent('kill -KILL $watchdogpid'),  # kill the timeout process
-			ShellSilent('pkill -KILL -P $watchdogpid'),  # kill all children of the timeout process
+			ShellCommand('watchdogchildren=%s' % ShellCapture('pgrep -P $watchdogpid -d " "')),
+			ShellSilent('kill $watchdogpid'),
+			ShellSilent('kill $watchdogchildren'),
 			ShellOr(
 				ShellTest('$_r -eq 0'),
 				ShellCommand('echo %s failed with return code $_r' % pipes.quote(self.name))
