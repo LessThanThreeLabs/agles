@@ -1,4 +1,3 @@
-import inspect
 import simplejson
 import os
 import pipes
@@ -192,10 +191,11 @@ class RemoteTestCommand(RemoteShellCommand):
 
 	def _get_xunit_contents_script(self, xunit_paths):
 		def read_xunit_contents(xunit_paths):
+			return '''
 			import os, os.path, json
 
 			files = []
-			for xunit_path in xunit_paths:
+			for xunit_path in %s:
 				if os.path.isfile(xunit_path):
 					files.append(xunit_path)
 				else:
@@ -210,11 +210,12 @@ class RemoteTestCommand(RemoteShellCommand):
 						contents[file] = file_contents
 
 			print json.dumps(contents)
+			''' % xunit_paths
 
-		function_source = inspect.getsource(read_xunit_contents)
+		function_source = read_xunit_contents(xunit_paths)
 		leading_spaces = len(function_source) - len(function_source.lstrip())
 		sanitized_source = '\n'.join(map(lambda line: line[leading_spaces:], function_source.split('\n')))
-		return '%s\n%s(%s)' % (sanitized_source, read_xunit_contents.func_name, xunit_paths)
+		return sanitized_source
 
 
 class RemoteTestFactoryCommand(RemoteShellCommand):
