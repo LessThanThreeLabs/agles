@@ -200,7 +200,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 		work_repo.git.reset('HEAD~', hard=True)
 
 		with model_server.rpc_connect("changes", "create") as client:
-			client.create_commit_and_change(self.repo_id, self.user_id, None, bare_repo.head.commit.hexsha, 'master', False, patch)
+			client.create_commit_and_change(self.repo_id, self.user_id, None, bare_repo.head.commit.hexsha, 'master', False, False, patch)
 
 		with Connection(RabbitSettings.kombu_connection_info) as connection:
 			Queue("verification:repos.update", EventsBroker.events_exchange, routing_key="repos", durable=False)(connection).declare()
