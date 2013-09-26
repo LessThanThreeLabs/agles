@@ -213,8 +213,9 @@ class RemoteTestCommand(RemoteShellCommand):
 			''' % xunit_paths
 
 		function_source = read_xunit_contents(xunit_paths)
-		leading_spaces = len(function_source) - len(function_source.lstrip())
-		sanitized_source = '\n'.join(map(lambda line: line[leading_spaces:], function_source.split('\n')))
+		function_lines = filter(lambda line: line.strip(), function_source.split('\n'))
+		leading_spaces = len(function_lines[0]) - len(function_lines[0].lstrip())
+		sanitized_source = '\n'.join(map(lambda line: line[leading_spaces:], function_lines))
 		return sanitized_source
 
 
