@@ -257,7 +257,7 @@ class RemotePatchCommand(RemoteSetupCommand):
 		super(RemotePatchCommand, self).__init__('patch')
 		with model_server.rpc_connect('changes', 'read') as client:
 			patch = client.get_patch(patch_id)
-		self.patch_contents = str(patch['contents']) if patch else None
+		self.patch_contents = patch['contents'] if patch else None
 		self.repo_name = repo_name
 
 	def _run(self, virtual_machine, output_handler=None):
