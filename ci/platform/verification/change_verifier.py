@@ -227,12 +227,24 @@ class ChangeVerifier(EventSubscriber):
 		if not change_started.wait():
 			return  # Failed prematurely
 
+
+		default_results_collected = False
 		change_failed = False
 		while task_queue.has_more_results():
-			result = task_queue.get_result()
-			if self._is_result_failed(result) and not change_failed:
-				fail_change()
-				change_failed = True
+			task_result = task_queue.get_result()
+			if task_result.type == 'other':
+				if default_results_collected:
+					continue
+				if self._is_result_failed(task_result.result):
+					if not change_failed:
+						fail_change()
+						change_failed = True
+			else:
+				default_results_collected = True
+				if self._is_result_failed(task_result.result) and not change_failed:
+					fail_change()
+					change_failed = True
+
 		if not change_failed:
 			pass_change(verify_only)
 
@@ -320,6 +332,9 @@ class ChangeVerifier(EventSubscriber):
 		return isinstance(result, Exception)
 
 
+TaskResult = collections.namedtuple('TaskResult', ['type', 'result'])
+
+
 class TaskQueue(object):
 	def __init__(self):
 		self.task_queue = queue.Queue()
@@ -366,12 +381,14 @@ class TaskQueue(object):
 				break
 
 	def add_task_result(self, result):
-		self.results_queue.put(result)
+		task_result = TaskResult(type='default', result=result)
+		self.results_queue.put(task_result)
 		self.task_queue.task_done()
 		self.num_results_received = self.num_results_received + 1
 
 	def add_other_result(self, result):
-		self.results_queue.put(result)
+		task_result = TaskResult(type='other', result=result)
+		self.results_queue.put(task_result)
 		self.num_results_received = self.num_results_received + 1
 
 	def get_result(self):
