@@ -166,7 +166,7 @@ class VirtualMachine(object):
 			ShellOr(
 				ShellAdvertised('ssh %s true' % host_url),
 				ShellAnd(
-					ShellCommand('echo Failed to access the master instance. Please check to make sure your security groups are configured correctly.'),
+					ShellCommand('echo -e %s' %pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
 					ShellCommand('false')
 				)
 			),

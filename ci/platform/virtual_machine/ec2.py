@@ -86,8 +86,11 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
-		bdm = ami.block_device_mapping.copy()
-		bdm['/dev/sda1'].size = max(bdm['/dev/sda1'].size, AwsSettings.root_drive_size)
+		bdm_dict = ami.block_device_mapping.copy()
+		bdm_dict['/dev/sda1'].size = max(bdm_dict['/dev/sda1'].size, AwsSettings.root_drive_size)
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		for key, value in bdm_dict.iteritems():
+			bdm[key] = value
 
 		instance = cls.CloudClient().run_instances(ami.id, instance_type=instance_type,
 			security_groups=[security_group],
@@ -299,8 +302,11 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		self._validate_security_group(security_group)
 
-		bdm = ami.block_device_mapping.copy()
-		bdm['/dev/sda1'].size = max(bdm['/dev/sda1'].size, AwsSettings.root_drive_size)
+		bdm_dict = ami.block_device_mapping.copy()
+		bdm_dict['/dev/sda1'].size = max(bdm_dict['/dev/sda1'].size, AwsSettings.root_drive_size)
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		for key, value in bdm_dict.iteritems():
+			bdm[key] = value
 
 		self.instance = self.CloudClient().run_instances(ami.id, instance_type=instance_type,
 			security_groups=[security_group],
