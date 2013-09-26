@@ -111,9 +111,10 @@ class VirtualMachineBuildCore(object):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		return self.virtual_machine.cache_repository(repo_name, console_appender)
 
-	def export_files(self, repo_name, export_prefix, file_paths):
+	def export_files(self, repo_name, export_prefix, file_paths, console_appender=None):
 		export_command = RemoteExportCommand(repo_name, export_prefix, file_paths)
-		return export_command.run(self.virtual_machine)
+		return export_command.run(self.virtual_machine,
+			self._get_output_handler(console_appender, ConsoleType.Export, export_command.name))
 
 
 class VagrantBuildCore(VirtualMachineBuildCore):

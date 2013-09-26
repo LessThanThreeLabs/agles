@@ -377,7 +377,6 @@ class RemoteExportCommand(RemoteCommand):
 					return self.uploader.upload(bucket, export_path, file_path)
 
 				def _get_export_path(self, export_prefix, file_path):
-					print os.getcwd()
 					return self._translate_path('%s/%s' % (export_prefix, os.path.relpath(file_path)))
 
 				def _translate_path(self, path):

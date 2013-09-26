@@ -148,22 +148,27 @@ class BuildVerifier(object):
 		build = self._get_build(build_id)
 		export_prefix = "repo_%d/change_%d/%d" % (build['repo_id'], build['change_id'], change_index)
 
-		def parse_export_uris(export_results):
-			if export_results.returncode == 0:
-				try:
-					return yaml.safe_load(export_results.output)['uris']
-				except:
-					pass
-			return []
+		with model_server.rpc_connect("build_consoles", "update") as build_consoles_update_rpc:
+			console_appender = self._make_console_appender(build_consoles_update_rpc, build_id)
 
-		try:
-			export_uris = parse_export_uris(self.build_core.export_files(
-				verification_config.repo_name,
-				export_prefix,
-				verification_config.export_paths
-			))
-		except:
-			export_uris = []
+			def parse_export_uris(export_results):
+				if export_results.returncode == 0:
+					try:
+						print export_results
+						return yaml.safe_load(export_results.output)['uris']
+					except:
+						pass
+				return []
+
+			try:
+				export_uris = parse_export_uris(self.build_core.export_files(
+					verification_config.repo_name,
+					export_prefix,
+					verification_config.export_paths,
+					console_appender
+				))
+			except:
+				export_uris = []
 
 		def uri_to_metadata(export_uri):
 			uri_suffix = export_uri.partition(export_prefix)[2]

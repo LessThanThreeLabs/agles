@@ -4,7 +4,8 @@ from virtual_machine.remote_command import RemoteProvisionCommand, RemoteCompile
 
 
 class VerificationConfig(object):
-	def __init__(self, machines, setup_commands, compile_commands, test_factory_commands, test_commands, export_paths):
+	def __init__(self, repo_name, machines, setup_commands, compile_commands, test_factory_commands, test_commands, export_paths):
+		self.repo_name = repo_name
 		self.machines = machines
 		self.setup_commands = setup_commands
 		self.compile_commands = compile_commands
@@ -101,13 +102,13 @@ class VerificationConfig(object):
 		if config_errors:
 			return InvalidYamlErrorVerificationConfig(config_errors)
 
-		return cls(machines, setup_commands, compile_commands, test_factory_commands, test_commands, export_paths)
+		return cls(repo_name, machines, setup_commands, compile_commands, test_factory_commands, test_commands, export_paths)
 
 
 class ErrorVerificationConfig(VerificationConfig):
 	def __init__(self, error_title, error_message):
 		super(ErrorVerificationConfig, self).__init__(
-			machines=1, setup_commands=[RemoteErrorCommand(error_title, error_message)], compile_commands=[], test_factory_commands=[], test_commands=[], export_paths=[]
+			repo_name='error', machines=1, setup_commands=[RemoteErrorCommand(error_title, error_message)], compile_commands=[], test_factory_commands=[], test_commands=[], export_paths=[]
 		)
 
 	def error_to_message(self, error):
