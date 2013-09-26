@@ -133,7 +133,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		os.makedirs(os.path.join(self.hg_repo_path, ".hg", "strip-backup"))
 		second_repo.bundle(os.path.join(self.hg_repo_path, ".hg", "strip-backup", "%s.hg" % new_sha), all=True)
 
-		self.store.merge_changeset(self.hg_repo_id, "hgrepo", new_sha, new_sha)
+		self.store.merge_changeset(self.hg_repo_id, "hgrepo", new_sha, new_sha, new_sha)
 
 		assert_equals(hglib.open(self.hg_repo_path).tip()[5], "Merging in %s" % new_sha)
 
@@ -152,7 +152,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self._git_modify_commit_push(work_repo, "test.txt", "c3",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
-		assert_raises(MergeError, self.store.merge_changeset, self.git_repo_id, "gitrepo", "refs/pending/1", "master")
+		assert_raises(MergeError, self.store.merge_changeset, self.git_repo_id, "gitrepo", "refs/pending/1", "", "master")
 		clone_repo = bare_repo.clone(bare_repo.working_dir + ".clone2")
 		assert_equals(master_sha, clone_repo.heads.master.commit.hexsha)  # Makes sure the repository has reset
 
@@ -172,7 +172,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		os.makedirs(os.path.join(self.hg_repo_path, ".hg", "strip-backup"))
 		second_repo.bundle(os.path.join(self.hg_repo_path, ".hg", "strip-backup", "%s.hg" % new_sha), all=True)
 
-		assert_raises(MergeError, self.store.merge_changeset, self.hg_repo_id, "hgrepo", new_sha, new_sha)
+		assert_raises(MergeError, self.store.merge_changeset, self.hg_repo_id, "hgrepo", new_sha, new_sha, new_sha)
 		assert_equals(hglib.open(self.hg_repo_path).tip()[1], initial_sha)
 
 	def test_git_push_forwarding_fail_repo_reset(self):
@@ -191,7 +191,7 @@ class RepoStoreTests(BaseIntegrationTest, ModelServerTestMixin, RepoStoreTestMix
 		self._git_modify_commit_push(work_repo, "test.txt", "c2",
 			parent_commits=[init_commit], refspec="HEAD:refs/pending/1")
 
-		assert_raises(Exception, self.store.merge_changeset, self.git_repo_id, "gitrepo", "refs/pending/1", "master")
+		assert_raises(Exception, self.store.merge_changeset, self.git_repo_id, "gitrepo", "refs/pending/1", "", "master")
 		clone_repo = bare_repo.clone(bare_repo.working_dir + ".clone2")
 		assert_equals(master_sha, clone_repo.heads.master.commit.hexsha)  # Makes sure the repository has reset
 
