@@ -32,6 +32,7 @@ setup:
     - echo -e "[ui]\\nusername = Koality <koality@koalitycode.com>\\n\\n[extensions]\\nmq =" > ~/.hgrc
     - path: ci/scripts
       script: ./rabbitmq_setup.sh
+    - exit $((RANDOM%2 > 0))
 compile:
   scripts:
     - pip install --upgrade .:
