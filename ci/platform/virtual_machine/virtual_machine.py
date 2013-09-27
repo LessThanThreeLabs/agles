@@ -8,7 +8,7 @@ import eventlet
 from database.engine import ConnectionFactory
 from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest, ShellSudo
 from provisioner import Provisioner
-from streaming_executor import StreamingExecutor, RemoteStreamingExecutor, CommandResults
+from streaming_executor import StreamingExecutor, CommandResults
 from util.log import Logged
 
 
