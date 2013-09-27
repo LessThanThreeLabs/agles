@@ -320,8 +320,11 @@ class FileSystemRepositoryStore(RepositoryStore):
 				exc_info = sys.exc_info()
 				error_msg = "Attempting to update/merge from forward url. base_sha: %s" % (base_sha)
 				self.logger.info(error_msg, exc_info=exc_info)
-				repo.update(rev=base_sha, clean=True)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=base_sha, nobackup=True))
+
+				if base_sha:
+					repo.update(rev=base_sha, clean=True)
+					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=base_sha, nobackup=True))
+
 				self._hg_fetch_with_private_key(repo, remote_repo)
 				raise MergeError, error_msg, exc_info[2]
 			except:
@@ -701,7 +704,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 			commit_attributes["message"] = log[5]
 			commit_attributes["username"] = log[4].split('<')[0].strip()
 			commit_attributes["email"] = log[4].split('<')[1].strip('> ')
-			commit_attributes["branch"] = log[3]
 		else:
 			return
 

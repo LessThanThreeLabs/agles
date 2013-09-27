@@ -71,9 +71,6 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		commit_dict = to_dict(commit_row, commit.columns)
 		patch_id = self.store_patch(change_id, patch_contents) if patch_contents else None
 
-		if repo_type == 'hg':
-			merge_target = commit_attributes['branch']
-
 		skip = False
 
 		if '[ci skip]' in commit_attributes['message']:
