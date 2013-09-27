@@ -429,8 +429,14 @@ class FileSystemRepositoryStore(RepositoryStore):
 				# If the branches that these two refs are on do not match, then perform a merge.
 				if not(repo.log(ref_to_merge)[0][3] == repo.log(ref_to_merge_into)[0][3]):
 					repo.update(rev=ref_to_merge_into, clean=True)
-					repo.merge(rev=ref_to_merge, tool="internal:fail")
-					rev, ref_to_merge = repo.commit("Merging in %s" % ref_to_merge)
+					try:
+						repo.merge(rev=ref_to_merge, tool="internal:fail")
+						rev, ref_to_merge = repo.commit("Merging in %s" % ref_to_merge)
+					except CommandError:
+						exc_info = sys.exc_info
+						error_msg = "Attempting to merge from api call. sha: %s" % (ref_to_merge)
+						self.logger.info(error_msg, exc_info=exc_info)
+						raise MergeError, error_msg, exc_info[2]
 
 				self._hg_push_merge_retry(repo, remote_repo, ref_to_merge, base_sha)
 		else:

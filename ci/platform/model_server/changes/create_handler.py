@@ -31,7 +31,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		user = database.schema.user
 		commit = database.schema.commit
 
-		remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
+		manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repo_type_query = repo.select().where(repo.c.id == repo_id)
@@ -40,7 +40,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			repostore_id = repo_row[repo.c.repostore_id]
 			repo_name = repo_row[repo.c.name]
 
-		commit_attributes = remote_repo_manager.get_commit_attributes(repostore_id, repo_id, repo_name, head_sha)
+		commit_attributes = manager.get_commit_attributes(repostore_id, repo_id, repo_name, head_sha)
 
 		commit_id = self._create_commit(repo_id, user_id, commit_attributes, base_sha, head_sha, store_pending)
 
