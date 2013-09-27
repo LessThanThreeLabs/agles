@@ -233,13 +233,13 @@ class ChangeVerifier(EventSubscriber):
 		while task_queue.has_more_results():
 			task_result = task_queue.get_result()
 			if task_result.type == 'other':
-				if not default_results_collected and self._is_result_failed(task_result.result) and not change_failed:
+				if not default_results_collected and task_result.is_failed() and not change_failed:
 					# There's a race condition here. A greenthread can switch here a worker ends up moving to the else clause, then we call change failed. Paradise lost
 					fail_change()
 					change_failed = True
 			else:
 				default_results_collected = True
-				if self._is_result_failed(task_result.result) and not change_failed:
+				if task_result.is_failed() and not change_failed:
 					fail_change()
 					change_failed = True
 
@@ -326,11 +326,14 @@ class ChangeVerifier(EventSubscriber):
 			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=exc_info)
 			return ParseErrorVerificationConfig(exc_info[1])
 
-	def _is_result_failed(self, result):
-		return isinstance(result, Exception)
 
+class TaskResult(object):
+	def __init__(self, type, result):
+		self.type = type
+		self.result = result
 
-TaskResult = collections.namedtuple('TaskResult', ['type', 'result'])
+	def is_failed(self):
+		return isinstance(self.result, Exception)
 
 
 class TaskQueue(object):
@@ -379,13 +382,13 @@ class TaskQueue(object):
 				break
 
 	def add_task_result(self, result):
-		task_result = TaskResult(type='default', result=result)
+		task_result = TaskResult('default', result)
 		self.results_queue.put(task_result)
 		self.task_queue.task_done()
 		self.num_results_received = self.num_results_received + 1
 
 	def add_other_result(self, result):
-		task_result = TaskResult(type='other', result=result)
+		task_result = TaskResult('other', result)
 		self.results_queue.put(task_result)
 		self.num_results_received = self.num_results_received + 1
 
