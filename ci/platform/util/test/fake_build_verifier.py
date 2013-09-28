@@ -45,8 +45,8 @@ class FakeVirtualMachine(VirtualMachine):
 		return self.call('bash -c %s' % pipes.quote('mkdir -p %s; cd %s; %s' % (self.vm_working_dir, self.vm_working_dir, command_string)), output_handler, timeout=timeout)
 
 	def scp_call(self, src_fpath, dest_fpath, output_handler=None, timeout=None):
-		dest_fpath = dest_fpath.replace('~', self.vm_working_dir)
-		self.call('cp %s %s' % (pipes.quote(src_fpath), pipes.quote(dest_fpath)))
+		dest_fpath = os.path.join(self.vm_working_dir, dest_fpath)
+		return self.call('cp %s %s' % (pipes.quote(src_fpath), pipes.quote(dest_fpath)))
 
 	def export(self, export_prefix, files, output_handler=None):
 		return self.call('true')
