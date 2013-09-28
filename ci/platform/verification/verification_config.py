@@ -141,7 +141,7 @@ class InvalidYamlErrorVerificationConfig(ErrorVerificationConfig):
 class NoYamlErrorVerificationConfig(ErrorVerificationConfig):
 	def __init__(self):
 		super(NoYamlErrorVerificationConfig, self).__init__(
-			'missing koaliy.yml',
+			'missing koality.yml',
 			'Please add a "koality.yml" or ".koality.yml" file to the root of your repository.'
 		)
 
