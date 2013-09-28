@@ -44,11 +44,11 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	def scp_call(self, src_fpath, dest_fpath, output_handler=None, timeout=None):
-		self.call(self.ssh_args().to_scp_arg_list(src_fpath, dest_fpath), output_handler=output_handler, timeout=timeout)
+		return self.call(self.ssh_args().to_scp_arg_list(src_fpath, dest_fpath), output_handler=output_handler, timeout=timeout)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		try:
-			return StreamingExecutor().execute(self.ssh_args().to_arg_list() + [str(command)], output_handler, timeout=timeout)
+			return self.call(self.ssh_args().to_arg_list() + [str(command)], output_handler, timeout=timeout)
 		except Exception as e:
 			failure_message = 'Failed to connect to the testing instance: %s' % e
 			if output_handler is not None:
@@ -125,9 +125,15 @@ class VirtualMachine(object):
 
 		if patch_contents:
 			with tempfile.NamedTemporaryFile(mode='w') as tmp:
-				tmp.write(patch_contents)
+				tmp.write(patch_contents.encode('utf8'))
 				tmp.flush()
-				self.scp_call(tmp.name, '~/.koality_patch')
+				scp_results = self.scp_call(tmp.name, '.koality_patch')
+
+			if scp_results.returncode != 0:
+				self.logger.error('Failed to scp patchfile.\nResults: (%s, %s)' % scp_results)
+				if output_handler is not None:
+					output_handler.append({1: 'Failed to send patchfile to the remote machine.'})
+				return scp_results
 
 			command = ShellAnd(
 				ShellCommand('echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset))),
