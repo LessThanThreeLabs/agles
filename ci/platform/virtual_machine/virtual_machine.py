@@ -143,14 +143,20 @@ class VirtualMachine(object):
 				ShellCommand('echo %s' % pipes.quote('%sPATCHING:%s' % (ansi_bright_cyan, ansi_reset))),
 				ShellCommand('echo'),
 				ShellAdvertised('cd %s' % repo_name),
-				ShellAdvertised('patch -p1 < ~/.koality_patch', actual_command=ShellCommand('patch -p1 < ~/.koality_patch'))
+				ShellOr(
+					ShellAdvertised('git apply ~/.koality_patch'),
+					ShellAnd(
+						ShellCommand('echo -e %s' % pipes.quote('%sFailed to git apply, attempting standard patching...%s' % (ansi_bright_yellow, ansi_reset))),
+						ShellAdvertised('patch -p1 < ~/.koality_patch')
+					)
+				)
 			)
 		else:
 			command = 'echo %s' % pipes.quote('%sWARNING: No patch contents received.%s' % (ansi_bright_yellow, ansi_reset))
 
 		results = self.ssh_call(command, output_handler)
 		if results.returncode != 0:
-			self.logger.warn("Failed to apply patch %s\nResults: %s" % (patch_contents, results.output))
+			self.logger.warn("Failed to apply patch %r\nResults: %s" % (patch_contents, results.output))
 		return results
 
 	def configure_ssh(self, private_key, output_handler=None):
