@@ -2,8 +2,6 @@ import collections
 import os
 import sys
 
-import yaml
-
 from eventlet import event, spawn, spawn_n, spawn_after, queue
 from kombu.messaging import Producer
 
@@ -19,7 +17,7 @@ from settings.verification_server import VerificationServerSettings
 from streaming_executor import StreamingExecutor
 from util import pathgen
 from util.log import Logged
-from verification_config import VerificationConfig
+from verification_config import VerificationConfig, ParseErrorVerificationConfig
 from verification_results_handler import VerificationResultsHandler
 
 @Logged()
@@ -229,12 +227,22 @@ class ChangeVerifier(EventSubscriber):
 		if not change_started.wait():
 			return  # Failed prematurely
 
+
+		default_results_collected = False
 		change_failed = False
 		while task_queue.has_more_results():
-			result = task_queue.get_result()
-			if self._is_result_failed(result) and not change_failed:
-				fail_change()
-				change_failed = True
+			task_result = task_queue.get_result()
+			if task_result.type == 'other':
+				if not default_results_collected and task_result.is_failed() and not change_failed:
+					# There's a race condition here. A greenthread can switch here a worker ends up moving to the else clause, then we call change failed. Paradise lost
+					fail_change()
+					change_failed = True
+			else:
+				default_results_collected = True
+				if task_result.is_failed() and not change_failed:
+					fail_change()
+					change_failed = True
+
 		if not change_failed:
 			pass_change(verify_only)
 
@@ -266,7 +274,7 @@ class ChangeVerifier(EventSubscriber):
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, "ChangeVerifier")
 		PubkeyRegistrar().register_pubkey(VerificationUser.id, "Koality Keypair", StoreSettings.ssh_public_key)
 
-		config_dict = {}
+		config_yaml = None
 
 		if repo_type == 'git':
 			ref = pathgen.hidden_ref(commit_id)
@@ -290,21 +298,18 @@ class ChangeVerifier(EventSubscriber):
 				checkout_url = repo_uri
 				show_command = lambda file_name: ["bash", "-c", "cd %s && hg -R %s cat -r tip %s" % ((repo_uri, os.path.join(repo_uri, ".hg", "strip-backup", head_sha + ".hg")), file_name)]
 		else:
-			self.logger.critical()
+			self.logger.critical('Unexpected repo type specified for verification: %s' % repo_type)
 			assert False
 
 		for file_name in ['koality.yml', '.koality.yml']:
 			results = StreamingExecutor().execute(show_command(file_name))
 			if results.returncode == 0:
 				try:
-					config_dict = yaml.safe_load(results.output)
+					config_yaml = results.output
 				except:
 					pass
 				else:
 					break
-
-		if not isinstance(config_dict, dict):
-			config_dict = {}
 
 		environment = collections.OrderedDict()
 		environment['KOALITY']  = 'true'
@@ -315,13 +320,20 @@ class ChangeVerifier(EventSubscriber):
 		environment['KOALITY_REPOSITORY'] = repo_name
 
 		try:
-			return VerificationConfig(repo_type, repo_name, checkout_url, ref, environment, config_dict, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
+			return VerificationConfig.from_yaml(repo_type, repo_name, checkout_url, ref, environment, config_yaml, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
 		except:
-			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=True)
-			return VerificationConfig(repo_type, repo_name, checkout_url, ref, environment, {})
+			exc_info = sys.exc_info()
+			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=exc_info)
+			return ParseErrorVerificationConfig(exc_info[1])
 
-	def _is_result_failed(self, result):
-		return isinstance(result, Exception)
+
+class TaskResult(object):
+	def __init__(self, type, result):
+		self.type = type
+		self.result = result
+
+	def is_failed(self):
+		return isinstance(self.result, Exception)
 
 
 class TaskQueue(object):
@@ -370,12 +382,14 @@ class TaskQueue(object):
 				break
 
 	def add_task_result(self, result):
-		self.results_queue.put(result)
+		task_result = TaskResult('default', result)
+		self.results_queue.put(task_result)
 		self.task_queue.task_done()
 		self.num_results_received = self.num_results_received + 1
 
 	def add_other_result(self, result):
-		self.results_queue.put(result)
+		task_result = TaskResult('other', result)
+		self.results_queue.put(task_result)
 		self.num_results_received = self.num_results_received + 1
 
 	def get_result(self):

@@ -91,6 +91,24 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			domain_name=domain_name)
 
 	@AdminApi
+	def set_allowed_connection_types(self, user_id, allowed_connection_types):
+		valid_connection_types = ['default', 'google']
+		assert isinstance(allowed_connection_types, list)
+		assert set(allowed_connection_types).issubset(valid_connection_types)
+		self.update_setting("authentication", "allowed_connection_types", allowed_connection_types)
+		self.publish_event("system_settings", None, "allowed connection types updated",
+			allowed_connection_types=allowed_connection_types)
+
+	@AdminApi
+	def set_allowed_email_domains(self, user_id, allowed_email_domains):
+		assert isinstance(allowed_email_domains, list)
+		for domain in allowed_email_domains:
+			assert isinstance(domain, (str, unicode))
+		self.update_setting("authentication", "allowed_email_domains", allowed_email_domains)
+		self.publish_event("system_settings", None, "allowed email domains updated",
+			allowed_email_domains=allowed_email_domains)
+
+	@AdminApi
 	def set_cloud_provider(self, user_id, cloud_provider):
 		self.update_setting("verification_server", "cloud_provider", cloud_provider)
 
@@ -106,17 +124,19 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			secret_key=secret_key)
 
 	@AdminApi
-	def set_aws_instance_settings(self, user_id, instance_size, root_drive_size, security_group_name):
+	def set_aws_instance_settings(self, user_id, instance_size, root_drive_size, security_group_name, user_data):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		assert isinstance(root_drive_size, int)
 		assert root_drive_size >= AwsSettings._default_root_drive_size
 		self.update_setting("aws", "instance_type", instance_size)
 		self.update_setting("aws", "root_drive_size", root_drive_size)
 		self.update_setting("aws", "security_group", security_group_name)
+		self.update_setting("aws", "user_data", user_data)
 		self.publish_event("system_settings", None, "aws instance settings updated",
 			instance_size=instance_size,
 			root_drive_size=root_drive_size,
-			security_group_name=security_group_name)
+			security_group_name=security_group_name,
+			user_data=user_data)
 
 	@AdminApi
 	def set_s3_bucket_name(self, user_id, bucket_name):

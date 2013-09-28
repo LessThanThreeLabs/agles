@@ -22,7 +22,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def __init__(self, channel=None):
 		super(ChangesCreateHandler, self).__init__("changes", "create", channel)
 
-	def create_commit_and_change(self, repo_id, user_id, base_sha, head_sha, merge_target, verify_only=False, patch_contents=None):
+	def create_commit_and_change(self, repo_id, user_id, base_sha, head_sha, merge_target, verify_only=False, store_pending=False, patch_contents=None):
 		repo_id = int(repo_id)
 		user_id = int(user_id)
 
@@ -31,7 +31,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		user = database.schema.user
 		commit = database.schema.commit
 
-		remote_repo_manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
+		manager = DistributedLoadBalancingRemoteRepositoryManager(ConnectionFactory.get_redis_connection('repostore'))
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			repo_type_query = repo.select().where(repo.c.id == repo_id)
@@ -40,9 +40,9 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			repostore_id = repo_row[repo.c.repostore_id]
 			repo_name = repo_row[repo.c.name]
 
-		commit_attributes = remote_repo_manager.get_commit_attributes(repostore_id, repo_id, repo_name, head_sha)
+		commit_attributes = manager.get_commit_attributes(repostore_id, repo_id, repo_name, head_sha)
 
-		commit_id = self._create_commit(repo_id, user_id, commit_attributes, base_sha, head_sha, verify_only)
+		commit_id = self._create_commit(repo_id, user_id, commit_attributes, base_sha, head_sha, store_pending)
 
 		prev_change_number = 0
 
@@ -70,9 +70,6 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		user_dict = to_dict(user_row, user.columns)
 		commit_dict = to_dict(commit_row, commit.columns)
 		patch_id = self.store_patch(change_id, patch_contents) if patch_contents else None
-
-		if repo_type == 'hg':
-			merge_target = commit_attributes['branch']
 
 		skip = False
 
@@ -104,8 +101,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			else:
 				raise RepositoryNotFoundError(github_repo_name, github_owner_name)
 
-		verify_only = True
-		return self.create_commit_and_change(repo_id, user_id, base_sha, head_sha, branch_name, verify_only)
+		return self.create_commit_and_change(repo_id, user_id, base_sha, head_sha, branch_name, verify_only=True, store_pending=True)
 
 	def launch_debug_instance(self, user_id, change_id, timeout=DEFAULT_TIMEOUT):
 		if not isinstance(timeout, (int, float)) or timeout < 0:
@@ -121,7 +117,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			patch_id = result.inserted_primary_key[0]
 		return patch_id
 
-	def _create_commit(self, repo_id, user_id, commit_attributes, base_sha, head_sha, verify_only):
+	def _create_commit(self, repo_id, user_id, commit_attributes, base_sha, head_sha, store_pending):
 		commit = database.schema.commit
 
 		timestamp = int(time.time())
@@ -132,7 +128,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			result = sqlconn.execute(ins)
 		commit_id = result.inserted_primary_key[0]
 
-		if verify_only:
+		if store_pending:
 			self._store_pending_commit(repo_id, head_sha, commit_id)
 
 		self._push_pending_commit(repo_id, head_sha, commit_id)

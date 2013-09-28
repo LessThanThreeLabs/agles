@@ -99,6 +99,9 @@ class SchemaDataGenerator(object):
 					repo_id = conn.execute(ins_repo).inserted_primary_key[0]
 					repos[repo_id] = 0
 					repo_ids.append(repo_id)
+					if random.random() > 0.3:
+						ins_github = schema.github_repo_metadata.insert().values(repo_id=repo_id, owner_name='gh-owner', repo_name='repo-%d' % repo, added_by_user_id=1)
+						conn.execute(ins_github)
 
 			for user in range(num_users):
 				first_name = random.choice(['Jon', 'Jordan', 'Brian', 'Ryan', 'Andrey'])

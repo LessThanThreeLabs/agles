@@ -32,7 +32,7 @@ class RemoteRepositoryManager(object):
 	def register_remote_store(self, repostore_id, num_repos):
 		raise NotImplementedError("Subclasses should override this!")
 
-	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, base_sha, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def create_repository(self, repostore_id, repo_id, repo_name):
@@ -69,11 +69,11 @@ class DistributedLoadBalancingRemoteRepositoryManager(RemoteRepositoryManager):
 	def register_remote_store(self, repostore_id, num_repos=0):
 		self._redisdb.zadd(self.SERVER_REPO_COUNT_NAME, **{str(repostore_id): num_repos})
 
-	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repostore_id, repo_id, repo_name, ref_to_merge, base_sha, ref_to_merge_into):
 		assert isinstance(repo_id, int)
 
 		with Client(StoreSettings.rpc_exchange_name, RepositoryStore.queue_name(repostore_id), globals=globals()) as client:
-			client.merge_changeset(repo_id, repo_name, ref_to_merge, ref_to_merge_into)
+			client.merge_changeset(repo_id, repo_name, ref_to_merge, base_sha, ref_to_merge_into)
 
 	def create_repository(self, repostore_id, repo_id, repo_name):
 		assert isinstance(repo_id, int)
@@ -186,7 +186,7 @@ class RepositoryStore(object):
 				self.logger.error("ip address updater greenlet failed unexpectedly", exc_info=True)
 			time.sleep(5 * MINUTE)
 
-	def merge_changeset(self, repo_id, repo_name, sha_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repo_id, repo_name, sha_to_merge, base_sha, ref_to_merge_into):
 		raise NotImplementedError("Subclasses should override this!")
 
 	def create_repository(self, repo_id, repo_name):
@@ -309,9 +309,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			else:
 				break
 
-	def _hg_push_merge_retry(self, repo, remote_repo, ref_to_merge, ref_to_merge_into):
-		sha = ref_to_merge
-
+	def _hg_push_merge_retry(self, repo, remote_repo, sha, base_sha):
 		def update_from_forward_url(sha):
 			try:
 				self._hg_fetch_with_private_key(repo, remote_repo)
@@ -320,17 +318,20 @@ class FileSystemRepositoryStore(RepositoryStore):
 				return sha
 			except CommandError:
 				exc_info = sys.exc_info()
-				error_msg = "Attempting to update/merge from forward url. ref_to_merge: %s" % (ref_to_merge)
+				error_msg = "Attempting to update/merge from forward url. base_sha: %s" % (base_sha)
 				self.logger.info(error_msg, exc_info=exc_info)
-				repo.update(rev=ref_to_merge_into, clean=True)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
+
+				if base_sha:
+					repo.update(rev=base_sha, clean=True)
+					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=base_sha, nobackup=True))
+
 				self._hg_fetch_with_private_key(repo, remote_repo)
 				raise MergeError, error_msg, exc_info[2]
 			except:
 				exc_info = sys.exc_info()
 				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=exc_info)
-				repo.update(rev=ref_to_merge_into, clean=True)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
+				repo.update(rev=base_sha, clean=True)
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=base_sha, nobackup=True))
 				self.hg_fetch_with_private_key(repo, remote_repo)
 				raise exc_info
 
@@ -402,7 +403,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			self.logger.error(error_msg)
 			raise e
 
-	def merge_changeset(self, repo_id, repo_name, ref_to_merge, ref_to_merge_into):
+	def merge_changeset(self, repo_id, repo_name, ref_to_merge, base_sha, ref_to_merge_into):
 		assert isinstance(repo_id, int)
 
 		repo_type = self._get_repo_type(repo_id)
@@ -424,7 +425,20 @@ class FileSystemRepositoryStore(RepositoryStore):
 				self._hg_fetch_with_private_key(repo, remote_repo)
 				# The rev argument is to make sure that we only pull the revision and it's dependencies into the repository.
 				repo.pull(os.path.join(repo_path, ".hg", "strip-backup", ref_to_merge + ".hg"), rev=ref_to_merge, update=True)
-				self._hg_push_merge_retry(repo, remote_repo, ref_to_merge, ref_to_merge_into)
+
+				# If the branches that these two refs are on do not match, then perform a merge.
+				if not(repo.log(ref_to_merge)[0][3] == repo.log(ref_to_merge_into)[0][3]):
+					repo.update(rev=ref_to_merge_into, clean=True)
+					try:
+						repo.merge(rev=ref_to_merge, tool="internal:fail")
+						rev, ref_to_merge = repo.commit("Merging in %s" % ref_to_merge)
+					except CommandError:
+						exc_info = sys.exc_info
+						error_msg = "Attempting to merge from api call. sha: %s" % (ref_to_merge)
+						self.logger.info(error_msg, exc_info=exc_info)
+						raise MergeError, error_msg, exc_info[2]
+
+				self._hg_push_merge_retry(repo, remote_repo, ref_to_merge, base_sha)
 		else:
 			return
 
@@ -696,7 +710,6 @@ class FileSystemRepositoryStore(RepositoryStore):
 			commit_attributes["message"] = log[5]
 			commit_attributes["username"] = log[4].split('<')[0].strip()
 			commit_attributes["email"] = log[4].split('<')[1].strip('> ')
-			commit_attributes["branch"] = log[3]
 		else:
 			return
 

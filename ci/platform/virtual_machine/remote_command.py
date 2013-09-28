@@ -3,7 +3,7 @@ import os
 import pipes
 import model_server
 
-from pysh.shell_tools import ShellCommand, ShellSilent, ShellAnd, ShellOr, ShellChain, ShellTest, ShellIf, ShellAdvertised, ShellLogin, ShellBackground, ShellSubshell
+from pysh.shell_tools import ShellCommand, ShellSilent, ShellAnd, ShellOr, ShellChain, ShellTest, ShellIf, ShellAdvertised, ShellLogin, ShellBackground, ShellSubshell, ShellCapture
 from streaming_executor import CommandResults
 
 
@@ -115,7 +115,7 @@ class RemoteShellCommand(RemoteCommand):
 		given_command = ShellCommand('eval %s' % pipes.quote(str(ShellAnd(*map(advertise, self.commands)))))
 
 		# If timeout fails to cleanly interrupt the script in 3 seconds, we send a SIGKILL
-		timeout_message = "echo %s timed out after %s seconds" % (pipes.quote(self.name), self.timeout)
+		timeout_message = "\\x1b[31;1m%s timed out after %s seconds\\x1b[0m" % (pipes.quote(self.name), self.timeout)
 
 		timeout_command = ShellChain(
 			ShellCommand('sleep %s' % self.timeout),
@@ -127,25 +127,26 @@ class RemoteShellCommand(RemoteCommand):
 					ShellCommand('sleep 2'),
 					ShellSilent('kill -KILL $$'),
 					ShellCommand('echo'),
-					timeout_message,
-					ShellCommand('kill -9 0')
+					ShellCommand('echo -e %s' % pipes.quote(timeout_message)),
+					ShellCommand('kill -KILL 0')
 				),
 				ShellChain(
 					ShellCommand('echo'),
-					timeout_message,
-					ShellCommand('kill -9 0')
+					ShellCommand('echo -e %s' % pipes.quote(timeout_message)),
+					ShellCommand('kill -KILL 0')
 				)
 			)
 		)
 
 		commands_with_timeout = ShellChain(
-			ShellBackground(ShellSilent(ShellSubshell(timeout_command))),
+			ShellBackground(ShellSubshell(timeout_command)),
 			ShellCommand('watchdogpid=$!'),
 			given_command,
 			ShellCommand('_r=$?'),
 			ShellCommand('exec 2>/dev/null'),  # goodbye stderr stream
-			ShellSilent('kill -KILL $watchdogpid'),  # kill the timeout process
-			ShellSilent('pkill -KILL -P $watchdogpid'),  # kill all children of the timeout process
+			ShellCommand('watchdogchildren=%s' % ShellCapture('pgrep -P $watchdogpid -d " "')),
+			ShellSilent('kill $watchdogpid'),
+			ShellSilent('kill $watchdogchildren'),
 			ShellOr(
 				ShellTest('$_r -eq 0'),
 				ShellCommand('echo %s failed with return code $_r' % pipes.quote(self.name))
@@ -180,7 +181,7 @@ class RemoteTestCommand(RemoteShellCommand):
 				else:
 					xunit_paths = [os.path.join(self.repo_name, xunit) for xunit in self.xunit]
 				results = virtual_machine.ssh_call(
-					"python - <<'EOF'\n%s\nEOF" % self._get_xunit_contents_script(xunit_paths))
+					'python -c %s' % pipes.quote(self._get_xunit_contents_script(xunit_paths)))
 				try:
 					return simplejson.loads(results.output)
 				except:
@@ -189,25 +190,33 @@ class RemoteTestCommand(RemoteShellCommand):
 		return retval
 
 	def _get_xunit_contents_script(self, xunit_paths):
-		pythonc_func = """import os, os.path, json
+		def read_xunit_contents(xunit_paths):
+			return '''
+			import os, os.path, json
 
-files = []
-for xunit_path in %s:
-	if os.path.isfile(xunit_path):
-		files.append(xunit_path)
-	else:
-		for root, dirs, dirfiles in os.walk(xunit_path):
-			files.extend([os.path.join(root, dirfile) for dirfile in dirfiles if dirfile.endswith('.xml')])
+			files = []
+			for xunit_path in %s:
+				if os.path.isfile(xunit_path):
+					files.append(xunit_path)
+				else:
+					for root, dirs, dirfiles in os.walk(xunit_path):
+						files.extend([os.path.join(root, dirfile) for dirfile in dirfiles if dirfile.endswith('.xml')])
 
-contents = {}
-for file in files:
-	with open(file) as f:
-		file_contents = f.read().strip()
-		if file_contents:
-			contents[file] = file_contents
+			contents = {}
+			for file in files:
+				with open(file) as f:
+					file_contents = f.read().strip()
+					if file_contents:
+						contents[file] = file_contents
 
-print json.dumps(contents)"""
-		return pythonc_func % xunit_paths
+			print json.dumps(contents)
+			''' % xunit_paths
+
+		function_source = read_xunit_contents(xunit_paths)
+		function_lines = filter(lambda line: line.strip(), function_source.split('\n'))
+		leading_spaces = len(function_lines[0]) - len(function_lines[0].lstrip())
+		sanitized_source = '\n'.join(map(lambda line: line[leading_spaces:], function_lines))
+		return sanitized_source
 
 
 class RemoteTestFactoryCommand(RemoteShellCommand):
@@ -251,7 +260,7 @@ class RemotePatchCommand(RemoteSetupCommand):
 		super(RemotePatchCommand, self).__init__('patch')
 		with model_server.rpc_connect('changes', 'read') as client:
 			patch = client.get_patch(patch_id)
-		self.patch_contents = str(patch['contents']) if patch else None
+		self.patch_contents = patch['contents'] if patch else None
 		self.repo_name = repo_name
 
 	def _run(self, virtual_machine, output_handler=None):
