@@ -101,8 +101,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 			else:
 				raise RepositoryNotFoundError(github_repo_name, github_owner_name)
 
-		verify_only = True
-		return self.create_commit_and_change(repo_id, user_id, base_sha, head_sha, branch_name, verify_only)
+		return self.create_commit_and_change(repo_id, user_id, base_sha, head_sha, branch_name, verify_only=True, store_pending=True)
 
 	def launch_debug_instance(self, user_id, change_id, timeout=DEFAULT_TIMEOUT):
 		if not isinstance(timeout, (int, float)) or timeout < 0:
