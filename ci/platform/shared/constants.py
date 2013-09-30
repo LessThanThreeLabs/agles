@@ -1,5 +1,6 @@
 VERSION = '0.6.0'
 
+MAX_SPECIAL_USER_ID = 999
 
 class VerificationUser(object):
 	id = 3
