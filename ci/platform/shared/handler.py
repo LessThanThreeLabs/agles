@@ -35,7 +35,8 @@ class EventSubscriber(MessageHandler):
 		self.resources = resources
 
 	def bind(self, channel):
-		channel.basic_qos(0, 1, False)
+		# If we ever use multiple verification servers, uncomment this or find something smarter
+		# channel.basic_qos(0, 1, False)
 		for rb in self.resources:
 			assert isinstance(rb, ResourceBinding)
 			consumer = EventsBroker(channel).subscribe(rb.resource, queue_name=rb.queue_name,

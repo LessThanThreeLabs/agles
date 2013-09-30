@@ -51,12 +51,11 @@ class VerificationResultsHandler(object):
 		base_sha = commit_attributes['base_sha']
 
 		ref = pathgen.hidden_ref(commit_id) if attributes['repo']['type'] == "git" else sha
-		ref_to_merge_into = merge_target if attributes['repo']['type'] == "git" else base_sha
 
 		try:
 			self.remote_repo_manager.merge_changeset(
 				attributes['repostore']['id'], attributes['repo']['id'],
-				attributes['repo']['name'], ref, ref_to_merge_into)
+				attributes['repo']['name'], ref, base_sha, merge_target)
 			return True
 		except (MergeError, CommandError):
 			self._mark_change_merge_failure(change_id, verification_status)

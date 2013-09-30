@@ -83,6 +83,12 @@ class VerificationConfig(object):
 			setup_commands.append(RemotePatchCommand(repo_name, patch_id))
 		setup_commands.append(RemoteProvisionCommand(repo_name, environment, language_section, setup_section))
 
+		if compile_section is not None and not isinstance(compile_section, dict):
+			return InvalidYamlErrorVerificationConfig('"compile" section must parse to a dictionary, was %s instead' % type(compile_section).__name__)
+
+		if test_section is not None and not isinstance(test_section, dict):
+			return InvalidYamlErrorVerificationConfig('"test" section must parse to a dictionary, was %s instead' % type(test_section).__name__)
+
 		machines = test_section.get('machines')
 
 		if not isinstance(machines, (int, type(None))):
@@ -135,7 +141,7 @@ class InvalidYamlErrorVerificationConfig(ErrorVerificationConfig):
 class NoYamlErrorVerificationConfig(ErrorVerificationConfig):
 	def __init__(self):
 		super(NoYamlErrorVerificationConfig, self).__init__(
-			'missing koaliy.yml',
+			'missing koality.yml',
 			'Please add a "koality.yml" or ".koality.yml" file to the root of your repository.'
 		)
 

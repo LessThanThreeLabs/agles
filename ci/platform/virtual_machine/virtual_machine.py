@@ -1,4 +1,5 @@
 import pipes
+import tempfile
 
 from util import greenlets
 
@@ -7,7 +8,7 @@ import eventlet
 from database.engine import ConnectionFactory
 from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest, ShellSudo
 from provisioner import Provisioner
-from streaming_executor import StreamingExecutor, RemoteStreamingExecutor, CommandResults
+from streaming_executor import StreamingExecutor, CommandResults
 from util.log import Logged
 
 
@@ -39,9 +40,12 @@ class VirtualMachine(object):
 	def ssh_args(self):
 		raise NotImplementedError()
 
+	def scp_call(self, src_fpath, dest_fpath, output_handler=None, timeout=None):
+		return self.call(self.ssh_args().to_scp_arg_list(src_fpath, dest_fpath), output_handler=output_handler, timeout=timeout)
+
 	def ssh_call(self, command, output_handler=None, timeout=None):
 		try:
-			return StreamingExecutor().execute(self.ssh_args().to_arg_list() + [str(command)], output_handler, timeout=timeout)
+			return self.call(self.ssh_args().to_arg_list() + [str(command)], output_handler, timeout=timeout)
 		except Exception as e:
 			failure_message = 'Failed to connect to the testing instance: %s' % e
 			if output_handler is not None:
@@ -117,22 +121,39 @@ class VirtualMachine(object):
 		ansi_reset = '\033[0m'
 
 		if patch_contents:
+			with tempfile.NamedTemporaryFile(mode='w') as tmp:
+				tmp.write(patch_contents.encode('utf8'))
+				tmp.flush()
+				scp_results = self.scp_call(tmp.name, '.koality_patch')
+
+			if scp_results.returncode != 0:
+				self.logger.error('Failed to scp patchfile.\nResults: (%s, %s)' % scp_results)
+				if output_handler is not None:
+					output_handler.append({1: 'Failed to send patchfile to the remote machine.'})
+				return scp_results
+
 			command = ShellAnd(
 				ShellCommand('echo %s' % pipes.quote('%sPATCH CONTENTS:%s' % (ansi_bright_cyan, ansi_reset))),
 				ShellCommand('echo'),
-				ShellCommand('echo %s' % pipes.quote(patch_contents)),
+				ShellCommand('cat ~/.koality_patch'),
 				ShellCommand('echo'),
 				ShellCommand('echo %s' % pipes.quote('%sPATCHING:%s' % (ansi_bright_cyan, ansi_reset))),
 				ShellCommand('echo'),
 				ShellAdvertised('cd %s' % repo_name),
-				ShellAdvertised('patch -p1 ...', actual_command=ShellPipe('echo %s' % pipes.quote(patch_contents), 'patch -p1'))
+				ShellOr(
+					ShellAdvertised('git apply ~/.koality_patch'),
+					ShellAnd(
+						ShellCommand('echo -e %s' % pipes.quote('%sFailed to git apply, attempting standard patching...%s' % (ansi_bright_yellow, ansi_reset))),
+						ShellAdvertised('patch -p1 < ~/.koality_patch')
+					)
+				)
 			)
 		else:
 			command = 'echo %s' % pipes.quote('%sWARNING: No patch contents received.%s' % (ansi_bright_yellow, ansi_reset))
 
 		results = self.ssh_call(command, output_handler)
 		if results.returncode != 0:
-			self.logger.warn("Failed to apply patch %s\nResults: %s" % (patch_contents, results.output))
+			self.logger.warn("Failed to apply patch %r\nResults: %s" % (patch_contents, results.output))
 		return results
 
 	def configure_ssh(self, private_key, output_handler=None):
@@ -323,6 +344,7 @@ class VirtualMachine(object):
 	def __repr__(self):
 		return '%s(%r, %r, %r)' % (type(self).__name__, self.vm_id, self.instance, self.vm_username)
 
+
 	class SshArgs(object):
 		def __init__(self, username, hostname, port=22, options={}):
 			self.username = username
@@ -332,3 +354,8 @@ class VirtualMachine(object):
 
 		def to_arg_list(self):
 			return ['ssh'] + map(lambda option: '-o%s=%s' % option, self.options.iteritems()) + ['%s@%s' % (self.username, self.hostname), '-p', str(self.port)]
+
+		def to_scp_arg_list(self, src_fpath, dest_fpath):
+			src_fpath = pipes.quote(src_fpath)
+			dest_fpath = pipes.quote(dest_fpath)
+			return ['scp'] + map(lambda option: '-o%s=%s' % option, self.options.iteritems()) + ['-P', str(self.port), src_fpath, '%s@%s:%s' % (self.username, self.hostname, dest_fpath)]

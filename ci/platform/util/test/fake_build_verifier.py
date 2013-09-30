@@ -41,7 +41,12 @@ class FakeVirtualMachine(VirtualMachine):
 		return self.call('true')
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
-		return self.call('bash -c %s' % pipes.quote('mkdir -p %s; cd %s; %s' % (self.vm_working_dir, self.vm_working_dir, str(command))), output_handler, timeout=timeout)
+		command_string = str(command).replace('~', self.vm_working_dir)
+		return self.call('bash -c %s' % pipes.quote('mkdir -p %s; cd %s; %s' % (self.vm_working_dir, self.vm_working_dir, command_string)), output_handler, timeout=timeout)
+
+	def scp_call(self, src_fpath, dest_fpath, output_handler=None, timeout=None):
+		dest_fpath = os.path.join(self.vm_working_dir, dest_fpath)
+		return self.call('cp %s %s' % (pipes.quote(src_fpath), pipes.quote(dest_fpath)))
 
 	def delete(self):
 		return self.call('rm -rf %s' %self.vm_working_dir)

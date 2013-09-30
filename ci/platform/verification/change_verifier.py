@@ -1,6 +1,5 @@
 import collections
 import os
-import subprocess
 import sys
 
 from eventlet import event, spawn, spawn_n, spawn_after, queue
@@ -15,6 +14,7 @@ from shared.handler import EventSubscriber, ResourceBinding
 from settings.deployment import DeploymentSettings
 from settings.store import StoreSettings
 from settings.verification_server import VerificationServerSettings
+from streaming_executor import StreamingExecutor
 from util import pathgen
 from util.log import Logged
 from verification_config import VerificationConfig, ParseErrorVerificationConfig
@@ -227,12 +227,22 @@ class ChangeVerifier(EventSubscriber):
 		if not change_started.wait():
 			return  # Failed prematurely
 
+
+		default_results_collected = False
 		change_failed = False
 		while task_queue.has_more_results():
-			result = task_queue.get_result()
-			if self._is_result_failed(result) and not change_failed:
-				fail_change()
-				change_failed = True
+			task_result = task_queue.get_result()
+			if task_result.type == 'other':
+				if not default_results_collected and task_result.is_failed() and not change_failed:
+					# There's a race condition here. A greenthread can switch here a worker ends up moving to the else clause, then we call change failed. Paradise lost
+					fail_change()
+					change_failed = True
+			else:
+				default_results_collected = True
+				if task_result.is_failed() and not change_failed:
+					fail_change()
+					change_failed = True
+
 		if not change_failed:
 			pass_change(verify_only)
 
@@ -292,12 +302,14 @@ class ChangeVerifier(EventSubscriber):
 			assert False
 
 		for file_name in ['koality.yml', '.koality.yml']:
-			try:
-				config_yaml = subprocess.check_output(show_command(file_name), stderr=subprocess.STDOUT)
-			except:
-				pass
-			else:
-				break
+			results = StreamingExecutor().execute(show_command(file_name))
+			if results.returncode == 0:
+				try:
+					config_yaml = results.output
+				except:
+					pass
+				else:
+					break
 
 		environment = collections.OrderedDict()
 		environment['KOALITY']  = 'true'
@@ -314,8 +326,14 @@ class ChangeVerifier(EventSubscriber):
 			self.logger.critical("Unexpected exception while getting verification configuration", exc_info=exc_info)
 			return ParseErrorVerificationConfig(exc_info[1])
 
-	def _is_result_failed(self, result):
-		return isinstance(result, Exception)
+
+class TaskResult(object):
+	def __init__(self, type, result):
+		self.type = type
+		self.result = result
+
+	def is_failed(self):
+		return isinstance(self.result, Exception)
 
 
 class TaskQueue(object):
@@ -364,12 +382,14 @@ class TaskQueue(object):
 				break
 
 	def add_task_result(self, result):
-		self.results_queue.put(result)
+		task_result = TaskResult('default', result)
+		self.results_queue.put(task_result)
 		self.task_queue.task_done()
 		self.num_results_received = self.num_results_received + 1
 
 	def add_other_result(self, result):
-		self.results_queue.put(result)
+		task_result = TaskResult('other', result)
+		self.results_queue.put(task_result)
 		self.num_results_received = self.num_results_received + 1
 
 	def get_result(self):

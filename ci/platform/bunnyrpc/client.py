@@ -4,7 +4,10 @@ See server.py for the RPC protocol definition.
 """
 import sys
 
-from kombu.connection import Connection
+import eventlet
+import kombu.pools
+
+from kombu.connection import BrokerConnection
 from kombu.entity import Exchange, Queue
 
 from bunnyrpc.exceptions import RPCRequestError
@@ -38,6 +41,10 @@ class Client(ClientBase):
 			 itself as a race condition where the client hangs on Event.set().
 	!!!
 	"""
+
+	# This means a process with rpc clients can only have 1024 simultaneous rpc connections
+	# This could be a bottleneck for verification server at some point
+	kombu.pools.set_limit(1024)
 
 	@property
 	def deadletter_exchange_name(self):
@@ -75,8 +82,23 @@ class Client(ClientBase):
 			remote_method, *args, **kwargs)
 
 	def _connect(self):
-		self.connection = Connection(RabbitSettings.kombu_connection_info)
-		self.channel = self.connection.channel()
+		def establish_connection():
+			self.connection = kombu.pools.connections[BrokerConnection(RabbitSettings.kombu_connection_info)].acquire(block=True, timeout=30)
+			self.channel = self.connection.default_channel
+
+		max_attempts = 3
+		for attempt in xrange(1, max_attempts + 1):
+			try:
+				establish_connection()
+			except Exception as e:
+				if attempt < max_attempts:
+					if self.connection:
+						self.connection.release()
+					eventlet.sleep(2**attempt)
+				else:
+					raise e
+			else:
+				break
 
 		self.consumer = self.channel.Consumer(
 			callbacks=[self._on_response],
@@ -89,13 +111,13 @@ class Client(ClientBase):
 		self.deadletter_exchange = Exchange(self.deadletter_exchange_name,
 			"fanout", channel=self.channel, durable=False)
 
-		self.exchange.declare()
-		self.deadletter_exchange.declare()
+		self.exchange.declare(nowait=True)
+		self.deadletter_exchange.declare(nowait=True)
 
 		self.response_mq = Queue(exchange=self.exchange, durable=False, exclusive=True, auto_delete=True, channel=self.channel)
 		self.response_mq.declare()
 		self.response_mq.routing_key = self.response_mq.name
-		self.response_mq.queue_bind()
+		self.response_mq.queue_bind(nowait=True)
 		self.consumer.add_queue(self.response_mq)
 		self.consumer.consume()
 
@@ -161,4 +183,6 @@ class Client(ClientBase):
 
 	def close(self):
 		"""Closes the rabbit connection and cleans up resources."""
-		self.connection.close()
+		if self.response_mq and self.consumer:
+			self.consumer.cancel_by_queue(self.response_mq.name)
+		self.connection.release()
