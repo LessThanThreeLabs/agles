@@ -11,6 +11,7 @@ from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
 from settings.authentication import AuthenticationSettings
 from settings.aws import AwsSettings
+from settings.github_enterprise import GithubEnterpriseSettings
 from settings.libcloud import LibCloudSettings
 from settings.verification_server import VerificationServerSettings
 from settings.web_server import WebServerSettings
@@ -164,6 +165,14 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 			'license_type': DeploymentSettings.license_type,
 			'license_trial_expiration_time': DeploymentSettings.license_trial_expiration_time,
 			'license_unpaid_expiration_time': DeploymentSettings.license_unpaid_expiration_time
+		}
+
+	@AdminApi
+	def get_github_enterprise_config(self, user_id):
+		return {
+			'url': GithubEnterpriseSettings.github_url,
+			'client_id': GithubEnterpriseSettings.client_id,
+			'client_secret': GithubEnterpriseSettings.client_secret
 		}
 
 	@AdminApi
