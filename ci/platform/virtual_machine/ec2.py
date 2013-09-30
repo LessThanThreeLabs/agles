@@ -267,13 +267,7 @@ class Ec2Vm(VirtualMachine):
 		self.instance.reboot()
 
 	@classmethod
-	def get_base_image(cls):
-		image_id = AwsSettings.vm_image_id
-		if image_id:
-			try:
-				return cls.CloudClient().get_image(image_id)
-			except:
-				cls.logger.exception('Invalid image id specified, using default instead')
+	def _get_default_base_image(cls):
 		return cls.CloudClient().get_all_images(
 			owners=['600991114254'],  # must be changed if our ec2 info changes
 			filters={
@@ -282,8 +276,20 @@ class Ec2Vm(VirtualMachine):
 			})[0]
 
 	@classmethod
+	def get_base_image(cls):
+		image_id = AwsSettings.vm_image_id
+		if image_id:
+			try:
+				return cls.CloudClient().get_image(image_id)
+			except:
+				cls.logger.exception('Invalid image id specified, using default instead')
+		return cls._get_default_base_image()
+
+	@classmethod
 	def get_available_base_images(cls):
-		return cls.CloudClient().get_all_images(owners=['self'])
+		own_images = cls.CloudClient().get_all_images(owners=['self'])
+		own_base_images = filter(lambda image: cls.get_snapshot_version(image) is None, own_images)
+		return [cls._get_default_base_image()] + sorted(own_base_images, key=lambda image: image.name)
 
 	@classmethod
 	def get_snapshots(cls, base_image):
