@@ -168,6 +168,7 @@ class BuildVerifier(object):
 					console_appender
 				))
 			except:
+				self.logger.exception('Failed to export')
 				export_uris = []
 
 		def uri_to_metadata(export_uri):

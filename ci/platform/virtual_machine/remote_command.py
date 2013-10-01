@@ -12,7 +12,12 @@ class RemoteCommand(object):
 	def run(self, virtual_machine, output_handler=None):
 		if output_handler:
 			output_handler.declare_command()
-		results = self._run(virtual_machine, output_handler)
+		try:
+			results = self._run(virtual_machine, output_handler)
+		except Exception as e:
+			if output_handler:
+				output_handler.set_return_code(255)
+			raise e
 		if output_handler:
 			output_handler.set_return_code(results.returncode)
 		return results
@@ -307,7 +312,7 @@ class RemoteExportCommand(RemoteCommand):
 						self.aws_secret_access_key = str(aws_secret_access_key)
 
 					def _sign_request(self, path, timestamp):
-						sign_headers = 'PUT\\n\\n\\n\\nx-amz-acl:public-read\nx-amz-date:%%s\n%%s' % (timestamp, path)
+						sign_headers = 'PUT\\n\\n\\n\\nx-amz-acl:public-read\\nx-amz-date:%%s\\n%%s' %% (timestamp, path)
 						return base64.encodestring(
 							hmac.new(
 								self.aws_secret_access_key,
@@ -337,7 +342,7 @@ class RemoteExportCommand(RemoteCommand):
 						return response.geturl()
 
 					def get_url(self, bucket, export_path):
-						return 'https://%%s.s3.amazonaws.com/%%s' % (bucket, export_path)
+						return 'https://%%s.s3.amazonaws.com/%%s' %% (bucket, export_path)
 
 
 				class Exporter(object):
@@ -380,29 +385,29 @@ class RemoteExportCommand(RemoteCommand):
 						return self.uploader.upload(bucket, export_path, file_path)
 
 					def _get_export_path(self, export_prefix, file_path):
-						return self._translate_path('%%s/%%s' % (export_prefix, os.path.relpath(file_path)))
+						return self._translate_path('%%s/%%s' %% (export_prefix, os.path.relpath(file_path)))
 
 					def _translate_path(self, path):
 						def translate_dots(matchobj):
-							return 'up%%d' % (len(matchobj.group(0)) / 2)
+							return 'up%%d' %% (len(matchobj.group(0)) / 2)
 
 						return re.sub('\.\.(\/\.\.)*', translate_dots, path)
 
-				uploader = S3CurlUploader(%(key)s, %(secret)s)
+				uploader = S3CurlUploader(%r, %r)
 				exporter = Exporter(uploader)
 
 				uris = []
 				errors = []
-				for file_path in %(file_paths)s:
+				for file_path in %r:
 					try:
-						uris.extend(exporter.upload(%(bucket)s, %(export_prefix)s, file_path))
+						uris.extend(exporter.upload(%r, %r, file_path))
 					except Exception as e:
-						errors.append('%%s: %%s' % (type(e).__name__, e))
+						errors.append('%%s: %%s' %% (type(e).__name__, e))
 
 				print json.dumps({
 					'uris': list(set(uris)),
 					'errors': errors
-				})'''
+				})''' % (key, secret, file_paths, bucket, export_prefix)
 
 		function_source = export(
 			AwsSettings.aws_access_key_id,
