@@ -8,6 +8,7 @@ import eventlet
 from database.engine import ConnectionFactory
 from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest, ShellSudo
 from provisioner import Provisioner
+from provisioner.package_parser import SystemPackageParser
 from streaming_executor import StreamingExecutor, CommandResults
 from util.log import Logged
 
@@ -188,7 +189,7 @@ class VirtualMachine(object):
 				self._get_host_access_check_command(host_url),
 				ShellOr(
 					ShellSilent(ShellCommand('which git')),
-					ShellSudo(ShellAdvertised('apt-get install -y git'))  # TODO (bbland): make this platform agnostic
+					ShellSudo(SystemPackageParser().install_packages(['git']))
 				),
 				ShellOr(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
@@ -225,7 +226,7 @@ class VirtualMachine(object):
 				self._get_host_access_check_command(host_url),
 				ShellOr(
 					ShellSilent(ShellCommand('which hg')),
-					ShellSudo(ShellAdvertised('apt-get install -y mercurial'))  # TODO (bbland): make this platform agnostic
+					ShellSudo(SystemPackageParser().install_packages(['mercurial']))  # TODO (bbland): make this platform agnostic
 				),
 				ShellIf(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
