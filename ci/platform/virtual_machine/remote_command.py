@@ -420,7 +420,7 @@ class RemoteExportCommand(RemoteCommand):
 		leading_spaces = len(function_lines[0]) - len(function_lines[0].lstrip())
 		sanitized_source = '\n'.join(map(lambda line: line[leading_spaces:], function_lines))
 
-		return virtual_machine.ssh_call('cd %s && python -c %s' % (self.repo_name, pipes.quote(sanitized_source)), output_handler=output_handler)
+		return virtual_machine.ssh_call('cd %s && python -c %s' % (self.repo_name, pipes.quote(sanitized_source)))
 
 
 class RemoteErrorCommand(RemoteCommand):
