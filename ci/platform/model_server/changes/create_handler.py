@@ -22,7 +22,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def __init__(self, channel=None):
 		super(ChangesCreateHandler, self).__init__("changes", "create", channel)
 
-	def create_commit_and_change(self, repo_id, user_id, base_sha, head_sha, merge_target, verify_only=False, store_pending=False, patch_contents=None):
+	def create_commit_and_change(self, repo_id, user_id, base_sha, head_sha, merge_target, verify_only=False, store_pending=False, patch_contents=None, email_to=None):
 		repo_id = int(repo_id)
 		user_id = int(user_id)
 
@@ -55,7 +55,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				prev_change_number = max_change_number_result[0]
 			change_number = prev_change_number + 1
 			ins = change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target=merge_target,
-				number=change_number, verification_status=BuildStatus.QUEUED, create_time=create_time)
+				number=change_number, verification_status=BuildStatus.QUEUED, create_time=create_time, email_to=email_to)
 			result = sqlconn.execute(ins)
 			change_id = result.inserted_primary_key[0]
 
