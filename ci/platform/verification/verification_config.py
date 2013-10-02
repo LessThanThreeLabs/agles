@@ -89,7 +89,7 @@ class VerificationConfig(object):
 		if test_section is not None and not isinstance(test_section, dict):
 			return InvalidYamlErrorVerificationConfig('"test" section must parse to a dictionary, was %s instead' % type(test_section).__name__)
 
-		machines = test_section.get('machines')
+		machines = test_section.get('machines') if test_section else None
 
 		if not isinstance(machines, (int, type(None))):
 			return InvalidYamlErrorVerificationConfig('test->machines must be an int or be unspecified')
