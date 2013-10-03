@@ -297,6 +297,7 @@ class RemoteExportCommand(RemoteCommand):
 		def export(key, secret, bucket, export_prefix, file_paths):
 			return '''
 				import base64
+				import glob
 				import hmac
 				import json
 				import os
@@ -350,7 +351,6 @@ class RemoteExportCommand(RemoteCommand):
 						self.uploader = uploader
 
 					def upload(self, bucket, export_prefix, path):
-						path = os.path.expanduser(os.path.expandvars(path))
 						if os.path.isfile(path):
 							return [self.upload_file(bucket, export_prefix, path)]
 						elif os.path.isdir(path):
@@ -398,11 +398,12 @@ class RemoteExportCommand(RemoteCommand):
 
 				uris = []
 				errors = []
-				for file_path in %r:
-					try:
-						uris.extend(exporter.upload(%r, %r, file_path))
-					except Exception as e:
-						errors.append('%%s: %%s' %% (type(e).__name__, e))
+				for file_glob in %r:
+					for file_path in glob.glob(os.path.expanduser(os.path.expandvars(file_glob))):
+						try:
+							uris.extend(exporter.upload(%r, %r, file_path))
+						except Exception as e:
+							errors.append('%%s: %%s' %% (type(e).__name__, e))
 
 				print json.dumps({
 					'uris': list(set(uris)),
