@@ -407,7 +407,7 @@ class Ec2Vm(VirtualMachine):
 	def _safe_terminate(self, instance_ids):
 		try:
 			with self.CloudClient() as ec2_client:
-				ec2_client.terminate(instance_ids)
+				ec2_client.terminate_instances(instance_ids)
 		except:
 			self.logger.info("Failed to terminate instances %s" % instance_ids, exc_info=True)
 
