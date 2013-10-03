@@ -8,6 +8,7 @@ import eventlet
 from database.engine import ConnectionFactory
 from pysh.shell_tools import ShellAnd, ShellCommand, ShellPipe, ShellAdvertised, ShellOr, ShellSilent, ShellChain, ShellRedirect, ShellIf, ShellNot, ShellTest, ShellSudo
 from provisioner import Provisioner
+from provisioner.package_parser import SystemPackageParser
 from streaming_executor import StreamingExecutor, CommandResults
 from util.log import Logged
 
@@ -36,9 +37,6 @@ class VirtualMachine(object):
 			if output_handler is not None:
 				output_handler.append({1: failure_message})
 			return CommandResults(1, failure_message)
-
-	def export(self, export_prefix, file_paths, output_handler=None):
-		raise NotImplementedError("Currently only supported for EC2 VMs")
 
 	def ssh_args(self):
 		raise NotImplementedError()
@@ -178,7 +176,7 @@ class VirtualMachine(object):
 			ShellOr(
 				ShellAdvertised('ssh %s true' % host_url),
 				ShellAnd(
-					ShellCommand('echo -e %s' %pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
+					ShellCommand('echo -e %s' % pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
 					ShellCommand('false')
 				)
 			),
@@ -189,6 +187,10 @@ class VirtualMachine(object):
 			host_url = repo_url[:repo_url.find(":")]
 			command = ShellAnd(
 				self._get_host_access_check_command(host_url),
+				ShellOr(
+					ShellSilent(ShellCommand('which git')),
+					ShellSudo(SystemPackageParser().install_packages(['git']))
+				),
 				ShellOr(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
 					ShellChain(
@@ -222,6 +224,10 @@ class VirtualMachine(object):
 
 			command = ShellAnd(
 				self._get_host_access_check_command(host_url),
+				ShellOr(
+					ShellSilent(ShellCommand('which hg')),
+					ShellSudo(SystemPackageParser().install_packages(['mercurial']))  # TODO (bbland): make this platform agnostic
+				),
 				ShellIf(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
 					ShellAnd(
@@ -284,30 +290,57 @@ class VirtualMachine(object):
 		return self.ssh_call(command, output_handler)
 
 	@classmethod
-	def get_newest_image(cls):
-		images = cls.get_all_images()
-		return max(images, key=cls.get_image_version)  # get image with greatest version
+	def get_active_image(cls):
+		base_image = cls.get_base_image()
+		snapshots = cls.get_snapshots(base_image)
+		if snapshots:
+			return max(snapshots, key=cls.get_snapshot_version)
+		return base_image
 
 	@classmethod
-	def get_newest_global_image(cls):
-		images = cls.get_all_images()
-		return max(filter(lambda image: cls.get_image_version(image)[1] == -1, images), key=lambda image: cls.get_image_version(image)[0])
-
-	@classmethod
-	def get_all_images(cls):
+	def get_base_image(cls):
 		raise NotImplementedError()
 
 	@classmethod
-	def get_image_version(cls, image):
-		name_parts = image.name.split('_')
-		try:
-			major_version, minor_version = VirtualMachine.ImageVersion(name_parts[-2]), VirtualMachine.ImageVersion(name_parts[-1])
-		except (IndexError, ValueError):
+	def get_available_base_images(cls):
+		raise NotImplementedError()
+
+	@classmethod
+	def get_snapshots(cls, base_image):
+		raise NotImplementedError()
+
+	@classmethod
+	def get_image_id(cls, image):
+		raise NotImplementedError()
+
+	@classmethod
+	def get_image_name(cls, image):
+		raise NotImplementedError()
+
+	@classmethod
+	def serialize_image(cls, image):
+		return {
+			'id': cls.get_image_id(image),
+			'name': cls.get_image_name(image)
+		}
+
+	@classmethod
+	def serialize_images(cls, images):
+		return map(cls.serialize_image, images)
+
+	@classmethod
+	def format_snapshot_name(cls, base_image, snapshot_version):
+		return 'koality-snapshot-(%s)-v%s' % (cls.get_image_name(base_image), snapshot_version)
+
+	@classmethod
+	def get_snapshot_version(cls, image):
+		image_name = cls.get_image_name(image)
+		if image_name.startswith('koality-snapshot-'):
 			try:
-				major_version, minor_version = VirtualMachine.ImageVersion(name_parts[-1]), -1
+				return int(image_name[image_name.rfind('v')])
 			except:
-				major_version, minor_version = -1, -1
-		return major_version, minor_version
+				pass
+		return None
 
 	def __repr__(self):
 		return '%s(%r, %r, %r)' % (type(self).__name__, self.vm_id, self.instance, self.vm_username)
@@ -327,63 +360,3 @@ class VirtualMachine(object):
 			src_fpath = pipes.quote(src_fpath)
 			dest_fpath = pipes.quote(dest_fpath)
 			return ['scp'] + map(lambda option: '-o%s=%s' % option, self.options.iteritems()) + ['-P', str(self.port), src_fpath, '%s@%s:%s' % (self.username, self.hostname, dest_fpath)]
-
-
-	class ImageVersion(object):
-		"""A multiple decimal-place version string (such as 1.0.4)"""
-		def __init__(self, string_representation):
-			string_representation = str(string_representation)
-			self.sub_versions = [int(sub_version) for sub_version in string_representation.split('.')]
-
-		def __eq__(self, other):
-			if not isinstance(other, VirtualMachine.ImageVersion):
-				try:
-					other = VirtualMachine.ImageVersion(other)
-				except:
-					return False
-
-			return self.sub_versions == other.sub_versions
-
-		def __cmp__(self, other):
-			if not isinstance(other, VirtualMachine.ImageVersion):
-				other = VirtualMachine.ImageVersion(other)
-
-			for version_index in xrange(len(self.sub_versions)):
-				if version_index >= len(other.sub_versions):
-					return 1
-				else:
-					comparison = cmp(self.sub_versions[version_index], other.sub_versions[version_index])
-					if comparison != 0:
-						return comparison
-			if len(self.sub_versions) < len(other.sub_versions):
-				return -1
-			return 0
-
-		def __add__(self, other):
-			if not isinstance(other, VirtualMachine.ImageVersion):
-				other = VirtualMachine.ImageVersion(other)
-
-			sub_versions = [0] * max(len(self.sub_versions), len(other.sub_versions))
-
-			for version_index in xrange(len(self.sub_versions)):
-				sub_versions[version_index] += self.sub_versions[version_index]
-
-			for version_index in xrange(len(other.sub_versions)):
-				sub_versions[version_index] += other.sub_versions[version_index]
-
-			return VirtualMachine.ImageVersion(self._from_sub_versions(sub_versions))
-
-		def __str__(self):
-			return self._from_sub_versions(self.sub_versions)
-
-		def __repr__(self):
-			return '%s(%s)' % (type(self).__name__, self)
-
-		def __int__(self):
-			return self.sub_versions[0]
-
-		def __getitem__(self, index):
-			return self.sub_versions[index]
-
-		def _from_sub_versions(self, sub_versions):
-			return '.'.join([str(sub_version) for sub_version in sub_versions])

@@ -5,7 +5,6 @@ import re
 import socket
 import sys
 import time
-import yaml
 
 import boto.ec2
 import boto.exception
@@ -110,21 +109,19 @@ CloudBroker = Ec2Broker()
 
 @Logged()
 class Ec2Vm(VirtualMachine):
-	VM_USERNAME = 'lt3'
-
 	CloudClient = CloudBroker.connection
 	Settings = AwsSettings
 
-	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
+	def __init__(self, vm_id, instance, vm_username):
 		super(Ec2Vm, self).__init__(vm_id, instance, vm_username)
 		self.store_vm_info()
 
 	@classmethod
-	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=VM_USERNAME):
+	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None):
 		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, ami, instance_type, vm_username)
 
 	@classmethod
-	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=VM_USERNAME):
+	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None):
 		if not name:
 			master_name = None
 			if ec2metadata:
@@ -136,9 +133,11 @@ class Ec2Vm(VirtualMachine):
 				master_name = socket.gethostname()
 			name = "koality-worker:%s (%s)" % (vm_id, master_name)
 		if not ami:
-			ami = cls.get_newest_image()
+			ami = cls.get_active_image()
 		if not instance_type:
 			instance_type = AwsSettings.instance_type
+
+		vm_username = vm_username or AwsSettings.vm_username
 
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
@@ -159,13 +158,13 @@ class Ec2Vm(VirtualMachine):
 		return Ec2Vm(vm_id, instance, vm_username)
 
 	@classmethod
-	def _default_user_data(cls, vm_username=VM_USERNAME):
+	def _default_user_data(cls, vm_username):
 		'''This utilizes Ubuntu cloud-init, which runs this script at "rc.local-like" time
 		when it finishes first boot.
 		This will fail if we use an image which doesn't utilitize EC2 user_data
 		'''
 		koality_config = '#!/bin/sh\n%s' % ShellChain(
-			ShellCommand('useradd --create-home %s' % vm_username),
+			ShellCommand('useradd --create-home -s /bin/bash %s' % vm_username),
 			ShellCommand('mkdir ~%s/.ssh' % vm_username),
 			ShellAppend('echo %s' % pipes.quote(PubkeyRegistrar().get_ssh_pubkey()), '~%s/.ssh/authorized_keys' % vm_username),
 			ShellCommand('chown -R %s:%s ~%s/.ssh' % (vm_username, vm_username, vm_username)),
@@ -242,7 +241,7 @@ class Ec2Vm(VirtualMachine):
 			return cls._from_instance_id(vm_id, vm_info['instance_id'], vm_info['username'])
 
 	@classmethod
-	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
+	def _from_instance_id(cls, vm_id, instance_id, vm_username):
 		try:
 			instance = CloudBroker.get_instance_by_id(instance_id)
 			vm = Ec2Vm(vm_id, instance, vm_username)
@@ -310,20 +309,6 @@ class Ec2Vm(VirtualMachine):
 		with model_server.rpc_connect("debug_instances", "create") as debug_create_rpc:
 			debug_create_rpc.create_vm_in_db("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
 
-	def export(self, repo_name, export_prefix, file_paths, output_handler=None):
-		export_options = {
-			'provider': 's3',
-			'key': AwsSettings.aws_access_key_id,
-			'secret': AwsSettings.aws_secret_access_key,
-			'container_name': AwsSettings.s3_bucket_name,
-			'export_prefix': export_prefix,
-			'file_paths': file_paths
-		}
-		return self.ssh_call(
-			"cd %s && koality-export %s" % (repo_name, pipes.quote(yaml.safe_dump(export_options))),
-			output_handler=output_handler
-		)
-
 	def ssh_args(self):
 		options = {
 			'LogLevel': 'error',
@@ -337,21 +322,51 @@ class Ec2Vm(VirtualMachine):
 		self.instance.reboot()
 
 	@classmethod
-	def get_all_images(cls):
-		with cls.CloudClient() as ec2_client:
-			return ec2_client.get_all_images(
-				filters={
-					'name': '%s_%s_%s*' % (AwsSettings.vm_image_name_prefix, AwsSettings.vm_image_name_suffix, AwsSettings.vm_image_name_version),
-					'state': 'available'
-				}
-			)
+	def _get_default_base_image(cls):
+		return cls.CloudClient().get_all_images(
+			owners=['600991114254'],  # must be changed if our ec2 info changes
+			filters={
+				'name': 'koality_verification_precise_0.4', # to be changed
+				'state': 'available'
+			})[0]
+
+	@classmethod
+	def get_base_image(cls):
+		image_id = AwsSettings.vm_image_id
+		if image_id:
+			try:
+				return cls.CloudClient().get_image(image_id)
+			except:
+				cls.logger.exception('Invalid image id specified, using default instead')
+		return cls._get_default_base_image()
+
+	@classmethod
+	def get_available_base_images(cls):
+		own_images = cls.CloudClient().get_all_images(owners=['self'])
+		own_base_images = filter(lambda image: cls.get_snapshot_version(image) is None, own_images)
+		return [cls._get_default_base_image()] + sorted(own_base_images, key=lambda image: image.name)
+
+	@classmethod
+	def get_snapshots(cls, base_image):
+		return cls.CloudClient().get_all_images(filters={
+				'name': cls.format_snapshot_name(base_image, '*'),
+				'state': 'available'
+			})
+
+	@classmethod
+	def get_image_id(cls, image):
+		return image.id
+
+	@classmethod
+	def get_image_name(cls, image):
+		return image.name
 
 	def create_image(self, name, description=None):
 		with self.CloudClient() as ec2_client:
 			return ec2_client.create_image(self.instance.id, name, description)
 
 	def rebuild(self):
-		ami = self.get_newest_image()
+		ami = self.get_active_image()
 		instance_type = self.instance.instance_type
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')

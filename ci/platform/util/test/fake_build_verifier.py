@@ -48,8 +48,5 @@ class FakeVirtualMachine(VirtualMachine):
 		dest_fpath = os.path.join(self.vm_working_dir, dest_fpath)
 		return self.call('cp %s %s' % (pipes.quote(src_fpath), pipes.quote(dest_fpath)))
 
-	def export(self, export_prefix, files, output_handler=None):
-		return self.call('true')
-
 	def delete(self):
 		return self.call('rm -rf %s' %self.vm_working_dir)
