@@ -215,6 +215,16 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		self.update_setting("store", "ssh_public_key", public_key.exportKey('OpenSSH'))
 
 	@AdminApi
+	def set_github_enterprise_config(self, user_id, url, client_id, client_secret):
+		self.update_setting("github_enterprise", "github_url", url)
+		self.update_setting("github_enterprise", "client_id", client_id)
+		self.update_setting("github_enterprise", "client_secret", client_secret)
+		self.publish_event("system_settings", None, "github enterprise settings updated",
+			url=url,
+			client_id=client_id,
+			client_secret=client_secret)
+
+	@AdminApi
 	def upgrade_deployment(self, user_id):
 		if DeploymentSettings.upgrade_status == 'running':
 			raise UpgradeInProgressException()

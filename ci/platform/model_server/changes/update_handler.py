@@ -1,5 +1,6 @@
 import time
 
+from shared.constants import MAX_SPECIAL_USER_ID
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
@@ -71,7 +72,11 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		query = change.join(commit).join(user).select(use_labels=True).where(change.c.id == change_id)
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			row = sqlconn.execute(query).first()
-		email = row[user.c.email]
+
+		email = row[change.c.email_to]
+		if not email:
+			email = row[user.c.email] if user.c.id <= MAX_SPECIAL_USER_ID else row[commit.c.committer_email]
+
 		first_name = row[user.c.first_name]
 		last_name = row[user.c.last_name]
 		repo_id = row[change.c.repo_id]
