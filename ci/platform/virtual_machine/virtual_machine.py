@@ -337,7 +337,7 @@ class VirtualMachine(object):
 		image_name = cls.get_image_name(image)
 		if image_name.startswith('koality-snapshot-'):
 			try:
-				return int(image_name[image_name.rfind('v')])
+				return int(image_name[image_name.rfind('v') + 1:])
 			except:
 				pass
 		return None
