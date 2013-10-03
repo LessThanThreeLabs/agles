@@ -57,3 +57,15 @@ test:
               echo "    path: ci/platform"
               echo "    xunit: nosetests.xml"
             done
+    - integration test factory 1:
+        path: ci/platform
+        script:
+          - |
+            ls tests/integration_tests/*.py | while read test; do
+              shortname=${test##*/}
+              shortname=${shortname%.py}
+              echo - $shortname:
+              echo "    script: nosetests -sv --with-xunit $test"
+              echo "    path: ci/platform"
+              echo "    xunit: nosetests.xml"
+            done
