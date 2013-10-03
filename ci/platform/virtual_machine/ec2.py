@@ -1,13 +1,15 @@
+import imp
 import logging
 import pipes
-import platform
 import re
 import socket
 import sys
+import time
 import yaml
 
 import boto.ec2
-import eventlet
+import boto.exception
+import eventlet, eventlet.pools
 
 import model_server
 
@@ -16,6 +18,11 @@ from settings.aws import AwsSettings
 from util.log import Logged
 from verification.pubkey_registrar import PubkeyRegistrar
 from virtual_machine import VirtualMachine
+
+try:
+	ec2metadata = imp.load_source('ec2metadata', '/usr/bin/ec2metadata')
+except:
+	ec2metadata = None
 
 
 class Ec2Client(object):
@@ -34,13 +41,19 @@ class Ec2Client(object):
 
 	@classmethod
 	def _connect(cls, aws_access_key_id, aws_secret_access_key, region=None):
-		if region is None:
-			region = AwsSettings.region or re.search(
+		region = region or AwsSettings.region
+		if not region and ec2metadata is not None:
+			availability_zone = ec2metadata.get('availability-zone')
+			region = re.search(
 				"(us|sa|eu|ap)-(north|south)?(east|west)?-[0-9]+",
-				Ec2Vm._call(['ec2metadata', '--availability-zone']).output
+				availability_zone
 			).group(0)
-		return boto.ec2.connect_to_region(region,
+		conn = boto.ec2.connect_to_region(region,
 			aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+		if conn:
+			return conn
+		raise cls.InvalidRegionError(region)
+
 
 	class InvalidCredentialsFilter(object):
 		def filter(self, record):
@@ -51,11 +64,55 @@ class Ec2Client(object):
 	logging.getLogger('boto').addFilter(InvalidCredentialsFilter())
 
 
+	class InvalidRegionError(Exception):
+		pass
+
+
+class Ec2Broker(object):
+	def __init__(self):
+		self._ec2_client_pool = eventlet.pools.Pool(create=Ec2Client.get_client)
+		self._last_request_time = 0
+		self._instances = []
+		self._updater_greenlet = None
+
+	def connection(self):
+		return self._ec2_client_pool.item()
+
+	def _update_instances(self):
+		if time.time() - self._last_request_time < 5:
+			return  # The information is new enough
+
+		if self._updater_greenlet is None:
+			self._updater_greenlet = eventlet.spawn(self._update_instance_info)
+
+		self._updater_greenlet.wait()
+		self._updater_greenlet = None
+
+	def _update_instance_info(self):
+		with self.connection() as conn:
+			self._instances = map(lambda reservation: reservation.instances[0], conn.get_all_instances())
+		self._last_request_time = time.time()
+
+	def get_all_instances(self):
+		self._update_instances()
+		return self._instances
+
+	def get_instance_by_id(self, instance_id):
+		self._update_instances()
+		instances = filter(lambda instance: instance.id == instance_id, self._instances)
+		if instances:
+			return instances[0]
+		return None
+
+
+CloudBroker = Ec2Broker()
+
+
 @Logged()
 class Ec2Vm(VirtualMachine):
 	VM_USERNAME = 'lt3'
 
-	CloudClient = Ec2Client.get_client
+	CloudClient = CloudBroker.connection
 	Settings = AwsSettings
 
 	def __init__(self, vm_id, instance, vm_username=VM_USERNAME):
@@ -70,11 +127,11 @@ class Ec2Vm(VirtualMachine):
 	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=VM_USERNAME):
 		if not name:
 			master_name = None
-			try:
-				master_instance_id = cls._call(['ec2metadata', '--instance-id']).output.strip()
-				master_name = cls.CloudClient().get_all_instances(filters={'instance-id': master_instance_id})[0].instances[0].tags['Name']
-			except:
-				pass
+			if ec2metadata:
+				try:
+					master_name = CloudBroker.get_instance_by_id(ec2metadata.get('instance-id')).tags['Name']
+				except:
+					pass
 			if not master_name:
 				master_name = socket.gethostname()
 			name = "koality-worker:%s (%s)" % (vm_id, master_name)
@@ -92,10 +149,12 @@ class Ec2Vm(VirtualMachine):
 		for key, value in bdm_dict.iteritems():
 			bdm[key] = value
 
-		instance = cls.CloudClient().run_instances(ami.id, instance_type=instance_type,
-			security_groups=[security_group],
-			user_data=cls._default_user_data(vm_username),
-			block_device_map=bdm).instances[0]
+		with cls.CloudClient() as ec2_client:
+			instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
+				security_groups=[security_group],
+				user_data=cls._default_user_data(vm_username),
+				block_device_map=bdm).instances[0]
+
 		cls._name_instance(instance, name)
 		return Ec2Vm(vm_id, instance, vm_username)
 
@@ -141,10 +200,10 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _validate_security_group(cls, security_group):
 		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
-		if platform.system() == 'Darwin':
-			own_security_groups = []
+		if ec2metadata:
+			own_security_groups = ec2metadata.get('security-groups').split('\n')
 		else:
-			own_security_groups = cls._call(['ec2metadata', '--security-groups']).output.split('\n')
+			own_security_groups = []
 		group = cls._get_or_create_security_group(security_group)
 		for rule in group.rules:
 			if (rule.ip_protocol == 'tcp' and
@@ -163,15 +222,15 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _get_or_create_security_group(cls, security_group):
-		ec2_client = cls.CloudClient()
-		groups = filter(lambda group: group.name == security_group, ec2_client.get_all_security_groups())
-		if groups:
-			cls.logger.debug('Found existing security group "%s"' % security_group)
-			group = groups[0]
-		else:
-			cls.logger.info('Creating new security group "%s"' % security_group)
-			group = ec2_client.create_security_group(security_group, 'Auto-generated Koality verification security group')
-		return group
+		with cls.CloudClient() as ec2_client:
+			groups = filter(lambda group: group.name == security_group, ec2_client.get_all_security_groups())
+			if groups:
+				cls.logger.debug('Found existing security group "%s"' % security_group)
+				group = groups[0]
+			else:
+				cls.logger.info('Creating new security group "%s"' % security_group)
+				group = ec2_client.create_security_group(security_group, 'Auto-generated Koality verification security group')
+			return group
 
 	@classmethod
 	def from_vm_id(cls, vm_id):
@@ -185,11 +244,8 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _from_instance_id(cls, vm_id, instance_id, vm_username=VM_USERNAME):
 		try:
-			client = cls.CloudClient()
-			reservations = client.get_all_instances(filters={'instance-id': instance_id})
-			if not reservations:
-				return None
-			vm = Ec2Vm(vm_id, reservations[0].instances[0], vm_username)
+			instance = CloudBroker.get_instance_by_id(instance_id)
+			vm = Ec2Vm(vm_id, instance, vm_username)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
 				cls.logger.warn("Found VM %s in %s state" % (vm, vm.instance.state))
 				vm.delete()
@@ -206,23 +262,22 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _name_instance(cls, instance, name):
-		ec2_client = cls.CloudClient()
 		#  Wait until EC2 recognizes that the instance exists
 		while True:
-			if ec2_client.get_all_instances(filters={'instance-id': instance.id}):
+			if CloudBroker.get_instance_by_id(instance.id):
 				break
 			eventlet.sleep(2)
-			instance.update()
 		while not 'Name' in instance.tags:
 			failures = 0
 			try:
 				instance.add_tag('Name', name or '')
-				instance.update()
+				eventlet.sleep(2)
+				instance = CloudBroker.get_instance_by_id(instance.id)
 			except:
 				failures += 1
 				if failures > 20:
 					raise
-				eventlet.sleep(1)  # Sometimes EC2 doesn't recognize that an instance exists yet
+				eventlet.sleep(2)  # Sometimes EC2 doesn't recognize that an instance exists yet
 
 	def wait_until_ready(self):
 		def handle_error(exc_info=None):
@@ -230,10 +285,10 @@ class Ec2Vm(VirtualMachine):
 			self.rebuild()
 
 		try:
-			self.instance.update()
+			self.instance = CloudBroker.get_instance_by_id(self.instance.id)
 			while not self.instance.state == 'running':
 				eventlet.sleep(3)
-				self.instance.update()
+				self.instance = CloudBroker.get_instance_by_id(self.instance.id)
 				if self.instance.state in ['stopped', 'terminated']:
 					handle_error()
 			for remaining_attempts in reversed(range(40)):
@@ -242,7 +297,7 @@ class Ec2Vm(VirtualMachine):
 				if self.ssh_call("true", timeout=10).returncode == 0:
 					return
 				eventlet.sleep(3)
-				self.instance.update()
+				self.instance = CloudBroker.get_instance_by_id(self.instance.id)
 		except:
 			handle_error(sys.exc_info())
 		else:
@@ -283,15 +338,17 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def get_all_images(cls):
-		return cls.CloudClient().get_all_images(
-			filters={
-				'name': '%s_%s_%s*' % (AwsSettings.vm_image_name_prefix, AwsSettings.vm_image_name_suffix, AwsSettings.vm_image_name_version),
-				'state': 'available'
-			}
-		)
+		with cls.CloudClient() as ec2_client:
+			return ec2_client.get_all_images(
+				filters={
+					'name': '%s_%s_%s*' % (AwsSettings.vm_image_name_prefix, AwsSettings.vm_image_name_suffix, AwsSettings.vm_image_name_version),
+					'state': 'available'
+				}
+			)
 
 	def create_image(self, name, description=None):
-		return self.CloudClient().create_image(self.instance.id, name, description)
+		with self.CloudClient() as ec2_client:
+			return ec2_client.create_image(self.instance.id, name, description)
 
 	def rebuild(self):
 		ami = self.get_newest_image()
@@ -308,10 +365,12 @@ class Ec2Vm(VirtualMachine):
 		for key, value in bdm_dict.iteritems():
 			bdm[key] = value
 
-		self.instance = self.CloudClient().run_instances(ami.id, instance_type=instance_type,
-			security_groups=[security_group],
-			user_data=self._default_user_data(self.vm_username),
-			block_device_map=bdm).instances[0]
+		with self.CloudClient() as ec2_client:
+			self.instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
+				security_groups=[security_group],
+				user_data=self._default_user_data(self.vm_username),
+				block_device_map=bdm).instances[0]
+
 		self._name_instance(self.instance, instance_name)
 
 		self.store_vm_info()
@@ -319,8 +378,7 @@ class Ec2Vm(VirtualMachine):
 
 	def delete(self):
 		if 'Name' in self.instance.tags:
-			instances = [reservation.instances[0] for reservation in self.CloudClient().get_all_instances(
-				filters={'tag:Name': self.instance.tags['Name']})]
+			instances = filter(lambda instance: instance.tags['Name'] == self.instance.tags['Name'], CloudBroker.get_all_instances())
 			for instance in instances:  # Clean up rogue VMs
 				self._safe_terminate(instance)
 		else:
@@ -339,7 +397,7 @@ class SecurityGroups(object):
 	@classmethod
 	def get_security_group_names(cls):
 		try:
-			existing_groups = map(lambda group: group.name, Ec2Client.get_client().get_all_security_groups())
+			existing_groups = map(lambda group: group.name, CloudBroker.get_all_security_groups())
 		except:
 			existing_groups = []
 		existing_groups_plus_selected = list(set(existing_groups).union([str(AwsSettings.security_group), str(AwsSettings._default_security_group)]))
