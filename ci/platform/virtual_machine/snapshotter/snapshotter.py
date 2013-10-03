@@ -58,10 +58,10 @@ class Snapshotter(object):
 		self.vm_class = vm_class
 
 	def snapshot(self):
-		newest_global_image = self.vm_class.get_newest_global_image()
-		newest_image_version = self.vm_class.get_image_version(self.vm_class.get_newest_image())
-		snapshot_version = newest_image_version[0], newest_image_version[1] + 1
-		instance_name = 'koality_snapshot_%s_%s' % snapshot_version
+		base_image = self.vm_class.get_base_image()
+		current_snapshot_version = self.vm_class.get_snapshot_version(self.vm_class.get_active_image())
+		new_snapshot_version = current_snapshot_version + 1 if current_snapshot_version is not None else 0
+		instance_name = self.vm_class.format_snapshot_name(base_image, new_snapshot_version)
 
 		with model_server.rpc_connect('repos', 'read') as model_rpc:
 			repositories = model_rpc.get_repositories(VerificationUser.id)
@@ -77,8 +77,8 @@ class Snapshotter(object):
 			self.logger.warn('No changes found in the last 30 days, skipping snapshotting.')
 			return
 
-		self.logger.info('Creating new instance named "%s" based on image "%s"' % (instance_name, newest_global_image.name))
-		virtual_machine = self.spawn_virtual_machine(snapshot_version, instance_name, newest_global_image)
+		self.logger.info('Creating new instance named "%s" based on image "%s"' % (instance_name, self.vm_class.get_image_name(base_image)))
+		virtual_machine = self.spawn_virtual_machine(new_snapshot_version, instance_name, base_image)
 
 		try:
 			virtual_machine.wait_until_ready()
@@ -95,7 +95,7 @@ class Snapshotter(object):
 				repository = filter(lambda repo: repo['id'] == repository_id, repositories)[0]
 				self.provision_for_repository(virtual_machine, repository, changes, uri_translator)
 
-			new_image_name = self.get_image_name(snapshot_version)
+			new_image_name = instance_name
 
 			self.logger.info('Saving instance as snapshot "%s"' % new_image_name)
 			virtual_machine.create_image(new_image_name)
@@ -106,7 +106,7 @@ class Snapshotter(object):
 			virtual_machine.delete()
 
 	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
-		return self.vm_class.from_id_or_construct(-int(snapshot_version[1]) or -1, instance_name, image)
+		return self.vm_class.from_id_or_construct(-int(snapshot_version) or -1, instance_name, image)
 
 	def clone_repositories(self, virtual_machine, repositories, uri_translator):
 		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
@@ -140,18 +140,6 @@ class Snapshotter(object):
 			self.logger.error(failure_message + '\nProvision output:\n%s' % provision_results.output)
 			raise Exception(failure_message)
 		virtual_machine.cache_repository(repository['name'])
-
-	def get_image_name(self, snapshot_version):
-		image_name_base = '%s_%s_%s' % (self.vm_class.Settings.vm_image_name_prefix, self.vm_class.Settings.vm_image_name_suffix, self.vm_class.Settings.vm_image_name_version)
-		if image_name_base.endswith(str(snapshot_version[0])):
-			image_name = '%s_%s' % (image_name_base, snapshot_version[1])
-		elif image_name_base.endswith('%s_' % snapshot_version[0]):
-			image_name = '%s%s' % (image_name_base, snapshot_version[1])
-		elif snapshot_version[0] == -1:
-			image_name = '%s_0_%s' % (image_name_base, snapshot_version[1])
-		else:
-			image_name = '%s%s_%s' % (image_name_base, snapshot_version[0], snapshot_version[1])
-		return image_name
 
 	# TODO (bbland): move this stuff into the vm wrapper implementations
 	def wait_for_image(self, image_name):
@@ -210,8 +198,8 @@ class Snapshotter(object):
 			else:
 				self.logger.error('Unsupported VM class provided for snapshotter')
 
-		images = self.vm_class.get_all_images()
-		local_images = sorted(filter(lambda image: self.vm_class.get_image_version(image)[1] >= 0, images), key=self.vm_class.get_image_version, reverse=True)
+		images = self.vm_class.get_snapshots(self.vm_class.get_base_image())
+		local_images = sorted(images, key=self.vm_class.get_snapshot_version, reverse=True)
 
 		stale_images = local_images[3:]
 		for image in stale_images:

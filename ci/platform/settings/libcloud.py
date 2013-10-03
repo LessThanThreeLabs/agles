@@ -10,7 +10,5 @@ class LibCloudSettings(DatabaseBackedSettings):
 			extra_credentials={},
 			instance_type='',
 			largest_instance_type=None,
-			vm_image_name_prefix='koality_verification',
-			vm_image_name_suffix='precise',
-			vm_image_name_version='0.3',
+			vm_image_id=None,  # default to our 12.04 AMI
 			security_group='koality_verification')

@@ -86,6 +86,8 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		return {
 			'instance_size': AwsSettings.instance_type,
+			'ami_id': AwsSettings.vm_image_id,
+			'vm_username': AwsSettings.vm_username,
 			'root_drive_size': AwsSettings.root_drive_size,
 			'security_group_name': AwsSettings.security_group,
 			'user_data': AwsSettings.user_data
@@ -105,6 +107,11 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	def get_aws_security_group_names(self, user_id):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		return ec2.SecurityGroups.get_security_group_names()
+
+	@AdminApi
+	def get_aws_base_images(self, user_id):
+		assert VerificationServerSettings.cloud_provider == 'aws'
+		return ec2.Ec2Vm.serialize_images(ec2.Ec2Vm.get_available_base_images())
 
 	@AdminApi
 	def get_hpcloud_keys(self, user_id):

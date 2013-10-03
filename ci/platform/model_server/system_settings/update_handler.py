@@ -124,16 +124,20 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			secret_key=secret_key)
 
 	@AdminApi
-	def set_aws_instance_settings(self, user_id, instance_size, root_drive_size, security_group_name, user_data):
+	def set_aws_instance_settings(self, user_id, instance_size, ami_id, vm_username, root_drive_size, security_group_name, user_data):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		assert isinstance(root_drive_size, int)
 		assert root_drive_size >= AwsSettings._default_root_drive_size
 		self.update_setting("aws", "instance_type", instance_size)
+		self.update_setting("aws", "vm_image_id", ami_id)
+		self.update_setting("aws", "vm_username", vm_username)
 		self.update_setting("aws", "root_drive_size", root_drive_size)
 		self.update_setting("aws", "security_group", security_group_name)
 		self.update_setting("aws", "user_data", user_data)
 		self.publish_event("system_settings", None, "aws instance settings updated",
 			instance_size=instance_size,
+			ami_id=ami_id,
+			vm_username=vm_username,
 			root_drive_size=root_drive_size,
 			security_group_name=security_group_name,
 			user_data=user_data)

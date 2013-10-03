@@ -4,6 +4,7 @@ import pipes
 import model_server
 
 from pysh.shell_tools import ShellCommand, ShellSilent, ShellAnd, ShellOr, ShellChain, ShellTest, ShellIf, ShellAdvertised, ShellLogin, ShellBackground, ShellSubshell, ShellCapture
+from settings.aws import AwsSettings
 from streaming_executor import CommandResults
 
 
@@ -11,7 +12,12 @@ class RemoteCommand(object):
 	def run(self, virtual_machine, output_handler=None):
 		if output_handler:
 			output_handler.declare_command()
-		results = self._run(virtual_machine, output_handler)
+		try:
+			results = self._run(virtual_machine, output_handler)
+		except Exception as e:
+			if output_handler:
+				output_handler.set_return_code(255)
+			raise e
 		if output_handler:
 			output_handler.set_return_code(results.returncode)
 		return results
@@ -288,7 +294,133 @@ class RemoteExportCommand(RemoteCommand):
 		self.file_paths = file_paths
 
 	def _run(self, virtual_machine, output_handler=None):
-		return virtual_machine.export(self.repo_name, self.export_prefix, self.file_paths, output_handler=output_handler)
+		def export(key, secret, bucket, export_prefix, file_paths):
+			return '''
+				import base64
+				import hmac
+				import json
+				import os
+				import re
+				import sha
+				import time
+				import urllib2
+
+
+				class S3CurlUploader(object):
+					def __init__(self, aws_access_key_id, aws_secret_access_key):
+						self.aws_access_key_id = str(aws_access_key_id)
+						self.aws_secret_access_key = str(aws_secret_access_key)
+
+					def _sign_request(self, path, timestamp):
+						sign_headers = 'PUT\\n\\n\\n\\nx-amz-acl:public-read\\nx-amz-date:%%s\\n%%s' %% (timestamp, path)
+						return base64.encodestring(
+							hmac.new(
+								self.aws_secret_access_key,
+								sign_headers,
+								sha
+							).digest()
+						).strip()
+
+					def upload(self, bucket, export_path, file_path):
+						timestamp = time.strftime('%%a, %%d %%b %%Y %%H:%%M:%%S %%Z')
+						signature = self._sign_request('/' + bucket + '/' + export_path, timestamp)
+
+						headers = {
+							'Authorization': 'AWS %%s:%%s' %% (self.aws_access_key_id, signature),
+							'Content-Type': '',
+							'x-amz-date': timestamp,
+							'x-amz-acl': 'public-read'
+						}
+
+						export_url = self.get_url(bucket, export_path)
+
+						with open(file_path) as f:
+							request = urllib2.Request(export_url, f.read(), headers=headers)
+						request.get_method = lambda: 'PUT'
+						response = urllib2.urlopen(request)
+
+						return response.geturl()
+
+					def get_url(self, bucket, export_path):
+						return 'https://%%s.s3.amazonaws.com/%%s' %% (bucket, export_path)
+
+
+				class Exporter(object):
+					def __init__(self, uploader):
+						self.uploader = uploader
+
+					def upload(self, bucket, export_prefix, path):
+						path = os.path.expanduser(os.path.expandvars(path))
+						if os.path.isfile(path):
+							return [self.upload_file(bucket, export_prefix, path)]
+						elif os.path.isdir(path):
+							return self.upload_directory(bucket, export_prefix, path)
+						else:
+							raise Exception("Invalid file path %%s" %% path)
+
+					def upload_directory(self, bucket, export_prefix, directory):
+						assert os.path.isdir(directory)
+
+						uris = []
+						visited_paths = set()
+
+						for path, dirs, files in os.walk(directory, followlinks=True):
+							visited_paths.add(os.path.realpath(path))
+							for f in files:
+								try:
+									uris.append(self.upload_file(bucket, export_prefix, os.path.join(path, f)))
+								except:
+									pass
+							dirs_copy = dirs[:]
+							for directory in dirs_copy:
+								if os.path.realpath(os.path.join(path, directory)) in visited_paths:
+									dirs.remove(directory)
+
+						return uris
+
+					def upload_file(self, bucket, export_prefix, file_path):
+						assert os.path.isfile(file_path)
+
+						export_path = self._get_export_path(export_prefix, file_path)
+						return self.uploader.upload(bucket, export_path, file_path)
+
+					def _get_export_path(self, export_prefix, file_path):
+						return self._translate_path('%%s/%%s' %% (export_prefix, os.path.relpath(file_path)))
+
+					def _translate_path(self, path):
+						def translate_dots(matchobj):
+							return 'up%%d' %% (len(matchobj.group(0)) / 2)
+
+						return re.sub('\.\.(\/\.\.)*', translate_dots, path)
+
+				uploader = S3CurlUploader(%r, %r)
+				exporter = Exporter(uploader)
+
+				uris = []
+				errors = []
+				for file_path in %r:
+					try:
+						uris.extend(exporter.upload(%r, %r, file_path))
+					except Exception as e:
+						errors.append('%%s: %%s' %% (type(e).__name__, e))
+
+				print json.dumps({
+					'uris': list(set(uris)),
+					'errors': errors
+				})''' % (key, secret, file_paths, bucket, export_prefix)
+
+		function_source = export(
+			AwsSettings.aws_access_key_id,
+			AwsSettings.aws_secret_access_key,
+			AwsSettings.s3_bucket_name,
+			self.export_prefix,
+			self.file_paths
+		)
+		function_lines = filter(lambda line: line.strip(), function_source.split('\n'))
+		leading_spaces = len(function_lines[0]) - len(function_lines[0].lstrip())
+		sanitized_source = '\n'.join(map(lambda line: line[leading_spaces:], function_lines))
+
+		return virtual_machine.ssh_call('cd %s && python -c %s' % (self.repo_name, pipes.quote(sanitized_source)))
 
 
 class RemoteErrorCommand(RemoteCommand):

@@ -111,9 +111,39 @@ class VirtualMachineBuildCore(object):
 		repo_name = self.uri_translator.extract_repo_name(repo_uri)
 		return self.virtual_machine.cache_repository(repo_name, console_appender)
 
-	def export_files(self, repo_name, export_prefix, file_paths):
+	def export_files(self, repo_name, export_prefix, file_paths, console_appender=None):
+		if not file_paths:
+			return []
+
 		export_command = RemoteExportCommand(repo_name, export_prefix, file_paths)
-		return export_command.run(self.virtual_machine)
+		output_handler = self._get_output_handler(console_appender, ConsoleType.Export, export_command.name)
+		results = export_command.run(self.virtual_machine, output_handler)
+		export_uris = []
+		if results.returncode != 0 and output_handler is not None:
+			output_dict = {pair[0] + 1: pair[1] for pair in enumerate(results.output.split('\n'))}
+			output_handler.append(output_dict)
+		else:
+			try:
+				export_info = yaml.safe_load(results.output)
+				export_uris = export_info['uris']
+				export_errors = export_info['errors']
+				if output_handler is not None:
+					if export_errors:
+						output_dict = {pair[0] + 1: pair[1] for pair in enumerate(export_errors)}
+					elif export_uris:
+						output_dict = {1: 'Files exported successfully.'}
+					else:
+						output_dict = {1: 'No files exported.'}
+					output_handler.append(output_dict)
+			except:
+				self.logger.exception('Failed to parse export output')
+
+		def uri_to_metadata(export_uri):
+			uri_suffix = export_uri.partition(export_prefix)[2]
+			path = uri_suffix[1:]
+			return {'uri': export_uri, 'path': path}
+
+		return map(uri_to_metadata, export_uris)
 
 
 class VagrantBuildCore(VirtualMachineBuildCore):

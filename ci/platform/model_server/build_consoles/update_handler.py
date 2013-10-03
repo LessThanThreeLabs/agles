@@ -73,8 +73,6 @@ class BuildConsolesUpdateHandler(ModelServerRpcHandler):
 		:param subtype: The console subtype we are appending to.
 		"""
 		if not read_lines:
-			self.publish_event("build_consoles", build_console_id, "new output",
-				**{str(line_number): line for line_number, line in read_lines.items()})
 			return
 
 		build_console = schema.build_console

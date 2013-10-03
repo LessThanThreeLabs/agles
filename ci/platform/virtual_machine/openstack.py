@@ -1,5 +1,6 @@
 import pipes
 import platform
+import re
 import socket
 
 import eventlet
@@ -199,9 +200,31 @@ class OpenstackVm(VirtualMachine):
 		self.instance.reboot()
 
 	@classmethod
-	def get_all_images(cls):
-		vm_image_name_search_term = '%s_%s_%s' % (LibCloudSettings.vm_image_name_prefix, LibCloudSettings.vm_image_name_suffix, LibCloudSettings.vm_image_name_version)
-		return filter(lambda image: vm_image_name_search_term in image.name, cls.CloudClient().list_images())
+	def get_base_image(cls):
+		images = cls.CloudClient().list_images()
+		image_id = LibCloudSettings.vm_image_id
+		if image_id:
+			try:
+				return filter(lambda image: image.id == cls.get_image_id(image), images)[0]
+			except:
+				cls.logger.exception('Invalid image id specified, using default instead')
+		return filter(lambda image: image.name == 'koality_verification_0.3', images)[0]
+
+	@classmethod
+	def get_available_base_images(cls):
+		return cls.CloudClient().list_images()  # This can be REALLY shitty
+
+	@classmethod
+	def get_snapshots(cls, base_image):
+		return filter(lambda image: re.match(cls.format_snapshot_name(base_image, '.+'), cls.get_image_name(image)), cls.CloudClient().list_images())
+
+	@classmethod
+	def get_image_id(cls, image):
+		return image.id
+
+	@classmethod
+	def get_image_name(cls, image):
+		return image.name
 
 	def create_image(self, name, description=None):
 		self.instance.driver.ex_save_image(self.instance, name, metadata={'description': description})
