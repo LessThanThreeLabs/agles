@@ -128,12 +128,14 @@ class VirtualMachineBuildCore(object):
 				export_uris = export_info['uris']
 				export_errors = export_info['errors']
 				if output_handler is not None:
-					if export_errors:
-						output_dict = {pair[0] + 1: pair[1] for pair in enumerate(export_errors)}
-					elif export_uris:
-						output_dict = {1: 'Files exported successfully.'}
+					if export_uris:
+						output_dict = {1: '%d files exported successfully.' % len(export_uris)}
 					else:
 						output_dict = {1: 'No files exported.'}
+					if export_errors:
+						output_dict[2] = ''
+						for index, error in enumerate(export_errors):
+							output_dict[index + 3] = error
 					output_handler.append(output_dict)
 			except:
 				self.logger.exception('Failed to parse export output')
