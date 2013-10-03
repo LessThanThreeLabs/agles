@@ -323,35 +323,39 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _get_default_base_image(cls):
-		return cls.CloudClient().get_all_images(
-			owners=['600991114254'],  # must be changed if our ec2 info changes
-			filters={
-				'name': 'koality_verification_precise_0.4', # to be changed
-				'state': 'available'
-			})[0]
+		with cls.CloudClient() as ec2_client:
+			return ec2_client.get_all_images(
+				owners=['600991114254'],  # must be changed if our ec2 info changes
+				filters={
+					'name': 'koality_verification_precise_0.4', # to be changed
+					'state': 'available'
+				})[0]
 
 	@classmethod
 	def get_base_image(cls):
 		image_id = AwsSettings.vm_image_id
 		if image_id:
 			try:
-				return cls.CloudClient().get_image(image_id)
+				with cls.CloudClient() as ec2_client:
+					return ec2_client.get_image(image_id)
 			except:
 				cls.logger.exception('Invalid image id specified, using default instead')
 		return cls._get_default_base_image()
 
 	@classmethod
 	def get_available_base_images(cls):
-		own_images = cls.CloudClient().get_all_images(owners=['self'])
+		with cls.CloudClient() as ec2_client:
+			own_images = ec2_client.get_all_images(owners=['self'])
 		own_base_images = filter(lambda image: cls.get_snapshot_version(image) is None, own_images)
 		return [cls._get_default_base_image()] + sorted(own_base_images, key=lambda image: image.name)
 
 	@classmethod
 	def get_snapshots(cls, base_image):
-		return cls.CloudClient().get_all_images(filters={
-				'name': cls.format_snapshot_name(base_image, '*'),
-				'state': 'available'
-			})
+		with cls.CloudClient() as ec2_client:
+			return ec2_client.get_all_images(filters={
+					'name': cls.format_snapshot_name(base_image, '*'),
+					'state': 'available'
+				})
 
 	@classmethod
 	def get_image_id(cls, image):
