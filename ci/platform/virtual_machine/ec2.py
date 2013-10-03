@@ -378,19 +378,19 @@ class Ec2Vm(VirtualMachine):
 
 	def delete(self):
 		if 'Name' in self.instance.tags:
-			instances = filter(lambda instance: instance.tags['Name'] == self.instance.tags['Name'], CloudBroker.get_all_instances())
-			for instance in instances:  # Clean up rogue VMs
-				self._safe_terminate(instance)
+			instance_ids = map(lambda instance: instance.id, filter(lambda instance: instance.tags.get('Name') == self.instance.tags['Name'], CloudBroker.get_all_instances()))
+			self._safe_terminate(instance_ids)
 		else:
-			self._safe_terminate(self.instance)
+			self._safe_terminate([self.instance.id])
 		self.remove_vm_info()
 		super(Ec2Vm, self).delete()
 
-	def _safe_terminate(self, instance):
+	def _safe_terminate(self, instance_ids):
 		try:
-			instance.terminate()
+			with self.CloudClient() as ec2_client:
+				ec2_client.terminate(instance_ids)
 		except:
-			self.logger.info("Failed to terminate instance %s" % instance, exc_info=True)
+			self.logger.info("Failed to terminate instances %s" % instance_ids, exc_info=True)
 
 
 class SecurityGroups(object):
