@@ -397,7 +397,8 @@ class SecurityGroups(object):
 	@classmethod
 	def get_security_group_names(cls):
 		try:
-			existing_groups = map(lambda group: group.name, CloudBroker.get_all_security_groups())
+			with CloudBroker.connection() as ec2_client:
+				existing_groups = map(lambda group: group.name, ec2_client.get_all_security_groups())
 		except:
 			existing_groups = []
 		existing_groups_plus_selected = list(set(existing_groups).union([str(AwsSettings.security_group), str(AwsSettings._default_security_group)]))
