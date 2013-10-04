@@ -5,6 +5,7 @@ Repository management for git is done using gitpython.
 """
 from util import greenlets
 
+import functools
 import os
 import re
 import shutil
@@ -17,7 +18,8 @@ import model_server
 import git.exc
 import hglib
 
-from git import GitCommandError, Repo, refs
+from git import Git, GitCmdObjectDB, GitCommandError, Repo, refs
+Repo = functools.partial(Repo, odbt=GitCmdObjectDB)
 from hglib.error import CommandError
 
 from bunnyrpc.client import Client
@@ -468,7 +470,8 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_path = self._resolve_path(repo_id, repo_name)
 			make_repo_dirs()
 			assert repo_name.endswith(".git")
-			repo = Repo.init(repo_path, bare=True)
+			Git(repo_path).init(bare=True)
+			repo = Repo(repo_path)
 			try:
 				# The explicit refspec pulls down all heads and sets them as the local heads
 				self._git_fetch_with_private_key(repo, remote_repo, '+refs/heads/*:refs/heads/*')
