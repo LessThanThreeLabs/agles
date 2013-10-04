@@ -142,20 +142,30 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		cls._validate_security_group(security_group)
 
-		bdm_dict = ami.block_device_mapping.copy()
-		bdm_dict['/dev/sda1'].size = max(bdm_dict['/dev/sda1'].size, AwsSettings.root_drive_size)
-		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
-		for key, value in bdm_dict.iteritems():
-			bdm[key] = value
-
 		with cls.CloudClient() as ec2_client:
 			instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
 				security_groups=[security_group],
 				user_data=cls._default_user_data(vm_username),
-				block_device_map=bdm).instances[0]
+				block_device_map=cls._block_device_mapping(ami)).instances[0]
 
 		cls._name_instance(instance, name)
 		return Ec2Vm(vm_id, instance, vm_username)
+
+	@classmethod
+	def _block_device_mapping(cls, ami):
+		bdm_dict = ami.block_device_mapping.copy()
+		if '/dev/sda' in bdm_dict.keys():
+			root_drive_name = '/dev/sda'
+		elif '/dev/sda1' in bdm_dict.keys():
+			root_drive_name = '/dev/sda1'
+		else:
+			root_drive_name = sorted(bdm_dict.keys())[0]  # this is just a wild guess :(
+
+		bdm_dict[root_drive_name].size = max(bdm_dict[root_drive_name].size, AwsSettings.root_drive_size)
+		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
+		for key, value in bdm_dict.iteritems():
+			bdm[key] = value
+		return bdm
 
 	@classmethod
 	def _default_user_data(cls, vm_username):
@@ -378,17 +388,11 @@ class Ec2Vm(VirtualMachine):
 		security_group = AwsSettings.security_group
 		self._validate_security_group(security_group)
 
-		bdm_dict = ami.block_device_mapping.copy()
-		bdm_dict['/dev/sda1'].size = max(bdm_dict['/dev/sda1'].size, AwsSettings.root_drive_size)
-		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
-		for key, value in bdm_dict.iteritems():
-			bdm[key] = value
-
 		with self.CloudClient() as ec2_client:
 			self.instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
 				security_groups=[security_group],
 				user_data=self._default_user_data(self.vm_username),
-				block_device_map=bdm).instances[0]
+				block_device_map=self._block_device_mapping(ami)).instances[0]
 
 		self._name_instance(self.instance, instance_name)
 
