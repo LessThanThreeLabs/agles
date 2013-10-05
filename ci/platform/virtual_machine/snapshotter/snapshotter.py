@@ -130,7 +130,7 @@ class Snapshotter(object):
 		self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
 		if virtual_machine.remote_checkout(repository['name'], uri_translator.translate(repository['uri']), repository['type'], branch).returncode != 0:
 			raise Exception('Failed to checkout branch "%s" for repository "%s"' % (branch, repository['name']))
-		config_contents_results = virtual_machine.ssh_call('cat ~/%s/*koality.yml' % repository['name'])
+		config_contents_results = virtual_machine.ssh_call('cd ~/%s && ls -A | grep koality.yml | xargs cat' % repository['name'])
 		if config_contents_results.returncode != 0:
 			raise Exception('Could not find a koality.yml or .koality.yml file for branch "%s" for repository "%s"' % (branch, repository['name']))
 		config_contents = yaml.safe_load(config_contents_results.output)

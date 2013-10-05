@@ -159,7 +159,7 @@ class Ec2Vm(VirtualMachine):
 		elif '/dev/sda1' in bdm_dict.keys():
 			root_drive_name = '/dev/sda1'
 		else:
-			root_drive_name = sorted(bdm_dict.keys())[0]  # this is just a wild guess :(
+			root_drive_name = sorted(bdm_dict.keys())[0]  # this is just a wild guess, as ami.root_device_name is wrong
 
 		bdm_dict[root_drive_name].size = max(bdm_dict[root_drive_name].size, AwsSettings.root_drive_size)
 		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
@@ -183,7 +183,7 @@ class Ec2Vm(VirtualMachine):
 				ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
 			),
 			ShellCommand('mkdir /etc/sudoers.d'),
-			ShellRedirect("echo '%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
+			ShellRedirect("echo 'Defaults !requiretty\n%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
 			ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
 		)
 		given_user_data = AwsSettings.user_data

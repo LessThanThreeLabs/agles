@@ -226,7 +226,7 @@ class VirtualMachine(object):
 				self._get_host_access_check_command(host_url),
 				ShellOr(
 					ShellSilent(ShellCommand('which hg')),
-					ShellSudo(SystemPackageParser().install_packages(['mercurial']))  # TODO (bbland): make this platform agnostic
+					ShellSudo(SystemPackageParser().install_packages(['mercurial']))
 				),
 				ShellIf(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),

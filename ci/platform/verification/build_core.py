@@ -134,11 +134,16 @@ class VirtualMachineBuildCore(object):
 						output_dict = {1: 'No files exported.'}
 					if export_errors:
 						output_dict[2] = ''
-						for index, error in enumerate(export_errors):
-							output_dict[index + 3] = error
+						for index, line in enumerate(('\n\n'.join(export_errors)).split('\n')):
+							output_dict[index + 3] = line
 					output_handler.append(output_dict)
 			except:
 				self.logger.exception('Failed to parse export output')
+				if output_handler is not None:
+					output_dict = {1: 'Exporter created non-yaml output, failed to parse:', 2: ''}
+					for index, line in enumerate(results.output.split('\n')):
+						output_dict[index + 3] = line
+					output_handler.append(output_dict)
 
 		def uri_to_metadata(export_uri):
 			uri_suffix = export_uri.partition(export_prefix)[2]
