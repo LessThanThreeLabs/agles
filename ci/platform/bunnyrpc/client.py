@@ -4,10 +4,7 @@ See server.py for the RPC protocol definition.
 """
 import sys
 
-import eventlet
-import kombu.pools
-
-from kombu.connection import BrokerConnection
+from kombu.connection import Connection
 from kombu.entity import Exchange, Queue
 
 from bunnyrpc.exceptions import RPCRequestError
@@ -41,10 +38,6 @@ class Client(ClientBase):
 			 itself as a race condition where the client hangs on Event.set().
 	!!!
 	"""
-
-	# This means a process with rpc clients can only have 1024 simultaneous rpc connections
-	# This could be a bottleneck for verification server at some point
-	kombu.pools.set_limit(1024)
 
 	@property
 	def deadletter_exchange_name(self):
@@ -83,8 +76,8 @@ class Client(ClientBase):
 
 	def _connect(self):
 		def establish_connection():
-			self.connection = kombu.pools.connections[BrokerConnection(RabbitSettings.kombu_connection_info)].acquire(block=True, timeout=30)
-			self.channel = self.connection.default_channel
+			self.connection = Connection(RabbitSettings.kombu_connection_info)
+			self.channel = self.connection.channel()
 
 		max_attempts = 3
 		for attempt in xrange(1, max_attempts + 1):
@@ -92,8 +85,11 @@ class Client(ClientBase):
 				establish_connection()
 			except Exception as e:
 				if attempt < max_attempts:
-					if self.connection:
-						self.connection.release()
+					try:
+						if self.connection:
+							self.connection.close()
+					except:
+						pass
 					eventlet.sleep(2**attempt)
 				else:
 					raise e
@@ -183,6 +179,4 @@ class Client(ClientBase):
 
 	def close(self):
 		"""Closes the rabbit connection and cleans up resources."""
-		if self.response_mq and self.consumer:
-			self.consumer.cancel_by_queue(self.response_mq.name)
-		self.connection.release()
+		self.connection.close()
