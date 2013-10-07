@@ -298,11 +298,11 @@ class RemoteExportCommand(RemoteCommand):
 			return '''
 				import base64
 				import glob
+				import hashlib
 				import hmac
 				import json
 				import os
 				import re
-				import sha
 				import time
 				import urllib2
 
@@ -318,7 +318,7 @@ class RemoteExportCommand(RemoteCommand):
 							hmac.new(
 								self.aws_secret_access_key,
 								sign_headers,
-								sha
+								hashlib.sha1
 							).digest()
 						).strip()
 
