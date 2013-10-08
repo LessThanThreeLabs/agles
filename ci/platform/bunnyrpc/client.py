@@ -4,6 +4,8 @@ See server.py for the RPC protocol definition.
 """
 import sys
 
+import eventlet
+
 from kombu.connection import Connection
 from kombu.entity import Exchange, Queue
 
