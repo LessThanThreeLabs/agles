@@ -111,7 +111,19 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	@AdminApi
 	def get_aws_base_images(self, user_id):
 		assert VerificationServerSettings.cloud_provider == 'aws'
-		return ec2.Ec2Vm.serialize_images(ec2.Ec2Vm.get_available_base_images())
+		try:
+			images = ec2.Ec2Vm.serialize_images(ec2.Ec2Vm.get_available_base_images())
+		except:
+			images = []
+		default_image = {
+			'id': None,
+			'name': 'default'
+		}
+		if images:
+			images[0] = default_image
+		else:
+			images.append(default_image)
+		return images
 
 	@AdminApi
 	def get_hpcloud_keys(self, user_id):
