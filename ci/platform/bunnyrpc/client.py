@@ -81,7 +81,7 @@ class Client(ClientBase):
 			self.connection = Connection(RabbitSettings.kombu_connection_info)
 			self.channel = self.connection.channel()
 
-		max_attempts = 3
+		max_attempts = 5
 		for attempt in xrange(1, max_attempts + 1):
 			try:
 				establish_connection()
