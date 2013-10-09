@@ -344,7 +344,7 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def get_base_image(cls):
 		image_id = AwsSettings.vm_image_id
-		if image_id:
+		if image_id and image_id != 'default':
 			try:
 				with cls.CloudClient() as ec2_client:
 					return ec2_client.get_image(image_id)

@@ -116,7 +116,7 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		except:
 			images = []
 		default_image = {
-			'id': '',
+			'id': 'default',
 			'name': 'default'
 		}
 		if images:

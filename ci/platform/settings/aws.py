@@ -9,7 +9,7 @@ class AwsSettings(DatabaseBackedSettings):
 			aws_secret_access_key='',
 			instance_type='m1.medium',
 			largest_instance_type=None,
-			vm_image_id='',  # default to our 12.04 AMI
+			vm_image_id='default',  # default to our 12.04 AMI
 			vm_username='lt3',
 			security_group='koality_verification',
 			root_drive_size=8,
