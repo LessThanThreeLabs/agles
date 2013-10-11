@@ -122,7 +122,7 @@ class ChangeVerifier(EventSubscriber):
 
 				spawn_after(contents['timeout'], scrap_instance)
 				with model_server.rpc_connect("debug_instances", "update") as debug_update_rpc:
-					debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, user_id)
+					debug_update_rpc.mark_debug_instance_launched(verifier.build_core.virtual_machine.instance.id, user_id, contents['timeout'])
 			except:
 				exc_info = sys.exc_info()
 				scrap_instance()
