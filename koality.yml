@@ -1,6 +1,5 @@
 --- #Koality: 0.1.5
 languages:
-  python: a
   ruby: 1.9.3
 setup:
   - packages:
@@ -33,23 +32,7 @@ compile:
     - pip install --upgrade .:
         path: ci/platform
 test:
-  babies: 3
   scripts:
-    - platform unit tests:
-        path: ci/platform
-        script: nosetests -sv --with-xunit tests/unit_tests
-        timeout: 10
-        xunit: nosetests.xml
+    - platform unit tests
   factories:
-    - integration test factory:
-        path: ci/platform
-        script:
-          - |
-            ls tests/integration_tests/*.py | while read test; do
-              shortname=${test##*/}
-              shortname=${shortname%.py}
-              echo - $shortname:
-              echo "    script: nosetests -sv --with-xunit $test"
-              echo "    path: ci/platform"
-              echo "    xunit: nosetests.xml"
-            done
+    - integration test factory
