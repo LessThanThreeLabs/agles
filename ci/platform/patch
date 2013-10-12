@@ -1,0 +1,13 @@
+diff --git a/ci/platform/settings/aws.py b/ci/platform/settings/aws.py
+index 48af141..978e2b1 100644
+--- a/ci/platform/settings/aws.py
++++ b/ci/platform/settings/aws.py
+@@ -11,7 +11,7 @@ class AwsSettings(DatabaseBackedSettings):
+ 			largest_instance_type=None,
+ 			vm_image_name_prefix='koality_verification',
+ 			vm_image_name_suffix='precise',
+-			vm_image_name_version='0.3',
++			vm_image_name_version='0.4',
+ 			security_group='koality_verification',
+ 			root_drive_size=8,
+ 			s3_bucket_name='',
