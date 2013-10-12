@@ -146,7 +146,8 @@ class Snapshotter(object):
 		def wait_for_ec2_image():
 			while True:
 				try:
-					image = self.vm_class.CloudClient().get_all_images(filters={'name': image_name})[0]
+					with self.vm_class.CloudClient() as ec2_client:
+						image = ec2_client.get_all_images(filters={'name': image_name})[0]
 				except:
 					pass
 				else:
