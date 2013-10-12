@@ -2,7 +2,7 @@
 languages:
   python: 2.7
   ruby: 1.9.3
-  nodejs: 0.8.12
+  asdf: 0.8.12
 setup:
   - packages:
     - system:
@@ -34,7 +34,7 @@ compile:
     - pip install --upgrade .:
         path: ci/platform
 test:
-  machines: 3
+  machines: a
   scripts:
     - platform unit tests:
         path: ci/platform
