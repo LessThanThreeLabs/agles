@@ -154,10 +154,10 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _block_device_mapping(cls, ami):
 		bdm_dict = ami.block_device_mapping.copy()
-		if '/dev/sda' in bdm_dict.keys():
-			root_drive_name = '/dev/sda'
-		elif '/dev/sda1' in bdm_dict.keys():
+		if '/dev/sda1' in bdm_dict.keys():
 			root_drive_name = '/dev/sda1'
+		elif '/dev/sda' in bdm_dict.keys():
+			root_drive_name = '/dev/sda'
 		else:
 			root_drive_name = sorted(bdm_dict.keys())[0]  # this is just a wild guess, as ami.root_device_name is wrong
 
