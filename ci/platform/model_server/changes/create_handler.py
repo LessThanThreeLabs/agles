@@ -73,7 +73,7 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		skip = False
 
-		if '[ci skip]' in commit_attributes['message']:
+		if '[ci skip]' in commit_attributes['message'] and not verify_only:
 			skip = True
 		elif '[ci test_only]' in commit_attributes['message']:
 			verify_only = True
