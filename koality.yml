@@ -1,8 +1,8 @@
 --- #Koality: 0.1.5
 languages:
   python: 2.7
-  ruby: 1.9.3
-  nodejs: 0.8.12
+#  ruby: 1.9.3
+#  nodejs: 0.8.12
 setup:
   - scripts:
     # This is a temporary hack because pip is dumb
