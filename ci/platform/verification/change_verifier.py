@@ -51,6 +51,7 @@ class ChangeVerifier(EventSubscriber):
 			commit_id = contents['commit']['id']
 			head_sha = contents['commit']['sha']
 			base_sha = contents['commit'].get('base_sha')
+			repo_id = contents['commit']['repo_id']
 			repo_type = contents['repo_type']
 			merge_target = contents['merge_target']
 			patch_id = contents['patch_id']
@@ -60,7 +61,7 @@ class ChangeVerifier(EventSubscriber):
 				self.skip_change(change_id)
 				return
 
-			verification_config = self._get_verification_config(commit_id, head_sha, base_sha, merge_target, repo_type, patch_id)
+			verification_config = self._get_verification_config(commit_id, head_sha, base_sha, change_id, merge_target, patch_id, repo_id, repo_type)
 
 			workers_spawned = event.Event()
 			spawn_n(self.verify_change, verification_config, change_id, repo_type, workers_spawned, verify_only, patch_id)
@@ -101,9 +102,10 @@ class ChangeVerifier(EventSubscriber):
 
 				commit_id = change_attributes['commit_id']
 				merge_target = change_attributes['merge_target']
+				repo_id = change_attributes['repo_id']
 
 				with model_server.rpc_connect("repos", "read") as client:
-					repo_type = client.get_repo_type(change_attributes['repo_id'])
+					repo_type = client.get_repo_type(repo_id)
 					commit_attributes = client.get_commit_attributes(commit_id)
 
 				head_sha = commit_attributes['sha']
@@ -111,7 +113,7 @@ class ChangeVerifier(EventSubscriber):
 
 				user_id = contents['user_id']
 
-				verification_config = self._get_verification_config(commit_id, head_sha, base_sha, merge_target, repo_type, None)
+				verification_config = self._get_verification_config(commit_id, head_sha, base_sha, change_id, merge_target, None, repo_id, repo_type)
 
 				debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
 
@@ -264,7 +266,7 @@ class ChangeVerifier(EventSubscriber):
 		with model_server.rpc_connect("builds", "create") as model_server_rpc:
 			return model_server_rpc.create_build(change_id)
 
-	def _get_verification_config(self, commit_id, head_sha, base_sha, merge_target, repo_type, patch_id):
+	def _get_verification_config(self, commit_id, head_sha, base_sha, change_id, merge_target, patch_id, repo_id, repo_type):
 		with model_server.rpc_connect("repos", "read") as model_server_rpc:
 			repo_uri = model_server_rpc.get_repo_uri(commit_id)
 			attributes = model_server_rpc.get_repo_attributes(repo_uri)
@@ -318,6 +320,8 @@ class ChangeVerifier(EventSubscriber):
 			environment['KOALITY_BASE_SHA'] = base_sha
 		environment['KOALITY_BRANCH'] = merge_target
 		environment['KOALITY_REPOSITORY'] = repo_name
+		environment['KOALITY_REPOSITORY_ID'] = repo_id
+		environment['KOALITY_CHANGE_ID'] = change_id
 
 		try:
 			return VerificationConfig.from_yaml(repo_type, repo_name, checkout_url, ref, environment, config_yaml, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
