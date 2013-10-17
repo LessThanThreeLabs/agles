@@ -314,14 +314,14 @@ class ChangeVerifier(EventSubscriber):
 					break
 
 		environment = collections.OrderedDict()
-		environment['KOALITY']  = 'true'
+		environment['KOALITY'] = 'true'
 		environment['KOALITY_HEAD_SHA'] = head_sha
 		if base_sha:
 			environment['KOALITY_BASE_SHA'] = base_sha
 		environment['KOALITY_BRANCH'] = merge_target
 		environment['KOALITY_REPOSITORY'] = repo_name
-		environment['KOALITY_REPOSITORY_ID'] = repo_id
-		environment['KOALITY_CHANGE_ID'] = change_id
+		environment['KOALITY_REPOSITORY_ID'] = str(repo_id)
+		environment['KOALITY_CHANGE_ID'] = str(change_id)
 
 		try:
 			return VerificationConfig.from_yaml(repo_type, repo_name, checkout_url, ref, environment, config_yaml, private_key=StoreSettings.ssh_private_key, patch_id=patch_id)
