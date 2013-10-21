@@ -40,7 +40,7 @@ test:
         path: ci/platform
         script: nosetests -sv --with-xunit tests/unit_tests
         timeout: 10
-        xunit: nosetests.xml
+        xunit: monster.xml
   factories:
     - integration test factory:
         path: ci/platform
@@ -52,5 +52,5 @@ test:
               echo - $shortname:
               echo "    script: nosetests -sv --with-xunit $test"
               echo "    path: ci/platform"
-              echo "    xunit: nosetests.xml"
+              echo "    xunit: monster.xml"
             done
