@@ -41,6 +41,9 @@ test:
         script: nosetests -sv --with-xunit tests/unit_tests
         timeout: 10
         xunit: monster.xml
+    - stuff:
+        script: 'for x in {0..100000}; do echo "esuyiaoesnflkjadsfgjlansrf;nars;fnajsndflkjnabslkjdfnblkajsbdfljkabsldkjfnblakjsndflkjanslkdjfnalkjsdnflkjasndlfkjnaslkdjfnalksjdnfalksjdnflkajsndflkjansldkjfnalskjdnflkajsndflkajsndlfkjansdlkfjansldkfjnaslkdjfnaslkdnflaksndflkajsndlfkjnaslkdfjnalskjdnflaksjdnflaksjdnflkasjndflkajsndflkajsndflkjansdflkjansdlfkjansdlfkjansdlkfjnaslkdjfnalksjdnflakjsndflkajsndflkajnsdflkjansdlfkj" > /tmp/$x.xml; done'
+        xunit: /tmp
   factories:
     - integration test factory:
         path: ci/platform
