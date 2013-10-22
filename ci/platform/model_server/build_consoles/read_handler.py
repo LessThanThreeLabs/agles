@@ -94,7 +94,13 @@ class BuildConsolesReadHandler(ModelServerRpcHandler):
 
 	# TODO: We should find a smarter way to do this whenever there are a lot of different output types
 	def get_valid_output_types(self, user_id, build_console_id):
-		if self.get_xunit_from_id(user_id, build_console_id):
+		xunit = database.schema.xunit
+
+		query = select([func.count(xunit.c.id)]).where(xunit.c.build_console_id == build_console_id)
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			row = sqlconn.execute(query).first()
+
+		if row[0] > 0:
 			return ['console', 'xunit']
 		return ['console']
 
