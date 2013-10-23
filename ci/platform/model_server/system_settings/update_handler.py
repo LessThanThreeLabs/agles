@@ -225,6 +225,13 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			client_secret=client_secret)
 
 	@AdminApi
+	def set_notification_config(self, user_id, hipchat_config):
+		self.update_setting("hipchat", "token", hipchat_config['token'])
+		self.update_setting("hipchat", "rooms", hipchat_config['rooms'])
+		self.publish_event("system_settings", None, "notification config updated",
+			hipchat=hipchat_config)
+
+	@AdminApi
 	def upgrade_deployment(self, user_id):
 		if DeploymentSettings.upgrade_status == 'running':
 			raise UpgradeInProgressException()

@@ -12,6 +12,7 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from settings.authentication import AuthenticationSettings
 from settings.aws import AwsSettings
 from settings.github_enterprise import GithubEnterpriseSettings
+from settings.hipchat import HipchatSettings
 from settings.libcloud import LibCloudSettings
 from settings.verification_server import VerificationServerSettings
 from settings.web_server import WebServerSettings
@@ -192,6 +193,15 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 			'url': GithubEnterpriseSettings.github_url,
 			'client_id': GithubEnterpriseSettings.client_id,
 			'client_secret': GithubEnterpriseSettings.client_secret
+		}
+
+	@AdminApi
+	def get_notification_config(self, user_id):
+		return {
+			'hipchat': {
+				'token': HipchatSettings.token,
+				'rooms': HipchatSettings.rooms
+			}
 		}
 
 	@AdminApi
