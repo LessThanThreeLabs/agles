@@ -228,7 +228,7 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 	def set_notification_config(self, user_id, hipchat_config):
 		self.update_setting("hipchat", "token", hipchat_config['token'])
 		self.update_setting("hipchat", "rooms", hipchat_config['rooms'])
-		self.publish_event("system_settings", None, "notification config updated",
+		self.publish_event("system_settings", None, "notification settings updated",
 			hipchat=hipchat_config)
 
 	@AdminApi
