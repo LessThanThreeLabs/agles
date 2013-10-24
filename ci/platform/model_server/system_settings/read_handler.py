@@ -200,7 +200,8 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		return {
 			'hipchat': {
 				'token': HipchatSettings.token,
-				'rooms': HipchatSettings.rooms
+				'rooms': HipchatSettings.rooms,
+				'type': HipchatSettings.type
 			}
 		}
 

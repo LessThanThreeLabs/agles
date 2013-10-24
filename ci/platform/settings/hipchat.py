@@ -5,4 +5,5 @@ class HipchatSettings(DatabaseBackedSettings):
 	def __init__(self):
 		super(HipchatSettings, self).__init__(
 			token='',
-			rooms=[])
+			rooms=[],
+			type='')
