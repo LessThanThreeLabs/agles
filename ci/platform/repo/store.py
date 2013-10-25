@@ -229,6 +229,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 	def git_merge_refs(self, repo_slave, ref_to_merge, ref_to_merge_into):
 		self.logger.info("Attempting to merge refs %s into %s on repo %s" % (ref_to_merge, ref_to_merge_into, repo_slave))
 		try:
+			repo_slave.git.remote("prune", "origin")
 			repo_slave.git.fetch()  # update branches
 			remote_branch = "origin/%s" % ref_to_merge_into  # origin/master or whatever
 			remote_branch_exists = re.search("\\s+" + remote_branch + "$", repo_slave.git.branch("-r"), re.MULTILINE)
@@ -346,13 +347,13 @@ class FileSystemRepositoryStore(RepositoryStore):
 				if i >= self.NUM_RETRIES:
 					error_msg = "Retried too many times, repo: %s" % (repo)
 					self.logger.warn(error_msg, exc_info=True)
-					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
+					repo.rawcommand(hglib.util.cmdbuilder("strip", rev=base_sha, nobackup=True))
 					raise PushForwardError, error_msg, sys.exc_info()[2]
 				time.sleep(1)
 				sha = update_from_forward_url(sha)
 			except:
 				self.logger.error("Push Forwarding failed due to unexpected error", exc_info=True)
-				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=ref_to_merge_into, nobackup=True))
+				repo.rawcommand(hglib.util.cmdbuilder("strip", rev=base_sha, nobackup=True))
 				raise
 			else:
 				break
@@ -368,12 +369,18 @@ class FileSystemRepositoryStore(RepositoryStore):
 		self.logger.info("Attempting to push repo to forward url %s" % remote_repo)
 		repo.push(remote_repo, newbranch=True, ssh="GIT_PRIVATE_KEY_PATH=%s %s" % (self._get_private_key_path(), self.SSH_WITH_PRIVATE_KEY_SCRIPT))
 
-	def _git_fetch_with_private_key(self, repo, *args, **kwargs):
+	def _git_fetch_with_private_key(self, repo, remote_repo, *args, **kwargs):
 		self.logger.info("Attempting to fetch to repo %s" % repo)
-		execute_args = ['git', 'fetch'] + list(args) + repo.git.transform_kwargs(**kwargs)
-		repo.git.execute(execute_args,
-			env={'GIT_SSH': self.SSH_WITH_PRIVATE_KEY_SCRIPT, 'GIT_PRIVATE_KEY_PATH': self._get_private_key_path(), 'GIT_SSH_TIMEOUT': '120'}
-		)
+		env = {
+			'GIT_SSH': self.SSH_WITH_PRIVATE_KEY_SCRIPT,
+			'GIT_PRIVATE_KEY_PATH': self._get_private_key_path(),
+			'GIT_SSH_TIMEOUT': '120'
+		}
+
+		prune_args = ['git', 'remote', 'prune', remote_repo]
+		repo.git.execute(prune_args, env=env)
+		fetch_args = ['git', 'fetch', remote_repo] + list(args) + repo.git.transform_kwargs(**kwargs)
+		repo.git.execute(fetch_args, env=env)
 
 	def _hg_fetch_with_private_key(self, repo, remote_repo):
 		self.logger.info("Attempting to fetch to repo %s" % repo)
