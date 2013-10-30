@@ -340,7 +340,9 @@ class RemoteExportCommand(RemoteCommand):
 						export_url = self.get_url(bucket, export_path)
 
 						with open(file_path) as f:
-							request = urllib2.Request(export_url, f.read(), headers=headers)
+							contents = f.read()
+
+						request = urllib2.Request(export_url.encode('ascii'), contents, headers=headers)
 						request.get_method = lambda: 'PUT'
 						response = urllib2.urlopen(request)
 
