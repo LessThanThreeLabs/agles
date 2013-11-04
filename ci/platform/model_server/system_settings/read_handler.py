@@ -90,7 +90,8 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 			'ami_id': AwsSettings.vm_image_id,
 			'vm_username': AwsSettings.vm_username,
 			'root_drive_size': AwsSettings.root_drive_size,
-			'security_group_name': AwsSettings.security_group,
+			'security_group_id': AwsSettings.security_group,
+			'subnet_id': AwsSettings.subnet_id,
 			'user_data': AwsSettings.user_data
 		}
 
@@ -105,9 +106,9 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		return ec2.InstanceTypes.get_allowed_instance_types()
 
 	@AdminApi
-	def get_aws_security_group_names(self, user_id):
+	def get_aws_security_groups(self, user_id):
 		assert VerificationServerSettings.cloud_provider == 'aws'
-		return ec2.SecurityGroups.get_security_group_names()
+		return ec2.SecurityGroups.get_security_groups()
 
 	@AdminApi
 	def get_aws_base_images(self, user_id):
