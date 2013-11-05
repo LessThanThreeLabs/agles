@@ -152,6 +152,7 @@ github_repo_metadata = Table('github_repo_metadata', metadata,
 	Column('repo_name', String, nullable=False),
 	Column('hook_id', Integer, nullable=True),
 	Column('hook_secret', String, nullable=True),
+	Column('hook_type', String, nullable=True),
 	Column('added_by_user_id', Integer, ForeignKey('user.id'), nullable=False)
 )
 
