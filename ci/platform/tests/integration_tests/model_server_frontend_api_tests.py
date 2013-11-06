@@ -285,32 +285,34 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			conn.set_cloud_provider(self.user_id, "aws")
 
 		security_group_name = "a security group"
+		subnet_id = "a subnet"
 		vm_image_id = "i-123456"
 		vm_username = "ubuntu"
 		root_drive_size = 42
 		instance_size = "m1.medium"
 		user_data = "#!/bin/bash\necho hi"
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_aws_instance_settings(self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, user_data)
+			conn.set_aws_instance_settings(self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, subnet_id, user_data)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "ami_id": vm_image_id, "vm_username": vm_username, "root_drive_size": root_drive_size, "security_group_name": security_group_name, "user_data": user_data},
+			assert_equals({"instance_size": instance_size, "ami_id": vm_image_id, "vm_username": vm_username, "root_drive_size": root_drive_size, "security_group_id": security_group_name, "subnet_id": subnet_id, "user_data": user_data},
 				conn.get_aws_instance_settings(self.user_id))
 
 		security_group_name = "a different security group"
+		subnet_id = "a different subnet"
 		vm_image_id = "i-abcdef"
 		vm_username = "bbland"
 		root_drive_size = 1337
 		instance_size = "m2.2xlarge"
 		user_data = ""
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_aws_instance_settings(self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, user_data)
+			conn.set_aws_instance_settings(self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, subnet_id, user_data)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "ami_id": vm_image_id, "vm_username": vm_username, "root_drive_size": root_drive_size, "security_group_name": security_group_name, "user_data": user_data},
+			assert_equals({"instance_size": instance_size, "ami_id": vm_image_id, "vm_username": vm_username, "root_drive_size": root_drive_size, "security_group_id": security_group_name, "subnet_id": subnet_id, "user_data": user_data},
 				conn.get_aws_instance_settings(self.user_id))
 
 		with model_server.rpc_connect("system_settings", "update") as conn:
 			conn.set_cloud_provider(self.user_id, "hpcloud")
-			assert_raises(AssertionError, conn.set_aws_instance_settings, self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, user_data)
+			assert_raises(AssertionError, conn.set_aws_instance_settings, self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, subnet_id, user_data)
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_raises(AssertionError, conn.get_aws_instance_settings, self.user_id)
 

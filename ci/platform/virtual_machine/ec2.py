@@ -126,7 +126,8 @@ class Ec2Vm(VirtualMachine):
 			master_name = None
 			if ec2metadata:
 				try:
-					master_name = CloudBroker.get_instance_by_id(ec2metadata.get('instance-id')).tags['Name']
+					instance_info = CloudBroker.get_instance_by_id(ec2metadata.get('instance-id'))
+					master_name = instance_info.tags['Name']
 				except:
 					pass
 			if not master_name:
@@ -139,14 +140,16 @@ class Ec2Vm(VirtualMachine):
 
 		vm_username = vm_username or AwsSettings.vm_username
 
+		subnet_id = AwsSettings.subnet_id
 		security_group = AwsSettings.security_group
-		cls._validate_security_group(security_group)
+		security_group_id = cls._validate_security_group(security_group)
 
 		with cls.CloudClient() as ec2_client:
 			instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
-				security_groups=[security_group],
+				security_group_ids=[security_group_id],
 				user_data=cls._default_user_data(vm_username),
-				block_device_map=cls._block_device_mapping(ami)).instances[0]
+				block_device_map=cls._block_device_mapping(ami),
+				subnet_id=subnet_id).instances[0]
 
 		cls._name_instance(instance, name)
 		return Ec2Vm(vm_id, instance, vm_username)
@@ -210,7 +213,7 @@ class Ec2Vm(VirtualMachine):
 	def _validate_security_group(cls, security_group):
 		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
 		if ec2metadata:
-			own_security_groups = ec2metadata.get('security-groups').split('\n')
+			own_security_groups = map(lambda group: group.id, CloudBroker.get_instance_by_id(ec2metadata.get('instance-id')).groups)
 		else:
 			own_security_groups = []
 		group = cls._get_or_create_security_group(security_group)
@@ -222,7 +225,7 @@ class Ec2Vm(VirtualMachine):
 					if grant.cidr_ip == cidr_ip:
 						cls.logger.debug('Found ssh authorization rule on security group "%s" for ip "%s"' % (security_group, cidr_ip))
 						return
-					elif grant.name in own_security_groups:
+					elif grant.group_id in own_security_groups:
 						cls.logger.debug('Found ssh authorization rule on security group "%s" for security group "%s"' % (security_group, grant.name))
 						return
 		cls.logger.info('Adding ssh authorization rule to security group "%s" for ip "%s"' % (security_group, cidr_ip))
@@ -232,7 +235,7 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _get_or_create_security_group(cls, security_group):
 		with cls.CloudClient() as ec2_client:
-			groups = filter(lambda group: group.name == security_group, ec2_client.get_all_security_groups())
+			groups = filter(lambda group: group.name == security_group or group.id == security_group, ec2_client.get_all_security_groups())
 			if groups:
 				cls.logger.debug('Found existing security group "%s"' % security_group)
 				group = groups[0]
@@ -385,14 +388,16 @@ class Ec2Vm(VirtualMachine):
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')
 
+		subnet_id = AwsSettings.subnet_id
 		security_group = AwsSettings.security_group
-		self._validate_security_group(security_group)
+		security_group_id = self._validate_security_group(security_group)
 
 		with self.CloudClient() as ec2_client:
 			self.instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
-				security_groups=[security_group],
+				security_group_ids=[security_group_id],
 				user_data=self._default_user_data(self.vm_username),
-				block_device_map=self._block_device_mapping(ami)).instances[0]
+				block_device_map=self._block_device_mapping(ami),
+				subnet_id=subnet_id).instances[0]
 
 		self._name_instance(self.instance, instance_name)
 
@@ -418,14 +423,23 @@ class Ec2Vm(VirtualMachine):
 
 class SecurityGroups(object):
 	@classmethod
-	def get_security_group_names(cls):
+	def _transform_group(cls, group):
+		return {
+			'name': group.name,
+			'id': group.id
+		}
+
+	@classmethod
+	def get_security_groups(cls):
 		try:
 			with CloudBroker.connection() as ec2_client:
-				existing_groups = map(lambda group: group.name, ec2_client.get_all_security_groups())
+				existing_groups = map(cls._transform_group, ec2_client.get_all_security_groups())
 		except:
 			existing_groups = []
-		existing_groups_plus_selected = list(set(existing_groups).union([str(AwsSettings.security_group), str(AwsSettings._default_security_group)]))
-		return sorted(existing_groups_plus_selected)
+		default_group_name = str(AwsSettings._default_security_group)
+		default_group = {'name': default_group_name, 'id': default_group_name}
+		existing_groups_plus_default = list(set(existing_groups).union([default_group]))
+		return sorted(existing_groups_plus_default, key=lambda group: group.name)
 
 
 class InstanceTypes(object):

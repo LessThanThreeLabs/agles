@@ -12,6 +12,7 @@ class AwsSettings(DatabaseBackedSettings):
 			vm_image_id='default',  # default to our 12.04 AMI
 			vm_username='lt3',
 			security_group='koality_verification',
+			subnet_id=None,
 			root_drive_size=8,
 			s3_bucket_name='',
 			user_data='')
