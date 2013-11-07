@@ -1,3 +1,4 @@
+
 """Remove build_commits_map table
 
 Revision ID: 10c6543b5424

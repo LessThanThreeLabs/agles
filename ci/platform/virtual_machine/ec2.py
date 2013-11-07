@@ -438,8 +438,8 @@ class SecurityGroups(object):
 			existing_groups = []
 		default_group_name = str(AwsSettings._default_security_group)
 		default_group = {'name': default_group_name, 'id': default_group_name}
-		existing_groups_plus_default = list(set(existing_groups).union([default_group]))
-		return sorted(existing_groups_plus_default, key=lambda group: group.name)
+		existing_groups_plus_default = {group['id']: group for group in (existing_groups + [default_group])}.values()
+		return sorted(existing_groups_plus_default, key=lambda group: group['name'])
 
 
 class InstanceTypes(object):
