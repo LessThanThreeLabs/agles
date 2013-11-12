@@ -616,7 +616,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 		with model_server.rpc_connect("repos", "read") as conn:
 			remote_repo = conn.get_repo_forward_url(repo_id)
 
-		self._git_fetch_with_private_key(repo, remote_repo, '+refs/heads/*:refs/heads/*')
+		self._git_fetch_with_private_key(repo, remote_repo, '+refs/*:refs/*')
 
 		try:
 			repo.commit(sha)
@@ -691,7 +691,7 @@ class FileSystemRepositoryStore(RepositoryStore):
 			repo_path = self._resolve_path(repo_id, repo_name)
 			repo = Repo(repo_path)
 
-			self._git_fetch_with_private_key(repo, remote_repo, '+refs/heads/*:refs/heads/*')
+			self._git_fetch_with_private_key(repo, remote_repo, '+refs/*:refs/*')
 
 			try:
 				commit = repo.commit(sha)
