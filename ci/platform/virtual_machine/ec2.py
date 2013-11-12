@@ -224,10 +224,10 @@ class Ec2Vm(VirtualMachine):
 				for grant in rule.grants:
 					if grant.cidr_ip == cidr_ip:
 						cls.logger.debug('Found ssh authorization rule on security group "%s" for ip "%s"' % (security_group, cidr_ip))
-						return
+						return group
 					elif grant.group_id in own_security_groups:
 						cls.logger.debug('Found ssh authorization rule on security group "%s" for security group "%s"' % (security_group, grant.name))
-						return
+						return group
 		cls.logger.info('Adding ssh authorization rule to security group "%s" for ip "%s"' % (security_group, cidr_ip))
 		group.authorize('tcp', '22', '22', cidr_ip, None)
 		return group
