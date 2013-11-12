@@ -437,9 +437,17 @@ class SecurityGroups(object):
 		except:
 			existing_groups = []
 		default_group_name = str(AwsSettings._default_security_group)
-		default_group = {'name': default_group_name, 'id': default_group_name}
-		existing_groups_plus_default = {group['id']: group for group in (existing_groups + [default_group])}.values()
-		return sorted(existing_groups_plus_default, key=lambda group: group['name'])
+
+		has_default_group = False
+		for group in existing_groups:
+			if group['name'] == default_group_name:
+				has_default_group = True
+
+		if not has_default_group:
+			default_group = {'name': default_group_name, 'id': default_group_name}
+			existing_groups = {group['id']: group for group in (existing_groups + [default_group])}.values()
+
+		return sorted(existing_groups, key=lambda group: group['name'])
 
 
 class InstanceTypes(object):
