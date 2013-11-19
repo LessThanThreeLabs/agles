@@ -9,7 +9,7 @@ import functools
 import os
 import re
 import shutil
-import socket
+import subprocess
 import sys
 import time
 import yaml
@@ -176,7 +176,7 @@ class RepositoryStore(object):
 
 	@classmethod
 	def _get_ip_address(cls):
-		return socket.gethostbyname(socket.gethostname())
+		return subprocess.check_output(['ifconfig', 'eth0']).split('\n')[1].split()[1][5:] or socket.gethostbyname(socket.gethostname())
 
 	def _ip_address_updater(self):
 		while True:
