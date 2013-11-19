@@ -55,6 +55,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 		repository_id = row[change.c.repo_id]
 		change_number = row[change.c.number]
+		target = row[change.c.merge_target]
 
 		user = to_dict(row, user.columns, tablename=user.name)
 		commit = to_dict(row, commit.columns, tablename=commit.name)
@@ -62,7 +63,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		if "merge_status" in kwargs:
 			self.publish_event("changes", change_id, "merge completed", merge_status=kwargs["merge_status"])
 		self.publish_event("repos", repository_id, event_name, change_id=change_id, verification_status=verification_status,
-			change_number=change_number, user=user, commit=commit, **kwargs)
+			change_number=change_number, user=user, commit=commit, merge_target=target, **kwargs)
 
 	def _notify_failure(self, change_id):
 		change = schema.change
