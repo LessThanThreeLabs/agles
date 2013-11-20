@@ -41,6 +41,6 @@ class DebugInstancesUpdateHandler(ModelServerRpcHandler):
 		last_name = row[user.c.last_name]
 
 		subject = "Your debug instance has launched"
-		text = LAUNCH_TEMPLATE % (first_name, last_name, duration, WebServerSettings.domain_name, instance_id)
+		text = LAUNCH_TEMPLATE % (first_name, last_name, duration/60, WebServerSettings.domain_name, instance_id)
 
 		return sendmail("koality@%s" % WebServerSettings.domain_name, [email], subject, text)
