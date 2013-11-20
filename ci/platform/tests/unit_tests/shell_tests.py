@@ -18,6 +18,7 @@ class ShellTest(BaseUnitTest):
 		assert_raises(InvalidCommandError, self.hg_rsh.handle_command, "invalid-command")
 		assert_raises(InvalidCommandError, self.hg_rsh.handle_command,
 			"invalid-command 'long/arg/in/quotes' user_id_arg")
+		assert_true(False)
 
 	def test_command_mutation(self):
 		requested_repo = self.git_rsh._get_requested_repo_uri("'schacon/simplegit-progit.git'")
