@@ -3,6 +3,7 @@ import logging
 import pipes
 import re
 import socket
+import subprocess
 import sys
 import time
 
@@ -211,7 +212,7 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _validate_security_group(cls, security_group):
-		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
+		cidr_ip = '%s/32' % (subprocess.check_output(['ifconfig', 'eth0']).split('\n')[1].split()[1][5:] or socket.gethostbyname(socket.gethostname()))
 		if ec2metadata:
 			own_security_groups = map(lambda group: group.id, CloudBroker.get_instance_by_id(ec2metadata.get('instance-id')).groups)
 		else:
