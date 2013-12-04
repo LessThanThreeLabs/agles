@@ -11,7 +11,7 @@ from util.sql import to_dict
 
 FAILMAIL_TEMPLATE = """%s %s,
 
-There was an issue with the change you submitted so it was not merged.
+There was an issue with your change (%s).
 Please fix the change and resubmit it.
 
 Details for your change are available here: %s
@@ -87,6 +87,6 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		change_link = "https://%s/repository/%d?change=%d" % (WebServerSettings.domain_name, repo_id, change_id)
 
 		subject = "There was an issue with your change (%s)" % sha
-		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link, target, message)
+		text = FAILMAIL_TEMPLATE % (first_name, last_name, sha, change_link, target, message)
 
 		return sendmail("koality@%s" % WebServerSettings.domain_name, [email], subject, text)
