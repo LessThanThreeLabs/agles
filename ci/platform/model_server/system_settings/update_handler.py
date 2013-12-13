@@ -124,25 +124,13 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			secret_key=secret_key)
 
 	@AdminApi
-	def set_aws_instance_settings(self, user_id, instance_size, ami_id, vm_username, root_drive_size, security_group_id, subnet_id, user_data):
+	def set_aws_instance_settings(self, user_id, security_group_id, subnet_id):
 		assert VerificationServerSettings.cloud_provider == 'aws'
-		assert isinstance(root_drive_size, int)
-		assert root_drive_size >= AwsSettings._default_root_drive_size
-		self.update_setting("aws", "instance_type", instance_size)
-		self.update_setting("aws", "vm_image_id", ami_id)
-		self.update_setting("aws", "vm_username", vm_username)
-		self.update_setting("aws", "root_drive_size", root_drive_size)
 		self.update_setting("aws", "security_group", security_group_id)
 		self.update_setting("aws", "subnet_id", subnet_id)
-		self.update_setting("aws", "user_data", user_data)
 		self.publish_event("system_settings", None, "aws instance settings updated",
-			instance_size=instance_size,
-			ami_id=ami_id,
-			vm_username=vm_username,
-			root_drive_size=root_drive_size,
 			security_group_id=security_group_id,
-			subnet_id=subnet_id,
-			user_data=user_data)
+			subnet_id=subnet_id)
 
 	@AdminApi
 	def set_s3_bucket_name(self, user_id, bucket_name):
@@ -185,13 +173,90 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 			security_group_name=security_group_name)
 
 	@AdminApi
-	def set_verifier_pool_parameters(self, user_id, min_ready, max_running):
+	def set_verifier_pool_parameters(self, user_id, pool_id, min_ready, max_running, instance_type, ami_id, vm_username, root_drive_size, user_data):
 		assert min_ready <= max_running
-		self.update_setting("verification_server", "static_pool_size", min_ready)
-		self.update_setting("verification_server", "max_virtual_machine_count", max_running)
+		assert isinstance(root_drive_size, int)
+
+		if pool_id == 0:
+			self.update_setting("verification_server", "static_pool_size", min_ready)
+			self.update_setting("verification_server", "max_virtual_machine_count", max_running)
+			self.update_setting("aws", "instance_type", instance_type)
+			self.update_setting("aws", "vm_image_id", ami_id)
+			self.update_setting("aws", "vm_username", vm_username)
+			self.update_setting("aws", "root_drive_size", root_drive_size)
+			self.update_setting("aws", "user_data", user_data)
+		else:
+			secondary_pool = database.schema.secondary_pool
+			update = secondary_pool.update().where(secondary_pool.c.id == pool_id).values(
+				min_ready=min_ready,
+				max_running=max_running,
+				instance_type=instance_type,
+				ami_id=ami_id,
+				vm_username=vm_username,
+				root_drive_size=root_drive_size,
+				user_data=user_data,
+			)
+
+			with ConnectionFactory.get_sql_connection() as sqlconn:
+				sqlconn.execute(update)
+
 		self.publish_event("system_settings", None, "verifier pool settings updated",
+			pool_id=pool_id,
 			min_ready=min_ready,
-			max_running=max_running)
+			max_running=max_running,
+			instance_type=instance_type,
+			ami_id=ami_id,
+			vm_username=vm_username,
+			root_drive_size=root_drive_size,
+			user_data=user_data,
+		)
+
+
+	@AdminApi
+	def create_verifier_pool(self, user_id, name, min_ready, max_running, instance_type, ami_id, vm_username, root_drive_size, user_data):
+		assert name != 'default'
+		assert min_ready <= max_running
+		assert isinstance(root_drive_size, int)
+
+		secondary_pool = database.schema.secondary_pool
+		ins = secondary_pool.insert().values(
+			name=name,
+			min_ready=min_ready,
+			max_running=max_running,
+			instance_type=instance_type,
+			ami_id=ami_id,
+			vm_username=vm_username,
+			root_drive_size=root_drive_size,
+			user_data=user_data,
+		)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			result = sqlconn.execute(ins)
+
+		pool_id = result.inserted_primary_key[0]
+
+		self.publish_event("system_settings", None, "verifier pool created",
+			pool_id=pool_id,
+			min_ready=min_ready,
+			max_running=max_running,
+			instance_type=instance_type,
+			ami_id=ami_id,
+			vm_username=vm_username,
+			root_drive_size=root_drive_size,
+			user_data=user_data,
+		)
+
+		return pool_id
+
+	@AdminApi
+	def delete_verifier_pool(self, user_id, pool_id):
+		secondary_pool = database.schema.secondary_pool
+		update = secondary_pool.update().where(secondary_pool.c.id == pool_id).values(deleted=pool_id)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			sqlconn.execute(update)
+
+		self.publish_event("system_settings", None, "verifier pool deleted", pool_id=pool_id)
 
 	@AdminApi
 	def validate_license_key(self, user_id, license_key):

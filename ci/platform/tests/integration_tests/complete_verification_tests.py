@@ -47,7 +47,7 @@ class VerificationRoundTripTest(BaseIntegrationTest, ModelServerTestMixin, Rabbi
 
 	class TestChangeVerifier(ChangeVerifier):
 		def __init__(self, verifier_pool):
-			super(VerificationRoundTripTest.TestChangeVerifier, self).__init__(verifier_pool, None)
+			super(VerificationRoundTripTest.TestChangeVerifier, self).__init__({0: verifier_pool}, None)
 			self._change_finished = eventlet.event.Event()
 
 		def verify_change(self, verification_config, change_id, repo_type, workers_spawned, verify_only, patch_id=None):

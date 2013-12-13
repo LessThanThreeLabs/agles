@@ -4,6 +4,7 @@ from util import greenlets
 import argparse
 import sys
 
+import model_server
 import util.log
 
 from settings.verification_server import VerificationServerSettings
@@ -68,11 +69,17 @@ def main():
 	print 'Starting Verification Server (%s)...' % cloud_provider
 
 	try:
+		verifier_pools = {}
+
 		if vm_class is not None:
-			verifier_pool = VirtualMachineVerifierPool(vm_class, max_running=max_vm_count, uri_translator=RepositoryUriTranslator())
+			with model_server.rpc_connect('system_settings', 'read') as rpc_client:
+				pool_parameters = rpc_client.get_verifier_pool_parameters(1)
+			for pool in pool_parameters:
+				verifier_pools[pool['id']] = VirtualMachineVerifierPool(vm_class, max_running=pool['max_running'], min_ready=pool['min_ready'], uri_translator=RepositoryUriTranslator(), pool_id=pool['id'])
 		else:
-			verifier_pool = VerifierPool(max_vm_count, 0)
-		change_verifier = ChangeVerifier(verifier_pool, RepositoryUriTranslator())
+			verifier_pools[0] = VerifierPool(max_vm_count, 0)
+
+		change_verifier = ChangeVerifier(verifier_pools, RepositoryUriTranslator())
 		verification_server = VerificationServer(change_verifier).run()
 	except:
 		print 'Failed to start Verification Server'

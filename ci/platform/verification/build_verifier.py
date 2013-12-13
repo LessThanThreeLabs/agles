@@ -14,8 +14,10 @@ class BuildVerifier(object):
 			try:
 				return func(*args, **kwargs)
 			except VerificationException as e:
+				print e
 				return e
 			except BaseException as e:
+				print e
 				BuildVerifier.logger.critical("Unexpected exception thrown during verification", exc_info=True)
 				return e
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import datetime
+import logging
 import sys
 import util.log
 
@@ -50,6 +51,14 @@ def main():
 	elif args.cleanup:
 		remove_stale_snapshots(snapshotter)
 	else:
+		simple_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		stream_handler = logging.StreamHandler()
+		stream_handler.setFormatter(simple_formatter)
+		stream_handler.setLevel(logging.INFO)
+
+		root_logger = logging.getLogger()
+		root_logger.addHandler(stream_handler)
+		root_logger.setLevel(logging.INFO)
 		snapshot(snapshotter)
 
 

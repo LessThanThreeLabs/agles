@@ -22,6 +22,7 @@ from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi, is_admin
 from upgrade import upgrade_check_url
+from util.sql import to_dict
 from virtual_machine import ec2, hpcloud
 
 
@@ -86,13 +87,8 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	def get_aws_instance_settings(self, user_id):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		return {
-			'instance_size': AwsSettings.instance_type,
-			'ami_id': AwsSettings.vm_image_id,
-			'vm_username': AwsSettings.vm_username,
-			'root_drive_size': AwsSettings.root_drive_size,
 			'security_group_id': AwsSettings.security_group,
 			'subnet_id': AwsSettings.subnet_id,
-			'user_data': AwsSettings.user_data
 		}
 
 	@AdminApi
@@ -163,10 +159,29 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_verifier_pool_parameters(self, user_id):
-		return {
+		primary_pool_parameters = {
+			'id': 0,
+			'name': 'default',
 			'min_ready': VerificationServerSettings.static_pool_size,
-			'max_running': VerificationServerSettings.max_virtual_machine_count
+			'max_running': VerificationServerSettings.max_virtual_machine_count,
+			'instance_type': AwsSettings.instance_type,
+			'ami_id': AwsSettings.vm_image_id,
+			'vm_username': AwsSettings.vm_username,
+			'root_drive_size': AwsSettings.root_drive_size,
+			'user_data': AwsSettings.user_data
 		}
+
+		secondary_pool = database.schema.secondary_pool
+		query = secondary_pool.select().where(secondary_pool.c.deleted == 0)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			rows = sqlconn.execute(query)
+			pools = [primary_pool_parameters]
+
+			pool_columns = [column for column in secondary_pool.columns if column != secondary_pool.c.deleted]
+
+			pools += [to_dict(row, pool_columns) for row in rows]
+		return pools
 
 	@AdminApi
 	def get_ssh_public_key(self, user_id):

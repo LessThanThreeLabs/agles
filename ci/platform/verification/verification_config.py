@@ -1,11 +1,14 @@
 import yaml
 
+import model_server
+
 from virtual_machine.remote_command import RemoteProvisionCommand, RemoteCompileCommand, RemoteTestCommand, RemoteTestFactoryCommand, RemoteErrorCommand, RemoteCheckoutCommand, RemotePatchCommand, RemoteSshConfigCommand
 
 
 class VerificationConfig(object):
-	def __init__(self, repo_name, machines, setup_commands, compile_commands, test_factory_commands, test_commands, export_paths):
+	def __init__(self, repo_name, pool_id, machines, setup_commands, compile_commands, test_factory_commands, test_commands, export_paths):
 		self.repo_name = repo_name
+		self.pool_id = pool_id
 		self.machines = machines
 		self.setup_commands = setup_commands
 		self.compile_commands = compile_commands
@@ -74,6 +77,7 @@ class VerificationConfig(object):
 		compile_section = config.get('compile')
 		test_section = config.get('test')
 		export_section = config.get('export')
+		pool_name = config.get('pool')
 
 		setup_commands = []
 		if private_key is not None:
@@ -94,6 +98,16 @@ class VerificationConfig(object):
 		if not isinstance(machines, (int, type(None))):
 			return InvalidYamlErrorVerificationConfig('test->machines must be an int or be unspecified')
 
+		if pool_name is None:
+			pool_id = 0
+		else:
+			try:
+				with model_server.rpc_connect('system_settings', 'read') as rpc_client:
+					pools_parameters = rpc_client.get_verifier_pool_parameters(1)
+					pool_id = filter(lambda pool: pool['name'] == pool_name, pools_parameters)[0]['id']
+			except:
+				return InvalidYamlErrorVerificationConfig('No pool found with name: %s' % pool_name)
+
 		compile_configs = compile_section.get('scripts') if compile_section else None
 		test_configs = test_section.get('scripts') if test_section else None
 		test_factory_configs = test_section.get('factories') if test_section else None
@@ -108,13 +122,13 @@ class VerificationConfig(object):
 		if config_errors:
 			return InvalidYamlErrorVerificationConfig(config_errors)
 
-		return cls(repo_name, machines, setup_commands, compile_commands, test_factory_commands, test_commands, export_paths)
+		return cls(repo_name, pool_id, machines, setup_commands, compile_commands, test_factory_commands, test_commands, export_paths)
 
 
 class ErrorVerificationConfig(VerificationConfig):
 	def __init__(self, error_title, error_message):
 		super(ErrorVerificationConfig, self).__init__(
-			repo_name='error', machines=1, setup_commands=[RemoteErrorCommand(error_title, error_message)], compile_commands=[], test_factory_commands=[], test_commands=[], export_paths=[]
+			repo_name='error', pool_id=0, machines=1, setup_commands=[RemoteErrorCommand(error_title, error_message)], compile_commands=[], test_factory_commands=[], test_commands=[], export_paths=[]
 		)
 
 	def error_to_message(self, error):

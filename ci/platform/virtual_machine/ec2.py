@@ -113,16 +113,27 @@ class Ec2Vm(VirtualMachine):
 	CloudClient = CloudBroker.connection
 	Settings = AwsSettings
 
-	def __init__(self, vm_id, instance, vm_username):
+	def __init__(self, vm_id, instance, vm_username, pool_id=0):
 		super(Ec2Vm, self).__init__(vm_id, instance, vm_username)
+		self.pool_id = pool_id
 		self.store_vm_info()
 
 	@classmethod
-	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None):
-		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, ami, instance_type, vm_username)
+	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None, pool_id=0):
+		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, ami, instance_type, vm_username, pool_id)
 
 	@classmethod
-	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None):
+	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None, pool_id=0):
+		with model_server.rpc_connect('system_settings', 'read') as rpc_client:
+			pools_parameters = rpc_client.get_verifier_pool_parameters(1)
+			pool_parameters = None
+			for pool in pools_parameters:
+				if pool['id'] == pool_id:
+					pool_parameters = pool
+					break
+		if pool_parameters is None:
+			raise Exception('Unexpected pool id: %s' % pool_id)
+
 		if not name:
 			master_name = None
 			if ec2metadata:
@@ -133,30 +144,35 @@ class Ec2Vm(VirtualMachine):
 					pass
 			if not master_name:
 				master_name = socket.gethostname()
-			name = "koality-worker:%s (%s)" % (vm_id, master_name)
+			name = "koality-worker:%s:%s (%s)" % (pool_parameters['name'], vm_id, master_name)
 		if not ami:
-			ami = cls.get_active_image()
+			ami = cls.get_active_image(pool_parameters)
 		if not instance_type:
-			instance_type = AwsSettings.instance_type
+			instance_type = pool_parameters['instance_type']
 
-		vm_username = vm_username or AwsSettings.vm_username
+		if not vm_username:
+			vm_username = pool_parameters['vm_username']
 
 		subnet_id = AwsSettings.subnet_id
 		security_group = AwsSettings.security_group
 		security_group_id = cls._validate_security_group(security_group)
 
+		if pool_id is None:
+			root_drive_size = pool_parameters['root_drive_size']
+
 		with cls.CloudClient() as ec2_client:
-			instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
+			instance = ec2_client.run_instances(ami.id,
+				instance_type=instance_type,
 				security_group_ids=[security_group_id],
-				user_data=cls._default_user_data(vm_username),
-				block_device_map=cls._block_device_mapping(ami),
+				user_data=cls._user_data(vm_username, pool_parameters['user_data']),
+				block_device_map=cls._block_device_mapping(ami, root_drive_size),
 				subnet_id=subnet_id).instances[0]
 
 		cls._name_instance(instance, name)
 		return Ec2Vm(vm_id, instance, vm_username)
 
 	@classmethod
-	def _block_device_mapping(cls, ami):
+	def _block_device_mapping(cls, ami, root_drive_size):
 		bdm_dict = ami.block_device_mapping.copy()
 		if '/dev/sda1' in bdm_dict.keys():
 			root_drive_name = '/dev/sda1'
@@ -165,14 +181,14 @@ class Ec2Vm(VirtualMachine):
 		else:
 			root_drive_name = sorted(bdm_dict.keys())[0]  # this is just a wild guess, as ami.root_device_name is wrong
 
-		bdm_dict[root_drive_name].size = max(bdm_dict[root_drive_name].size, AwsSettings.root_drive_size)
+		bdm_dict[root_drive_name].size = max(bdm_dict[root_drive_name].size, root_drive_size)
 		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
 		for key, value in bdm_dict.iteritems():
 			bdm[key] = value
 		return bdm
 
 	@classmethod
-	def _default_user_data(cls, vm_username):
+	def _user_data(cls, vm_username, custom_user_data):
 		'''This utilizes Ubuntu cloud-init, which runs this script at "rc.local-like" time
 		when it finishes first boot.
 		This will fail if we use an image which doesn't utilitize EC2 user_data
@@ -190,15 +206,14 @@ class Ec2Vm(VirtualMachine):
 			ShellRedirect("echo 'Defaults !requiretty\n%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
 			ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
 		)
-		given_user_data = AwsSettings.user_data
-		if given_user_data:
+		if custom_user_data:
 			generate_user_data = ShellAnd(
 				ShellSilent(
 					ShellAnd(
 						ShellCommand('koalitydata=%s' % ShellCapture('mktemp')),
 						ShellRedirect('echo %s' % pipes.quote(koality_config), '$koalitydata'),
 						ShellCommand('userdata=%s' % ShellCapture('mktemp')),
-						ShellRedirect('echo %s' % pipes.quote(given_user_data), '$userdata')
+						ShellRedirect('echo %s' % pipes.quote(custom_user_data), '$userdata')
 					)
 				),
 				ShellCommand('write-mime-multipart "$koalitydata" "$userdata"'),
@@ -346,12 +361,11 @@ class Ec2Vm(VirtualMachine):
 				})[0]
 
 	@classmethod
-	def get_base_image(cls):
-		image_id = AwsSettings.vm_image_id
-		if image_id and image_id != 'default':
+	def get_base_image(cls, base_image_id):
+		if base_image_id and base_image_id != 'default':
 			try:
 				with cls.CloudClient() as ec2_client:
-					return ec2_client.get_image(image_id)
+					return ec2_client.get_image(base_image_id)
 			except:
 				cls.logger.exception('Invalid image id specified, using default instead')
 		return cls._get_default_base_image()
@@ -364,10 +378,10 @@ class Ec2Vm(VirtualMachine):
 		return [cls._get_default_base_image()] + sorted(own_base_images, key=lambda image: image.name)
 
 	@classmethod
-	def get_snapshots(cls, base_image):
+	def get_snapshots(cls, pool_parameters, base_image):
 		with cls.CloudClient() as ec2_client:
 			return ec2_client.get_all_images(filters={
-					'name': cls.format_snapshot_name(base_image, '*'),
+					'name': cls.format_snapshot_name(pool_parameters['name'], base_image, '*'),
 					'state': 'available'
 				})
 
@@ -384,7 +398,17 @@ class Ec2Vm(VirtualMachine):
 			return ec2_client.create_image(self.instance.id, name, description)
 
 	def rebuild(self):
-		ami = self.get_active_image()
+		with model_server.rpc_connect('system_settings', 'read') as rpc_client:
+			pools_parameters = rpc_client.get_verifier_pool_parameters(1)
+			pool_parameters = None
+			for pool in pools_parameters:
+				if pool['id'] == self.pool_id:
+					pool_parameters = pool
+					break
+		if pool_parameters is None:
+			raise Exception('Unexpected pool id: %s' % pool_id)
+
+		ami = self.get_active_image(pool_parameters)
 		instance_type = self.instance.instance_type
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')
@@ -396,8 +420,8 @@ class Ec2Vm(VirtualMachine):
 		with self.CloudClient() as ec2_client:
 			self.instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
 				security_group_ids=[security_group_id],
-				user_data=self._default_user_data(self.vm_username),
-				block_device_map=self._block_device_mapping(ami),
+				user_data=self._user_data(self.vm_username, pool_parameters['user_data']),
+				block_device_map=self._block_device_mapping(ami, pool_parameters['root_drive_size']),
 				subnet_id=subnet_id).instances[0]
 
 		self._name_instance(self.instance, instance_name)
