@@ -342,7 +342,10 @@ class ChangeVerifier(EventSubscriber):
 				checkout_url = self.uri_translator.translate(repo_uri)
 				host_url = checkout_url[:checkout_url.find(":")]
 				repo_path = checkout_url[checkout_url.find(":") + 1:]
-				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
+
+				local_ref = ref
+
+				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "git-show", repo_path, "%s:%s" % (local_ref, file_name)]
 				checkout_url = attributes['repo']['forward_url']
 				ref = "refs/pending/%s" % head_sha
 			else:
