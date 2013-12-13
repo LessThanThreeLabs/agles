@@ -304,14 +304,14 @@ class ChangeVerifier(EventSubscriber):
 			assert False
 
 		for file_name in ['koality.yml', '.koality.yml']:
-			results = StreamingExecutor().execute(show_command(file_name))
-			if results.returncode == 0:
-				try:
+			try:
+				results = StreamingExecutor().execute(show_command(file_name))
+				if results.returncode == 0:
 					config_yaml = results.output
-				except:
-					pass
-				else:
-					break
+			except:
+				pass
+			else:
+				break
 
 		environment = collections.OrderedDict()
 		environment['KOALITY'] = 'true'
