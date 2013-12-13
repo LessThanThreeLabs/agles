@@ -17,18 +17,21 @@ from settings.verification_server import VerificationServerSettings
 from streaming_executor import StreamingExecutor
 from util import pathgen
 from util.log import Logged
+from verification.verifier_pool import VirtualMachineVerifierPool
 from verification_config import VerificationConfig, ParseErrorVerificationConfig
 from verification_results_handler import VerificationResultsHandler
 
 @Logged()
 class ChangeVerifier(EventSubscriber):
-	def __init__(self, verifier_pool, uri_translator):
+	def __init__(self, verifier_pools, uri_translator):
 		super(ChangeVerifier, self).__init__([
 			ResourceBinding('repos', 'verification:repos.update'),
 			ResourceBinding('changes', 'instance_launching'),
 			ResourceBinding('system_settings', None)
 		])
-		self.verifier_pool = verifier_pool
+		assert isinstance(verifier_pools, dict)
+		assert 0 in verifier_pools
+		self.verifier_pools = verifier_pools
 		self.uri_translator = uri_translator
 		self.results_handler = VerificationResultsHandler()
 
@@ -41,6 +44,10 @@ class ChangeVerifier(EventSubscriber):
 			self._handle_new_change(body['contents'])
 		elif body['type'] == 'verifier pool settings updated':
 			self._handle_verifier_settings_update(body['contents'])
+		elif body['type'] == 'verifier pool created':
+			self._handle_verifier_pool_created(body['contents'])
+		elif body['type'] == 'verifier pool deleted':
+			self._handle_verifier_pool_deleted(body['contents'])
 		elif body['type'] == 'launch debug machine':
 			self._handle_launch_debug(body['contents'])
 		message.ack()
@@ -74,26 +81,49 @@ class ChangeVerifier(EventSubscriber):
 		try:
 			max_running = contents["max_running"]
 			min_ready = contents["min_ready"]
-			self.verifier_pool.reinitialize(max_running=max_running, min_ready=min_ready)
+			pool_id = contents.get("pool_id", 0)
+
+			if pool_id not in self.verifier_pools:
+				self.logger.error("Tried to update nonexistent verifier pool with id: %s." % pool_id)
+				return
+
+			verifier_pool = self.verifier_pools[pool_id]
+			verifier_pool.reinitialize(max_running=max_running, min_ready=min_ready)
 		except:
 			self.logger.critical("Unexpected failure while updating verifier pool to %s." % contents, exc_info=True)
+
+	def _handle_verifier_pool_created(self, contents):
+		try:
+			max_running = contents["max_running"]
+			min_ready = contents["min_ready"]
+			pool_id = contents["pool_id"]
+
+			if pool_id in self.verifier_pools:
+				self.logger.error("Verifier pool with id %s already exists." % pool_id)
+				return
+
+			primary_pool = self.verifier_pools[0]
+			verifier_pool = VirtualMachineVerifierPool(primary_pool.virtual_machine_class, max_running=max_running, min_ready=min_ready, uri_translator=primary_pool.uri_translator, pool_id=pool_id)
+			self.verifier_pools[pool_id] = verifier_pool
+		except:
+			self.logger.critical("Unexpected failure while creating verifier pool %s." % contents, exc_info=True)
+
+	def _handle_verifier_pool_deleted(self, contents):
+		try:
+			pool_id = contents["pool_id"]
+
+			if pool_id not in self.verifier_pools:
+				self.logger.error("Tried to delete nonexistent verifier pool with id: %s." % pool_id)
+				return
+
+			verifier_pool = self.verifier_pools.pop(pool_id)
+			verifier_pool.reinitialize(max_running=0, min_ready=0)
+		except:
+			self.logger.critical("Unexpected failure while deleting verifier pool %s." % contents, exc_info=True)
 
 	# TODO(andrey) This should eventually not be in change_verifier.
 	def _handle_launch_debug(self, contents):
 		def launch_debug_instance():
-			verifier = None
-			try:
-				verifier = self.verifier_pool.get()
-				verifier.setup()
-			except:
-				if verifier is not None:
-					self.verifier_pool.remove(verifier)
-				return
-
-			def scrap_instance():
-				verifier.teardown()
-				self.verifier_pool.remove(verifier)
-
 			try:
 				change_id = contents['change_id']
 
@@ -114,6 +144,26 @@ class ChangeVerifier(EventSubscriber):
 				user_id = contents['user_id']
 
 				verification_config = self._get_verification_config(commit_id, head_sha, base_sha, change_id, merge_target, None, repo_id, repo_type)
+
+				if verification_config.pool_id not in self.verifier_pools:
+					error_message = "Tried to launch debug instance for nonexistent verifier pool with id: %s." % verification_config.pool_id
+					self.logger.error(error_message)
+					raise Exception(error_message)
+
+				verifier_pool = self.verifier_pools[verification_config.pool_id]
+
+				verifier = None
+				try:
+					verifier = verifier_pool.get()
+					verifier.setup()
+				except:
+					if verifier is not None:
+						verifier_pool.remove(verifier)
+					return
+
+				def scrap_instance():
+					verifier.teardown()
+					verifier_pool.remove(verifier)
 
 				debug_instance = spawn(verifier.launch_build, commit_id, repo_type, verification_config)
 
@@ -139,6 +189,13 @@ class ChangeVerifier(EventSubscriber):
 	def verify_change(self, verification_config, change_id, repo_type, workers_spawned, verify_only, patch_id=None):
 		task_queue = TaskQueue()
 
+		if verification_config.pool_id not in self.verifier_pools:
+			error_message = "Tried to launch change for nonexistent verifier pool with id: %s." % verification_config.pool_id
+			self.logger.error(error_message)
+			raise Exception(error_message)
+
+		verifier_pool = self.verifier_pools[verification_config.pool_id]
+
 		num_workers = self._get_num_workers(verification_config)
 
 		self.logger.info("Verifying change %d with %d workers" % (change_id, num_workers))
@@ -156,9 +213,9 @@ class ChangeVerifier(EventSubscriber):
 				task_queue.clear_remaining_tasks()
 			if VerificationServerSettings.teardown_after_build:
 				verifier.teardown()
-				self.verifier_pool.remove(verifier)
+				verifier_pool.remove(verifier)
 			else:
-				self.verifier_pool.put(verifier)
+				verifier_pool.put(verifier)
 			raise greenlet.throw()
 
 		def start_change():
@@ -189,17 +246,17 @@ class ChangeVerifier(EventSubscriber):
 		def setup_worker():
 			verifier = None
 			try:
-				verifier = self.verifier_pool.get()
+				verifier = verifier_pool.get()
 				verifier.setup()
 			except:
 				prematurely_fail_change(sys.exc_info())
 				if verifier is not None:
-					self.verifier_pool.remove(verifier)
+					verifier_pool.remove(verifier)
 				return
 			if not change_started.ready():
 				start_change()
 			if change_done.ready():  # We got a verifier after the change is already done
-				self.verifier_pool.put(verifier)  # Just return this verifier to the pool
+				verifier_pool.put(verifier)  # Just return this verifier to the pool
 				return
 			workers_alive.append(1)
 			change_index = len(workers_alive) - 1
@@ -212,9 +269,9 @@ class ChangeVerifier(EventSubscriber):
 					task_queue.clear_remaining_tasks()
 				if VerificationServerSettings.teardown_after_build:
 					verifier.teardown()
-					self.verifier_pool.remove(verifier)
+					verifier_pool.remove(verifier)
 				else:
-					self.verifier_pool.put(verifier)
+					verifier_pool.put(verifier)
 				raise greenlet.throw()
 
 			worker_greenlet.link(cleanup_greenlet)
@@ -285,7 +342,12 @@ class ChangeVerifier(EventSubscriber):
 				checkout_url = self.uri_translator.translate(repo_uri)
 				host_url = checkout_url[:checkout_url.find(":")]
 				repo_path = checkout_url[checkout_url.find(":") + 1:]
-				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "git-show", repo_path, "%s:%s" % (ref, file_name)]
+
+				local_ref = ref
+
+				show_command = lambda file_name: ["ssh", "-q", "-oStrictHostKeyChecking=no", host_url, "git-show", repo_path, "%s:%s" % (local_ref, file_name)]
+				checkout_url = attributes['repo']['forward_url']
+				ref = "refs/pending/%s" % head_sha
 			else:
 				checkout_url = repo_uri
 				show_command = lambda file_name: ["bash", "-c", "cd %s && git show %s:%s" % (repo_uri, ref, file_name)]

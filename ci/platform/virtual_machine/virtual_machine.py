@@ -170,11 +170,11 @@ class VirtualMachine(object):
 				output_handler.append({1: failure_message})
 			return CommandResults(1, failure_message)
 
-	def _get_host_access_check_command(self, host_url):
+	def _get_host_access_check_command(self, repo_url):
 		return ShellAnd(
 			ShellCommand('echo Testing ssh connection to master instance...'),
 			ShellOr(
-				ShellAdvertised('ssh %s true' % host_url),
+				ShellAdvertised('git ls-remote %s refs/heads/master' % repo_url),
 				ShellAnd(
 					ShellCommand('echo -e %s' % pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
 					ShellCommand('false')
@@ -184,9 +184,8 @@ class VirtualMachine(object):
 
 	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		def _remote_fetch():
-			host_url = repo_url[:repo_url.find(":")]
 			command = ShellAnd(
-				self._get_host_access_check_command(host_url),
+				self._get_host_access_check_command(repo_url),
 				ShellOr(
 					ShellSilent(ShellCommand('which git')),
 					ShellSudo(SystemPackageParser().install_packages(['git']))
@@ -290,15 +289,16 @@ class VirtualMachine(object):
 		return self.ssh_call(command, output_handler)
 
 	@classmethod
-	def get_active_image(cls):
-		base_image = cls.get_base_image()
-		snapshots = cls.get_snapshots(base_image)
+	def get_active_image(cls, pool_parameters):
+		base_image = cls.get_base_image(pool_parameters['ami_id'])
+
+		snapshots = cls.get_snapshots(pool_parameters, base_image)
 		if snapshots:
 			return max(snapshots, key=cls.get_snapshot_version)
 		return base_image
 
 	@classmethod
-	def get_base_image(cls):
+	def get_base_image(cls, base_image_id):
 		raise NotImplementedError()
 
 	@classmethod
@@ -306,7 +306,7 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	@classmethod
-	def get_snapshots(cls, base_image):
+	def get_snapshots(cls, pool_parameters, base_image):
 		raise NotImplementedError()
 
 	@classmethod
@@ -329,8 +329,8 @@ class VirtualMachine(object):
 		return map(cls.serialize_image, images)
 
 	@classmethod
-	def format_snapshot_name(cls, base_image, snapshot_version):
-		return 'koality-snapshot-(%s)-v%s' % (cls.get_image_name(base_image), snapshot_version)
+	def format_snapshot_name(cls, pool_name, base_image, snapshot_version):
+		return 'koality-snapshot-(%s:%s)-v%s' % (pool_name, cls.get_image_name(base_image), snapshot_version)
 
 	@classmethod
 	def get_snapshot_version(cls, image):
