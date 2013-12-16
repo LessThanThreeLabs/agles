@@ -118,9 +118,24 @@ class Ec2Vm(VirtualMachine):
 		self.pool_id = pool_id
 		self.store_vm_info()
 
+	def remove_vm_info(self):
+		try:
+			self._redis_conn.delete(str((self.pool_id, self.vm_id)))
+		except:
+			self.logger.info("Failed to remove vm info from redis for vm %s" % self.vm_id)
+
+	def store_vm_metadata(self, **metadata):
+		self._redis_conn.hmset(str((self.pool_id, self.vm_id)), metadata)
+
+	def get_vm_metadata(self):
+		return self._redis_conn.hgetall(str((self.pool_id, self.vm_id)))
+
+	def remove_vm_metadata(self, *keys):
+		self._redis_conn.hdel(str((self.pool_id, self.vm_id)), *keys)
+
 	@classmethod
 	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None, pool_id=0):
-		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, ami, instance_type, vm_username, pool_id)
+		return cls.from_vm_id(vm_id, pool_id) or cls.construct(vm_id, name, ami, instance_type, vm_username, pool_id)
 
 	@classmethod
 	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None, pool_id=0):
@@ -156,9 +171,7 @@ class Ec2Vm(VirtualMachine):
 		subnet_id = AwsSettings.subnet_id
 		security_group = AwsSettings.security_group
 		security_group_id = cls._validate_security_group(security_group)
-
-		if pool_id is None:
-			root_drive_size = pool_parameters['root_drive_size']
+		root_drive_size = pool_parameters['root_drive_size']
 
 		with cls.CloudClient() as ec2_client:
 			instance = ec2_client.run_instances(ami.id,
@@ -169,7 +182,7 @@ class Ec2Vm(VirtualMachine):
 				subnet_id=subnet_id).instances[0]
 
 		cls._name_instance(instance, name)
-		return Ec2Vm(vm_id, instance, vm_username)
+		return Ec2Vm(vm_id, instance, vm_username, pool_id)
 
 	@classmethod
 	def _block_device_mapping(cls, ami, root_drive_size):
@@ -203,7 +216,7 @@ class Ec2Vm(VirtualMachine):
 				ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
 			),
 			ShellCommand('mkdir /etc/sudoers.d'),
-			ShellRedirect("echo 'Defaults !requiretty\n%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
+			ShellRedirect("echo 'Defaults:%s !requiretty\n%s ALL=(ALL) NOPASSWD: ALL'" % (vm_username, vm_username), '/etc/sudoers.d/koality-%s' % vm_username),
 			ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
 		)
 		if custom_user_data:
@@ -261,19 +274,19 @@ class Ec2Vm(VirtualMachine):
 			return group
 
 	@classmethod
-	def from_vm_id(cls, vm_id):
+	def from_vm_id(cls, vm_id, pool_id=0):
 		try:
-			vm_info = cls.load_vm_info(vm_id)
+			vm_info = cls.load_vm_info(str((pool_id, vm_id)))
 		except:
 			return None
 		else:
-			return cls._from_instance_id(vm_id, vm_info['instance_id'], vm_info['username'])
+			return cls._from_instance_id(vm_id, vm_info['instance_id'], vm_info['username'], pool_id)
 
 	@classmethod
-	def _from_instance_id(cls, vm_id, instance_id, vm_username):
+	def _from_instance_id(cls, vm_id, instance_id, vm_username, pool_id):
 		try:
 			instance = CloudBroker.get_instance_by_id(instance_id)
-			vm = Ec2Vm(vm_id, instance, vm_username)
+			vm = Ec2Vm(vm_id, instance, vm_username, pool_id)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
 				cls.logger.warn("Found VM %s in %s state" % (vm, vm.instance.state))
 				vm.delete()

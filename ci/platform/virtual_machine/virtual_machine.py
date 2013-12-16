@@ -171,16 +171,18 @@ class VirtualMachine(object):
 			return CommandResults(1, failure_message)
 
 	def _get_host_access_check_command(self, repo_url):
-		return ShellAnd(
-			ShellCommand('echo Testing ssh connection to master instance...'),
-			ShellOr(
-				ShellAdvertised('git ls-remote %s refs/heads/master' % repo_url),
-				ShellAnd(
-					ShellCommand('echo -e %s' % pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
-					ShellCommand('false')
-				)
-			),
-		)
+		# return ShellAnd(
+		# 	ShellCommand('echo Testing ssh connection to master instance...'),
+		# 	ShellOr(
+		# 		ShellAdvertised('git ls-remote %s refs/heads/master' % repo_url),
+		# 		ShellAnd(
+		# 			ShellCommand('echo -e %s' % pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
+		# 			ShellCommand('false')
+		# 		)
+		# 	),
+		# )
+		# TODO (bbland): find something more useful for testing access to remote repositories
+		return ShellCommand('true')
 
 	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		def _remote_fetch():
@@ -188,7 +190,7 @@ class VirtualMachine(object):
 				self._get_host_access_check_command(repo_url),
 				ShellOr(
 					ShellSilent(ShellCommand('which git')),
-					ShellSudo(SystemPackageParser().install_packages(['git']))
+					ShellSudo(SystemPackageParser().install_packages(['git-core']))
 				),
 				ShellOr(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),

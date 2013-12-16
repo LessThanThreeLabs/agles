@@ -204,7 +204,7 @@ class Snapshotter(object):
 			else:
 				self.logger.error('Unsupported VM class provided for snapshotter')
 
-		images = self.vm_class.get_snapshots(self.vm_class.get_base_image(pool_parameters['ami_id']))
+		images = self.vm_class.get_snapshots(pool_parameters, self.vm_class.get_base_image(pool_parameters['ami_id']))
 		local_images = sorted(images, key=self.vm_class.get_snapshot_version, reverse=True)
 
 		stale_images = local_images[3:]
