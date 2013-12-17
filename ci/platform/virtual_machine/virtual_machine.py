@@ -263,9 +263,17 @@ class VirtualMachine(object):
 		if repo_type == 'git':
 			host_url = repo_url[:repo_url.find(":")]
 			clone_flags = ''
+			install_vcs_command = ShellOr(
+				ShellSilent(ShellCommand('which git')),
+				ShellSudo(SystemPackageParser().install_packages(['git-core']))
+			)
 		elif repo_type == 'hg':
 			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			clone_flags = '--uncompressed'
+			install_vcs_command = ShellOr(
+				ShellSilent(ShellCommand('which hg')),
+				ShellSudo(SystemPackageParser().install_packages(['mercurial']))
+			)
 
 		command = ShellAnd(
 			ShellOr(
@@ -273,6 +281,7 @@ class VirtualMachine(object):
 				ShellAdvertised('rm -rf %s' % repo_name)
 			),
 			self._get_host_access_check_command(host_url),
+			install_vcs_command,
 			ShellAdvertised('%s clone %s %s %s' % (repo_type, clone_flags, repo_url, repo_name))
 		)
 		results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler=output_handler)
@@ -332,7 +341,7 @@ class VirtualMachine(object):
 
 	@classmethod
 	def format_snapshot_name(cls, pool_name, base_image, snapshot_version):
-		return 'koality-snapshot-(%s:%s)-v%s' % (pool_name, cls.get_image_name(base_image), snapshot_version)
+		return 'koality-snapshot-(%s/%s)-v%s' % (pool_name, cls.get_image_name(base_image), snapshot_version)
 
 	@classmethod
 	def get_snapshot_version(cls, image):

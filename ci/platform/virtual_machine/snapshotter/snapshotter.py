@@ -131,19 +131,22 @@ class Snapshotter(object):
 		self.provision_for_branch(virtual_machine, repository, primary_branch, uri_translator, pool_parameters)
 
 	def provision_for_branch(self, virtual_machine, repository, branch, uri_translator, pool_parameters):
-		self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
 		if virtual_machine.remote_checkout(repository['name'], uri_translator.translate(repository['uri']), repository['type'], branch).returncode != 0:
 			raise Exception('Failed to checkout branch "%s" for repository "%s"' % (branch, repository['name']))
 		config_contents_results = virtual_machine.ssh_call('cd ~/%s && ls -A | grep koality.yml | xargs cat' % repository['name'])
 		if config_contents_results.returncode != 0:
 			raise Exception('Could not find a koality.yml or .koality.yml file for branch "%s" for repository "%s"' % (branch, repository['name']))
 		config_contents = yaml.safe_load(config_contents_results.output)
-		if config_contents.pool_id == pool_parameters['id']:
+		pool_name = config_contents.get('pool', 'default')
+		if pool_name == pool_parameters['name']:
+			self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
 			provision_results = virtual_machine.provision(repository['name'], {}, config_contents.get('languages'), config_contents.get('setup'))
 			if provision_results.returncode != 0:
 				failure_message = 'Provisioning failed with returncode %d' % provision_results.returncode
 				self.logger.error(failure_message + '\nProvision output:\n%s' % provision_results.output)
 				raise Exception(failure_message)
+		else:
+			self.logger.info('Skipping provisioning for repository "%s" because of a pool mismatch (was "%s")' % (repository['name'], pool_name))
 		virtual_machine.cache_repository(repository['name'])
 
 	# TODO (bbland): move this stuff into the vm wrapper implementations
