@@ -23,7 +23,8 @@ def main():
 		help='Clean up old snapshots')
 	parser.add_argument('-p', '--provider',
 		help='Selects the cloud provider. Supported options are "aws", "hpcloud", and "rackspace"')
-	parser.add_argument('pool', default='default', help='Selects the pool by name.')
+	parser.add_argument('pool', nargs='?', default='default',
+		help='Selects the pool by name.')
 	args = parser.parse_args()
 
 	try:

@@ -254,7 +254,10 @@ class SystemSettingsUpdateHandler(ModelServerRpcHandler):
 		update = secondary_pool.update().where(secondary_pool.c.id == pool_id).values(deleted=pool_id)
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
-			sqlconn.execute(update)
+			result = sqlconn.execute(update)
+
+		if result.rowcount == 0:
+			raise Exception("Verifier pool %s not found" % pool_id)
 
 		self.publish_event("system_settings", None, "verifier pool deleted", pool_id=pool_id)
 
