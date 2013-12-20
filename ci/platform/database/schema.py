@@ -152,6 +152,8 @@ github_repo_metadata = Table('github_repo_metadata', metadata,
 	Column('repo_name', String, nullable=False),
 	Column('hook_id', Integer, nullable=True),
 	Column('hook_secret', String, nullable=True),
+	Column('hook_push_enabled', Boolean, nullable=False, default=False),
+	Column('hook_pull_request_enabled', Boolean, nullable=False, default=False),
 	Column('added_by_user_id', Integer, ForeignKey('user.id'), nullable=False)
 )
 
@@ -180,6 +182,22 @@ system_setting = Table('system_setting', metadata,
 	Column('value', String, nullable=False),
 
 	UniqueConstraint('resource', 'key')
+)
+
+secondary_pool = Table('secondary_pool', metadata,
+	Column('id', Integer, primary_key=True),
+	Column('name', String, nullable=False),
+	Column('min_ready', Integer, nullable=False),
+	Column('max_running', Integer, nullable=False),
+	Column('instance_type', String, nullable=False),
+	Column('ami_id', String, nullable=False),
+	Column('vm_username', String, nullable=False),
+	Column('root_drive_size', Integer, nullable=False),
+	Column('user_data', String, nullable=True),
+	Column('deleted', Integer, nullable=False, default=0),
+
+	UniqueConstraint('name', 'deleted'),
+	CheckConstraint('deleted = 0 OR id = deleted')
 )
 
 temp_string = Table('temp_string', metadata,

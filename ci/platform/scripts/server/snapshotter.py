@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import argparse
 import datetime
+import logging
+import model_server
 import sys
 import util.log
 
@@ -21,6 +23,8 @@ def main():
 		help='Clean up old snapshots')
 	parser.add_argument('-p', '--provider',
 		help='Selects the cloud provider. Supported options are "aws", "hpcloud", and "rackspace"')
+	parser.add_argument('pool', nargs='?', default='default',
+		help='Selects the pool by name.')
 	args = parser.parse_args()
 
 	try:
@@ -43,18 +47,39 @@ def main():
 		parser.print_usage()
 		sys.exit(1)
 
+	pool_name = args.pool
+
 	if args.daemon and args.cleanup:
 		raise Exception('Must select only one of (--daemon, --cleanup)')
 	elif args.daemon:
 		run_snapshot_daemon(snapshotter)
 	elif args.cleanup:
-		remove_stale_snapshots(snapshotter)
+		remove_stale_snapshots(snapshotter, pool_name)
 	else:
-		snapshot(snapshotter)
+		simple_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		stream_handler = logging.StreamHandler()
+		stream_handler.setFormatter(simple_formatter)
+		stream_handler.setLevel(logging.INFO)
+
+		root_logger = logging.getLogger()
+		root_logger.addHandler(stream_handler)
+		root_logger.setLevel(logging.INFO)
+		snapshot(snapshotter, pool_name)
 
 
-def snapshot(snapshotter):
-	snapshotter.snapshot()
+def snapshot(snapshotter, pool_name):
+	with model_server.rpc_connect('system_settings', 'read') as model_rpc:
+		pools = model_rpc.get_verifier_pool_parameters(1)
+	pool_parameters = None
+	for pool in pools:
+		if pool['name'] == pool_name:
+			pool_parameters = pool
+			break
+
+	if pool_parameters is None:
+		raise Exception("Could not find pool with name %s" % pool_name)
+
+	snapshotter.snapshot(pool_parameters)
 
 
 def run_snapshot_daemon(snapshotter):
@@ -64,7 +89,15 @@ def run_snapshot_daemon(snapshotter):
 	snapshot_daemon.run()
 
 
-def remove_stale_snapshots(snapshotter):
+def remove_stale_snapshots(snapshotter, pool_name):
+	with model_server.rpc_connect('system_settings', 'read') as model_rpc:
+		pools = model_rpc.get_verifier_pool_parameters(1)
+	pool_parameters = None
+	for pool in pools:
+		if pool['name'] == pool_name:
+			pool_parameters = pool
+			break
+
 	snapshotter.remove_stale_snapshots()
 
 

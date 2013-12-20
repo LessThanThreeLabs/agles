@@ -12,7 +12,7 @@ from util.log import Logged
 from virtual_machine import ec2
 
 
-LICENSE_VERIFICATION_URL = 'https://license.koalitycode.com:9001/license/check'
+LICENSE_VERIFICATION_URL = 'https://license.koalitycode.com/license/check'
 MAX_FAILURES = 12
 
 

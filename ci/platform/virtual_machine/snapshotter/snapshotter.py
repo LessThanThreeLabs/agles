@@ -11,7 +11,6 @@ from shared.constants import BuildStatus, VerificationUser
 from util.log import Logged
 from util.uri_translator import RepositoryUriTranslator
 from virtual_machine.ec2 import Ec2Vm
-from virtual_machine.docker import DockerVm
 from virtual_machine.openstack import OpenstackVm
 
 
@@ -29,15 +28,20 @@ class SnapshotDaemon(object):
 			self.logger.info('Taking next scheduled snapshot at %s' % next_snapshot_time)
 			self.sleep_until(next_snapshot_time)
 			self.last_snapshot_time = next_snapshot_time
-			try:
-				self.logger.info('Taking scheduled snapshot')
-				self.snapshotter.snapshot()
-			except:
-				self.logger.error('Failed to take scheduled snapshot', exc_info=True)
-			try:
-				self.snapshotter.remove_stale_snapshots()
-			except:
-				self.logger.error('Failed to remove stale snapshots', exc_info=True)
+
+			with model_server.rpc_connect('system_settings', 'read') as model_rpc:
+				pools = model_rpc.get_verifier_pool_parameters(VerificationUser.id)
+
+			for pool in pools:
+				try:
+					self.logger.info('Taking scheduled snapshot for pool: %s' % pool['name'])
+					self.snapshotter.snapshot(pool)
+				except:
+					self.logger.error('Failed to take scheduled snapshot', exc_info=True)
+				try:
+					self.snapshotter.remove_stale_snapshots(pool)
+				except:
+					self.logger.error('Failed to remove stale snapshots', exc_info=True)
 
 	def sleep_until(self, wake_time):
 		sleep_time = (wake_time - datetime.datetime.now()).total_seconds()
@@ -57,11 +61,11 @@ class Snapshotter(object):
 		assert issubclass(vm_class, (Ec2Vm, OpenstackVm))
 		self.vm_class = vm_class
 
-	def snapshot(self):
-		base_image = self.vm_class.get_base_image()
-		current_snapshot_version = self.vm_class.get_snapshot_version(self.vm_class.get_active_image())
+	def snapshot(self, pool_parameters):
+		base_image = self.vm_class.get_base_image(pool_parameters['ami_id'])
+		current_snapshot_version = self.vm_class.get_snapshot_version(self.vm_class.get_active_image(pool_parameters))
 		new_snapshot_version = current_snapshot_version + 1 if current_snapshot_version is not None else 0
-		instance_name = self.vm_class.format_snapshot_name(base_image, new_snapshot_version)
+		instance_name = self.vm_class.format_snapshot_name(pool_parameters['name'], base_image, new_snapshot_version)
 
 		with model_server.rpc_connect('repos', 'read') as model_rpc:
 			repositories = model_rpc.get_repositories(VerificationUser.id)
@@ -93,7 +97,7 @@ class Snapshotter(object):
 			# Provision in order of increasing repository push frequency
 			for repository_id in map(lambda count: count[0], reversed(repo_change_counter.most_common())):
 				repository = filter(lambda repo: repo['id'] == repository_id, repositories)[0]
-				self.provision_for_repository(virtual_machine, repository, changes, uri_translator)
+				self.provision_for_repository(virtual_machine, repository, changes, uri_translator, pool_parameters)
 
 			new_image_name = instance_name
 
@@ -116,7 +120,7 @@ class Snapshotter(object):
 				raise Exception('Failed to clone repository "%s"' % repository['name'])
 			virtual_machine.ssh_call('rm -rf /repositories/cached/%s; mv %s /repositories/cached/%s' % (repository['name'], repository['name'], repository['name']))
 
-	def provision_for_repository(self, virtual_machine, repository, changes, uri_translator):
+	def provision_for_repository(self, virtual_machine, repository, changes, uri_translator, pool_parameters):
 		repo_changes = filter(lambda change: change['repo_id'] == repository['id'], changes)
 		valid_changes = filter(lambda change: ' ' not in change['merge_target'], repo_changes)
 		passed_changes = filter(lambda change: change['verification_status'] == BuildStatus.PASSED, valid_changes)
@@ -124,21 +128,25 @@ class Snapshotter(object):
 		if not branch_counter.most_common():
 			return
 		primary_branch = branch_counter.most_common(1)[0][0]
-		self.provision_for_branch(virtual_machine, repository, primary_branch, uri_translator)
+		self.provision_for_branch(virtual_machine, repository, primary_branch, uri_translator, pool_parameters)
 
-	def provision_for_branch(self, virtual_machine, repository, branch, uri_translator):
-		self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
+	def provision_for_branch(self, virtual_machine, repository, branch, uri_translator, pool_parameters):
 		if virtual_machine.remote_checkout(repository['name'], uri_translator.translate(repository['uri']), repository['type'], branch).returncode != 0:
 			raise Exception('Failed to checkout branch "%s" for repository "%s"' % (branch, repository['name']))
 		config_contents_results = virtual_machine.ssh_call('cd ~/%s && ls -A | grep koality.yml | xargs cat' % repository['name'])
 		if config_contents_results.returncode != 0:
 			raise Exception('Could not find a koality.yml or .koality.yml file for branch "%s" for repository "%s"' % (branch, repository['name']))
 		config_contents = yaml.safe_load(config_contents_results.output)
-		provision_results = virtual_machine.provision(repository['name'], {}, config_contents.get('languages'), config_contents.get('setup'))
-		if provision_results.returncode != 0:
-			failure_message = 'Provisioning failed with returncode %d' % provision_results.returncode
-			self.logger.error(failure_message + '\nProvision output:\n%s' % provision_results.output)
-			raise Exception(failure_message)
+		pool_name = config_contents.get('pool', 'default')
+		if pool_name == pool_parameters['name']:
+			self.logger.info('Provisioning for repository "%s" on branch "%s"' % (repository['name'], branch))
+			provision_results = virtual_machine.provision(repository['name'], {}, config_contents.get('languages'), config_contents.get('setup'))
+			if provision_results.returncode != 0:
+				failure_message = 'Provisioning failed with returncode %d' % provision_results.returncode
+				self.logger.error(failure_message + '\nProvision output:\n%s' % provision_results.output)
+				raise Exception(failure_message)
+		else:
+			self.logger.info('Skipping provisioning for repository "%s" because of a pool mismatch (was "%s")' % (repository['name'], pool_name))
 		virtual_machine.cache_repository(repository['name'])
 
 	# TODO (bbland): move this stuff into the vm wrapper implementations
@@ -184,7 +192,7 @@ class Snapshotter(object):
 		else:
 			self.logger.error('Unsupported VM class provided for snapshotter')
 
-	def remove_stale_snapshots(self):
+	def remove_stale_snapshots(self, pool_parameters):
 		def delete_image(image):
 			def delete_ec2_image():
 				image.deregister(delete_snapshot=True)
@@ -199,7 +207,7 @@ class Snapshotter(object):
 			else:
 				self.logger.error('Unsupported VM class provided for snapshotter')
 
-		images = self.vm_class.get_snapshots(self.vm_class.get_base_image())
+		images = self.vm_class.get_snapshots(pool_parameters, self.vm_class.get_base_image(pool_parameters['ami_id']))
 		local_images = sorted(images, key=self.vm_class.get_snapshot_version, reverse=True)
 
 		stale_images = local_images[3:]
@@ -211,8 +219,8 @@ class Snapshotter(object):
 		return int(time.time()) - 60 * 60 * 24 * 30
 
 
-@Logged()
-class DockerSnapshotter(Snapshotter):
-	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
-		virtual_machine = super(DockerSnapshotter, self).spawn_virtual_machine(snapshot_version, instance_name, image)
-		return DockerVm(virtual_machine)
+# @Logged()
+# class DockerSnapshotter(Snapshotter):
+# 	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
+# 		virtual_machine = super(DockerSnapshotter, self).spawn_virtual_machine(snapshot_version, instance_name, image)
+# 		return DockerVm(virtual_machine)

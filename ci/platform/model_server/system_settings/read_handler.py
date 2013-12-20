@@ -12,6 +12,7 @@ from model_server.rpc_handler import ModelServerRpcHandler
 from settings.authentication import AuthenticationSettings
 from settings.aws import AwsSettings
 from settings.github_enterprise import GithubEnterpriseSettings
+from settings.hipchat import HipchatSettings
 from settings.libcloud import LibCloudSettings
 from settings.verification_server import VerificationServerSettings
 from settings.web_server import WebServerSettings
@@ -21,6 +22,7 @@ from model_server.system_settings import system_settings_cipher
 from util.crypto_yaml import CryptoYaml
 from util.permissions import AdminApi, is_admin
 from upgrade import upgrade_check_url
+from util.sql import to_dict
 from virtual_machine import ec2, hpcloud
 
 
@@ -85,12 +87,8 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 	def get_aws_instance_settings(self, user_id):
 		assert VerificationServerSettings.cloud_provider == 'aws'
 		return {
-			'instance_size': AwsSettings.instance_type,
-			'ami_id': AwsSettings.vm_image_id,
-			'vm_username': AwsSettings.vm_username,
-			'root_drive_size': AwsSettings.root_drive_size,
-			'security_group_name': AwsSettings.security_group,
-			'user_data': AwsSettings.user_data
+			'security_group_id': AwsSettings.security_group,
+			'subnet_id': AwsSettings.subnet_id,
 		}
 
 	@AdminApi
@@ -104,9 +102,9 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 		return ec2.InstanceTypes.get_allowed_instance_types()
 
 	@AdminApi
-	def get_aws_security_group_names(self, user_id):
+	def get_aws_security_groups(self, user_id):
 		assert VerificationServerSettings.cloud_provider == 'aws'
-		return ec2.SecurityGroups.get_security_group_names()
+		return ec2.SecurityGroups.get_security_groups()
 
 	@AdminApi
 	def get_aws_base_images(self, user_id):
@@ -161,10 +159,29 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 
 	@AdminApi
 	def get_verifier_pool_parameters(self, user_id):
-		return {
+		primary_pool_parameters = {
+			'id': 0,
+			'name': 'default',
 			'min_ready': VerificationServerSettings.static_pool_size,
-			'max_running': VerificationServerSettings.max_virtual_machine_count
+			'max_running': VerificationServerSettings.max_virtual_machine_count,
+			'instance_type': AwsSettings.instance_type,
+			'ami_id': AwsSettings.vm_image_id,
+			'vm_username': AwsSettings.vm_username,
+			'root_drive_size': AwsSettings.root_drive_size,
+			'user_data': AwsSettings.user_data
 		}
+
+		secondary_pool = database.schema.secondary_pool
+		query = secondary_pool.select().where(secondary_pool.c.deleted == 0)
+
+		with ConnectionFactory.get_sql_connection() as sqlconn:
+			rows = sqlconn.execute(query)
+			pools = [primary_pool_parameters]
+
+			pool_columns = [column for column in secondary_pool.columns if column != secondary_pool.c.deleted]
+
+			pools += [to_dict(row, pool_columns) for row in rows]
+		return pools
 
 	@AdminApi
 	def get_ssh_public_key(self, user_id):
@@ -192,6 +209,16 @@ class SystemSettingsReadHandler(ModelServerRpcHandler):
 			'url': GithubEnterpriseSettings.github_url,
 			'client_id': GithubEnterpriseSettings.client_id,
 			'client_secret': GithubEnterpriseSettings.client_secret
+		}
+
+	@AdminApi
+	def get_notification_config(self, user_id):
+		return {
+			'hipchat': {
+				'token': HipchatSettings.token,
+				'rooms': HipchatSettings.rooms,
+				'type': HipchatSettings.type
+			}
 		}
 
 	@AdminApi

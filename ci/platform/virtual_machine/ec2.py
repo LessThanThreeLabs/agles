@@ -1,8 +1,10 @@
 import imp
 import logging
+import os
 import pipes
 import re
 import socket
+import subprocess
 import sys
 import time
 
@@ -112,47 +114,79 @@ class Ec2Vm(VirtualMachine):
 	CloudClient = CloudBroker.connection
 	Settings = AwsSettings
 
-	def __init__(self, vm_id, instance, vm_username):
+	def __init__(self, vm_id, instance, vm_username, pool_id=0):
 		super(Ec2Vm, self).__init__(vm_id, instance, vm_username)
+		self.pool_id = pool_id
 		self.store_vm_info()
 
-	@classmethod
-	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None):
-		return cls.from_vm_id(vm_id) or cls.construct(vm_id, name, ami, instance_type, vm_username)
+	def remove_vm_info(self):
+		try:
+			self._redis_conn.delete(str((self.pool_id, self.vm_id)))
+		except:
+			self.logger.info("Failed to remove vm info from redis for vm %s" % self.vm_id)
+
+	def store_vm_metadata(self, **metadata):
+		self._redis_conn.hmset(str((self.pool_id, self.vm_id)), metadata)
+
+	def get_vm_metadata(self):
+		return self._redis_conn.hgetall(str((self.pool_id, self.vm_id)))
+
+	def remove_vm_metadata(self, *keys):
+		self._redis_conn.hdel(str((self.pool_id, self.vm_id)), *keys)
 
 	@classmethod
-	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None):
+	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None, pool_id=0):
+		return cls.from_vm_id(vm_id, pool_id) or cls.construct(vm_id, name, ami, instance_type, vm_username, pool_id)
+
+	@classmethod
+	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None, pool_id=0):
+		with model_server.rpc_connect('system_settings', 'read') as rpc_client:
+			pools_parameters = rpc_client.get_verifier_pool_parameters(1)
+			pool_parameters = None
+			for pool in pools_parameters:
+				if pool['id'] == pool_id:
+					pool_parameters = pool
+					break
+		if pool_parameters is None:
+			raise Exception('Unexpected pool id: %s' % pool_id)
+
 		if not name:
 			master_name = None
 			if ec2metadata:
 				try:
-					master_name = CloudBroker.get_instance_by_id(ec2metadata.get('instance-id')).tags['Name']
+					instance_info = CloudBroker.get_instance_by_id(ec2metadata.get('instance-id'))
+					master_name = instance_info.tags['Name']
 				except:
 					pass
 			if not master_name:
 				master_name = socket.gethostname()
-			name = "koality-worker:%s (%s)" % (vm_id, master_name)
+			name = "koality-worker:%s:%s (%s)" % (pool_parameters['name'], vm_id, master_name)
 		if not ami:
-			ami = cls.get_active_image()
+			ami = cls.get_active_image(pool_parameters)
 		if not instance_type:
-			instance_type = AwsSettings.instance_type
+			instance_type = pool_parameters['instance_type']
 
-		vm_username = vm_username or AwsSettings.vm_username
+		if not vm_username:
+			vm_username = pool_parameters['vm_username']
 
+		subnet_id = AwsSettings.subnet_id
 		security_group = AwsSettings.security_group
-		cls._validate_security_group(security_group)
+		security_group_id = cls._validate_security_group(security_group)
+		root_drive_size = pool_parameters['root_drive_size']
 
 		with cls.CloudClient() as ec2_client:
-			instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
-				security_groups=[security_group],
-				user_data=cls._default_user_data(vm_username),
-				block_device_map=cls._block_device_mapping(ami)).instances[0]
+			instance = ec2_client.run_instances(ami.id,
+				instance_type=instance_type,
+				security_group_ids=[security_group_id],
+				user_data=cls._user_data(vm_username, pool_parameters['user_data']),
+				block_device_map=cls._block_device_mapping(ami, root_drive_size),
+				subnet_id=subnet_id).instances[0]
 
 		cls._name_instance(instance, name)
-		return Ec2Vm(vm_id, instance, vm_username)
+		return Ec2Vm(vm_id, instance, vm_username, pool_id)
 
 	@classmethod
-	def _block_device_mapping(cls, ami):
+	def _block_device_mapping(cls, ami, root_drive_size):
 		bdm_dict = ami.block_device_mapping.copy()
 		if '/dev/sda1' in bdm_dict.keys():
 			root_drive_name = '/dev/sda1'
@@ -161,14 +195,14 @@ class Ec2Vm(VirtualMachine):
 		else:
 			root_drive_name = sorted(bdm_dict.keys())[0]  # this is just a wild guess, as ami.root_device_name is wrong
 
-		bdm_dict[root_drive_name].size = max(bdm_dict[root_drive_name].size, AwsSettings.root_drive_size)
+		bdm_dict[root_drive_name].size = max(bdm_dict[root_drive_name].size, root_drive_size)
 		bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping()
 		for key, value in bdm_dict.iteritems():
 			bdm[key] = value
 		return bdm
 
 	@classmethod
-	def _default_user_data(cls, vm_username):
+	def _user_data(cls, vm_username, custom_user_data):
 		'''This utilizes Ubuntu cloud-init, which runs this script at "rc.local-like" time
 		when it finishes first boot.
 		This will fail if we use an image which doesn't utilitize EC2 user_data
@@ -183,18 +217,17 @@ class Ec2Vm(VirtualMachine):
 				ShellAppend('echo #includedir /etc/sudoers.d', '/etc/sudoers')
 			),
 			ShellCommand('mkdir /etc/sudoers.d'),
-			ShellRedirect("echo 'Defaults !requiretty\n%s ALL=(ALL) NOPASSWD: ALL'" % vm_username, '/etc/sudoers.d/koality-%s' % vm_username),
+			ShellRedirect("echo 'Defaults:%s !requiretty\n%s ALL=(ALL) NOPASSWD: ALL'" % (vm_username, vm_username), '/etc/sudoers.d/koality-%s' % vm_username),
 			ShellCommand('chmod 0440 /etc/sudoers.d/koality-%s' % vm_username)
 		)
-		given_user_data = AwsSettings.user_data
-		if given_user_data:
+		if custom_user_data:
 			generate_user_data = ShellAnd(
 				ShellSilent(
 					ShellAnd(
 						ShellCommand('koalitydata=%s' % ShellCapture('mktemp')),
 						ShellRedirect('echo %s' % pipes.quote(koality_config), '$koalitydata'),
 						ShellCommand('userdata=%s' % ShellCapture('mktemp')),
-						ShellRedirect('echo %s' % pipes.quote(given_user_data), '$userdata')
+						ShellRedirect('echo %s' % pipes.quote(custom_user_data), '$userdata')
 					)
 				),
 				ShellCommand('write-mime-multipart "$koalitydata" "$userdata"'),
@@ -208,9 +241,9 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def _validate_security_group(cls, security_group):
-		cidr_ip = '%s/32' % socket.gethostbyname(socket.gethostname())
+		cidr_ip = '%s/32' % (subprocess.check_output(['ifconfig', 'eth0'], env={'PATH': os.pathsep.join([os.environ['PATH'], '/sbin'])}).split('\n')[1].split()[1][5:] or socket.gethostbyname(socket.gethostname()))
 		if ec2metadata:
-			own_security_groups = ec2metadata.get('security-groups').split('\n')
+			own_security_groups = map(lambda group: group.id, CloudBroker.get_instance_by_id(ec2metadata.get('instance-id')).groups)
 		else:
 			own_security_groups = []
 		group = cls._get_or_create_security_group(security_group)
@@ -221,10 +254,10 @@ class Ec2Vm(VirtualMachine):
 				for grant in rule.grants:
 					if grant.cidr_ip == cidr_ip:
 						cls.logger.debug('Found ssh authorization rule on security group "%s" for ip "%s"' % (security_group, cidr_ip))
-						return
-					elif grant.name in own_security_groups:
+						return group
+					elif grant.group_id in own_security_groups:
 						cls.logger.debug('Found ssh authorization rule on security group "%s" for security group "%s"' % (security_group, grant.name))
-						return
+						return group
 		cls.logger.info('Adding ssh authorization rule to security group "%s" for ip "%s"' % (security_group, cidr_ip))
 		group.authorize('tcp', '22', '22', cidr_ip, None)
 		return group
@@ -232,7 +265,7 @@ class Ec2Vm(VirtualMachine):
 	@classmethod
 	def _get_or_create_security_group(cls, security_group):
 		with cls.CloudClient() as ec2_client:
-			groups = filter(lambda group: group.name == security_group, ec2_client.get_all_security_groups())
+			groups = filter(lambda group: group.name == security_group or group.id == security_group, ec2_client.get_all_security_groups())
 			if groups:
 				cls.logger.debug('Found existing security group "%s"' % security_group)
 				group = groups[0]
@@ -242,19 +275,19 @@ class Ec2Vm(VirtualMachine):
 			return group
 
 	@classmethod
-	def from_vm_id(cls, vm_id):
+	def from_vm_id(cls, vm_id, pool_id=0):
 		try:
-			vm_info = cls.load_vm_info(vm_id)
+			vm_info = cls.load_vm_info(str((pool_id, vm_id)))
 		except:
 			return None
 		else:
-			return cls._from_instance_id(vm_id, vm_info['instance_id'], vm_info['username'])
+			return cls._from_instance_id(vm_id, vm_info['instance_id'], vm_info['username'], pool_id)
 
 	@classmethod
-	def _from_instance_id(cls, vm_id, instance_id, vm_username):
+	def _from_instance_id(cls, vm_id, instance_id, vm_username, pool_id):
 		try:
 			instance = CloudBroker.get_instance_by_id(instance_id)
-			vm = Ec2Vm(vm_id, instance, vm_username)
+			vm = Ec2Vm(vm_id, instance, vm_username, pool_id)
 			if vm.instance.state == 'stopping' or vm.instance.state == 'stopped':
 				cls.logger.warn("Found VM %s in %s state" % (vm, vm.instance.state))
 				vm.delete()
@@ -300,7 +333,7 @@ class Ec2Vm(VirtualMachine):
 				self.instance = CloudBroker.get_instance_by_id(self.instance.id)
 				if self.instance.state in ['stopped', 'terminated']:
 					handle_error()
-			for remaining_attempts in reversed(range(40)):
+			for remaining_attempts in reversed(range(100)):
 				if remaining_attempts <= 2:
 					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
 				if self.ssh_call("true", timeout=10).returncode == 0:
@@ -342,12 +375,11 @@ class Ec2Vm(VirtualMachine):
 				})[0]
 
 	@classmethod
-	def get_base_image(cls):
-		image_id = AwsSettings.vm_image_id
-		if image_id and image_id != 'default':
+	def get_base_image(cls, base_image_id):
+		if base_image_id and base_image_id != 'default':
 			try:
 				with cls.CloudClient() as ec2_client:
-					return ec2_client.get_image(image_id)
+					return ec2_client.get_image(base_image_id)
 			except:
 				cls.logger.exception('Invalid image id specified, using default instead')
 		return cls._get_default_base_image()
@@ -360,10 +392,10 @@ class Ec2Vm(VirtualMachine):
 		return [cls._get_default_base_image()] + sorted(own_base_images, key=lambda image: image.name)
 
 	@classmethod
-	def get_snapshots(cls, base_image):
+	def get_snapshots(cls, pool_parameters, base_image):
 		with cls.CloudClient() as ec2_client:
 			return ec2_client.get_all_images(filters={
-					'name': cls.format_snapshot_name(base_image, '*'),
+					'name': cls.format_snapshot_name(pool_parameters['name'], base_image, '*'),
 					'state': 'available'
 				})
 
@@ -380,19 +412,31 @@ class Ec2Vm(VirtualMachine):
 			return ec2_client.create_image(self.instance.id, name, description)
 
 	def rebuild(self):
-		ami = self.get_active_image()
+		with model_server.rpc_connect('system_settings', 'read') as rpc_client:
+			pools_parameters = rpc_client.get_verifier_pool_parameters(1)
+			pool_parameters = None
+			for pool in pools_parameters:
+				if pool['id'] == self.pool_id:
+					pool_parameters = pool
+					break
+		if pool_parameters is None:
+			raise Exception('Unexpected pool id: %s' % pool_id)
+
+		ami = self.get_active_image(pool_parameters)
 		instance_type = self.instance.instance_type
 		self.delete()
 		instance_name = self.instance.tags.get('Name', '')
 
+		subnet_id = AwsSettings.subnet_id
 		security_group = AwsSettings.security_group
-		self._validate_security_group(security_group)
+		security_group_id = self._validate_security_group(security_group)
 
 		with self.CloudClient() as ec2_client:
 			self.instance = ec2_client.run_instances(ami.id, instance_type=instance_type,
-				security_groups=[security_group],
-				user_data=self._default_user_data(self.vm_username),
-				block_device_map=self._block_device_mapping(ami)).instances[0]
+				security_group_ids=[security_group_id],
+				user_data=self._user_data(self.vm_username, pool_parameters['user_data']),
+				block_device_map=self._block_device_mapping(ami, pool_parameters['root_drive_size']),
+				subnet_id=subnet_id).instances[0]
 
 		self._name_instance(self.instance, instance_name)
 
@@ -418,19 +462,41 @@ class Ec2Vm(VirtualMachine):
 
 class SecurityGroups(object):
 	@classmethod
-	def get_security_group_names(cls):
+	def _transform_group(cls, group):
+		return {
+			'name': group.name,
+			'id': group.id
+		}
+
+	@classmethod
+	def get_security_groups(cls):
 		try:
 			with CloudBroker.connection() as ec2_client:
-				existing_groups = map(lambda group: group.name, ec2_client.get_all_security_groups())
+				existing_groups = map(cls._transform_group, ec2_client.get_all_security_groups())
 		except:
 			existing_groups = []
-		existing_groups_plus_selected = list(set(existing_groups).union([str(AwsSettings.security_group), str(AwsSettings._default_security_group)]))
-		return sorted(existing_groups_plus_selected)
+		default_group_name = str(AwsSettings._default_security_group)
+
+		has_default_group = False
+		for group in existing_groups:
+			if group['name'] == default_group_name:
+				has_default_group = True
+
+		if not has_default_group:
+			default_group = {'name': default_group_name, 'id': default_group_name}
+			existing_groups = {group['id']: group for group in (existing_groups + [default_group])}.values()
+
+		return sorted(existing_groups, key=lambda group: group['name'])
 
 
 class InstanceTypes(object):
-	ordered_types = ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge',
-			'm3.xlarge', 'm3.2xlarge', 'c1.medium', 'c1.xlarge', 'hi1.4xlarge', 'hs1.8xlarge']
+	ordered_types = ['m1.small', 'm1.medium', 'm1.large', 'm1.xlarge',
+			'm3.xlarge', 'm3.2xlarge',
+			'c1.medium', 'c1.xlarge',
+			'c3.large', 'c3.xlarge', 'c3.2xlarge', 'c3.4xlarge',
+			'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge', 'cr1.8xlarge',
+			'g2.2xlarge', 'cg1.4xlarge',
+			'hi1.4xlarge', 'hs1.8xlarge']
 
 	@classmethod
 	def set_largest_instance_type(cls, largest_instance_type):

@@ -301,6 +301,7 @@ class RemoteExportCommand(RemoteCommand):
 				import hashlib
 				import hmac
 				import json
+				import mimetypes
 				import os
 				import re
 				import time
@@ -312,8 +313,8 @@ class RemoteExportCommand(RemoteCommand):
 						self.aws_access_key_id = str(aws_access_key_id)
 						self.aws_secret_access_key = str(aws_secret_access_key)
 
-					def _sign_request(self, path, timestamp):
-						sign_headers = 'PUT\\n\\n\\n\\nx-amz-acl:public-read\\nx-amz-date:%%s\\n%%s' %% (timestamp, path)
+					def _sign_request(self, path, timestamp, content_type):
+						sign_headers = 'PUT\\n\\n%%s\\n\\nx-amz-acl:public-read\\nx-amz-date:%%s\\n%%s' %% (content_type, timestamp, path)
 						return base64.encodestring(
 							hmac.new(
 								self.aws_secret_access_key,
@@ -324,11 +325,14 @@ class RemoteExportCommand(RemoteCommand):
 
 					def upload(self, bucket, export_path, file_path):
 						timestamp = time.strftime('%%a, %%d %%b %%Y %%H:%%M:%%S %%Z')
-						signature = self._sign_request('/' + bucket + '/' + export_path, timestamp)
+						content_type, encoding = mimetypes.guess_type(file_path, strict=False)
+						content_type = content_type or ''
+
+						signature = self._sign_request('/' + bucket + '/' + export_path, timestamp, content_type)
 
 						headers = {
 							'Authorization': 'AWS %%s:%%s' %% (self.aws_access_key_id, signature),
-							'Content-Type': '',
+							'Content-Type': content_type,
 							'x-amz-date': timestamp,
 							'x-amz-acl': 'public-read'
 						}
@@ -336,7 +340,9 @@ class RemoteExportCommand(RemoteCommand):
 						export_url = self.get_url(bucket, export_path)
 
 						with open(file_path) as f:
-							request = urllib2.Request(export_url, f.read(), headers=headers)
+							contents = f.read()
+
+						request = urllib2.Request(export_url.encode('ascii'), contents, headers=headers)
 						request.get_method = lambda: 'PUT'
 						response = urllib2.urlopen(request)
 

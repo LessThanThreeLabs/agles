@@ -147,7 +147,7 @@ class RestrictedGitShell(RestrictedShell):
 
 	def _up_pullthrough_args(self, private_key, forward_url, user_id):
 		uri, path = forward_url.split(':')
-		command_parts = ["git-upload-pack", path]
+		command_parts = ["git-upload-pack", "'%s'" % path]
 		full_command = ' '.join(command_parts)
 		private_key_file = os.path.join('/tmp', hashlib.sha1(private_key).hexdigest())
 		with open(private_key_file, 'w') as key_file:

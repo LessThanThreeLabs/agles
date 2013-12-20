@@ -170,26 +170,27 @@ class VirtualMachine(object):
 				output_handler.append({1: failure_message})
 			return CommandResults(1, failure_message)
 
-	def _get_host_access_check_command(self, host_url):
-		return ShellAnd(
-			ShellCommand('echo Testing ssh connection to master instance...'),
-			ShellOr(
-				ShellAdvertised('ssh %s true' % host_url),
-				ShellAnd(
-					ShellCommand('echo -e %s' % pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
-					ShellCommand('false')
-				)
-			),
-		)
+	def _get_host_access_check_command(self, repo_url):
+		# return ShellAnd(
+		# 	ShellCommand('echo Testing ssh connection to master instance...'),
+		# 	ShellOr(
+		# 		ShellAdvertised('git ls-remote %s refs/heads/master' % repo_url),
+		# 		ShellAnd(
+		# 			ShellCommand('echo -e %s' % pipes.quote('\\x1b[33;1mFailed to access the master instance. Please check to make sure your security groups are configured correctly.\\x1b[0m')),
+		# 			ShellCommand('false')
+		# 		)
+		# 	),
+		# )
+		# TODO (bbland): find something more useful for testing access to remote repositories
+		return ShellCommand('true')
 
 	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		def _remote_fetch():
-			host_url = repo_url[:repo_url.find(":")]
 			command = ShellAnd(
-				self._get_host_access_check_command(host_url),
+				self._get_host_access_check_command(repo_url),
 				ShellOr(
 					ShellSilent(ShellCommand('which git')),
-					ShellSudo(SystemPackageParser().install_packages(['git']))
+					ShellSudo(SystemPackageParser().install_packages(['git-core']))
 				),
 				ShellOr(
 					ShellSilent('mv /repositories/cached/%s %s' % (repo_name, repo_name)),
@@ -262,9 +263,17 @@ class VirtualMachine(object):
 		if repo_type == 'git':
 			host_url = repo_url[:repo_url.find(":")]
 			clone_flags = ''
+			install_vcs_command = ShellOr(
+				ShellSilent(ShellCommand('which git')),
+				ShellSudo(SystemPackageParser().install_packages(['git-core']))
+			)
 		elif repo_type == 'hg':
 			host_url, _, repo_uri = repo_url.split('://')[1].partition('/')
 			clone_flags = '--uncompressed'
+			install_vcs_command = ShellOr(
+				ShellSilent(ShellCommand('which hg')),
+				ShellSudo(SystemPackageParser().install_packages(['mercurial']))
+			)
 
 		command = ShellAnd(
 			ShellOr(
@@ -272,6 +281,7 @@ class VirtualMachine(object):
 				ShellAdvertised('rm -rf %s' % repo_name)
 			),
 			self._get_host_access_check_command(host_url),
+			install_vcs_command,
 			ShellAdvertised('%s clone %s %s %s' % (repo_type, clone_flags, repo_url, repo_name))
 		)
 		results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler=output_handler)
@@ -290,15 +300,16 @@ class VirtualMachine(object):
 		return self.ssh_call(command, output_handler)
 
 	@classmethod
-	def get_active_image(cls):
-		base_image = cls.get_base_image()
-		snapshots = cls.get_snapshots(base_image)
+	def get_active_image(cls, pool_parameters):
+		base_image = cls.get_base_image(pool_parameters['ami_id'])
+
+		snapshots = cls.get_snapshots(pool_parameters, base_image)
 		if snapshots:
 			return max(snapshots, key=cls.get_snapshot_version)
 		return base_image
 
 	@classmethod
-	def get_base_image(cls):
+	def get_base_image(cls, base_image_id):
 		raise NotImplementedError()
 
 	@classmethod
@@ -306,7 +317,7 @@ class VirtualMachine(object):
 		raise NotImplementedError()
 
 	@classmethod
-	def get_snapshots(cls, base_image):
+	def get_snapshots(cls, pool_parameters, base_image):
 		raise NotImplementedError()
 
 	@classmethod
@@ -329,8 +340,8 @@ class VirtualMachine(object):
 		return map(cls.serialize_image, images)
 
 	@classmethod
-	def format_snapshot_name(cls, base_image, snapshot_version):
-		return 'koality-snapshot-(%s)-v%s' % (cls.get_image_name(base_image), snapshot_version)
+	def format_snapshot_name(cls, pool_name, base_image, snapshot_version):
+		return 'koality-snapshot-(%s/%s)-v%s' % (pool_name, cls.get_image_name(base_image), snapshot_version)
 
 	@classmethod
 	def get_snapshot_version(cls, image):

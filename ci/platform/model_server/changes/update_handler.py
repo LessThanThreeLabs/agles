@@ -11,7 +11,7 @@ from util.sql import to_dict
 
 FAILMAIL_TEMPLATE = """%s %s,
 
-There was an issue with the change you submitted so it was not merged.
+There was an issue with your change (%s).
 Please fix the change and resubmit it.
 
 Details for your change are available here: %s
@@ -55,6 +55,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 		repository_id = row[change.c.repo_id]
 		change_number = row[change.c.number]
+		target = row[change.c.merge_target]
 
 		user = to_dict(row, user.columns, tablename=user.name)
 		commit = to_dict(row, commit.columns, tablename=commit.name)
@@ -62,7 +63,7 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		if "merge_status" in kwargs:
 			self.publish_event("changes", change_id, "merge completed", merge_status=kwargs["merge_status"])
 		self.publish_event("repos", repository_id, event_name, change_id=change_id, verification_status=verification_status,
-			change_number=change_number, user=user, commit=commit, **kwargs)
+			change_number=change_number, user=user, commit=commit, merge_target=target, **kwargs)
 
 	def _notify_failure(self, change_id):
 		change = schema.change
@@ -74,8 +75,8 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 			row = sqlconn.execute(query).first()
 
 		email = row[change.c.email_to]
-		if not email:
-			email = row[user.c.email] if user.c.id <= MAX_SPECIAL_USER_ID else row[commit.c.committer_email]
+		if email is None:
+			email = row[user.c.email] if user.c.id > MAX_SPECIAL_USER_ID else row[commit.c.committer_email]
 
 		first_name = row[user.c.first_name]
 		last_name = row[user.c.last_name]
@@ -86,6 +87,6 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		change_link = "https://%s/repository/%d?change=%d" % (WebServerSettings.domain_name, repo_id, change_id)
 
 		subject = "There was an issue with your change (%s)" % sha
-		text = FAILMAIL_TEMPLATE % (first_name, last_name, change_link, target, message)
+		text = FAILMAIL_TEMPLATE % (first_name, last_name, sha, change_link, target, message)
 
 		return sendmail("koality@%s" % WebServerSettings.domain_name, [email], subject, text)

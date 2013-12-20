@@ -285,32 +285,24 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 			conn.set_cloud_provider(self.user_id, "aws")
 
 		security_group_name = "a security group"
-		vm_image_id = "i-123456"
-		vm_username = "ubuntu"
-		root_drive_size = 42
-		instance_size = "m1.medium"
-		user_data = "#!/bin/bash\necho hi"
+		subnet_id = "a subnet"
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_aws_instance_settings(self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, user_data)
+			conn.set_aws_instance_settings(self.user_id, security_group_name, subnet_id)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "ami_id": vm_image_id, "vm_username": vm_username, "root_drive_size": root_drive_size, "security_group_name": security_group_name, "user_data": user_data},
+			assert_equals({"security_group_id": security_group_name, "subnet_id": subnet_id},
 				conn.get_aws_instance_settings(self.user_id))
 
 		security_group_name = "a different security group"
-		vm_image_id = "i-abcdef"
-		vm_username = "bbland"
-		root_drive_size = 1337
-		instance_size = "m2.2xlarge"
-		user_data = ""
+		subnet_id = "a different subnet"
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_aws_instance_settings(self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, user_data)
+			conn.set_aws_instance_settings(self.user_id, security_group_name, subnet_id)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"instance_size": instance_size, "ami_id": vm_image_id, "vm_username": vm_username, "root_drive_size": root_drive_size, "security_group_name": security_group_name, "user_data": user_data},
+			assert_equals({"security_group_id": security_group_name, "subnet_id": subnet_id},
 				conn.get_aws_instance_settings(self.user_id))
 
 		with model_server.rpc_connect("system_settings", "update") as conn:
 			conn.set_cloud_provider(self.user_id, "hpcloud")
-			assert_raises(AssertionError, conn.set_aws_instance_settings, self.user_id, instance_size, vm_image_id, vm_username, root_drive_size, security_group_name, user_data)
+			assert_raises(AssertionError, conn.set_aws_instance_settings, self.user_id, security_group_name, subnet_id)
 		with model_server.rpc_connect("system_settings", "read") as conn:
 			assert_raises(AssertionError, conn.get_aws_instance_settings, self.user_id)
 
@@ -343,18 +335,34 @@ class ModelServerFrontEndApiTest(BaseIntegrationTest, ModelServerTestMixin, Rabb
 	def test_verifier_pool_parameters(self):
 		min_ready = 42
 		max_running = 69
+		ami_id = "i-123456"
+		vm_username = "ubuntu"
+		root_drive_size = 42
+		instance_type = "m1.medium"
+		user_data = "#!/bin/bash\necho hi"
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_verifier_pool_parameters(self.user_id, min_ready, max_running)
+			conn.set_verifier_pool_parameters(self.user_id, 0, min_ready, max_running,
+				instance_type, ami_id, vm_username, root_drive_size, user_data)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"min_ready": min_ready, "max_running": max_running},
+			assert_equals([{"id": 0, "name": "default", "min_ready": min_ready, "max_running": max_running,
+				"instance_type": instance_type, "ami_id": ami_id, "vm_username": vm_username,
+				"root_drive_size": root_drive_size, "user_data": user_data}],
 				conn.get_verifier_pool_parameters(self.user_id))
 
 		min_ready = 1337
 		max_running = 9001
+		ami_id = "i-abcdef"
+		vm_username = "bbland"
+		root_drive_size = 1337
+		instance_type = "m2.2xlarge"
+		user_data = ""
 		with model_server.rpc_connect("system_settings", "update") as conn:
-			conn.set_verifier_pool_parameters(self.user_id, min_ready, max_running)
+			conn.set_verifier_pool_parameters(self.user_id, 0, min_ready, max_running,
+				instance_type, ami_id, vm_username, root_drive_size, user_data)
 		with model_server.rpc_connect("system_settings", "read") as conn:
-			assert_equals({"min_ready": min_ready, "max_running": max_running},
+			assert_equals([{"id": 0, "name": "default", "min_ready": min_ready, "max_running": max_running,
+				"instance_type": instance_type, "ami_id": ami_id, "vm_username": vm_username,
+				"root_drive_size": root_drive_size, "user_data": user_data}],
 				conn.get_verifier_pool_parameters(self.user_id))
 
 	def test_deployment_settings(self):

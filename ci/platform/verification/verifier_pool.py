@@ -5,12 +5,11 @@ from build_core import CloudBuildCore
 from build_verifier import BuildVerifier
 from settings.verification_server import VerificationServerSettings
 from util.log import Logged
-from virtual_machine.docker import DockerVm
 
 
 @Logged()
 class VerifierPool(object):
-	def __init__(self, max_running=None, min_ready=None, uri_translator=None):
+	def __init__(self, max_running=None, min_ready=None, uri_translator=None, pool_id=0):
 		self.max_running = max_running
 		self.min_ready = min_ready
 
@@ -19,6 +18,7 @@ class VerifierPool(object):
 		assert max_running >= min_ready
 
 		self.uri_translator = uri_translator
+		self.pool_id = pool_id
 
 		self.allocated_slots = []
 
@@ -216,9 +216,9 @@ class VerifierPool(object):
 
 
 class VirtualMachineVerifierPool(VerifierPool):
-	def __init__(self, virtual_machine_class, max_running=None, min_ready=None, uri_translator=None):
+	def __init__(self, virtual_machine_class, max_running=None, min_ready=None, uri_translator=None, pool_id=0):
 		self.virtual_machine_class = virtual_machine_class
-		super(VirtualMachineVerifierPool, self).__init__(max_running, min_ready, uri_translator)
+		super(VirtualMachineVerifierPool, self).__init__(max_running, min_ready, uri_translator, pool_id)
 
 	def spawn_verifier(self, verifier_number):
 		virtual_machine = self.spawn_virtual_machine(verifier_number)
@@ -230,24 +230,26 @@ class VirtualMachineVerifierPool(VerifierPool):
 		return BuildVerifier(CloudBuildCore(virtual_machine, self.uri_translator))
 
 	def spawn_virtual_machine(self, virtual_machine_number):
-		return self.virtual_machine_class.from_id_or_construct(virtual_machine_number)
+		return self.virtual_machine_class.from_id_or_construct(virtual_machine_number, pool_id=self.pool_id)
 
 
-class DockerVirtualMachineVerifierPool(VirtualMachineVerifierPool):
-	def __init__(self, virtual_machine_class, max_running=None, min_ready=None, uri_translator=None):
-		super(DockerVirtualMachineVerifierPool, self).__init__(virtual_machine_class, max_running, min_ready, uri_translator)
+# This is misleading, so I've commented it out (bbland)
+#
+# class DockerVirtualMachineVerifierPool(VirtualMachineVerifierPool):
+# 	def __init__(self, virtual_machine_class, max_running=None, min_ready=None, uri_translator=None):
+# 		super(DockerVirtualMachineVerifierPool, self).__init__(virtual_machine_class, max_running, min_ready, uri_translator)
 
-	def spawn_virtual_machine(self, virtual_machine_number):
-		virtual_machine = super(DockerVirtualMachineVerifierPool, self).spawn_virtual_machine(virtual_machine_number)
-		return DockerVm(virtual_machine)
+# 	def spawn_virtual_machine(self, virtual_machine_number):
+# 		virtual_machine = super(DockerVirtualMachineVerifierPool, self).spawn_virtual_machine(virtual_machine_number)
+# 		return DockerVm(virtual_machine)
 
-	def put(self, verifier):
-		try:
-			verifier.rebuild()
-		except:
-			self.remove(verifier)
-		else:
-			return super(DockerVirtualMachineVerifierPool, self).put(verifier)
+# 	def put(self, verifier):
+# 		try:
+# 			verifier.rebuild()
+# 		except:
+# 			self.remove(verifier)
+# 		else:
+# 			return super(DockerVirtualMachineVerifierPool, self).put(verifier)
 
 
 class AvailableSlotQueue(eventlet.queue.PriorityQueue):
