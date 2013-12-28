@@ -48,7 +48,7 @@ class RestrictedSSHForwardingShell(RestrictedShell):
 		if vm is None:
 			raise VirtualMachineNotFoundError(vm_instance_id)
 
-		virtual_machine = Ec2Vm.from_vm_id(vm['pool_slot'], vm['pool_id'])
+		virtual_machine = Ec2Vm.from_vm_id(vm['pool_id'], vm['pool_slot'])
 
 		if virtual_machine is None or virtual_machine.instance.id != vm_instance_id:
 			raise VirtualMachineNotFoundError(vm_instance_id)

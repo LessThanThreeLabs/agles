@@ -136,7 +136,7 @@ class Ec2Vm(VirtualMachine):
 
 	@classmethod
 	def from_id_or_construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None, pool_id=0):
-		return cls.from_vm_id(vm_id, pool_id) or cls.construct(vm_id, name, ami, instance_type, vm_username, pool_id)
+		return cls.from_vm_id(pool_id, vm_id) or cls.construct(vm_id, name, ami, instance_type, vm_username, pool_id)
 
 	@classmethod
 	def construct(cls, vm_id, name=None, ami=None, instance_type=None, vm_username=None, pool_id=0):
@@ -275,7 +275,7 @@ class Ec2Vm(VirtualMachine):
 			return group
 
 	@classmethod
-	def from_vm_id(cls, vm_id, pool_id=0):
+	def from_vm_id(cls, pool_id, vm_id):
 		try:
 			vm_info = cls.load_vm_info(str((pool_id, vm_id)))
 		except:
