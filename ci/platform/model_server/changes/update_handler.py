@@ -77,6 +77,8 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		email = row[change.c.email_to]
 		if email is None:
 			email = row[user.c.email] if user.c.id > MAX_SPECIAL_USER_ID else row[commit.c.committer_email]
+		if not email:
+			return
 
 		first_name = row[user.c.first_name]
 		last_name = row[user.c.last_name]
