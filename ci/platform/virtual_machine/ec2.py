@@ -350,7 +350,7 @@ class Ec2Vm(VirtualMachine):
 	def store_vm_info(self):
 		super(Ec2Vm, self).store_vm_info()
 		with model_server.rpc_connect("debug_instances", "create") as debug_create_rpc:
-			debug_create_rpc.create_vm_in_db("Ec2Vm", self.instance.id, self.vm_id, self.vm_username)
+			debug_create_rpc.create_vm_in_db("Ec2Vm", self.instance.id, self.pool_id, self.vm_id, self.vm_username)
 
 	def ssh_args(self):
 		options = {

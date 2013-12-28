@@ -92,6 +92,7 @@ virtual_machine = Table('virtual_machine', metadata,
 	Column('id', Integer, primary_key=True),
 	Column('type', String, nullable=False),
 	Column('instance_id', String, nullable=False),
+	Column('pool_id', Integer, nullable=False),
 	Column('pool_slot', Integer, nullable=False),
 	Column('username', String, nullable=False)
 	#TODO(andrey) deleted column necessary if instance_id is not unique
