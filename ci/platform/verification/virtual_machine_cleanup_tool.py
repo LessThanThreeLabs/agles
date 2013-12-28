@@ -16,7 +16,7 @@ class VirtualMachineCleanupTool(object):
 				if isinstance(key, collections.Iterable) and len(key) == 2:
 					vm = self.vm_class.from_vm_id(*key)
 				else:
-					vm = self.vm_class.from_id(key)
+					vm = self.vm_class.from_id(0, key)
 				vm.delete() if vm else None
 			except:
 				pass
