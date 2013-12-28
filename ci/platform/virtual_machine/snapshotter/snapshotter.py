@@ -122,12 +122,18 @@ class Snapshotter(object):
 
 	def provision_for_repository(self, virtual_machine, repository, changes, uri_translator, pool_parameters):
 		repo_changes = filter(lambda change: change['repo_id'] == repository['id'], changes)
-		valid_changes = filter(lambda change: ' ' not in change['merge_target'], repo_changes)
-		passed_changes = filter(lambda change: change['verification_status'] == BuildStatus.PASSED, valid_changes)
+		passed_changes = filter(lambda change: change['verification_status'] == BuildStatus.PASSED, repo_changes)
 		branch_counter = Counter(map(lambda change: change['merge_target'], passed_changes))
 		if not branch_counter.most_common():
 			return
 		primary_branch = branch_counter.most_common(1)[0][0]
+		if ' ' in primary_branch:
+			if repository['type'] == 'git':
+				primary_branch = 'master'
+			elif repository['type'] == 'hg':
+				primary_branch = 'default'
+			else:
+				return
 		self.provision_for_branch(virtual_machine, repository, primary_branch, uri_translator, pool_parameters)
 
 	def provision_for_branch(self, virtual_machine, repository, branch, uri_translator, pool_parameters):
