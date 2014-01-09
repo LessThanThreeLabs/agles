@@ -336,7 +336,7 @@ class Ec2Vm(VirtualMachine):
 			for remaining_attempts in reversed(range(100)):
 				if remaining_attempts <= 2:
 					self.logger.info("Checking VM %s for ssh access, %s attempts remaining" % (self, remaining_attempts))
-				if self.ssh_call("true", timeout=10).returncode == 0:
+				if self._ssh_call("true", timeout=10).returncode == 0:
 					return
 				eventlet.sleep(3)
 				self.instance = CloudBroker.get_instance_by_id(self.instance.id)

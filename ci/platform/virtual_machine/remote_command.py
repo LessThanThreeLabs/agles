@@ -16,7 +16,7 @@ class RemoteCommand(object):
 			results = self._run(virtual_machine, output_handler)
 		except Exception as e:
 			if output_handler:
-				output_handler.set_return_code(255)
+				output_handler.set_return_code(-1)
 			raise e
 		if output_handler:
 			output_handler.set_return_code(results.returncode)
