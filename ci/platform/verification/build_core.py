@@ -79,7 +79,7 @@ class VirtualMachineBuildCore(object):
 				line_number += 1  # leave a blank line in between errors
 			if output_handler:
 				output_handler.append(failure_lines)
-				output_handler.set_return_code(255)
+				output_handler.set_return_code(-2)
 			raise VerificationException("Factory: %s" % factory_command.name)
 
 		try:

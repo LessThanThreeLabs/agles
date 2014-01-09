@@ -23,15 +23,23 @@ class VirtualMachine(object):
 		self._redis_conn = redis_connection or ConnectionFactory.get_redis_connection('virtual_machine')
 
 	def provision(self, repo_name, environment, language_config, setup_config, output_handler=None):
+		def check_valid_results(results):
+			if results.returncode == 255:
+				self.logger.error("Provision exited with failure results: %r" % (results,))
+				if not results.output:
+					return False
+			return True
+
 		try:
 			provisioner = Provisioner(ssh_args=self.ssh_args().to_arg_list())
-			return provisioner.provision(
-				'~/%s' % repo_name,
-				environment=environment,
-				language_config=language_config,
-				setup_config=setup_config,
-				output_handler=output_handler
-			)
+			results = self._try_multiple_times(3, check_valid_results, provisioner.provision, '~/%s' % repo_name,
+				environment=environment, language_config=language_config, setup_config=setup_config, output_handler=output_handler)
+			if not results.output and results.returncode == 255:
+				failure_message = 'Failed to connect to the testing instance after 3 attempts.'
+				if output_handler is not None:
+					output_handler.append({1: failure_message})
+				return CommandResults(1, failure_message)
+			return results
 		except:
 			failure_message = 'Failed to provision, could not connect to the testing instance.'
 			if output_handler is not None:
@@ -45,6 +53,22 @@ class VirtualMachine(object):
 		return self.call(self.ssh_args().to_scp_arg_list(src_fpath, dest_fpath), output_handler=output_handler, timeout=timeout)
 
 	def ssh_call(self, command, output_handler=None, timeout=None):
+		def check_valid_results(results):
+			if results.returncode == 255:
+				self.logger.error("Command %r exited with failure results: %r" % (command, results))
+				if not results.output:
+					return False
+			return True
+
+		results = self._try_multiple_times(3, check_valid_results, self._ssh_call, command, output_handler=output_handler, timeout=timeout)
+		if not results.output and results.returncode == 255:
+			failure_message = 'Failed to connect to the testing instance after 3 attempts.'
+			if output_handler is not None:
+				output_handler.append({1: failure_message})
+			return CommandResults(1, failure_message)
+		return results
+
+	def _ssh_call(self, command, output_handler=None, timeout=None):
 		try:
 			return self.call(self.ssh_args().to_arg_list() + [str(command)], output_handler, timeout=timeout)
 		except Exception as e:
@@ -152,7 +176,7 @@ class VirtualMachine(object):
 		else:
 			command = 'echo %s' % pipes.quote('%sWARNING: No patch contents received.%s' % (ansi_bright_yellow, ansi_reset))
 
-		results = self.ssh_call(command, output_handler)
+		results = self._ssh_call(command, output_handler)
 		if results.returncode != 0:
 			self.logger.warn("Failed to apply patch %r\nResults: %s" % (patch_contents, results.output))
 		return results
@@ -204,7 +228,7 @@ class VirtualMachine(object):
 				ShellAdvertised('git checkout --force FETCH_HEAD')
 			)
 
-			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler=output_handler)
+			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self._ssh_call, command, output_handler=output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out ref %s from %s, results: %s" % (ref, repo_url, results))
 			return results
@@ -246,7 +270,7 @@ class VirtualMachine(object):
 
 			)
 
-			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler=output_handler)
+			results = self._try_multiple_times(5, lambda results: results.returncode == 0, self._ssh_call, command, output_handler=output_handler)
 			if results.returncode != 0:
 				self.logger.error("Failed to check out bundle %s from %s, results: %s" % (ref, repo_url, results))
 			return results
@@ -284,7 +308,7 @@ class VirtualMachine(object):
 			install_vcs_command,
 			ShellAdvertised('%s clone %s %s %s' % (repo_type, clone_flags, repo_url, repo_name))
 		)
-		results = self._try_multiple_times(5, lambda results: results.returncode == 0, self.ssh_call, command, output_handler=output_handler)
+		results = self._try_multiple_times(5, lambda results: results.returncode == 0, self._ssh_call, command, output_handler=output_handler)
 		if results.returncode != 0:
 			self.logger.error("Failed to clone %s, results: %s" % (repo_url, results))
 		return results
@@ -297,7 +321,7 @@ class VirtualMachine(object):
 				ShellCommand('rm -rf %s' % repo_name)
 			)
 		)
-		return self.ssh_call(command, output_handler)
+		return self._ssh_call(command, output_handler)
 
 	@classmethod
 	def get_active_image(cls, pool_parameters):
