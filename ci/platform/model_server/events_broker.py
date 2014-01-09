@@ -23,12 +23,12 @@ class EventsBroker(object):
 		:param _event_type: A description of the event.
 		:param contents: An implicit dictionary to send in the message under the 'contents' key.
 		"""
-		producer = self.channel.Producer(serializer="msgpack", exchange=self.events_exchange, auto_declare=False)
 		message = {'id': _id, 'type': _event_type, 'contents': contents}
 
-		_publish_lock.acquire()
-		self.events_exchange(self.channel).declare(nowait=True)
-		producer.publish(message,
-			routing_key=_resource,
-			delivery_mode=2)
-		_publish_lock.release()
+		with _publish_lock:
+			producer = self.channel.Producer(serializer="msgpack", exchange=self.events_exchange, auto_declare=False)
+
+			self.events_exchange(self.channel).declare(nowait=True)
+			producer.publish(message,
+				routing_key=_resource,
+				delivery_mode=2)

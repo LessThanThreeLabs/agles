@@ -119,19 +119,16 @@ class Server(object):
 	def _respond(self, message, response):
 		correlation_id = message.properties.get("correlation_id")
 
-		self.response_lock.acquire()
-
-		try:
-			self.producer.publish(response,
-				routing_key=message.properties["reply_to"],
-				correlation_id=correlation_id,
-				delivery_mode=2
-			)
-			message.channel.basic_ack(delivery_tag=message.delivery_tag)
-		except amqp.exceptions.RecoverableConnectionError:
-			pass  # This will only happen if we cleanly closed the connection already, like in tests
-
-		self.response_lock.release()
+		with self.response_lock:
+			try:
+				self.producer.publish(response,
+					routing_key=message.properties["reply_to"],
+					correlation_id=correlation_id,
+					delivery_mode=2
+				)
+				message.channel.basic_ack(delivery_tag=message.delivery_tag)
+			except amqp.exceptions.RecoverableConnectionError:
+				pass  # This will only happen if we cleanly closed the connection already, like in tests
 
 	def _call(self, method_name, args):
 		proto = {}
