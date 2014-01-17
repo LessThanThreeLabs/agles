@@ -496,7 +496,8 @@ class InstanceTypes(object):
 			'c3.large', 'c3.xlarge', 'c3.2xlarge', 'c3.4xlarge',
 			'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge', 'cr1.8xlarge',
 			'g2.2xlarge', 'cg1.4xlarge',
-			'hi1.4xlarge', 'hs1.8xlarge']
+			'hi1.4xlarge', 'hs1.8xlarge',
+			'i2.xlarge', 'i2.2xlarge', 'i2.4xlarge', 'i2.8xlarge']
 
 	@classmethod
 	def set_largest_instance_type(cls, largest_instance_type):

@@ -378,8 +378,20 @@ class FileSystemRepositoryStore(RepositoryStore):
 			'GIT_SSH_TIMEOUT': '120'
 		}
 
-		prune_args = ['git', 'remote', 'prune', remote_repo]
-		repo.git.execute(prune_args, env=env)
+		local_branches = map(lambda branch: branch.name, repo.branches)
+
+		ls_remote_args = ['git', 'ls-remote', '-h', remote_repo]
+		remote_heads_output = repo.git.execute(ls_remote_args, env=env)
+		remote_heads = remote_heads_output.split()[1::2]
+		remote_branches = map(lambda head: head[len('refs/heads/'):], remote_heads)
+
+		extra_branches = set(local_branches).difference(remote_branches)
+		extra_branches = filter(lambda branch: branch != repo.active_branch.name, extra_branches)
+
+		if extra_branches:
+			delete_branches_args = ['git', 'branch', '-D'] + list(extra_branches)
+			repo.git.execute(delete_branches_args, env=env)
+
 		fetch_args = ['git', 'fetch', remote_repo] + list(args) + repo.git.transform_kwargs(**kwargs)
 		repo.git.execute(fetch_args, env=env)
 
