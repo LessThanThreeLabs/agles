@@ -240,7 +240,7 @@ class DockerVirtualMachineVerifierPool(VerifierPool):
 		super(DockerVirtualMachineVerifierPool, self).__init__(max_running, min_ready, pool_id)
 
 	def spawn_verifier(self, verifier_number):
-		return BuildVerifier(CloudBuildCore(DockerVm(), self.uri_translator))
+		return BuildVerifier(CloudBuildCore(DockerVm(verifier_number), self.uri_translator))
 
 
 class AvailableSlotQueue(eventlet.queue.PriorityQueue):

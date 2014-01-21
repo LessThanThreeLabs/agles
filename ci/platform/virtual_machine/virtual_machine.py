@@ -31,16 +31,10 @@ class VirtualMachine(object):
 			return True
 
 		try:
-			provisioner = Provisioner(ssh_args=self.ssh_args().to_arg_list())
-			results = self._try_multiple_times(3, check_valid_results, provisioner.provision, '~/%s' % repo_name,
-				environment=environment, language_config=language_config, setup_config=setup_config, output_handler=output_handler)
-			if not results.output and results.returncode == 255:
-				failure_message = 'Failed to connect to the testing instance after 3 attempts.'
-				if output_handler is not None:
-					output_handler.append({1: failure_message})
-				return CommandResults(1, failure_message)
-			return results
+			provisioner = Provisioner(ssh_method=self.ssh_call)
+			return provisioner.provision('~/%s' % repo_name, environment=environment, language_config=language_config, setup_config=setup_config, output_handler=output_handler)
 		except:
+			self.logger.exception('Provision failed with an exception')
 			failure_message = 'Failed to provision, could not connect to the testing instance.'
 			if output_handler is not None:
 				output_handler.append({1: failure_message})
@@ -183,12 +177,13 @@ class VirtualMachine(object):
 
 	def configure_ssh(self, private_key, output_handler=None):
 		try:
-			provisioner = Provisioner(ssh_args=self.ssh_args().to_arg_list())
+			provisioner = Provisioner(ssh_method=self.ssh_call)
 			return provisioner.set_private_key(
 				private_key,
 				output_handler=output_handler
 			)
 		except:
+			self.logger.exception("Failed to configure ssh")
 			failure_message = 'Failed to provision, could not connect to the testing instance.'
 			if output_handler is not None:
 				output_handler.append({1: failure_message})
