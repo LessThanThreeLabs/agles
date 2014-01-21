@@ -4,6 +4,7 @@ import datetime
 import logging
 import model_server
 import sys
+import time
 import util.log
 
 from settings.verification_server import VerificationServerSettings
@@ -22,7 +23,7 @@ def main():
 	parser.add_argument('-c', '--cleanup', action='store_true',
 		help='Clean up old snapshots')
 	parser.add_argument('-p', '--provider',
-		help='Selects the cloud provider. Supported options are "aws", "hpcloud", and "rackspace"')
+		help='Selects the cloud provider. Only "aws" is currently supported.')
 	parser.add_argument('pool', nargs='?', default='default',
 		help='Selects the pool by name.')
 	args = parser.parse_args()
@@ -36,6 +37,10 @@ def main():
 				sys.exit(1)
 			else:
 				print 'Cloud provider not specified; defaulting to the stored settings value (%s)' % cloud_provider
+		if cloud_provider == 'docker':
+			print 'Docker not supported for snapshotting; exiting in one hour'
+			time.sleep(60 * 60)
+			sys.exit(1)
 
 		snapshotter = Snapshotter({
 			'aws': Ec2Vm,
@@ -98,7 +103,7 @@ def remove_stale_snapshots(snapshotter, pool_name):
 			pool_parameters = pool
 			break
 
-	snapshotter.remove_stale_snapshots()
+	snapshotter.remove_stale_snapshots(pool_parameters)
 
 
 def _next_3am():
