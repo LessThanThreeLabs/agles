@@ -201,7 +201,10 @@ class VirtualMachine(object):
 		# 	),
 		# )
 		# TODO (bbland): find something more useful for testing access to remote repositories
-		return ShellCommand('true')
+		return ShellOr(
+			ShellSilent(ShellCommand('which ssh')),
+			ShellSudo(SystemPackageParser().install_packages(['ssh-client']))
+		)
 
 	def remote_checkout(self, repo_name, repo_url, repo_type, ref, output_handler=None):
 		def _remote_fetch():
