@@ -14,9 +14,9 @@ class DockerVm(VirtualMachine):
 			self.id = container_id
 
 	def __init__(self, vm_id):
-		username = DockerSettings.container_username
-		container_repository = DockerSettings.container_repository
-		container_tag = DockerSettings.container_tag
+		username = str(DockerSettings.container_username)
+		container_repository = str(DockerSettings.container_repository)
+		container_tag = str(DockerSettings.container_tag)
 
 		self.container_image = container_repository + ':' + container_tag if container_tag else container_repository
 		self.container_id = self._create_container(self.container_image, username)
