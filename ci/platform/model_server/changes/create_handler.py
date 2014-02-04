@@ -7,6 +7,7 @@ from sqlalchemy import and_
 from shared.constants import BuildStatus
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
+from shared.constants import BuildStatus
 from sqlalchemy import select
 from sqlalchemy.sql import func
 from util import pathgen
@@ -86,6 +87,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 	def create_github_commit_and_change(self, user_id, github_owner_name, github_repo_name, base_sha, head_sha, branch_name):
 		github_repo_metadata = database.schema.github_repo_metadata
 		repo = database.schema.repo
+		change = database.schema.change
+		commit = database.schema.commit
 
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			query = github_repo_metadata.join(repo).select().apply_labels().where(
@@ -100,6 +103,18 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				repo_id = row[repo.c.id]
 			else:
 				raise RepositoryNotFoundError(github_repo_name, github_owner_name)
+
+			query = change.join(commit).select().where(
+				and_(
+					change.c.repo_id == repo_id,
+					commit.c.sha == head_sha,
+					change.c.verification_status == BuildStatus.PASSED,
+				)
+			)
+			row = sqlconn.execute(query).first()
+			if row is not None:
+				# We found a passing change for this repository with this sha, so don't do anything
+				return None
 
 		return self.create_commit_and_change(repo_id, user_id, base_sha, head_sha, branch_name, verify_only=True, store_pending=True)
 
