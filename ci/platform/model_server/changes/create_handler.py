@@ -4,10 +4,9 @@ import database.schema
 import repo.store as repostore
 
 from sqlalchemy import and_
-from shared.constants import BuildStatus
 from database.engine import ConnectionFactory
 from model_server.rpc_handler import ModelServerRpcHandler
-from shared.constants import BuildStatus
+from shared.constants import BuildStatus, MergeStatus
 from sqlalchemy import select
 from sqlalchemy.sql import func
 from util import pathgen
@@ -49,6 +48,19 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 
 		create_time = int(time.time())
 
+		skip = False
+
+		if '[ci skip]' in commit_attributes['message'] and not verify_only:
+			skip = True
+		elif '[ci test_only]' in commit_attributes['message']:
+			verify_only = True
+
+		if verify_only:
+			merge_status = None
+		else:
+			merge_status = MergeStatus.TODO
+
+
 		with ConnectionFactory.get_sql_connection() as sqlconn:
 			change_number_query = select([func.max(change.c.number)], change.c.repo_id == repo_id)
 			max_change_number_result = sqlconn.execute(change_number_query).first()
@@ -56,7 +68,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 				prev_change_number = max_change_number_result[0]
 			change_number = prev_change_number + 1
 			ins = change.insert().values(commit_id=commit_id, repo_id=repo_id, merge_target=merge_target,
-				number=change_number, verification_status=BuildStatus.QUEUED, create_time=create_time, email_to=email_to)
+				number=change_number, verification_status=BuildStatus.QUEUED,
+				merge_status=merge_status, create_time=create_time, email_to=email_to)
 			result = sqlconn.execute(ins)
 			change_id = result.inserted_primary_key[0]
 
@@ -72,15 +85,8 @@ class ChangesCreateHandler(ModelServerRpcHandler):
 		commit_dict = to_dict(commit_row, commit.columns)
 		patch_id = self.store_patch(change_id, patch_contents) if patch_contents else None
 
-		skip = False
-
-		if '[ci skip]' in commit_attributes['message'] and not verify_only:
-			skip = True
-		elif '[ci test_only]' in commit_attributes['message']:
-			verify_only = True
-
 		self.publish_event("repos", repo_id, "change added", user=user_dict, commit=commit_dict,
-			repo_type=repo_type, change_id=change_id, change_number=change_number, verification_status="queued",
+			repo_type=repo_type, change_id=change_id, change_number=change_number, verification_status="queued", merge_status=merge_status,
 			merge_target=merge_target, create_time=create_time, patch_id=patch_id, verify_only=verify_only, skip=skip)
 		return {"change_id": change_id, "commit_id": commit_id}
 

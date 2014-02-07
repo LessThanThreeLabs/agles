@@ -15,5 +15,6 @@ class BuildStatus(object):
 
 
 class MergeStatus(object):
+	TODO = 'todo'
 	PASSED = 'passed'
 	FAILED = 'failed'

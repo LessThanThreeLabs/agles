@@ -7,6 +7,7 @@ import time
 from database import schema
 from database.engine import ConnectionFactory
 from model_server.system_settings.update_handler import SystemSettingsUpdateHandler
+from shared.constants import BuildStatus, MergeStatus
 
 SALT = 'GMZhGiZU4/JYE3NlmCZgGA=='
 
@@ -162,10 +163,10 @@ class SchemaDataGenerator(object):
 			SystemSettingsUpdateHandler().initialize_deployment(1, True)
 
 	def get_random_commit_status(self):
-		return random.choice(['queued', 'running', 'passed', 'failed', 'skipped'])
+		return random.choice([BuildStatus.QUEUED, BuildStatus.RUNNING, BuildStatus.PASSED, BuildStatus.FAILED, BuildStatus.SKIPPED])
 
 	def get_random_merge_status(self):
-		return random.choice(['passed', 'failed', None])
+		return random.choice([MergeStatus.TODO, MergeStatus.PASSED, MergeStatus.FAILED, None])
 
 	def generate_console_output(self, sqlconn, console_id):
 		console_output = schema.console_output
