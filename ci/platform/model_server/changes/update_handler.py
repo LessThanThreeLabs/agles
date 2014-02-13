@@ -35,10 +35,10 @@ class ChangesUpdateHandler(ModelServerRpcHandler):
 		self._update_change_status(change_id, BuildStatus.RUNNING,
 			"change started", start_time=int(time.time()))
 
-	def mark_change_finished(self, change_id, verification_status, merge_status=None):
+	def mark_change_finished(self, change_id, verification_status, **kwargs):
 		self._update_change_status(change_id, verification_status,
-			"change finished", end_time=int(time.time()), merge_status=merge_status)
-		if verification_status == BuildStatus.FAILED or merge_status == MergeStatus.FAILED:
+			"change finished", end_time=int(time.time()), **kwargs)
+		if verification_status == BuildStatus.FAILED or kwargs.get("merge_status") == MergeStatus.FAILED:
 			self._notify_failure(change_id)
 
 	def _update_change_status(self, change_id, verification_status, event_name, **kwargs):
