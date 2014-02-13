@@ -73,4 +73,4 @@ class VerificationResultsHandler(object):
 			existing_verification_status = changes_read_rpc.get_change_attributes(change_id)['verification_status']
 		if existing_verification_status not in (BuildStatus.PASSED, BuildStatus.FAILED, BuildStatus.SKIPPED):
 			with model_server.rpc_connect("changes", "update") as changes_update_rpc:
-				changes_update_rpc.mark_change_finished(change_id, verification_status, merge_status)
+				changes_update_rpc.mark_change_finished_with_merge_status(change_id, verification_status, merge_status)
