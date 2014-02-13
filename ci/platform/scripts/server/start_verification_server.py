@@ -74,7 +74,7 @@ def main():
 		verifier_pools = {}
 
 		if vm_class == DockerVm:
-			verifier_pools[0] = DockerVirtualMachineVerifierPool(max_running=32, min_ready=1, uri_translator=RepositoryUriTranslator(), pool_id=0)
+			verifier_pools[0] = DockerVirtualMachineVerifierPool(max_running=32, min_ready=0, uri_translator=RepositoryUriTranslator(), pool_id=0)
 		elif vm_class is not None:
 			with model_server.rpc_connect('system_settings', 'read') as rpc_client:
 				pool_parameters = rpc_client.get_verifier_pool_parameters(1)
