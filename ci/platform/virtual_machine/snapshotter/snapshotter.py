@@ -82,7 +82,7 @@ class Snapshotter(object):
 			return
 
 		self.logger.info('Creating new instance named "%s" based on image "%s"' % (instance_name, self.vm_class.get_image_name(base_image)))
-		virtual_machine = self.spawn_virtual_machine(new_snapshot_version, instance_name, base_image)
+		virtual_machine = self.spawn_virtual_machine(new_snapshot_version, instance_name, base_image, pool_parameters)
 
 		try:
 			virtual_machine.wait_until_ready()
@@ -109,8 +109,8 @@ class Snapshotter(object):
 			self.logger.info('Deleting instance "%s"' % instance_name)
 			virtual_machine.delete()
 
-	def spawn_virtual_machine(self, snapshot_version, instance_name, image):
-		return self.vm_class.from_id_or_construct(-int(snapshot_version) or -1, instance_name, image)
+	def spawn_virtual_machine(self, snapshot_version, instance_name, image, pool_parameters):
+		return self.vm_class.from_id_or_construct(-int(snapshot_version) or -1, instance_name, image, pool_id=pool_parameters['id'])
 
 	def clone_repositories(self, virtual_machine, repositories, uri_translator):
 		virtual_machine.ssh_call('sudo mkdir -p /repositories/cached && sudo chown -R %s:%s /repositories/cached' % (virtual_machine.vm_username, virtual_machine.vm_username))
