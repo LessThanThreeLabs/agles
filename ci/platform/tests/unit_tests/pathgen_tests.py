@@ -25,6 +25,6 @@ class ShellTest(BaseUnitTest):
 		name = 'repo.git'
 		assert_equal('12/34/567890/repo.git', to_path(evenlen_hash, name))
 
-	def test_fail(self):
-		assert_equal(False, True)
+#	def test_fail(self):
+#		assert_equal(False, True)
 
