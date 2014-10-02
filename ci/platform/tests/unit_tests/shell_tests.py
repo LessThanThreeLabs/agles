@@ -26,3 +26,4 @@ class ShellTest(BaseUnitTest):
 		requested_repo = self.hg_rsh._get_requested_repo_uri("schacon/simplegit-progit")
 		assert_equal("schacon/simplegit-progit", requested_repo,
 			msg="Did not correctly parse requested repository from argument string")
+		assert_equal(True, False)
